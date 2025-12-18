@@ -1,7 +1,16 @@
 import type { NextConfig } from "next";
 
+// Config updated
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+      }
+    ]
+  }
 };
 
 export default nextConfig;
+// Trigger rebuild 4
