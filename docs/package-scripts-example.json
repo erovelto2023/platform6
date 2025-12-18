@@ -1,0 +1,12 @@
+{
+    "scripts": {
+        "dev": "next dev --turbopack",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "db:migrate": "node scripts/migrate-database.js",
+        "db:seed": "node scripts/seed-database.js",
+        "db:backup": "mongodump --uri=$MONGODB_URI --out=./backups/$(date +%Y%m%d_%H%M%S)",
+        "db:restore": "mongorestore --uri=$MONGODB_URI --drop"
+    }
+}
