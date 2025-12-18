@@ -14,6 +14,17 @@ import { ContentEditor } from "./_components/content-editor";
 import { StyleEditor } from "./_components/style-editor";
 import { defaultTemplates } from "@/lib/constants/page-builder-templates";
 
+// DEBUG: Check if templates are loading
+console.log("🔍 Page Builder Templates Debug:");
+console.log("  - Total templates:", defaultTemplates?.length || 0);
+console.log("  - First template:", defaultTemplates?.[0]?.name || "NONE");
+if (!defaultTemplates || defaultTemplates.length === 0) {
+    console.error("❌ TEMPLATES NOT LOADED! Check build output.");
+} else {
+    console.log("✅ Templates loaded successfully");
+}
+
+
 interface Section {
     _id?: string;
     templateId: string;
