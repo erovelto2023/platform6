@@ -2,34 +2,40 @@
  * Seed Content Templates to Database
  * Run this to populate content templates for the Content Studio
  * 
- * Usage: node scripts/seed-content-templates.js
+ * Usage: MONGODB_URI="your-uri" node scripts/seed-content-templates.js
  */
+
+// Load environment variables
+require('dotenv').config();
 
 const mongoose = require('mongoose');
 
-// Content Template Schema
+// Content Template Schema (matching the actual model)
 const ContentTemplateSchema = new mongoose.Schema({
     name: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     description: String,
     category: { type: String, required: true },
+    subcategory: String,
     icon: String,
-    prompt: { type: String, required: true },
-    fields: [
+    systemPrompt: { type: String, required: true },
+    inputs: [
         {
-            name: String,
-            label: String,
-            type: String,
-            required: Boolean,
+            label: { type: String, required: true },
+            variableName: { type: String, required: true },
+            type: {
+                type: String,
+                enum: ['text', 'textarea', 'select', 'number'],
+                default: 'text'
+            },
             placeholder: String,
             options: [String],
+            required: { type: Boolean, default: true }
         },
     ],
     isActive: { type: Boolean, default: true },
     isPremium: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-});
+}, { timestamps: true });
 
 const ContentTemplate = mongoose.models.ContentTemplate || mongoose.model('ContentTemplate', ContentTemplateSchema);
 
@@ -40,13 +46,13 @@ const defaultTemplates = [
         slug: "blog-post",
         description: "Create engaging blog posts optimized for SEO",
         category: "Blog",
-        icon: "📝",
-        prompt: "Write a comprehensive blog post about {topic} targeting {targetAudience}. Include SEO keywords: {keywords}. Tone: {tone}.",
-        fields: [
-            { name: "topic", label: "Topic", type: "text", required: true, placeholder: "Enter blog topic" },
-            { name: "targetAudience", label: "Target Audience", type: "text", required: true, placeholder: "Who is this for?" },
-            { name: "keywords", label: "Keywords", type: "text", required: false, placeholder: "SEO keywords (comma separated)" },
-            { name: "tone", label: "Tone", type: "select", required: false, options: ["Professional", "Casual", "Friendly", "Authoritative"] },
+        icon: "FileText",
+        systemPrompt: "Write a comprehensive blog post about {topic} targeting {audience}. Include SEO keywords: {keywords}. Tone: {tone}.",
+        inputs: [
+            { label: "Topic", variableName: "topic", type: "text", required: true, placeholder: "Enter blog topic" },
+            { label: "Target Audience", variableName: "audience", type: "text", required: true, placeholder: "Who is this for?" },
+            { label: "Keywords", variableName: "keywords", type: "text", required: false, placeholder: "SEO keywords (comma separated)" },
+            { label: "Tone", variableName: "tone", type: "select", required: false, options: ["Professional", "Casual", "Friendly", "Authoritative"] },
         ],
         isActive: true,
     },
@@ -55,12 +61,12 @@ const defaultTemplates = [
         slug: "product-description",
         description: "Write compelling product descriptions that convert",
         category: "E-commerce",
-        icon: "🛍️",
-        prompt: "Write a compelling product description for {productName}. Key features: {features}. Target audience: {targetAudience}. Focus on benefits and include a call-to-action.",
-        fields: [
-            { name: "productName", label: "Product Name", type: "text", required: true, placeholder: "Product name" },
-            { name: "features", label: "Key Features", type: "textarea", required: true, placeholder: "List key features" },
-            { name: "targetAudience", label: "Target Audience", type: "text", required: false, placeholder: "Who will buy this?" },
+        icon: "ShoppingBag",
+        systemPrompt: "Write a compelling product description for {productName}. Key features: {features}. Target audience: {audience}. Focus on benefits and include a call-to-action.",
+        inputs: [
+            { label: "Product Name", variableName: "productName", type: "text", required: true, placeholder: "Product name" },
+            { label: "Key Features", variableName: "features", type: "textarea", required: true, placeholder: "List key features" },
+            { label: "Target Audience", variableName: "audience", type: "text", required: false, placeholder: "Who will buy this?" },
         ],
         isActive: true,
     },
@@ -69,12 +75,12 @@ const defaultTemplates = [
         slug: "social-media-post",
         description: "Create engaging social media content",
         category: "Social Media",
-        icon: "📱",
-        prompt: "Create a {platform} post about {topic}. Tone: {tone}. Include relevant hashtags and a call-to-action.",
-        fields: [
-            { name: "platform", label: "Platform", type: "select", required: true, options: ["Facebook", "Instagram", "Twitter", "LinkedIn", "TikTok"] },
-            { name: "topic", label: "Topic", type: "text", required: true, placeholder: "What's the post about?" },
-            { name: "tone", label: "Tone", type: "select", required: false, options: ["Professional", "Casual", "Funny", "Inspirational"] },
+        icon: "Share2",
+        systemPrompt: "Create a {platform} post about {topic}. Tone: {tone}. Include relevant hashtags and a call-to-action.",
+        inputs: [
+            { label: "Platform", variableName: "platform", type: "select", required: true, options: ["Facebook", "Instagram", "Twitter", "LinkedIn", "TikTok"] },
+            { label: "Topic", variableName: "topic", type: "text", required: true, placeholder: "What's the post about?" },
+            { label: "Tone", variableName: "tone", type: "select", required: false, options: ["Professional", "Casual", "Funny", "Inspirational"] },
         ],
         isActive: true,
     },
@@ -83,11 +89,11 @@ const defaultTemplates = [
         slug: "email-newsletter",
         description: "Craft engaging email newsletters",
         category: "Email",
-        icon: "📧",
-        prompt: "Write an email newsletter about {topic} for {targetAudience}. Include a compelling subject line, engaging content, and clear call-to-action.",
-        fields: [
-            { name: "topic", label: "Topic", type: "text", required: true, placeholder: "Newsletter topic" },
-            { name: "targetAudience", label: "Target Audience", type: "text", required: true, placeholder: "Who are you sending to?" },
+        icon: "Mail",
+        systemPrompt: "Write an email newsletter about {topic} for {audience}. Include a compelling subject line, engaging content, and clear call-to-action.",
+        inputs: [
+            { label: "Topic", variableName: "topic", type: "text", required: true, placeholder: "Newsletter topic" },
+            { label: "Target Audience", variableName: "audience", type: "text", required: true, placeholder: "Who are you sending to?" },
         ],
         isActive: true,
     },
@@ -96,11 +102,11 @@ const defaultTemplates = [
         slug: "landing-page-copy",
         description: "High-converting landing page content",
         category: "Marketing",
-        icon: "🎯",
-        prompt: "Write landing page copy for {product}. Target audience: {targetAudience}. Include a compelling headline, benefits, features, and strong call-to-action.",
-        fields: [
-            { name: "product", label: "Product/Service", type: "text", required: true, placeholder: "What are you selling?" },
-            { name: "targetAudience", label: "Target Audience", type: "text", required: true, placeholder: "Who is this for?" },
+        icon: "Target",
+        systemPrompt: "Write landing page copy for {product}. Target audience: {audience}. Include a compelling headline, benefits, features, and strong call-to-action.",
+        inputs: [
+            { label: "Product/Service", variableName: "product", type: "text", required: true, placeholder: "What are you selling?" },
+            { label: "Target Audience", variableName: "audience", type: "text", required: true, placeholder: "Who is this for?" },
         ],
         isActive: true,
     },
@@ -109,11 +115,11 @@ const defaultTemplates = [
         slug: "seo-meta-description",
         description: "Optimized meta descriptions for better CTR",
         category: "SEO",
-        icon: "🔍",
-        prompt: "Write an SEO-optimized meta description (max 160 characters) for a page about {topic}. Include keywords: {keywords}. Make it compelling to increase click-through rate.",
-        fields: [
-            { name: "topic", label: "Page Topic", type: "text", required: true, placeholder: "What's the page about?" },
-            { name: "keywords", label: "Keywords", type: "text", required: false, placeholder: "Target keywords" },
+        icon: "Search",
+        systemPrompt: "Write an SEO-optimized meta description (max 160 characters) for a page about {topic}. Include keywords: {keywords}. Make it compelling to increase click-through rate.",
+        inputs: [
+            { label: "Page Topic", variableName: "topic", type: "text", required: true, placeholder: "What's the page about?" },
+            { label: "Keywords", variableName: "keywords", type: "text", required: false, placeholder: "Target keywords" },
         ],
         isActive: true,
     },
@@ -122,12 +128,12 @@ const defaultTemplates = [
         slug: "video-script",
         description: "Engaging video scripts for YouTube, TikTok, etc.",
         category: "Video",
-        icon: "🎬",
-        prompt: "Write a video script about {topic} for {platform}. Length: {duration}. Include hook, main content, and call-to-action.",
-        fields: [
-            { name: "topic", label: "Video Topic", type: "text", required: true, placeholder: "What's the video about?" },
-            { name: "platform", label: "Platform", type: "select", required: true, options: ["YouTube", "TikTok", "Instagram Reels", "Facebook"] },
-            { name: "duration", label: "Duration", type: "select", required: false, options: ["30 seconds", "1 minute", "3 minutes", "5+ minutes"] },
+        icon: "Video",
+        systemPrompt: "Write a video script about {topic} for {platform}. Length: {duration}. Include hook, main content, and call-to-action.",
+        inputs: [
+            { label: "Video Topic", variableName: "topic", type: "text", required: true, placeholder: "What's the video about?" },
+            { label: "Platform", variableName: "platform", type: "select", required: true, options: ["YouTube", "TikTok", "Instagram Reels", "Facebook"] },
+            { label: "Duration", variableName: "duration", type: "select", required: false, options: ["30 seconds", "1 minute", "3 minutes", "5+ minutes"] },
         ],
         isActive: true,
     },
@@ -136,12 +142,12 @@ const defaultTemplates = [
         slug: "ad-copy",
         description: "Persuasive ad copy for paid campaigns",
         category: "Advertising",
-        icon: "💰",
-        prompt: "Write ad copy for {platform} promoting {product}. Target audience: {targetAudience}. Include headline, description, and call-to-action. Keep it concise and compelling.",
-        fields: [
-            { name: "platform", label: "Platform", type: "select", required: true, options: ["Google Ads", "Facebook Ads", "Instagram Ads", "LinkedIn Ads"] },
-            { name: "product", label: "Product/Service", type: "text", required: true, placeholder: "What are you advertising?" },
-            { name: "targetAudience", label: "Target Audience", type: "text", required: false, placeholder: "Who should see this ad?" },
+        icon: "DollarSign",
+        systemPrompt: "Write ad copy for {platform} promoting {product}. Target audience: {audience}. Include headline, description, and call-to-action. Keep it concise and compelling.",
+        inputs: [
+            { label: "Platform", variableName: "platform", type: "select", required: true, options: ["Google Ads", "Facebook Ads", "Instagram Ads", "LinkedIn Ads"] },
+            { label: "Product/Service", variableName: "product", type: "text", required: true, placeholder: "What are you advertising?" },
+            { label: "Target Audience", variableName: "audience", type: "text", required: false, placeholder: "Who should see this ad?" },
         ],
         isActive: true,
     },
