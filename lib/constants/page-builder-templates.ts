@@ -1,4 +1,4 @@
-import type { Template } from "./types"
+import type { Template } from "@/lib/types"
 
 export const defaultTemplates: Template[] = [
   // Hero Sections
