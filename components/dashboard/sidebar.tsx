@@ -207,9 +207,6 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/admin");
 
-    // Debug logging (remove after fixing)
-    console.log('Sidebar userRole:', userRole);
-
     // Filter routes based on user role - remove Admin link if user is not an admin
     const filteredRoutes = userRole === 'admin' ? routes : routes.filter(route => route.href !== '/admin');
     const currentRoutes = isAdmin ? adminRoutes : filteredRoutes;

@@ -1,5 +1,5 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { getCurrentUserRole } from "@/lib/actions/user.actions";
+import { getUserRole } from "@/lib/roles";
 
 // Force dynamic rendering to avoid build-time errors with Clerk
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ const DashboardLayout = async ({
 }: {
     children: React.ReactNode;
 }) => {
-    const userRole = await getCurrentUserRole();
+    const userRole = await getUserRole();
 
     return (
         <DashboardShell userRole={userRole}>
@@ -20,4 +20,3 @@ const DashboardLayout = async ({
 }
 
 export default DashboardLayout;
-

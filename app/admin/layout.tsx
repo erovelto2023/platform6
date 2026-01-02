@@ -2,7 +2,7 @@ import { Navbar } from "@/components/dashboard/navbar";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { getCurrentUserRole } from "@/lib/actions/user.actions";
+import { checkRole, getUserRole } from "@/lib/roles";
 
 // Force dynamic rendering to avoid build-time errors with Clerk
 export const dynamic = 'force-dynamic';
@@ -19,11 +19,13 @@ const AdminLayout = async ({
         redirect("/sign-in");
     }
 
-    // Check if user is admin
-    const userRole = await getCurrentUserRole();
-    if (userRole !== 'admin') {
+    // Check if user is admin using Clerk metadata
+    const isAdmin = await checkRole('admin');
+    if (!isAdmin) {
         redirect('/dashboard');
     }
+
+    const userRole = await getUserRole();
 
     return (
         <div className="h-full relative">
