@@ -1,26 +1,65 @@
 import { Roles } from '@/types/globals';
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server';
+
+// Get admin emails from environment variable
+const getAdminEmails = (): string[] => {
+    const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+    return adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
+};
 
 export const checkRole = async (role: Roles) => {
-    const { sessionClaims } = await auth();
-    console.log('[checkRole] Full sessionClaims:', JSON.stringify(sessionClaims, null, 2));
+    const { userId } = await auth();
 
-    // Clerk stores public metadata in sessionClaims.public_metadata or sessionClaims.metadata
-    const publicMetadata = (sessionClaims?.public_metadata || sessionClaims?.metadata) as { role?: Roles };
-    const userRole = publicMetadata?.role;
+    if (!userId) {
+        console.log('[checkRole] No userId found');
+        return false;
+    }
 
-    console.log('[checkRole] public_metadata:', publicMetadata);
-    console.log('[checkRole] Checking if', userRole, '===', role, ':', userRole === role);
-    return userRole === role;
+    try {
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+
+        console.log('[checkRole] User email:', userEmail);
+
+        if (role === 'admin') {
+            const adminEmails = getAdminEmails();
+            const isAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+            console.log('[checkRole] Admin emails:', adminEmails);
+            console.log('[checkRole] Is admin:', isAdmin);
+            return isAdmin;
+        }
+
+        return role === 'student'; // Everyone is at least a student
+    } catch (error) {
+        console.error('[checkRole] Error fetching user:', error);
+        return false;
+    }
 };
 
 export const getUserRole = async (): Promise<Roles> => {
-    const { sessionClaims } = await auth();
+    const { userId } = await auth();
 
-    // Clerk stores public metadata in sessionClaims.public_metadata or sessionClaims.metadata
-    const publicMetadata = (sessionClaims?.public_metadata || sessionClaims?.metadata) as { role?: Roles };
-    const userRole = (publicMetadata?.role as Roles) || 'student';
+    if (!userId) {
+        console.log('[getUserRole] No userId found, returning student');
+        return 'student';
+    }
 
-    console.log('[getUserRole] Returning role:', userRole);
-    return userRole;
+    try {
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+
+        const adminEmails = getAdminEmails();
+        const isAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+
+        console.log('[getUserRole] User email:', userEmail);
+        console.log('[getUserRole] Admin emails:', adminEmails);
+        console.log('[getUserRole] Returning role:', isAdmin ? 'admin' : 'student');
+
+        return isAdmin ? 'admin' : 'student';
+    } catch (error) {
+        console.error('[getUserRole] Error fetching user:', error);
+        return 'student';
+    }
 };
