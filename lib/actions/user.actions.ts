@@ -73,13 +73,17 @@ export async function getUserSettings() {
 export async function getCurrentUserRole() {
     try {
         const clerkUser = await currentUser();
-        if (!clerkUser) return null;
+        if (!clerkUser) {
+            console.log('getCurrentUserRole: No Clerk user found');
+            return null;
+        }
 
         await connectDB();
         let user = await User.findOne({ clerkId: clerkUser.id }).select('role');
 
         // If user doesn't exist in database, create them first
         if (!user) {
+            console.log('getCurrentUserRole: User not found in DB, creating with student role:', clerkUser.id);
             user = await User.create({
                 clerkId: clerkUser.id,
                 email: clerkUser.emailAddresses[0].emailAddress,
@@ -90,10 +94,12 @@ export async function getCurrentUserRole() {
             console.log('User auto-synced to database during role check:', clerkUser.id);
         }
 
-        return user?.role || 'student';
+        const role = user?.role || 'student';
+        console.log('getCurrentUserRole: Returning role:', role, 'for user:', clerkUser.emailAddresses[0].emailAddress);
+        return role;
     } catch (error) {
         console.error("Failed to fetch user role:", error);
+        // Return 'student' as safe default instead of throwing
         return 'student';
     }
 }
-
