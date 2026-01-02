@@ -4,6 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getCurrentUserRole } from "@/lib/actions/user.actions";
 
+// Force dynamic rendering to avoid build-time errors with Clerk
+export const dynamic = 'force-dynamic';
+
+
 const AdminLayout = async ({
     children
 }: {
