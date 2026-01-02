@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "make-admin": "tsx scripts/make-admin.ts",
-    "list-users": "tsx scripts/list-users.ts"
+    "list-users": "tsx scripts/list-users.ts",
+    "fix-user-roles": "tsx scripts/fix-user-roles.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.2",
