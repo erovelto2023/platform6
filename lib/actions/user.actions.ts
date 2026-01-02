@@ -74,31 +74,35 @@ export async function getCurrentUserRole() {
     try {
         const clerkUser = await currentUser();
         if (!clerkUser) {
-            console.log('getCurrentUserRole: No Clerk user found');
+            console.log('[getCurrentUserRole] No Clerk user found');
             return null;
         }
 
+        const userEmail = clerkUser.emailAddresses[0].emailAddress;
+        console.log('[getCurrentUserRole] Fetching role for:', userEmail);
+
         await connectDB();
-        let user = await User.findOne({ clerkId: clerkUser.id }).select('role');
+        let user = await User.findOne({ clerkId: clerkUser.id }).select('role email');
 
         // If user doesn't exist in database, create them first
         if (!user) {
-            console.log('getCurrentUserRole: User not found in DB, creating with student role:', clerkUser.id);
+            console.log('[getCurrentUserRole] User not found in DB, creating with student role:', clerkUser.id);
             user = await User.create({
                 clerkId: clerkUser.id,
-                email: clerkUser.emailAddresses[0].emailAddress,
+                email: userEmail,
                 firstName: clerkUser.firstName || '',
                 lastName: clerkUser.lastName || '',
                 role: 'student',
             });
-            console.log('User auto-synced to database during role check:', clerkUser.id);
+            console.log('[getCurrentUserRole] User auto-synced to database:', clerkUser.id);
         }
 
         const role = user?.role || 'student';
-        console.log('getCurrentUserRole: Returning role:', role, 'for user:', clerkUser.emailAddresses[0].emailAddress);
+        console.log('[getCurrentUserRole] DB email:', user?.email, 'DB role:', role);
+        console.log('[getCurrentUserRole] Returning role:', role, 'for user:', userEmail);
         return role;
     } catch (error) {
-        console.error("Failed to fetch user role:", error);
+        console.error("[getCurrentUserRole] Failed to fetch user role:", error);
         // Return 'student' as safe default instead of throwing
         return 'student';
     }
