@@ -58,19 +58,19 @@ const routes = [
     },
     {
         label: "Tools",
-        icon: Settings, // Placeholder icon
+        icon: Settings,
         href: "/tools",
         color: "text-gray-500",
     },
     {
         label: "Knowledge Base",
-        icon: BookOpen, // Placeholder icon
+        icon: BookOpen,
         href: "/knowledge-base",
         color: "text-yellow-500",
     },
     {
         label: "Resources",
-        icon: BookOpen, // Placeholder icon
+        icon: BookOpen,
         href: "/resources",
         color: "text-blue-500",
     },
@@ -137,7 +137,6 @@ const adminRoutes = [
         href: "/admin/page-builder",
         color: "text-purple-500",
     },
-
     {
         label: "BrandBaser",
         icon: Sparkles,
@@ -200,10 +199,17 @@ const adminRoutes = [
     },
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+    userRole?: string | null;
+}
+
+export const Sidebar = ({ userRole }: SidebarProps) => {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/admin");
-    const currentRoutes = isAdmin ? adminRoutes : routes;
+
+    // Filter routes based on user role - remove Admin link if user is not an admin
+    const filteredRoutes = userRole === 'admin' ? routes : routes.filter(route => route.href !== '/admin');
+    const currentRoutes = isAdmin ? adminRoutes : filteredRoutes;
     const { isCollapsed, toggle } = useSidebarStore();
 
     return (

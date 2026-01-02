@@ -4,10 +4,13 @@ import { UserButton } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/dashboard/sidebar";
-
 import { useEffect, useState } from "react";
 
-export const Navbar = () => {
+interface NavbarProps {
+    userRole?: string | null;
+}
+
+export const Navbar = ({ userRole }: NavbarProps = {}) => {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
@@ -35,7 +38,7 @@ export const Navbar = () => {
                     <Menu />
                 </SheetTrigger>
                 <SheetContent side="left" className="p-0 bg-[#111827] border-none text-white">
-                    <Sidebar />
+                    <Sidebar userRole={userRole} />
                 </SheetContent>
             </Sheet>
             <div className="flex w-full justify-end">
