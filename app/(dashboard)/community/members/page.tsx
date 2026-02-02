@@ -17,11 +17,23 @@ interface MembersPageProps {
 
 export default async function MembersPage({ searchParams }: MembersPageProps) {
     const user = await currentUser();
-    if (!user) return redirect("/sign-in");
+    if (!user) {
+        console.log('No user found, redirecting to sign-in');
+        return redirect("/sign-in");
+    }
+
+    console.log('User found:', user.id);
 
     await connectToDatabase();
     const dbUser = await User.findOne({ clerkId: user.id });
-    if (!dbUser) return redirect("/");
+
+    if (!dbUser) {
+        console.log('No database user found for clerkId:', user.id);
+        console.log('Redirecting to home page');
+        return redirect("/");
+    }
+
+    console.log('Database user found:', dbUser._id.toString());
 
     const params = await searchParams;
     const page = Number(params.page) || 1;
