@@ -95,12 +95,8 @@ export const LessonAudioForm = ({
                         <Music className="h-10 w-10 text-slate-500" />
                     </div>
                 ) : (
-                    <div className="relative mt-2">
-                        <audio
-                            controls
-                            className="w-full mt-2"
-                            src={initialData.videoUrl}
-                        />
+                    <div className="mt-2 p-3 bg-white rounded-md border">
+                        <p className="text-sm text-slate-600 break-all">{initialData.videoUrl}</p>
                     </div>
                 )
             )}

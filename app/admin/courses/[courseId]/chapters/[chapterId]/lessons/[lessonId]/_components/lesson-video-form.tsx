@@ -95,12 +95,8 @@ export const LessonVideoForm = ({
                         <Video className="h-10 w-10 text-slate-500" />
                     </div>
                 ) : (
-                    <div className="relative aspect-video mt-2">
-                        <video
-                            controls
-                            className="w-full h-full rounded-md bg-black"
-                            src={initialData.videoUrl}
-                        />
+                    <div className="mt-2 p-3 bg-white rounded-md border">
+                        <p className="text-sm text-slate-600 break-all">{initialData.videoUrl}</p>
                     </div>
                 )
             )}
