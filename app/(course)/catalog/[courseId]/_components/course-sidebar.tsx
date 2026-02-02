@@ -5,6 +5,7 @@ import { getCourse } from "@/lib/actions/course.actions";
 import { getProgress } from "@/lib/actions/progress.actions";
 import { CourseSidebarItem } from "./course-sidebar-item";
 import { CourseProgress } from "@/components/course-progress";
+import { CollapsibleModule } from "./collapsible-module";
 
 interface CourseSidebarProps {
     course: any; // Type properly later
@@ -40,22 +41,13 @@ export const CourseSidebar = async ({
             </div>
             <div className="flex flex-col w-full">
                 {course.modules.map((module: any) => (
-                    <div key={module._id}>
-                        <div className="px-6 py-4 font-medium text-sm bg-slate-50 border-b">
-                            {module.title}
-                        </div>
-                        {module.lessons.map((lesson: any) => (
-                            <CourseSidebarItem
-                                key={lesson._id}
-                                id={lesson._id}
-                                label={lesson.title}
-                                isCompleted={completedLessonIds.includes(lesson._id)}
-                                courseId={course._id}
-                                isLocked={!lesson.isFreePreview && false} // TODO: Add purchase check
-                                chapterId={module._id}
-                            />
-                        ))}
-                    </div>
+                    <CollapsibleModule
+                        key={module._id}
+                        module={module}
+                        courseId={course._id}
+                        completedLessonIds={completedLessonIds}
+                        defaultOpen={false}
+                    />
                 ))}
             </div>
         </div>
