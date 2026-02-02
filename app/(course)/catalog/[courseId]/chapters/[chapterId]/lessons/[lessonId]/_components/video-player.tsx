@@ -23,6 +23,7 @@ export const VideoPlayer = ({
     const youtubeId = getYouTubeId(videoUrl);
     const isGroove = videoUrl.includes("groove.cm") || videoUrl.includes("groovevideo");
     const isGrooveEmbed = videoUrl.includes("<groovevideo-widget");
+    const isVideoPlayerGG = videoUrl.includes("videoplayer.gg");
 
     return (
         <div className="relative aspect-video">
@@ -57,6 +58,14 @@ export const VideoPlayer = ({
                             className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
+                        />
+                    ) : isVideoPlayerGG ? (
+                        <iframe
+                            src={videoUrl}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            allowFullScreen
+                            frameBorder="0"
                         />
                     ) : (
                         <video
