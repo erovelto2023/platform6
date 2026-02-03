@@ -237,7 +237,16 @@ export async function getBlogAnalyticsSummary() {
 }
 */
 
-export async function getBlogAnalyticsSummary() {
+export async function getBlogAnalyticsSummary(): Promise<Array<{
+    _id: any;
+    title: string;
+    slug: string;
+    totalViews: number;
+    recentViews: number;
+    uniqueVisitors: number;
+    avgTimeOnPage: number;
+    topReferrers: Array<{ domain: string; count: number }>;
+}>> {
     // Temporary stub until Article model is created
     return [];
 }
