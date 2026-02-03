@@ -7,6 +7,10 @@ import { revalidatePath } from "next/cache";
 export async function createPost(data: any) {
     try {
         await connectDB();
+        // Set publishedAt if isPublished is true
+        if (data.isPublished && !data.publishedAt) {
+            data.publishedAt = new Date();
+        }
         const post = await Post.create(data);
         revalidatePath("/blog");
         revalidatePath("/admin/blog");
@@ -20,6 +24,15 @@ export async function createPost(data: any) {
 export async function updatePost(id: string, data: any) {
     try {
         await connectDB();
+
+        // If isPublished is being set to true, set publishedAt if not already set
+        if (data.isPublished) {
+            const existingPost = await Post.findById(id);
+            if (existingPost && !existingPost.publishedAt) {
+                data.publishedAt = new Date();
+            }
+        }
+
         const post = await Post.findByIdAndUpdate(id, data, { new: true });
         revalidatePath("/blog");
         revalidatePath(`/blog/${post.slug}`);
