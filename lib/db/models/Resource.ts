@@ -8,9 +8,18 @@ const ResourceSchema = new Schema({
     description: {
         type: String,
     },
-    fileUrl: {
+    url: {
         type: String,
         required: true,
+    },
+    type: {
+        type: String,
+        enum: ['file', 'link', 'video', 'image', 'pdf'],
+        default: 'file',
+    },
+    category: {
+        type: String,
+        default: 'General',
     },
     isPublished: {
         type: Boolean,

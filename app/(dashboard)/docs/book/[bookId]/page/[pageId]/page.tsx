@@ -42,7 +42,7 @@ export default async function DocPageViewer(props: { params: Promise<{ bookId: s
         <div className="min-h-screen bg-white">
             {/* Header with breadcrumbs */}
             <header className="border-b bg-white sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-6 py-4">
+                <div className="w-full px-8 py-4">
                     <Link href={`/docs/book/${book._id}`} className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 mb-3">
                         <ArrowLeft size={16} />
                         Back to {book.title}

@@ -71,12 +71,6 @@ const routes = [
         color: "text-blue-600",
     },
     {
-        label: "Knowledge Base",
-        icon: BookOpen,
-        href: "/knowledge-base",
-        color: "text-yellow-500",
-    },
-    {
         label: "Resources",
         icon: BookOpen,
         href: "/resources",

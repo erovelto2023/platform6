@@ -14,11 +14,13 @@ export async function createResource(title: string) {
 
         const resource = await Resource.create({
             title,
-            fileUrl: "#", // Default
+            url: "#", // Default
+            type: "file",
+            category: "General",
         });
 
         revalidatePath("/admin/resources");
-        return resource;
+        return JSON.parse(JSON.stringify(resource));
     } catch (error) {
         console.error("Create resource error:", error);
         return null;
@@ -28,8 +30,8 @@ export async function createResource(title: string) {
 export async function getResources() {
     try {
         await connectDB();
-        const resources = await Resource.find({}).sort({ createdAt: -1 });
-        return resources;
+        const resources = await Resource.find({}).sort({ createdAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(resources));
     } catch (error) {
         console.error("Get resources error:", error);
         return [];
@@ -39,8 +41,8 @@ export async function getResources() {
 export async function getResource(resourceId: string) {
     try {
         await connectDB();
-        const resource = await Resource.findById(resourceId);
-        return resource;
+        const resource = await Resource.findById(resourceId).lean();
+        return JSON.parse(JSON.stringify(resource));
     } catch (error) {
         console.error("Get resource error:", error);
         return null;
@@ -50,9 +52,10 @@ export async function getResource(resourceId: string) {
 interface IResourceUpdate {
     title?: string;
     description?: string;
-    fileUrl?: string;
+    url?: string;
+    type?: 'file' | 'link' | 'video' | 'image' | 'pdf';
+    category?: string;
     isPublished?: boolean;
-    [key: string]: unknown;
 }
 
 export async function updateResource(resourceId: string, values: IResourceUpdate) {
@@ -64,11 +67,12 @@ export async function updateResource(resourceId: string, values: IResourceUpdate
 
         const resource = await Resource.findByIdAndUpdate(resourceId, {
             ...values,
-        }, { new: true });
+        }, { new: true }).lean();
 
         revalidatePath(`/admin/resources/${resourceId}`);
+        revalidatePath("/admin/resources");
         revalidatePath("/resources");
-        return resource;
+        return JSON.parse(JSON.stringify(resource));
     } catch (error) {
         console.error("Update resource error:", error);
         return null;

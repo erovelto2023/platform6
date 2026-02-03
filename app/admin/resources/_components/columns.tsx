@@ -29,6 +29,38 @@ export const columns: ColumnDef<any>[] = [
         },
     },
     {
+        accessorKey: "category",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Category
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
+        accessorKey: "type",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Type
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+        cell: ({ row }) => {
+            const type = row.getValue("type") as string;
+            return <Badge variant="outline" className="capitalize">{type}</Badge>
+        }
+    },
+    {
         accessorKey: "isPublished",
         header: ({ column }) => {
             return (

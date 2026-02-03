@@ -2,12 +2,14 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getResource } from "@/lib/actions/resource.actions";
 import { IconBadge } from "@/components/icon-badge";
-import { LayoutDashboard, File } from "lucide-react";
+import { LayoutDashboard, File, ListChecks, Type } from "lucide-react";
 import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-form";
 import { FileForm } from "./_components/file-form";
 import { ResourceActions } from "./_components/resource-actions";
 import { Banner } from "@/components/banner";
+import { CategoryForm } from "./_components/category-form";
+import { TypeForm } from "./_components/type-form";
 
 export default async function ResourceIdPage({
     params
@@ -30,7 +32,9 @@ export default async function ResourceIdPage({
     const requiredFields = [
         resource.title,
         resource.description,
-        resource.fileUrl,
+        resource.url,
+        resource.category,
+        resource.type,
     ];
 
     const totalFields = requiredFields.length;
@@ -44,7 +48,7 @@ export default async function ResourceIdPage({
         <>
             {!resource.isPublished && (
                 <Banner
-                    label="This resource is unpublished. It will not be visible to the users."
+                    label="This resource is unpublished. It will not be visible to users."
                 />
             )}
             <div className="p-6">
@@ -64,28 +68,46 @@ export default async function ResourceIdPage({
                     />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-                    <div>
-                        <div className="flex items-center gap-x-2">
-                            <IconBadge icon={LayoutDashboard} />
-                            <h2 className="text-xl">
-                                Customize your resource
-                            </h2>
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex items-center gap-x-2">
+                                <IconBadge icon={LayoutDashboard} />
+                                <h2 className="text-xl">
+                                    Customize your resource
+                                </h2>
+                            </div>
+                            <TitleForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
+                            <DescriptionForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
                         </div>
-                        <TitleForm
-                            initialData={resource}
-                            resourceId={resource._id}
-                        />
-                        <DescriptionForm
-                            initialData={resource}
-                            resourceId={resource._id}
-                        />
+                        <div>
+                            <div className="flex items-center gap-x-2">
+                                <IconBadge icon={ListChecks} />
+                                <h2 className="text-xl">
+                                    Organization
+                                </h2>
+                            </div>
+                            <CategoryForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
+                            <TypeForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
+                        </div>
                     </div>
                     <div className="space-y-6">
                         <div>
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={File} />
                                 <h2 className="text-xl">
-                                    Resource File
+                                    Resource Content
                                 </h2>
                             </div>
                             <FileForm
