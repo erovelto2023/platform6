@@ -6,13 +6,19 @@ import { Users, Calendar, UserPlus, Bookmark, Home, TrendingUp } from "lucide-re
 
 // ...
 
+import { useRouter } from "next/navigation";
+
+// ...
+
 interface CommunitySidebarProps {
     user: any;
-    onTabChange: (tab: string) => void;
-    activeTab: string;
+    onTabChange?: (tab: string) => void; // Optional
+    activeTab?: string; // Optional
 }
 
 export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySidebarProps) {
+    const router = useRouter();
+
     const menuItems = [
         { id: "feed", label: "News Feed", icon: Home },
         { id: "popular", label: "Popular", icon: TrendingUp },
@@ -22,6 +28,27 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
         { id: "groups", label: "Groups", icon: Users },
         { id: "saved", label: "Saved", icon: Bookmark },
     ];
+
+    const handleNavigation = (id: string) => {
+        if (onTabChange) {
+            onTabChange(id);
+        } else {
+            // Fallback navigation for standalone pages
+            switch (id) {
+                case 'members':
+                    router.push('/community/members');
+                    break;
+                case 'events':
+                    router.push('/community/events');
+                    break;
+                case 'groups':
+                    router.push('/community/groups');
+                    break;
+                default:
+                    router.push('/community');
+            }
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -35,7 +62,7 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
                         return (
                             <button
                                 key={item.id}
-                                onClick={() => onTabChange(item.id)}
+                                onClick={() => handleNavigation(item.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition ${isActive
                                     ? 'bg-indigo-50 text-indigo-600'
                                     : 'text-slate-600 hover:bg-slate-100'
