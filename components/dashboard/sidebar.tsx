@@ -21,7 +21,8 @@ import {
     FileQuestion,
     ShoppingBag,
     MessageSquare,
-    Library
+    Library,
+    Wrench
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -77,6 +78,12 @@ const routes = [
         color: "text-blue-500",
     },
     {
+        label: "Tools & Apps",
+        icon: Wrench,
+        href: "/tools",
+        color: "text-orange-500",
+    },
+    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/affiliates",
@@ -120,6 +127,12 @@ const adminRoutes = [
         icon: BookOpen,
         href: "/admin/resources",
         color: "text-blue-500",
+    },
+    {
+        label: "Tools",
+        icon: Wrench,
+        href: "/admin/tools",
+        color: "text-orange-500",
     },
     {
         label: "Library Manager",
