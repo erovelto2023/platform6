@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, MoreHorizontal, Share2, ThumbsUp, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Share2, ThumbsUp, Trash2, Bookmark, BookmarkCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
     DropdownMenu,
@@ -13,7 +13,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toggleReaction, addComment, getComments, deleteComment, deletePost } from "@/lib/actions/community.actions";
+import { toggleReaction, addComment, getComments, deleteComment, deletePost, toggleSavePost } from "@/lib/actions/community.actions";
 import Link from "next/link";
 import { toast } from "react-hot-toast";
 import ReactPlayer from "react-player";
@@ -41,6 +41,19 @@ export function PostCard({ post, currentUser }: PostCardProps) {
     const [userReaction, setUserReaction] = useState(post.reactions?.[currentUser._id]);
     const [isClient, setIsClient] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isSaved, setIsSaved] = useState(post.savedBy?.includes(currentUser._id) || false);
+
+    const handleSave = async () => {
+        const newState = !isSaved;
+        setIsSaved(newState);
+        try {
+            await toggleSavePost(post._id, currentUser._id);
+            toast.success(newState ? "Post saved" : "Post unsaved");
+        } catch (error) {
+            setIsSaved(!newState);
+            toast.error("Failed to update save status");
+        }
+    };
 
     useEffect(() => {
         setIsClient(true);
@@ -158,21 +171,26 @@ export function PostCard({ post, currentUser }: PostCardProps) {
                         {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </p>
                 </div>
-                {currentUser._id === post.userId._id && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={handleDeletePost} className="text-red-600 focus:text-red-600 cursor-pointer">
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Post
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" onClick={handleSave} title={isSaved ? "Unsave" : "Save"}>
+                        {isSaved ? <BookmarkCheck className="h-5 w-5 text-indigo-600 fill-indigo-100" /> : <Bookmark className="h-5 w-5 text-slate-500" />}
+                    </Button>
+                    {currentUser._id === post.userId._id && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleDeletePost} className="text-red-600 focus:text-red-600 cursor-pointer">
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Post
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
             </CardHeader>
 
             <CardContent className="p-4 pt-0">

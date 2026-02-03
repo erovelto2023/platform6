@@ -1,54 +1,55 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Users, Lock, Globe, TrendingUp } from "lucide-react";
+import { Users, Lock, Globe, TrendingUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { getGroupsWithMembership, joinGroup } from "@/lib/actions/group.actions";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface GroupsTabProps {
     currentUser: any;
 }
 
 export function GroupsTab({ currentUser }: GroupsTabProps) {
-    const groups = [
-        {
-            id: 1,
-            name: "Marketing Mastery",
-            description: "Share and learn marketing strategies that work",
-            members: 234,
-            posts: 156,
-            privacy: "public",
-            joined: true
-        },
-        {
-            id: 2,
-            name: "Content Creators Hub",
-            description: "A community for content creators to collaborate and grow",
-            members: 189,
-            posts: 203,
-            privacy: "public",
-            joined: true
-        },
-        {
-            id: 3,
-            name: "Business Growth Strategies",
-            description: "Discuss tactics and strategies for scaling your business",
-            members: 312,
-            posts: 278,
-            privacy: "private",
-            joined: false
-        },
-        {
-            id: 4,
-            name: "Social Media Success",
-            description: "Tips, tricks, and best practices for social media marketing",
-            members: 167,
-            posts: 134,
-            privacy: "public",
-            joined: false
-        },
-    ];
+    const [groups, setGroups] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [joining, setJoining] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            if (!currentUser) return;
+            try {
+                const res = await getGroupsWithMembership(currentUser._id);
+                setGroups(res);
+            } catch (error) {
+                console.error("Failed to fetch groups", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchGroups();
+    }, [currentUser]);
+
+    const handleJoin = async (groupId: string) => {
+        setJoining(groupId);
+        try {
+            const res = await joinGroup(groupId, currentUser._id);
+            if (res.success) {
+                toast.success("Joined group!");
+                setGroups(prev => prev.map(g =>
+                    g._id === groupId ? { ...g, joined: true, memberCount: (g.memberCount || 0) + 1 } : g
+                ));
+            } else {
+                toast.error(res.message || "Failed to join");
+            }
+        } catch (error) {
+            toast.error("Error joining group");
+        } finally {
+            setJoining(null);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -64,56 +65,73 @@ export function GroupsTab({ currentUser }: GroupsTabProps) {
                 </CardHeader>
             </Card>
 
-            <div className="grid gap-4">
-                {groups.map((group) => (
-                    <Card key={group.id} className="hover:shadow-md transition">
-                        <CardContent className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex gap-4 flex-1">
-                                    <div className="flex-shrink-0">
-                                        <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                                            <Users className="h-8 w-8 text-white" />
-                                        </div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <h3 className="font-semibold text-lg">{group.name}</h3>
-                                            {group.privacy === "private" ? (
-                                                <Lock className="h-4 w-4 text-slate-400" />
-                                            ) : (
-                                                <Globe className="h-4 w-4 text-slate-400" />
-                                            )}
-                                        </div>
-                                        <p className="text-sm text-slate-600 mb-3">{group.description}</p>
-
-                                        <div className="flex items-center gap-4 text-sm text-slate-500">
-                                            <div className="flex items-center gap-1">
-                                                <Users className="h-4 w-4" />
-                                                {group.members} members
+            {loading ? (
+                <div className="flex justify-center py-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                </div>
+            ) : groups.length > 0 ? (
+                <div className="grid gap-4">
+                    {groups.map((group) => (
+                        <Card key={group._id} className="hover:shadow-md transition">
+                            <CardContent className="p-6">
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex gap-4 flex-1">
+                                        <div className="flex-shrink-0">
+                                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                                <Users className="h-8 w-8 text-white" />
                                             </div>
-                                            <div className="flex items-center gap-1">
-                                                <TrendingUp className="h-4 w-4" />
-                                                {group.posts} posts
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h3 className="font-semibold text-lg">{group.name}</h3>
+                                                {group.type === "Private" ? (
+                                                    <Lock className="h-4 w-4 text-slate-400" />
+                                                ) : (
+                                                    <Globe className="h-4 w-4 text-slate-400" />
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-slate-600 mb-3 line-clamp-2">{group.description}</p>
+
+                                            <div className="flex items-center gap-4 text-sm text-slate-500">
+                                                <div className="flex items-center gap-1">
+                                                    <Users className="h-4 w-4" />
+                                                    {group.memberCount || 1} members
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <TrendingUp className="h-4 w-4" />
+                                                    {group.threadCount || 0} posts
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {group.joined ? (
-                                <div className="flex gap-2">
-                                    <Button variant="outline" className="flex-1">View Group</Button>
-                                    <Button variant="ghost">Leave</Button>
-                                </div>
-                            ) : (
-                                <Button className="w-full">
-                                    {group.privacy === "private" ? "Request to Join" : "Join Group"}
-                                </Button>
-                            )}
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                                {group.joined ? (
+                                    <div className="flex gap-2">
+                                        <Link href={`/community/groups/${group.slug}`} className="flex-1">
+                                            <Button variant="outline" className="w-full">View Group</Button>
+                                        </Link>
+                                        {/* <Button variant="ghost">Leave</Button> */}
+                                    </div>
+                                ) : (
+                                    <Button
+                                        className="w-full"
+                                        onClick={() => handleJoin(group._id)}
+                                        disabled={joining === group._id}
+                                    >
+                                        {joining === group._id && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                                        {group.type === "Private" ? "Request to Join" : "Join Group"}
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-10 text-slate-500">
+                    No active groups found.
+                </div>
+            )}
         </div>
     );
 }

@@ -1,104 +1,121 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageCircle, Share2, Clock } from "lucide-react";
+import { UserPlus, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { getFriendsActivity, getSuggestedUsers, sendFriendRequest } from "@/lib/actions/community.actions";
+import { PostCard } from "./post-card";
+import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 interface FriendsActivityProps {
     currentUser: any;
 }
 
 export function FriendsActivity({ currentUser }: FriendsActivityProps) {
-    // Mock data - replace with real data from your API
-    const friendsActivities = [
-        {
-            id: 1,
-            user: { name: "Sarah Johnson", avatar: "", initials: "SJ" },
-            action: "liked",
-            target: "your post about marketing strategies",
-            time: "2 hours ago"
-        },
-        {
-            id: 2,
-            user: { name: "Mike Chen", avatar: "", initials: "MC" },
-            action: "commented on",
-            target: "Building a Profitable Business",
-            time: "5 hours ago"
-        },
-        {
-            id: 3,
-            user: { name: "Emily Davis", avatar: "", initials: "ED" },
-            action: "shared",
-            target: "your article about content creation",
-            time: "1 day ago"
-        },
-        {
-            id: 4,
-            user: { name: "James Wilson", avatar: "", initials: "JW" },
-            action: "posted",
-            target: "a new update in Marketing Mastery group",
-            time: "2 days ago"
-        },
-    ];
+    const [posts, setPosts] = useState<any[]>([]);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [fetchedPosts, fetchedSuggestions] = await Promise.all([
+                    getFriendsActivity(currentUser._id),
+                    getSuggestedUsers(currentUser._id, 5)
+                ]);
+                setPosts(fetchedPosts);
+                setSuggestions(fetchedSuggestions);
+            } catch (error) {
+                console.error("Failed to load friend activity", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (currentUser) {
+            fetchData();
+        }
+    }, [currentUser]);
+
+    const handleAddFriend = async (userId: string) => {
+        try {
+            await sendFriendRequest(currentUser._id, userId);
+            toast.success("Friend request sent");
+            setSuggestions(prev => prev.filter(u => u._id !== userId));
+        } catch (error) {
+            toast.error("Failed to send request");
+        }
+    };
 
     return (
-        <div className="space-y-4">
-            <Card>
-                <CardHeader>
-                    <h2 className="text-xl font-semibold">Friends Activity</h2>
-                    <p className="text-sm text-slate-500">See what your friends are up to</p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    {friendsActivities.map((activity) => (
-                        <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition">
-                            <Avatar className="h-10 w-10">
-                                <AvatarImage src={activity.user.avatar} />
-                                <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                                    {activity.user.initials}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                                <p className="text-sm">
-                                    <span className="font-semibold">{activity.user.name}</span>
-                                    {" "}<span className="text-slate-600">{activity.action}</span>
-                                    {" "}<span className="font-medium">{activity.target}</span>
-                                </p>
-                                <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
-                                    <Clock className="h-3 w-3" />
-                                    {activity.time}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 space-y-6">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Recent from Friends</h2>
+                </div>
 
-            {/* Friend Suggestions */}
-            <Card>
-                <CardHeader>
-                    <h3 className="text-lg font-semibold">People You May Know</h3>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10">
-                                    <AvatarFallback className="bg-purple-100 text-purple-600">
-                                        U{i}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="font-medium text-sm">User {i}</p>
-                                    <p className="text-xs text-slate-500">3 mutual friends</p>
+                {loading ? (
+                    <div className="space-y-4">
+                        {[1, 2].map(i => (
+                            <div key={i} className="h-48 bg-slate-100 animate-pulse rounded-lg" />
+                        ))}
+                    </div>
+                ) : posts.length > 0 ? (
+                    posts.map((post) => (
+                        <PostCard key={post._id} post={post} currentUser={currentUser} />
+                    ))
+                ) : (
+                    <Card>
+                        <CardContent className="py-10 text-center text-slate-500">
+                            No recent posts from friends.
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
+
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">People You May Know</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {loading ? (
+                            [1, 2, 3].map(i => (
+                                <div key={i} className="flex gap-3">
+                                    <div className="h-10 w-10 bg-slate-100 rounded-full animate-pulse" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
+                                        <div className="h-3 w-16 bg-slate-100 rounded animate-pulse" />
+                                    </div>
                                 </div>
-                            </div>
-                            <button className="px-3 py-1 text-xs font-medium bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                                Add Friend
-                            </button>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+                            ))
+                        ) : suggestions.length > 0 ? (
+                            suggestions.map((user) => (
+                                <div key={user._id} className="flex items-center justify-between">
+                                    <Link href={`/community/profile/${user._id}`} className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10">
+                                            <AvatarImage src={user.avatar || user.imageUrl} />
+                                            <AvatarFallback>{user.firstName?.[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <p className="font-medium text-sm hover:underline">{user.firstName} {user.lastName}</p>
+                                            <p className="text-xs text-slate-500 truncate max-w-[120px]">{user.bio || "Member"}</p>
+                                        </div>
+                                    </Link>
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleAddFriend(user._id)}>
+                                        <UserPlus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-sm text-center text-slate-500">No suggestions available.</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

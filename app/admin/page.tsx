@@ -113,15 +113,7 @@ export default async function AdminDashboardPage() {
             bg: "bg-emerald-100",
             hover: "group-hover:bg-emerald-600"
         },
-        {
-            title: "Knowledge Base",
-            description: "Help articles",
-            href: "/admin/knowledge-base",
-            icon: Library,
-            color: "text-emerald-600",
-            bg: "bg-emerald-100",
-            hover: "group-hover:bg-emerald-600"
-        },
+
         {
             title: "Niche Business in a Box",
             description: "Business blueprints",
@@ -282,7 +274,7 @@ export default async function AdminDashboardPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {[
                         { label: "Affiliate Partners", count: stats.breakdown.affiliatePartners, color: "text-blue-600" },
-                        { label: "Blog Posts", count: stats.breakdown.articles, color: "text-blue-600" },
+
                         { label: "Courses", count: stats.breakdown.courses, color: "text-indigo-600" },
                         { label: "Events", count: stats.breakdown.events, color: "text-pink-600" },
                         { label: "Groups", count: stats.breakdown.groups, color: "text-emerald-600" },

@@ -47,6 +47,26 @@ export async function getPosts(filter: any = {}, limit = 10, skip = 0) {
     return JSON.parse(JSON.stringify(posts));
 }
 
+export async function getCommunityPhotos(userId: string, limit = 9) {
+    await connectToDatabase();
+    const posts = await CommunityPost.find({
+        userId: userId,
+        media: { $exists: true, $ne: [] }
+    })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .select('media');
+
+    const photos: string[] = [];
+    for (const post of posts) {
+        if (post.media && Array.isArray(post.media)) {
+            photos.push(...post.media);
+        }
+    }
+    return photos.slice(0, limit);
+}
+
+
 export async function getPopularPosts(limit = 10) {
     await connectToDatabase();
 
@@ -206,6 +226,62 @@ export async function getComments(postId: string) {
 
     return JSON.parse(JSON.stringify(comments));
 }
+
+export async function getSavedPosts(userId: string) {
+    await connectToDatabase();
+    const posts = await CommunityPost.find({ savedBy: userId })
+        .sort({ createdAt: -1 })
+        .populate('userId', 'firstName lastName avatar clerkId')
+        .lean();
+
+    return JSON.parse(JSON.stringify(posts));
+}
+
+export async function toggleSavePost(postId: string, userId: string) {
+    await connectToDatabase();
+    const post = await CommunityPost.findById(postId);
+    if (!post) throw new Error("Post not found");
+
+    const savedIndex = post.savedBy?.indexOf(userId) ?? -1;
+    let isSaved = false;
+
+    if (savedIndex > -1) {
+        // Unsave
+        post.savedBy.splice(savedIndex, 1);
+        isSaved = false;
+    } else {
+        // Save
+        if (!post.savedBy) post.savedBy = [];
+        post.savedBy.push(userId);
+        isSaved = true;
+    }
+
+    await post.save();
+    revalidatePath("/community");
+    return { success: true, isSaved };
+}
+
+export async function getFriendsActivity(userId: string) {
+    await connectToDatabase();
+    // Get friends first
+    const friendships = await Friendship.find({
+        $or: [{ requester: userId }, { recipient: userId }],
+        status: 'accepted'
+    });
+
+    const friendIds = friendships.map(f =>
+        f.requester.toString() === userId ? f.recipient : f.requester
+    );
+
+    const posts = await CommunityPost.find({ userId: { $in: friendIds } })
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .populate('userId', 'firstName lastName avatar clerkId')
+        .lean();
+
+    return JSON.parse(JSON.stringify(posts));
+}
+
 
 // --- Friend Actions ---
 

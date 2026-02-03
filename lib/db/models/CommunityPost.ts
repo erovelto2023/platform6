@@ -34,7 +34,11 @@ const CommunityPostSchema = new Schema({
     commentCount: {
         type: Number,
         default: 0,
-    }
+    },
+    savedBy: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }]
 }, { timestamps: true });
 
 const CommunityPost = models.CommunityPost || model('CommunityPost', CommunityPostSchema);

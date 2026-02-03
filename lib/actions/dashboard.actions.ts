@@ -4,7 +4,7 @@ import connectDB from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
 import Course from "@/lib/db/models/Course";
 import NicheBox from "@/lib/db/models/NicheBox";
-import Article from "@/lib/db/models/Article";
+
 import BrandBase from "@/lib/db/models/BrandBase";
 import Resource from "@/lib/db/models/Resource";
 import Payment from "@/lib/db/models/Payment";
@@ -50,7 +50,6 @@ export async function getDashboardStats() {
         // Content counts
         const totalCourses = await Course.countDocuments();
         const totalNicheBoxes = await NicheBox.countDocuments();
-        const totalArticles = await Article.countDocuments();
         const totalBrandBases = await BrandBase.countDocuments();
         const totalResources = await Resource.countDocuments();
         const totalAffiliatePartners = await AffiliateCompany.countDocuments();
@@ -59,13 +58,13 @@ export async function getDashboardStats() {
         const totalWholesaleSuppliers = await Supplier.countDocuments();
 
         // Calculate total content items
-        const totalContent = totalCourses + totalNicheBoxes + totalArticles + totalBrandBases + totalResources;
+        const totalContent = totalCourses + totalNicheBoxes + totalBrandBases + totalResources;
 
         // Content from last month
         const contentLastMonth =
             await Course.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
             await NicheBox.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
-            await Article.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
+
             await BrandBase.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
             await Resource.countDocuments({ createdAt: { $lt: thirtyDaysAgo } });
 
@@ -108,7 +107,6 @@ export async function getDashboardStats() {
             breakdown: {
                 courses: totalCourses,
                 nicheBoxes: totalNicheBoxes,
-                articles: totalArticles,
                 brandBases: totalBrandBases,
                 resources: totalResources,
                 events: await CommunityEvent.countDocuments({ startDate: { $gte: new Date() } }),
@@ -135,7 +133,6 @@ export async function getDashboardStats() {
             breakdown: {
                 courses: 0,
                 nicheBoxes: 0,
-                articles: 0,
                 brandBases: 0,
                 resources: 0,
                 events: 0,

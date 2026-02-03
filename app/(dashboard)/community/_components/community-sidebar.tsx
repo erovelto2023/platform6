@@ -1,23 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
 import { Users, Calendar, UserPlus, Bookmark, Home, TrendingUp } from "lucide-react";
-
-// ...
-
 import { useRouter } from "next/navigation";
-
-// ...
+import { getCommunityPhotos } from "@/lib/actions/community.actions";
 
 interface CommunitySidebarProps {
     user: any;
-    onTabChange?: (tab: string) => void; // Optional
-    activeTab?: string; // Optional
+    onTabChange?: (tab: string) => void;
+    activeTab?: string;
 }
 
 export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySidebarProps) {
     const router = useRouter();
+    const [photos, setPhotos] = useState<string[]>([]);
+    const [loadingPhotos, setLoadingPhotos] = useState(true);
+
+    useEffect(() => {
+        const fetchPhotos = async () => {
+            if (!user) return;
+            try {
+                // Try _id first (Mongo), then id (Clerk/other)
+                const userId = user._id || user.id;
+                if (userId) {
+                    const res = await getCommunityPhotos(userId);
+                    setPhotos(res);
+                }
+            } catch (error) {
+                console.error("Error fetching photos:", error);
+            } finally {
+                setLoadingPhotos(false);
+            }
+        };
+
+        fetchPhotos();
+    }, [user]);
+
 
     const menuItems = [
         { id: "feed", label: "News Feed", icon: Home },
@@ -88,10 +107,7 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
                             {new Date(user.createdAt).toLocaleDateString()}
                         </span>
                     </div>
-                    <div>
-                        <span className="font-semibold text-slate-900">Email: </span>
-                        <span className="text-slate-500">{user.email}</span>
-                    </div>
+
                 </CardContent>
             </Card>
 
@@ -99,17 +115,24 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
             <Card>
                 <CardHeader>
                     <CardTitle className="text-lg">Photos</CardTitle>
-                    <CardAction>
-                        <button className="text-xs text-indigo-600 hover:underline font-medium">
-                            See All
-                        </button>
-                    </CardAction>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-3 gap-2">
-                        {[1, 2, 3, 4, 5, 6].map((i) => (
-                            <div key={i} className="aspect-square bg-slate-100 rounded-md overflow-hidden"></div>
-                        ))}
+                        {loadingPhotos ? (
+                            [1, 2, 3].map((i) => (
+                                <div key={i} className="aspect-square bg-slate-100 animate-pulse rounded-md" />
+                            ))
+                        ) : photos.length > 0 ? (
+                            photos.map((url, i) => (
+                                <div key={i} className="aspect-square bg-slate-100 rounded-md overflow-hidden relative group">
+                                    <img src={url} alt="Post media" className="w-full h-full object-cover transition duration-300 group-hover:scale-110" />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="col-span-3 text-center text-xs text-slate-500 py-4">
+                                No photos yet
+                            </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>

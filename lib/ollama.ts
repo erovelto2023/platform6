@@ -1,5 +1,5 @@
 
-const OLLAMA_HOST = 'http://31.97.146.3:11434';
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://31.97.146.3:11434';
 
 export async function getOllamaResponse(prompt: string, model: string = 'deepseek-r1', systemPrompt: string = "Provide clear, direct output. Do not include code blocks or technical implementation details. Do not include sections like 'Why This Works'. Write in plain text.") {
     console.log(`[Ollama] Sending request to ${OLLAMA_HOST}/api/generate with model: ${model}`);

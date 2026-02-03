@@ -20,7 +20,8 @@ import {
     Link as LinkIcon,
     FileQuestion,
     ShoppingBag,
-    MessageSquare
+    MessageSquare,
+    Library
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -64,10 +65,10 @@ const routes = [
         color: "text-pink-700",
     },
     {
-        label: "Tools",
-        icon: Settings,
-        href: "/tools",
-        color: "text-gray-500",
+        label: "Library",
+        icon: Library,
+        href: "/docs",
+        color: "text-blue-600",
     },
     {
         label: "Knowledge Base",
@@ -121,16 +122,16 @@ const adminRoutes = [
         color: "text-pink-700",
     },
     {
-        label: "Knowledge Base",
-        icon: BookOpen,
-        href: "/admin/knowledge-base",
-        color: "text-yellow-500",
-    },
-    {
         label: "Resources",
         icon: BookOpen,
         href: "/admin/resources",
         color: "text-blue-500",
+    },
+    {
+        label: "Library Manager",
+        icon: Library,
+        href: "/admin/docs",
+        color: "text-blue-600",
     },
     {
         label: "Blog",

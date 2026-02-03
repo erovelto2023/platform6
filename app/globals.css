@@ -116,7 +116,68 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
+
+/* SimpleMDE Editor Customization */
+.CodeMirror {
+  height: auto !important;
+  min-height: calc(100vh - 200px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.CodeMirror-scroll {
+  min-height: calc(100vh - 200px);
+}
+
+.editor-toolbar {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  background: white;
+  opacity: 1;
+}
+
+.editor-toolbar button {
+  color: #334155 !important;
+}
+
+.editor-toolbar button:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.editor-toolbar.fullscreen {
+  z-index: 9999;
+}
+
+.CodeMirror-fullscreen {
+  z-index: 9998;
+}
+
+/* HTML Content Rendering */
+.html-content {
+  all: initial;
+  display: block;
+  width: 100%;
+}
+
+.html-content * {
+  all: revert;
+}
+
+/* Ensure HTML content renders with its own styles */
+.html-content html,
+.html-content body {
+  all: revert;
+  margin: 0;
+  padding: 0;
+}
+
+.html-content body { min-height: 100vh; }
+.html-content html, .html-content body { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }

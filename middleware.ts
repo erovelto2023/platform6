@@ -1,10 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
 const isProtected = createRouteMatcher([
     '/dashboard(.*)',
     '/catalog(.*)',
     '/niche-catalog(.*)',
     '/admin(.*)',
+    '/docs-editor(.*)', // Protect the new editor route
 ]);
 
 const isPublic = createRouteMatcher([
@@ -12,6 +14,12 @@ const isPublic = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+    // Redirect old editor URLs to new location
+    if (req.nextUrl.pathname.startsWith('/admin/docs/editor/')) {
+        const pageId = req.nextUrl.pathname.split('/').pop();
+        return NextResponse.redirect(new URL(`/docs-editor/${pageId}`, req.url));
+    }
+
     if (isProtected(req) && !isPublic(req)) await auth.protect();
 });
 

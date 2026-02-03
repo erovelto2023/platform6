@@ -42,6 +42,25 @@ export async function getGroups(filter: any = {}) {
     return JSON.parse(JSON.stringify(groups));
 }
 
+export async function getGroupsWithMembership(userId: string) {
+    await connectToDatabase();
+
+    // Fetch all active groups
+    const groups = await Group.find({ status: { $ne: 'Archived' } }).sort({ isFeatured: -1, memberCount: -1 }).lean();
+
+    // Fetch user memberships
+    const memberships = await GroupMember.find({ user: userId });
+    const joinedGroupIds = memberships.map(m => m.group.toString());
+
+    const result = groups.map((group: any) => ({
+        ...group,
+        joined: joinedGroupIds.includes(group._id.toString())
+    }));
+
+    return JSON.parse(JSON.stringify(result));
+}
+
+
 export async function getGroup(slug: string) {
     await connectToDatabase();
     const group = await Group.findOne({ slug }).lean();
