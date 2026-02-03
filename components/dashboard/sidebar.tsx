@@ -19,7 +19,8 @@ import {
     Search,
     Link as LinkIcon,
     FileQuestion,
-    ShoppingBag
+    ShoppingBag,
+    MessageSquare
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -37,6 +38,12 @@ const routes = [
         icon: Users,
         href: "/community",
         color: "text-emerald-500",
+    },
+    {
+        label: "Messages",
+        icon: MessageSquare,
+        href: "/messages",
+        color: "text-blue-500",
     },
     {
         label: "Member Search",

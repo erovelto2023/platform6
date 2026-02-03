@@ -4,6 +4,7 @@ import { UserButton } from "@clerk/nextjs";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Sidebar } from "@/components/dashboard/sidebar";
+import { NotificationBellWrapper } from "@/components/notifications";
 import { useEffect, useState } from "react";
 
 interface NavbarProps {
@@ -11,28 +12,14 @@ interface NavbarProps {
 }
 
 export const Navbar = ({ userRole }: NavbarProps = {}) => {
-    const [isMounted, setIsMounted] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true);
+        setMounted(true);
     }, []);
 
-    if (!isMounted) {
-        return (
-            <div className="flex items-center p-4">
-                <button className="md:hidden pr-4 hover:opacity-75 transition">
-                    <Menu />
-                </button>
-                <div className="flex w-full justify-end">
-                    {/* Skeleton or empty div to prevent layout shift if desired, or just null */}
-                    <div className="w-8 h-8 rounded-full bg-slate-200 animate-pulse" />
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="flex items-center p-4">
+        <div className="flex items-center p-4 border-b">
             <Sheet>
                 <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition">
                     <Menu />
@@ -41,8 +28,9 @@ export const Navbar = ({ userRole }: NavbarProps = {}) => {
                     <Sidebar userRole={userRole} />
                 </SheetContent>
             </Sheet>
-            <div className="flex w-full justify-end">
-                <UserButton />
+            <div className="flex w-full justify-end items-center gap-4">
+                <NotificationBellWrapper />
+                {mounted && <UserButton />}
             </div>
         </div>
     );

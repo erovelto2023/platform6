@@ -1,54 +1,51 @@
 "use client";
-// Force rebuild
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
+import { Users, Calendar, UserPlus, Bookmark, Home, TrendingUp } from "lucide-react";
+
+// ...
 
 interface CommunitySidebarProps {
     user: any;
+    onTabChange: (tab: string) => void;
+    activeTab: string;
 }
 
-export function CommunitySidebar({ user }: CommunitySidebarProps) {
-    const pathname = usePathname();
-
-    const isActive = (path: string) => pathname === path;
+export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySidebarProps) {
+    const menuItems = [
+        { id: "feed", label: "News Feed", icon: Home },
+        { id: "popular", label: "Popular", icon: TrendingUp },
+        { id: "friends", label: "Friends", icon: Users },
+        { id: "members", label: "Find Members", icon: UserPlus },
+        { id: "events", label: "Events", icon: Calendar },
+        { id: "groups", label: "Groups", icon: Users },
+        { id: "saved", label: "Saved", icon: Bookmark },
+    ];
 
     return (
         <div className="space-y-6">
             {/* Navigation Menu */}
             <Card>
                 <CardContent className="p-4 space-y-1">
-                    <Link href="/community">
-                        <div className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${isActive('/community') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
-                            News Feed
-                        </div>
-                    </Link>
-                    <Link href="/community/friends">
-                        <div className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${isActive('/community/friends') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
-                            Friends
-                        </div>
-                    </Link>
-                    <Link href="/community/members">
-                        <div className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${isActive('/community/members') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
-                            Find Members
-                        </div>
-                    </Link>
-                    <Link href="/community/events">
-                        <div className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${isActive('/community/events') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
-                            Events
-                        </div>
-                    </Link>
-                    <Link href="/community/groups">
-                        <div className={`px-4 py-2 text-sm font-medium rounded-lg cursor-pointer ${isActive('/community/groups') ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-100'}`}>
-                            Groups
-                        </div>
-                    </Link>
-                    {['Saved'].map((item) => (
-                        <div key={item} className="px-4 py-2 text-sm font-medium rounded-lg cursor-pointer text-slate-600 hover:bg-slate-100">
-                            {item}
-                        </div>
-                    ))}
+                    {menuItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => onTabChange(item.id)}
+                                className={`w-full flex items-center gap-3 px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition ${isActive
+                                    ? 'bg-indigo-50 text-indigo-600'
+                                    : 'text-slate-600 hover:bg-slate-100'
+                                    }`}
+                            >
+                                <Icon className="h-4 w-4" />
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </CardContent>
             </Card>
 
@@ -73,9 +70,13 @@ export function CommunitySidebar({ user }: CommunitySidebarProps) {
 
             {/* Photos Preview */}
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader>
                     <CardTitle className="text-lg">Photos</CardTitle>
-                    <span className="text-xs text-indigo-600 cursor-pointer hover:underline">See All</span>
+                    <CardAction>
+                        <button className="text-xs text-indigo-600 hover:underline font-medium">
+                            See All
+                        </button>
+                    </CardAction>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-3 gap-2">

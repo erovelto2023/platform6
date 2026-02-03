@@ -14,8 +14,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toggleReaction, addComment, getComments, deleteComment, deletePost } from "@/lib/actions/community.actions";
+import Link from "next/link";
 import { toast } from "react-hot-toast";
 import ReactPlayer from "react-player";
+import { Reactions } from "./reactions";
 
 interface PostCardProps {
     post: any;
@@ -130,16 +132,22 @@ export function PostCard({ post, currentUser }: PostCardProps) {
 
     return (
         <Card className="mb-4 overflow-visible">
+
+
             <CardHeader className="flex flex-row items-center gap-4 p-4 pb-2">
-                <Avatar>
-                    <AvatarImage src={post.userId.avatar || post.userId.imageUrl} />
-                    <AvatarFallback>{post.userId.firstName?.[0]}</AvatarFallback>
-                </Avatar>
+                <Link href={`/community/profile/${post.userId._id || post.userId.id || post.userId}`}>
+                    <Avatar className="cursor-pointer transition-opacity hover:opacity-80">
+                        <AvatarImage src={post.userId.avatar || post.userId.imageUrl} />
+                        <AvatarFallback>{post.userId.firstName?.[0]}</AvatarFallback>
+                    </Avatar>
+                </Link>
                 <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-sm">
-                            {post.userId.firstName} {post.userId.lastName}
-                        </h3>
+                        <Link href={`/community/profile/${post.userId._id || post.userId.id || post.userId}`} className="hover:underline">
+                            <h3 className="font-semibold text-sm">
+                                {post.userId.firstName} {post.userId.lastName}
+                            </h3>
+                        </Link>
                         {post.feeling && (
                             <span className="text-sm text-slate-500">
                                 is feeling {post.feeling}
@@ -201,35 +209,13 @@ export function PostCard({ post, currentUser }: PostCardProps) {
             </div>
 
             <CardFooter className="p-2 border-t grid grid-cols-3 gap-1 relative z-0">
-                <div className="group relative flex justify-center">
-                    <Button
-                        variant="ghost"
-                        className={`w-full ${userReaction ? "text-indigo-600" : "text-slate-600"}`}
-                        onClick={() => handleReaction("like")}
-                    >
-                        <ThumbsUp className="h-4 w-4 mr-2" />
-                        {userReaction === "like" ? "Liked" : "Like"}
-                    </Button>
-
-                    {/* Hover Reaction Menu */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex bg-white shadow-xl rounded-full p-1 border animate-in fade-in slide-in-from-bottom-2 z-50">
-                        {REACTIONS.map((r) => (
-                            <button
-                                key={r.value}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleReaction(r.value);
-                                }}
-                                className="p-2 hover:scale-125 transition-transform text-2xl cursor-pointer"
-                                title={r.label}
-                                type="button"
-                            >
-                                {r.icon}
-                            </button>
-                        ))}
-                    </div>
-                    {/* Invisible bridge to prevent menu closing */}
-                    <div className="absolute bottom-full left-0 w-full h-4 bg-transparent hidden group-hover:block" />
+                <div className="flex justify-center w-full">
+                    <Reactions
+                        postId={post._id}
+                        currentReaction={userReaction}
+                        reactions={optimisticReactions}
+                        onReact={handleReaction}
+                    />
                 </div>
 
                 <Button variant="ghost" className="w-full text-slate-600" onClick={() => setShowComments(!showComments)}>

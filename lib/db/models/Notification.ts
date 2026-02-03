@@ -8,7 +8,21 @@ const NotificationSchema = new Schema({
     },
     type: {
         type: String,
-        enum: ['friend_request', 'friend_accepted', 'message', 'reaction', 'system', 'group_invite'],
+        enum: [
+            'friend_request',
+            'friend_accepted',
+            'message',
+            'reaction',
+            'like',
+            'comment',
+            'reply',
+            'mention',
+            'follow',
+            'post_share',
+            'group_invite',
+            'event_invite',
+            'system'
+        ],
         required: true,
     },
     sender: {

@@ -3,12 +3,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Edit, Camera } from "lucide-react";
+import { Edit, Camera, UserPlus, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { UploadButton } from "@/lib/uploadthing";
 import { toast } from "sonner";
-import { updateUserProfile } from "@/lib/actions/community.actions";
-import { startConversation } from "@/lib/actions/messaging.actions";
+import { updateUserProfile, sendFriendRequest } from "@/lib/actions/community.actions";
+import { getOrCreateConversation } from "@/lib/actions/message.actions";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { useRouter } from "next/navigation";
 
@@ -28,12 +28,26 @@ export function ProfileHeader({ user, isOwnProfile, currentUserId }: ProfileHead
         if (!currentUserId) return;
         setIsLoading(true);
         try {
-            const conversationId = await startConversation(currentUserId, user._id);
-            router.push(`/community/messages/${conversationId}`);
+            const result = await getOrCreateConversation(currentUserId, user._id);
+            if (result.success && result.data) {
+                router.push(`/messages?conversationId=${result.data._id}`);
+            } else {
+                toast.error("Failed to start conversation");
+            }
         } catch (error) {
             toast.error("Failed to start conversation");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleFriendRequest = async () => {
+        if (!currentUserId) return;
+        try {
+            await sendFriendRequest(currentUserId, user._id);
+            toast.success("Friend request sent!");
+        } catch (error) {
+            toast.error("Failed to send friend request");
         }
     };
 
@@ -127,14 +141,20 @@ export function ProfileHeader({ user, isOwnProfile, currentUserId }: ProfileHead
                             <EditProfileDialog user={user} />
                         ) : (
                             <>
-                                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                                <Button
+                                    className="bg-indigo-600 hover:bg-indigo-700 gap-2"
+                                    onClick={handleFriendRequest}
+                                >
+                                    <UserPlus className="h-4 w-4" />
                                     Add Friend
                                 </Button>
                                 <Button
                                     variant="secondary"
                                     onClick={handleMessage}
                                     disabled={isLoading}
+                                    className="gap-2"
                                 >
+                                    <MessageCircle className="h-4 w-4" />
                                     Message
                                 </Button>
                             </>

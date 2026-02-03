@@ -107,32 +107,42 @@ export function CreatePost({ user }: CreatePostProps) {
                         <div className="flex items-center justify-between mt-3 pt-3 border-t">
                             <div className="flex gap-2">
                                 {/* Image Upload */}
-                                <div className="relative">
-                                    <UploadButton
-                                        endpoint="communityPostImage"
-                                        onClientUploadComplete={(res) => {
-                                            if (res?.[0]) {
-                                                setMediaUrl(res[0].url);
-                                                toast.success("Image uploaded!");
-                                            }
-                                        }}
-                                        onUploadError={(error: Error) => {
-                                            toast.error(`Upload failed: ${error.message}`);
-                                        }}
-                                        appearance={{
-                                            button: "bg-transparent text-slate-500 hover:text-indigo-600 shadow-none h-8 px-2 text-sm font-normal justify-start w-auto after:bg-transparent focus-within:ring-0",
-                                            allowedContent: "hidden"
-                                        }}
-                                        content={{
-                                            button: (
-                                                <div className="flex items-center">
-                                                    <ImageIcon className="h-5 w-5 mr-2" />
-                                                    Photo
-                                                </div>
-                                            )
-                                        }}
-                                    />
-                                </div>
+                                <UploadButton
+                                    endpoint="communityPostImage"
+                                    onClientUploadComplete={(res) => {
+                                        if (res?.[0]) {
+                                            setMediaUrl(res[0].url);
+                                            toast.success("Image uploaded!");
+                                        }
+                                    }}
+                                    onUploadError={(error: Error) => {
+                                        toast.error(`Upload failed: ${error.message}`);
+                                    }}
+                                    appearance={{
+                                        button: {
+                                            background: "transparent",
+                                            color: "rgb(100 116 139)",
+                                            height: "36px",
+                                            padding: "8px 12px",
+                                            fontSize: "14px",
+                                            fontWeight: "500",
+                                            border: "none",
+                                            boxShadow: "none",
+                                            transition: "colors 0.2s",
+                                        },
+                                        allowedContent: {
+                                            display: "none"
+                                        }
+                                    }}
+                                    content={{
+                                        button: () => (
+                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                                <ImageIcon className="h-5 w-5" />
+                                                <span>Photo</span>
+                                            </div>
+                                        )
+                                    }}
+                                />
 
                                 <Button variant="ghost" size="sm" className="text-slate-500 hover:text-pink-600" onClick={() => setShowVideoInput(!showVideoInput)}>
                                     <Video className="h-5 w-5 mr-2" />
