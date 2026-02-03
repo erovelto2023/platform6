@@ -2,7 +2,7 @@
 
 import connectDB from "@/lib/db/connect";
 import BlogAnalytics from "@/lib/db/models/BlogAnalytics";
-import Article from "@/lib/db/models/Article";
+// import Article from "@/lib/db/models/Article"; // TODO: Create Article model
 import { headers } from "next/headers";
 
 interface TrackVisitParams {
@@ -174,6 +174,8 @@ export async function updatePageMetrics(
     }
 }
 
+// TODO: Uncomment when Article model is created
+/*
 export async function getBlogAnalyticsSummary() {
     try {
         await connectDB();
@@ -232,6 +234,12 @@ export async function getBlogAnalyticsSummary() {
         console.error('Error fetching blog analytics:', error);
         return [];
     }
+}
+*/
+
+export async function getBlogAnalyticsSummary() {
+    // Temporary stub until Article model is created
+    return [];
 }
 
 export async function getArticleDetailedAnalytics(articleId: string) {
