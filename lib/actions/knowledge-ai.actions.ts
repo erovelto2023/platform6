@@ -3,7 +3,7 @@
 import { AIService } from "@/lib/ai-service";
 import { auth } from "@clerk/nextjs/server";
 import connectDB from "@/lib/db/connect";
-import Article from "@/lib/db/models/Article";
+// import Article from "@/lib/db/models/Article"; // TODO: Create Article model
 import { revalidatePath } from "next/cache";
 
 interface SpokeData {
@@ -89,6 +89,9 @@ The JSON structure must be:
     }
 }
 
+
+// TODO: Uncomment when Article model is created
+/*
 export async function saveKnowledgePlan(plan: KBPlan, mainKeyword: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -131,7 +134,16 @@ export async function saveKnowledgePlan(plan: KBPlan, mainKeyword: string) {
         throw new Error("Failed to save plan");
     }
 }
+*/
 
+export async function saveKnowledgePlan(plan: KBPlan, mainKeyword: string) {
+    throw new Error("Article model not yet implemented");
+}
+
+
+
+// TODO: Uncomment when Article model is created
+/*
 export async function generateArticleContent(articleId: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
@@ -207,3 +219,9 @@ Content Requirements:
         throw new Error(`Failed to generate content: ${error.message || "Unknown error"}`);
     }
 }
+*/
+
+export async function generateArticleContent(articleId: string) {
+    throw new Error("Article model not yet implemented");
+}
+
