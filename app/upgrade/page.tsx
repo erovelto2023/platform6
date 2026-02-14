@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle2, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 
 export default function UpgradePage() {
     const router = useRouter();
+    const { openUserProfile } = useClerk();
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 p-4">
@@ -40,7 +42,7 @@ export default function UpgradePage() {
                     <Button
                         size="lg"
                         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
-                        onClick={() => router.push("/#pricing")}
+                        onClick={() => openUserProfile()}
                     >
                         Upgrade Now
                     </Button>
