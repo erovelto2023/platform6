@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PricingTable } from "@clerk/nextjs";
 import { SimpleHeroSlideshow } from "@/components/animations";
 import { motion } from "framer-motion";
 import {
@@ -476,93 +477,8 @@ export default function LandingPage() {
 
         {/* Pricing Section */}
         <section className="w-full py-24 bg-slate-900" id="pricing">
-          <div className="container px-4 md:px-6 mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-                Simple, Transparent Pricing
-              </h2>
-              <p className="text-slate-400 text-lg">
-                Get full access to everything—courses, tools, niche boxes, and community.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto items-center">
-              {/* Monthly Plan */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="flex flex-col p-8 bg-slate-950 border border-slate-800 rounded-2xl hover:border-purple-500/30 transition-all"
-              >
-                <h3 className="text-2xl font-semibold text-white mb-2">Monthly Access</h3>
-                <p className="text-slate-400 mb-6">Perfect for getting started.</p>
-                <div className="mb-6">
-                  <span className="text-5xl font-bold text-white">$97</span>
-                  <span className="text-slate-500 text-lg"> / month</span>
-                </div>
-                <ul className="space-y-4 mb-8 flex-1">
-                  {[
-                    "Access to all courses",
-                    "Unlimited use of business tools",
-                    "New Niche Boxes every month",
-                    "Private community access",
-                    "Cancel anytime"
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-slate-300">
-                      <CheckCircle2 className="h-5 w-5 text-slate-500 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/sign-up?plan=monthly" className="w-full">
-                  <Button variant="outline" className="w-full h-12 text-lg border-slate-700 hover:bg-slate-800 hover:text-white text-white">
-                    Get Started Monthly
-                  </Button>
-                </Link>
-              </motion.div>
-
-              {/* Yearly Plan */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="flex flex-col p-10 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl shadow-2xl shadow-purple-900/30 relative transform md:scale-105 border border-purple-500/20"
-              >
-                <div className="absolute top-0 right-0 bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-bl-xl rounded-tr-2xl">
-                  BEST VALUE
-                </div>
-                <h3 className="text-2xl font-semibold text-white mb-2">Yearly Access</h3>
-                <p className="text-purple-200 mb-6">Commit to your success & save.</p>
-                <div className="mb-6">
-                  <span className="text-6xl font-bold text-white">$997</span>
-                  <span className="text-purple-200 text-lg"> / year</span>
-                </div>
-                <div className="inline-block bg-white/10 px-3 py-1 rounded-full text-sm text-emerald-300 font-medium mb-8">
-                  Includes 2 Months Free (Save $167)
-                </div>
-                <ul className="space-y-4 mb-8 flex-1">
-                  {[
-                    "Everything in Monthly",
-                    "Access to all courses",
-                    "Unlimited use of business tools",
-                    "New Niche Boxes every month",
-                    "Private community access",
-                    "Priority support",
-                    "Commitment to long-term success"
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-white">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/sign-up?plan=yearly" className="w-full">
-                  <Button className="w-full h-14 text-lg bg-white text-purple-900 hover:bg-slate-100 font-bold shadow-xl">
-                    Get Started Yearly
-                  </Button>
-                </Link>
-              </motion.div>
-            </div>
+          <div className="container px-4 md:px-6 mx-auto flex justify-center">
+            <PricingTable />
           </div>
         </section>
 
