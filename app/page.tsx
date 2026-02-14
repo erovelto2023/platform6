@@ -477,8 +477,14 @@ export default function LandingPage() {
 
         {/* Pricing Section */}
         <section className="w-full py-24 bg-slate-900" id="pricing">
-          <div className="container px-4 md:px-6 mx-auto flex justify-center">
-            <PricingTable />
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
+              <p className="text-slate-400">Everything we offer, for one simple price. Cancel anytime.</p>
+            </div>
+            <div className="flex justify-center max-w-5xl mx-auto">
+              <PricingTable />
+            </div>
           </div>
         </section>
 
