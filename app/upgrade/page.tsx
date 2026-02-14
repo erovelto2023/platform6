@@ -44,6 +44,11 @@ export default function UpgradePage() {
                     >
                         Upgrade Now
                     </Button>
+                    <p className="text-xs text-center text-slate-500 px-4">
+                        You can also upgrade your plan by going to
+                        <br />
+                        <span className="font-semibold text-slate-400">Manage Account &rarr; Billing</span>
+                    </p>
                     <Button
                         variant="ghost"
                         className="w-full text-slate-400 hover:text-white"
