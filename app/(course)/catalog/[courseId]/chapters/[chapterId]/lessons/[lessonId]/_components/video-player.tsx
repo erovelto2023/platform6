@@ -41,8 +41,7 @@ export const VideoPlayer = ({
                         <iframe
                             src={`https://www.youtube.com/embed/${youtubeId}`}
                             className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         />
                     ) : isGrooveEmbed ? (
                         <div className="w-full h-full flex items-center justify-center bg-black">
@@ -56,16 +55,7 @@ export const VideoPlayer = ({
                         <iframe
                             src={videoUrl}
                             className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
-                    ) : isVideoPlayerGG ? (
-                        <iframe
-                            src={videoUrl}
-                            className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                            allowFullScreen
-                            frameBorder="0"
                         />
                     ) : (
                         <video
