@@ -11,7 +11,7 @@ export default async function ToolsLayout({
 
     if (!isPro) {
         // Redirect to the pricing section (or a specific upgrade page)
-        redirect("/#pricing");
+        redirect("/upgrade");
     }
 
     return <>{children}</>;

@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getCourse } from "@/lib/actions/course.actions";
 import { getProgress } from "@/lib/actions/progress.actions";
+import { checkSubscription } from "@/lib/check-subscription";
 import { CourseSidebar } from "./_components/course-sidebar";
 import { CourseNavbar } from "./_components/course-navbar";
 
@@ -23,6 +24,14 @@ export default async function CourseLayout({
 
     if (!course) {
         return redirect("/");
+    }
+
+    // Check if course is premium and user has subscription
+    if (course.isPremium) {
+        const hasSubscription = await checkSubscription();
+        if (!hasSubscription) {
+            return redirect("/upgrade");
+        }
     }
 
     const progress = await getProgress(courseId);

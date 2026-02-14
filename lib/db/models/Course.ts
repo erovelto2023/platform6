@@ -32,6 +32,7 @@ const CourseSchema = new Schema({
     description: { type: String },
     price: { type: Number, default: 0 },
     isPublished: { type: Boolean, default: false },
+    isPremium: { type: Boolean, default: false },
     modules: [ModuleSchema],
 }, { timestamps: true });
 

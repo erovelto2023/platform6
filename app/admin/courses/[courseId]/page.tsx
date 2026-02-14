@@ -4,6 +4,7 @@ import { getCourse } from "@/lib/actions/course.actions";
 import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-form";
 import { ImageForm } from "./_components/image-form";
+import { PremiumForm } from "./_components/premium-form";
 import { ChaptersForm } from "./_components/chapters-form";
 import { LayoutDashboard, ListChecks } from "lucide-react";
 import { IconBadge } from "@/components/icon-badge";
@@ -83,6 +84,10 @@ export default async function CourseIdPage({
                             courseId={course._id}
                         />
                         <ImageForm
+                            initialData={course}
+                            courseId={course._id}
+                        />
+                        <PremiumForm
                             initialData={course}
                             courseId={course._id}
                         />
