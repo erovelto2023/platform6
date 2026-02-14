@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import connectToDatabase from "@/lib/db/connect";
-import User from "@/lib/db/models/User";
+import { getOrCreateUser } from "@/lib/actions/user.actions";
 import { MessagesPageClient } from "./_components/messages-page-client";
 import { getConversations } from "@/lib/actions/message.actions";
 
@@ -13,9 +12,7 @@ export default async function MessagesPage({ searchParams }: MessagesPageProps) 
     const user = await currentUser();
     if (!user) return redirect("/sign-in");
 
-    await connectToDatabase();
-    const dbCurrentUserDoc = await User.findOne({ clerkId: user.id });
-    const dbCurrentUser = JSON.parse(JSON.stringify(dbCurrentUserDoc));
+    const dbCurrentUser = await getOrCreateUser();
 
     if (!dbCurrentUser) {
         return <div>User not found in database. Please contact support.</div>;

@@ -1,8 +1,7 @@
 import { getPosts } from "@/lib/actions/community.actions";
 import { currentUser } from "@clerk/nextjs/server";
 import { ProfileHeader } from "./_components/profile-header";
-import connectToDatabase from "@/lib/db/connect";
-import User from "@/lib/db/models/User";
+import { getOrCreateUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
 import { CommunityPageClient } from "./_components/community-page-client";
 
@@ -10,9 +9,7 @@ export default async function CommunityPage() {
     const user = await currentUser();
     if (!user) return redirect("/sign-in");
 
-    await connectToDatabase();
-    const dbCurrentUserDoc = await User.findOne({ clerkId: user.id });
-    const dbCurrentUser = JSON.parse(JSON.stringify(dbCurrentUserDoc));
+    const dbCurrentUser = await getOrCreateUser();
 
     if (!dbCurrentUser) {
         return <div>User not found in database. Please contact support.</div>;

@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import connectToDatabase from "@/lib/db/connect";
-import User from "@/lib/db/models/User";
+import { getOrCreateUser } from "@/lib/actions/user.actions";
 import { searchMembers } from "@/lib/actions/member.actions";
 import { MemberSearch } from "./_components/member-search";
 import { MemberCard } from "./_components/member-card";
@@ -24,13 +23,11 @@ export default async function MembersPage({ searchParams }: MembersPageProps) {
 
     console.log('User found:', user.id);
 
-    await connectToDatabase();
-    const dbUser = await User.findOne({ clerkId: user.id });
+    const dbUser = await getOrCreateUser();
 
     if (!dbUser) {
         console.log('No database user found for clerkId:', user.id);
-        console.log('Redirecting to home page');
-        return redirect("/");
+        return redirect("/sign-in");
     }
 
     console.log('Database user found:', dbUser._id.toString());

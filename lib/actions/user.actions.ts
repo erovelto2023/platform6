@@ -4,12 +4,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import connectDB from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
 
-export async function syncCurrentUser() {
+export async function getOrCreateUser() {
     try {
         const clerkUser = await currentUser();
 
         if (!clerkUser) {
-            return { success: false, error: "Not authenticated" };
+            return null;
         }
 
         await connectDB();
@@ -25,16 +25,27 @@ export async function syncCurrentUser() {
                 firstName: clerkUser.firstName || '',
                 lastName: clerkUser.lastName || '',
                 role: 'student',
+                username: clerkUser.username || clerkUser.emailAddresses[0].emailAddress.split('@')[0],
+                photo: clerkUser.imageUrl,
+                onboardingCompleted: true
             });
 
-            console.log('User synced to database:', clerkUser.id);
+            console.log('User synced/created in database:', clerkUser.id);
         }
 
-        return { success: true, user: JSON.parse(JSON.stringify(user)) };
+        return JSON.parse(JSON.stringify(user));
     } catch (error) {
-        console.error('Error syncing user:', error);
-        return { success: false, error: "Failed to sync user" };
+        console.error('Error in getOrCreateUser:', error);
+        return null; // Handle error appropriately in calling component
     }
+}
+
+export async function syncCurrentUser() {
+    const user = await getOrCreateUser();
+    if (user) {
+        return { success: true, user };
+    }
+    return { success: false, error: "Failed to sync user" };
 }
 
 export async function updateAISettings(settings: any) {
@@ -72,35 +83,8 @@ export async function getUserSettings() {
 
 export async function getCurrentUserRole() {
     try {
-        const clerkUser = await currentUser();
-        if (!clerkUser) {
-            console.log('[getCurrentUserRole] No Clerk user found');
-            return null;
-        }
-
-        const userEmail = clerkUser.emailAddresses[0].emailAddress;
-        console.log('[getCurrentUserRole] Fetching role for:', userEmail);
-
-        await connectDB();
-        let user = await User.findOne({ clerkId: clerkUser.id }).select('role email');
-
-        // If user doesn't exist in database, create them first
-        if (!user) {
-            console.log('[getCurrentUserRole] User not found in DB, creating with student role:', clerkUser.id);
-            user = await User.create({
-                clerkId: clerkUser.id,
-                email: userEmail,
-                firstName: clerkUser.firstName || '',
-                lastName: clerkUser.lastName || '',
-                role: 'student',
-            });
-            console.log('[getCurrentUserRole] User auto-synced to database:', clerkUser.id);
-        }
-
-        const role = user?.role || 'student';
-        console.log('[getCurrentUserRole] DB email:', user?.email, 'DB role:', role);
-        console.log('[getCurrentUserRole] Returning role:', role, 'for user:', userEmail);
-        return role;
+        const user = await getOrCreateUser();
+        return user?.role || 'student';
     } catch (error) {
         console.error("[getCurrentUserRole] Failed to fetch user role:", error);
         // Return 'student' as safe default instead of throwing
