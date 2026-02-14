@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getNicheBox } from "@/lib/actions/niche.actions";
+import { checkSubscription } from "@/lib/check-subscription";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,9 +16,14 @@ export default async function NicheBoxDetailPage({
     params: Promise<{ nicheId: string }>
 }) {
     const { userId } = await auth();
+    const isPro = await checkSubscription();
 
     if (!userId) {
         return redirect("/");
+    }
+
+    if (!isPro) {
+        return redirect("/upgrade");
     }
 
     const { nicheId } = await params;
