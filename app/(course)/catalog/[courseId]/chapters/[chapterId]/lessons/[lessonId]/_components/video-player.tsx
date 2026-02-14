@@ -57,6 +57,13 @@ export const VideoPlayer = ({
                             className="w-full h-full"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                         />
+                    ) : isVideoPlayerGG ? (
+                        <iframe
+                            src={videoUrl.includes("?") ? videoUrl : `${videoUrl}?embed=true`}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            allowFullScreen
+                        />
                     ) : (
                         <video
                             src={videoUrl}
