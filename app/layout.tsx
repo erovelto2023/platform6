@@ -26,6 +26,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "K Business Academy",
   description: "All-in-one educational and business-building platform.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
