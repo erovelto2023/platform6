@@ -15,7 +15,7 @@ export default async function AdminTicketsPage() {
             </div>
 
             <div className="rounded-md border bg-white">
-                <div className="grid grid-cols-5 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
+                <div className="grid grid-cols-[120px_2fr_1fr_1fr_100px_100px] gap-4 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
                     <div>Date</div>
                     <div>User</div>
                     <div>Product</div>
@@ -29,15 +29,15 @@ export default async function AdminTicketsPage() {
                     </div>
                 ) : (
                     tickets.map((ticket: any) => (
-                        <div key={ticket._id} className="grid grid-cols-5 p-4 items-center text-sm border-b last:border-0 hover:bg-slate-50/50 transition">
+                        <div key={ticket._id} className="grid grid-cols-[120px_2fr_1fr_1fr_100px_100px] gap-4 p-4 items-center text-sm border-b last:border-0 hover:bg-slate-50/50 transition">
                             <div>
                                 {format(new Date(ticket.createdAt), 'MMM d, yyyy')}
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-medium">{ticket.userInfo?.name}</span>
-                                <span className="text-xs text-muted-foreground">{ticket.userInfo?.email}</span>
+                            <div className="flex flex-col overflow-hidden">
+                                <span className="font-medium truncate">{ticket.userInfo?.name}</span>
+                                <span className="text-xs text-muted-foreground truncate">{ticket.userInfo?.email}</span>
                             </div>
-                            <div>
+                            <div className="truncate">
                                 {ticket.product}
                             </div>
                             <div>
