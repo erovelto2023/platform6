@@ -22,7 +22,8 @@ import {
     ShoppingBag,
     MessageSquare,
     Library,
-    Wrench
+    Wrench,
+    LifeBuoy
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -90,6 +91,12 @@ const routes = [
         color: "text-blue-500",
     },
     {
+        label: "Support",
+        icon: LifeBuoy,
+        href: "/support",
+        color: "text-emerald-500",
+    },
+    {
         label: "Admin",
         icon: ShieldCheck,
         href: "/admin",
@@ -103,6 +110,12 @@ const adminRoutes = [
         icon: LayoutDashboard,
         href: "/admin",
         color: "text-sky-500",
+    },
+    {
+        label: "Support Tickets",
+        icon: LifeBuoy,
+        href: "/admin/tickets",
+        color: "text-emerald-500",
     },
     {
         label: "Affiliate CRM",
