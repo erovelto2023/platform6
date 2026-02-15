@@ -117,6 +117,7 @@ const routes = [
 ];
 
 const adminRoutes = [
+    // Admin routes configuration
     {
         label: "Overview",
         icon: LayoutDashboard,

@@ -11,6 +11,7 @@ interface DashboardShellProps {
 }
 
 export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
+    // Force sidebar update
     const { isCollapsed } = useSidebarStore();
 
     return (
