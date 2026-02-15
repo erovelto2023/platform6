@@ -55,7 +55,7 @@ export async function getUserTickets() {
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get user tickets error:", error);
-        return [];
+        throw new Error("Failed to fetch user tickets");
     }
 }
 
@@ -72,7 +72,7 @@ export async function getAllTickets() {
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get all tickets error:", error);
-        return [];
+        throw new Error("Failed to fetch tickets");
     }
 }
 

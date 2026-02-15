@@ -60,6 +60,7 @@ export const getUserRole = async (): Promise<Roles> => {
         return isAdmin ? 'admin' : 'student';
     } catch (error) {
         console.error('[getUserRole] Error fetching user:', error);
+        // Force return student on error to prevent layout crash
         return 'student';
     }
 };
