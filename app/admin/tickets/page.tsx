@@ -48,20 +48,17 @@ export default async function AdminTicketsPage() {
                             tickets.map((ticket: any) => (
                                 <TableRow key={ticket._id}>
                                     <TableCell>
-                                        <div className="flex items-center gap-x-2">
+                                        <div className="flex items-center gap-2">
                                             <Avatar className="h-8 w-8">
-                                                <AvatarImage src={ticket.userId?.avatar} />
-                                                <AvatarFallback>
-                                                    {ticket.userId?.firstName?.[0]}
-                                                    {ticket.userId?.lastName?.[0]}
-                                                </AvatarFallback>
+                                                <AvatarImage src={ticket.userInfo?.avatar} />
+                                                <AvatarFallback>{ticket.userInfo?.firstName?.[0]}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex flex-col text-sm">
                                                 <span className="font-medium">
-                                                    {ticket.userId?.firstName} {ticket.userId?.lastName}
+                                                    {ticket.userInfo?.firstName} {ticket.userInfo?.lastName}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {ticket.userId?.email}
+                                                    {ticket.userInfo?.email}
                                                 </span>
                                             </div>
                                         </div>

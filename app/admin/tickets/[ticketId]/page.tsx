@@ -28,9 +28,9 @@ export default async function AdminTicketIdPage({
                         <span>From: </span>
                         <div className="flex items-center gap-x-1">
                             <span className="font-semibold text-slate-900">
-                                {ticket.userId?.firstName} {ticket.userId?.lastName}
+                                {ticket.userInfo?.firstName} {ticket.userInfo?.lastName}
                             </span>
-                            <span>({ticket.userId?.email})</span>
+                            <span>({ticket.userInfo?.email})</span>
                         </div>
                     </div>
                     <div className="text-xs text-muted-foreground">
@@ -54,16 +54,15 @@ export default async function AdminTicketIdPage({
                         className={`flex gap-x-4 ${message.isAdmin ? "flex-row-reverse" : "flex-row"}`}
                     >
                         <Avatar>
-                            <AvatarImage src={message.senderId?.avatar} />
+                            <AvatarImage src={message.senderAvatar} />
                             <AvatarFallback>
-                                {message.senderId?.firstName?.[0]}
-                                {message.senderId?.lastName?.[0]}
+                                {message.senderName?.[0]}
                             </AvatarFallback>
                         </Avatar>
                         <div className={`flex flex-col max-w-[80%] ${message.isAdmin ? "items-end" : "items-start"}`}>
                             <div className="flex items-center gap-x-2 mb-1">
                                 <span className="text-sm font-semibold">
-                                    {message.senderId?.firstName} {message.senderId?.lastName}
+                                    {message.senderName}
                                 </span>
                                 {message.isAdmin && (
                                     <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">Admin</Badge>
@@ -73,8 +72,8 @@ export default async function AdminTicketIdPage({
                                 </span>
                             </div>
                             <div className={`p-4 rounded-lg text-sm ${message.isAdmin
-                                    ? "bg-slate-100 text-slate-900"
-                                    : "bg-blue-600 text-white"
+                                ? "bg-slate-100 text-slate-900"
+                                : "bg-blue-600 text-white"
                                 }`}>
                                 {message.content}
                             </div>

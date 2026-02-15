@@ -1,34 +1,33 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { checkRole } from "@/lib/roles";
 import connectDB from "@/lib/db/connect";
 import Ticket from "@/lib/db/models/Ticket";
-import User from "@/lib/db/models/User";
 import { revalidatePath } from "next/cache";
-
-// Helper to check if user is admin
-async function isAdmin(userId: string) {
-    await connectDB();
-    const user = await User.findOne({ clerkId: userId });
-    return user?.role === 'admin';
-}
 
 export async function createTicket(title: string, description: string, priority: string) {
     try {
-        const { userId } = await auth();
-        if (!userId) return { error: "Unauthorized" };
+        const user = await currentUser();
+        if (!user) return { error: "Unauthorized" };
 
         await connectDB();
-        const user = await User.findOne({ clerkId: userId });
-        if (!user) return { error: "User not found" };
 
         const ticket = await Ticket.create({
-            userId: user._id,
+            clerkId: user.id,
+            userInfo: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.emailAddresses[0]?.emailAddress,
+                avatar: user.imageUrl,
+            },
             title,
             description,
             priority,
             messages: [{
-                senderId: user._id,
+                senderId: user.id,
+                senderName: `${user.firstName} ${user.lastName}`,
+                senderAvatar: user.imageUrl,
                 content: description,
                 isAdmin: false,
             }]
@@ -44,14 +43,11 @@ export async function createTicket(title: string, description: string, priority:
 
 export async function getUserTickets() {
     try {
-        const { userId } = await auth();
-        if (!userId) return [];
-
-        await connectDB();
-        const user = await User.findOne({ clerkId: userId });
+        const user = await currentUser();
         if (!user) return [];
 
-        const tickets = await Ticket.find({ userId: user._id }).sort({ updatedAt: -1 });
+        await connectDB();
+        const tickets = await Ticket.find({ clerkId: user.id }).sort({ updatedAt: -1 });
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get user tickets error:", error);
@@ -61,14 +57,11 @@ export async function getUserTickets() {
 
 export async function getAllTickets() {
     try {
-        const { userId } = await auth();
-        if (!userId) return [];
+        const isAdmin = await checkRole('admin');
+        if (!isAdmin) return [];
 
-        if (!(await isAdmin(userId))) return [];
-
-        const tickets = await Ticket.find({})
-            .sort({ updatedAt: -1 })
-            .populate('userId', 'firstName lastName email avatar'); // Populate user details
+        await connectDB();
+        const tickets = await Ticket.find({}).sort({ updatedAt: -1 });
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get all tickets error:", error);
@@ -78,24 +71,17 @@ export async function getAllTickets() {
 
 export async function getTicket(ticketId: string) {
     try {
-        const { userId } = await auth();
-        if (!userId) return null;
-
-        await connectDB();
-        const user = await User.findOne({ clerkId: userId });
+        const user = await currentUser();
         if (!user) return null;
 
-        const ticket = await Ticket.findById(ticketId)
-            .populate('userId', 'firstName lastName email avatar')
-            .populate('messages.senderId', 'firstName lastName avatar role');
-
+        await connectDB();
+        const ticket = await Ticket.findById(ticketId);
         if (!ticket) return null;
 
-        // Check auth: Owner or Admin
-        const isOwner = ticket.userId._id.toString() === user._id.toString();
-        const isUserAdmin = user.role === 'admin';
+        const isAdmin = await checkRole('admin');
+        const isOwner = ticket.clerkId === user.id;
 
-        if (!isOwner && !isUserAdmin) return null;
+        if (!isOwner && !isAdmin) return null;
 
         return JSON.parse(JSON.stringify(ticket));
     } catch (error) {
@@ -106,32 +92,27 @@ export async function getTicket(ticketId: string) {
 
 export async function addMessage(ticketId: string, content: string) {
     try {
-        const { userId } = await auth();
-        if (!userId) return { error: "Unauthorized" };
+        const user = await currentUser();
+        if (!user) return { error: "Unauthorized" };
 
         await connectDB();
-        const user = await User.findOne({ clerkId: userId });
-        if (!user) return { error: "User not found" };
-
         const ticket = await Ticket.findById(ticketId);
         if (!ticket) return { error: "Ticket not found" };
 
-        const isUserAdmin = user.role === 'admin';
+        const isAdmin = await checkRole('admin');
 
         // If not admin, verify ownership
-        if (!isUserAdmin && ticket.userId.toString() !== user._id.toString()) {
+        if (!isAdmin && ticket.clerkId !== user.id) {
             return { error: "Unauthorized" };
         }
 
         ticket.messages.push({
-            senderId: user._id,
+            senderId: user.id,
+            senderName: `${user.firstName || 'User'} ${user.lastName || ''}`.trim(),
+            senderAvatar: user.imageUrl,
             content,
-            isAdmin: isUserAdmin,
+            isAdmin,
         });
-
-        // If admin replies, user might want to know (status update?)
-        // If user replies, maybe set status to Open if it was waiting?
-        // For now, simple message add.
 
         await ticket.save();
 
@@ -146,11 +127,10 @@ export async function addMessage(ticketId: string, content: string) {
 
 export async function updateTicketStatus(ticketId: string, status: string) {
     try {
-        const { userId } = await auth();
-        if (!userId) return { error: "Unauthorized" };
+        const isAdmin = await checkRole('admin');
+        if (!isAdmin) return { error: "Unauthorized" };
 
-        if (!(await isAdmin(userId))) return { error: "Unauthorized" };
-
+        await connectDB();
         await Ticket.findByIdAndUpdate(ticketId, { status });
 
         revalidatePath(`/support/${ticketId}`);
@@ -165,11 +145,10 @@ export async function updateTicketStatus(ticketId: string, status: string) {
 
 export async function updateTicketPriority(ticketId: string, priority: string) {
     try {
-        const { userId } = await auth();
-        if (!userId) return { error: "Unauthorized" };
+        const isAdmin = await checkRole('admin');
+        if (!isAdmin) return { error: "Unauthorized" };
 
-        if (!(await isAdmin(userId))) return { error: "Unauthorized" };
-
+        await connectDB();
         await Ticket.findByIdAndUpdate(ticketId, { priority });
 
         revalidatePath(`/support/${ticketId}`);
