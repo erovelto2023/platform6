@@ -54,13 +54,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         K Business Academy
                     </Link>
                 </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6">
+                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
                     <Link className="text-sm font-medium hover:underline underline-offset-4" href="/courses">Courses</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/library">Library</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/business-resources">Resources</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/affiliate-crm">Affiliate CRM</Link>
                     <Link className="text-sm font-medium hover:underline underline-offset-4" href="/niche-boxes">Niche Boxes</Link>
                     <Link className="text-sm font-medium hover:underline underline-offset-4 text-indigo-600" href="/blog">Blog</Link>
                     <Link href="/sign-in"><Button variant="ghost" size="sm">Log In</Button></Link>
                     <Link href="/sign-up"><Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Get Started</Button></Link>
                 </nav>
+                <div className="ml-auto md:hidden">
+                    <Link href="/sign-up">
+                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Get Started</Button>
+                    </Link>
+                </div>
             </header>
 
             <main className="flex-1 container px-4 md:px-6 mx-auto py-12 max-w-4xl">

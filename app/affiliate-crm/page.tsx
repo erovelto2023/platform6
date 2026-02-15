@@ -49,6 +49,9 @@ export default function AffiliatePage() {
                     </Link>
                 </div>
                 <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
+                        Courses
+                    </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
                         Library
                     </Link>
@@ -60,6 +63,9 @@ export default function AffiliatePage() {
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/niche-boxes">
                         Niche Boxes
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
+                        Blog
                     </Link>
                     <Link href="/sign-in">
                         <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">

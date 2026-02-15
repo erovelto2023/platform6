@@ -64,9 +64,18 @@ export default async function BlogPage() {
                         </span>
                     </Link>
                 </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6">
+                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
                         Courses
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
+                        Library
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
+                        Resources
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
+                        Affiliate CRM
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/niche-boxes">
                         Niche Boxes
@@ -85,6 +94,11 @@ export default async function BlogPage() {
                         </Button>
                     </Link>
                 </nav>
+                <div className="ml-auto md:hidden">
+                    <Link href="/sign-up">
+                        <Button size="sm">Get Started</Button>
+                    </Link>
+                </div>
             </header>
 
             <main className="flex-1">
