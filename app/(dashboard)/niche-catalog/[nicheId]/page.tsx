@@ -16,15 +16,15 @@ export default async function NicheBoxDetailPage({
     params: Promise<{ nicheId: string }>
 }) {
     const { userId } = await auth();
-    const isPro = await checkSubscription();
+    // const isPro = await checkSubscription();
 
     if (!userId) {
         return redirect("/");
     }
 
-    if (!isPro) {
-        return redirect("/upgrade");
-    }
+    // if (!isPro) {
+    //    return redirect("/upgrade");
+    // }
 
     const { nicheId } = await params;
     const niche = await getNicheBox(nicheId);

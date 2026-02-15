@@ -184,9 +184,18 @@ export async function seedTools() {
                 description: "Find and manage wholesale suppliers for your business.",
                 icon: "ShoppingBag",
                 gradient: "from-cyan-500 to-blue-600",
-                path: "/tools/wholesale-directory",
                 isEnabled: true,
                 order: 8
+            },
+            {
+                name: "Graphite Editor",
+                slug: "graphite",
+                description: "A free, open-source 2D vector graphics editor.",
+                icon: "PenTool",
+                gradient: "from-zinc-700 to-zinc-900",
+                path: "/tools/graphite",
+                isEnabled: true,
+                order: 9
             }
         ];
 

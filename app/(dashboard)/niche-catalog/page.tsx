@@ -7,11 +7,11 @@ import { checkSubscription } from "@/lib/check-subscription";
 import { redirect } from "next/navigation";
 
 export default async function NicheBoxesPage() {
-    const isPro = await checkSubscription();
-
-    if (!isPro) {
-        return redirect("/upgrade");
-    }
+    // const isPro = await checkSubscription();
+    // 
+    // if (!isPro) {
+    //    return redirect("/upgrade");
+    // }
 
     const niches = await getNicheBoxes();
 

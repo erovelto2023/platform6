@@ -7,12 +7,12 @@ export default async function ToolsLayout({
 }: {
     children: ReactNode;
 }) {
-    const isPro = await checkSubscription();
-
-    if (!isPro) {
-        // Redirect to the pricing section (or a specific upgrade page)
-        redirect("/upgrade");
-    }
+    // const isPro = await checkSubscription();
+    // 
+    // if (!isPro) {
+    //    // Redirect to the pricing section (or a specific upgrade page)
+    //    redirect("/upgrade");
+    // }
 
     return <>{children}</>;
 }
