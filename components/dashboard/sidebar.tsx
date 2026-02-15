@@ -111,6 +111,12 @@ const adminRoutes = [
         color: "text-sky-500",
     },
     {
+        label: "Support Tickets",
+        icon: FileQuestion,
+        href: "/admin/tickets",
+        color: "text-emerald-500",
+    },
+    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/admin/affiliates",
