@@ -6,10 +6,14 @@ import CanvasArea from './canvas-area';
 import EditorSidebar from './sidebar';
 import EditorToolbar from './toolbar';
 
+import AISidebarPanel from './ai-sidebar-panel';
+
 export default function DesignEditorDetails() {
     const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
     const [hasSelection, setHasSelection] = useState(false);
     const [selectedColor, setSelectedColor] = useState("#000000");
+    const [isAIOpen, setIsAIOpen] = useState(false);
+
 
     useEffect(() => {
         if (!canvas) return;
@@ -146,6 +150,20 @@ export default function DesignEditorDetails() {
         }
     }
 
+    const handleAddAIText = (text: string) => {
+        if (!canvas) return;
+        const textObj = new fabric.IText(text, {
+            left: 100,
+            top: 100,
+            fontSize: 24,
+            fill: '#333333',
+            width: 300,
+        });
+        canvas.add(textObj);
+        canvas.setActiveObject(textObj);
+        canvas.renderAll();
+    }
+
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
             <EditorToolbar
@@ -155,14 +173,24 @@ export default function DesignEditorDetails() {
                 onDownload={handleDownload}
                 onColorChange={handleColorChange}
             />
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden relative">
                 <EditorSidebar
                     onAddText={handleAddText}
                     onAddRectangle={handleAddRectangle}
                     onAddCircle={handleAddCircle}
                     onAddTriangle={handleAddTriangle}
                     onAddImage={handleAddImage}
+                    onToggleAI={() => setIsAIOpen(!isAIOpen)}
+                    isAIOpen={isAIOpen}
                 />
+
+                {isAIOpen && (
+                    <AISidebarPanel
+                        onAddImage={handleAddImage}
+                        onAddText={handleAddAIText}
+                    />
+                )}
+
                 <CanvasArea onCanvasReady={setCanvas} />
             </div>
         </div>
