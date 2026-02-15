@@ -90,6 +90,12 @@ const routes = [
         color: "text-blue-500",
     },
     {
+        label: "Tickets",
+        icon: FileQuestion,
+        href: "/tickets",
+        color: "text-emerald-500",
+    },
+    {
         label: "Admin",
         icon: ShieldCheck,
         href: "/admin",
