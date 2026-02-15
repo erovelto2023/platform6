@@ -95,6 +95,15 @@ export default function LandingPage() {
           <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
             Courses
           </Link>
+          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
+            Library
+          </Link>
+          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
+            Resources
+          </Link>
+          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
+            Affiliate CRM
+          </Link>
           <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/niche-boxes">
             Niche Boxes
           </Link>
