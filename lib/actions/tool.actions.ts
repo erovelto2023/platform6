@@ -207,9 +207,10 @@ export async function seedTools() {
             );
         }
 
-        // Cleanup: Remove Content Planner & Whiteboard (moved to sidebar)
+        // Cleanup: Remove Content Planner, Whiteboard, and Graphite
         // await Tool.deleteOne({ slug: "content-planner" });
         await Tool.deleteOne({ slug: "whiteboard" });
+        await Tool.deleteOne({ slug: "graphite" });
 
 
         revalidatePath("/tools");
