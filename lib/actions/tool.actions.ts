@@ -113,6 +113,14 @@ export async function toggleToolStatus(id: string) {
     }
 }
 
+import { tools as pdfTools } from "@/app/(dashboard)/tools/pdf-suite/_config/tools";
+// Note: We can't easily import content here if it's not exported in a way that works with server actions or if it's too large?
+// Actually, let's just use the metadata we have in tools.ts.
+// But tools.ts doesn't have the full description/title (it has id/slug).
+// The content is in tool-content/en.ts.
+// Let's rely on a basic mapping for now, or import content.
+import { toolContentEn as toolContent } from "@/app/(dashboard)/tools/pdf-suite/_config/tool-content/en";
+
 export async function seedTools() {
     try {
         await connectToDatabase();
@@ -184,6 +192,7 @@ export async function seedTools() {
                 description: "Find and manage wholesale suppliers for your business.",
                 icon: "ShoppingBag",
                 gradient: "from-cyan-500 to-blue-600",
+                path: "/tools/wholesale-directory",
                 isEnabled: true,
                 order: 8
             },
@@ -199,6 +208,7 @@ export async function seedTools() {
             }
         ];
 
+        // Seed Core Tools
         for (const toolData of tools) {
             await Tool.findOneAndUpdate(
                 { slug: toolData.slug },
@@ -207,8 +217,34 @@ export async function seedTools() {
             );
         }
 
+        // Seed PDF Tools
+        console.log("Seeding PDF Tools...");
+        let pdfOrder = 100;
+        for (const pdfTool of pdfTools) {
+            const content = toolContent[pdfTool.id];
+            const name = content?.title || pdfTool.id.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+            const description = content?.description || `Tool to ${pdfTool.features[0] || 'process PDF'}`;
+
+            const toolData = {
+                name: name,
+                slug: pdfTool.slug,
+                description: description.substring(0, 150) + (description.length > 150 ? '...' : ''), // Truncate for listing
+                icon: pdfTool.icon, // Lucide icon name, should map correctly if UI handles it
+                gradient: "from-red-500 to-orange-500", // Standard PDF gradient
+                path: `/tools/pdf-suite/${pdfTool.slug}`,
+                isEnabled: !pdfTool.disabled,
+                order: pdfOrder++
+            };
+
+            await Tool.findOneAndUpdate(
+                { slug: toolData.slug },
+                // Update everything for PDF tools to ensure they sync with config changes
+                { $set: toolData },
+                { upsert: true, new: true }
+            );
+        }
+
         // Cleanup: Remove Content Planner, Whiteboard, and Graphite
-        // await Tool.deleteOne({ slug: "content-planner" });
         await Tool.deleteOne({ slug: "whiteboard" });
         await Tool.deleteOne({ slug: "graphite" });
 
