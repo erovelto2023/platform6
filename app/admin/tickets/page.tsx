@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { DeleteTicketButton } from "./_components/delete-button";
 
 export default async function AdminTicketsPage() {
     const tickets = await getAllTickets();
@@ -52,12 +53,13 @@ export default async function AdminTicketsPage() {
                                     {ticket.status}
                                 </Badge>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right flex items-center justify-end gap-2">
                                 <Link href={`/admin/tickets/${ticket._id}`}>
                                     <Button variant="ghost" size="sm">
                                         Manage
                                     </Button>
                                 </Link>
+                                <DeleteTicketButton ticketId={ticket._id} />
                             </div>
                         </div>
                     ))

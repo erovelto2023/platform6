@@ -97,7 +97,13 @@ export async function closeTicket(ticketId: string) {
         if (!ticket) return { error: "Ticket not found" };
 
         if (ticket.clerkId !== user.id) {
-            return { error: "Unauthorized" };
+            // Check if admin
+            const { checkRole } = await import("@/lib/roles");
+            const isAdmin = await checkRole("admin");
+
+            if (!isAdmin) {
+                return { error: "Unauthorized" };
+            }
         }
 
         await Ticket.findByIdAndUpdate(ticketId, { status: 'closed' }, { new: true });
@@ -129,5 +135,35 @@ export async function getAllTickets() {
     } catch (error) {
         console.error("Get all tickets error:", error);
         throw new Error("Failed to fetch tickets");
+    }
+}
+
+// @desc    Delete ticket
+// @access  Private/Admin
+export async function deleteTicket(ticketId: string) {
+    try {
+        const user = await currentUser();
+        if (!user) return { error: "Unauthorized" };
+
+        const { checkRole } = await import("@/lib/roles");
+        const isAdmin = await checkRole("admin");
+
+        if (!isAdmin) {
+            return { error: "Unauthorized" };
+        }
+
+        await connectDB();
+
+        await Ticket.findByIdAndDelete(ticketId);
+
+        // Optionally delete associated notes
+        // const Note = (await import("@/lib/db/models/Note")).default;
+        // await Note.deleteMany({ ticketId });
+
+        revalidatePath("/admin/tickets");
+        return { success: true };
+    } catch (error) {
+        console.error("Delete ticket error:", error);
+        return { error: "Failed to delete ticket" };
     }
 }
