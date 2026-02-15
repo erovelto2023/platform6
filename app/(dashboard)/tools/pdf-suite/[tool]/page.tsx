@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { tools } from '../_config/tools';
 import { getToolContent } from '../_lib/content';
 import ToolPage from '../_components/tools/ToolPage';
-// import MergePDFTool from '../_components/tools/merge/MergePDFTool';
+import MergePDFTool from '../_components/tools/merge/MergePDFTool';
+import { GenericPDFTool } from '../_components/tools/GenericPDFTool';
 
 interface PageProps {
   params: Promise<{
@@ -38,14 +39,9 @@ export default async function Page(props: PageProps) {
   const renderToolInterface = () => {
     switch (tool.id) {
       case 'merge-pdf':
-        // return <MergePDFTool />;
-        return <div className="p-8 text-center">Merge Tool Placeholder</div>;
+        return <MergePDFTool />;
       default:
-        return (
-          <div className="p-8 text-center text-muted-foreground">
-            <p>This tool is coming soon.</p>
-          </div>
-        );
+        return <GenericPDFTool tool={tool} />;
     }
   };
 
