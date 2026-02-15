@@ -242,7 +242,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
     return (
         <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white relative">
-            <div className="px-3 py-2 flex-1">
+            <div className="px-3 py-2 flex-1 overflow-y-auto">
                 <Link href="/dashboard" className={cn("flex items-center mb-14 transition-all duration-300", isCollapsed ? "justify-center pl-0" : "pl-3")}>
                     <div className={cn("relative transition-all duration-300", isCollapsed ? "w-10 h-10 mr-0" : "w-8 h-8 mr-4")}>
                         {/* Logo placeholder */}
