@@ -62,24 +62,6 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-cyan-600"
         },
         {
-            title: "BrandBaser",
-            description: "Brand builder",
-            href: "/admin/brand-baser",
-            icon: Sparkles,
-            color: "text-violet-600",
-            bg: "bg-violet-100",
-            hover: "group-hover:bg-violet-600"
-        },
-        {
-            title: "Content Planner",
-            description: "Schedule posts",
-            href: "/tools/content-planner",
-            icon: LayoutTemplate,
-            color: "text-indigo-600",
-            bg: "bg-indigo-100",
-            hover: "group-hover:bg-indigo-600"
-        },
-        {
             title: "Content Templates",
             description: "Manage templates",
             href: "/admin/content-templates",
@@ -284,7 +266,6 @@ export default async function AdminDashboardPage() {
                         { label: "Surveys", count: stats.breakdown.surveys, color: "text-orange-600" },
                         { label: "Wholesale Partners", count: stats.breakdown.wholesaleSuppliers, color: "text-cyan-600" },
                         { label: "Resources", count: stats.breakdown.resources, color: "text-amber-600" },
-                        { label: "Brand Bases", count: stats.breakdown.brandBases, color: "text-violet-600" },
                     ].map((item, i) => (
                         <Card key={i} className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <CardContent className="pt-6 pb-6">
