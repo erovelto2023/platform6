@@ -8,12 +8,18 @@ import { revalidatePath } from "next/cache";
 
 export async function createTicket(title: string, description: string, priority: string) {
     try {
+        console.log("[createTicket] Starting ticket creation...");
         const user = await currentUser();
-        if (!user) return { error: "Unauthorized" };
+        if (!user) {
+            console.log("[createTicket] Unauthorized: No user found");
+            return { error: "Unauthorized" };
+        }
+        console.log("[createTicket] User found:", user.id);
 
         await connectDB();
+        console.log("[createTicket] DB Connected");
 
-        const ticket = await Ticket.create({
+        const ticketData = {
             clerkId: user.id,
             userInfo: {
                 firstName: user.firstName,
@@ -31,12 +37,16 @@ export async function createTicket(title: string, description: string, priority:
                 content: description,
                 isAdmin: false,
             }]
-        });
+        };
+        console.log("[createTicket] Creating ticket with data:", JSON.stringify(ticketData, null, 2));
+
+        const ticket = await Ticket.create(ticketData);
+        console.log("[createTicket] Ticket created successfully:", ticket._id);
 
         revalidatePath("/support");
         return { success: true, ticketId: ticket._id.toString() };
     } catch (error) {
-        console.error("Create ticket error:", error);
+        console.error("[createTicket] CRITICAL ERROR:", error);
         return { error: "Failed to create ticket" };
     }
 }
