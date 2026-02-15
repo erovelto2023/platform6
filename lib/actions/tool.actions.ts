@@ -188,12 +188,12 @@ export async function seedTools() {
                 order: 8
             },
             {
-                name: "Graphite Editor",
-                slug: "graphite",
-                description: "A free, open-source 2D vector graphics editor.",
-                icon: "PenTool",
-                gradient: "from-zinc-700 to-zinc-900",
-                path: "/tools/graphite",
+                name: "Design Editor",
+                slug: "design-editor",
+                description: "A free, easy-to-use graphic design editor.",
+                icon: "LayoutTemplate",
+                gradient: "from-pink-500 to-rose-500",
+                path: "/tools/design-editor",
                 isEnabled: true,
                 order: 9
             }

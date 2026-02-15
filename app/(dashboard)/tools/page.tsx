@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, ShoppingCart, ExternalLink, Image as ImageIcon, LayoutTemplate, Calendar, FileText, Search, BarChart3, Globe, ShoppingBag, PenTool } from "lucide-react";
+import { Settings, ShoppingCart, ExternalLink, Image as ImageIcon, LayoutTemplate, Calendar, FileText, Search, BarChart3, Globe, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { getTools } from "@/lib/actions/tool.actions";
 import * as Icons from "lucide-react";
@@ -13,8 +13,7 @@ const iconMap: { [key: string]: any } = {
     BarChart3,
     Globe,
     ShoppingBag,
-    Settings,
-    PenTool
+    Settings
 };
 
 export default async function ToolsDashboardPage() {
