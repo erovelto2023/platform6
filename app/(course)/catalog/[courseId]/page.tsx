@@ -18,9 +18,14 @@ export default async function CourseIdPage({
     const firstLesson = firstModule?.lessons?.[0];
 
     if (!firstModule || !firstLesson) {
-        // If no lessons, just stay here or redirect to dashboard? 
-        // For now, let's redirect to dashboard if empty
-        return redirect("/");
+        return (
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+                <h1 className="text-2xl font-bold mb-2">No content available</h1>
+                <p className="text-muted-foreground">
+                    This course does not have any lessons yet. Check back later!
+                </p>
+            </div>
+        );
     }
 
     return redirect(`/catalog/${courseId}/chapters/${firstModule._id}/lessons/${firstLesson._id}`);
