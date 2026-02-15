@@ -21,7 +21,7 @@ export default async function TicketsPage() {
             <div className="rounded-md border">
                 <div className="grid grid-cols-5 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
                     <div>Date</div>
-                    <div>Product</div>
+                    <div>Subject</div>
                     <div>Last Updated</div>
                     <div>Status</div>
                     <div className="text-right">Action</div>
@@ -36,8 +36,8 @@ export default async function TicketsPage() {
                             <div>
                                 {format(new Date(ticket.createdAt), 'MM/dd/yyyy')}
                             </div>
-                            <div>
-                                {ticket.product}
+                            <div className="font-medium truncate pr-4">
+                                {ticket.subject || ticket.product}
                             </div>
                             <div>
                                 {format(new Date(ticket.lastMessageAt || ticket.createdAt), 'MMM d, h:mm a')}

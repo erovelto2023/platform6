@@ -87,7 +87,7 @@ export async function createNote(ticketId: string, text: string) {
                         recipientId: recipientDoc._id,
                         senderId: senderDoc._id,
                         type: 'reply',
-                        content: `New reply on your ticket: ${ticket.product}`,
+                        content: `New reply on your ticket: ${ticket.subject}`,
                         link: `/tickets/${ticketId}`,
                         relatedId: ticket._id
                     });

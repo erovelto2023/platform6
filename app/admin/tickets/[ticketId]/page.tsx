@@ -71,7 +71,7 @@ export default async function AdminTicketIdPage({
                 </div>
 
                 <div className="bg-slate-50 p-4 rounded-md border text-sm">
-                    <h3 className="font-semibold mb-2">Product: {ticket.product}</h3>
+                    <h3 className="font-semibold mb-2">Subject: {ticket.subject || ticket.product}</h3>
                     <hr className="my-2" />
                     <div className="whitespace-pre-wrap text-slate-700">
                         {ticket.description}

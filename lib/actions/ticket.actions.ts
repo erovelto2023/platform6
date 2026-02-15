@@ -53,13 +53,13 @@ export async function getTicket(ticketId: string) {
 
 // @desc    Create new ticket
 // @access  Private
-export async function createTicket(product: string, description: string) {
+export async function createTicket(subject: string, description: string) {
     try {
         const user = await currentUser();
         if (!user) return { error: "Unauthorized" };
 
-        if (!product || !description) {
-            return { error: "Please add a product and description" };
+        if (!subject || !description) {
+            return { error: "Please add a subject and description" };
         }
 
         await connectDB();
@@ -71,7 +71,7 @@ export async function createTicket(product: string, description: string) {
                 email: user.emailAddresses[0]?.emailAddress,
                 avatar: user.imageUrl,
             },
-            product,
+            subject,
             description,
             status: 'new',
         });

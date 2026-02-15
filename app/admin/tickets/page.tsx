@@ -18,7 +18,7 @@ export default async function AdminTicketsPage() {
                 <div className="grid grid-cols-[120px_2fr_1fr_1fr_100px_100px] gap-4 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
                     <div>Date</div>
                     <div>User</div>
-                    <div>Product</div>
+                    <div>Subject</div>
                     <div>Last Updated</div>
                     <div>Status</div>
                     <div className="text-right">Action</div>
@@ -37,8 +37,8 @@ export default async function AdminTicketsPage() {
                                 <span className="font-medium truncate">{ticket.userInfo?.name}</span>
                                 <span className="text-xs text-muted-foreground truncate">{ticket.userInfo?.email}</span>
                             </div>
-                            <div className="truncate">
-                                {ticket.product}
+                            <div className="truncate font-medium">
+                                {ticket.subject || ticket.product}
                             </div>
                             <div>
                                 {format(new Date(ticket.lastMessageAt || ticket.createdAt), 'MMM d, h:mm a')}

@@ -11,10 +11,9 @@ const TicketSchema = new Schema({
         email: { type: String },
         avatar: { type: String },
     },
-    product: {
+    subject: {
         type: String,
-        required: [true, 'Please select a product'],
-        enum: ['iPhone', 'Macbook Pro', 'iMac', 'iPad'],
+        required: [true, 'Please enter a subject'],
     },
     description: {
         type: String,

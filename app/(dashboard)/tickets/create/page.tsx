@@ -22,7 +22,7 @@ export default function CreateTicketPage() {
     const [isLoading, setIsLoading] = useState(false);
 
     // Form state
-    const [product, setProduct] = useState("iPhone");
+    const [subject, setSubject] = useState("");
     const [description, setDescription] = useState("");
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -30,7 +30,7 @@ export default function CreateTicketPage() {
         setIsLoading(true);
 
         try {
-            const result = await createTicket(product, description);
+            const result = await createTicket(subject, description);
 
             if (result.error) {
                 toast.error(result.error);
@@ -60,22 +60,14 @@ export default function CreateTicketPage() {
 
                 <form onSubmit={onSubmit} className="space-y-6">
                     <div className="space-y-2">
-                        <Label>Product</Label>
-                        <Select
+                        <Label>Subject</Label>
+                        <Input
                             disabled={isLoading}
-                            value={product}
-                            onValueChange={setProduct}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a product" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="iPhone">iPhone</SelectItem>
-                                <SelectItem value="Macbook Pro">Macbook Pro</SelectItem>
-                                <SelectItem value="iMac">iMac</SelectItem>
-                                <SelectItem value="iPad">iPad</SelectItem>
-                            </SelectContent>
-                        </Select>
+                            placeholder="e.g. login issue"
+                            value={subject}
+                            onChange={(e) => setSubject(e.target.value)}
+                            required
+                        />
                     </div>
 
                     <div className="space-y-2">
