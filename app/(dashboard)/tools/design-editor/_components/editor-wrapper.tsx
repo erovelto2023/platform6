@@ -8,23 +8,35 @@ import EditorToolbar from './toolbar';
 
 export default function DesignEditorDetails() {
     const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-    const [activeObject, setActiveObject] = useState<fabric.Object | null>(null);
+    const [hasSelection, setHasSelection] = useState(false);
+    const [selectedColor, setSelectedColor] = useState("#000000");
 
     useEffect(() => {
         if (!canvas) return;
 
-        const handleSelection = () => {
-            setActiveObject(canvas.getActiveObject());
+        const updateSelection = () => {
+            const active = canvas.getActiveObject();
+            setHasSelection(!!active);
+
+            if (active) {
+                // Safely get fill color
+                const fill = active.get('fill');
+                if (typeof fill === 'string') {
+                    setSelectedColor(fill);
+                } else {
+                    setSelectedColor("#000000");
+                }
+            }
         };
 
-        canvas.on('selection:created', handleSelection);
-        canvas.on('selection:updated', handleSelection);
-        canvas.on('selection:cleared', handleSelection);
+        canvas.on('selection:created', updateSelection);
+        canvas.on('selection:updated', updateSelection);
+        canvas.on('selection:cleared', updateSelection);
 
         return () => {
-            canvas.off('selection:created', handleSelection);
-            canvas.off('selection:updated', handleSelection);
-            canvas.off('selection:cleared', handleSelection);
+            canvas.off('selection:created', updateSelection);
+            canvas.off('selection:updated', updateSelection);
+            canvas.off('selection:cleared', updateSelection);
         };
     }, [canvas]);
 
@@ -94,7 +106,7 @@ export default function DesignEditorDetails() {
             canvas.add(img);
             canvas.setActiveObject(img);
             canvas.renderAll();
-        }, { crossOrigin: 'anonymous' }); // Added crossOrigin
+        }, { crossOrigin: 'anonymous' });
     };
 
     const handleDelete = () => {
@@ -105,7 +117,7 @@ export default function DesignEditorDetails() {
             active.forEach((obj) => {
                 canvas.remove(obj);
             });
-            canvas.renderAll(); // Ensure re-render
+            canvas.renderAll();
         }
     };
 
@@ -114,7 +126,7 @@ export default function DesignEditorDetails() {
         const dataURL = canvas.toDataURL({
             format: 'png',
             quality: 1,
-            multiplier: 2 // High res export
+            multiplier: 2
         });
         const link = document.createElement('a');
         link.download = 'design.png';
@@ -130,15 +142,15 @@ export default function DesignEditorDetails() {
         if (active) {
             active.set('fill', color);
             canvas.renderAll();
-            // Force update state to reflect change immediately if needed
-            setActiveObject({ ...active } as fabric.Object);
+            setSelectedColor(color);
         }
     }
 
     return (
         <div className="flex flex-col h-full bg-slate-50 overflow-hidden">
             <EditorToolbar
-                activeObject={activeObject}
+                hasSelection={hasSelection}
+                selectedColor={selectedColor}
                 onDelete={handleDelete}
                 onDownload={handleDownload}
                 onColorChange={handleColorChange}

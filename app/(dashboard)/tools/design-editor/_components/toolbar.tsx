@@ -1,29 +1,28 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, Undo, Redo } from "lucide-react";
-import { fabric } from 'fabric';
+import { Download, Trash2 } from "lucide-react";
 
 interface EditorToolbarProps {
-    activeObject: fabric.Object | null | undefined;
+    hasSelection: boolean;
+    selectedColor: string;
     onDelete: () => void;
     onDownload: () => void;
     onColorChange: (color: string) => void;
 }
 
-export default function EditorToolbar({ activeObject, onDelete, onDownload, onColorChange }: EditorToolbarProps) {
+export default function EditorToolbar({ hasSelection, selectedColor, onDelete, onDownload, onColorChange }: EditorToolbarProps) {
     return (
         <div className="h-16 border-b bg-white flex items-center justify-between px-6 shadow-sm z-10">
             <div className="flex items-center gap-4">
                 <h1 className="font-bold text-lg">Design Editor</h1>
-                {activeObject && (
+                {hasSelection && (
                     <div className="flex items-center gap-2 border-l pl-4 ml-4">
                         <span className="text-sm font-medium">Color:</span>
                         <input
                             type="color"
                             className="h-8 w-8 rounded cursor-pointer border-none p-0"
-                            // @ts-ignore
-                            value={activeObject.get('fill') as string || "#000000"}
+                            value={selectedColor}
                             onChange={(e) => onColorChange(e.target.value)}
                         />
                         <Button variant="ghost" size="icon" onClick={onDelete} className="text-red-500 hover:text-red-600 hover:bg-red-50">
