@@ -198,8 +198,9 @@ export async function seedTools() {
             );
         }
 
-        // Cleanup: Remove Content Planner
-        await Tool.deleteOne({ slug: "content-planner" });
+        // Cleanup: Remove Content Planner & Whiteboard (moved to sidebar)
+        // await Tool.deleteOne({ slug: "content-planner" });
+        await Tool.deleteOne({ slug: "whiteboard" });
 
 
         revalidatePath("/tools");

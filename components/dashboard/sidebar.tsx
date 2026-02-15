@@ -23,6 +23,7 @@ import {
     MessageSquare,
     Library,
     Wrench,
+    PenTool,
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -100,6 +101,12 @@ const routes = [
         icon: ShieldCheck,
         href: "/admin",
         color: "text-orange-700",
+    },
+    {
+        label: "Whiteboard",
+        icon: PenTool,
+        href: "/whiteboard",
+        color: "text-pink-500",
     },
 ];
 
