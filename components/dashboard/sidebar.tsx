@@ -85,6 +85,12 @@ const routes = [
         color: "text-orange-500",
     },
     {
+        label: "PDF Suite",
+        icon: FileText,
+        href: "/tools/pdf-suite",
+        color: "text-red-500",
+    },
+    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/affiliates",
