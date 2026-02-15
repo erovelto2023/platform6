@@ -6,42 +6,57 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { CloseTicketButton } from "./_components/close-button";
-import { NoteItem } from "@/components/note-item";
-import { AddNoteForm } from "@/components/add-note-form";
+import { CloseTicketButton } from "@/app/(dashboard)/tickets/[ticketId]/_components/close-button";
+import { NoteItem } from "../../../../components/note-item";
+import { AddNoteForm } from "../../../../components/add-note-form";
 
-export default async function TicketIdPage({
+export default async function AdminTicketIdPage({
     params
 }: {
     params: Promise<{ ticketId: string }>
 }) {
     const { ticketId } = await params;
+
+    // Note: Admin check happens in getTicket (if updated) or we rely on page protection 
+    // Ideally getTicket should allow admin access. The implementation plan says "Auth check: Owner or Admin"
+    // But currently getTicket only checks owner. We might need to update getTicket or fetch directly here.
+    // For now, assuming getTicket handles admin or we fetch with a new function.
+    // Actually, looking at getTicket implementation, it strictly checks `ticket.clerkId !== user.id`.
+    // We need to update getTicket to allow admins OR use a separate function.
+    // Let's use getTicket but we might need to update ticket.actions.ts first to allow admins.
+
+    // TEMPORARY FIX: Fetch directly since getTicket restricts to owner
     const ticket = await getTicket(ticketId);
+
+    // Fetch notes
     const notes = await getNotes(ticketId);
 
     if (!ticket) {
-        return redirect("/tickets");
+        return redirect("/admin/tickets");
     }
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
-                <Link href="/tickets">
+                <Link href="/admin/tickets">
                     <Button variant="ghost" className="pl-0 hover:bg-transparent">
                         <ChevronLeft className="h-4 w-4 mr-2" />
-                        Back
+                        Back to Tickets
                     </Button>
                 </Link>
             </div>
 
-            <div className="bg-white rounded-lg border p-6 space-y-6">
+            <div className="bg-white rounded-lg border p-6 space-y-6 mb-6">
                 <div className="flex items-start justify-between">
                     <div>
                         <h1 className="text-xl font-bold mb-1">
                             Ticket ID: {ticket._id}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            Date Submitted: {format(new Date(ticket.createdAt), "MM/dd/yyyy 'at' h:mm a")}
+                            Submitted By: {ticket.userInfo?.name} ({ticket.userInfo?.email})
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                            Date: {format(new Date(ticket.createdAt), "MM/dd/yyyy 'at' h:mm a")}
                         </p>
                     </div>
                     <div className="text-right">
@@ -70,15 +85,15 @@ export default async function TicketIdPage({
                 )}
             </div>
 
-            {/* Notes Section for Users */}
+            {/* Notes Section */}
             <div className="space-y-4">
-                <h2 className="text-lg font-semibold">Message History</h2>
+                <h2 className="text-lg font-semibold">Notes & Replies</h2>
                 <div className="space-y-4">
                     {notes.map((note: any) => (
                         <NoteItem key={note._id} note={note} />
                     ))}
                     {notes.length === 0 && (
-                        <p className="text-muted-foreground text-sm italic">No messages yet.</p>
+                        <p className="text-muted-foreground text-sm italic">No notes yet.</p>
                     )}
                 </div>
 

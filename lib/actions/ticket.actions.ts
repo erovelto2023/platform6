@@ -35,7 +35,13 @@ export async function getTicket(ticketId: string) {
         if (!ticket) return null;
 
         if (ticket.clerkId !== user.id) {
-            return null; // Not Authorized
+            // Check if admin
+            const { checkRole } = await import("@/lib/roles");
+            const isAdmin = await checkRole("admin");
+
+            if (!isAdmin) {
+                return null; // Not Authorized
+            }
         }
 
         return JSON.parse(JSON.stringify(ticket));
@@ -102,5 +108,26 @@ export async function closeTicket(ticketId: string) {
     } catch (error) {
         console.error("Close ticket error:", error);
         return { error: "Failed to close ticket" };
+    }
+}
+
+// @desc    Get all tickets (Admin)
+// @access  Private/Admin
+export async function getAllTickets() {
+    try {
+        const user = await currentUser();
+        if (!user) return [];
+
+        const { checkRole } = await import("@/lib/roles");
+        const isAdmin = await checkRole("admin");
+
+        if (!isAdmin) return [];
+
+        await connectDB();
+        const tickets = await Ticket.find({}).sort({ createdAt: -1 });
+        return JSON.parse(JSON.stringify(tickets));
+    } catch (error) {
+        console.error("Get all tickets error:", error);
+        throw new Error("Failed to fetch tickets");
     }
 }
