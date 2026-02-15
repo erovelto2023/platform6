@@ -119,16 +119,6 @@ export async function seedTools() {
 
         const tools = [
             {
-                name: "Content Planner",
-                slug: "content-planner",
-                description: "Plan, schedule, and publish content across all platforms.",
-                icon: "Calendar",
-                gradient: "from-indigo-500 to-blue-600",
-                path: "/tools/content-planner",
-                isEnabled: true,
-                order: 1
-            },
-            {
                 name: "Amazon Engine",
                 slug: "amazon-product-engine",
                 description: "Search products, generate affiliate links, and create displays.",
@@ -207,6 +197,10 @@ export async function seedTools() {
                 { upsert: true, new: true }
             );
         }
+
+        // Cleanup: Remove Content Planner
+        await Tool.deleteOne({ slug: "content-planner" });
+
 
         revalidatePath("/tools");
         revalidatePath("/admin/tools");
