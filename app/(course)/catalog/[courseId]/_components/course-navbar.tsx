@@ -38,7 +38,7 @@ export const CourseNavbar = ({
                         </Button>
                     </Link>
                     <ClientWrapper>
-                        <UserButton afterSignOutUrl="/" />
+                        <UserButton />
                     </ClientWrapper>
                 </div>
             </div>
