@@ -14,7 +14,7 @@ export async function getTickets() {
         if (!user) return [];
 
         await connectDB();
-        const tickets = await Ticket.find({ clerkId: user.id }).sort({ createdAt: -1 });
+        const tickets = await Ticket.find({ clerkId: user.id }).sort({ lastMessageAt: -1, createdAt: -1 });
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get tickets error:", error);
@@ -124,7 +124,7 @@ export async function getAllTickets() {
         if (!isAdmin) return [];
 
         await connectDB();
-        const tickets = await Ticket.find({}).sort({ createdAt: -1 });
+        const tickets = await Ticket.find({}).sort({ lastMessageAt: -1, createdAt: -1 });
         return JSON.parse(JSON.stringify(tickets));
     } catch (error) {
         console.error("Get all tickets error:", error);

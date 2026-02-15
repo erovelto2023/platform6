@@ -25,6 +25,10 @@ const TicketSchema = new Schema({
         enum: ['new', 'open', 'closed'],
         default: 'new',
     },
+    lastMessageAt: {
+        type: Date,
+        default: Date.now,
+    },
 }, {
     timestamps: true,
 });

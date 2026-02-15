@@ -19,9 +19,10 @@ export default async function TicketsPage() {
             </div>
 
             <div className="rounded-md border">
-                <div className="grid grid-cols-4 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
+                <div className="grid grid-cols-5 bg-slate-100 p-4 font-medium text-sm text-slate-500 border-b">
                     <div>Date</div>
                     <div>Product</div>
+                    <div>Last Updated</div>
                     <div>Status</div>
                     <div className="text-right">Action</div>
                 </div>
@@ -31,12 +32,15 @@ export default async function TicketsPage() {
                     </div>
                 ) : (
                     tickets.map((ticket: any) => (
-                        <div key={ticket._id} className="grid grid-cols-4 p-4 items-center text-sm border-b last:border-0 hover:bg-slate-50/50 transition">
+                        <div key={ticket._id} className="grid grid-cols-5 p-4 items-center text-sm border-b last:border-0 hover:bg-slate-50/50 transition">
                             <div>
                                 {format(new Date(ticket.createdAt), 'MM/dd/yyyy')}
                             </div>
                             <div>
                                 {ticket.product}
+                            </div>
+                            <div>
+                                {format(new Date(ticket.lastMessageAt || ticket.createdAt), 'MMM d, h:mm a')}
                             </div>
                             <div>
                                 <Badge variant={

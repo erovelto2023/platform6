@@ -18,6 +18,7 @@ export default async function AdminTicketsPage() {
                     <div>Date</div>
                     <div>User</div>
                     <div>Product</div>
+                    <div>Last Updated</div>
                     <div>Status</div>
                     <div className="text-right">Action</div>
                 </div>
@@ -37,6 +38,9 @@ export default async function AdminTicketsPage() {
                             </div>
                             <div>
                                 {ticket.product}
+                            </div>
+                            <div>
+                                {format(new Date(ticket.lastMessageAt || ticket.createdAt), 'MMM d, h:mm a')}
                             </div>
                             <div>
                                 <Badge variant={
