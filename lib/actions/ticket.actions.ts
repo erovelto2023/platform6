@@ -167,3 +167,24 @@ export async function deleteTicket(ticketId: string) {
         return { error: "Failed to delete ticket" };
     }
 }
+
+// @desc    Get ticket count
+// @access  Private/Admin
+export async function getTicketCount() {
+    try {
+        const user = await currentUser();
+        if (!user) return 0;
+
+        const { checkRole } = await import("@/lib/roles");
+        const isAdmin = await checkRole("admin");
+
+        if (!isAdmin) return 0;
+
+        await connectDB();
+        const count = await Ticket.countDocuments();
+        return count;
+    } catch (error) {
+        console.error("Get ticket count error:", error);
+        return 0;
+    }
+}

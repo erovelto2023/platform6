@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/actions/dashboard.actions";
+import { getTicketCount } from "@/lib/actions/ticket.actions";
 import { syncCurrentUser } from "@/lib/actions/user.actions";
 
 export default async function AdminDashboardPage() {
@@ -30,6 +31,7 @@ export default async function AdminDashboardPage() {
     await syncCurrentUser();
 
     const stats = await getDashboardStats();
+    const ticketCount = await getTicketCount();
 
     const adminTools = [
         {
@@ -249,20 +251,20 @@ export default async function AdminDashboardPage() {
                     </CardContent>
                 </Card>
 
-                {/* Revenue (Placeholder) */}
+                {/* Support Tickets */}
                 <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-600">Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium text-slate-600">Support Tickets</CardTitle>
                         <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                            <DollarSign className="h-4 w-4 text-slate-500" />
+                            <FileQuestion className="h-4 w-4 text-slate-500" />
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-slate-900">
-                            {stats.totalRevenue > 0 ? `$${stats.totalRevenue.toLocaleString()}` : "Coming Soon"}
+                            {ticketCount.toLocaleString()}
                         </div>
                         <p className="text-xs text-slate-500 mt-1">
-                            {stats.totalRevenue > 0 ? "from last month" : "Integrate payment provider"}
+                            Total tickets
                         </p>
                     </CardContent>
                 </Card>
