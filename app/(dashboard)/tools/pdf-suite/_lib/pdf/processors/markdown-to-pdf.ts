@@ -215,31 +215,8 @@ async function simpleMarkdownToHtml(markdown: string, gfm: boolean, syntaxHighli
     html = html.replace(/_(.+?)_/g, '<em>$1</em>');
 
     // Code blocks with syntax highlighting
-    if (syntaxHighlight) {
-        const hljs = (await import('highlight.js')).default;
-
-        // Process fenced code blocks with language
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
-            try {
-                if (lang && hljs.getLanguage(lang)) {
-                    const highlighted = hljs.highlight(code.trim(), { language: lang }).value;
-                    return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
-                } else if (lang) {
-                    // Unknown language, try auto-detect
-                    const highlighted = hljs.highlightAuto(code.trim()).value;
-                    return `<pre><code class="hljs">${highlighted}</code></pre>`;
-                } else {
-                    // No language specified
-                    const highlighted = hljs.highlightAuto(code.trim()).value;
-                    return `<pre><code class="hljs">${highlighted}</code></pre>`;
-                }
-            } catch {
-                return `<pre><code>${code}</code></pre>`;
-            }
-        });
-    } else {
-        html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
-    }
+    // Code blocks (Syntax highlighting disabled to avoid dependency)
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="language-$1">$2</code></pre>');
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
     // Links and images
