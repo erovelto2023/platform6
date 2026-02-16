@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { createContentItem } from "@/lib/actions/content.actions"; // We'll need to update this or create a new action for ContentPost
+import { createContentPost } from "@/lib/actions/content.actions";
 
 // Mocks for now, should be replaced with actual data or passed in props
 const PILLARS = ['education', 'promotion', 'engagement', 'authority', 'lifestyle', 'entertainment'];
