@@ -209,6 +209,7 @@ export async function seedTools() {
         ];
 
         // Seed Core Tools
+        console.log("Seeding Core Tools...");
         for (const toolData of tools) {
             await Tool.findOneAndUpdate(
                 { slug: toolData.slug },
@@ -218,31 +219,56 @@ export async function seedTools() {
         }
 
         // Seed PDF Tools
-        console.log("Seeding PDF Tools...");
+        console.log(`Seeding configured PDF Tools (${pdfTools.length})...`);
         let pdfOrder = 100;
+        let seededCount = 0;
+        let statusUpdateCount = 0;
+
         for (const pdfTool of pdfTools) {
-            const content = toolContent[pdfTool.id];
-            const name = content?.title || pdfTool.id.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-            const description = content?.description || `Tool to ${pdfTool.features[0] || 'process PDF'}`;
+            try {
+                // Skip completely broken tools if any, but try to seed everything that's not explicitly disabled
+                // Note: We ignore 'disabled' property here to ensure they are in DB, but set isEnabled to false if disabled
 
-            const toolData = {
-                name: name,
-                slug: pdfTool.slug,
-                description: description.substring(0, 150) + (description.length > 150 ? '...' : ''), // Truncate for listing
-                icon: pdfTool.icon, // Lucide icon name, should map correctly if UI handles it
-                gradient: "from-red-500 to-orange-500", // Standard PDF gradient
-                path: `/tools/pdf-suite/${pdfTool.slug}`,
-                isEnabled: !pdfTool.disabled,
-                order: pdfOrder++
-            };
+                const content = toolContent[pdfTool.id];
+                const cleanId = pdfTool.id || 'unknown-id';
 
-            await Tool.findOneAndUpdate(
-                { slug: toolData.slug },
-                // Update everything for PDF tools to ensure they sync with config changes
-                { $set: toolData },
-                { upsert: true, new: true }
-            );
+                const name = content?.title || cleanId.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
+
+                // Fallback description
+                const defaultDesc = `Professional tool to ${pdfTool.features?.[0]?.replace(/-/g, ' ') || 'process PDF files'}.`;
+                const description = content?.metaDescription || content?.description || defaultDesc;
+
+                // Truncate description for listing
+                const shortDescription = description.length > 200
+                    ? description.substring(0, 197) + '...'
+                    : description;
+
+                const toolData = {
+                    name: name,
+                    slug: pdfTool.slug,
+                    description: shortDescription,
+                    icon: pdfTool.icon,
+                    gradient: "from-red-500 to-orange-500", // Standard PDF gradient
+                    path: `/tools/pdf-suite/${pdfTool.slug}`,
+                    isEnabled: !pdfTool.disabled,
+                    order: pdfOrder++
+                };
+
+                await Tool.findOneAndUpdate(
+                    { slug: toolData.slug },
+                    { $set: toolData },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
+
+                seededCount++;
+            } catch (err) {
+                console.error(`Failed to seed PDF tool ${pdfTool.id}:`, err);
+            }
         }
+
+        // Ensure status updates are pushed
+        // Update PDF Suite status separately to ensure the main entry exists if we were to have one
+        // (We don't have a single entry for PDF Suite in the tools list, it's a collection)
 
         // Cleanup: Remove Content Planner, Whiteboard, and Graphite
         await Tool.deleteOne({ slug: "whiteboard" });
@@ -252,15 +278,17 @@ export async function seedTools() {
         revalidatePath("/tools");
         revalidatePath("/admin/tools");
 
+        console.log(`Seeding complete. Seeded ${seededCount} PDF tools.`);
+
         return {
             success: true,
-            message: "Tools seeded successfully"
+            message: `Tools seeded successfully. Processed ${seededCount} PDF tools.`
         };
     } catch (error) {
         console.error("[SEED_TOOLS]", error);
         return {
             success: false,
-            error: "Failed to seed tools"
+            error: "Failed to seed tools: " + (error as Error).message
         };
     }
 }

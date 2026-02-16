@@ -6,6 +6,13 @@ import ToolPage from '../_components/tools/ToolPage';
 import MergePDFTool from '../_components/tools/merge/MergePDFTool';
 import { GenericPDFTool } from '../_components/tools/GenericPDFTool';
 
+// Generate static params for all tools at build time
+export async function generateStaticParams() {
+  return tools.map((tool) => ({
+    tool: tool.slug,
+  }));
+}
+
 interface PageProps {
   params: Promise<{
     tool: string;
