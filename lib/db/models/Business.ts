@@ -22,6 +22,11 @@ export interface IBusiness extends Document {
         slotInterval?: number;
         requiresConfirmation?: boolean;
     };
+    emailSettings?: {
+        provider: 'resend';
+        apiKey: string;
+        fromEmail: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -61,6 +66,11 @@ const BusinessSchema = new Schema<IBusiness>(
             bufferTime: { type: Number, default: 0 },
             slotInterval: { type: Number, default: 30 },
             requiresConfirmation: { type: Boolean, default: false },
+        },
+        emailSettings: {
+            provider: { type: String, default: 'resend' },
+            apiKey: { type: String, select: false }, // Don't return API key by default
+            fromEmail: { type: String, default: 'onboarding@resend.dev' },
         },
     },
     {

@@ -8,6 +8,7 @@ export interface ICalendarService extends Document {
     duration: number; // In minutes
     price: number;
     slug?: string;
+    location?: string; // e.g. "Zoom", "Google Meet", "Office"
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -38,6 +39,9 @@ const CalendarServiceSchema = new Schema(
         },
         slug: {
             type: String,
+        },
+        location: {
+            type: String, // "Zoom", "Phone", "123 Main St"
         },
         isActive: {
             type: Boolean,

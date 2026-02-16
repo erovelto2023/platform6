@@ -75,12 +75,15 @@ export async function getOrCreateBusiness() {
         const userId = user.id;
 
         if (activeBusinessId) {
-            business = await Business.findOne({ _id: activeBusinessId, userId });
+            // Use select('+emailSettings.apiKey') to include the hidden field if needed for settings page
+            // But usually we don't want to send it back to client in full.
+            // For settings page, we might check if it exists but mask it.
+            business = await Business.findOne({ _id: activeBusinessId, userId }).select('+emailSettings.apiKey');
         }
 
         if (!business) {
             // Fallback to first business
-            business = await Business.findOne({ userId });
+            business = await Business.findOne({ userId }).select('+emailSettings.apiKey');
         }
 
         if (!business) {
@@ -93,16 +96,20 @@ export async function getOrCreateBusiness() {
             });
         }
 
-        // Ensure the cookie is set to the current business if it wasn't
-        // Note: we cannot set cookies here if called from a Server Component.
-        // We will handle default cookie setting in a Client Component (BusinessInitializer)
-        // if (!activeBusinessId || activeBusinessId !== business._id.toString()) {
-        //     cookieStore.set(BUSINESS_COOKIE_NAME, business._id.toString());
-        // }
+        const businessData = JSON.parse(JSON.stringify(business));
+
+        // MASK API KEY for client side security
+        if (businessData.emailSettings?.apiKey) {
+            businessData.emailSettings.apiKey = '********'; // Mask it
+            businessData.emailSettings.isConfigured = true;
+        } else {
+            if (businessData.emailSettings) businessData.emailSettings.isConfigured = false;
+        }
+
 
         return {
             success: true,
-            data: JSON.parse(JSON.stringify(business)),
+            data: businessData,
         };
     } catch (error) {
         console.error('[GET_OR_CREATE_BUSINESS]', error);
@@ -165,9 +172,17 @@ export async function updateCalendarSettings(settings: any) {
             }
         }
 
+        const updateData: any = {
+            'calendarSettings.slug': settings.slug,
+            'calendarSettings.timezone': settings.timezone,
+            'calendarSettings.bufferTime': settings.bufferTime,
+            'calendarSettings.slotInterval': settings.slotInterval,
+            'calendarSettings.requiresConfirmation': settings.requiresConfirmation,
+        };
+
         const business = await Business.findByIdAndUpdate(
             businessId,
-            { $set: { calendarSettings: settings } },
+            { $set: updateData },
             { new: true }
         );
 
@@ -176,5 +191,36 @@ export async function updateCalendarSettings(settings: any) {
     } catch (error) {
         console.error('[UPDATE_CALENDAR_SETTINGS]', error);
         return { success: false, error: 'Failed to update calendar settings' };
+    }
+}
+
+export async function updateEmailSettings(settings: { apiKey?: string; fromEmail: string }) {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) return { success: false, error: 'Business not found' };
+        const businessId = businessResult.data._id;
+
+        await connectToDatabase();
+
+        const updateData: any = {
+            'emailSettings.fromEmail': settings.fromEmail,
+        };
+
+        // Only update API key if provided (allow empty to keep existing)
+        if (settings.apiKey && !settings.apiKey.includes('****')) {
+            updateData['emailSettings.apiKey'] = settings.apiKey;
+        }
+
+        const business = await Business.findByIdAndUpdate(
+            businessId,
+            { $set: updateData },
+            { new: true }
+        );
+
+        revalidatePath('/calendar/settings');
+        return { success: true };
+    } catch (error) {
+        console.error('[UPDATE_EMAIL_SETTINGS]', error);
+        return { success: false, error: 'Failed to update email settings' };
     }
 }

@@ -8,6 +8,7 @@ import CalendarService from "@/lib/db/models/CalendarService";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 import { revalidatePath } from "next/cache";
 import { addMinutes, format, parse, isSameDay, setHours, setMinutes, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
+import { sendBookingConfirmation } from "./email.actions";
 
 // Helper to generate slots
 export async function getAvailableSlots(date: Date | string, serviceId: string) {
@@ -216,6 +217,18 @@ export async function createBooking(data: any) {
 
         // Update Contact Stats logic could go here (Phase 6)
         // updateContactStats(booking.customerEmail, booking.businessId)...
+
+        // Send Confirmation Email
+        await sendBookingConfirmation(
+            service.businessId,
+            {
+                customerEmail: booking.customerEmail,
+                customerName: booking.customerName,
+                serviceName: service.name,
+                startTime: booking.startTime,
+                location: service.location
+            }
+        );
 
         return { success: true, data: JSON.parse(JSON.stringify(booking)) };
     } catch (error) {

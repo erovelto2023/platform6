@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { updateCalendarSettings } from "@/lib/actions/business.actions";
+import { updateCalendarSettings, updateEmailSettings } from "@/lib/actions/business.actions";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -36,6 +36,8 @@ const formSchema = z.object({
     bufferTime: z.string(),
     slotInterval: z.string(),
     requiresConfirmation: z.boolean(),
+    resendApiKey: z.string().optional(),
+    fromEmail: z.string().email("Invalid email address").optional().or(z.literal('')),
 });
 
 interface SettingsFormProps {
@@ -53,22 +55,34 @@ export function SettingsForm({ business }: SettingsFormProps) {
             bufferTime: (business.calendarSettings?.bufferTime || 0).toString(),
             slotInterval: (business.calendarSettings?.slotInterval || 30).toString(),
             requiresConfirmation: business.calendarSettings?.requiresConfirmation || false,
+            resendApiKey: business.emailSettings?.apiKey || "", // Will be masked *******
+            fromEmail: business.emailSettings?.fromEmail || "onboarding@resend.dev",
         },
     });
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
         try {
+            // 1. Update Calendar Settings
             const formattedValues = {
-                ...values,
+                slug: values.slug,
+                timezone: values.timezone,
                 bufferTime: Number(values.bufferTime),
                 slotInterval: Number(values.slotInterval),
+                requiresConfirmation: values.requiresConfirmation,
             };
-            const res = await updateCalendarSettings(formattedValues);
-            if (res.success) {
+            const resCalendar = await updateCalendarSettings(formattedValues);
+
+            // 2. Update Email Settings
+            const resEmail = await updateEmailSettings({
+                apiKey: values.resendApiKey,
+                fromEmail: values.fromEmail || "onboarding@resend.dev",
+            });
+
+            if (resCalendar.success && resEmail.success) {
                 toast.success("Settings saved successfully");
             } else {
-                toast.error(res.error || "Failed to save settings");
+                toast.error(resCalendar.error || resEmail.error || "Failed to save settings");
             }
         } catch (error) {
             toast.error("An error occurred");
@@ -80,6 +94,50 @@ export function SettingsForm({ business }: SettingsFormProps) {
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+                {/* Email Configuration */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>
+                            Configure automated emails using Resend.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="resendApiKey"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Resend API Key</FormLabel>
+                                    <FormControl>
+                                        <Input type="password" placeholder="re_1234..." {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Enter your API key from Resend.com.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="fromEmail"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>From Email</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="onboarding@resend.dev" {...field} />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Must be a verified domain in Resend.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                </Card>
 
                 {/* Company Info */}
                 <Card>
