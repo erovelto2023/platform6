@@ -33,8 +33,8 @@ import { Separator } from "@/components/ui/separator";
 const formSchema = z.object({
     slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
     timezone: z.string(),
-    bufferTime: z.string().transform(Number),
-    slotInterval: z.string().transform(Number),
+    bufferTime: z.string(),
+    slotInterval: z.string(),
     requiresConfirmation: z.boolean(),
 });
 
@@ -59,7 +59,12 @@ export function SettingsForm({ business }: SettingsFormProps) {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
         try {
-            const res = await updateCalendarSettings(values);
+            const formattedValues = {
+                ...values,
+                bufferTime: Number(values.bufferTime),
+                slotInterval: Number(values.slotInterval),
+            };
+            const res = await updateCalendarSettings(formattedValues);
             if (res.success) {
                 toast.success("Settings saved successfully");
             } else {
@@ -184,7 +189,7 @@ export function SettingsForm({ business }: SettingsFormProps) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Buffer time</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select buffer time" />
@@ -211,7 +216,7 @@ export function SettingsForm({ business }: SettingsFormProps) {
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Time Slot Intervals</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Select interval" />
