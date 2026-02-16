@@ -49,10 +49,11 @@ type InvoiceFormValues = z.infer<typeof formSchema>;
 
 interface InvoiceFormProps {
     clients: any[];
+    products?: any[];
     initialData?: any;
 }
 
-export function InvoiceForm({ clients, initialData }: InvoiceFormProps) {
+export function InvoiceForm({ clients, products = [], initialData }: InvoiceFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -226,57 +227,84 @@ export function InvoiceForm({ clients, initialData }: InvoiceFormProps) {
                             </thead>
                             <tbody className="divide-y">
                                 {fields.map((field, index) => (
-                                    <tr key={field.id} className="bg-white">
-                                        <td className="p-2">
-                                            <FormField
-                                                control={form.control}
-                                                name={`items.${index}.description`}
-                                                render={({ field }) => (
-                                                    <FormItem className="space-y-0">
-                                                        <FormControl>
-                                                            <Input placeholder="Item description" {...field} className="border-0 focus-visible:ring-0 px-2" />
-                                                        </FormControl>
-                                                    </FormItem>
+                                    <tr key={field.id} className="bg-white group">
+                                        <td className="p-2 align-top">
+                                            <div className="space-y-2">
+                                                {products && products.length > 0 && (
+                                                    <Select
+                                                        onValueChange={(productId) => {
+                                                            const product = products.find(p => p._id === productId);
+                                                            if (product) {
+                                                                form.setValue(`items.${index}.description`, product.name + (product.description ? ` - ${product.description}` : ''));
+                                                                form.setValue(`items.${index}.rate`, product.price);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="h-8 text-xs border-slate-200 bg-slate-50 text-slate-500">
+                                                            <SelectValue placeholder="Load from Product..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {products.map((p) => (
+                                                                <SelectItem key={p._id} value={p._id}>
+                                                                    <div className="flex justify-between w-full gap-4">
+                                                                        <span>{p.name}</span>
+                                                                        <span className="text-slate-400 font-mono">{formatCurrency(p.price)}</span>
+                                                                    </div>
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
                                                 )}
-                                            />
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`items.${index}.description`}
+                                                    render={({ field }) => (
+                                                        <FormItem className="space-y-0">
+                                                            <FormControl>
+                                                                <Input placeholder="Item description" {...field} className="border-0 focus-visible:ring-0 px-2 shadow-none" />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
                                         </td>
-                                        <td className="p-2">
+                                        <td className="p-2 align-top">
                                             <FormField
                                                 control={form.control}
                                                 name={`items.${index}.quantity`}
                                                 render={({ field }) => (
                                                     <FormItem className="space-y-0">
                                                         <FormControl>
-                                                            <Input type="number" min="1" {...field} className="text-right border-0 focus-visible:ring-0 px-2" />
+                                                            <Input type="number" min="1" {...field} className="text-right border-0 focus-visible:ring-0 px-2 shadow-none" />
                                                         </FormControl>
                                                     </FormItem>
                                                 )}
                                             />
                                         </td>
-                                        <td className="p-2">
+                                        <td className="p-2 align-top">
                                             <FormField
                                                 control={form.control}
                                                 name={`items.${index}.rate`}
                                                 render={({ field }) => (
                                                     <FormItem className="space-y-0">
                                                         <FormControl>
-                                                            <Input type="number" min="0" step="0.01" {...field} className="text-right border-0 focus-visible:ring-0 px-2" />
+                                                            <Input type="number" min="0" step="0.01" {...field} className="text-right border-0 focus-visible:ring-0 px-2 shadow-none" />
                                                         </FormControl>
                                                     </FormItem>
                                                 )}
                                             />
                                         </td>
-                                        <td className="p-4 text-right font-medium text-slate-700">
+                                        <td className="p-4 text-right font-medium text-slate-700 align-top">
                                             {formatCurrency(items[index]?.amount || 0)}
                                         </td>
-                                        <td className="p-2 text-center">
+                                        <td className="p-2 text-center align-top">
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => remove(index)}
                                                 disabled={fields.length === 1}
-                                                className="text-slate-400 hover:text-red-600"
+                                                className="text-slate-400 hover:text-red-600 h-8 w-8 p-0"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

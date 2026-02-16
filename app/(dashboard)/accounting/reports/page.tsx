@@ -133,6 +133,25 @@ export default async function ReportsPage() {
                 </Link>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <Link href="/accounting/reports/trial-balance">
+                    <Card className="hover:bg-slate-50 transition cursor-pointer border-slate-200">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Trial Balance</CardTitle>
+                            <CardDescription>View balances for all your accounts.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </Link>
+                <Link href="/accounting/reports/aging">
+                    <Card className="hover:bg-slate-50 transition cursor-pointer border-slate-200">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Aging Report</CardTitle>
+                            <CardDescription>See which invoices are overdue.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </Link>
+            </div>
+
             {/* Chart */}
             <FinancialChart data={chartDataArray} />
 

@@ -24,34 +24,51 @@ async function getActiveBusinessId(userId: string) {
 }
 
 
-export async function getExpenses() {
+export async function getExpenses(page = 1, limit = 50, search = "", category = "") {
     try {
-        const { userId } = await auth();
-        if (!userId) {
-            return { success: false, error: 'Unauthorized' };
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
         }
+        const businessId = businessResult.data._id;
 
         await connectToDatabase();
 
+        const query: any = { businessId };
 
-        const businessId = await getActiveBusinessId(userId);
-        if (!businessId) {
-            return { success: true, data: [] };
+        if (category && category !== 'all') {
+            query.category = category;
         }
 
-        const expenses = await Expense.find({ businessId }).sort({ date: -1 });
+        if (search) {
+            query.$or = [
+                { description: { $regex: search, $options: 'i' } },
+                { vendor: { $regex: search, $options: 'i' } }
+            ];
+        }
 
+        const skip = (page - 1) * limit;
+
+        const expenses = await Expense.find(query)
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Expense.countDocuments(query);
 
         return {
             success: true,
             data: JSON.parse(JSON.stringify(expenses)),
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
         };
     } catch (error) {
         console.error('[GET_EXPENSES]', error);
-        return {
-            success: false,
-            error: 'Failed to get expenses',
-        };
+        return { success: false, error: 'Failed to fetch expenses' };
     }
 }
 

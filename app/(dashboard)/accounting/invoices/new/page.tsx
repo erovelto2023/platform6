@@ -2,10 +2,12 @@ import { BackButton } from "@/components/accounting/BackButton";
 import { InvoiceForm } from "@/components/accounting/InvoiceForm";
 import { getClients } from "@/lib/actions/client.actions";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
+import { getProducts } from "@/lib/actions/product.actions";
 
 export default async function NewInvoicePage() {
     const { data: clients } = await getClients();
     const { data: business } = await getOrCreateBusiness();
+    const { data: products } = await getProducts(1, 100); // Fetch first 100 products
 
     return (
         <div className="p-6 bg-slate-50 min-h-screen">
@@ -24,7 +26,7 @@ export default async function NewInvoicePage() {
                 </div>
 
                 <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
-                    <InvoiceForm clients={clients || []} />
+                    <InvoiceForm clients={clients || []} products={products || []} />
                 </div>
             </div>
         </div>

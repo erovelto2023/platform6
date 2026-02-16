@@ -2,6 +2,7 @@ import { getInvoice } from "@/lib/actions/invoice.actions";
 import { InvoiceForm } from "@/components/accounting/InvoiceForm";
 import { BackButton } from "@/components/accounting/BackButton";
 import { getClients } from "@/lib/actions/client.actions";
+import { getProducts } from "@/lib/actions/product.actions";
 import { notFound } from "next/navigation";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 
@@ -16,6 +17,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
     const { data: invoice } = await getInvoice(id);
     const { data: clients } = await getClients();
     const { data: business } = await getOrCreateBusiness();
+    const { data: products } = await getProducts(1, 100);
 
     if (!invoice) {
         notFound();
@@ -38,7 +40,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
 
             <div className="max-w-5xl">
                 <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
-                    <InvoiceForm clients={clients || []} initialData={invoice} />
+                    <InvoiceForm clients={clients || []} products={products || []} initialData={invoice} />
                 </div>
             </div>
         </div>

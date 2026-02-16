@@ -5,7 +5,7 @@ import connectToDatabase from '../db/connect';
 import Product from '../db/models/Product';
 import { getOrCreateBusiness } from './business.actions';
 
-export async function getProducts(page = 1, limit = 50) {
+export async function getProducts(page = 1, limit = 50, search = "") {
     try {
         const businessResult = await getOrCreateBusiness();
         if (!businessResult.success || !businessResult.data) {
@@ -16,12 +16,22 @@ export async function getProducts(page = 1, limit = 50) {
         await connectToDatabase();
         const skip = (page - 1) * limit;
 
-        const products = await Product.find({ businessId })
+        const query: any = { businessId };
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { sku: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const products = await Product.find(query)
             .sort({ name: 1 })
             .skip(skip)
             .limit(limit);
 
-        const total = await Product.countDocuments({ businessId });
+        const total = await Product.countDocuments(query);
 
         return {
             success: true,

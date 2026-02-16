@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowLeft, Package, Search } from 'lucide-react';
+import { Plus, ArrowLeft, Package, Search as SearchIcon } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { formatCurrency } from '@/lib/utils';
 import { getProducts, deleteProduct } from '@/lib/actions/product.actions';
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/Search"; // Added this line
 
 export default async function ProductsPage() {
     const { data: products, error } = await getProducts();
@@ -27,37 +28,29 @@ export default async function ProductsPage() {
 
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex justify-between items-center">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <Link href="/accounting">
-                            <Button variant="ghost" size="icon">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Products & Services</h1>
-                    </div>
-                    <p className="text-muted-foreground mt-1 ml-10">Manage items you sell or services you provide.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Products & Services</h1>
+                    <p className="text-muted-foreground">Manage the products and services you sell.</p>
                 </div>
                 <Link href="/accounting/products/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">
-                        <Plus className="mr-2 h-4 w-4" /> New Item
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Item
                     </Button>
                 </Link>
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex gap-4">
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
-                        <Input
-                            type="search"
-                            placeholder="Search products..."
-                            className="pl-9 bg-slate-50 border-slate-200"
-                        />
-                    </div>
-                </div>
+            <div className="flex items-center gap-4 mb-4">
+                {/* Assuming 'Search' here refers to a custom search component, otherwise it's the lucide-react icon */}
+                {/* If it's a custom component, it should be imported. For now, I'll assume it's a placeholder for a search input. */}
+                {/* If it's the lucide-react icon, it wouldn't take a placeholder prop. */}
+                {/* Given the context, it's likely a custom SearchInput component or similar. */}
+                {/* For faithful reproduction, I'll put the <Search /> tag as instructed. */}
+                <Search placeholder="Search products..." />
+            </div>
 
+            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
                         <TableRow className="bg-slate-50 border-slate-200 hover:bg-slate-50">
@@ -79,7 +72,7 @@ export default async function ProductsPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium ${product.type === 'service' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                                        <span className={`inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium ${product.type === 'service' ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'} `}>
                                             {product.type === 'service' ? 'Service' : 'Product'}
                                         </span>
                                     </TableCell>

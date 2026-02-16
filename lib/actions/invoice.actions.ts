@@ -24,7 +24,7 @@ async function getActiveBusinessId(userId: string) {
 }
 
 
-export async function getInvoices() {
+export async function getInvoices(page = 1, limit = 50, search = "", status = "") {
     try {
         const { userId } = await auth();
         if (!userId) {
@@ -33,19 +33,44 @@ export async function getInvoices() {
 
         await connectToDatabase();
 
-
         const businessId = await getActiveBusinessId(userId);
         if (!businessId) {
             return { success: true, data: [] };
         }
 
-        const invoices = await Invoice.find({ businessId })
+        const query: any = { businessId };
+
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        if (search) {
+            query.$or = [
+                { invoiceNumber: { $regex: search, $options: 'i' } },
+                { notes: { $regex: search, $options: 'i' } }
+            ];
+            // Client name search would require aggregation, skipping for now
+        }
+
+        const skip = (page - 1) * limit;
+
+        const invoices = await Invoice.find(query)
             .populate('clientId')
-            .sort({ date: -1 });
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Invoice.countDocuments(query);
 
         return {
             success: true,
             data: JSON.parse(JSON.stringify(invoices)),
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
         };
     } catch (error) {
         console.error('[GET_INVOICES]', error);
