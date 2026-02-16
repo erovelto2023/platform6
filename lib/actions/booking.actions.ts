@@ -4,7 +4,7 @@
 import connectToDatabase from "@/lib/db/connect";
 import Booking from "@/lib/db/models/Booking";
 import Availability from "@/lib/db/models/Availability";
-import Product from "@/lib/db/models/Product";
+import CalendarService from "@/lib/db/models/CalendarService";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 import { revalidatePath } from "next/cache";
 import { addMinutes, format, parse, isSameDay, setHours, setMinutes, isBefore, isAfter, startOfDay, endOfDay } from "date-fns";
@@ -16,7 +16,7 @@ export async function getAvailableSlots(date: Date | string, serviceId: string) 
         const targetDate = new Date(date);
 
         // 1. Get Service Duration & Business
-        const service = await Product.findById(serviceId);
+        const service = await CalendarService.findById(serviceId);
         if (!service || !service.duration) {
             return { success: false, error: 'Invalid service or missing duration' };
         }
@@ -194,7 +194,7 @@ export async function createBooking(data: any) {
         await connectToDatabase();
 
         // Basic validation
-        const service = await Product.findById(data.serviceId);
+        const service = await CalendarService.findById(data.serviceId);
         if (!service) return { success: false, error: 'Service not found' };
 
         // Calculate end time
