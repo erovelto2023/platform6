@@ -37,9 +37,51 @@ const routes = [
         color: "text-sky-500",
     },
     {
+        label: "Accounting",
+        icon: BarChart3,
+        href: "/accounting",
+        color: "text-green-600",
+    },
+    {
+        label: "Admin",
+        icon: ShieldCheck,
+        href: "/admin",
+        color: "text-orange-700",
+    },
+    {
+        label: "Affiliate CRM",
+        icon: LinkIcon,
+        href: "/affiliates",
+        color: "text-blue-500",
+    },
+    {
+        label: "Browse Courses",
+        icon: BookOpen,
+        href: "/catalog",
+        color: "text-violet-500",
+    },
+    {
+        label: "Calendar",
+        icon: Calendar,
+        href: "/calendar",
+        color: "text-rose-500",
+    },
+    {
         label: "Community",
         icon: Users,
         href: "/community",
+        color: "text-emerald-500",
+    },
+    {
+        label: "Library",
+        icon: Library,
+        href: "/docs",
+        color: "text-blue-600",
+    },
+    {
+        label: "Member Search",
+        icon: Search,
+        href: "/community/members",
         color: "text-emerald-500",
     },
     {
@@ -49,52 +91,15 @@ const routes = [
         color: "text-blue-500",
     },
     {
-        label: "Member Search",
-        icon: Search,
-        href: "/community/members",
-        color: "text-emerald-500",
-    },
-    {
-        label: "Browse Courses",
-        icon: BookOpen,
-        href: "/catalog",
-        color: "text-violet-500",
-    },
-    {
         label: "Niche Business in a Box",
         icon: Compass,
         href: "/niche-catalog",
         color: "text-pink-700",
     },
     {
-        label: "Library",
-        icon: Library,
-        href: "/docs",
-        color: "text-blue-600",
-    },
-    {
         label: "Resources",
         icon: BookOpen,
         href: "/resources",
-        color: "text-blue-500",
-    },
-    {
-        label: "Tools & Apps",
-        icon: Wrench,
-        href: "/tools",
-        color: "text-orange-500",
-    },
-    {
-        label: "Accounting",
-        icon: BarChart3,
-        href: "/accounting",
-        color: "text-green-600",
-    },
-
-    {
-        label: "Affiliate CRM",
-        icon: LinkIcon,
-        href: "/affiliates",
         color: "text-blue-500",
     },
     {
@@ -104,10 +109,10 @@ const routes = [
         color: "text-emerald-500",
     },
     {
-        label: "Admin",
-        icon: ShieldCheck,
-        href: "/admin",
-        color: "text-orange-700",
+        label: "Tools & Apps",
+        icon: Wrench,
+        href: "/tools",
+        color: "text-orange-500",
     },
     {
         label: "Whiteboard",
@@ -118,18 +123,11 @@ const routes = [
 ];
 
 const adminRoutes = [
-    // Admin routes configuration
     {
         label: "Overview",
         icon: LayoutDashboard,
         href: "/admin",
         color: "text-sky-500",
-    },
-    {
-        label: "Support Tickets",
-        icon: FileQuestion,
-        href: "/admin/tickets",
-        color: "text-emerald-500",
     },
     {
         label: "Affiliate CRM",
@@ -138,47 +136,16 @@ const adminRoutes = [
         color: "text-blue-500",
     },
     {
-        label: "Courses",
-        icon: BookOpen,
-        href: "/admin/courses",
-        color: "text-violet-500",
-    },
-    {
-        label: "Niche Business in a Box",
-        icon: Compass,
-        href: "/admin/niche-boxes",
-        color: "text-pink-700",
-    },
-    {
-        label: "Resources",
-        icon: BookOpen,
-        href: "/admin/resources",
-        color: "text-blue-500",
-    },
-    {
-        label: "Tools",
-        icon: Wrench,
-        href: "/admin/tools",
-        color: "text-orange-500",
-    },
-
-    {
-        label: "Library Manager",
-        icon: Library,
-        href: "/admin/docs",
-        color: "text-blue-600",
-    },
-    {
         label: "Blog",
         icon: FileText,
         href: "/admin/blog",
         color: "text-indigo-500",
     },
     {
-        label: "Page Builder",
-        icon: FileStack,
-        href: "/admin/page-builder",
-        color: "text-purple-500",
+        label: "Blog Analytics",
+        icon: BarChart3,
+        href: "/admin/blog/analytics",
+        color: "text-cyan-500",
     },
     {
         label: "BrandBaser",
@@ -193,16 +160,10 @@ const adminRoutes = [
         color: "text-pink-500",
     },
     {
-        label: "Section Templates",
-        icon: LayoutDashboard,
-        href: "/admin/section-templates",
-        color: "text-indigo-500",
-    },
-    {
-        label: "Blog Analytics",
-        icon: BarChart3,
-        href: "/admin/blog/analytics",
-        color: "text-cyan-500",
+        label: "Courses",
+        icon: BookOpen,
+        href: "/admin/courses",
+        color: "text-violet-500",
     },
     {
         label: "Events",
@@ -217,9 +178,51 @@ const adminRoutes = [
         color: "text-emerald-500",
     },
     {
+        label: "Library Manager",
+        icon: Library,
+        href: "/admin/docs",
+        color: "text-blue-600",
+    },
+    {
+        label: "Niche Business in a Box",
+        icon: Compass,
+        href: "/admin/niche-boxes",
+        color: "text-pink-700",
+    },
+    {
+        label: "Page Builder",
+        icon: FileStack,
+        href: "/admin/page-builder",
+        color: "text-purple-500",
+    },
+    {
+        label: "Resources",
+        icon: BookOpen,
+        href: "/admin/resources",
+        color: "text-blue-500",
+    },
+    {
+        label: "Section Templates",
+        icon: LayoutDashboard,
+        href: "/admin/section-templates",
+        color: "text-indigo-500",
+    },
+    {
+        label: "Support Tickets",
+        icon: FileQuestion,
+        href: "/admin/tickets",
+        color: "text-emerald-500",
+    },
+    {
         label: "Surveys",
         icon: FileQuestion,
         href: "/admin/surveys",
+        color: "text-orange-500",
+    },
+    {
+        label: "Tools",
+        icon: Wrench,
+        href: "/admin/tools",
         color: "text-orange-500",
     },
     {

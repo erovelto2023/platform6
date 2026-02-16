@@ -103,6 +103,10 @@ export async function updateProduct(id: string, data: any) {
         const businessId = businessResult.data._id;
 
         await connectToDatabase();
+        if (data.vendorId === 'none' || data.vendorId === '') {
+            data.vendorId = null;
+        }
+
         const product = await Product.findOneAndUpdate(
             { _id: id, businessId },
             data,

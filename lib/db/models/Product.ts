@@ -4,6 +4,8 @@ export interface IProduct extends Document {
     businessId: string;
     vendorId?: string; // ObjectId as string
     vendorProductUrl?: string;
+    duration?: number; // In minutes
+    isBookable?: boolean;
     name: string;
     description?: string;
     price: number;
@@ -26,6 +28,13 @@ const ProductSchema = new Schema(
         },
         vendorProductUrl: {
             type: String,
+        },
+        duration: {
+            type: Number,
+        },
+        isBookable: {
+            type: Boolean,
+            default: false,
         },
         name: {
             type: String,

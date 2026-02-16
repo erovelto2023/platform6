@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     Form,
     FormControl,
@@ -36,6 +37,8 @@ const productSchema = z.object({
     sku: z.string().optional(),
     vendorId: z.string().optional(),
     vendorProductUrl: z.string().optional(),
+    duration: z.coerce.number().optional(),
+    isBookable: z.boolean().default(false).optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -59,6 +62,8 @@ export default function ProductForm({ initialData, vendors = [] }: ProductFormPr
             sku: '',
             vendorId: '',
             vendorProductUrl: '',
+            duration: 30,
+            isBookable: false,
         },
     });
 
@@ -195,45 +200,45 @@ export default function ProductForm({ initialData, vendors = [] }: ProductFormPr
                         )}
                     />
 
-                    <FormField
-                        control={form.control}
-                        name="vendorId"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Vendor (Optional)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    {/* Booking Fields */}
+                    <div className="col-span-2 grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <FormField
+                            control={form.control}
+                            name="isBookable"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-white">
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a vendor" />
-                                        </SelectTrigger>
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
                                     </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="none">None</SelectItem>
-                                        {vendors.map((vendor) => (
-                                            <SelectItem key={vendor._id} value={vendor._id}>
-                                                {vendor.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                    <div className="space-y-1 leading-none">
+                                        <FormLabel>
+                                            Allow Online Booking
+                                        </FormLabel>
+                                        <FormDescription>
+                                            Clients can book this service via your calendar.
+                                        </FormDescription>
+                                    </div>
+                                </FormItem>
+                            )}
+                        />
 
-                    <FormField
-                        control={form.control}
-                        name="vendorProductUrl"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Vendor Product URL</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="https://vendor.com/product/..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                        <FormField
+                            control={form.control}
+                            name="duration"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Duration (Minutes)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} disabled={!form.watch('isBookable')} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <FormField
                         control={form.control}
