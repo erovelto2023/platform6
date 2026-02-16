@@ -23,7 +23,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createBusiness, getUserBusinesses, switchBusiness } from "@/lib/actions/business.actions";
-import { useToast } from "@/hooks/use-toast"; // Assuming this hook exists, or using sonner toast
+import { toast } from "sonner";
 
 // Interface for Business
 interface Business {
@@ -89,10 +89,14 @@ export function BusinessSwitcher({ currentBusinessId }: BusinessSwitcherProps) {
                 await switchBusiness(result.data._id);
                 setShowNewBusinessDialog(false);
                 setNewBusinessName("");
+                toast.success("Business created successfully");
                 router.refresh();
+            } else {
+                toast.error(result.error || "Failed to create business");
             }
         } catch (error) {
             console.error("Failed to create business", error);
+            toast.error("An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }
