@@ -14,6 +14,8 @@ import { ContentCard } from "./ContentCard";
 import { ContentFilters, FilterState } from "./ContentFilters";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { ContentWizard } from "./ContentWizard";
+import { CampaignWizard } from "./CampaignWizard";
+import { OfferWizard } from "./OfferWizard";
 
 interface AdvancedContentCalendarProps {
     posts: any[];
@@ -31,8 +33,11 @@ export function AdvancedContentCalendar({ posts, campaigns, offers }: AdvancedCo
         funnelStage: null
     });
 
+    const [selectedPost, setSelectedPost] = useState<any | null>(null);
+
     // Navigation
     const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+
     const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
     const today = () => setCurrentDate(startOfToday());
 
@@ -112,6 +117,9 @@ export function AdvancedContentCalendar({ posts, campaigns, offers }: AdvancedCo
                             </SheetContent>
                         </Sheet>
 
+
+                        <CampaignWizard />
+                        <OfferWizard />
                         <ContentWizard
                             campaigns={campaigns}
                             offers={offers}
@@ -156,7 +164,7 @@ export function AdvancedContentCalendar({ posts, campaigns, offers }: AdvancedCo
 
                                         <div className="flex flex-col gap-2 flex-1">
                                             {dayPosts.map(post => (
-                                                <ContentCard key={post._id} item={post} />
+                                                <ContentCard key={post._id} item={post} onClick={() => setSelectedPost(post)} />
                                             ))}
                                         </div>
                                     </div>
@@ -179,6 +187,18 @@ export function AdvancedContentCalendar({ posts, campaigns, offers }: AdvancedCo
                     offers={offers}
                 />
             </div>
+
+            {/* Edit Wizard */}
+            {selectedPost && (
+                <ContentWizard
+                    open={!!selectedPost}
+                    onOpenChange={(open) => !open && setSelectedPost(null)}
+                    campaigns={campaigns}
+                    offers={offers}
+                    initialData={selectedPost}
+                    onSuccess={() => setSelectedPost(null)}
+                />
+            )}
         </div>
     );
 }

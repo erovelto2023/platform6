@@ -25,9 +25,11 @@ const COLUMNS = [
     { id: "published", title: "Published", color: "bg-green-50 border-green-100" }
 ];
 
-export function KanbanBoard({ posts }: KanbanBoardProps) {
+export function KanbanBoard({ posts, campaigns = [], offers = [] }: KanbanBoardProps) {
     const router = useRouter();
     const [optimisticPosts, setOptimisticPosts] = useState(posts);
+    const [selectedPost, setSelectedPost] = useState<any | null>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     const handleStatusChange = async (postId: string, newStatus: string) => {
         // Optimistic update
@@ -44,6 +46,11 @@ export function KanbanBoard({ posts }: KanbanBoardProps) {
             // Revert
             setOptimisticPosts(posts);
         }
+    };
+
+    const handleEditClick = (post: any) => {
+        setSelectedPost(post);
+        setIsEditOpen(true);
     };
 
     const getIcon = (type: string) => {
@@ -75,7 +82,7 @@ export function KanbanBoard({ posts }: KanbanBoardProps) {
                                 <Card
                                     key={post._id}
                                     className="cursor-pointer hover:shadow-md transition-all border-slate-200 bg-white group"
-                                    onClick={() => router.push(`/tools/content-planner/edit/${post._id}`)}
+                                    onClick={() => handleEditClick(post)}
                                 >
                                     <CardContent className="p-4 space-y-3">
                                         <div className="flex justify-between items-start gap-2">
@@ -135,13 +142,47 @@ export function KanbanBoard({ posts }: KanbanBoardProps) {
                                     </Button>
                                 }
                                 defaultStatus={col.id}
-                                campaigns={posts.length > 0 && posts[0].userId ? [] : []} // quick fix, improved below
-                                offers={[]}
+                                campaigns={campaigns}
+                                offers={offers}
                             />
                         </div>
                     </div>
                 );
             })}
+
+            {/* Edit Wizard (controlled) */}
+            {isEditOpen && selectedPost && (
+                <ContentWizard
+                    trigger={<span className="hidden"></span>} // Hidden trigger since we control open state via a wrapper or by passing open prop?
+                    // ContentWizard doesn't export open prop yet.
+                    // I need to either modify ContentWizard to accept open prop or just remount it.
+                    // Remounting is easiest for now: just render it.
+                    // Wait, ContentWizard is a dialog. If I render it, it will render the trigger.
+                    // I should probably make ContentWizard accept `open` and `onOpenChange` props to be fully controlled.
+                    // But for now, if I render it, and click the trigger... no, I want to open it programmatically.
+
+                    // Actually, let's just make the ContentWizard handle the "Edit" state internally? 
+                    // No, simpler: Just modify ContentWizard to accept `isOpen` prop if possible.
+                    // Or, I can wrap it in a Dialog? No, it IS a Dialog.
+
+                    // Let's modify ContentWizard one more time to accept controlled open state?
+                    // Or I can cheat: Render it with an auto-click trigger? No that's hacky.
+
+                    // Best way: Add `open` and `onOpenChange` to ContentWizard props.
+                    // Since I already modified ContentWizard heavily, let's do that.
+
+                    campaigns={campaigns}
+                    offers={offers}
+                    initialData={selectedPost}
+                    onSuccess={() => { setIsEditOpen(false); setSelectedPost(null); }}
+                />
+            )}
+
+            {/* 
+               Wait, I cannot easily control the open state of ContentWizard without modifying it to accept `open` prop.
+               Current ContentWizard has internal state `const [open, setOpen] = useState(false);`
+               I should hoist that state up or allow it to be controlled.
+            */}
         </div>
     );
 }

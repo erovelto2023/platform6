@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
@@ -15,7 +15,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { createContentPost } from "@/lib/actions/content.actions";
+import { createContentPost, updateContentPost } from "@/lib/actions/content.actions";
 
 // Mocks for now, should be replaced with actual data or passed in props
 const PILLARS = ['education', 'promotion', 'engagement', 'authority', 'lifestyle', 'entertainment'];
@@ -27,13 +27,35 @@ interface ContentWizardProps {
     offers: any[];
     trigger?: React.ReactNode;
     defaultStatus?: string;
+    initialData?: any;
     onSuccess?: () => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 }
 
-export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'idea', onSuccess }: ContentWizardProps) {
-    const [open, setOpen] = useState(false);
+export function ContentWizard(props: ContentWizardProps) {
+    const { campaigns, offers, trigger, defaultStatus = 'idea', initialData, onSuccess } = props;
+
+    // Controlled vs Uncontrolled state logic
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = typeof props.open !== 'undefined';
+    const open = isControlled ? props.open : internalOpen;
+    const setOpen = isControlled ? props.onOpenChange! : setInternalOpen;
+
+    // Helper to safely set open state
+    const handleOpenChange = (newOpen: boolean) => {
+        if (isControlled && props.onOpenChange) {
+            props.onOpenChange(newOpen);
+        } else {
+            setInternalOpen(newOpen);
+        }
+    };
+
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState<'basics' | 'strategy'>('basics');
+
+    // If initialData is provided, we are in "Edit Mode"
+    const isEditing = !!initialData;
 
     const [formData, setFormData] = useState({
         title: "",
@@ -48,6 +70,25 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
         content: ""
     });
 
+    // Reset/Init form data when open or initialData changes
+    useEffect(() => {
+        if (open) {
+            setFormData({
+                title: initialData?.title || "",
+                contentType: initialData?.contentType || "social",
+                status: initialData?.status || defaultStatus,
+                scheduledFor: initialData?.scheduledFor ? new Date(initialData.scheduledFor).toISOString().slice(0, 16) : "",
+                contentPillar: initialData?.contentPillar || "",
+                funnelStage: initialData?.funnelStage || "awareness",
+                campaignId: initialData?.campaignId?._id || initialData?.campaignId || "none",
+                offerId: initialData?.offerId?._id || initialData?.offerId || "none",
+                estimatedEffort: initialData?.estimatedEffort || "medium",
+                content: initialData?.content || ""
+            });
+            setStep('basics');
+        }
+    }, [open, initialData, defaultStatus]);
+
     const handleChange = (key: string, value: string) => {
         setFormData(prev => ({ ...prev, [key]: value }));
     };
@@ -60,27 +101,33 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
                 ...formData,
                 campaignId: formData.campaignId === 'none' ? null : formData.campaignId,
                 offerId: formData.offerId === 'none' ? null : formData.offerId,
-                platforms: [{ name: 'instagram', status: 'pending' }] // Default platform logic
+                // Only set default platforms on create if not present
             };
 
-            const res = await createContentPost(payload);
+            let res;
+            if (isEditing && initialData._id) {
+                res = await updateContentPost(initialData._id, payload);
+            } else {
+                (payload as any).platforms = [{ name: 'instagram', status: 'pending' }];
+                res = await createContentPost(payload);
+            }
 
             if (res.success) {
-                toast.success("Content created!");
-                setOpen(false);
+                toast.success(isEditing ? "Content updated!" : "Content created!");
+                handleOpenChange(false);
                 onSuccess?.();
             } else {
-                toast.error("Failed to create content: " + (res.error || "Unknown error"));
+                toast.error("Failed to save: " + (res.error || "Unknown error"));
             }
         } catch (error) {
-            toast.error("Failed to create content");
+            toast.error("Failed to save content");
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {trigger || (
                     <Button className="bg-indigo-600 hover:bg-indigo-700">
@@ -90,9 +137,9 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
             </DialogTrigger>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>New Content Piece</DialogTitle>
+                    <DialogTitle>{initialData ? 'Edit Content' : 'New Content Piece'}</DialogTitle>
                     <DialogDescription>
-                        Draft a new post, idea, or campaign asset.
+                        {initialData ? 'Update your content details and strategy.' : 'Draft a new post, idea, or campaign asset.'}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -237,7 +284,7 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
                     ) : (
                         <Button onClick={handleSubmit} disabled={isLoading || !formData.title} className="bg-indigo-600 hover:bg-indigo-700">
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Content
+                            {initialData ? 'Save Changes' : 'Create Content'}
                         </Button>
                     )}
                 </DialogFooter>

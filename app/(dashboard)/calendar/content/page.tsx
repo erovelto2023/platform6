@@ -48,7 +48,7 @@ export default async function ContentCalendarPage() {
                 </TabsContent>
 
                 <TabsContent value="kanban" className="flex-1 mt-4 h-[calc(100vh-250px)]">
-                    <KanbanBoard posts={posts} />
+                    <KanbanBoard posts={posts} campaigns={campaigns} offers={offers} />
                 </TabsContent>
 
                 <TabsContent value="strategy" className="mt-4">
