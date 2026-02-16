@@ -207,7 +207,7 @@ export async function seedTools() {
         for (const toolData of tools) {
             await Tool.findOneAndUpdate(
                 { slug: toolData.slug },
-                { $setOnInsert: toolData },
+                { $set: toolData },
                 { upsert: true, new: true }
             );
         }
