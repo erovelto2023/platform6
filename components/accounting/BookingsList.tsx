@@ -1,111 +1,107 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock, User, Mail } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 import { getBookings } from "@/lib/actions/booking.actions";
-import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar"; // Assuming shadcn Calendar exists
-// If Calendar doesn't exist, we might need to use a simpler date picker or list view for now.
-// For this step, I'll stick to a list view first to be safe, or check if Calendar exists.
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format, isFuture, isPast } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { TabsContent } from "@/components/ui/tabs";
 
-export function BookingsList() {
+interface BookingsListProps {
+    searchTerm?: string;
+}
+
+export function BookingsList({ searchTerm = "" }: BookingsListProps) {
     const [bookings, setBookings] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        loadBookings();
-    }, []);
-
-    async function loadBookings() {
-        try {
+        const fetchBookings = async () => {
             const res = await getBookings();
             if (res.success) {
                 setBookings(res.data);
-            } else {
-                toast.error("Failed to load bookings");
             }
-        } catch (error) {
-            toast.error("An error occurred");
-        } finally {
-            setIsLoading(false);
-        }
+            setLoading(false);
+        };
+        fetchBookings();
+    }, []);
+
+    if (loading) {
+        return <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>;
     }
 
-    if (isLoading) return <div>Loading bookings...</div>;
+    const filteredBookings = bookings.filter(booking => {
+        const matchesSearch =
+            booking.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            booking.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (booking.serviceId?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesSearch;
+    });
 
-    const upcomingBookings = bookings.filter(b => new Date(b.startTime) >= new Date());
-    const pastBookings = bookings.filter(b => new Date(b.startTime) < new Date());
+    const upcomingBookings = filteredBookings.filter(b => isFuture(new Date(b.startTime)));
+    const pastBookings = filteredBookings.filter(b => isPast(new Date(b.startTime)));
+
+    // Helper table component
+    const BookingTable = ({ data }: { data: any[] }) => (
+        <div className="rounded-md border">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Time</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Service</TableHead>
+                        <TableHead>Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {data.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                                No bookings found.
+                            </TableCell>
+                        </TableRow>
+                    ) : (
+                        data.map((booking) => (
+                            <TableRow key={booking._id}>
+                                <TableCell className="font-medium">{format(new Date(booking.startTime), "MMM d, yyyy")}</TableCell>
+                                <TableCell>
+                                    {format(new Date(booking.startTime), "h:mm a")} - {format(new Date(booking.endTime), "h:mm a")}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">{booking.customerName}</span>
+                                        <span className="text-xs text-muted-foreground">{booking.customerEmail}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{booking.serviceId?.name || "Unknown"}</TableCell>
+                                <TableCell>
+                                    <Badge variant={booking.status === "confirmed" ? "default" : booking.status === "cancelled" ? "destructive" : "secondary"}>
+                                        {booking.status}
+                                    </Badge>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
+                </TableBody>
+            </Table>
+        </div>
+    );
 
     return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Upcoming Appointments</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {upcomingBookings.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-8">No upcoming bookings.</p>
-                    ) : (
-                        <div className="space-y-4">
-                            {upcomingBookings.map((booking) => (
-                                <div key={booking._id} className="flex items-center justify-between border p-4 rounded-lg">
-                                    <div className="flex items-center gap-4">
-                                        <div className="bg-blue-100 p-3 rounded-full">
-                                            <CalendarIcon className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-semibold">{booking.serviceId?.name || "Unknown Service"}</h4>
-                                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                                                <Clock className="h-3 w-3" />
-                                                {format(new Date(booking.startTime), "PP p")} - {format(new Date(booking.endTime), "p")}
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                                                <User className="h-3 w-3" /> {booking.customerName}
-                                                <Mail className="h-3 w-3 ml-2" /> {booking.customerEmail}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Badge>{booking.status}</Badge>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Past Appointments</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {pastBookings.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-8">No past bookings.</p>
-                    ) : (
-                        <div className="space-y-4 opacity-75">
-                            {pastBookings.map((booking) => (
-                                <div key={booking._id} className="flex items-center justify-between border p-4 rounded-lg bg-slate-50">
-                                    <div>
-                                        <h4 className="font-semibold">{booking.serviceId?.name}</h4>
-                                        <div className="text-sm text-slate-500">
-                                            {format(new Date(booking.startTime), "PP p")}
-                                        </div>
-                                        <div className="text-sm text-slate-500">
-                                            {booking.customerName}
-                                        </div>
-                                    </div>
-                                    <Badge variant="outline">Completed</Badge>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+        <>
+            <TabsContent value="upcoming" className="mt-0">
+                <BookingTable data={upcomingBookings} />
+            </TabsContent>
+            <TabsContent value="past" className="mt-0">
+                <BookingTable data={pastBookings} />
+            </TabsContent>
+            <TabsContent value="all" className="mt-0">
+                <BookingTable data={filteredBookings} />
+            </TabsContent>
+        </>
     );
 }

@@ -1,5 +1,5 @@
 
-import { AvailabilitySettings } from "@/components/accounting/AvailabilitySettings";
+import { AvailabilityEditor } from "@/components/calendar/AvailabilityEditor";
 import { BackButton } from "@/components/accounting/BackButton";
 
 export default function AvailabilityPage() {
@@ -13,8 +13,8 @@ export default function AvailabilityPage() {
                 </div>
             </div>
 
-            <div className="max-w-3xl">
-                <AvailabilitySettings />
+            <div className="max-w-4xl">
+                <AvailabilityEditor />
             </div>
         </div>
     );

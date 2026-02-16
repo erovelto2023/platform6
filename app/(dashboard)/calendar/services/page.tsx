@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Copy, ExternalLink, Clock, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { ClientCopyButton } from "./ClientCopyButton";
+import { EmbedButton } from "./EmbedButton";
 
 export default async function ServicesPage() {
     // Fetch only bookable products
@@ -63,6 +64,7 @@ export default async function ServicesPage() {
                                 <ClientCopyButton
                                     url={`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/book/${service._id}`}
                                 />
+                                <EmbedButton serviceId={service._id} />
                                 <Link href={`/book/${service._id}`} target="_blank" className="flex-1">
                                     <Button variant="outline" className="w-full">
                                         <ExternalLink className="mr-2 h-3 w-3" />

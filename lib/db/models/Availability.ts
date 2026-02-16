@@ -3,9 +3,9 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IAvailability extends Document {
     businessId: string;
-    dayOfWeek: number; // 0=Sunday, 1=Monday, etc.
-    startTime: string; // "09:00"
-    endTime: string; // "17:00"
+    dayOfWeek?: number;
+    date?: Date;
+    slots: { startTime: string; endTime: string }[];
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -18,20 +18,20 @@ const AvailabilitySchema = new Schema(
             required: true,
             index: true,
         },
+        // For recurring rules (0-6)
         dayOfWeek: {
             type: Number,
-            required: true,
             min: 0,
             max: 6,
         },
-        startTime: {
-            type: String,
-            required: true,
+        // For specific date overrides
+        date: {
+            type: Date,
         },
-        endTime: {
-            type: String,
-            required: true,
-        },
+        slots: [{
+            startTime: String, // "09:00"
+            endTime: String,   // "17:00"
+        }],
         isActive: {
             type: Boolean,
             default: true,

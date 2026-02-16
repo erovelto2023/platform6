@@ -143,3 +143,38 @@ export async function updateBusiness(data: any) {
         };
     }
 }
+
+export async function updateCalendarSettings(settings: any) {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
+
+        await connectToDatabase();
+
+        // If slug is being updated, check uniqueness
+        if (settings.slug) {
+            const existing = await Business.findOne({
+                'calendarSettings.slug': settings.slug,
+                _id: { $ne: businessId }
+            });
+            if (existing) {
+                return { success: false, error: 'Booking URL slug is already taken' };
+            }
+        }
+
+        const business = await Business.findByIdAndUpdate(
+            businessId,
+            { $set: { calendarSettings: settings } },
+            { new: true }
+        );
+
+        revalidatePath('/calendar/settings');
+        return { success: true, data: JSON.parse(JSON.stringify(business)) };
+    } catch (error) {
+        console.error('[UPDATE_CALENDAR_SETTINGS]', error);
+        return { success: false, error: 'Failed to update calendar settings' };
+    }
+}
