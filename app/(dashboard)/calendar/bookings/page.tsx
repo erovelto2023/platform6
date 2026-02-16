@@ -3,6 +3,7 @@ import { BookingsList } from "@/components/accounting/BookingsList";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function BookingsPage() {
     return (
@@ -21,7 +22,16 @@ export default function BookingsPage() {
                 */}
             </div>
 
-            <BookingsList />
+            <Tabs defaultValue="upcoming" className="w-full">
+                <TabsList>
+                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                    <TabsTrigger value="past">Past</TabsTrigger>
+                    <TabsTrigger value="all">All Bookings</TabsTrigger>
+                </TabsList>
+                <div className="mt-4">
+                    <BookingsList />
+                </div>
+            </Tabs>
         </div>
     );
 }
