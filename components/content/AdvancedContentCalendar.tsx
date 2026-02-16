@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight, Filter as FilterIcon, Plus } from "lucide-re
 import { ContentCard } from "./ContentCard";
 import { ContentFilters, FilterState } from "./ContentFilters";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ContentWizard } from "./ContentWizard";
 
 interface AdvancedContentCalendarProps {
     posts: any[];
@@ -111,9 +112,10 @@ export function AdvancedContentCalendar({ posts, campaigns, offers }: AdvancedCo
                             </SheetContent>
                         </Sheet>
 
-                        <Button className="bg-indigo-600 hover:bg-indigo-700">
-                            <Plus className="mr-2 h-4 w-4" /> Create Content
-                        </Button>
+                        <ContentWizard
+                            campaigns={campaigns}
+                            offers={offers}
+                        />
                     </div>
                 </div>
 

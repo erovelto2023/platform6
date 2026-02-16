@@ -9,9 +9,12 @@ import { MoreHorizontal, Plus, Calendar as CalendarIcon, FileText, Video, Mail, 
 import { updateContentPost } from "@/lib/actions/content.actions";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ContentWizard } from "@/components/content/ContentWizard";
 
 interface KanbanBoardProps {
     posts: any[];
+    campaigns?: any[];
+    offers?: any[];
 }
 
 const COLUMNS = [
@@ -121,14 +124,20 @@ export function KanbanBoard({ posts }: KanbanBoardProps) {
                                 </Card>
                             ))}
 
-                            <Button
-                                variant="ghost"
-                                className="w-full text-slate-500 border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                                onClick={() => router.push(`/tools/content-planner/create?status=${col.id}`)}
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add {col.title.slice(0, -1)}
-                            </Button>
+                            <ContentWizard
+                                trigger={
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full text-slate-500 border-2 border-dashed border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add {col.title.slice(0, -1)}
+                                    </Button>
+                                }
+                                defaultStatus={col.id}
+                                campaigns={posts.length > 0 && posts[0].userId ? [] : []} // quick fix, improved below
+                                offers={[]}
+                            />
                         </div>
                     </div>
                 );

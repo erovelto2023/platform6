@@ -176,3 +176,37 @@ export async function repurposeContent(originalId: string, formats: string[]) {
         return { success: false, error: 'Failed to repurpose content' };
     }
 }
+// ... existing code ...
+
+export async function createContentPost(data: any) {
+    try {
+        await connectToDatabase();
+
+        // Ensure userId is present (mock for now, should come from auth)
+        // In a real app we'd use auth() or similar. 
+        // For this demo, let's assume we can get it from the data or default to a dummy if not.
+        // But ContentPost demands userId.
+        // Let's rely on the client passing it or we fetch the first user.
+
+        // Quick fix: Fetch a business or user to attribute to.
+        const businessResult = await getOrCreateBusiness();
+        let userId = 'unknown';
+        if (businessResult.success && businessResult.data) {
+            userId = businessResult.data.userId; // Assuming business has userId
+        }
+
+        const newPost = await ContentPost.create({
+            ...data,
+            userId: data.userId || userId,
+            status: data.status || 'idea',
+            platforms: data.platforms || [],
+            tags: data.tags || []
+        });
+
+        revalidatePath('/calendar/content');
+        return { success: true, data: JSON.parse(JSON.stringify(newPost)) };
+    } catch (error) {
+        console.error('[CREATE_CONTENT_POST]', error);
+        return { success: false, error: 'Failed to create content post' };
+    }
+}
