@@ -44,12 +44,14 @@ const formSchema = z.object({
     description: z.string().optional(),
 });
 
+type ExpenseFormValues = z.infer<typeof formSchema>;
+
 export function ExpenseForm() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<ExpenseFormValues>({
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             vendor: "",
             category: "",

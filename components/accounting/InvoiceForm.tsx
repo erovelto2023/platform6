@@ -45,6 +45,8 @@ const formSchema = z.object({
     status: z.enum(["draft", "sent", "paid", "overdue"]),
 });
 
+type InvoiceFormValues = z.infer<typeof formSchema>;
+
 interface InvoiceFormProps {
     clients: any[];
 }
@@ -53,8 +55,8 @@ export function InvoiceForm({ clients }: InvoiceFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<InvoiceFormValues>({
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             clientId: "",
             date: new Date().toISOString().split('T')[0],
