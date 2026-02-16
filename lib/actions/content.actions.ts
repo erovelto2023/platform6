@@ -3,6 +3,7 @@
 
 import connectToDatabase from "@/lib/db/connect";
 import ContentItem, { IContentItem } from "@/lib/db/models/ContentItem";
+import ContentPost from "@/lib/db/models/ContentPost";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 import { revalidatePath } from "next/cache";
 
@@ -95,5 +96,20 @@ export async function deleteContentItem(id: string) {
     } catch (error) {
         console.error('[DELETE_CONTENT_ITEM]', error);
         return { success: false, error: 'Failed to delete content item' };
+    }
+}
+
+// Legacy / Content Planner Actions
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function updateContentPost(id: string, data: any) {
+    try {
+        await connectToDatabase();
+        const updatedPost = await ContentPost.findByIdAndUpdate(id, data, { new: true });
+        if (!updatedPost) return { success: false, error: "Post not found" };
+        revalidatePath('/tools/content-planner');
+        return { success: true, data: JSON.parse(JSON.stringify(updatedPost)) };
+    } catch (error) {
+        console.error("Error updating content post:", error);
+        return { success: false, error: "Failed to update post" };
     }
 }
