@@ -52,6 +52,18 @@ export function addRecentFile(name: string, size: number, toolSlug: string, tool
   }
 }
 
+export function removeRecentFile(id: string): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const recentFiles = getRecentFiles();
+    const updated = recentFiles.filter(f => f.id !== id);
+    localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(updated));
+  } catch (error) {
+    console.error('Failed to remove recent file', error);
+  }
+}
+
 export function clearRecentFiles(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(RECENT_FILES_KEY);
