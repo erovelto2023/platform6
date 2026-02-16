@@ -1,5 +1,8 @@
 import { BackButton } from "@/components/accounting/BackButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import { getInvoices } from "@/lib/actions/invoice.actions";
 import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
@@ -114,12 +117,20 @@ export default async function ReportsPage() {
 
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
-            <div className="mb-8">
-                <BackButton href="/accounting" />
-                <div className="mt-4">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Financial Reports</h1>
-                    <p className="text-muted-foreground">View your business performance and financial health.</p>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <BackButton href="/accounting" />
+                    <div className="mt-4">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Financial Reports</h1>
+                        <p className="text-muted-foreground">View your business performance and financial health.</p>
+                    </div>
                 </div>
+                <Link href="/accounting/ledger">
+                    <Button variant="outline">
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        General Ledger
+                    </Button>
+                </Link>
             </div>
 
             {/* Chart */}

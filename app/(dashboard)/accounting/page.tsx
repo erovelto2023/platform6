@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, TrendingUp, Users, FileText, CreditCard, BarChart3 } from "lucide-react";
+import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, TrendingUp, Users, FileText, CreditCard, BarChart3, Package, Wallet, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { getInvoices } from "@/lib/actions/invoice.actions";
 import { getExpenses } from "@/lib/actions/expense.actions";
@@ -206,9 +206,21 @@ export default async function AccountingDashboard() {
                                 <BarChart3 className="h-6 w-6 text-green-600 mb-2" />
                                 <span className="text-sm font-medium">Reports</span>
                             </Link>
-                            <Link href="/accounting/journal" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200 col-span-2 md:col-span-1">
+                            <Link href="/accounting/products" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
+                                <Package className="h-6 w-6 text-orange-600 mb-2" />
+                                <span className="text-sm font-medium">Products</span>
+                            </Link>
+                            <Link href="/accounting/accounts" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
+                                <Wallet className="h-6 w-6 text-cyan-600 mb-2" />
+                                <span className="text-sm font-medium">Accounts</span>
+                            </Link>
+                            <Link href="/accounting/journal" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
                                 <FileText className="h-6 w-6 text-slate-600 mb-2" />
-                                <span className="text-sm font-medium">Journal</span>
+                                <span className="text-sm font-medium">Journal Entries</span>
+                            </Link>
+                            <Link href="/accounting/ledger" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200 col-span-2">
+                                <BookOpen className="h-6 w-6 text-indigo-600 mb-2" />
+                                <span className="text-sm font-medium">General Ledger</span>
                             </Link>
                         </CardContent>
                     </Card>
