@@ -23,7 +23,7 @@ const BookingSchema = new Schema(
         },
         serviceId: {
             type: Schema.Types.ObjectId,
-            ref: 'Product',
+            ref: 'CalendarService',
             required: true,
         },
         customerName: {

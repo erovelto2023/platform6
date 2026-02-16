@@ -80,6 +80,10 @@ export async function createProduct(data: any) {
         const businessId = businessResult.data._id;
 
         await connectToDatabase();
+        if (data.vendorId === 'none' || data.vendorId === '') {
+            data.vendorId = null;
+        }
+
         const product = await Product.create({
             ...data,
             businessId,
