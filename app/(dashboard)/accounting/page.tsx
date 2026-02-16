@@ -4,12 +4,14 @@ import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, TrendingUp, Users, File
 import Link from "next/link";
 import { getInvoices } from "@/lib/actions/invoice.actions";
 import { getExpenses } from "@/lib/actions/expense.actions";
-import { getOrCreateBusiness } from "@/lib/actions/business.actions";
+import { getOrCreateBusiness, getActiveBusinessId } from "@/lib/actions/business.actions";
 import { formatCurrency } from "@/lib/utils";
+import { BusinessInitializer } from "@/components/accounting/BusinessInitializer";
 
 export default async function AccountingDashboard() {
     const businessData = await getOrCreateBusiness();
     const business = businessData.data;
+    const activeBusinessId = await getActiveBusinessId();
 
     const invoicesData = await getInvoices();
     const expensesData = await getExpenses();
@@ -56,6 +58,7 @@ export default async function AccountingDashboard() {
 
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+            <BusinessInitializer businessId={business._id} activeBusinessId={activeBusinessId} />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Accounting Dashboard</h1>
@@ -202,6 +205,10 @@ export default async function AccountingDashboard() {
                             <Link href="/accounting/reports" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
                                 <BarChart3 className="h-6 w-6 text-green-600 mb-2" />
                                 <span className="text-sm font-medium">Reports</span>
+                            </Link>
+                            <Link href="/accounting/journal" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200 col-span-2 md:col-span-1">
+                                <FileText className="h-6 w-6 text-slate-600 mb-2" />
+                                <span className="text-sm font-medium">Journal</span>
                             </Link>
                         </CardContent>
                     </Card>

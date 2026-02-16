@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BackButton } from "@/components/accounting/BackButton";
+import { InvoiceRowActions } from "@/components/accounting/InvoiceRowActions";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, FileText, MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -95,25 +96,7 @@ export default async function InvoicesPage() {
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <Link href={`/accounting/invoices/${invoice._id}`}>
-                                                    <DropdownMenuItem>View details</DropdownMenuItem>
-                                                </Link>
-                                                <Link href={`/accounting/invoices/${invoice._id}/edit`}>
-                                                    <DropdownMenuItem>Edit invoice</DropdownMenuItem>
-                                                </Link>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600">Delete invoice</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <InvoiceRowActions invoice={invoice} />
                                     </TableCell>
                                 </TableRow>
                             ))

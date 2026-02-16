@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IBusiness extends Document {
-    userId: mongoose.Types.ObjectId;
+    userId: string;
     name: string;
     email: string;
     phone?: string;
@@ -22,8 +22,7 @@ export interface IBusiness extends Document {
 const BusinessSchema = new Schema<IBusiness>(
     {
         userId: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
+            type: String,
             required: true,
             index: true,
         },

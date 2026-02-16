@@ -49,15 +49,27 @@ type InvoiceFormValues = z.infer<typeof formSchema>;
 
 interface InvoiceFormProps {
     clients: any[];
+    initialData?: any;
 }
 
-export function InvoiceForm({ clients }: InvoiceFormProps) {
+export function InvoiceForm({ clients, initialData }: InvoiceFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<InvoiceFormValues>({
         resolver: zodResolver(formSchema) as any,
-        defaultValues: {
+        defaultValues: initialData ? {
+            ...initialData,
+            clientId: initialData.clientId?._id || initialData.clientId || "",
+            date: new Date(initialData.date).toISOString().split('T')[0],
+            dueDate: new Date(initialData.dueDate).toISOString().split('T')[0],
+            items: initialData.items.map((item: any) => ({
+                ...item,
+                amount: Number(item.amount),
+                quantity: Number(item.quantity),
+                rate: Number(item.rate),
+            })),
+        } : {
             clientId: "",
             date: new Date().toISOString().split('T')[0],
             dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 14 days from now
@@ -69,12 +81,12 @@ export function InvoiceForm({ clients }: InvoiceFormProps) {
         },
     });
 
+    // ... hooks ...
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: "items",
     });
 
-    // Watch items to calculate totals
     const items = useWatch({
         control: form.control,
         name: "items",
@@ -87,6 +99,8 @@ export function InvoiceForm({ clients }: InvoiceFormProps) {
             const rate = Number(item.rate) || 0;
             const amount = quantity * rate;
 
+            // Only update if difference is significant to avoid infinite loops if generic
+            // But strict equality check should be fine
             if (item.amount !== amount) {
                 form.setValue(`items.${index}.amount`, amount);
             }
@@ -100,21 +114,31 @@ export function InvoiceForm({ clients }: InvoiceFormProps) {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
-            const result = await createInvoice({
+            const data = {
                 ...values,
                 date: new Date(values.date),
                 dueDate: new Date(values.dueDate),
                 subtotal,
                 tax,
                 total,
-            });
+            };
+
+            let result;
+            if (initialData) {
+                // Update
+                const { updateInvoice } = await import("@/lib/actions/invoice.actions");
+                result = await updateInvoice(initialData._id, data);
+            } else {
+                // Create
+                result = await createInvoice(data);
+            }
 
             if (result.success) {
-                toast.success("Invoice created successfully");
+                toast.success(initialData ? "Invoice updated successfully" : "Invoice created successfully");
                 router.push("/accounting/invoices");
                 router.refresh();
             } else {
-                toast.error(result.error || "Failed to create invoice");
+                toast.error(result.error || "Failed to save invoice");
             }
         } catch (error) {
             toast.error("Something went wrong");

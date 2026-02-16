@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import connectToDatabase from '../db/connect';
 import Business from '../db/models/Business';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { cookies } from 'next/headers';
 
 const BUSINESS_COOKIE_NAME = 'accounting_business_id';
@@ -25,15 +25,15 @@ export async function getUserBusinesses() {
 
 export async function createBusiness(data: { name: string, currency?: string }) {
     try {
-        const { userId } = await auth();
-        if (!userId) return { success: false, error: 'Unauthorized' };
+        const user = await currentUser();
+        if (!user) return { success: false, error: 'Unauthorized' };
 
         await connectToDatabase();
         const business = await Business.create({
-            userId,
+            userId: user.id,
             name: data.name,
             currency: data.currency || 'USD',
-            email: '', // Optional or default
+            email: user.emailAddresses[0]?.emailAddress || '',
         });
 
         return { success: true, data: JSON.parse(JSON.stringify(business)) };
@@ -62,8 +62,8 @@ export async function getActiveBusinessId() {
 
 export async function getOrCreateBusiness() {
     try {
-        const { userId } = await auth();
-        if (!userId) {
+        const user = await currentUser();
+        if (!user) {
             return { success: false, error: 'Unauthorized' };
         }
 
@@ -72,6 +72,7 @@ export async function getOrCreateBusiness() {
         let business;
         const cookieStore = await cookies();
         const activeBusinessId = cookieStore.get(BUSINESS_COOKIE_NAME)?.value;
+        const userId = user.id;
 
         if (activeBusinessId) {
             business = await Business.findOne({ _id: activeBusinessId, userId });
@@ -87,17 +88,17 @@ export async function getOrCreateBusiness() {
             business = await Business.create({
                 userId,
                 name: 'My Business',
-                email: '',
+                email: user.emailAddresses[0]?.emailAddress || '',
                 currency: 'USD',
             });
         }
 
         // Ensure the cookie is set to the current business if it wasn't
-        if (!activeBusinessId || activeBusinessId !== business._id.toString()) {
-            // We can't set cookies in a Server Component directly if it's not an Action or Route Handler?
-            // Actually getOrCreateBusiness is an action, so we can set cookies.
-            cookieStore.set(BUSINESS_COOKIE_NAME, business._id.toString());
-        }
+        // Note: we cannot set cookies here if called from a Server Component.
+        // We will handle default cookie setting in a Client Component (BusinessInitializer)
+        // if (!activeBusinessId || activeBusinessId !== business._id.toString()) {
+        //     cookieStore.set(BUSINESS_COOKIE_NAME, business._id.toString());
+        // }
 
         return {
             success: true,

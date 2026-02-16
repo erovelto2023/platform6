@@ -49,15 +49,21 @@ type ExpenseFormValues = z.infer<typeof formSchema>;
 
 interface ExpenseFormProps {
     accounts?: any[];
+    initialData?: any;
 }
 
-export function ExpenseForm({ accounts = [] }: ExpenseFormProps) {
+export function ExpenseForm({ accounts = [], initialData }: ExpenseFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(formSchema) as any,
-        defaultValues: {
+        defaultValues: initialData ? {
+            ...initialData,
+            date: new Date(initialData.date).toISOString().split('T')[0],
+            amount: Number(initialData.amount),
+            accountId: initialData.accountId?._id || initialData.accountId || "",
+        } : {
             vendor: "",
             category: "",
             amount: 0,
@@ -71,17 +77,27 @@ export function ExpenseForm({ accounts = [] }: ExpenseFormProps) {
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsSubmitting(true);
         try {
-            const result = await createExpense({
+            const data = {
                 ...values,
                 date: new Date(values.date),
-            });
+            };
+
+            let result;
+            if (initialData) {
+                // Update
+                const { updateExpense } = await import("@/lib/actions/expense.actions");
+                result = await updateExpense(initialData._id, data);
+            } else {
+                // Create
+                result = await createExpense(data);
+            }
 
             if (result.success) {
-                toast.success("Expense added successfully");
+                toast.success(initialData ? "Expense updated successfully" : "Expense added successfully");
                 router.push("/accounting/expenses");
                 router.refresh();
             } else {
-                toast.error(result.error || "Failed to add expense");
+                toast.error(result.error || "Failed to save expense");
             }
         } catch (error) {
             toast.error("Something went wrong");

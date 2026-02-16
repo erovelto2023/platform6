@@ -55,6 +55,42 @@ export async function getExpenses() {
     }
 }
 
+export async function getExpense(expenseId: string) {
+    try {
+        const { userId } = await auth();
+        if (!userId) {
+            return { success: false, error: 'Unauthorized' };
+        }
+
+        await connectToDatabase();
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
+            return { success: false, error: 'Business profile not found' };
+        }
+
+        const expense = await Expense.findOne({
+            _id: expenseId,
+            businessId,
+        }).populate('accountId');
+
+        if (!expense) {
+            return { success: false, error: 'Expense not found' };
+        }
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(expense)),
+        };
+    } catch (error) {
+        console.error('[GET_EXPENSE]', error);
+        return {
+            success: false,
+            error: 'Failed to get expense',
+        };
+    }
+}
+
 export async function createExpense(data: any) {
     try {
         const { userId } = await auth();

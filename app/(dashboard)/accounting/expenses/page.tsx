@@ -18,6 +18,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ExpenseRowActions } from "@/components/accounting/ExpenseRowActions";
 import { BackButton } from "@/components/accounting/BackButton";
 import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
@@ -79,25 +80,7 @@ export default async function ExpensesPage() {
                                     <TableCell>{expense.paymentMethod || 'Not specified'}</TableCell>
                                     <TableCell className="font-medium text-red-600">-{formatCurrency(expense.amount)}</TableCell>
                                     <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                                    <span className="sr-only">Open menu</span>
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                {expense.receipt && (
-                                                    <DropdownMenuItem>View receipt</DropdownMenuItem>
-                                                )}
-                                                <Link href={`/accounting/expenses/${expense._id}/edit`}>
-                                                    <DropdownMenuItem>Edit expense</DropdownMenuItem>
-                                                </Link>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-red-600">Delete expense</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        <ExpenseRowActions expense={expense} />
                                     </TableCell>
                                 </TableRow>
                             ))
