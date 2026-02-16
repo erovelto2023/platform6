@@ -1,157 +1,99 @@
-"use server";
 
-import { AIService } from "@/lib/ai-service";
-import { auth } from "@clerk/nextjs/server";
+'use server';
+
 import connectToDatabase from "@/lib/db/connect";
-import ContentPost from "@/lib/db/models/ContentPost";
+import ContentItem, { IContentItem } from "@/lib/db/models/ContentItem";
+import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 import { revalidatePath } from "next/cache";
-import User from "@/lib/db/models/User";
 
-export async function generateContentFromTemplate(template: any, inputs: any) {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    // 1. Construct the prompt
-    let prompt = template.systemPrompt;
-
-    // Replace variables
-    for (const [key, value] of Object.entries(inputs)) {
-        const regex = new RegExp(`{{${key}}}`, 'g');
-        prompt = prompt.replace(regex, String(value));
-    }
-
-    // Inject Rich Metadata Context if available
-    if (inputs.intent || inputs.targetAudience || inputs.keywords) {
-        prompt += `\n\n[CONTEXT]\n`;
-        if (inputs.intent) prompt += `Search Intent: ${inputs.intent}\n`;
-        if (inputs.targetAudience) prompt += `Target Audience: ${inputs.targetAudience}\n`;
-        if (inputs.keywords) prompt += `Secondary Keywords to Include: ${inputs.keywords}\n`;
-        prompt += `\nPlease ensure the content aligns with this context.`;
-    }
-
-    // 2. Call AI Service
+export async function getContentItems() {
     try {
-        console.log(`[ContentGen] Generating with template: ${template.name}, User: ${userId}`);
-        const response = await AIService.generate({
-            prompt: prompt,
-            systemPrompt: "You are a helpful content assistant.",
-            userId: userId, // Pass userId so service can look up settings
-            model: template.model // Optional: allow template to override
-        });
-        console.log(`[ContentGen] Success. Provider: ${response.provider}, Model: ${response.model}`);
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
 
-        return { success: true, content: response.content };
-    } catch (error: any) {
-        console.error("[ContentGen] Error:", error);
-        return { success: false, error: error.message };
+        await connectToDatabase();
+        const items = await ContentItem.find({ businessId }).sort({ scheduledAt: 1 });
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(items)),
+        };
+    } catch (error) {
+        console.error('[GET_CONTENT_ITEMS]', error);
+        return { success: false, error: 'Failed to fetch content items' };
     }
 }
 
-export async function getContentPosts() {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+export async function createContentItem(data: Partial<IContentItem>) {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
 
-    await connectToDatabase();
-    const posts = await ContentPost.find({ userId }).sort({ scheduledFor: 1, createdAt: -1 });
+        await connectToDatabase();
 
-    // Serialize for client
-    return posts.map(post => ({
-        ...post.toObject(),
-        _id: post._id.toString(),
-        userId: post.userId.toString(),
-        campaignId: post.campaignId?.toString(),
-        scheduledFor: post.scheduledFor?.toISOString(),
-        publishedAt: post.publishedAt?.toISOString(),
-        createdAt: post.createdAt?.toISOString(),
-        updatedAt: post.updatedAt?.toISOString(),
-    }));
+        const newItem = await ContentItem.create({
+            ...data,
+            businessId,
+        });
+
+        revalidatePath('/calendar/content');
+        return { success: true, data: JSON.parse(JSON.stringify(newItem)) };
+    } catch (error) {
+        console.error('[CREATE_CONTENT_ITEM]', error);
+        return { success: false, error: 'Failed to create content item' };
+    }
 }
 
-export async function getContentPostById(id: string) {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+export async function updateContentItem(id: string, data: Partial<IContentItem>) {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
 
-    await connectToDatabase();
-    const post = await ContentPost.findOne({ _id: id, userId });
+        await connectToDatabase();
 
-    if (!post) return null;
+        const updatedItem = await ContentItem.findOneAndUpdate(
+            { _id: id, businessId },
+            data,
+            { new: true }
+        );
 
-    return {
-        ...post.toObject(),
-        _id: post._id.toString(),
-        userId: post.userId.toString(),
-        campaignId: post.campaignId?.toString(),
-        scheduledFor: post.scheduledFor?.toISOString(),
-        publishedAt: post.publishedAt?.toISOString(),
-        createdAt: post.createdAt?.toISOString(),
-        updatedAt: post.updatedAt?.toISOString(),
-    };
+        if (!updatedItem) {
+            return { success: false, error: 'Content item not found' };
+        }
+
+        revalidatePath('/calendar/content');
+        return { success: true, data: JSON.parse(JSON.stringify(updatedItem)) };
+    } catch (error) {
+        console.error('[UPDATE_CONTENT_ITEM]', error);
+        return { success: false, error: 'Failed to update content item' };
+    }
 }
 
-export async function createContentPost(data: any) {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+export async function deleteContentItem(id: string) {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
 
-    await connectToDatabase();
-    const post: any = await ContentPost.create({
-        ...data,
-        userId,
-    });
+        await connectToDatabase();
 
-    revalidatePath("/tools/content-planner");
-    return { success: true, id: post._id.toString() };
-}
+        await ContentItem.findOneAndDelete({ _id: id, businessId });
 
-export async function updateContentPost(id: string, data: any) {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    await connectToDatabase();
-    await ContentPost.findOneAndUpdate(
-        { _id: id, userId },
-        { $set: data },
-        { new: true }
-    );
-
-    revalidatePath("/tools/content-planner");
-    return { success: true };
-}
-
-export async function deleteContentPost(id: string) {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    await connectToDatabase();
-    await ContentPost.findOneAndDelete({ _id: id, userId });
-
-    revalidatePath("/tools/content-planner");
-    return { success: true };
-}
-
-export async function fixContentOwnership() {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-
-    await connectToDatabase();
-
-    // 1. Find the user's MongoDB _id
-    const user = await User.findOne({ clerkId: userId });
-    if (!user) return { success: false, message: "User not found" };
-
-    const mongoId = user._id.toString();
-
-    // 2. Find posts that have the MongoDB ID as the userId
-    // We check both string and ObjectId versions just in case
-    const result = await ContentPost.updateMany(
-        {
-            $or: [
-                { userId: mongoId },
-                { userId: user._id }
-            ]
-        },
-        { $set: { userId: userId } }
-    );
-
-    revalidatePath("/tools/content-planner");
-    return { success: true, count: result.modifiedCount };
+        revalidatePath('/calendar/content');
+        return { success: true };
+    } catch (error) {
+        console.error('[DELETE_CONTENT_ITEM]', error);
+        return { success: false, error: 'Failed to delete content item' };
+    }
 }

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Calendar as CalendarIcon, List, Clock, Briefcase } from "lucide-react";
+import { Calendar as CalendarIcon, List, Clock, Briefcase, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CalendarLayout({
@@ -34,6 +34,11 @@ export default function CalendarLayout({
             name: "Availability",
             href: "/calendar/availability",
             icon: Clock,
+        },
+        {
+            name: "Content",
+            href: "/calendar/content",
+            icon: FileText,
         },
     ];
 
