@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, TrendingUp, Users, FileText, CreditCard, BarChart3, Package, Wallet, BookOpen } from "lucide-react";
+import { Plus, ArrowUpRight, ArrowDownRight, DollarSign, TrendingUp, Users, FileText, CreditCard, BarChart3, Package, Wallet, BookOpen, Truck, Key } from "lucide-react";
 import Link from "next/link";
 import { getInvoices } from "@/lib/actions/invoice.actions";
 import { getExpenses } from "@/lib/actions/expense.actions";
@@ -213,6 +213,14 @@ export default async function AccountingDashboard() {
                             <Link href="/accounting/accounts" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
                                 <Wallet className="h-6 w-6 text-cyan-600 mb-2" />
                                 <span className="text-sm font-medium">Accounts</span>
+                            </Link>
+                            <Link href="/accounting/vendors" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
+                                <Truck className="h-6 w-6 text-indigo-600 mb-2" />
+                                <span className="text-sm font-medium">Vendors</span>
+                            </Link>
+                            <Link href="/accounting/credentials" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
+                                <Key className="h-6 w-6 text-slate-600 mb-2" />
+                                <span className="text-sm font-medium">Logins</span>
                             </Link>
                             <Link href="/accounting/journal" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
                                 <FileText className="h-6 w-6 text-slate-600 mb-2" />

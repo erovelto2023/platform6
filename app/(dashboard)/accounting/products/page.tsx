@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { formatCurrency } from '@/lib/utils';
 import { getProducts, deleteProduct } from '@/lib/actions/product.actions';
 import { Input } from "@/components/ui/input";
-import { Search } from "@/components/ui/Search"; // Added this line
+import { BackButton } from "@/components/accounting/BackButton";
+import { Search } from "@/components/ui/Search";
 
 export default async function ProductsPage() {
     const { data: products, error } = await getProducts();
@@ -29,7 +30,8 @@ export default async function ProductsPage() {
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="flex justify-between items-center">
-                <div>
+                <div className="space-y-1">
+                    <BackButton href="/accounting" />
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900">Products & Services</h1>
                     <p className="text-muted-foreground">Manage the products and services you sell.</p>
                 </div>
