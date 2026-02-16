@@ -113,3 +113,66 @@ export async function updateContentPost(id: string, data: any) {
         return { success: false, error: "Failed to update post" };
     }
 }
+// ... existing code ...
+
+export async function getFullContentPosts() {
+    try {
+        await connectToDatabase();
+        // Populate campaign, offer, and pillar
+        const posts = await ContentPost.find({})
+            .populate('campaignId')
+            .populate('offerId')
+            .populate('pillarId')
+            .sort({ scheduledFor: 1 });
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(posts)),
+        };
+    } catch (error) {
+        console.error('[GET_FULL_CONTENT_POSTS]', error);
+        return { success: false, error: 'Failed to fetch content posts' };
+    }
+}
+
+export async function repurposeContent(originalId: string, formats: string[]) {
+    try {
+        await connectToDatabase();
+        const originalPost = await ContentPost.findById(originalId);
+        if (!originalPost) return { success: false, error: "Original post not found" };
+
+        let count = 0;
+
+        // Simple generation logic (placeholder for AI)
+        for (const format of formats) {
+            let contentType = 'social';
+            let platformName = 'twitter';
+            let titlePrefix = 'Repurposed: ';
+
+            if (format === 'twitter_thread') { platformName = 'twitter'; titlePrefix = 'Thread: '; }
+            if (format === 'linkedin_post') { platformName = 'linkedin'; titlePrefix = 'LinkedIn: '; }
+            if (format === 'email_newsletter') { contentType = 'email'; platformName = 'email'; titlePrefix = 'Email: '; }
+            if (format === 'short_video_script') { contentType = 'video'; platformName = 'tiktok'; titlePrefix = 'Script: '; }
+            if (format === 'instagram_carousel') { contentType = 'carousel'; platformName = 'instagram'; titlePrefix = 'Carousel: '; }
+
+            await ContentPost.create({
+                title: `${titlePrefix}${originalPost.title}`,
+                content: `(Draft generated from ${originalPost.title})\n\n[Insert repurposed content here]`,
+                contentType,
+                status: 'draft',
+                userId: originalPost.userId,
+                repurposedFrom: originalId,
+                campaignId: originalPost.campaignId,
+                platforms: [{ name: platformName, status: 'pending' }],
+                tags: [...(originalPost.tags || []), 'repurposed']
+            });
+            count++;
+        }
+
+        revalidatePath('/calendar/content');
+        return { success: true, count };
+    } catch (error) {
+        console.error('[REPURPOSE_CONTENT]', error);
+        return { success: false, error: 'Failed to repurpose content' };
+    }
+}

@@ -47,17 +47,38 @@ const ContentPostSchema = new Schema({
     }],
 
     // Strategy & Organization
-    contentPillar: {
+    contentPillar: { // Keeping for backward compatibility, but prefer pillarId
         type: String,
         enum: ['education', 'promotion', 'engagement', 'authority', 'lifestyle', 'entertainment'],
+    },
+    pillarId: {
+        type: Schema.Types.ObjectId,
+        ref: 'PillarContent',
     },
     campaignId: {
         type: Schema.Types.ObjectId,
         ref: 'Campaign',
     },
+    offerId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Offer',
+    },
     funnelStage: {
         type: String,
-        enum: ['top', 'middle', 'bottom'],
+        enum: ['awareness', 'consideration', 'conversion', 'retention'],
+    },
+    estimatedEffort: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+    },
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high', 'critical'],
+        default: 'medium',
+    },
+    repurposedFrom: {
+        type: Schema.Types.ObjectId,
+        ref: 'ContentPost',
     },
     tags: [String],
 

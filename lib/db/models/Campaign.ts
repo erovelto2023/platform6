@@ -7,34 +7,30 @@ const CampaignSchema = new Schema({
         required: true,
     },
     description: String,
+    type: {
+        type: String,
+        enum: ['launch', 'evergreen', 'promo', 'theme', 'newsletter', 'other'],
+        default: 'other',
+    },
 
     // Dates
     startDate: {
         type: Date,
-        required: true,
     },
     endDate: {
         type: Date,
-        required: true,
     },
 
     // Goals
-    goal: {
-        type: String,
-        enum: ['traffic', 'leads', 'sales', 'engagement', 'awareness', 'launch'],
-        required: true,
-    },
-    targetMetric: Number,
+    revenueGoal: Number,
+    trafficFocus: String,
+    notes: String,
 
-    // Organization
-    funnelStage: {
-        type: String,
-        enum: ['top', 'middle', 'bottom'],
-    },
-    productId: {
+    // Relations
+    primaryOfferId: {
         type: Schema.Types.ObjectId,
+        ref: 'Offer',
     },
-    offerName: String,
 
     // Status
     status: {
@@ -43,21 +39,11 @@ const CampaignSchema = new Schema({
         default: 'planning',
     },
 
-    // Analytics
-    analytics: {
-        totalPosts: { type: Number, default: 0 },
-        totalReach: { type: Number, default: 0 },
-        totalEngagement: { type: Number, default: 0 },
-        totalClicks: { type: Number, default: 0 },
-        totalConversions: { type: Number, default: 0 },
-        totalRevenue: { type: Number, default: 0 },
-    },
-
     // User
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true,
+        index: true,
     },
 
 }, { timestamps: true });
