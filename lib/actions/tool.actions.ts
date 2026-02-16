@@ -113,13 +113,7 @@ export async function toggleToolStatus(id: string) {
     }
 }
 
-import { tools as pdfTools } from "@/app/(dashboard)/tools/pdf-suite/_config/tools";
-// Note: We can't easily import content here if it's not exported in a way that works with server actions or if it's too large?
-// Actually, let's just use the metadata we have in tools.ts.
-// But tools.ts doesn't have the full description/title (it has id/slug).
-// The content is in tool-content/en.ts.
-// Let's rely on a basic mapping for now, or import content.
-import { toolContentEn as toolContent } from "@/app/(dashboard)/tools/pdf-suite/_config/tool-content/en";
+
 
 export async function seedTools() {
     try {
@@ -218,56 +212,7 @@ export async function seedTools() {
             );
         }
 
-        // Seed PDF Tools
-        console.log(`Seeding configured PDF Tools (${pdfTools.length})...`);
-        let pdfOrder = 100;
-        let seededCount = 0;
-        let statusUpdateCount = 0;
 
-        for (const pdfTool of pdfTools) {
-            try {
-                // Skip completely broken tools if any, but try to seed everything that's not explicitly disabled
-                // Note: We ignore 'disabled' property here to ensure they are in DB, but set isEnabled to false if disabled
-
-                const content = toolContent[pdfTool.id];
-                const cleanId = pdfTool.id || 'unknown-id';
-
-                const name = content?.title || cleanId.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-
-                // Fallback description
-                const defaultDesc = `Professional tool to ${pdfTool.features?.[0]?.replace(/-/g, ' ') || 'process PDF files'}.`;
-                const description = content?.metaDescription || content?.description || defaultDesc;
-
-                // Truncate description for listing
-                const shortDescription = description.length > 200
-                    ? description.substring(0, 197) + '...'
-                    : description;
-
-                const toolData = {
-                    name: name,
-                    slug: pdfTool.slug,
-                    description: shortDescription,
-                    icon: pdfTool.icon,
-                    gradient: "from-red-500 to-orange-500", // Standard PDF gradient
-                    path: `/tools/pdf-suite/${pdfTool.slug}`,
-                    isEnabled: !pdfTool.disabled,
-                    order: pdfOrder++
-                };
-
-                await Tool.findOneAndUpdate(
-                    { slug: toolData.slug },
-                    { $set: toolData },
-                    { upsert: true, new: true, setDefaultsOnInsert: true }
-                );
-
-                seededCount++;
-            } catch (err) {
-                console.error(`Failed to seed PDF tool ${pdfTool.id}:`, err);
-            }
-        }
-
-        // Ensure status updates are pushed
-        // Update PDF Suite status separately to ensure the main entry exists if we were to have one
         // (We don't have a single entry for PDF Suite in the tools list, it's a collection)
 
         // Cleanup: Remove Content Planner, Whiteboard, and Graphite
@@ -278,11 +223,10 @@ export async function seedTools() {
         revalidatePath("/tools");
         revalidatePath("/admin/tools");
 
-        console.log(`Seeding complete. Seeded ${seededCount} PDF tools.`);
 
         return {
             success: true,
-            message: `Tools seeded successfully. Processed ${seededCount} PDF tools.`
+            message: `Core tools seeded successfully.`
         };
     } catch (error) {
         console.error("[SEED_TOOLS]", error);

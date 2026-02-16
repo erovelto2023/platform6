@@ -84,12 +84,7 @@ const routes = [
         href: "/tools",
         color: "text-orange-500",
     },
-    {
-        label: "PDF Suite",
-        icon: FileText,
-        href: "/tools/pdf-suite",
-        color: "text-red-500",
-    },
+
     {
         label: "Affiliate CRM",
         icon: LinkIcon,
@@ -160,12 +155,7 @@ const adminRoutes = [
         href: "/admin/tools",
         color: "text-orange-500",
     },
-    {
-        label: "PDF Suite",
-        icon: FileText,
-        href: "/tools/pdf-suite",
-        color: "text-red-500",
-    },
+
     {
         label: "Library Manager",
         icon: Library,
