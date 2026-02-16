@@ -1,30 +1,27 @@
 
-import { BookingsList } from "@/components/accounting/BookingsList";
+import { getBookings } from "@/lib/actions/booking.actions";
+import { CalendarClient } from "./CalendarClient";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { CalendarCheck } from "lucide-react";
 
-export default function CalendarPage() {
+export default async function CalendarOverviewPage() {
+    const { data: bookings } = await getBookings();
+
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Calendar</h1>
-                        <p className="text-muted-foreground">Manage your appointments and schedule.</p>
-                    </div>
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-900">Weekly Schedule</h2>
+                    <p className="text-sm text-slate-500">Overview of your upcoming appointments.</p>
                 </div>
-                <div className="flex gap-2">
-                    <Link href="/calendar/availability">
-                        <Button variant="outline">
-                            <CalendarCheck className="mr-2 h-4 w-4" />
-                            Manage Availability
-                        </Button>
-                    </Link>
-                </div>
+                <Link href="/calendar/services">
+                    <Button variant="outline">
+                        Manage Services
+                    </Button>
+                </Link>
             </div>
 
-            <BookingsList />
+            <CalendarClient bookings={bookings || []} />
         </div>
     );
 }
