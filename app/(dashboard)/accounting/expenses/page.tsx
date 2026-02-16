@@ -18,6 +18,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { BackButton } from "@/components/accounting/BackButton";
 import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
 
@@ -28,8 +29,11 @@ export default async function ExpensesPage() {
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Expenses</h1>
-                    <p className="text-muted-foreground">Track and categorize your business expenses.</p>
+                    <BackButton href="/accounting" />
+                    <div className="mt-4">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Expenses</h1>
+                        <p className="text-muted-foreground">Track and categorize your business expenses.</p>
+                    </div>
                 </div>
                 <Link href="/accounting/expenses/new">
                     <Button className="bg-red-600 hover:bg-red-700 text-white">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackButton } from "@/components/accounting/BackButton";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, FileText, MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -38,8 +39,11 @@ export default async function InvoicesPage() {
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Invoices</h1>
-                    <p className="text-muted-foreground">Manage your invoices and payments.</p>
+                    <BackButton href="/accounting" /> {/* Add BackButton */}
+                    <div className="mt-4">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Invoices</h1>
+                        <p className="text-muted-foreground">Manage your invoices and payments.</p>
+                    </div>
                 </div>
                 <Link href="/accounting/invoices/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">

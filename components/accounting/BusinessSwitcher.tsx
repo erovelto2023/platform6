@@ -59,6 +59,9 @@ export function BusinessSwitcher({ currentBusinessId }: BusinessSwitcherProps) {
                 } else if (result.data.length > 0) {
                     // Default to first if not set
                     setSelectedBusiness(result.data[0]);
+                } else {
+                    // No businesses found, enforce creation
+                    setShowNewBusinessDialog(true);
                 }
             }
         };
