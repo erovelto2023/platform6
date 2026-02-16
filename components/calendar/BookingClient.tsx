@@ -14,12 +14,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 interface BookingClientProps {
-    productId: string;
+    serviceId: string;
     initialDate: string;
     slots: string[];
 }
 
-export function BookingClient({ productId, initialDate, slots }: BookingClientProps) {
+export function BookingClient({ serviceId, initialDate, slots }: BookingClientProps) {
     const router = useRouter();
     const [date, setDate] = useState<Date | undefined>(new Date(initialDate));
     const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -36,7 +36,7 @@ export function BookingClient({ productId, initialDate, slots }: BookingClientPr
             setDate(selected);
             setSelectedSlot(null);
             // Update URL to fetch new slots (server component re-render)
-            router.push(`/book/${productId}?date=${format(selected, 'yyyy-MM-dd')}`);
+            router.push(`/book/${serviceId}?date=${format(selected, 'yyyy-MM-dd')}`);
         }
     };
 
@@ -58,7 +58,7 @@ export function BookingClient({ productId, initialDate, slots }: BookingClientPr
             startTime.setHours(hours, minutes, 0, 0);
 
             const res = await createBooking({
-                serviceId: productId,
+                serviceId: serviceId,
                 customerName: name,
                 customerEmail: email,
                 startTime: startTime,

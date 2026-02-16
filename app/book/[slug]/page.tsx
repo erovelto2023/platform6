@@ -3,7 +3,7 @@ import { getCalendarService } from "@/lib/actions/calendar-service.actions";
 import { format, addDays, startOfToday } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { BookingClient } from "@/components/accounting/BookingClient";
+import { BookingClient } from "@/components/calendar/BookingClient";
 
 interface BookingPageProps {
     params: {
@@ -63,7 +63,7 @@ export default async function PublicBookingPage(props: BookingPageProps) {
                 {/* Right Content: Calendar & Slots */}
                 <div className="w-full md:w-2/3 p-8">
                     <BookingClient
-                        productId={serviceId}
+                        serviceId={serviceId}
                         initialDate={dateParam}
                         slots={slots || []}
                     />

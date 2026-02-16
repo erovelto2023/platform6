@@ -11,6 +11,10 @@
     "list-users": "tsx scripts/list-users.ts",
     "fix-user-roles": "tsx scripts/fix-user-roles.ts"
   },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
+  },
   "dependencies": {
     "@clerk/nextjs": "^6.36.2",
     "@dnd-kit/core": "^6.3.1",
