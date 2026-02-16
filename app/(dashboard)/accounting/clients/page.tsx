@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/accounting/BackButton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Users, MoreHorizontal, Mail, Phone, MapPin } from "lucide-react";
@@ -36,8 +37,11 @@ export default async function ClientsPage() {
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
-                    <p className="text-muted-foreground">Manage your customer database.</p>
+                    <BackButton href="/accounting" />
+                    <div className="mt-4">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
+                        <p className="text-muted-foreground">Manage your customer database.</p>
+                    </div>
                 </div>
 
                 <Dialog>

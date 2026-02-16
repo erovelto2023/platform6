@@ -5,6 +5,24 @@ import connectToDatabase from '../db/connect';
 import Invoice from '../db/models/Invoice';
 import Business from '../db/models/Business';
 import { auth } from '@clerk/nextjs/server';
+import { getOrCreateBusiness } from './business.actions';
+import { cookies } from 'next/headers';
+
+const BUSINESS_COOKIE_NAME = 'accounting_business_id';
+
+async function getActiveBusinessId(userId: string) {
+    const cookieStore = await cookies();
+    const cookieId = cookieStore.get(BUSINESS_COOKIE_NAME)?.value;
+    if (cookieId) return cookieId;
+
+    // Fallback: get default business
+    const result = await getOrCreateBusiness();
+    if (result.success && result.data) {
+        return result.data._id;
+    }
+    return null;
+}
+
 
 export async function getInvoices() {
     try {
@@ -15,12 +33,13 @@ export async function getInvoices() {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: true, data: [] };
         }
 
-        const invoices = await Invoice.find({ businessId: business._id })
+        const invoices = await Invoice.find({ businessId })
             .populate('clientId')
             .sort({ date: -1 });
 
@@ -46,14 +65,16 @@ export async function getInvoice(invoiceId: string) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business not found' };
         }
 
+
         const invoice = await Invoice.findOne({
             _id: invoiceId,
-            businessId: business._id,
+            businessId: businessId,
         }).populate('clientId');
 
         if (!invoice) {
@@ -82,18 +103,21 @@ export async function createInvoice(data: any) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         // Generate invoice number
-        const count = await Invoice.countDocuments({ businessId: business._id });
+        const count = await Invoice.countDocuments({ businessId });
+
         const invoiceNumber = `INV-${String(count + 1).padStart(5, '0')}`;
 
         const invoice = await Invoice.create({
             ...data,
-            businessId: business._id,
+            businessId,
             invoiceNumber,
         });
 
@@ -122,13 +146,16 @@ export async function updateInvoice(invoiceId: string, data: any) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         const invoice = await Invoice.findOneAndUpdate(
-            { _id: invoiceId, businessId: business._id },
+            { _id: invoiceId, businessId },
+
             { $set: data },
             { new: true }
         ).populate('clientId');
@@ -163,14 +190,16 @@ export async function deleteInvoice(invoiceId: string) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         await Invoice.findOneAndDelete({
             _id: invoiceId,
-            businessId: business._id,
+            businessId,
         });
 
         revalidatePath('/accounting');

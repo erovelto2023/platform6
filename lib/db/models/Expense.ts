@@ -6,6 +6,7 @@ export interface IExpense extends Document {
     vendor: string;
     category: string;
     amount: number;
+    accountId?: mongoose.Types.ObjectId;
     description?: string;
     receipt?: string;
     paymentMethod?: string;
@@ -38,6 +39,10 @@ const ExpenseSchema = new Schema<IExpense>(
             type: Number,
             required: true,
             min: 0,
+        },
+        accountId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Account',
         },
         description: String,
         receipt: String,

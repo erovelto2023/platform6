@@ -42,11 +42,16 @@ const formSchema = z.object({
     date: z.string(), // YYYY-MM-DD
     paymentMethod: z.string().optional(),
     description: z.string().optional(),
+    accountId: z.string().optional(),
 });
 
 type ExpenseFormValues = z.infer<typeof formSchema>;
 
-export function ExpenseForm() {
+interface ExpenseFormProps {
+    accounts?: any[];
+}
+
+export function ExpenseForm({ accounts = [] }: ExpenseFormProps) {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -59,6 +64,7 @@ export function ExpenseForm() {
             date: new Date().toISOString().split('T')[0],
             paymentMethod: "",
             description: "",
+            accountId: "",
         },
     });
 
@@ -109,6 +115,31 @@ export function ExpenseForm() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="accountId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Paid From Account (Optional)</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select account" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {accounts.map((account) => (
+                                            <SelectItem key={account._id} value={account._id}>
+                                                {account.name} ({account.type})
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
                     <FormField
                         control={form.control}
                         name="vendor"

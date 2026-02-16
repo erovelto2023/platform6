@@ -5,6 +5,24 @@ import connectToDatabase from '../db/connect';
 import Client from '../db/models/Client';
 import Business from '../db/models/Business';
 import { auth } from '@clerk/nextjs/server';
+import { getOrCreateBusiness } from './business.actions';
+import { cookies } from 'next/headers';
+
+const BUSINESS_COOKIE_NAME = 'accounting_business_id';
+
+async function getActiveBusinessId(userId: string) {
+    const cookieStore = await cookies();
+    const cookieId = cookieStore.get(BUSINESS_COOKIE_NAME)?.value;
+    if (cookieId) return cookieId;
+
+    // Fallback: get default business
+    const result = await getOrCreateBusiness();
+    if (result.success && result.data) {
+        return result.data._id;
+    }
+    return null;
+}
+
 
 export async function getClients() {
     try {
@@ -15,12 +33,14 @@ export async function getClients() {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: true, data: [] };
         }
 
-        const clients = await Client.find({ businessId: business._id }).sort({ createdAt: -1 });
+        const clients = await Client.find({ businessId }).sort({ createdAt: -1 });
+
 
         return {
             success: true,
@@ -44,14 +64,16 @@ export async function createClient(data: any) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         const client = await Client.create({
             ...data,
-            businessId: business._id,
+            businessId,
         });
 
         revalidatePath('/accounting/clients');
@@ -79,13 +101,16 @@ export async function updateClient(clientId: string, data: any) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         const client = await Client.findOneAndUpdate(
-            { _id: clientId, businessId: business._id },
+            { _id: clientId, businessId },
+
             { $set: data },
             { new: true }
         );
@@ -119,14 +144,16 @@ export async function deleteClient(clientId: string) {
 
         await connectToDatabase();
 
-        const business = await Business.findOne({ userId });
-        if (!business) {
+
+        const businessId = await getActiveBusinessId(userId);
+        if (!businessId) {
             return { success: false, error: 'Business profile not found' };
         }
 
+
         await Client.findOneAndDelete({
             _id: clientId,
-            businessId: business._id,
+            businessId,
         });
 
         revalidatePath('/accounting/clients');

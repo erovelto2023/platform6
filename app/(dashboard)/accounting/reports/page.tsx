@@ -1,8 +1,10 @@
+import { BackButton } from "@/components/accounting/BackButton";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getInvoices } from "@/lib/actions/invoice.actions";
 import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { FinancialChart } from "@/components/accounting/FinancialChart";
 
 export default async function ReportsPage() {
     const { data: invoices } = await getInvoices();
@@ -27,12 +29,101 @@ export default async function ReportsPage() {
         return acc;
     }, {});
 
+    // Prepare chart data (Monthly aggregation for last 6 months)
+    const monthlyData: Record<string, { income: number; expenses: number; order: number }> = {};
+    const today = new Date();
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const monthName = d.toLocaleString('default', { month: 'short' });
+        monthlyData[monthName] = { income: 0, expenses: 0, order: i };
+    }
+
+    // Aggregate Income
+    invoiceList.forEach((inv: any) => {
+        if (inv.status === 'paid') {
+            const d = new Date(inv.date);
+            const monthName = d.toLocaleString('default', { month: 'short' });
+            if (monthlyData[monthName]) {
+                monthlyData[monthName].income += inv.total;
+            }
+        }
+    });
+
+    // Aggregate Expenses
+    expenseList.forEach((exp: any) => {
+        const d = new Date(exp.date);
+        const monthName = d.toLocaleString('default', { month: 'short' });
+        if (monthlyData[monthName]) {
+            monthlyData[monthName].expenses += exp.amount;
+        }
+    });
+
+    const chartData = Object.entries(monthlyData)
+        .sort(([, a], [, b]) => b.order - a.order) // Actually we initialized in order, but object keys iteration order isn't guaranteed. Wait.
+        // Better to just map the initialized months.
+        // Let's rely on the fact we only populated keys we care about.
+        // Actually, simple sort index is safer.
+        .map(([name, data]) => ({
+            name,
+            income: data.income,
+            expenses: data.expenses,
+            order: data.order
+        }))
+        .sort((a, b) => a.order - b.order) // wait, i=5 is 5 months ago (largest diff). i=0 is today. 
+    // Logic: i=5 (5 months ago).. i=0 (this month). 
+    // So we want to sort by 'order' descending? No.
+    // i=5 is Jan (if today June). i=0 is June.
+    // We want Jan -> June.
+    // My loop: i=5 (Jan), i=4 (Feb)...
+    // monthlyData['Jan'] = { order: 5 }
+    // monthlyData['Jun'] = { order: 0 }
+    // We want Jan first. So verify loop order.
+    // Actually simpler: just generate the array directly relative to now.
+    // Let's rewrite the aggregation slightly for robustness
+
+    const chartDataArray = [];
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const monthName = d.toLocaleString('default', { month: 'short' });
+
+        // Calculate totals for this specific month/year to handle year rollover correctly
+        const monthIncome = invoiceList
+            .filter((inv: any) => {
+                if (inv.status !== 'paid') return false;
+                const invDate = new Date(inv.date);
+                return invDate.getMonth() === d.getMonth() && invDate.getFullYear() === d.getFullYear();
+            })
+            .reduce((sum: number, inv: any) => sum + inv.total, 0);
+
+        const monthExpenses = expenseList
+            .filter((exp: any) => {
+                const expDate = new Date(exp.date);
+                return expDate.getMonth() === d.getMonth() && expDate.getFullYear() === d.getFullYear();
+            })
+            .reduce((sum: number, exp: any) => sum + exp.amount, 0);
+
+        chartDataArray.push({
+            name: monthName,
+            income: monthIncome,
+            expenses: monthExpenses
+        });
+    }
+
+
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Financial Reports</h1>
-                <p className="text-muted-foreground">View your business performance and financial health.</p>
+                <BackButton href="/accounting" />
+                <div className="mt-4">
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Financial Reports</h1>
+                    <p className="text-muted-foreground">View your business performance and financial health.</p>
+                </div>
             </div>
+
+            {/* Chart */}
+            <FinancialChart data={chartDataArray} />
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

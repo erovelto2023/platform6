@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/accounting/BackButton";
 import { InvoiceForm } from "@/components/accounting/InvoiceForm";
 import { getClients } from "@/lib/actions/client.actions";
 
@@ -8,8 +9,11 @@ export default async function NewInvoicePage() {
         <div className="p-6 bg-slate-50 min-h-screen">
             <div className="max-w-4xl mx-auto">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Create Invoice</h1>
-                    <p className="text-muted-foreground">Create a new invoice for a client.</p>
+                    <BackButton href="/accounting/invoices" />
+                    <div className="mt-4">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Create Invoice</h1>
+                        <p className="text-muted-foreground">Create a new invoice for a client.</p>
+                    </div>
                 </div>
 
                 <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
