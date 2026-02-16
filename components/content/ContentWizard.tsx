@@ -56,11 +56,6 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
         setIsLoading(true);
         try {
             // Mapping to ContentPost structure
-            // We need a createContentPost action that handles the new schema
-            // For now, assume createContentItem is updated or we create a new one.
-            // Let's assume we need to import `createContentPost` (I need to create this action if it doesn't exist).
-
-            // Temporary Action Call (I will implement this next)
             const payload = {
                 ...formData,
                 campaignId: formData.campaignId === 'none' ? null : formData.campaignId,
@@ -68,11 +63,15 @@ export function ContentWizard({ campaigns, offers, trigger, defaultStatus = 'ide
                 platforms: [{ name: 'instagram', status: 'pending' }] // Default platform logic
             };
 
-            // await createContentPost(payload); 
-            // Mock success
-            toast.success("Content created!");
-            setOpen(false);
-            onSuccess?.();
+            const res = await createContentPost(payload);
+
+            if (res.success) {
+                toast.success("Content created!");
+                setOpen(false);
+                onSuccess?.();
+            } else {
+                toast.error("Failed to create content: " + (res.error || "Unknown error"));
+            }
         } catch (error) {
             toast.error("Failed to create content");
         } finally {
