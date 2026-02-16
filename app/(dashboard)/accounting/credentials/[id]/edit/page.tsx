@@ -4,6 +4,8 @@ import { CredentialForm } from "@/components/accounting/CredentialForm";
 import { getCredential } from "@/lib/actions/credential.actions";
 import { redirect } from "next/navigation";
 
+import { getAllVendors } from "@/lib/actions/vendor.actions";
+
 interface EditCredentialPageProps {
     params: {
         id: string;
@@ -13,9 +15,15 @@ interface EditCredentialPageProps {
 export default async function EditCredentialPage(props: EditCredentialPageProps) {
     const params = await props.params;
     const { data: credential, error } = await getCredential(params.id);
+    const vendorsData = await getAllVendors();
+    const vendors = vendorsData.success ? vendorsData.data : [];
 
     if (error || !credential) {
         redirect("/accounting/credentials");
+    }
+
+    if (credential.vendorId && typeof credential.vendorId === 'object') {
+        credential.vendorId = credential.vendorId._id;
     }
 
     return (
@@ -30,7 +38,7 @@ export default async function EditCredentialPage(props: EditCredentialPageProps)
                 </div>
 
                 <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
-                    <CredentialForm initialData={credential} />
+                    <CredentialForm initialData={credential} vendors={vendors} />
                 </div>
             </div>
         </div>

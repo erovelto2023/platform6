@@ -164,3 +164,27 @@ export async function deleteVendor(vendorId: string) {
         return { success: false, error: 'Failed to delete vendor' };
     }
 }
+
+export async function getAllVendors() {
+    try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
+
+        await connectToDatabase();
+
+        const vendors = await Vendor.find({ businessId })
+            .select('name _id website')
+            .sort({ name: 1 });
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(vendors))
+        };
+    } catch (error) {
+        console.error('[GET_ALL_VENDORS]', error);
+        return { success: false, error: 'Failed to fetch vendors' };
+    }
+}

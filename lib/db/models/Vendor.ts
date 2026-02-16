@@ -8,6 +8,7 @@ export interface IVendor extends Document {
     email?: string;
     phone?: string;
     address?: string;
+    website?: string;
     taxId?: string;
     notes?: string;
     createdAt: Date;
@@ -41,6 +42,10 @@ const VendorSchema = new Schema<IVendor>(
             trim: true,
         },
         address: {
+            type: String,
+            trim: true,
+        },
+        website: {
             type: String,
             trim: true,
         },

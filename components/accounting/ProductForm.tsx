@@ -34,15 +34,18 @@ const productSchema = z.object({
     price: z.coerce.number().min(0, 'Price must be positive'),
     type: z.enum(['service', 'product']),
     sku: z.string().optional(),
+    vendorId: z.string().optional(),
+    vendorProductUrl: z.string().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
     initialData?: any;
+    vendors?: any[];
 }
 
-export default function ProductForm({ initialData }: ProductFormProps) {
+export default function ProductForm({ initialData, vendors = [] }: ProductFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
 
@@ -54,6 +57,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             price: 0,
             type: 'service',
             sku: '',
+            vendorId: '',
+            vendorProductUrl: '',
         },
     });
 
@@ -124,6 +129,46 @@ export default function ProductForm({ initialData }: ProductFormProps) {
 
                     <FormField
                         control={form.control}
+                        name="vendorId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Vendor (Optional)</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a vendor" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        {vendors.map((vendor) => (
+                                            <SelectItem key={vendor._id} value={vendor._id}>
+                                                {vendor.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="vendorProductUrl"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Vendor Product URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://vendor.com/product/..." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
                         name="price"
                         render={({ field }) => (
                             <FormItem>
@@ -144,6 +189,46 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                                 <FormLabel>SKU (Optional)</FormLabel>
                                 <FormControl>
                                     <Input placeholder="e.g. S-001" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="vendorId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Vendor (Optional)</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a vendor" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        {vendors.map((vendor) => (
+                                            <SelectItem key={vendor._id} value={vendor._id}>
+                                                {vendor.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="vendorProductUrl"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Vendor Product URL</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="https://vendor.com/product/..." {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

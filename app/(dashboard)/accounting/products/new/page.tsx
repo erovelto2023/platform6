@@ -1,7 +1,11 @@
 import ProductForm from "@/components/accounting/ProductForm";
 import { BackButton } from "@/components/accounting/BackButton";
+import { getAllVendors } from "@/lib/actions/vendor.actions";
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+    const vendorsData = await getAllVendors();
+    const vendors = vendorsData.success ? vendorsData.data : [];
+
     return (
         <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
             <div className="flex items-center gap-4">
@@ -12,7 +16,7 @@ export default function NewProductPage() {
                 </div>
             </div>
 
-            <ProductForm />
+            <ProductForm vendors={vendors} />
         </div>
     );
 }

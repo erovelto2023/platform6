@@ -28,6 +28,7 @@ const formSchema = z.object({
     contactPerson: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
     phone: z.string().optional(),
+    website: z.string().optional(),
     address: z.string().optional(),
     taxId: z.string().optional(),
     notes: z.string().optional(),
@@ -48,6 +49,7 @@ export function VendorForm({ initialData }: VendorFormProps) {
             contactPerson: "",
             email: "",
             phone: "",
+            website: "",
             address: "",
             taxId: "",
             notes: "",
@@ -138,6 +140,19 @@ export function VendorForm({ initialData }: VendorFormProps) {
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
                                         <Input placeholder="vendor@example.com" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="website"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Website</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="https://example.com" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

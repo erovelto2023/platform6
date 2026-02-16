@@ -2,7 +2,12 @@
 import { BackButton } from "@/components/accounting/BackButton";
 import { CredentialForm } from "@/components/accounting/CredentialForm";
 
-export default function NewCredentialPage() {
+import { getAllVendors } from "@/lib/actions/vendor.actions";
+
+export default async function NewCredentialPage() {
+    const vendorsData = await getAllVendors();
+    const vendors = vendorsData.success ? vendorsData.data : [];
+
     return (
         <div className="p-6 bg-slate-50 min-h-screen">
             <div className="max-w-2xl mx-auto space-y-6">
@@ -15,7 +20,7 @@ export default function NewCredentialPage() {
                 </div>
 
                 <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-8">
-                    <CredentialForm />
+                    <CredentialForm vendors={vendors} />
                 </div>
             </div>
         </div>

@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, models, model } from "mongoose";
 
 export interface ICredential extends Document {
     businessId: mongoose.Types.ObjectId;
+    vendorId?: mongoose.Types.ObjectId;
     serviceName: string;
     url?: string;
     username?: string;
@@ -18,6 +19,11 @@ const CredentialSchema = new Schema<ICredential>(
             type: Schema.Types.ObjectId,
             ref: "Business",
             required: true,
+            index: true,
+        },
+        vendorId: {
+            type: Schema.Types.ObjectId,
+            ref: "Vendor",
             index: true,
         },
         serviceName: {

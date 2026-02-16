@@ -2,6 +2,8 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IProduct extends Document {
     businessId: string;
+    vendorId?: string; // ObjectId as string
+    vendorProductUrl?: string;
     name: string;
     description?: string;
     price: number;
@@ -17,6 +19,13 @@ const ProductSchema = new Schema(
             type: String,
             required: true,
             index: true,
+        },
+        vendorId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Vendor',
+        },
+        vendorProductUrl: {
+            type: String,
         },
         name: {
             type: String,

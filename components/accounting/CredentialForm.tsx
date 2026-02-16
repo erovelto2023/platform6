@@ -19,6 +19,13 @@ import { createCredential, updateCredential } from "@/lib/actions/credential.act
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2, Eye, EyeOff, Copy, Check } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -29,13 +36,15 @@ const formSchema = z.object({
     username: z.string().optional(),
     password: z.string().optional(),
     notes: z.string().optional(),
+    vendorId: z.string().optional(),
 });
 
 interface CredentialFormProps {
     initialData?: any;
+    vendors?: any[];
 }
 
-export function CredentialForm({ initialData }: CredentialFormProps) {
+export function CredentialForm({ initialData, vendors = [] }: CredentialFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +58,7 @@ export function CredentialForm({ initialData }: CredentialFormProps) {
             username: "",
             password: "",
             notes: "",
+            vendorId: "",
         },
     });
 
@@ -104,6 +114,31 @@ export function CredentialForm({ initialData }: CredentialFormProps) {
                                     <FormControl>
                                         <Input placeholder="e.g. Gmail, AWS, Bank" {...field} />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="vendorId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Link to Vendor (Optional)</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a vendor" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="none">None</SelectItem>
+                                            {vendors.map((vendor) => (
+                                                <SelectItem key={vendor._id} value={vendor._id}>
+                                                    {vendor.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

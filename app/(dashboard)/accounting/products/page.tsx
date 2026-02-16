@@ -80,13 +80,19 @@ export default async function ProductsPage() {
                                     </TableCell>
                                     <TableCell className="text-slate-500 max-w-md truncate">
                                         {product.description || '-'}
+                                        {product.vendorId && (
+                                            <div className="text-xs text-indigo-600 mt-1">
+                                                Vendor: {typeof product.vendorId === 'object' ? product.vendorId.name : 'Unknown'}
+                                            </div>
+                                        )}
                                     </TableCell>
                                     <TableCell className="text-right font-medium">
                                         {formatCurrency(product.price)}
                                     </TableCell>
                                     <TableCell>
-                                        {/* Actions would go here (Edit/Delete) */}
-                                        <Button variant="ghost" size="sm">Edit</Button>
+                                        <Link href={`/accounting/products/${product._id}/edit`}>
+                                            <Button variant="ghost" size="sm">Edit</Button>
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             ))
