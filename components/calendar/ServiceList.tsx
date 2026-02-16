@@ -62,7 +62,11 @@ export function ServiceList({ services }: ServiceListProps) {
                                     <DropdownMenuItem onClick={() => router.push(`/calendar/services/${service._id}`)}>
                                         Edit Service
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => navigator.clipboard.writeText(`${window.location.origin}/book/${service._id}`)}>
+                                    <DropdownMenuItem onClick={() => {
+                                        const slug = service.slug || service._id;
+                                        navigator.clipboard.writeText(`${window.location.origin}/book/${slug}`)
+                                        toast.success("Link copied to clipboard");
+                                    }}>
                                         Copy Booking Link
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
@@ -90,7 +94,7 @@ export function ServiceList({ services }: ServiceListProps) {
 
                         <div className="pt-2">
                             <Button variant="outline" className="w-full text-indigo-600 border-indigo-200 hover:bg-indigo-50" asChild>
-                                <Link href={`/book/${service._id}`} target="_blank">
+                                <Link href={`/book/${service.slug || service._id}`} target="_blank">
                                     <ExternalLink className="mr-2 h-4 w-4" />
                                     View Booking Page
                                 </Link>

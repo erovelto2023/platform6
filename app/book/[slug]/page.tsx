@@ -26,7 +26,7 @@ export default async function PublicBookingPage(props: BookingPageProps) {
         return <div className="p-8 text-center">Service not found or not active.</div>;
     }
 
-    const { data: slots } = await getAvailableSlots(new Date(dateParam), serviceId);
+    const { data: slots } = await getAvailableSlots(new Date(dateParam), service._id);
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
@@ -63,7 +63,7 @@ export default async function PublicBookingPage(props: BookingPageProps) {
                 {/* Right Content: Calendar & Slots */}
                 <div className="w-full md:w-2/3 p-8">
                     <BookingClient
-                        serviceId={serviceId}
+                        serviceId={service._id}
                         initialDate={dateParam}
                         slots={slots || []}
                     />

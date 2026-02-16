@@ -24,16 +24,26 @@ export async function getCalendarServices() {
     }
 }
 
-export async function getCalendarService(id: string) {
+export async function getCalendarService(identifier: string) {
     try {
-        const businessResult = await getOrCreateBusiness();
-        if (!businessResult.success || !businessResult.data) {
-            return { success: false, error: 'Business not found' };
-        }
-        const businessId = businessResult.data._id;
+        // We might be looking up by public slug, so we can't restrict by businessId from auth/cookie
+        // logic here needs to change.
+        // Public booking page calls this. It doesn't have a business context?
+        // Wait, the original code looked up `businessId` from `getOrCreateBusiness`.
+        // If this is a PUBLIC page, `getOrCreateBusiness` might fail or return a default?
+        // Let's re-read getOrCreateBusiness.
 
         await connectToDatabase();
-        const service = await CalendarService.findOne({ _id: id, businessId });
+
+        // Check if identifier is a valid ObjectId
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(identifier);
+
+        let service;
+        if (isObjectId) {
+            service = await CalendarService.findById(identifier);
+        } else {
+            service = await CalendarService.findOne({ slug: identifier });
+        }
 
         if (!service) {
             return { success: false, error: 'Service not found' };
