@@ -10,6 +10,8 @@ import { format, isFuture, isPast } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { TabsContent } from "@/components/ui/tabs";
 
+import { BookingDetailsSheet } from "@/components/calendar/BookingDetailsSheet";
+
 interface BookingsListProps {
     searchTerm?: string;
 }
@@ -17,17 +19,26 @@ interface BookingsListProps {
 export function BookingsList({ searchTerm = "" }: BookingsListProps) {
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedBooking, setSelectedBooking] = useState<any | null>(null);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    const fetchBookings = async () => {
+        setLoading(true);
+        const res = await getBookings();
+        if (res.success) {
+            setBookings(res.data);
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
-        const fetchBookings = async () => {
-            const res = await getBookings();
-            if (res.success) {
-                setBookings(res.data);
-            }
-            setLoading(false);
-        };
         fetchBookings();
     }, []);
+
+    const handleBookingClick = (booking: any) => {
+        setSelectedBooking(booking);
+        setIsSheetOpen(true);
+    };
 
     if (loading) {
         return <div className="flex justify-center p-8"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>;
@@ -66,7 +77,11 @@ export function BookingsList({ searchTerm = "" }: BookingsListProps) {
                         </TableRow>
                     ) : (
                         data.map((booking) => (
-                            <TableRow key={booking._id}>
+                            <TableRow
+                                key={booking._id}
+                                className="cursor-pointer hover:bg-slate-50 transition-colors"
+                                onClick={() => handleBookingClick(booking)}
+                            >
                                 <TableCell className="font-medium">{format(new Date(booking.startTime), "MMM d, yyyy")}</TableCell>
                                 <TableCell>
                                     {format(new Date(booking.startTime), "h:mm a")} - {format(new Date(booking.endTime), "h:mm a")}
@@ -102,6 +117,13 @@ export function BookingsList({ searchTerm = "" }: BookingsListProps) {
             <TabsContent value="all" className="mt-0">
                 <BookingTable data={filteredBookings} />
             </TabsContent>
+
+            <BookingDetailsSheet
+                booking={selectedBooking}
+                open={isSheetOpen}
+                onOpenChange={setIsSheetOpen}
+                onUpdate={fetchBookings}
+            />
         </>
     );
 }

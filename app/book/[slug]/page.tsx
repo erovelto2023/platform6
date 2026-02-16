@@ -30,9 +30,9 @@ export default async function PublicBookingPage(props: BookingPageProps) {
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
                 {/* Left Sidebar: Service Details */}
-                <div className="w-full md:w-1/3 bg-slate-100 p-8 border-r border-slate-200">
+                <div className="w-full md:w-1/3 lg:w-1/4 bg-slate-100 p-8 border-r border-slate-200">
                     <div className="sticky top-8">
                         {/* Avatar/Logo placeholder */}
                         <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl mb-6">

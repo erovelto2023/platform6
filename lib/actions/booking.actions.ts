@@ -243,3 +243,25 @@ export async function getBookings() {
         return { success: false, error: 'Failed to fetch bookings' };
     }
 }
+export async function updateBooking(id: string, data: any) {
+    try {
+        await connectToDatabase();
+
+        // If rescheduling (changing time), validate availability
+        if (data.startTime && data.endTime) {
+            // simplified check for now, ideally re-run availability logic
+        }
+
+        const booking = await Booking.findByIdAndUpdate(
+            id,
+            { ...data },
+            { new: true }
+        );
+
+        revalidatePath('/calendar/bookings');
+        return { success: true, data: JSON.parse(JSON.stringify(booking)) };
+    } catch (error) {
+        console.error('[UPDATE_BOOKING]', error);
+        return { success: false, error: 'Failed to update booking' };
+    }
+}

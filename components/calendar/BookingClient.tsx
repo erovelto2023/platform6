@@ -89,7 +89,15 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
                     You meet with KBAcademy on <br />
                     <span className="font-semibold text-slate-900">{date ? format(date, 'PPPP') : ''} at {selectedSlot}</span>.
                 </p>
-                <p className="text-sm text-slate-400">An invitation has been sent to {email}.</p>
+                <p className="text-sm text-slate-400 mb-6">An invitation has been sent to {email}.</p>
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={() => window.location.reload()}>
+                        Book Another
+                    </Button>
+                    <Button onClick={() => router.push('/')}>
+                        Back to Home
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -132,14 +140,19 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
     return (
         <div className="h-full flex flex-col">
             <h2 className="text-xl font-bold text-slate-900 mb-6">Select a Date & Time</h2>
-            <div className="flex flex-col md:flex-row gap-8 flex-1">
+            <div className="flex flex-col md:flex-row gap-12 flex-1 pt-8">
                 {/* Calendar */}
-                <div className="md:w-[320px]">
+                <div className="flex justify-center md:justify-start">
                     <Calendar
                         mode="single"
                         selected={date}
                         onSelect={handleDateSelect}
-                        className="rounded-md border shadow-sm p-4 w-full"
+                        className="rounded-md border shadow-sm p-4 w-full h-fit bg-white"
+                        classNames={{
+                            head_cell: "text-slate-500 rounded-md w-12 font-normal text-[0.8rem]",
+                            cell: "h-12 w-12 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-slate-100/50 [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                            day: "h-12 w-12 p-0 font-normal aria-selected:opacity-100 ring-offset-white hover:bg-slate-100 focus:bg-slate-100 focus:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 aria-selected:bg-blue-600 aria-selected:text-slate-50 aria-selected:hover:bg-blue-600/90 aria-selected:focus:bg-blue-600 aria-selected:focus:text-slate-50",
+                        }}
                         disabled={(date: Date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                     />
                 </div>
@@ -150,20 +163,20 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
                         {date ? format(date, 'EEEE, MMMM do') : 'Select a date'}
                     </h3>
 
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {slots.length > 0 ? (
                             slots.map((slot: string) => (
                                 <Button
                                     key={slot}
                                     variant="outline"
-                                    className="w-full justify-center py-6 hover:border-blue-600 hover:text-blue-600 transition-all"
+                                    className="w-full justify-center py-6 text-base font-medium hover:border-blue-600 hover:text-blue-600 transition-all"
                                     onClick={() => handleSlotSelect(slot)}
                                 >
                                     {slot}
                                 </Button>
                             ))
                         ) : (
-                            <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-lg">
+                            <div className="col-span-full text-center py-20 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
                                 <p className="text-slate-400">No slots available for this date.</p>
                             </div>
                         )}
