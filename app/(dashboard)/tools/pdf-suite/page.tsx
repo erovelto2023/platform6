@@ -2,7 +2,7 @@ import { tools } from "./_config/tools";
 import { toolContentEn } from "./_config/tool-content/en";
 import { Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./_components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "./_components/ui/PdfCard";
 import NextLink from "next/link";
 import * as Icons from "lucide-react";
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { usePDFTranslations as useTranslations } from '@/app/(dashboard)/tools/pdf-suite/_lib/use-translations';
-import { Button, type ButtonProps } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/Button';
+import { Button, type ButtonProps } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/PdfButton';
 import { addRecentFile } from '@/app/(dashboard)/tools/pdf-suite/_lib/storage/recent-files';
 // import { useToolContext } from '@/app/(dashboard)/tools/pdf-suite/_lib/contexts/ToolContext';
 import { sanitizeFilename } from '@/app/(dashboard)/tools/pdf-suite/_lib/utils/sanitize';

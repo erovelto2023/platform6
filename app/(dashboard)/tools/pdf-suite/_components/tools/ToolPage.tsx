@@ -2,7 +2,7 @@
 
 import { usePDFTranslations as useTranslations } from '@/app/(dashboard)/tools/pdf-suite/_lib/use-translations';
 import { Tool, ToolContent, HowToStep, UseCase, FAQ, ToolCategory } from '@/app/(dashboard)/tools/pdf-suite/_types/tool';
-import { Card } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/Card';
+import { Card } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/PdfCard';
 import { getToolById } from '@/app/(dashboard)/tools/pdf-suite/_config/tools';
 import { ToolProvider } from '@/app/(dashboard)/tools/pdf-suite/_lib/contexts/ToolContext';
 import { getToolIcon } from '@/app/(dashboard)/tools/pdf-suite/_config/icons';

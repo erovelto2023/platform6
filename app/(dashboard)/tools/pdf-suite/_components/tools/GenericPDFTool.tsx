@@ -5,8 +5,8 @@ import { usePDFTranslations as useTranslations } from '@/app/(dashboard)/tools/p
 import { FileUploader } from './FileUploader';
 import { ProcessingProgress, ProcessingStatus } from './ProcessingProgress';
 import { DownloadButton } from './DownloadButton';
-import { Button } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/Button';
-import { Card } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/Card';
+import { Button } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/PdfButton';
+import { Card } from '@/app/(dashboard)/tools/pdf-suite/_components/ui/PdfCard';
 import { executeNode } from '@/app/(dashboard)/tools/pdf-suite/_lib/workflow/executor';
 import type { Tool } from '@/app/(dashboard)/tools/pdf-suite/_types/tool';
 import type { UploadedFile, ProcessOutput } from '@/app/(dashboard)/tools/pdf-suite/_types/pdf';
