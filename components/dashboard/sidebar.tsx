@@ -84,6 +84,12 @@ const routes = [
         href: "/tools",
         color: "text-orange-500",
     },
+    {
+        label: "Accounting",
+        icon: BarChart3,
+        href: "/accounting",
+        color: "text-green-600",
+    },
 
     {
         label: "Affiliate CRM",
