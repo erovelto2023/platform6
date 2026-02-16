@@ -66,6 +66,7 @@ export class RemoveBlankPagesProcessor extends BasePDFProcessor {
           canvas.height = viewport.height;
 
           await page.render({
+            canvas: canvas,
             canvasContext: context,
             viewport: viewport,
           }).promise;

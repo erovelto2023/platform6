@@ -111,7 +111,7 @@ export function validateConnection(
 
     // Check if output format matches accepted formats
     const outputWithDot = sourceOutput.startsWith('.') ? sourceOutput : `.${sourceOutput}`;
-    const isFormatCompatible = targetAccepted.some(format => {
+    const isFormatCompatible = targetAccepted.some((format: string) => {
         const formatLower = format.toLowerCase();
         const outputLower = outputWithDot.toLowerCase();
         return formatLower === outputLower ||

@@ -117,6 +117,12 @@ export function GenericPDFTool({ tool, className = '' }: GenericPDFToolProps) {
             data: {
                 toolId: tool.id,
                 label: tool.id,
+                icon: tool.icon,
+                category: tool.category || 'convert',
+                acceptedFormats: tool.features || ['.pdf'],
+                outputFormat: '.pdf',
+                status: 'idle',
+                progress: 0,
                 settings: {}, // Default settings for now
             },
             position: { x: 0, y: 0 },

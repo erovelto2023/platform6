@@ -220,6 +220,7 @@ export class RasterizePDFProcessor extends BasePDFProcessor {
 
                     // Render page
                     await page.render({
+                        canvas: canvas,
                         canvasContext: ctx,
                         viewport,
                     }).promise;

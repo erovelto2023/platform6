@@ -366,6 +366,7 @@ export class PDFToImageProcessor extends BasePDFProcessor {
 
     // Render PDF page to canvas
     await page.render({
+      canvas: canvas,
       canvasContext: ctx,
       viewport: viewport,
     }).promise;
@@ -452,10 +453,21 @@ export class PDFToImageProcessor extends BasePDFProcessor {
 
       ctx.save();
       ctx.translate(xOffset, yOffset);
+
+      // Create a temporary canvas for this page
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = viewport.width;
+      tempCanvas.height = viewport.height;
+      const tempCtx = tempCanvas.getContext('2d')!;
+
       await page.render({
-        canvasContext: ctx,
+        canvas: tempCanvas,
+        canvasContext: tempCtx,
         viewport: page.getViewport({ scale: options.scale }),
       }).promise;
+
+      // Draw the temp canvas onto the main canvas
+      ctx.drawImage(tempCanvas, 0, 0);
       ctx.restore();
     }
 
