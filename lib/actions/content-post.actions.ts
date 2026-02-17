@@ -10,6 +10,15 @@ export async function saveGeneratedContent(data: any) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
+    // Fetch active business
+    // We need to dynamically import or use the existing action, but to avoid circular deps with business.actions if any,
+    // we can re-implement fetching active business logic or just use getOrCreateBusiness
+    const { getOrCreateBusiness } = await import("@/lib/actions/business.actions");
+    const businessResult = await getOrCreateBusiness();
+
+    if (!businessResult.data) throw new Error("No business found");
+    const businessId = businessResult.data._id;
+
     await connectToDatabase();
 
     // Map template category to contentType
@@ -20,6 +29,7 @@ export async function saveGeneratedContent(data: any) {
 
     const post = await ContentPost.create({
         userId: userId, // Use Clerk ID directly
+        businessId: businessId,
         title: data.title || "Untitled AI Draft",
         content: data.content,
         contentType: contentType,

@@ -12,6 +12,7 @@ export async function createCampaign(data: any) {
         if (!businessResult.success || !businessResult.data) {
             return { success: false, error: 'Business not found' };
         }
+        const businessId = businessResult.data._id;
         const userId = businessResult.data.userId;
 
         await connectToDatabase();
@@ -19,6 +20,7 @@ export async function createCampaign(data: any) {
         const newCampaign = await Campaign.create({
             ...data,
             userId,
+            businessId,
             status: data.status || 'planning'
         });
 
@@ -63,10 +65,10 @@ export async function getCampaigns() {
     try {
         const businessResult = await getOrCreateBusiness();
         if (!businessResult.success || !businessResult.data) return { success: false, error: "Business not found" };
-        const userId = businessResult.data.userId;
+        const businessId = businessResult.data._id;
 
         await connectToDatabase();
-        const campaigns = await Campaign.find({ userId }).sort({ createdAt: -1 });
+        const campaigns = await Campaign.find({ businessId }).sort({ createdAt: -1 });
         return { success: true, data: JSON.parse(JSON.stringify(campaigns)) };
     } catch (error) {
         console.error('[GET_CAMPAIGNS]', error);

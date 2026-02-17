@@ -7,8 +7,12 @@ export const metadata: Metadata = {
 };
 
 import { getLibraryItems } from "@/lib/actions/whiteboard.actions";
+import { getOrCreateBusiness } from "@/lib/actions/business.actions";
 
 export default async function WhiteboardPage() {
     const libraryItems = await getLibraryItems();
-    return <ClientWhiteboard libraryItems={libraryItems} />;
+    const businessResult = await getOrCreateBusiness();
+    const businessId = businessResult.data?._id || "default";
+
+    return <ClientWhiteboard libraryItems={libraryItems} businessId={businessId} />;
 }

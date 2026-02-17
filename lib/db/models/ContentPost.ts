@@ -121,6 +121,11 @@ const ContentPostSchema = new Schema({
         required: true,
         index: true,
     },
+    businessId: {
+        type: String,
+        required: true,
+        index: true,
+    },
     isEvergreen: {
         type: Boolean,
         default: false,

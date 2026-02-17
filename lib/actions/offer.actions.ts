@@ -12,6 +12,7 @@ export async function createOffer(data: any) {
         if (!businessResult.success || !businessResult.data) {
             return { success: false, error: 'Business not found' };
         }
+        const businessId = businessResult.data._id;
         const userId = businessResult.data.userId;
 
         await connectToDatabase();
@@ -19,6 +20,7 @@ export async function createOffer(data: any) {
         const newOffer = await Offer.create({
             ...data,
             userId,
+            businessId,
             status: data.status || 'draft'
         });
 
@@ -63,10 +65,11 @@ export async function getOffers() {
     try {
         const businessResult = await getOrCreateBusiness();
         if (!businessResult.success || !businessResult.data) return { success: false, error: "Business not found" };
-        const userId = businessResult.data.userId;
+        if (!businessResult.success || !businessResult.data) return { success: false, error: "Business not found" };
+        const businessId = businessResult.data._id;
 
         await connectToDatabase();
-        const offers = await Offer.find({ userId }).sort({ createdAt: -1 });
+        const offers = await Offer.find({ businessId }).sort({ createdAt: -1 });
         return { success: true, data: JSON.parse(JSON.stringify(offers)) };
     } catch (error) {
         console.error('[GET_OFFERS]', error);

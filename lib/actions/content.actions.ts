@@ -117,9 +117,15 @@ export async function updateContentPost(id: string, data: any) {
 
 export async function getFullContentPosts() {
     try {
+        const businessResult = await getOrCreateBusiness();
+        if (!businessResult.success || !businessResult.data) {
+            return { success: false, error: 'Business not found' };
+        }
+        const businessId = businessResult.data._id;
+
         await connectToDatabase();
         // Populate campaign, offer, and pillar
-        const posts = await ContentPost.find({})
+        const posts = await ContentPost.find({ businessId })
             .populate('campaignId')
             .populate('offerId')
             .populate('pillarId')
@@ -191,13 +197,16 @@ export async function createContentPost(data: any) {
         // Quick fix: Fetch a business or user to attribute to.
         const businessResult = await getOrCreateBusiness();
         let userId = 'unknown';
+        let businessId = 'default';
         if (businessResult.success && businessResult.data) {
-            userId = businessResult.data.userId; // Assuming business has userId
+            userId = businessResult.data.userId;
+            businessId = businessResult.data._id;
         }
 
         const newPost = await ContentPost.create({
             ...data,
             userId: data.userId || userId,
+            businessId: businessId,
             status: data.status || 'idea',
             platforms: data.platforms || [],
             tags: data.tags || []

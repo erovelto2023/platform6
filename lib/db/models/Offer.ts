@@ -27,6 +27,11 @@ const OfferSchema = new Schema({
         required: true,
         index: true,
     },
+    businessId: {
+        type: String,
+        required: true,
+        index: true,
+    },
 }, { timestamps: true });
 
 // Prevent Mongoose OverwriteModelError
