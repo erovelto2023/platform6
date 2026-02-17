@@ -30,7 +30,7 @@ interface ThreadEngagementProps {
 }
 
 export function ThreadEngagement({ threadId, userId, initialActivity, isResource }: ThreadEngagementProps) {
-    const pathname = usePathname();
+    const pathname = usePathname() || "";
     const [activity, setActivity] = useState(initialActivity || {});
     const [isLoading, setIsLoading] = useState<string | null>(null);
     const [note, setNote] = useState(initialActivity?.personalNotes || "");
