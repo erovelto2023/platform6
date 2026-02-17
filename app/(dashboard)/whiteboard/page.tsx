@@ -6,6 +6,9 @@ export const metadata: Metadata = {
     description: "A virtual whiteboard for brainstorming and planning.",
 };
 
-export default function WhiteboardPage() {
-    return <ClientWhiteboard />;
+import { getLibraryItems } from "@/lib/actions/whiteboard.actions";
+
+export default async function WhiteboardPage() {
+    const libraryItems = await getLibraryItems();
+    return <ClientWhiteboard libraryItems={libraryItems} />;
 }

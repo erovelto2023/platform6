@@ -14,11 +14,11 @@ const ExcalidrawWrapper = dynamic(
     }
 );
 
-export default function ClientWhiteboard() {
+export default function ClientWhiteboard({ libraryItems = [] }: { libraryItems?: any[] }) {
     return (
         <div className="h-full w-full p-4">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden h-[calc(100vh-140px)]">
-                <ExcalidrawWrapper />
+                <ExcalidrawWrapper libraryItems={libraryItems} />
             </div>
         </div>
     );
