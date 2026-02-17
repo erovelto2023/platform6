@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { SlackHeader } from "./slack-header";
 import { SlackSidebar } from "./slack-sidebar";
 import { SlackChat } from "./slack-chat";
 import { SlackThread } from "./slack-thread";
@@ -13,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface SlackLayoutProps {
     currentUser: any;
@@ -119,39 +121,57 @@ export function SlackLayout({
     const activeChannel = channels.find(c => c._id === activeChannelId);
     const activeConversation = initialConversations.find(c => c._id === activeConversationId);
 
-    return (
-        <div className="h-[calc(100vh-4rem)] flex overflow-hidden border-t">
-            <SlackSidebar
-                channels={channels}
-                conversations={initialConversations}
-                activeChannelId={activeChannelId}
-                activeConversationId={activeConversationId}
-                onSelectChannel={handleSelectChannel}
-                onSelectConversation={handleSelectConversation}
-                currentUser={currentUser}
-                onCreateChannel={() => setOpenCreateChannel(true)}
-                onInvite={handleInvite}
-                onShowProfile={(user) => setSelectedProfileUser(user)}
-            />
+    const handleSelectMessage = (message: any) => {
+        if (message.channelId) {
+            setActiveChannelId(message.channelId._id || message.channelId);
+            setActiveConversationId(undefined);
+        } else if (message.conversationId) {
+            setActiveConversationId(message.conversationId._id || message.conversationId);
+            setActiveChannelId(undefined);
+        }
+    };
 
-            <main className="flex-1 flex flex-col min-w-0 bg-white">
-                <SlackChat
-                    channel={activeChannel}
-                    conversation={activeConversation}
+    return (
+        <div className="h-screen flex flex-col overflow-hidden">
+            <SlackHeader userId={currentUser._id} onSelectMessage={handleSelectMessage} />
+
+            <div className="flex-1 flex overflow-hidden border-t min-h-0">
+                <SlackSidebar
+                    channels={channels}
+                    conversations={initialConversations}
+                    activeChannelId={activeChannelId}
+                    activeConversationId={activeConversationId}
+                    onSelectChannel={handleSelectChannel}
+                    onSelectConversation={handleSelectConversation}
+                    onConversationCreated={(conv) => {
+                        handleSelectConversation(conv._id);
+                        router.push(`/messages`); // Ensure we are on the messages view
+                    }}
                     currentUser={currentUser}
+                    onCreateChannel={() => setOpenCreateChannel(true)}
                     onInvite={handleInvite}
-                    onThreadClick={(msg) => setActiveThreadMessage(msg)}
                     onShowProfile={(user) => setSelectedProfileUser(user)}
                 />
 
-                {activeThreadMessage && (
-                    <SlackThread
-                        parentMessage={activeThreadMessage}
+                <main className="flex-1 flex flex-col min-w-0 bg-white relative">
+                    <SlackChat
+                        channel={activeChannel}
+                        conversation={activeConversation}
                         currentUser={currentUser}
-                        onClose={() => setActiveThreadMessage(null)}
+                        onInvite={handleInvite}
+                        onThreadClick={(msg) => setActiveThreadMessage(msg)}
+                        onShowProfile={(user) => setSelectedProfileUser(user)}
                     />
-                )}
-            </main>
+
+                    {activeThreadMessage && (
+                        <SlackThread
+                            parentMessage={activeThreadMessage}
+                            currentUser={currentUser}
+                            onClose={() => setActiveThreadMessage(null)}
+                        />
+                    )}
+                </main>
+            </div>
 
             <SlackProfileModal
                 user={selectedProfileUser}

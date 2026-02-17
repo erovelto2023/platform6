@@ -101,3 +101,14 @@ export async function updateUserPresence(userId: string) {
         return { success: false };
     }
 }
+
+export async function getUsers() {
+    try {
+        await connectDB();
+        const users = await User.find({}).select('firstName lastName profileImage lastActiveAt').lean();
+        return { success: true, data: JSON.parse(JSON.stringify(users)) };
+    } catch (error) {
+        console.error("Failed to fetch users:", error);
+        return { success: false, error: "Failed to fetch users" };
+    }
+}

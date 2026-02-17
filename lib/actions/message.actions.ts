@@ -3,6 +3,7 @@
 import connectToDatabase from "@/lib/db/connect";
 import Conversation from "@/lib/db/models/Conversation";
 import Message from "@/lib/db/models/Message";
+import Channel from "@/lib/db/models/Channel";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "./notification.actions";
 
@@ -65,6 +66,43 @@ export async function getOrCreateConversation(userId: string, otherUserId: strin
         return {
             success: false,
             error: "Failed to get conversation"
+        };
+    }
+}
+
+export async function createGroupConversation(userId: string, participants: string[], name?: string) {
+    try {
+        await connectToDatabase();
+
+        // Ensure current user is in participants
+        const allParticipants = Array.from(new Set([...participants, userId]));
+
+        if (allParticipants.length < 2) {
+            return { success: false, error: "At least two participants required" };
+        }
+
+        const conversation = await Conversation.create({
+            participants: allParticipants,
+            isGroup: true,
+            groupName: name || "",
+            unreadCounts: {}
+        });
+
+        const populated = await Conversation.findById(conversation._id)
+            .populate('participants', 'firstName lastName email profileImage lastActiveAt')
+            .lean();
+
+        revalidatePath("/messages");
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(populated))
+        };
+    } catch (error) {
+        console.error("[CREATE_GROUP_CONVERSATION]", error);
+        return {
+            success: false,
+            error: "Failed to create group conversation"
         };
     }
 }
@@ -299,5 +337,61 @@ export async function toggleReaction(messageId: string, userId: string, emoji: s
     } catch (error) {
         console.error("[TOGGLE_REACTION]", error);
         return { success: false, error: "Failed to toggle reaction" };
+    }
+}
+
+export async function searchMessages(query: string, userId: string) {
+    try {
+        if (!query.trim()) return { success: true, data: [] };
+        await connectToDatabase();
+
+        // 1. Get all channels user is member of OR are public
+        const channels = await Channel.find({
+            $or: [
+                { members: userId },
+                { isPubliclyViewable: true }
+            ]
+        }).select('_id');
+        const channelIds = channels.map(c => c._id);
+
+        // 2. Get all conversations user is participant in
+        const conversations = await Conversation.find({
+            participants: userId
+        }).select('_id');
+        const conversationIds = conversations.map(c => c._id);
+
+        // 3. Search messages in accessible channels and conversations
+        const messages = await Message.find({
+            $and: [
+                {
+                    $or: [
+                        { channelId: { $in: channelIds } },
+                        { conversationId: { $in: conversationIds } }
+                    ]
+                },
+                { content: { $regex: query, $options: 'i' } },
+                { isDeleted: { $ne: true } }
+            ]
+        })
+            .populate('sender', 'firstName lastName email profileImage')
+            .populate('channelId', 'name')
+            .populate({
+                path: 'conversationId',
+                populate: { path: 'participants', select: 'firstName lastName' }
+            })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean();
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(messages))
+        };
+    } catch (error) {
+        console.error("[SEARCH_MESSAGES]", error);
+        return {
+            success: false,
+            error: "Failed to search messages"
+        };
     }
 }

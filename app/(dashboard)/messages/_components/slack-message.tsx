@@ -30,6 +30,8 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(message.content);
     const [isPending, setIsPending] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [threadMenuOpen, setThreadMenuOpen] = useState(false);
 
     const currentUserId = currentUser?._id || currentUser?.id;
     const msgSender = message.sender?._id || message.sender;
@@ -90,7 +92,10 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
                 </div>
 
                 {/* Floating Actions */}
-                <div className="hidden group-hover:flex items-center absolute -top-4 right-5 bg-white border border-slate-200 shadow-sm rounded-lg p-0.5 z-10">
+                <div className={cn(
+                    "items-center absolute -top-4 right-5 bg-white border border-slate-200 shadow-sm rounded-lg p-0.5 z-10",
+                    (menuOpen || threadMenuOpen) ? "flex" : "hidden group-hover:flex"
+                )}>
                     <SlackReactionPicker onSelect={(emoji) => onReaction?.(emoji)}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
                             <Smile className="h-4 w-4" />
@@ -105,7 +110,7 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
                         <MessageSquare className="h-4 w-4" />
                     </Button>
                     {isOwner && (
-                        <DropdownMenu>
+                        <DropdownMenu onOpenChange={setMenuOpen}>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
                                     <MoreVertical className="h-4 w-4" />
@@ -265,7 +270,10 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
             </div>
 
             {/* Floating Actions */}
-            <div className="hidden group-hover:flex items-center absolute -top-4 right-5 bg-white border border-slate-200 shadow-sm rounded-lg p-0.5 z-10">
+            <div className={cn(
+                "items-center absolute -top-4 right-5 bg-white border border-slate-200 shadow-sm rounded-lg p-0.5 z-10",
+                (menuOpen || threadMenuOpen) ? "flex" : "hidden group-hover:flex"
+            )}>
                 <SlackReactionPicker onSelect={(emoji) => onReaction?.(emoji)}>
                     <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
                         <Smile className="h-4 w-4" />
@@ -280,7 +288,7 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
                     <MessageSquare className="h-4 w-4" />
                 </Button>
                 {isOwner && (
-                    <DropdownMenu>
+                    <DropdownMenu onOpenChange={setMenuOpen}>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
                                 <MoreVertical className="h-4 w-4" />

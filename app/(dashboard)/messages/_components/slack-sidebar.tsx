@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SlackNewDmModal } from "./slack-new-dm-modal";
 
 interface SlackSidebarProps {
     channels: any[];
@@ -27,6 +28,7 @@ interface SlackSidebarProps {
     onCreateChannel: () => void;
     onInvite?: () => void;
     onShowProfile: (user: any) => void;
+    onConversationCreated: (conversation: any) => void;
 }
 
 export function SlackSidebar({
@@ -39,10 +41,12 @@ export function SlackSidebar({
     currentUser,
     onCreateChannel,
     onInvite,
-    onShowProfile
+    onShowProfile,
+    onConversationCreated
 }: SlackSidebarProps) {
     const [channelsOpen, setChannelsOpen] = useState(true);
     const [dmsOpen, setDmsOpen] = useState(true);
+    const [openNewDm, setOpenNewDm] = useState(false);
 
     return (
         <div className="w-64 bg-[#3F0E40] flex flex-col h-full text-[#cfc3cf]">
@@ -111,9 +115,9 @@ export function SlackSidebar({
                     </div>
 
                     {/* Direct Messages Section */}
-                    <div>
+                    <div className="flex items-center justify-between px-2 group mb-1">
                         <div
-                            className="flex items-center px-2 mb-1 cursor-pointer hover:text-white"
+                            className="flex items-center cursor-pointer hover:text-white"
                             onClick={() => setDmsOpen(!dmsOpen)}
                         >
                             {dmsOpen ? (
@@ -123,56 +127,83 @@ export function SlackSidebar({
                             )}
                             <span className="text-sm font-medium">Direct Messages</span>
                         </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 text-[#cfc3cf] hover:text-white hover:bg-transparent"
+                            onClick={() => setOpenNewDm(true)}
+                        >
+                            <Plus className="w-4 h-4" />
+                        </Button>
+                    </div>
 
-                        {dmsOpen && (
-                            <div className="space-y-0.5">
-                                {conversations.map(conversation => {
-                                    const otherUser = conversation.participants.find(
-                                        (p: any) => p._id !== currentUser._id
-                                    );
-                                    const isOnline = otherUser?.lastActiveAt &&
-                                        (new Date().getTime() - new Date(otherUser.lastActiveAt).getTime()) < 300000; // 5 mins
-                                    return (
-                                        <button
-                                            key={conversation._id}
-                                            onClick={(e) => {
-                                                if ((e.target as HTMLElement).closest('.avatar-trigger')) {
-                                                    onShowProfile(otherUser);
-                                                } else {
-                                                    onSelectConversation(conversation._id);
-                                                }
-                                            }}
-                                            className={cn(
-                                                "w-full flex items-center px-2 py-1 rounded hover:bg-[#350d36] text-sm text-[15px] group",
-                                                activeConversationId === conversation._id && "bg-[#1164A3] text-white hover:bg-[#1164A3]"
-                                            )}
-                                        >
-                                            <div className="relative mr-2 avatar-trigger hover:opacity-80 transition-opacity">
-                                                <Avatar className="w-4 h-4 rounded">
-                                                    <AvatarImage src={otherUser?.profileImage} className="rounded" />
-                                                    <AvatarFallback className="rounded text-[10px] bg-slate-500 text-white">
-                                                        {otherUser?.firstName?.[0]}
+                    {dmsOpen && (
+                        <div className="space-y-0.5">
+                            {conversations.map(conversation => {
+                                const isGroup = conversation.isGroup;
+                                const otherUser = isGroup ? null : conversation.participants.find(
+                                    (p: any) => p._id !== currentUser._id
+                                );
+
+                                const displayName = isGroup
+                                    ? (conversation.groupName || conversation.participants
+                                        .filter((p: any) => p._id !== currentUser._id)
+                                        .map((p: any) => p.firstName)
+                                        .join(", "))
+                                    : `${otherUser?.firstName} ${otherUser?.lastName}`;
+
+                                const isOnline = !isGroup && otherUser?.lastActiveAt &&
+                                    (new Date().getTime() - new Date(otherUser.lastActiveAt).getTime()) < 300000; // 5 mins
+                                return (
+                                    <button
+                                        key={conversation._id}
+                                        onClick={(e) => {
+                                            if (!isGroup && (e.target as HTMLElement).closest('.avatar-trigger')) {
+                                                onShowProfile(otherUser);
+                                            } else {
+                                                onSelectConversation(conversation._id);
+                                            }
+                                        }}
+                                        className={cn(
+                                            "w-full flex items-center px-2 py-1 rounded hover:bg-[#350d36] text-sm text-[15px] group",
+                                            activeConversationId === conversation._id && "bg-[#1164A3] text-white hover:bg-[#1164A3]"
+                                        )}
+                                    >
+                                        <div className="relative mr-2 avatar-trigger hover:opacity-80 transition-opacity">
+                                            <Avatar className="w-4 h-4 rounded">
+                                                {isGroup ? (
+                                                    <AvatarFallback className="rounded text-[10px] bg-slate-600 text-white flex items-center justify-center">
+                                                        {conversation.participants.length}
                                                     </AvatarFallback>
-                                                </Avatar>
+                                                ) : (
+                                                    <>
+                                                        <AvatarImage src={otherUser?.profileImage} className="rounded" />
+                                                        <AvatarFallback className="rounded text-[10px] bg-slate-500 text-white">
+                                                            {otherUser?.firstName?.[0]}
+                                                        </AvatarFallback>
+                                                    </>
+                                                )}
+                                            </Avatar>
+                                            {!isGroup && (
                                                 <div className={cn(
                                                     "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-[#3F0E40]",
                                                     isOnline ? "bg-green-500" : "bg-transparent border-slate-400"
                                                 )} />
-                                            </div>
-                                            <span className="truncate opacity-90">
-                                                {otherUser?.firstName} {otherUser?.lastName}
-                                            </span>
-                                            {conversation.unreadCount?.[currentUser._id] > 0 && (
-                                                <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 rounded-full">
-                                                    {conversation.unreadCount?.[currentUser._id]}
-                                                </span>
                                             )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
+                                        </div>
+                                        <span className="truncate opacity-90">
+                                            {displayName}
+                                        </span>
+                                        {conversation.unreadCount?.[currentUser._id] > 0 && (
+                                            <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                                                {conversation.unreadCount?.[currentUser._id]}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </ScrollArea>
 
@@ -186,6 +217,12 @@ export function SlackSidebar({
                     <span className="text-sm">Invite people</span>
                 </Button>
             </div>
-        </div>
+            <SlackNewDmModal
+                open={openNewDm}
+                onOpenChange={setOpenNewDm}
+                currentUser={currentUser}
+                onConversationCreated={onConversationCreated}
+            />
+        </div >
     );
 }

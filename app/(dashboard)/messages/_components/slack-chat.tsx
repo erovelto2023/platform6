@@ -211,9 +211,16 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
         );
     }
 
+    const isGroup = conversation?.isGroup;
+    const otherUser = isGroup ? null : conversation?.participants.find((p: any) => p._id !== currentUser._id);
+
     const title = channel ? channel.name : (
-        conversation.participants.find((p: any) => p._id !== currentUser._id)?.firstName + " " +
-        conversation.participants.find((p: any) => p._id !== currentUser._id)?.lastName
+        isGroup
+            ? (conversation.groupName || conversation.participants
+                .filter((p: any) => p._id !== currentUser._id)
+                .map((p: any) => p.firstName)
+                .join(", "))
+            : (otherUser?.firstName + " " + otherUser?.lastName)
     );
 
     return (
@@ -224,9 +231,15 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                     {channel ? (
                         channel.isPrivate ? <Lock className="w-4 h-4 mr-2" /> : <Hash className="w-4 h-4 mr-2 text-slate-500" />
                     ) : (
-                        <div className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                        isGroup ? (
+                            <div className="w-5 h-5 rounded bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-600 mr-2">
+                                {conversation.participants.length}
+                            </div>
+                        ) : (
+                            <div className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                        )
                     )}
-                    <h3 className="font-bold text-slate-900">{title}</h3>
+                    <h3 className="font-bold text-slate-900 truncate max-w-[400px]">{title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     {channel && (
