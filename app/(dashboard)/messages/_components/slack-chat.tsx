@@ -1,0 +1,226 @@
+"use client";
+
+import { useEffect, useRef, useState, useCallback } from "react";
+import { format } from "date-fns";
+import { Hash, Info, Lock, Send, Paperclip, Smile, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SlackMessage } from "./slack-message";
+import { sendChannelMessage, getChannelMessages } from "@/lib/actions/channel.actions";
+import { getMessages, sendMessage } from "@/lib/actions/message.actions";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface SlackChatProps {
+    channel?: any;
+    conversation?: any;
+    currentUser: any;
+}
+
+export function SlackChat({ channel, conversation, currentUser }: SlackChatProps) {
+    const [messages, setMessages] = useState<any[]>([]);
+    const [newMessage, setNewMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [pending, setPending] = useState(false);
+
+    const isAtBottom = () => {
+        if (!scrollRef.current) return true;
+        const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+        return scrollHeight - scrollTop - clientHeight < 50;
+    };
+
+    const scrollToBottom = () => {
+        setTimeout(() => {
+            if (scrollRef.current) {
+                scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }
+        }, 100);
+    };
+
+    const fetchMessages = useCallback(async (silent = false) => {
+        if (!channel && !conversation) return;
+
+        try {
+            if (!silent) setLoading(true);
+            let res;
+            if (channel) {
+                res = await getChannelMessages(channel._id);
+            } else {
+                res = await getMessages(conversation._id);
+            }
+
+            if (res.success) {
+                // If silent update, check if we need to scroll (only if at bottom)
+                // For now, simpler approach: just update state
+                // Only scroll on initial load or if user sent message
+                const wasAtBottom = isAtBottom();
+                setMessages(res.data);
+                if (!silent || (wasAtBottom && res.data.length > messages.length)) {
+                    scrollToBottom();
+                }
+            }
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    }, [channel, conversation]);
+
+    // Initial fetch
+    useEffect(() => {
+        fetchMessages();
+    }, [fetchMessages]);
+
+    // Polling for realtime-like updates (every 3s)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchMessages(true);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [fetchMessages]);
+
+    const handleSendMessage = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+        if (!newMessage.trim() || pending) return;
+
+        setPending(true);
+        const content = newMessage;
+        setNewMessage(""); // Optimistic clear
+
+        try {
+            let res;
+            if (channel) {
+                res = await sendChannelMessage({
+                    channelId: channel._id,
+                    senderId: currentUser._id,
+                    content
+                });
+            } else {
+                res = await sendMessage({
+                    conversationId: conversation._id,
+                    senderId: currentUser._id,
+                    content
+                });
+            }
+
+            if (res.success) {
+                setMessages(prev => [...prev, res.data]);
+                scrollToBottom();
+            } else {
+                toast.error("Failed to send message");
+                setNewMessage(content); // Restore on error
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        } finally {
+            setPending(false);
+        }
+    };
+
+    if (!channel && !conversation) {
+        return (
+            <div className="flex-1 flex items-center justify-center bg-white text-slate-500">
+                <div className="text-center">
+                    <p>Select a channel or conversation to start chatting.</p>
+                </div>
+            </div>
+        );
+    }
+
+    const title = channel ? channel.name : (
+        conversation.participants.find((p: any) => p._id !== currentUser._id)?.firstName + " " +
+        conversation.participants.find((p: any) => p._id !== currentUser._id)?.lastName
+    );
+
+    return (
+        <div className="flex-1 flex flex-col h-full bg-white">
+            {/* Header */}
+            <div className="h-16 border-b flex items-center justify-between px-5 flex-shrink-0">
+                <div className="flex items-center">
+                    {channel ? (
+                        channel.isPrivate ? <Lock className="w-4 h-4 mr-2" /> : <Hash className="w-4 h-4 mr-2 text-slate-500" />
+                    ) : (
+                        <div className="w-2 h-2 rounded-full bg-green-500 mr-2" />
+                    )}
+                    <h3 className="font-bold text-slate-900">{title}</h3>
+                </div>
+                <Button variant="ghost" size="icon" className="text-slate-500">
+                    <Info className="w-5 h-5" />
+                </Button>
+            </div>
+
+            {/* Messages */}
+            <div
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto"
+            >
+                {loading && messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full text-slate-400">Loading messages...</div>
+                ) : (
+                    <div className="pb-4">
+                        {messages.length === 0 ? (
+                            <div className="p-8 text-slate-500 pb-20">
+                                <h3 className="font-bold text-2xl mb-2">Welcome to #{title}!</h3>
+                                <p>This is the start of the <span className="font-semibold">#{title}</span> channel.</p>
+                            </div>
+                        ) : (
+                            messages.map((msg, i) => (
+                                <SlackMessage
+                                    key={msg._id}
+                                    message={msg}
+                                    isSameSender={i > 0 && messages[i - 1].sender?._id === msg.sender?._id}
+                                />
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Input Area */}
+            <div className="p-5 pt-0">
+                <div className="border border-slate-300 rounded-lg shadow-sm bg-white overflow-hidden focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                    {/* Toolbar */}
+                    <div className="flex items-center bg-slate-50 border-b p-1 px-2 gap-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="font-bold">B</span></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="italic">I</span></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="line-through">S</span></Button>
+                        <div className="w-px h-4 bg-slate-300 mx-1" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><Paperclip className="w-4 h-4" /></Button>
+                    </div>
+
+                    <form onSubmit={handleSendMessage} className="p-2">
+                        <Input
+                            className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
+                            placeholder={`Message #${title}`}
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            autoFocus
+                        />
+                        <div className="flex justify-between items-center mt-2">
+                            <div className="flex gap-1">
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                    <Plus className="w-5 h-5" />
+                                </Button>
+                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                    <Smile className="w-5 h-5" />
+                                </Button>
+                            </div>
+                            <Button
+                                type="submit"
+                                size="sm"
+                                className={cn(
+                                    "transition-colors",
+                                    newMessage.trim() ? "bg-[#007a5a] hover:bg-[#148567]" : "bg-slate-200 text-slate-400 hover:bg-slate-200"
+                                )}
+                                disabled={!newMessage.trim() || pending}
+                            >
+                                <Send className="w-4 h-4 mr-1" /> Send
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}
