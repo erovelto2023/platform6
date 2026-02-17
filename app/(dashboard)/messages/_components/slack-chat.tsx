@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SlackMessage } from "./slack-message";
 import { SlackReactionPicker } from "./slack-reaction-picker";
 import { sendChannelMessage, getChannelMessages } from "@/lib/actions/channel.actions";
-import { getMessages, sendMessage, toggleReaction } from "@/lib/actions/message.actions";
+import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUploadThing } from "@/lib/uploadthing";
@@ -141,6 +141,35 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
         }
     };
 
+    const handleEditMessage = async (messageId: string, content: string) => {
+        try {
+            const res = await updateMessage(messageId, currentUser._id, content);
+            if (res.success) {
+                setMessages(prev => prev.map(m => m._id === messageId ? { ...m, content, isEdited: true } : m));
+            } else {
+                toast.error(res.error || "Failed to edit message");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
+    const handleDeleteMessage = async (messageId: string) => {
+        try {
+            const res = await deleteMessage(messageId, currentUser._id);
+            if (res.success) {
+                setMessages(prev => prev.filter(m => m._id !== messageId));
+                toast.success("Message deleted");
+            } else {
+                toast.error(res.error || "Failed to delete message");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
     const handleReaction = async (messageId: string, emoji: string) => {
         try {
             const res = await toggleReaction(messageId, currentUser._id, emoji);
@@ -154,12 +183,9 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                         } else {
                             newReactions[currentUser._id] = emoji;
                         }
-                        return { ...m, reactions: newReactions };
                     }
                     return m;
                 }));
-            } else {
-                toast.error("Failed to toggle reaction");
             }
         } catch (err) {
             console.error(err);
@@ -239,10 +265,13 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                                 <SlackMessage
                                     key={msg._id}
                                     message={msg}
+                                    currentUser={currentUser}
                                     isSameSender={i > 0 && messages[i - 1].sender?._id === msg.sender?._id}
                                     onThreadClick={onThreadClick}
                                     onReaction={(emoji) => handleReaction(msg._id, emoji)}
                                     onShowProfile={() => onShowProfile(msg.sender)}
+                                    onEdit={handleEditMessage}
+                                    onDelete={handleDeleteMessage}
                                 />
                             ))
                         )}

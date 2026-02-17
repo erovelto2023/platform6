@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { SlackMessage } from "./slack-message";
 import { SlackReactionPicker } from "./slack-reaction-picker";
-import { getThreadReplies, sendMessage, toggleReaction } from "@/lib/actions/message.actions";
+import { getThreadReplies, sendMessage, toggleReaction, updateMessage, deleteMessage } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUploadThing } from "@/lib/uploadthing";
@@ -108,6 +108,35 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
         }
     };
 
+    const handleEditMessage = async (messageId: string, content: string) => {
+        try {
+            const res = await updateMessage(messageId, currentUser._id, content);
+            if (res.success) {
+                setReplies(prev => prev.map(m => m._id === messageId ? { ...m, content, isEdited: true } : m));
+            } else {
+                toast.error(res.error || "Failed to edit message");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
+    const handleDeleteMessage = async (messageId: string) => {
+        try {
+            const res = await deleteMessage(messageId, currentUser._id);
+            if (res.success) {
+                setReplies(prev => prev.filter(m => m._id !== messageId));
+                toast.success("Message deleted");
+            } else {
+                toast.error(res.error || "Failed to delete message");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
     const handleReaction = async (messageId: string, emoji: string) => {
         try {
             const res = await toggleReaction(messageId, currentUser._id, emoji);
@@ -162,7 +191,10 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
                     <div className="border-b pb-2 mb-2 bg-slate-50/50">
                         <SlackMessage
                             message={parentMessage}
+                            currentUser={currentUser}
                             onReaction={(emoji) => handleReaction(parentMessage._id, emoji)}
+                            onEdit={handleEditMessage}
+                            onDelete={handleDeleteMessage}
                         />
                     </div>
 
@@ -182,8 +214,11 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
                                 <SlackMessage
                                     key={reply._id}
                                     message={reply}
+                                    currentUser={currentUser}
                                     isSameSender={i > 0 && replies[i - 1].sender?._id === reply.sender?._id}
                                     onReaction={(emoji) => handleReaction(reply._id, emoji)}
+                                    onEdit={handleEditMessage}
+                                    onDelete={handleDeleteMessage}
                                 />
                             ))
                         )}

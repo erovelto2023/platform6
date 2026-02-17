@@ -1,22 +1,58 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, Reply, Smile, Plus, FileIcon, Download } from "lucide-react";
+import { MessageSquare, Reply, Smile, Plus, FileIcon, Download, MoreVertical, Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SlackReactionPicker } from "./slack-reaction-picker";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 
 interface SlackMessageProps {
     message: any;
+    currentUser?: any;
     isSameSender?: boolean;
     onThreadClick?: (message: any) => void;
     onReaction?: (emoji: string) => void;
     onShowProfile?: () => void;
+    onEdit?: (messageId: string, content: string) => Promise<void>;
+    onDelete?: (messageId: string) => Promise<void>;
 }
 
-export function SlackMessage({ message, isSameSender, onThreadClick, onReaction, onShowProfile }: SlackMessageProps) {
+export function SlackMessage({ message, currentUser, isSameSender, onThreadClick, onReaction, onShowProfile, onEdit, onDelete }: SlackMessageProps) {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(message.content);
+    const [isPending, setIsPending] = useState(false);
+
+    const isOwner = currentUser?._id === message.sender?._id;
     const sender = message.sender || { firstName: "Unknown", lastName: "User" };
+
+    const handleUpdate = async () => {
+        if (!editContent.trim() || editContent === message.content) {
+            setIsEditing(false);
+            return;
+        }
+        setIsPending(true);
+        try {
+            await onEdit?.(message._id, editContent);
+            setIsEditing(false);
+        } finally {
+            setIsPending(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (confirm("Are you sure you want to delete this message?")) {
+            await onDelete?.(message._id);
+        }
+    };
 
     if (isSameSender) {
         return (
@@ -24,8 +60,30 @@ export function SlackMessage({ message, isSameSender, onThreadClick, onReaction,
                 <div className="hidden group-hover:block absolute left-2 top-0 text-[10px] text-slate-400">
                     {format(new Date(message.createdAt), "h:mm a")}
                 </div>
-                <div className="text-[15px] text-slate-900 leading-relaxed">
-                    {message.content}
+                <div className="text-[15px] text-slate-900 leading-relaxed group/edit">
+                    {isEditing ? (
+                        <div className="mt-1">
+                            <Input
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="h-9 mb-2 focus-visible:ring-1"
+                                autoFocus
+                            />
+                            <div className="flex gap-2">
+                                <Button size="sm" className="h-7 px-3 bg-[#007a5a] hover:bg-[#148567]" onClick={handleUpdate} disabled={isPending}>
+                                    Save
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 px-3" onClick={() => setIsEditing(false)} disabled={isPending}>
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {message.content}
+                            {message.isEdited && <span className="text-[10px] text-slate-500 ml-1">(edited)</span>}
+                        </>
+                    )}
                 </div>
 
                 {/* Floating Actions */}
@@ -43,6 +101,23 @@ export function SlackMessage({ message, isSameSender, onThreadClick, onReaction,
                     >
                         <MessageSquare className="h-4 w-4" />
                     </Button>
+                    {isOwner && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-40">
+                                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                    <Pencil className="h-4 w-4 mr-2" /> Edit message
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
+                                    <Trash className="h-4 w-4 mr-2" /> Delete message
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
                 </div>
             </div>
         );
@@ -72,8 +147,30 @@ export function SlackMessage({ message, isSameSender, onThreadClick, onReaction,
                         {format(new Date(message.createdAt), "h:mm a")}
                     </span>
                 </div>
-                <div className="text-[15px] text-slate-900 leading-relaxed">
-                    {message.content}
+                <div className="text-[15px] text-slate-900 leading-relaxed group/edit">
+                    {isEditing ? (
+                        <div className="mt-1">
+                            <Input
+                                value={editContent}
+                                onChange={(e) => setEditContent(e.target.value)}
+                                className="h-9 mb-2 focus-visible:ring-1"
+                                autoFocus
+                            />
+                            <div className="flex gap-2">
+                                <Button size="sm" className="h-7 px-3 bg-[#007a5a] hover:bg-[#148567]" onClick={handleUpdate} disabled={isPending}>
+                                    Save
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 px-3" onClick={() => setIsEditing(false)} disabled={isPending}>
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            {message.content}
+                            {message.isEdited && <span className="text-[10px] text-slate-500 ml-1">(edited)</span>}
+                        </>
+                    )}
                 </div>
 
                 {message.attachments?.length > 0 && (
@@ -179,6 +276,23 @@ export function SlackMessage({ message, isSameSender, onThreadClick, onReaction,
                 >
                     <MessageSquare className="h-4 w-4" />
                 </Button>
+                {isOwner && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                <Pencil className="h-4 w-4 mr-2" /> Edit message
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
+                                <Trash className="h-4 w-4 mr-2" /> Delete message
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
         </div>
     );

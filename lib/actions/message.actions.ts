@@ -215,35 +215,43 @@ export async function deleteMessage(messageId: string, userId: string) {
         await connectToDatabase();
 
         const message = await Message.findById(messageId);
-
-        if (!message) {
-            return {
-                success: false,
-                error: "Message not found"
-            };
-        }
+        if (!message) return { success: false, error: "Message not found" };
 
         // Only allow sender to delete
-        if (message.senderId.toString() !== userId) {
-            return {
-                success: false,
-                error: "Unauthorized"
-            };
+        if (message.sender.toString() !== userId) {
+            return { success: false, error: "Unauthorized" };
         }
 
         await Message.findByIdAndDelete(messageId);
-
         revalidatePath("/messages");
 
-        return {
-            success: true
-        };
+        return { success: true };
     } catch (error) {
         console.error("[DELETE_MESSAGE]", error);
-        return {
-            success: false,
-            error: "Failed to delete message"
-        };
+        return { success: false, error: "Failed to delete message" };
+    }
+}
+
+export async function updateMessage(messageId: string, userId: string, content: string) {
+    try {
+        await connectToDatabase();
+        const message = await Message.findById(messageId);
+        if (!message) return { success: false, error: "Message not found" };
+
+        // Only allow sender to edit
+        if (message.sender.toString() !== userId) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+        message.content = content;
+        message.isEdited = true;
+        await message.save();
+
+        revalidatePath("/messages");
+        return { success: true, data: JSON.parse(JSON.stringify(message)) };
+    } catch (error) {
+        console.error("[UPDATE_MESSAGE]", error);
+        return { success: false, error: "Failed to update message" };
     }
 }
 export async function getThreadReplies(parentMessageId: string) {
