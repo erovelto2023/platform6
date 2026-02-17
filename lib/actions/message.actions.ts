@@ -340,27 +340,39 @@ export async function toggleReaction(messageId: string, userId: string, emoji: s
     }
 }
 
+import mongoose from "mongoose";
+
 export async function searchMessages(query: string, userId: string) {
     try {
         if (!query.trim()) return { success: true, data: [] };
         await connectToDatabase();
 
-        // 1. Get all channels user is member of OR are public
+        // 1. Explicitly cast IDs for robust querying
+        const userObjId = new mongoose.Types.ObjectId(userId);
+
+        // 2. Get all channels user is member of OR are public
         const channels = await Channel.find({
             $or: [
-                { members: userId },
+                { members: userObjId },
                 { isPubliclyViewable: true }
             ]
         }).select('_id');
         const channelIds = channels.map(c => c._id);
 
-        // 2. Get all conversations user is participant in
+        // 3. Get all conversations user is participant in
         const conversations = await Conversation.find({
-            participants: userId
+            participants: userObjId
         }).select('_id');
         const conversationIds = conversations.map(c => c._id);
 
-        // 3. Search messages in accessible channels and conversations
+        // 4. Create regex for each word to improve focus
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const words = escapedQuery.split(/\s+/).filter(w => w.length > 0);
+
+        // Match ALL words (Slack-like focus)
+        const regexes = words.map(word => ({ content: { $regex: word, $options: 'i' } }));
+
+        // 5. Search messages in accessible channels and conversations
         const messages = await Message.find({
             $and: [
                 {
@@ -369,7 +381,7 @@ export async function searchMessages(query: string, userId: string) {
                         { conversationId: { $in: conversationIds } }
                     ]
                 },
-                { content: { $regex: query, $options: 'i' } },
+                ...regexes,
                 { isDeleted: { $ne: true } }
             ]
         })

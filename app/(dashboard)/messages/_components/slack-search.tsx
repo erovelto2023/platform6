@@ -70,7 +70,11 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
                 </kbd>
             </button>
 
-            <CommandDialog open={open} onOpenChange={setOpen}>
+            <CommandDialog
+                open={open}
+                onOpenChange={setOpen}
+                shouldFilter={false}
+            >
                 <div className="flex flex-col h-full">
                     <CommandInput
                         placeholder="Search messages..."
@@ -79,13 +83,14 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
                     <CommandList className="max-h-[400px] overflow-y-auto">
                         {loading && <div className="p-4 text-center text-xs text-slate-500">Searching...</div>}
                         {!loading && query.length > 0 && results.length === 0 && (
-                            <CommandEmpty>No messages found.</CommandEmpty>
+                            <CommandEmpty>No messages found for "{query}".</CommandEmpty>
                         )}
                         {!loading && results.length > 0 && (
                             <CommandGroup heading="Messages">
                                 {results.map((msg) => (
                                     <CommandItem
                                         key={msg._id}
+                                        value={msg._id}
                                         onSelect={() => {
                                             onSelectMessage(msg);
                                             setOpen(false);
@@ -101,7 +106,7 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
                                             </span>
                                         </div>
                                         <div className="text-xs text-slate-600 line-clamp-2 w-full">
-                                            {msg.content}
+                                            {highlightTerms(msg.content, query)}
                                         </div>
                                         <div className="text-[10px] text-[#007a5a] font-medium">
                                             {msg.channelId ? `#${msg.channelId.name}` : "Direct Message"}
@@ -114,5 +119,32 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
                 </div>
             </CommandDialog>
         </>
+    );
+}
+
+function highlightTerms(text: string, query: string) {
+    if (!query) return text;
+
+    const words = query.split(/\s+/).filter(w => w.length > 0);
+    if (words.length === 0) return text;
+
+    // Create a regex that matches any of the words
+    const escapedWords = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const regex = new RegExp(`(${escapedWords.join('|')})`, 'gi');
+
+    const parts = text.split(regex);
+
+    return (
+        <span>
+            {parts.map((part, i) => (
+                regex.test(part) ? (
+                    <mark key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5">
+                        {part}
+                    </mark>
+                ) : (
+                    <span key={i}>{part}</span>
+                )
+            ))}
+        </span>
     );
 }
