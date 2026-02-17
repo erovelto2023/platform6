@@ -51,11 +51,11 @@ export const BlogTracker = ({ articleId, articleTitle, articleSlug }: BlogTracke
 
         // Get UTM parameters
         const utmParams = {
-            source: searchParams.get('utm_source') || undefined,
-            medium: searchParams.get('utm_medium') || undefined,
-            campaign: searchParams.get('utm_campaign') || undefined,
-            term: searchParams.get('utm_term') || undefined,
-            content: searchParams.get('utm_content') || undefined,
+            source: searchParams?.get('utm_source') || undefined,
+            medium: searchParams?.get('utm_medium') || undefined,
+            campaign: searchParams?.get('utm_campaign') || undefined,
+            term: searchParams?.get('utm_term') || undefined,
+            content: searchParams?.get('utm_content') || undefined,
         };
 
         // Track the visit
@@ -73,7 +73,9 @@ export const BlogTracker = ({ articleId, articleTitle, articleSlug }: BlogTracke
         setTracked(true);
 
         // Store current page for next visit
-        sessionStorage.setItem('previous_page', pathname);
+        if (pathname) {
+            sessionStorage.setItem('previous_page', pathname);
+        }
 
         // Track scroll depth
         const handleScroll = () => {

@@ -21,10 +21,10 @@ export function Filter({ paramName, options, placeholder = "Filter", defaultValu
     const pathname = usePathname();
     const { replace } = useRouter();
 
-    const currentValue = searchParams.get(paramName) || defaultValue;
+    const currentValue = searchParams?.get(paramName) || defaultValue;
 
     const handleFilter = (value: string) => {
-        const params = new URLSearchParams(searchParams);
+        const params = new URLSearchParams(searchParams?.toString() || "");
 
         if (value && value !== 'all') {
             params.set(paramName, value);
@@ -35,7 +35,9 @@ export function Filter({ paramName, options, placeholder = "Filter", defaultValu
         // Reset page
         params.set('page', '1');
 
-        replace(`${pathname}?${params.toString()}`);
+        if (pathname) {
+            replace(`${pathname}?${params.toString()}`);
+        }
     };
 
     return (
