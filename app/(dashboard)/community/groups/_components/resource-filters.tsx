@@ -17,10 +17,10 @@ export function ResourceFilters() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const [search, setSearch] = useState(searchParams.get("q") || "");
+    const [search, setSearch] = useState(searchParams?.get("q") || "");
 
     const updateUrl = (key: string, value: string | null) => {
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(searchParams?.toString() || "");
         if (value) {
             params.set(key, value);
         } else {
@@ -53,7 +53,7 @@ export function ResourceFilters() {
             <div className="flex gap-4">
                 {/* Type Filter */}
                 <Select
-                    value={searchParams.get("resourceType") || "all"}
+                    value={searchParams?.get("resourceType") || "all"}
                     onValueChange={(val) => updateUrl("resourceType", val === "all" ? null : val)}
                 >
                     <SelectTrigger className="w-[140px]">
@@ -76,7 +76,7 @@ export function ResourceFilters() {
 
                 {/* Difficulty Filter */}
                 <Select
-                    value={searchParams.get("difficulty") || "all"}
+                    value={searchParams?.get("difficulty") || "all"}
                     onValueChange={(val) => updateUrl("difficulty", val === "all" ? null : val)}
                 >
                     <SelectTrigger className="w-[140px]">
@@ -92,7 +92,7 @@ export function ResourceFilters() {
 
                 {/* Pricing Filter */}
                 <Select
-                    value={searchParams.get("pricing") || "all"}
+                    value={searchParams?.get("pricing") || "all"}
                     onValueChange={(val) => updateUrl("pricing", val === "all" ? null : val)}
                 >
                     <SelectTrigger className="w-[140px]">
