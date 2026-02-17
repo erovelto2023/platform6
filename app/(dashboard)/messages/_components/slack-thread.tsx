@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { SlackMessage } from "./slack-message";
+import { SlackReactionPicker } from "./slack-reaction-picker";
 import { getThreadReplies, sendMessage, toggleReaction } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,8 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { startUpload, isUploading } = useUploadThing("messageAttachment", {
         onClientUploadComplete: (res: any) => {
@@ -130,6 +133,15 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
         }
     };
 
+    const handleEmojiSelect = (emoji: string) => {
+        setNewReply(prev => prev + emoji);
+        inputRef.current?.focus();
+    };
+
+    const handlePaperclipClick = () => {
+        fileInputRef.current?.click();
+    };
+
     return (
         <div className="w-[400px] border-l flex flex-col h-full bg-white animate-in slide-in-from-right duration-300">
             {/* Header */}
@@ -185,6 +197,7 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
                 <div className="border border-slate-300 rounded-lg bg-white overflow-hidden">
                     <form onSubmit={handleSendReply} className="p-2">
                         <Input
+                            ref={inputRef}
                             className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-sm resize-none shadow-none"
                             placeholder="Reply..."
                             value={newReply}
@@ -192,22 +205,27 @@ export function SlackThread({ parentMessage, currentUser, onClose }: SlackThread
                         />
                         <div className="flex justify-between items-center mt-2">
                             <div className="flex gap-1">
-                                <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-slate-500">
-                                    <Smile className="w-4 h-4" />
-                                </Button>
+                                <SlackReactionPicker onSelect={handleEmojiSelect}>
+                                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-slate-500">
+                                        <Smile className="w-4 h-4" />
+                                    </Button>
+                                </SlackReactionPicker>
                                 <label className="cursor-pointer">
                                     <input
                                         type="file"
                                         className="hidden"
                                         multiple
+                                        ref={fileInputRef}
                                         onChange={(e) => {
                                             if (e.target.files) startUpload(Array.from(e.target.files));
                                         }}
                                     />
-                                    <div className={cn(
-                                        "h-7 w-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100",
-                                        isUploading && "opacity-50 animate-pulse"
-                                    )}>
+                                    <div
+                                        onClick={handlePaperclipClick}
+                                        className={cn(
+                                            "h-7 w-7 flex items-center justify-center rounded-md text-slate-500 hover:bg-slate-100",
+                                            isUploading && "opacity-50 animate-pulse"
+                                        )}>
                                         <Paperclip className="w-4 h-4" />
                                     </div>
                                 </label>

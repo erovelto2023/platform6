@@ -3,7 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, Reply, Smile, Plus } from "lucide-react";
+import { MessageSquare, Reply, Smile, Plus, FileIcon, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SlackReactionPicker } from "./slack-reaction-picker";
 
@@ -77,15 +77,40 @@ export function SlackMessage({ message, isSameSender, onThreadClick, onReaction,
                 </div>
 
                 {message.attachments?.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                        {message.attachments.map((url: string, i: number) => (
-                            <img
-                                key={i}
-                                src={url}
-                                alt="Attachment"
-                                className="max-h-60 rounded-md border border-slate-200"
-                            />
-                        ))}
+                    <div className="mt-2 flex flex-col gap-2">
+                        {message.attachments.map((url: string, i: number) => {
+                            const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+                            const fileName = url.split('/').pop() || 'Attachment';
+
+                            return isImage ? (
+                                <img
+                                    key={i}
+                                    src={url}
+                                    alt="Attachment"
+                                    className="max-h-60 rounded-md border border-slate-200"
+                                />
+                            ) : (
+                                <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-slate-50 group/file w-fit min-w-[200px]">
+                                    <div className="h-10 w-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded">
+                                        <FileIcon className="h-6 w-6" />
+                                    </div>
+                                    <div className="flex flex-col min-w-0 pr-4">
+                                        <span className="text-sm font-medium text-slate-900 truncate max-w-[200px]">
+                                            {fileName}
+                                        </span>
+                                        <a
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                                        >
+                                            <Download className="h-3 w-3" />
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 

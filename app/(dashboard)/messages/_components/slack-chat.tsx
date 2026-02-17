@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SlackMessage } from "./slack-message";
+import { SlackReactionPicker } from "./slack-reaction-picker";
 import { sendChannelMessage, getChannelMessages } from "@/lib/actions/channel.actions";
 import { getMessages, sendMessage, toggleReaction } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
@@ -28,6 +29,8 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
     const [attachments, setAttachments] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [pending, setPending] = useState(false);
 
     const { startUpload, isUploading } = useUploadThing("messageAttachment", {
@@ -163,6 +166,15 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
         }
     };
 
+    const handleEmojiSelect = (emoji: string) => {
+        setNewMessage(prev => prev + emoji);
+        inputRef.current?.focus();
+    };
+
+    const handlePlusClick = () => {
+        fileInputRef.current?.click();
+    };
+
     if (!channel && !conversation) {
         return (
             <div className="flex-1 flex items-center justify-center bg-white text-slate-500">
@@ -252,14 +264,18 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                                 type="file"
                                 className="hidden"
                                 multiple
+                                ref={fileInputRef}
                                 onChange={(e) => {
                                     if (e.target.files) startUpload(Array.from(e.target.files));
                                 }}
                             />
-                            <div className={cn(
-                                "h-8 w-8 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-200",
-                                isUploading && "opacity-50 animate-pulse"
-                            )}>
+                            <div
+                                onClick={handlePlusClick}
+                                className={cn(
+                                    "h-8 w-8 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-200",
+                                    isUploading && "opacity-50 animate-pulse"
+                                )}
+                            >
                                 <Paperclip className="w-4 h-4" />
                             </div>
                         </label>
@@ -284,6 +300,7 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
 
                     <form onSubmit={handleSendMessage} className="p-2">
                         <Input
+                            ref={inputRef}
                             className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
                             placeholder={`Message #${title}`}
                             value={newMessage}
@@ -292,12 +309,20 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                         />
                         <div className="flex justify-between items-center mt-2">
                             <div className="flex gap-1">
-                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-500 hover:bg-slate-100"
+                                    onClick={handlePlusClick}
+                                >
                                     <Plus className="w-5 h-5" />
                                 </Button>
-                                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
-                                    <Smile className="w-5 h-5" />
-                                </Button>
+                                <SlackReactionPicker onSelect={handleEmojiSelect}>
+                                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                        <Smile className="w-5 h-5" />
+                                    </Button>
+                                </SlackReactionPicker>
                             </div>
                             <Button
                                 type="submit"
