@@ -39,6 +39,13 @@ const MessageSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Message',
     },
+    replyCount: {
+        type: Number,
+        default: 0,
+    },
+    lastReplyAt: {
+        type: Date,
+    },
     isEdited: {
         type: Boolean,
         default: false,
@@ -50,6 +57,8 @@ const MessageSchema = new Schema({
 }, { timestamps: true });
 
 MessageSchema.index({ conversationId: 1, createdAt: 1 });
+MessageSchema.index({ channelId: 1, createdAt: 1 });
+MessageSchema.index({ replyTo: 1, createdAt: 1 });
 
 const Message = models.Message || model('Message', MessageSchema);
 

@@ -91,3 +91,13 @@ export async function getCurrentUserRole() {
         return 'student';
     }
 }
+export async function updateUserPresence(userId: string) {
+    try {
+        await connectDB();
+        await User.findByIdAndUpdate(userId, { lastActiveAt: new Date() });
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update presence:", error);
+        return { success: false };
+    }
+}

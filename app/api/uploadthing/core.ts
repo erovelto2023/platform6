@@ -78,6 +78,16 @@ export const ourFileRouter = {
         .onUploadComplete(async ({ metadata, file }) => {
             return { uploadedBy: metadata.userId, url: file.url };
         }),
+
+    messageAttachment: f({
+        image: { maxFileSize: "8MB", maxFileCount: 4 },
+        pdf: { maxFileSize: "16MB", maxFileCount: 2 },
+        blob: { maxFileSize: "32MB", maxFileCount: 1 }
+    })
+        .middleware(handleAuth)
+        .onUploadComplete(async ({ metadata, file }) => {
+            return { uploadedBy: metadata.userId, url: file.url };
+        }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

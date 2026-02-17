@@ -2,28 +2,45 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { format } from "date-fns";
-import { Hash, Info, Lock, Send, Paperclip, Smile, Plus } from "lucide-react";
+import { Hash, Info, Lock, Send, Paperclip, Smile, Plus, UserPlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SlackMessage } from "./slack-message";
 import { sendChannelMessage, getChannelMessages } from "@/lib/actions/channel.actions";
-import { getMessages, sendMessage } from "@/lib/actions/message.actions";
+import { getMessages, sendMessage, toggleReaction } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface SlackChatProps {
     channel?: any;
     conversation?: any;
     currentUser: any;
+    onInvite?: () => void;
+    onThreadClick?: (message: any) => void;
+    onShowProfile: (user: any) => void;
 }
 
-export function SlackChat({ channel, conversation, currentUser }: SlackChatProps) {
+export function SlackChat({ channel, conversation, currentUser, onInvite, onThreadClick, onShowProfile }: SlackChatProps) {
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState("");
+    const [attachments, setAttachments] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const [pending, setPending] = useState(false);
+
+    const { startUpload, isUploading } = useUploadThing("messageAttachment", {
+        onClientUploadComplete: (res: any) => {
+            const urls = res.map((f: any) => f.url);
+            setAttachments(prev => [...prev, ...urls]);
+            toast.success("Files uploaded");
+        },
+        onUploadError: (err: any) => {
+            toast.error("Upload failed");
+            console.error(err);
+        }
+    });
 
     const isAtBottom = () => {
         if (!scrollRef.current) return true;
@@ -93,18 +110,21 @@ export function SlackChat({ channel, conversation, currentUser }: SlackChatProps
                 res = await sendChannelMessage({
                     channelId: channel._id,
                     senderId: currentUser._id,
-                    content
+                    content,
+                    attachments
                 });
             } else {
                 res = await sendMessage({
                     conversationId: conversation._id,
                     senderId: currentUser._id,
-                    content
+                    content,
+                    attachments
                 });
             }
 
             if (res.success) {
                 setMessages(prev => [...prev, res.data]);
+                setAttachments([]);
                 scrollToBottom();
             } else {
                 toast.error("Failed to send message");
@@ -115,6 +135,31 @@ export function SlackChat({ channel, conversation, currentUser }: SlackChatProps
             toast.error("Something went wrong");
         } finally {
             setPending(false);
+        }
+    };
+
+    const handleReaction = async (messageId: string, emoji: string) => {
+        try {
+            const res = await toggleReaction(messageId, currentUser._id, emoji);
+            if (res.success) {
+                // Update local state for immediate feedback
+                setMessages(prev => prev.map(m => {
+                    if (m._id === messageId) {
+                        const newReactions = { ...(m.reactions || {}) };
+                        if (newReactions[currentUser._id] === emoji) {
+                            delete newReactions[currentUser._id];
+                        } else {
+                            newReactions[currentUser._id] = emoji;
+                        }
+                        return { ...m, reactions: newReactions };
+                    }
+                    return m;
+                }));
+            } else {
+                toast.error("Failed to toggle reaction");
+            }
+        } catch (err) {
+            console.error(err);
         }
     };
 
@@ -145,9 +190,22 @@ export function SlackChat({ channel, conversation, currentUser }: SlackChatProps
                     )}
                     <h3 className="font-bold text-slate-900">{title}</h3>
                 </div>
-                <Button variant="ghost" size="icon" className="text-slate-500">
-                    <Info className="w-5 h-5" />
-                </Button>
+                <div className="flex items-center gap-2">
+                    {channel && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-slate-500 hover:text-slate-900 hidden md:flex items-center gap-2"
+                            onClick={onInvite}
+                        >
+                            <UserPlus className="w-4 h-4" />
+                            <span>Invite</span>
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="icon" className="text-slate-500">
+                        <Info className="w-5 h-5" />
+                    </Button>
+                </div>
             </div>
 
             {/* Messages */}
@@ -170,6 +228,9 @@ export function SlackChat({ channel, conversation, currentUser }: SlackChatProps
                                     key={msg._id}
                                     message={msg}
                                     isSameSender={i > 0 && messages[i - 1].sender?._id === msg.sender?._id}
+                                    onThreadClick={onThreadClick}
+                                    onReaction={(emoji) => handleReaction(msg._id, emoji)}
+                                    onShowProfile={() => onShowProfile(msg.sender)}
                                 />
                             ))
                         )}
@@ -186,8 +247,40 @@ export function SlackChat({ channel, conversation, currentUser }: SlackChatProps
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="italic">I</span></Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="line-through">S</span></Button>
                         <div className="w-px h-4 bg-slate-300 mx-1" />
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><Paperclip className="w-4 h-4" /></Button>
+                        <label className="cursor-pointer">
+                            <input
+                                type="file"
+                                className="hidden"
+                                multiple
+                                onChange={(e) => {
+                                    if (e.target.files) startUpload(Array.from(e.target.files));
+                                }}
+                            />
+                            <div className={cn(
+                                "h-8 w-8 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-200",
+                                isUploading && "opacity-50 animate-pulse"
+                            )}>
+                                <Paperclip className="w-4 h-4" />
+                            </div>
+                        </label>
                     </div>
+
+                    {attachments.length > 0 && (
+                        <div className="p-2 flex flex-wrap gap-2 bg-slate-50 border-b">
+                            {attachments.map((url, i) => (
+                                <div key={i} className="relative group h-20 w-20 border rounded overflow-hidden bg-white">
+                                    <img src={url} alt="Attached" className="h-full w-full object-cover" />
+                                    <button
+                                        type="button"
+                                        onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
 
                     <form onSubmit={handleSendMessage} className="p-2">
                         <Input

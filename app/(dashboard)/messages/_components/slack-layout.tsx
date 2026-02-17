@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { SlackSidebar } from "./slack-sidebar";
 import { SlackChat } from "./slack-chat";
-import { createChannel } from "@/lib/actions/channel.actions";
+import { SlackThread } from "./slack-thread";
+import { SlackProfileModal } from "./slack-profile-modal";
+import { createChannel, generateChannelInvite } from "@/lib/actions/channel.actions";
+import { updateUserPresence } from "@/lib/actions/user.actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +35,21 @@ export function SlackLayout({
         initialChannelId || (initialChannels.length > 0 ? initialChannels[0]._id : undefined)
     );
     const [activeConversationId, setActiveConversationId] = useState<string | undefined>(initialConversationId);
+    const [activeThreadMessage, setActiveThreadMessage] = useState<any | null>(null);
+    const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
+
+    // Heartbeat for presence
+    useEffect(() => {
+        if (!currentUser?._id) return;
+
+        const heartbeat = async () => {
+            await updateUserPresence(currentUser._id);
+        };
+
+        heartbeat(); // Initial
+        const interval = setInterval(heartbeat, 30000); // 30s
+        return () => clearInterval(interval);
+    }, [currentUser?._id]);
 
     // Modal state
     const [openCreateChannel, setOpenCreateChannel] = useState(false);
@@ -42,12 +60,14 @@ export function SlackLayout({
     const handleSelectChannel = (channelId: string) => {
         setActiveChannelId(channelId);
         setActiveConversationId(undefined);
+        setActiveThreadMessage(null);
         // router.push(`/messages/channels/${channelId}`); // TODO: Add routing
     };
 
     const handleSelectConversation = (conversationId: string) => {
         setActiveConversationId(conversationId);
         setActiveChannelId(undefined);
+        setActiveThreadMessage(null);
         // router.push(`/messages/dms/${conversationId}`); // TODO: Add routing
     };
 
@@ -76,6 +96,26 @@ export function SlackLayout({
         }
     };
 
+    const handleInvite = async () => {
+        if (!activeChannelId) {
+            toast.error("Please select a channel first");
+            return;
+        }
+        try {
+            const res = await generateChannelInvite(activeChannelId, currentUser._id);
+            if (res.success) {
+                const inviteUrl = `${window.location.origin}/invite/${res.token}`;
+                await navigator.clipboard.writeText(inviteUrl);
+                toast.success("Invite link copied to clipboard!");
+            } else {
+                toast.error(res.error || "Failed to generate invite link");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        }
+    };
+
     const activeChannel = channels.find(c => c._id === activeChannelId);
     const activeConversation = initialConversations.find(c => c._id === activeConversationId);
 
@@ -90,6 +130,8 @@ export function SlackLayout({
                 onSelectConversation={handleSelectConversation}
                 currentUser={currentUser}
                 onCreateChannel={() => setOpenCreateChannel(true)}
+                onInvite={handleInvite}
+                onShowProfile={(user) => setSelectedProfileUser(user)}
             />
 
             <main className="flex-1 flex flex-col min-w-0 bg-white">
@@ -97,8 +139,25 @@ export function SlackLayout({
                     channel={activeChannel}
                     conversation={activeConversation}
                     currentUser={currentUser}
+                    onInvite={handleInvite}
+                    onThreadClick={(msg) => setActiveThreadMessage(msg)}
+                    onShowProfile={(user) => setSelectedProfileUser(user)}
                 />
+
+                {activeThreadMessage && (
+                    <SlackThread
+                        parentMessage={activeThreadMessage}
+                        currentUser={currentUser}
+                        onClose={() => setActiveThreadMessage(null)}
+                    />
+                )}
             </main>
+
+            <SlackProfileModal
+                user={selectedProfileUser}
+                open={!!selectedProfileUser}
+                onOpenChange={(open) => !open && setSelectedProfileUser(null)}
+            />
 
             <Dialog open={openCreateChannel} onOpenChange={setOpenCreateChannel}>
                 <DialogContent>

@@ -13,7 +13,7 @@ export async function getConversations(userId: string) {
         const conversations = await Conversation.find({
             participants: userId
         })
-            .populate('participants', 'firstName lastName email profileImage')
+            .populate('participants', 'firstName lastName email profileImage lastActiveAt')
             .populate('lastMessage')
             .sort({ lastMessageAt: -1 })
             .lean();
@@ -40,7 +40,7 @@ export async function getOrCreateConversation(userId: string, otherUserId: strin
             participants: { $all: [userId, otherUserId] },
             isGroup: false
         })
-            .populate('participants', 'firstName lastName email profileImage')
+            .populate('participants', 'firstName lastName email profileImage lastActiveAt')
             .lean();
 
         // Create new conversation if it doesn't exist
@@ -52,7 +52,7 @@ export async function getOrCreateConversation(userId: string, otherUserId: strin
             });
 
             conversation = await Conversation.findById(conversation._id)
-                .populate('participants', 'firstName lastName email profileImage')
+                .populate('participants', 'firstName lastName email profileImage lastActiveAt')
                 .lean();
         }
 
@@ -73,8 +73,8 @@ export async function getMessages(conversationId: string, limit = 50) {
     try {
         await connectToDatabase();
 
-        const messages = await Message.find({ conversationId })
-            .populate('senderId', 'firstName lastName email profileImage')
+        const messages = await Message.find({ conversationId, replyTo: { $exists: false } })
+            .populate('sender', 'firstName lastName email profileImage')
             .sort({ createdAt: -1 })
             .limit(limit)
             .lean();
@@ -93,10 +93,13 @@ export async function getMessages(conversationId: string, limit = 50) {
 }
 
 export async function sendMessage(data: {
-    conversationId: string;
+    conversationId?: string;
+    channelId?: string;
     senderId: string;
     content: string;
     type?: string;
+    replyTo?: string;
+    attachments?: string[];
 }) {
     try {
         await connectToDatabase();
@@ -104,11 +107,21 @@ export async function sendMessage(data: {
         // Create message
         const message = await Message.create({
             conversationId: data.conversationId,
-            senderId: data.senderId,
+            channelId: data.channelId,
+            sender: data.senderId,
             content: data.content,
             type: data.type || 'text',
-            isRead: false
+            replyTo: data.replyTo,
+            attachments: data.attachments || [],
         });
+
+        // If it's a reply, update parent
+        if (data.replyTo) {
+            await Message.findByIdAndUpdate(data.replyTo, {
+                $inc: { replyCount: 1 },
+                lastReplyAt: new Date(),
+            });
+        }
 
         // Update conversation
         const conversation = await Conversation.findByIdAndUpdate(
@@ -144,7 +157,7 @@ export async function sendMessage(data: {
         }
 
         const populatedMessage = await Message.findById(message._id)
-            .populate('senderId', 'firstName lastName email profileImage')
+            .populate('sender', 'firstName lastName email profileImage')
             .lean();
 
         revalidatePath("/messages");
@@ -231,5 +244,52 @@ export async function deleteMessage(messageId: string, userId: string) {
             success: false,
             error: "Failed to delete message"
         };
+    }
+}
+export async function getThreadReplies(parentMessageId: string) {
+    try {
+        await connectToDatabase();
+
+        const messages = await Message.find({ replyTo: parentMessageId })
+            .populate('sender', 'firstName lastName email profileImage')
+            .sort({ createdAt: 1 })
+            .lean();
+
+        return {
+            success: true,
+            data: JSON.parse(JSON.stringify(messages))
+        };
+    } catch (error) {
+        console.error("[GET_THREAD_REPLIES]", error);
+        return {
+            success: false,
+            error: "Failed to fetch thread replies"
+        };
+    }
+}
+
+export async function toggleReaction(messageId: string, userId: string, emoji: string) {
+    try {
+        await connectToDatabase();
+        const message = await Message.findById(messageId);
+        if (!message) return { success: false, error: "Message not found" };
+
+        const currentReaction = message.reactions?.get(userId);
+
+        if (currentReaction === emoji) {
+            // Remove if same emoji
+            message.reactions.delete(userId);
+        } else {
+            // Add or update emoji
+            message.reactions.set(userId, emoji);
+        }
+
+        await message.save();
+        revalidatePath("/messages");
+
+        return { success: true, data: JSON.parse(JSON.stringify(message)) };
+    } catch (error) {
+        console.error("[TOGGLE_REACTION]", error);
+        return { success: false, error: "Failed to toggle reaction" };
     }
 }

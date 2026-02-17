@@ -9,7 +9,8 @@ import {
     Search,
     ChevronDown,
     ChevronRight,
-    Lock
+    Lock,
+    UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,6 +25,8 @@ interface SlackSidebarProps {
     onSelectConversation: (conversationId: string) => void;
     currentUser: any;
     onCreateChannel: () => void;
+    onInvite?: () => void;
+    onShowProfile: (user: any) => void;
 }
 
 export function SlackSidebar({
@@ -34,7 +37,9 @@ export function SlackSidebar({
     onSelectChannel,
     onSelectConversation,
     currentUser,
-    onCreateChannel
+    onCreateChannel,
+    onInvite,
+    onShowProfile
 }: SlackSidebarProps) {
     const [channelsOpen, setChannelsOpen] = useState(true);
     const [dmsOpen, setDmsOpen] = useState(true);
@@ -125,17 +130,24 @@ export function SlackSidebar({
                                     const otherUser = conversation.participants.find(
                                         (p: any) => p._id !== currentUser._id
                                     );
-                                    const isOffline = true; // Todo: Add presence
+                                    const isOnline = otherUser?.lastActiveAt &&
+                                        (new Date().getTime() - new Date(otherUser.lastActiveAt).getTime()) < 300000; // 5 mins
                                     return (
                                         <button
                                             key={conversation._id}
-                                            onClick={() => onSelectConversation(conversation._id)}
+                                            onClick={(e) => {
+                                                if ((e.target as HTMLElement).closest('.avatar-trigger')) {
+                                                    onShowProfile(otherUser);
+                                                } else {
+                                                    onSelectConversation(conversation._id);
+                                                }
+                                            }}
                                             className={cn(
                                                 "w-full flex items-center px-2 py-1 rounded hover:bg-[#350d36] text-sm text-[15px] group",
                                                 activeConversationId === conversation._id && "bg-[#1164A3] text-white hover:bg-[#1164A3]"
                                             )}
                                         >
-                                            <div className="relative mr-2">
+                                            <div className="relative mr-2 avatar-trigger hover:opacity-80 transition-opacity">
                                                 <Avatar className="w-4 h-4 rounded">
                                                     <AvatarImage src={otherUser?.profileImage} className="rounded" />
                                                     <AvatarFallback className="rounded text-[10px] bg-slate-500 text-white">
@@ -144,7 +156,7 @@ export function SlackSidebar({
                                                 </Avatar>
                                                 <div className={cn(
                                                     "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-[#3F0E40]",
-                                                    isOffline ? "bg-transparent border-slate-400" : "bg-green-500"
+                                                    isOnline ? "bg-green-500" : "bg-transparent border-slate-400"
                                                 )} />
                                             </div>
                                             <span className="truncate opacity-90">
@@ -163,6 +175,17 @@ export function SlackSidebar({
                     </div>
                 </div>
             </ScrollArea>
+
+            <div className="p-4 border-t border-[#5d2c5d]">
+                <Button
+                    variant="ghost"
+                    className="w-full justify-start text-[#cfc3cf] hover:text-white hover:bg-[#350d36] transition-colors gap-2"
+                    onClick={onInvite}
+                >
+                    <UserPlus className="w-4 h-4" />
+                    <span className="text-sm">Invite people</span>
+                </Button>
+            </div>
         </div>
     );
 }

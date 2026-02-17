@@ -26,6 +26,15 @@ const ChannelSchema = new Schema({
     },
     workspaceId: { // Future-proofing for multi-workspace if needed, optional for now
         type: String,
+    },
+    shareToken: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    isPubliclyViewable: {
+        type: Boolean,
+        default: false,
     }
 }, { timestamps: true });
 
