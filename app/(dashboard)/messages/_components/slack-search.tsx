@@ -17,10 +17,11 @@ import { cn } from "@/lib/utils";
 interface SlackSearchProps {
     userId: string;
     onSelectMessage: (message: any) => void;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 }
 
-export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
-    const [open, setOpen] = useState(false);
+export function SlackSearch({ userId, onSelectMessage, open, onOpenChange }: SlackSearchProps) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -29,12 +30,12 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
-                setOpen((open) => !open);
+                onOpenChange(!open);
             }
         };
         document.addEventListener("keydown", down);
         return () => document.removeEventListener("keydown", down);
-    }, []);
+    }, [open, onOpenChange]);
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -60,7 +61,7 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
     return (
         <>
             <button
-                onClick={() => setOpen(true)}
+                onClick={() => onOpenChange(true)}
                 className="w-full max-w-[400px] h-7 bg-[#481349] hover:bg-[#5D2B5E] text-slate-300 flex items-center gap-2 px-2 rounded-md transition-colors text-xs border border-white/10"
             >
                 <Search className="h-3.5 w-3.5" />
@@ -72,7 +73,7 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
 
             <CommandDialog
                 open={open}
-                onOpenChange={setOpen}
+                onOpenChange={onOpenChange}
                 shouldFilter={false}
             >
                 <div className="flex flex-col h-full">
@@ -93,7 +94,7 @@ export function SlackSearch({ userId, onSelectMessage }: SlackSearchProps) {
                                         value={msg._id}
                                         onSelect={() => {
                                             onSelectMessage(msg);
-                                            setOpen(false);
+                                            onOpenChange(false);
                                         }}
                                         className="flex flex-col items-start gap-1 p-3 cursor-pointer aria-selected:bg-slate-100"
                                     >

@@ -24,9 +24,20 @@ interface SlackMessageProps {
     onShowProfile?: () => void;
     onEdit?: (messageId: string, content: string) => Promise<void>;
     onDelete?: (messageId: string) => Promise<void>;
+    isTarget?: boolean;
 }
 
-export function SlackMessage({ message, currentUser, isSameSender, onThreadClick, onReaction, onShowProfile, onEdit, onDelete }: SlackMessageProps) {
+export function SlackMessage({
+    message,
+    currentUser,
+    isSameSender,
+    onThreadClick,
+    onReaction,
+    onShowProfile,
+    onEdit,
+    onDelete,
+    isTarget
+}: SlackMessageProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editContent, setEditContent] = useState(message.content);
     const [isPending, setIsPending] = useState(false);
@@ -61,7 +72,13 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
 
     if (isSameSender) {
         return (
-            <div className="group relative flex items-start px-5 py-0.5 hover:bg-slate-50 -ml-5 pl-14">
+            <div
+                id={`message-${message._id}`}
+                className={cn(
+                    "group relative flex items-start px-5 py-0.5 hover:bg-slate-50 -ml-5 pl-14 transition-colors",
+                    isTarget && "bg-yellow-100/50 hover:bg-yellow-100/50 ring-1 ring-yellow-200"
+                )}
+            >
                 <div className="hidden group-hover:block absolute left-2 top-0 text-[10px] text-slate-400">
                     {format(new Date(message.createdAt), "h:mm a")}
                 </div>
@@ -132,7 +149,13 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
     }
 
     return (
-        <div className="group relative flex items-start gap-2 px-5 py-1 hover:bg-slate-50 mt-1">
+        <div
+            id={`message-${message._id}`}
+            className={cn(
+                "group relative flex items-start gap-2 px-5 py-1 hover:bg-slate-50 mt-1 transition-colors",
+                isTarget && "bg-yellow-100/50 hover:bg-yellow-100/50 ring-1 ring-yellow-200"
+            )}
+        >
             <Avatar
                 className="h-9 w-9 mt-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={onShowProfile}

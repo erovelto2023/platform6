@@ -49,7 +49,7 @@ export async function getOrCreateConversation(userId: string, otherUserId: strin
             conversation = await Conversation.create({
                 participants: [userId, otherUserId],
                 isGroup: false,
-                unreadCount: {}
+                unreadCounts: {}
             });
 
             conversation = await Conversation.findById(conversation._id)
@@ -178,8 +178,8 @@ export async function sendMessage(data: {
             );
 
             for (const participantId of otherParticipants) {
-                const currentCount = conversation.unreadCount?.get(participantId.toString()) || 0;
-                conversation.unreadCount?.set(participantId.toString(), currentCount + 1);
+                const currentCount = conversation.unreadCounts?.get(participantId.toString()) || 0;
+                conversation.unreadCounts?.set(participantId.toString(), currentCount + 1);
 
                 // Create notification
                 await createNotification({
@@ -230,7 +230,7 @@ export async function markMessagesAsRead(conversationId: string, userId: string)
         // Reset unread count for this user
         const conversation = await Conversation.findById(conversationId);
         if (conversation) {
-            conversation.unreadCount?.set(userId, 0);
+            conversation.unreadCounts?.set(userId, 0);
             await conversation.save();
         }
 

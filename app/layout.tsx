@@ -7,6 +7,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfettiProvider } from "@/components/providers/confetti-provider";
+import { SocketProvider } from "@/components/providers/socket-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -50,9 +51,11 @@ export default function RootLayout({
              */
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
-          {children}
-          <ConfettiProvider />
-          <Toaster />
+          <SocketProvider>
+            {children}
+            <ConfettiProvider />
+            <Toaster />
+          </SocketProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -29,6 +29,7 @@ interface SlackSidebarProps {
     onInvite?: () => void;
     onShowProfile: (user: any) => void;
     onConversationCreated: (conversation: any) => void;
+    onSearchClick: () => void;
 }
 
 export function SlackSidebar({
@@ -42,7 +43,8 @@ export function SlackSidebar({
     onCreateChannel,
     onInvite,
     onShowProfile,
-    onConversationCreated
+    onConversationCreated,
+    onSearchClick
 }: SlackSidebarProps) {
     const [channelsOpen, setChannelsOpen] = useState(true);
     const [dmsOpen, setDmsOpen] = useState(true);
@@ -58,6 +60,18 @@ export function SlackSidebar({
 
             <ScrollArea className="flex-1">
                 <div className="p-2 space-y-6">
+                    {/* Search Item */}
+                    <button
+                        onClick={onSearchClick}
+                        className="w-full flex items-center px-2 py-1.5 rounded hover:bg-[#350d36] text-[15px] group text-[#cfc3cf] transition-colors"
+                    >
+                        <Search className="w-4 h-4 mr-2 opacity-70 group-hover:opacity-100" />
+                        <span>Search</span>
+                        <kbd className="ml-auto pointer-events-none hidden h-4 select-none items-center gap-1 rounded bg-white/10 px-1.5 font-mono text-[10px] font-medium opacity-50 group-hover:opacity-100 sm:flex">
+                            <span className="text-xs">⌘</span>K
+                        </kbd>
+                    </button>
+
                     {/* Channels Section */}
                     <div>
                         <div className="flex items-center justify-between px-2 group mb-1">
@@ -98,7 +112,17 @@ export function SlackSidebar({
                                         ) : (
                                             <Hash className="w-3 h-3 mr-2 opacity-70" />
                                         )}
-                                        <span className="truncate">{channel.name}</span>
+                                        <span className={cn(
+                                            "truncate",
+                                            channel.unreadCounts?.[currentUser._id] > 0 && "font-bold text-white"
+                                        )}>
+                                            {channel.name}
+                                        </span>
+                                        {channel.unreadCounts?.[currentUser._id] > 0 && (
+                                            <span className="ml-auto bg-[#EB144C] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                                {channel.unreadCounts[currentUser._id]}
+                                            </span>
+                                        )}
                                     </button>
                                 ))}
                                 <button
@@ -191,12 +215,15 @@ export function SlackSidebar({
                                                 )} />
                                             )}
                                         </div>
-                                        <span className="truncate opacity-90">
+                                        <span className={cn(
+                                            "truncate opacity-90",
+                                            conversation.unreadCounts?.[currentUser._id] > 0 && "font-bold opacity-100 text-white"
+                                        )}>
                                             {displayName}
                                         </span>
-                                        {conversation.unreadCount?.[currentUser._id] > 0 && (
-                                            <span className="ml-auto bg-red-500 text-white text-[10px] px-1.5 rounded-full">
-                                                {conversation.unreadCount?.[currentUser._id]}
+                                        {conversation.unreadCounts?.[currentUser._id] > 0 && (
+                                            <span className="ml-auto bg-[#EB144C] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                                {conversation.unreadCounts[currentUser._id]}
                                             </span>
                                         )}
                                     </button>

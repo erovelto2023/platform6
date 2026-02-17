@@ -72,6 +72,20 @@ export async function getChannelMessages(channelId: string) {
     }
 }
 
+// Clear unreads for a user in a channel
+export async function clearChannelUnreads(channelId: string, userId: string) {
+    try {
+        await connectToDatabase();
+        await Channel.findByIdAndUpdate(channelId, {
+            $set: { [`unreadCounts.${userId}`]: 0 }
+        });
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error clearing channel unreads:", error);
+        return { success: false, error: error.message };
+    }
+}
+
 // Send a message to a channel
 export async function sendChannelMessage(params: {
     channelId: string;
@@ -98,6 +112,22 @@ export async function sendChannelMessage(params: {
                 $inc: { replyCount: 1 },
                 lastReplyAt: new Date(),
             });
+        }
+
+        // Update channel unread counts for all members except sender
+        const channel = await Channel.findById(params.channelId);
+        if (channel) {
+            const updates: any = {};
+            channel.members.forEach((memberId: string) => {
+                const mid = memberId.toString();
+                if (mid !== params.senderId) {
+                    updates[`unreadCounts.${mid}`] = (channel.unreadCounts.get(mid) || 0) + 1;
+                }
+            });
+
+            if (Object.keys(updates).length > 0) {
+                await Channel.findByIdAndUpdate(params.channelId, { $set: updates });
+            }
         }
 
         // Populate sender for immediate UI update return

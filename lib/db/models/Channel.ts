@@ -35,6 +35,11 @@ const ChannelSchema = new Schema({
     isPubliclyViewable: {
         type: Boolean,
         default: false,
+    },
+    unreadCounts: {
+        type: Map,
+        of: Number,
+        default: {},
     }
 }, { timestamps: true });
 

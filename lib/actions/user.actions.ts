@@ -105,10 +105,33 @@ export async function updateUserPresence(userId: string) {
 export async function getUsers() {
     try {
         await connectDB();
-        const users = await User.find({}).select('firstName lastName profileImage lastActiveAt').lean();
+        const users = await User.find({}).select('firstName lastName profileImage lastActiveAt bio').lean();
         return { success: true, data: JSON.parse(JSON.stringify(users)) };
     } catch (error) {
         console.error("Failed to fetch users:", error);
         return { success: false, error: "Failed to fetch users" };
+    }
+}
+
+export async function updateUserProfile(data: { firstName: string, lastName: string, bio: string }) {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Not authenticated" };
+
+        await connectDB();
+        const user = await User.findOneAndUpdate(
+            { clerkId: clerkUser.id },
+            {
+                firstName: data.firstName,
+                lastName: data.lastName,
+                bio: data.bio
+            },
+            { new: true }
+        );
+
+        return { success: true, user: JSON.parse(JSON.stringify(user)) };
+    } catch (error) {
+        console.error("Failed to update user profile:", error);
+        return { success: false, error: "Update failed" };
     }
 }

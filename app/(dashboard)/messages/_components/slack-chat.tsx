@@ -1,4 +1,5 @@
 "use client";
+// Phase 12: Real-time & UX Polish - SlackChat with Jump-to-Message support
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { format } from "date-fns";
@@ -8,11 +9,12 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SlackMessage } from "./slack-message";
 import { SlackReactionPicker } from "./slack-reaction-picker";
-import { sendChannelMessage, getChannelMessages } from "@/lib/actions/channel.actions";
-import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage } from "@/lib/actions/message.actions";
+import { sendChannelMessage, getChannelMessages, clearChannelUnreads } from "@/lib/actions/channel.actions";
+import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage, markMessagesAsRead } from "@/lib/actions/message.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUploadThing } from "@/lib/uploadthing";
+import { useSocket } from "@/components/providers/socket-provider";
 
 interface SlackChatProps {
     channel?: any;
@@ -21,9 +23,21 @@ interface SlackChatProps {
     onInvite?: () => void;
     onThreadClick?: (message: any) => void;
     onShowProfile: (user: any) => void;
+    targetMessageId?: string;
+    onTargetMessageScrolled?: () => void;
 }
 
-export function SlackChat({ channel, conversation, currentUser, onInvite, onThreadClick, onShowProfile }: SlackChatProps) {
+export function SlackChat({
+    channel,
+    conversation,
+    currentUser,
+    onInvite,
+    onThreadClick,
+    onShowProfile,
+    targetMessageId,
+    onTargetMessageScrolled
+}: SlackChatProps) {
+    const { socket, isConnected } = useSocket();
     const [messages, setMessages] = useState<any[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [attachments, setAttachments] = useState<string[]>([]);
@@ -89,15 +103,57 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
     // Initial fetch
     useEffect(() => {
         fetchMessages();
-    }, [fetchMessages]);
 
-    // Polling for realtime-like updates (every 3s)
+        // Clear unreads when entering channel/conversation
+        if (channel) {
+            clearChannelUnreads(channel._id, currentUser._id);
+        } else if (conversation) {
+            markMessagesAsRead(conversation._id, currentUser._id);
+        }
+    }, [fetchMessages, channel?._id, conversation?._id, currentUser._id]);
+
+    // Socket listeners for real-time updates
     useEffect(() => {
-        const interval = setInterval(() => {
-            fetchMessages(true);
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [fetchMessages]);
+        if (!socket) return;
+
+        const onNewMessage = (msg: any) => {
+            // Only add if it belongs to the current view
+            const isForChannel = channel && msg.channelId === channel._id;
+            const isForConversation = conversation && msg.conversationId === conversation._id;
+
+            if (isForChannel || isForConversation) {
+                setMessages((prev) => {
+                    if (prev.find(m => m._id === msg._id)) return prev;
+                    return [...prev, msg];
+                });
+                scrollToBottom();
+            }
+        };
+
+        socket.on("message:new", onNewMessage);
+
+        return () => {
+            socket.off("message:new", onNewMessage);
+        };
+    }, [socket, channel?._id, conversation?._id]);
+
+    // Handle jumping to a specific message
+    useEffect(() => {
+        if (!targetMessageId || messages.length === 0) return;
+
+        const timer = setTimeout(() => {
+            const element = document.getElementById(`message-${targetMessageId}`);
+            if (element && scrollRef.current) {
+                element.scrollIntoView({ behavior: "smooth", block: "center" });
+                // Clear the target after a short delay so highlighting eventually disappears
+                setTimeout(() => {
+                    onTargetMessageScrolled?.();
+                }, 2000);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [targetMessageId, messages.length, onTargetMessageScrolled]);
 
     const handleSendMessage = async (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -126,9 +182,28 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
             }
 
             if (res.success) {
-                setMessages(prev => [...prev, res.data]);
+                setNewMessage("");
                 setAttachments([]);
-                scrollToBottom();
+
+                // Emit socket event for real-time update
+                if (socket) {
+                    socket.emit("message:new", res.data);
+                }
+
+                // For channels, we also want to trigger an unread update for others
+                if (channel && socket) {
+                    socket.emit("unread:update", {
+                        channelId: channel._id,
+                        senderId: currentUser._id
+                    });
+                } else if (conversation && socket) {
+                    socket.emit("unread:update", {
+                        conversationId: conversation._id,
+                        senderId: currentUser._id
+                    });
+                }
+
+                fetchMessages(true);
             } else {
                 toast.error("Failed to send message");
                 setNewMessage(content); // Restore on error
@@ -285,6 +360,7 @@ export function SlackChat({ channel, conversation, currentUser, onInvite, onThre
                                     onShowProfile={() => onShowProfile(msg.sender)}
                                     onEdit={handleEditMessage}
                                     onDelete={handleDeleteMessage}
+                                    isTarget={msg._id === targetMessageId}
                                 />
                             ))
                         )}

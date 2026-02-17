@@ -6,8 +6,10 @@ import { SlackSidebar } from "./slack-sidebar";
 import { SlackChat } from "./slack-chat";
 import { SlackThread } from "./slack-thread";
 import { SlackProfileModal } from "./slack-profile-modal";
-import { createChannel, generateChannelInvite } from "@/lib/actions/channel.actions";
+import { createChannel, generateChannelInvite, getChannels } from "@/lib/actions/channel.actions";
+import { getConversations } from "@/lib/actions/message.actions";
 import { updateUserPresence } from "@/lib/actions/user.actions";
+import { useSocket } from "@/components/providers/socket-provider";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +41,7 @@ export function SlackLayout({
     const [activeConversationId, setActiveConversationId] = useState<string | undefined>(initialConversationId);
     const [activeThreadMessage, setActiveThreadMessage] = useState<any | null>(null);
     const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
+    const [targetMessageId, setTargetMessageId] = useState<string | undefined>(undefined);
 
     // Heartbeat for presence
     useEffect(() => {
@@ -53,10 +56,58 @@ export function SlackLayout({
         return () => clearInterval(interval);
     }, [currentUser?._id]);
 
+    // Poll for sidebar updates (unreads and new channels/DMs)
+    useEffect(() => {
+        if (!currentUser?._id) return;
+
+        const refreshSidebar = async () => {
+            const [channelsRes, dmsRes] = await Promise.all([
+                getChannels(currentUser._id),
+                getConversations(currentUser._id)
+            ]);
+
+            if (channelsRes.success) setChannels(channelsRes.data);
+            if (dmsRes.success) setConversations(dmsRes.data);
+        };
+
+        const interval = setInterval(refreshSidebar, 5000); // 5s poll for sidebar
+        return () => clearInterval(interval);
+    }, [currentUser?._id]);
+
+    // Socket listener for sidebar updates
+    const { socket, isConnected } = useSocket();
+    useEffect(() => {
+        if (!socket || !currentUser?._id) return;
+
+        const onUnreadUpdate = (data: any) => {
+            // If we are already in this channel/conversation, we might not need to update unreads
+            // but simpler to just refresh the sidebar data
+            const refreshSidebar = async () => {
+                const [channelsRes, dmsRes] = await Promise.all([
+                    getChannels(currentUser._id),
+                    getConversations(currentUser._id)
+                ]);
+
+                if (channelsRes.success) setChannels(channelsRes.data);
+                if (dmsRes.success) setConversations(dmsRes.data);
+            };
+
+            refreshSidebar();
+        };
+
+        socket.on("unread:update", onUnreadUpdate);
+        return () => {
+            socket.off("unread:update", onUnreadUpdate);
+        };
+    }, [socket, currentUser?._id]);
+
+    const [conversations, setConversations] = useState(initialConversations);
+
     // Modal state
     const [openCreateChannel, setOpenCreateChannel] = useState(false);
     const [newChannelName, setNewChannelName] = useState("");
     const [creating, setCreating] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     // Sync URL with state (optional, can do deep linking later)
     const handleSelectChannel = (channelId: string) => {
@@ -129,11 +180,19 @@ export function SlackLayout({
             setActiveConversationId(message.conversationId._id || message.conversationId);
             setActiveChannelId(undefined);
         }
+
+        // Set target message for scrolling/highlighting
+        setTargetMessageId(message._id);
     };
 
     return (
         <div className="h-screen flex flex-col overflow-hidden">
-            <SlackHeader userId={currentUser._id} onSelectMessage={handleSelectMessage} />
+            <SlackHeader
+                userId={currentUser._id}
+                onSelectMessage={handleSelectMessage}
+                searchOpen={isSearchOpen}
+                onSearchOpenChange={setIsSearchOpen}
+            />
 
             <div className="flex-1 flex overflow-hidden border-t min-h-0">
                 <SlackSidebar
@@ -151,6 +210,7 @@ export function SlackLayout({
                     onCreateChannel={() => setOpenCreateChannel(true)}
                     onInvite={handleInvite}
                     onShowProfile={(user) => setSelectedProfileUser(user)}
+                    onSearchClick={() => setIsSearchOpen(true)}
                 />
 
                 <main className="flex-1 flex flex-col min-w-0 bg-white relative">
@@ -161,6 +221,8 @@ export function SlackLayout({
                         onInvite={handleInvite}
                         onThreadClick={(msg) => setActiveThreadMessage(msg)}
                         onShowProfile={(user) => setSelectedProfileUser(user)}
+                        targetMessageId={targetMessageId}
+                        onTargetMessageScrolled={() => setTargetMessageId(undefined)}
                     />
 
                     {activeThreadMessage && (
@@ -175,8 +237,17 @@ export function SlackLayout({
 
             <SlackProfileModal
                 user={selectedProfileUser}
+                currentUser={currentUser}
                 open={!!selectedProfileUser}
                 onOpenChange={(open) => !open && setSelectedProfileUser(null)}
+                onUpdate={(updatedUser) => {
+                    // Optionally update local currentUser state if it's the own profile
+                    if (updatedUser._id === currentUser._id) {
+                        // You might need a way to refresh the global currentUser state
+                        // For now, at least closing modal and showing success is handled
+                    }
+                    setSelectedProfileUser(updatedUser);
+                }}
             />
 
             <Dialog open={openCreateChannel} onOpenChange={setOpenCreateChannel}>
