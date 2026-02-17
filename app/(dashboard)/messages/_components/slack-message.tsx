@@ -31,7 +31,10 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
     const [editContent, setEditContent] = useState(message.content);
     const [isPending, setIsPending] = useState(false);
 
-    const isOwner = currentUser?._id === message.sender?._id;
+    const currentUserId = currentUser?._id || currentUser?.id;
+    const msgSender = message.sender?._id || message.sender;
+    const isOwner = currentUserId && msgSender && currentUserId.toString() === msgSender.toString();
+
     const sender = message.sender || { firstName: "Unknown", lastName: "User" };
 
     const handleUpdate = async () => {
@@ -56,7 +59,7 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
 
     if (isSameSender) {
         return (
-            <div className="group flex items-start px-5 py-0.5 hover:bg-slate-50 -ml-5 pl-14">
+            <div className="group relative flex items-start px-5 py-0.5 hover:bg-slate-50 -ml-5 pl-14">
                 <div className="hidden group-hover:block absolute left-2 top-0 text-[10px] text-slate-400">
                     {format(new Date(message.createdAt), "h:mm a")}
                 </div>
@@ -124,7 +127,7 @@ export function SlackMessage({ message, currentUser, isSameSender, onThreadClick
     }
 
     return (
-        <div className="group flex items-start gap-2 px-5 py-1 hover:bg-slate-50 mt-1">
+        <div className="group relative flex items-start gap-2 px-5 py-1 hover:bg-slate-50 mt-1">
             <Avatar
                 className="h-9 w-9 mt-0.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={onShowProfile}
