@@ -350,18 +350,18 @@ export async function searchMessages(query: string, userId: string) {
         // 1. Explicitly cast IDs for robust querying
         const userObjId = new mongoose.Types.ObjectId(userId);
 
-        // 2. Get all channels user is member of OR are public
+        // 2. Get all channels user is member of OR are public (not private)
         const channels = await Channel.find({
             $or: [
-                { members: userObjId },
-                { isPubliclyViewable: true }
+                { members: userId },
+                { isPrivate: false }
             ]
         }).select('_id');
         const channelIds = channels.map(c => c._id);
 
         // 3. Get all conversations user is participant in
         const conversations = await Conversation.find({
-            participants: userObjId
+            participants: userId
         }).select('_id');
         const conversationIds = conversations.map(c => c._id);
 
