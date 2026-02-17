@@ -16,13 +16,13 @@ export function MemberSearch() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [query, setQuery] = useState(searchParams.get("q") || "");
-    const [role, setRole] = useState(searchParams.get("role") || "all");
-    const [sort, setSort] = useState(searchParams.get("sort") || "relevance");
+    const [query, setQuery] = useState(searchParams?.get("q") || "");
+    const [role, setRole] = useState(searchParams?.get("role") || "all");
+    const [sort, setSort] = useState(searchParams?.get("sort") || "relevance");
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            const params = new URLSearchParams(searchParams.toString());
+            const params = new URLSearchParams(searchParams?.toString() || "");
             if (query) params.set("q", query);
             else params.delete("q");
 

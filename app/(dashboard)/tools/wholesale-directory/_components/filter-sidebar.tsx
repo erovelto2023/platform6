@@ -16,7 +16,7 @@ export function FilterSidebar() {
 
     const createQueryString = useCallback(
         (name: string, value: string) => {
-            const params = new URLSearchParams(searchParams.toString());
+            const params = new URLSearchParams(searchParams?.toString() || "");
             if (value === null || value === "") {
                 params.delete(name);
             } else {
@@ -37,7 +37,7 @@ export function FilterSidebar() {
             <div className="space-y-3">
                 <h3 className="font-semibold text-sm text-slate-900">Supplier Type</h3>
                 <RadioGroup
-                    defaultValue={searchParams.get("type") || "All"}
+                    defaultValue={searchParams?.get("type") || "All"}
                     onValueChange={(val) => handleFilterChange("type", val === "All" ? "" : val)}
                 >
                     <div className="flex items-center space-x-2">
@@ -62,7 +62,7 @@ export function FilterSidebar() {
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="channel-amazon"
-                            checked={searchParams.get("channel") === "Amazon"}
+                            checked={searchParams?.get("channel") === "Amazon"}
                             onCheckedChange={(checked) => handleFilterChange("channel", checked ? "Amazon" : "")}
                         />
                         <Label htmlFor="channel-amazon">Amazon</Label>
@@ -70,7 +70,7 @@ export function FilterSidebar() {
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="channel-ebay"
-                            checked={searchParams.get("channel") === "eBay"}
+                            checked={searchParams?.get("channel") === "eBay"}
                             onCheckedChange={(checked) => handleFilterChange("channel", checked ? "eBay" : "")}
                         />
                         <Label htmlFor="channel-ebay">eBay</Label>
@@ -78,7 +78,7 @@ export function FilterSidebar() {
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="channel-store"
-                            checked={searchParams.get("channel") === "Online Store"}
+                            checked={searchParams?.get("channel") === "Online Store"}
                             onCheckedChange={(checked) => handleFilterChange("channel", checked ? "Online Store" : "")}
                         />
                         <Label htmlFor="channel-store">Online Store</Label>
@@ -90,7 +90,7 @@ export function FilterSidebar() {
             <div className="space-y-3">
                 <h3 className="font-semibold text-sm text-slate-900">Supplier Location</h3>
                 <RadioGroup
-                    defaultValue={searchParams.get("location") || "Any"}
+                    defaultValue={searchParams?.get("location") || "Any"}
                     onValueChange={(val) => handleFilterChange("location", val === "Any" ? "" : val)}
                 >
                     <div className="flex items-center space-x-2">
@@ -121,8 +121,8 @@ export function FilterSidebar() {
                                         key={cat}
                                         variant="ghost"
                                         size="sm"
-                                        className={`w-full justify-start h-8 px-2 text-sm ${searchParams.get("category") === cat ? "bg-slate-100 font-medium" : "text-slate-600"}`}
-                                        onClick={() => handleFilterChange("category", cat === searchParams.get("category") ? "" : cat)}
+                                        className={`w-full justify-start h-8 px-2 text-sm ${searchParams?.get("category") === cat ? "bg-slate-100 font-medium" : "text-slate-600"}`}
+                                        onClick={() => handleFilterChange("category", cat === searchParams?.get("category") ? "" : cat)}
                                     >
                                         {cat}
                                     </Button>
