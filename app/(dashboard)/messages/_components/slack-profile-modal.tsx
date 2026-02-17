@@ -8,9 +8,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail, Shield, Clock } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { Mail, Shield, Clock, ExternalLink } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface SlackProfileModalProps {
     user: any;
@@ -193,8 +194,15 @@ export function SlackProfileModal({ user, currentUser, open, onOpenChange, onUpd
                                         Message
                                     </Button>
                                 )}
-                                <Button variant="outline" className="flex-1">
-                                    History
+                                <Button variant="outline" className="flex-1" asChild>
+                                    <Link
+                                        href={`/community/profile/${user._id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <ExternalLink className="h-4 w-4 mr-2" />
+                                        Profile
+                                    </Link>
                                 </Button>
                             </>
                         )}

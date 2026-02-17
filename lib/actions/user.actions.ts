@@ -105,7 +105,7 @@ export async function updateUserPresence(userId: string) {
 export async function getUsers() {
     try {
         await connectDB();
-        const users = await User.find({}).select('firstName lastName profileImage lastActiveAt bio').lean();
+        const users = await User.find({}).select('firstName lastName profileImage lastActiveAt bio email role').lean();
         return { success: true, data: JSON.parse(JSON.stringify(users)) };
     } catch (error) {
         console.error("Failed to fetch users:", error);
