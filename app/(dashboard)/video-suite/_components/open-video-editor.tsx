@@ -130,6 +130,9 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
 
                 if (clip) {
                     console.log("[OpenVideo] Clip created successfully:", clip.type, clip.id);
+                    await clip.ready;
+                    console.log("[OpenVideo] Clip ready. Metadata:", clip.meta);
+
                     // Add to a track. Create one if none exist.
                     if (studioRef.current.tracks.length === 0) {
                         console.log("[OpenVideo] Adding default track...");
@@ -137,7 +140,15 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                     }
                     const trackId = studioRef.current.tracks[0].id;
                     const startTime = studioRef.current.maxDuration;
-                    clip.display = { from: startTime, to: startTime + clip.duration };
+
+                    // Ensure dimensions are valid before adding
+                    if (clip.type === 'Image' || clip.type === 'Video') {
+                        if (clip.meta.width === 0 || clip.meta.height === 0) {
+                            console.warn("[OpenVideo] Clip has 0 dimensions, centering default size.");
+                        }
+                    }
+
+                    clip.display = { from: startTime, to: startTime + (clip.duration === Infinity ? 5000000 : clip.duration) };
                     console.log("[OpenVideo] Adding clip to track:", trackId, "at:", startTime);
                     await studioRef.current.addClip(clip, { trackId });
                     console.log("[OpenVideo] Clip added to Studio.");
