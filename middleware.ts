@@ -12,6 +12,7 @@ const isProtected = createRouteMatcher([
 const isPublic = createRouteMatcher([
     '/api/uploadthing(.*)',
     '/invite(.*)',
+    '/uploads(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

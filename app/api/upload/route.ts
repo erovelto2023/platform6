@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
         const fileName = `${uniqueId}.${extension}`;
         const path = join(uploadDir, fileName);
 
+        console.log(`[DEBUG_UPLOAD] Writing file to: ${path}`);
         await writeFile(path, buffer);
 
         // Return the public URL
