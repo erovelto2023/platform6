@@ -40,7 +40,7 @@ export function SlackNewDmModal({ open, onOpenChange, currentUser, onConversatio
                 try {
                     const res = await getUsers();
                     if (res.success) {
-                        setUsers(res.data.filter((u: any) => u._id !== currentUser._id));
+                        setUsers(res.data);
                     }
                 } finally {
                     setLoading(false);

@@ -372,7 +372,7 @@ export function SlackChat({
     }
 
     const isGroup = conversation?.isGroup;
-    const otherUser = isGroup ? null : conversation?.participants.find((p: any) => p._id !== currentUser._id);
+    const otherUser = isGroup ? null : (conversation?.participants.find((p: any) => p._id !== currentUser._id) || currentUser);
 
     const title = channel ? channel.name : (
         isGroup
@@ -380,7 +380,9 @@ export function SlackChat({
                 .filter((p: any) => p._id !== currentUser._id)
                 .map((p: any) => p.firstName)
                 .join(", "))
-            : (otherUser?.firstName + " " + otherUser?.lastName)
+            : (otherUser?._id === currentUser?._id
+                ? `${currentUser.firstName} ${currentUser.lastName} (you)`
+                : `${otherUser?.firstName} ${otherUser?.lastName}`)
     );
 
     return (

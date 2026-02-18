@@ -165,16 +165,18 @@ export function SlackSidebar({
                         <div className="space-y-0.5">
                             {conversations.map(conversation => {
                                 const isGroup = conversation.isGroup;
-                                const otherUser = isGroup ? null : conversation.participants.find(
+                                const otherUser = isGroup ? null : (conversation.participants.find(
                                     (p: any) => p._id !== currentUser._id
-                                );
+                                ) || currentUser);
 
                                 const displayName = isGroup
                                     ? (conversation.groupName || conversation.participants
                                         .filter((p: any) => p._id !== currentUser._id)
                                         .map((p: any) => p.firstName)
                                         .join(", "))
-                                    : `${otherUser?.firstName} ${otherUser?.lastName}`;
+                                    : (otherUser?._id === currentUser?._id
+                                        ? `${currentUser.firstName} ${currentUser.lastName} (you)`
+                                        : `${otherUser?.firstName} ${otherUser?.lastName}`);
 
                                 const isOnline = !isGroup && otherUser?.lastActiveAt &&
                                     (new Date().getTime() - new Date(otherUser.lastActiveAt).getTime()) < 300000; // 5 mins
