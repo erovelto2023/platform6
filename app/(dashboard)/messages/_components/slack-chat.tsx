@@ -11,6 +11,7 @@ import { SlackMessage } from "./slack-message";
 import { SlackReactionPicker } from "./slack-reaction-picker";
 import { sendChannelMessage, getChannelMessages, clearChannelUnreads } from "@/lib/actions/channel.actions";
 import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage, markMessagesAsRead } from "@/lib/actions/message.actions";
+import { getUsers } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUploadThing } from "@/lib/uploadthing";
@@ -46,6 +47,12 @@ export function SlackChat({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const [pending, setPending] = useState(false);
+
+    // Mention state
+    const [allUsers, setAllUsers] = useState<any[]>([]);
+    const [mentionSearch, setMentionSearch] = useState("");
+    const [showMentions, setShowMentions] = useState(false);
+    const [mentionIndex, setMentionIndex] = useState(0);
 
     const { startUpload, isUploading } = useUploadThing("messageAttachment", {
         onClientUploadComplete: (res: any) => {
@@ -111,6 +118,68 @@ export function SlackChat({
             markMessagesAsRead(conversation._id, currentUser._id);
         }
     }, [fetchMessages, channel?._id, conversation?._id, currentUser._id]);
+
+    // Fetch all users for mentions
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const res = await getUsers();
+            if (res.success) {
+                setAllUsers(res.data);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    // Mention helpers
+    const filteredMentions = allUsers
+        .filter(u =>
+            u._id !== currentUser._id &&
+            (u.firstName?.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+                u.lastName?.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+                u.username?.toLowerCase().includes(mentionSearch.toLowerCase()))
+        )
+        .slice(0, 8);
+
+    const handleMentionSelect = (user: any) => {
+        const before = newMessage.substring(0, newMessage.lastIndexOf("@"));
+        const username = user.username || `${user.firstName}${user.lastName}`.toLowerCase().replace(/\s/g, "");
+        setNewMessage(before + "@" + username + " ");
+        setShowMentions(false);
+        inputRef.current?.focus();
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setNewMessage(value);
+
+        const lastChar = value[value.length - 1];
+        const lastWord = value.split(" ").pop() || "";
+
+        if (lastWord.startsWith("@")) {
+            setMentionSearch(lastWord.substring(1));
+            setShowMentions(true);
+            setMentionIndex(0);
+        } else {
+            setShowMentions(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (showMentions) {
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setMentionIndex(prev => (prev + 1) % filteredMentions.length);
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setMentionIndex(prev => (prev - 1 + filteredMentions.length) % filteredMentions.length);
+            } else if (e.key === "Enter" && filteredMentions.length > 0) {
+                e.preventDefault();
+                handleMentionSelect(filteredMentions[mentionIndex]);
+            } else if (e.key === "Escape") {
+                setShowMentions(false);
+            }
+        }
+    };
 
     // Socket listeners for real-time updates
     useEffect(() => {
@@ -200,6 +269,22 @@ export function SlackChat({
                     socket.emit("unread:update", {
                         conversationId: conversation._id,
                         senderId: currentUser._id
+                    });
+                }
+
+                // Emit notifications for mentions in real-time
+                if (socket && res.data.mentions?.length > 0) {
+                    res.data.mentions.forEach((mentionId: string) => {
+                        if (mentionId !== currentUser._id) {
+                            socket.emit("notification:new", {
+                                recipientId: mentionId,
+                                senderId: currentUser._id,
+                                senderName: `${currentUser.firstName} ${currentUser.lastName}`,
+                                type: "mention",
+                                content: `mentioned you in ${channel ? `#${channel.name}` : "a message"}`,
+                                link: channel ? `/messages?channelId=${channel._id}` : `/messages/${conversation._id}`
+                            });
+                        }
                     });
                 }
 
@@ -417,14 +502,51 @@ export function SlackChat({
                     )}
 
                     <form onSubmit={handleSendMessage} className="p-2">
-                        <Input
-                            ref={inputRef}
-                            className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
-                            placeholder={`Message #${title}`}
-                            value={newMessage}
-                            onChange={(e) => setNewMessage(e.target.value)}
-                            autoFocus
-                        />
+                        <div className="relative">
+                            <Input
+                                ref={inputRef}
+                                className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
+                                placeholder={`Message #${title}`}
+                                value={newMessage}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                            />
+
+                            {showMentions && filteredMentions.length > 0 && (
+                                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                                    <div className="p-2 bg-slate-50 border-b text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                        Members
+                                    </div>
+                                    <div className="max-h-60 overflow-y-auto">
+                                        {filteredMentions.map((user, i) => (
+                                            <div
+                                                key={user._id}
+                                                className={cn(
+                                                    "flex items-center gap-2 p-2 px-3 cursor-pointer transition-colors",
+                                                    i === mentionIndex ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50"
+                                                )}
+                                                onClick={() => handleMentionSelect(user)}
+                                            >
+                                                <div className="h-6 w-6 rounded-full overflow-hidden bg-slate-200">
+                                                    {user.profileImage ? (
+                                                        <img src={user.profileImage} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center text-[10px] font-bold">
+                                                            {user.firstName?.[0]}{user.lastName?.[0]}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 truncate">
+                                                    <span className="font-medium text-sm">@{user.username || `${user.firstName}${user.lastName}`.toLowerCase()}</span>
+                                                    <span className="ml-2 text-xs text-slate-400">{user.firstName} {user.lastName}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <div className="flex justify-between items-center mt-2">
                             <div className="flex gap-1">
                                 <Button

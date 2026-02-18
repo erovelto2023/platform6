@@ -8,6 +8,10 @@ import {
 } from "react";
 // @ts-ignore
 import { io } from "socket.io-client";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import Link from "next/link";
+import { Bell } from "lucide-react";
 
 type SocketContextType = {
     socket: any | null;
@@ -44,6 +48,28 @@ export const SocketProvider = ({
 
         socketInstance.on("disconnect", () => {
             setIsConnected(false);
+        });
+
+        socketInstance.on("notification:new", (data: any) => {
+            // We need to compare MongoDB _id, which usually comes from current user details
+            // For now, if we don't have MongoDB _id yet, we just show it if clerkId matches or if it's targeted
+            // Actually, we should probably fetch the DB user once on mount
+
+            // Temporary check: if we have a way to identify the user
+            // We'll use a simpler approach: the sender already restricted emission to the recipientId
+            // but for safety in broadcast, we check it here
+            const storage = window.localStorage.getItem('kb-user-id'); // Assuming we store it
+
+            if (storage && data.recipientId === storage) {
+                toast(`New ${data.type}`, {
+                    description: `${data.senderName} ${data.content}`,
+                    icon: <Bell className="h-4 w-4" />,
+                    action: data.link ? {
+                        label: "View",
+                        onClick: () => window.location.href = data.link
+                    } : undefined
+                });
+            }
         });
 
         setSocket(socketInstance);

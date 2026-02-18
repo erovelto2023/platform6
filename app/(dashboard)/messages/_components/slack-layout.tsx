@@ -43,6 +43,13 @@ export function SlackLayout({
     const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
     const [targetMessageId, setTargetMessageId] = useState<string | undefined>(undefined);
 
+    // Sync user ID for socket notification filtering
+    useEffect(() => {
+        if (currentUser?._id) {
+            window.localStorage.setItem('kb-user-id', currentUser._id);
+        }
+    }, [currentUser?._id]);
+
     // Heartbeat for presence
     useEffect(() => {
         if (!currentUser?._id) return;
@@ -240,14 +247,6 @@ export function SlackLayout({
                 currentUser={currentUser}
                 open={!!selectedProfileUser}
                 onOpenChange={(open) => !open && setSelectedProfileUser(null)}
-                onUpdate={(updatedUser) => {
-                    // Optionally update local currentUser state if it's the own profile
-                    if (updatedUser._id === currentUser._id) {
-                        // You might need a way to refresh the global currentUser state
-                        // For now, at least closing modal and showing success is handled
-                    }
-                    setSelectedProfileUser(updatedUser);
-                }}
             />
 
             <Dialog open={openCreateChannel} onOpenChange={setOpenCreateChannel}>

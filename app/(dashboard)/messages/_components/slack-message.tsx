@@ -70,6 +70,21 @@ export function SlackMessage({
         }
     };
 
+    const renderContent = (content: string) => {
+        if (!content) return null;
+        const parts = content.split(/(@\w+)/g);
+        return parts.map((part, i) => {
+            if (part && part.startsWith("@")) {
+                return (
+                    <span key={i} className="text-blue-600 font-semibold bg-blue-50 px-1 rounded cursor-pointer hover:underline">
+                        {part}
+                    </span>
+                );
+            }
+            return part;
+        });
+    };
+
     if (isSameSender) {
         return (
             <div
@@ -102,7 +117,7 @@ export function SlackMessage({
                         </div>
                     ) : (
                         <>
-                            {message.content}
+                            {renderContent(message.content)}
                             {message.isEdited && <span className="text-[10px] text-slate-500 ml-1">(edited)</span>}
                         </>
                     )}
@@ -198,7 +213,7 @@ export function SlackMessage({
                         </div>
                     ) : (
                         <>
-                            {message.content}
+                            {renderContent(message.content)}
                             {message.isEdited && <span className="text-[10px] text-slate-500 ml-1">(edited)</span>}
                         </>
                     )}

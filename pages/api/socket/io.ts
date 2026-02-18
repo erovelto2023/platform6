@@ -26,6 +26,10 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIo) => {
             socket.on("unread:update", (data) => {
                 socket.broadcast.emit("unread:update", data);
             });
+
+            socket.on("notification:new", (data) => {
+                socket.broadcast.emit("notification:new", data);
+            });
         });
 
         res.socket.server.io = io;

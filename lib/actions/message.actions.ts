@@ -4,6 +4,7 @@ import connectToDatabase from "@/lib/db/connect";
 import Conversation from "@/lib/db/models/Conversation";
 import Message from "@/lib/db/models/Message";
 import Channel from "@/lib/db/models/Channel";
+import User from "@/lib/db/models/User";
 import { revalidatePath } from "next/cache";
 import { createNotification } from "./notification.actions";
 
@@ -142,7 +143,20 @@ export async function sendMessage(data: {
     try {
         await connectToDatabase();
 
-        // Create message
+        // 1. Parse mentions (@username)
+        const mentionRegex = /@(\w+)/g;
+        const mentionMatches = [...data.content.matchAll(mentionRegex)];
+        const mentionedUsernames = [...new Set(mentionMatches.map(match => match[1]))];
+
+        let mentionIds: string[] = [];
+        if (mentionedUsernames.length > 0) {
+            const mentionedUsers = await User.find({
+                username: { $in: mentionedUsernames }
+            }).select('_id');
+            mentionIds = mentionedUsers.map(u => u._id.toString());
+        }
+
+        // 2. Create message
         const message = await Message.create({
             conversationId: data.conversationId,
             channelId: data.channelId,
@@ -151,6 +165,7 @@ export async function sendMessage(data: {
             type: data.type || 'text',
             replyTo: data.replyTo,
             attachments: data.attachments || [],
+            mentions: mentionIds,
         });
 
         // If it's a reply, update parent
@@ -192,6 +207,21 @@ export async function sendMessage(data: {
             }
 
             await conversation.save();
+        }
+
+        // 4. Create notifications for mentioned users (excluding sender)
+        const filteredMentionIds = mentionIds.filter(id => id !== data.senderId);
+
+        for (const recipientId of filteredMentionIds) {
+            // Check if we haven't already notified this user (e.g. if it's a DM)
+            // For now, we'll just send it, but in the future we might want to prioritize "mention" over "message" notification
+            await createNotification({
+                recipientId,
+                senderId: data.senderId,
+                type: "mention",
+                content: `mentioned you in ${data.channelId ? "a channel" : "a message"}`,
+                link: data.channelId ? `/messages?channelId=${data.channelId}` : `/messages/${data.conversationId}`
+            });
         }
 
         const populatedMessage = await Message.findById(message._id)

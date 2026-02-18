@@ -97,13 +97,27 @@ export async function sendChannelMessage(params: {
     try {
         await connectToDatabase();
 
+        // 1. Parse mentions (@username)
+        const mentionRegex = /@(\w+)/g;
+        const mentionMatches = [...params.content.matchAll(mentionRegex)];
+        const mentionedUsernames = [...new Set(mentionMatches.map(match => match[1]))];
+
+        let mentionIds: string[] = [];
+        if (mentionedUsernames.length > 0) {
+            const mentionedUsers = await User.find({
+                username: { $in: mentionedUsernames }
+            }).select('_id');
+            mentionIds = mentionedUsers.map(u => u._id.toString());
+        }
+
         const message = await Message.create({
             channelId: params.channelId,
             sender: params.senderId,
             content: params.content,
             attachments: params.attachments || [],
             replyTo: params.replyTo,
-            readBy: [params.senderId]
+            readBy: [params.senderId],
+            mentions: mentionIds,
         });
 
         // If it's a reply, update parent
@@ -138,6 +152,21 @@ export async function sendChannelMessage(params: {
         });
 
         revalidatePath("/messages");
+
+        // 4. Create notifications for mentioned users (excluding sender)
+        const { createNotification } = await import("./notification.actions");
+        const filteredMentionIds = mentionIds.filter(id => id !== params.senderId);
+
+        for (const recipientId of filteredMentionIds) {
+            await createNotification({
+                recipientId,
+                senderId: params.senderId,
+                type: "mention",
+                content: `mentioned you in channel #${channel?.name || "some channel"}`,
+                link: `/messages?channelId=${params.channelId}`
+            });
+        }
+
         return { success: true, data: JSON.parse(JSON.stringify(message)) };
     } catch (error: any) {
         console.error("Error sending channel message:", error);

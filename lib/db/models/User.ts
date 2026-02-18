@@ -76,6 +76,12 @@ const UserSchema = new Schema({
         },
         apiKey: { type: String }, // For OpenRouter
         defaultModel: { type: String, default: 'deepseek-r1' }
+    },
+    notificationSettings: {
+        mentions: { type: Boolean, default: true },
+        directMessages: { type: Boolean, default: true },
+        announcements: { type: Boolean, default: true },
+        emailNotifications: { type: Boolean, default: false }
     }
 }, { timestamps: true });
 

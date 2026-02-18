@@ -54,6 +54,10 @@ const MessageSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    mentions: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }],
 }, { timestamps: true });
 
 MessageSchema.index({ conversationId: 1, createdAt: 1 });
