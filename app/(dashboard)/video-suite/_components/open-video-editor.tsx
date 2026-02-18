@@ -58,10 +58,18 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
 
                 const projectData = (initialData && typeof initialData === 'object' && Array.isArray(initialData.clips))
                     ? initialData
-                    : { clips: [], tracks: [], settings: { width: 1280, height: 720, fps: 30 } };
+                    : null;
 
-                console.log("[OpenVideo] Loading project data:", projectData);
-                await studio.loadFromJSON(projectData as any);
+                if (projectData && projectData.clips.length > 0) {
+                    console.log("[OpenVideo] Loading project data:", projectData);
+                    await studio.loadFromJSON(projectData as any);
+                } else {
+                    console.log("[OpenVideo] Skipping loadFromJSON for empty project.");
+                    // Optional: Initialize with a default track if needed
+                    if (studio.tracks.length === 0) {
+                        studio.addTrack({ name: "Main Track", type: "video" });
+                    }
+                }
 
                 setIsReady(true);
                 setV(v => v + 1);
@@ -101,41 +109,65 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
     }, [initialData]);
 
     const handleAddMedia = async (res: any[]) => {
-        if (!studioRef.current || !res || res.length === 0) return;
-
-        for (const file of res) {
-            let clip;
-            if (file.type?.startsWith('video')) {
-                clip = new Video(file.url);
-            } else if (file.type?.startsWith('audio')) {
-                clip = new Audio(file.url);
-            } else if (file.type?.startsWith('image')) {
-                clip = new Image(file.url);
-            }
-
-            if (clip) {
-                // Add to a track. Create one if none exist.
-                if (studioRef.current.tracks.length === 0) {
-                    studioRef.current.addTrack({ name: "Track 1", type: "video" });
-                }
-                const trackId = studioRef.current.tracks[0].id;
-                await studioRef.current.addClip(clip, { trackId });
-            }
+        console.log("[OpenVideo] handleAddMedia triggered with:", res);
+        if (!studioRef.current || !res || res.length === 0) {
+            console.warn("[OpenVideo] handleAddMedia: Missing studioRef or empty response.");
+            return;
         }
-        toast.success("Assets added to project");
-        setV(prev => prev + 1);
+
+        try {
+            for (const file of res) {
+                console.log("[OpenVideo] Processing file:", file.name, file.type, file.url);
+                let clip;
+                if (file.type?.startsWith('video')) {
+                    clip = new Video(file.url);
+                } else if (file.type?.startsWith('audio')) {
+                    clip = new Audio(file.url);
+                } else if (file.type?.startsWith('image')) {
+                    clip = new Image(file.url);
+                }
+
+                if (clip) {
+                    console.log("[OpenVideo] Clip created successfully:", clip.type, clip.id);
+                    // Add to a track. Create one if none exist.
+                    if (studioRef.current.tracks.length === 0) {
+                        console.log("[OpenVideo] Adding default track...");
+                        studioRef.current.addTrack({ name: "Track 1", type: "video" });
+                    }
+                    const trackId = studioRef.current.tracks[0].id;
+                    console.log("[OpenVideo] Adding clip to track:", trackId);
+                    await studioRef.current.addClip(clip, { trackId });
+                    console.log("[OpenVideo] Clip added to Studio.");
+                } else {
+                    console.warn("[OpenVideo] Failed to create clip for file:", file.name);
+                }
+            }
+            toast.success("Assets added to project");
+        } catch (error) {
+            console.error("[OpenVideo] Error in handleAddMedia:", error);
+            toast.error("Failed to add media to timeline");
+        } finally {
+            console.log("[OpenVideo] handleAddMedia complete. Forcing re-render.");
+            setV(prev => prev + 1);
+        }
     };
 
     const handleAddText = async () => {
         if (!studioRef.current) return;
-        if (studioRef.current.tracks.length === 0) {
-            studioRef.current.addTrack({ name: "Track 1", type: "video" });
+        try {
+            if (studioRef.current.tracks.length === 0) {
+                studioRef.current.addTrack({ name: "Track 1", type: "video" });
+            }
+            const textClip = new Text("New Text");
+            const trackId = studioRef.current.tracks[0].id;
+            await studioRef.current.addClip(textClip, { trackId });
+            toast.success("Text added");
+        } catch (error) {
+            console.error("[OpenVideo] Error in handleAddText:", error);
+            toast.error("Failed to add text");
+        } finally {
+            setV(prev => prev + 1);
         }
-        const textClip = new Text("New Text");
-        const trackId = studioRef.current.tracks[0].id;
-        await studioRef.current.addClip(textClip, { trackId });
-        toast.success("Text added");
-        setV(prev => prev + 1);
     };
 
     const handleTogglePlay = () => {
@@ -250,6 +282,7 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                         size="sm"
                         className="bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2"
                         disabled={isExporting}
+                        onClick={handleExport}
                     >
                         <Download className="w-4 h-4" />
                         Export
