@@ -42,45 +42,61 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
     const [v, setV] = useState(0); // Force re-render for internal state updates
 
     useEffect(() => {
-        if (!canvasRef.current || studioRef.current) return;
+        const initStudio = async () => {
+            try {
+                const studio = new Studio({
+                    width: 1280,
+                    height: 720,
+                    canvas: canvasRef.current!,
+                    bgColor: "#1A1D21"
+                });
 
-        const studio = new Studio({
-            width: 1280,
-            height: 720,
-            canvas: canvasRef.current,
-            bgColor: "#1A1D21"
-        });
+                studioRef.current = studio;
+                await studio.ready;
 
-        studioRef.current = studio;
+                console.log("[OpenVideo] Studio ready. Initial data:", initialData);
 
-        if (initialData) {
-            studio.loadFromJSON(initialData).then(() => {
+                if (initialData && typeof initialData === 'object' && Array.isArray(initialData.clips)) {
+                    console.log("[OpenVideo] Loading valid initial data...");
+                    await studio.loadFromJSON(initialData);
+                } else if (initialData) {
+                    console.warn("[OpenVideo] initialData provided but does not conform to ProjectJSON (missing clips array). Skipping loadFromJSON.");
+                }
+
                 setIsReady(true);
                 setV(v => v + 1);
-            });
-        } else {
-            setIsReady(true);
-        }
 
-        studio.on("play", ({ isPlaying }) => setIsPlaying(isPlaying));
-        studio.on("pause", ({ isPlaying }) => setIsPlaying(isPlaying));
-        studio.on("clip:added", () => setV(v => v + 1));
-        studio.on("clip:removed", () => setV(v => v + 1));
-        studio.on("selection:created", ({ selected }) => {
-            if (selected.length > 0) setSelectedClipId(selected[0].id);
-            else setSelectedClipId(null);
-        });
-        studio.on("selection:cleared", () => setSelectedClipId(null));
+                studio.on("play", ({ isPlaying }) => setIsPlaying(isPlaying));
+                studio.on("pause", ({ isPlaying }) => setIsPlaying(isPlaying));
+                studio.on("clip:added", () => setV(v => v + 1));
+                studio.on("clip:removed", () => setV(v => v + 1));
+                studio.on("selection:created", ({ selected }) => {
+                    if (selected.length > 0) setSelectedClipId(selected[0].id);
+                    else setSelectedClipId(null);
+                });
+                studio.on("selection:cleared", () => setSelectedClipId(null));
+            } catch (error) {
+                console.error("Failed to initialize OpenVideo Studio:", error);
+                toast.error("Failed to initialize video editor");
+                setIsReady(true); // Stop loader anyway
+            }
+        };
+
+        if (canvasRef.current && !studioRef.current) {
+            initStudio();
+        }
 
         // Sync time for UI
         const interval = setInterval(() => {
-            if (studio.isPlaying) setV(v => v + 1);
+            if (studioRef.current?.isPlaying) setV(v => v + 1);
         }, 100);
 
         return () => {
             clearInterval(interval);
-            studio.destroy();
-            studioRef.current = null;
+            if (studioRef.current) {
+                studioRef.current.destroy();
+                studioRef.current = null;
+            }
         };
     }, [initialData]);
 
