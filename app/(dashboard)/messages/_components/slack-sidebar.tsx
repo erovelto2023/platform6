@@ -11,7 +11,8 @@ import {
     ChevronRight,
     Lock,
     UserPlus,
-    Bookmark
+    Bookmark,
+    Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +34,8 @@ interface SlackSidebarProps {
     onSearchClick: () => void;
     onSavedItemsClick: () => void;
     activeView: 'chat' | 'saved';
+    onJoinHuddle: () => void;
+    isHuddleActive: boolean;
 }
 
 export function SlackSidebar({
@@ -49,7 +52,9 @@ export function SlackSidebar({
     onConversationCreated,
     onSearchClick,
     onSavedItemsClick,
-    activeView
+    activeView,
+    onJoinHuddle,
+    isHuddleActive
 }: SlackSidebarProps) {
     const [channelsOpen, setChannelsOpen] = useState(true);
     const [dmsOpen, setDmsOpen] = useState(true);
@@ -264,6 +269,23 @@ export function SlackSidebar({
                 >
                     <UserPlus className="w-4 h-4" />
                     <span className="text-sm">Invite people</span>
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    className={cn(
+                        "w-full justify-start text-[#cfc3cf] hover:text-white hover:bg-[#350d36] transition-colors gap-2 mt-1",
+                        isHuddleActive && "text-[#2EB67D] hover:text-[#2EB67D] bg-[#2EB67D]/10"
+                    )}
+                    onClick={onJoinHuddle}
+                >
+                    <div className="relative">
+                        <Headphones className="w-4 h-4" />
+                        {isHuddleActive && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2EB67D] rounded-full border border-[#3F0E40]" />
+                        )}
+                    </div>
+                    <span className="text-sm font-medium">Huddle</span>
                 </Button>
             </div>
             <SlackNewDmModal

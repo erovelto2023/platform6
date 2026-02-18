@@ -6,6 +6,8 @@ import { SlackSidebar } from "./slack-sidebar";
 import { SlackChat } from "./slack-chat";
 import { SlackThread } from "./slack-thread";
 import { SlackSavedItems } from "./slack-saved-items";
+import { SlackHuddleBox } from "./slack-huddle-box";
+import { createHuddleToken } from "@/lib/actions/huddle.actions";
 import { SlackProfileModal } from "./slack-profile-modal";
 import { createChannel, generateChannelInvite, getChannels } from "@/lib/actions/channel.actions";
 import { getConversations } from "@/lib/actions/message.actions";
@@ -45,6 +47,13 @@ export function SlackLayout({
     const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
     const [targetMessageId, setTargetMessageId] = useState<string | undefined>(undefined);
     const [activeView, setActiveView] = useState<'chat' | 'saved'>('chat');
+
+    // Huddle State
+    const [activeHuddle, setActiveHuddle] = useState<{
+        token: string;
+        wsUrl: string;
+        roomName: string;
+    } | null>(null);
 
     const refreshSidebar = async () => {
         const [channelsRes, dmsRes] = await Promise.all([
@@ -175,6 +184,40 @@ export function SlackLayout({
         }
     };
 
+    const handleJoinHuddle = async () => {
+        // Use the active channel name or conversation as the room name
+        const roomName = activeChannel ? activeChannel.name :
+            activeConversation ? `dm-${activeConversation._id}` :
+                null;
+
+        if (!roomName) {
+            toast.error("Select a channel or DM to start a huddle");
+            return;
+        }
+
+        try {
+            const res = await createHuddleToken(currentUser._id, roomName);
+            if (res.success && res.data) {
+                setActiveHuddle({
+                    token: res.data.token,
+                    wsUrl: res.data.wsUrl,
+                    roomName: res.data.room
+                });
+                toast.success("Joining huddle...");
+            } else {
+                toast.error(res.error || "Failed to join huddle");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Huddle server not configured");
+        }
+    };
+
+    const handleLeaveHuddle = () => {
+        setActiveHuddle(null);
+        toast.info("Left huddle");
+    };
+
     const activeChannel = channels.find(c => c._id === activeChannelId);
     const activeConversation = conversations.find(c => c._id === activeConversationId);
 
@@ -220,6 +263,8 @@ export function SlackLayout({
                     onSearchClick={() => setIsSearchOpen(true)}
                     onSavedItemsClick={() => setActiveView('saved')}
                     activeView={activeView}
+                    onJoinHuddle={handleJoinHuddle}
+                    isHuddleActive={!!activeHuddle}
                 />
 
                 <main className="flex-1 flex flex-col min-w-0 bg-white relative">
@@ -251,6 +296,16 @@ export function SlackLayout({
                     )}
                 </main>
             </div>
+
+            {activeHuddle && (
+                <SlackHuddleBox
+                    token={activeHuddle.token}
+                    wsUrl={activeHuddle.wsUrl}
+                    roomName={activeHuddle.roomName}
+                    onClose={handleLeaveHuddle}
+                    currentUser={currentUser}
+                />
+            )}
 
             <SlackProfileModal
                 user={selectedProfileUser}
