@@ -24,6 +24,7 @@ import {
     Library,
     Wrench,
     PenTool,
+    Film
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -119,6 +120,12 @@ const routes = [
         icon: PenTool,
         href: "/whiteboard",
         color: "text-pink-500",
+    },
+    {
+        label: "Video Suite",
+        icon: Film,
+        href: "/video-suite",
+        color: "text-purple-500",
     },
 ];
 
@@ -230,6 +237,12 @@ const adminRoutes = [
         icon: ShoppingBag,
         href: "/admin/wholesale-directory",
         color: "text-cyan-500",
+    },
+    {
+        label: "Video Suite",
+        icon: Film,
+        href: "/video-suite",
+        color: "text-purple-600",
     },
     {
         label: "Settings",

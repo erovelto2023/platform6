@@ -12,12 +12,10 @@ import {
     Lock,
     UserPlus,
     Bookmark,
-    Headphones,
-    Film
+    Headphones
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SlackNewDmModal } from "./slack-new-dm-modal";
 
@@ -289,16 +287,6 @@ export function SlackSidebar({
                     </div>
                     <span className="text-sm font-medium">Huddle</span>
                 </Button>
-
-                <Link href="/video-suite" className="block w-full">
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-start text-[#cfc3cf] hover:text-white hover:bg-[#350d36] transition-colors gap-2 mt-1"
-                    >
-                        <Film className="w-4 h-4" />
-                        <span className="text-sm">Video Suite</span>
-                    </Button>
-                </Link>
             </div>
             <SlackNewDmModal
                 open={openNewDm}
