@@ -12,7 +12,18 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
-import { X, Minus, Maximize2, Mic, MicOff, Video, VideoOff, PhoneOff, Headphones } from "lucide-react";
+import {
+    X,
+    Minus,
+    Maximize2,
+    Mic,
+    MicOff,
+    Video,
+    VideoOff,
+    PhoneOff,
+    Headphones,
+    User as UserIcon
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -79,10 +90,11 @@ export function SlackHuddleBox({
                 isMinimized && "hidden"
             )}>
                 <LiveKitRoom
-                    video={false} // Default to audio only for Huddles
+                    video={true}
                     audio={true}
                     token={token}
                     serverUrl={wsUrl}
+                    connect={true}
                     onDisconnected={onClose}
                     data-lk-theme="default"
                     className="h-full"
@@ -112,8 +124,8 @@ export function SlackHuddleBox({
 function HuddleParticipants() {
     const tracks = useTracks(
         [
-            { source: Track.Source.Camera, withPlaceholder: false },
-            { source: Track.Source.Microphone, withPlaceholder: false },
+            { source: Track.Source.Camera, withPlaceholder: true },
+            { source: Track.Source.ScreenShare, withPlaceholder: false },
         ]
     );
 
@@ -126,6 +138,14 @@ function HuddleParticipants() {
                     className="aspect-square !bg-[#1A1D21] !border-[#303236] rounded-lg overflow-hidden"
                 />
             ))}
+            {tracks.length === 0 && (
+                <div className="col-span-2 flex flex-col items-center justify-center h-40 text-[#ABABAD] gap-2">
+                    <div className="w-12 h-12 rounded-full bg-[#303236] flex items-center justify-center">
+                        <UserIcon className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs">Waiting for others...</span>
+                </div>
+            )}
         </div>
     );
 }
