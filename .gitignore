@@ -44,3 +44,4 @@ next-env.d.ts
 /.clerk/
 temp_contentcraft/
 temp_pdfcraft/
+temp_slack_clone/
