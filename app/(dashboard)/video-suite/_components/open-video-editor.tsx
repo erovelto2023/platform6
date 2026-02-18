@@ -56,12 +56,12 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
 
                 console.log("[OpenVideo] Studio ready. Initial data:", initialData);
 
-                if (initialData && typeof initialData === 'object' && Array.isArray(initialData.clips)) {
-                    console.log("[OpenVideo] Loading valid initial data...");
-                    await studio.loadFromJSON(initialData);
-                } else if (initialData) {
-                    console.warn("[OpenVideo] initialData provided but does not conform to ProjectJSON (missing clips array). Skipping loadFromJSON.");
-                }
+                const projectData = (initialData && typeof initialData === 'object' && Array.isArray(initialData.clips))
+                    ? initialData
+                    : { clips: [], tracks: [], settings: { width: 1280, height: 720, fps: 30 } };
+
+                console.log("[OpenVideo] Loading project data:", projectData);
+                await studio.loadFromJSON(projectData as any);
 
                 setIsReady(true);
                 setV(v => v + 1);
@@ -337,7 +337,7 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                 <div className="flex-1 flex flex-col bg-black relative">
                     <div className="flex-1 flex items-center justify-center p-8">
                         <div className="relative aspect-video w-full max-w-4xl bg-[#1A1D21] rounded-lg overflow-hidden shadow-2xl border border-[#303236]">
-                            <canvas ref={canvasRef} className="w-full h-full" />
+                            <canvas ref={canvasRef} width={1280} height={720} className="w-full h-full" />
                             {!isReady && (
                                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
                                     <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
