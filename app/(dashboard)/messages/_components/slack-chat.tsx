@@ -60,7 +60,7 @@ export function SlackChat({
 
     const { startUpload, isUploading } = useUploadThing("messageAttachment", {
         onClientUploadComplete: (res: any) => {
-            const urls = res.map((f: any) => f.url);
+            const urls = res.map((f: any) => f.ufsUrl || f.url);
             setAttachments(prev => [...prev, ...urls]);
             toast.success("Files uploaded");
         },

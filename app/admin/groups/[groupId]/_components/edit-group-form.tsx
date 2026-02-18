@@ -122,7 +122,7 @@ export function EditGroupForm({ group }: EditGroupFormProps) {
                                                 allowedContent: "text-slate-500 text-xs"
                                             }}
                                             onClientUploadComplete={(res) => {
-                                                field.onChange(res[0].url);
+                                                field.onChange(res[0].ufsUrl || res[0].url);
                                                 toast.success("Avatar uploaded");
                                             }}
                                             onUploadError={(error: Error) => {
@@ -174,7 +174,7 @@ export function EditGroupForm({ group }: EditGroupFormProps) {
                                                 allowedContent: "text-slate-500 text-xs"
                                             }}
                                             onClientUploadComplete={(res) => {
-                                                field.onChange(res[0].url);
+                                                field.onChange(res[0].ufsUrl || res[0].url);
                                                 toast.success("Banner uploaded");
                                             }}
                                             onUploadError={(error: Error) => {

@@ -136,7 +136,7 @@ export const LessonVideoForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ videoUrl: res[0].url });
+                                onSubmit({ videoUrl: res[0].ufsUrl || res[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

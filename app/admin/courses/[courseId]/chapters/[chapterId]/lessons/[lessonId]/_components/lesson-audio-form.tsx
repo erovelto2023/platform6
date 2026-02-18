@@ -128,7 +128,7 @@ export const LessonAudioForm = ({
                     <div className="text-xs text-muted-foreground mb-4">
                         OR upload an audio file directly:
                     </div>
-                    <div className="flex items-center justify-center w-full">
+                    <div className="flex items-center justify-center">
                         <UploadButton
                             endpoint="courseAttachment"
                             appearance={{
@@ -136,7 +136,7 @@ export const LessonAudioForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ videoUrl: res[0].url });
+                                onSubmit({ videoUrl: res[0].ufsUrl || res[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

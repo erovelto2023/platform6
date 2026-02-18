@@ -97,7 +97,7 @@ export const LessonAttachmentForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ fileUrl: res[0].url, fileName: res[0].name });
+                                onSubmit({ fileUrl: res[0].ufsUrl || res[0].url, fileName: res[0].name });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

@@ -108,7 +108,7 @@ export const FileForm = ({
                         <UploadButton
                             endpoint="courseAttachment"
                             onClientUploadComplete={(res) => {
-                                onSubmit({ url: res?.[0].url });
+                                onSubmit({ url: res?.[0].ufsUrl || res?.[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

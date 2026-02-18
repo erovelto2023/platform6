@@ -65,9 +65,9 @@ export function ProfileHeader({ user, isOwnProfile, currentUserId }: ProfileHead
                             endpoint="communityCoverImage"
                             onClientUploadComplete={async (res) => {
                                 if (res?.[0]) {
-                                    setCoverImage(res[0].url);
-                                    await updateUserProfile(user._id, { coverImage: res[0].url });
-                                    toast.success("Cover updated!");
+                                    setCoverImage(res[0].ufsUrl || res[0].url);
+                                    await updateUserProfile(user._id, { coverImage: res[0].ufsUrl || res[0].url });
+                                    toast.success("Cover image updated");
                                 }
                             }}
                             onUploadError={(error: Error) => {
@@ -105,9 +105,9 @@ export function ProfileHeader({ user, isOwnProfile, currentUserId }: ProfileHead
                                     endpoint="communityAvatar"
                                     onClientUploadComplete={async (res) => {
                                         if (res?.[0]) {
-                                            setAvatar(res[0].url);
-                                            await updateUserProfile(user._id, { avatar: res[0].url });
-                                            toast.success("Avatar updated!");
+                                            setAvatar(res[0].ufsUrl || res[0].url);
+                                            await updateUserProfile(user._id, { avatar: res[0].ufsUrl || res[0].url });
+                                            toast.success("Avatar updated");
                                         }
                                     }}
                                     onUploadError={(error: Error) => {

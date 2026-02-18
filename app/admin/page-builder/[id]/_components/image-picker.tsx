@@ -45,7 +45,7 @@ export function ImagePicker({ value, onChange, label = "Image" }: ImagePickerPro
                             endpoint="pageBuilderImage"
                             onClientUploadComplete={(res) => {
                                 if (res && res[0]) {
-                                    onChange(res[0].url);
+                                    onChange(res[0].ufsUrl || res[0].url);
                                     toast.success("Image uploaded!");
                                 }
                             }}

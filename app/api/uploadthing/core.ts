@@ -24,14 +24,14 @@ export const ourFileRouter = {
         .middleware(handleAuth)
         .onUploadComplete(async ({ metadata, file }) => {
             console.log("Upload complete for userId:", metadata.userId);
-            console.log("file url", file.url);
+            console.log("file url", file.ufsUrl || file.url);
             return { uploadedBy: metadata.userId };
         }),
 
     lessonFile: f({ blob: { maxFileSize: "256MB", maxFileCount: 1 } })
         .middleware(handleAuth)
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Lesson file uploaded:", file.url);
+            console.log("Lesson file uploaded:", file.ufsUrl || file.url);
             return { uploadedBy: metadata.userId };
         }),
 
@@ -69,14 +69,14 @@ export const ourFileRouter = {
     pageBuilderImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
         .middleware(handleAuth)
         .onUploadComplete(async ({ metadata, file }) => {
-            console.log("Page builder image uploaded:", file.url);
-            return { uploadedBy: metadata.userId, url: file.url };
+            console.log("Page builder image uploaded:", file.ufsUrl || file.url);
+            return { uploadedBy: metadata.userId, url: file.ufsUrl || file.url };
         }),
 
     pageBuilderMultipleImages: f({ image: { maxFileSize: "4MB", maxFileCount: 10 } })
         .middleware(handleAuth)
         .onUploadComplete(async ({ metadata, file }) => {
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: file.ufsUrl || file.url };
         }),
 
     messageAttachment: f({
@@ -86,7 +86,7 @@ export const ourFileRouter = {
     })
         .middleware(handleAuth)
         .onUploadComplete(async ({ metadata, file }) => {
-            return { uploadedBy: metadata.userId, url: file.url };
+            return { uploadedBy: metadata.userId, url: file.ufsUrl || file.url };
         }),
 } satisfies FileRouter;
 

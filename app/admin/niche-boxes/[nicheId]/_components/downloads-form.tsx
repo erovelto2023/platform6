@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addDownload, removeDownload } from "@/lib/actions/niche.actions";
 import { UploadButton } from "@/lib/uploadthing";
+import { toast } from "sonner";
 
 import {
     Form,
@@ -18,7 +19,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import {
     Select,
     SelectContent,
@@ -179,7 +179,7 @@ export const DownloadsForm = ({
                                         allowedContent: "text-slate-500"
                                     }}
                                     onClientUploadComplete={(res) => {
-                                        form.setValue("url", res[0].url);
+                                        form.setValue("url", res[0].ufsUrl || res[0].url);
                                         if (!form.getValues("title")) {
                                             form.setValue("title", res[0].name);
                                         }

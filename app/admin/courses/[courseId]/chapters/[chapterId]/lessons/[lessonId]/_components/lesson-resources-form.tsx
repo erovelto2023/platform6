@@ -8,7 +8,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { addAttachment, removeAttachment } from "@/lib/actions/lesson.actions";
 import { UploadButton } from "@/lib/uploadthing";
-
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -118,7 +117,7 @@ export const LessonResourcesForm = ({
             )}
             {isEditing && (
                 <div>
-                    <div className="flex items-center justify-center w-full">
+                    <div className="flex items-center justify-center">
                         <UploadButton
                             endpoint="lessonFile"
                             appearance={{
@@ -126,7 +125,7 @@ export const LessonResourcesForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ url: res[0].url, title: res[0].name });
+                                onSubmit({ url: res[0].ufsUrl || res[0].url, title: res[0].name });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

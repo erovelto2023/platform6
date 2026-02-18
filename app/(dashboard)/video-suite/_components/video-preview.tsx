@@ -26,12 +26,18 @@ export function VideoPreview() {
 
     const playerRef = useRef<any>(null);
     const [duration, setDuration] = useState(0);
+    const [isReady, setIsReady] = useState(false);
 
     // Find the clip that should be playing at currentTime
     const activeClip = clips.find(c =>
         currentTime >= c.position &&
         currentTime < c.position + (c.duration * 1000)
     );
+
+    // Reset ready state when clip changes
+    useEffect(() => {
+        setIsReady(false);
+    }, [activeClip?.id]);
 
     const handleProgress = (state: any) => {
         if (isPlaying && activeClip) {
@@ -49,11 +55,12 @@ export function VideoPreview() {
                     <ReactPlayer
                         ref={playerRef}
                         url={activeClip.url}
-                        playing={isPlaying}
+                        playing={isPlaying && isReady}
                         controls={false}
                         width="100%"
                         height="100%"
                         onProgress={(state: any) => handleProgress(state)}
+                        onReady={() => setIsReady(true)}
                         progressInterval={100}
                     />
                 ) : (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useVideoEditorStore } from "@/hooks/use-video-editor-store";
-import { UploadButton } from "@/lib/uploadthing";
+import { FileLocalUpload } from "@/components/file-local-upload";
 import {
     Film,
     Image as ImageIcon,
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 export function VideoAssets() {
     const { clips, addClip, removeClip, setActiveClipId } = useVideoEditorStore();
 
-    const handleUploadComplete = (res: any) => {
+    const handleUploadComplete = (res: any[]) => {
         if (res && res.length > 0) {
             res.forEach((file: any) => {
                 const newClip: any = {
@@ -41,25 +41,14 @@ export function VideoAssets() {
 
     return (
         <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-[#303236] flex items-center justify-between">
+            <div className="p-4 border-b border-[#303236] flex items-center justify-between gap-4">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-[#ABABAD]">Assets</h3>
-                <UploadButton
-                    endpoint="courseAttachment"
-                    onClientUploadComplete={handleUploadComplete}
-                    onUploadError={(error: Error) => {
-                        toast.error(`Upload failed: ${error.message}`);
-                    }}
-                    appearance={{
-                        button: "bg-purple-600 hover:bg-purple-700 text-white text-[10px] h-7 px-3",
-                        allowedContent: "hidden"
-                    }}
-                    content={{
-                        button({ ready }) {
-                            if (ready) return "Upload";
-                            return "Preparing...";
-                        }
-                    }}
-                />
+                <div className="flex-1 max-w-[120px]">
+                    <FileLocalUpload
+                        onUploadComplete={handleUploadComplete}
+                        onChange={() => { }}
+                    />
+                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-2 space-y-2">

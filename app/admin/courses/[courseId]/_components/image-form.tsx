@@ -99,7 +99,7 @@ export const ImageForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ thumbnail: res[0].url });
+                                onSubmit({ thumbnail: res[0].ufsUrl || res[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

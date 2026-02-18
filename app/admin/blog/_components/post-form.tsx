@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createPost, updatePost, deletePost } from "@/lib/actions/post.actions";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Loader2, Trash, X, ImageIcon, Settings, ArrowLeft, Eye } from "lucide-react";
 import { UploadButton } from "@/lib/uploadthing";
 import Image from "next/image";
@@ -321,7 +321,7 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                             <UploadButton
                                                                 endpoint="courseThumbnail"
                                                                 onClientUploadComplete={(res) => {
-                                                                    setValue("imageUrl", res[0].url);
+                                                                    setValue("imageUrl", res[0].ufsUrl || res[0].url);
                                                                     toast.success("Image uploaded");
                                                                 }}
                                                                 onUploadError={(error: Error) => {
