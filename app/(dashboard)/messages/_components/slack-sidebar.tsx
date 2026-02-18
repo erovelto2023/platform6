@@ -10,7 +10,8 @@ import {
     ChevronDown,
     ChevronRight,
     Lock,
-    UserPlus
+    UserPlus,
+    Bookmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -30,6 +31,8 @@ interface SlackSidebarProps {
     onShowProfile: (user: any) => void;
     onConversationCreated: (conversation: any) => void;
     onSearchClick: () => void;
+    onSavedItemsClick: () => void;
+    activeView: 'chat' | 'saved';
 }
 
 export function SlackSidebar({
@@ -44,7 +47,9 @@ export function SlackSidebar({
     onInvite,
     onShowProfile,
     onConversationCreated,
-    onSearchClick
+    onSearchClick,
+    onSavedItemsClick,
+    activeView
 }: SlackSidebarProps) {
     const [channelsOpen, setChannelsOpen] = useState(true);
     const [dmsOpen, setDmsOpen] = useState(true);
@@ -70,6 +75,21 @@ export function SlackSidebar({
                         <kbd className="ml-auto pointer-events-none hidden h-4 select-none items-center gap-1 rounded bg-white/10 px-1.5 font-mono text-[10px] font-medium opacity-50 group-hover:opacity-100 sm:flex">
                             <span className="text-xs">⌘</span>K
                         </kbd>
+                    </button>
+
+                    {/* Saved Items */}
+                    <button
+                        onClick={onSavedItemsClick}
+                        className={cn(
+                            "w-full flex items-center px-2 py-1.5 rounded hover:bg-[#350d36] text-[15px] group text-[#cfc3cf] transition-colors",
+                            activeView === 'saved' && "bg-[#1164A3] text-white hover:bg-[#1164A3]"
+                        )}
+                    >
+                        <Bookmark className={cn(
+                            "w-4 h-4 mr-2 opacity-70 group-hover:opacity-100",
+                            activeView === 'saved' && "opacity-100 fill-white"
+                        )} />
+                        <span>Saved Items</span>
                     </button>
 
                     {/* Channels Section */}

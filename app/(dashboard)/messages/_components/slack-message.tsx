@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { MessageSquare, Reply, Smile, Plus, FileIcon, Download, MoreVertical, Pencil, Trash } from "lucide-react";
+import { MessageSquare, Reply, Smile, Plus, FileIcon, Download, MoreVertical, Pencil, Trash, Pin, PinOff, Bookmark, BookmarkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SlackReactionPicker } from "./slack-reaction-picker";
 import {
@@ -24,6 +24,8 @@ interface SlackMessageProps {
     onShowProfile?: () => void;
     onEdit?: (messageId: string, content: string) => Promise<void>;
     onDelete?: (messageId: string) => Promise<void>;
+    onPin?: (messageId: string) => Promise<void>;
+    onBookmark?: (messageId: string) => Promise<void>;
     isTarget?: boolean;
 }
 
@@ -36,6 +38,8 @@ export function SlackMessage({
     onShowProfile,
     onEdit,
     onDelete,
+    onPin,
+    onBookmark,
     isTarget
 }: SlackMessageProps) {
     const [isEditing, setIsEditing] = useState(false);
@@ -96,6 +100,14 @@ export function SlackMessage({
             >
                 <div className="hidden group-hover:block absolute left-2 top-0 text-[10px] text-slate-400">
                     {format(new Date(message.createdAt), "h:mm a")}
+                </div>
+                <div className="flex items-center gap-1 absolute left-14 top-0.5">
+                    {message.isPinned && (
+                        <Pin className="h-3 w-3 text-slate-400 fill-slate-400 rotate-45" />
+                    )}
+                    {message.bookmarkedBy?.includes(currentUserId) && (
+                        <BookmarkIcon className="h-3 w-3 text-[#E01E5A] fill-[#E01E5A]" />
+                    )}
                 </div>
                 <div className="text-[15px] text-slate-900 leading-relaxed group/edit">
                     {isEditing ? (
@@ -192,6 +204,15 @@ export function SlackMessage({
                     <span className="text-xs text-slate-500">
                         {format(new Date(message.createdAt), "h:mm a")}
                     </span>
+                    {message.isPinned && (
+                        <div className="flex items-center gap-1 text-[10px] text-slate-500 font-medium ml-1">
+                            <Pin className="h-3 w-3 fill-slate-500 rotate-45" />
+                            Pinned
+                        </div>
+                    )}
+                    {message.bookmarkedBy?.includes(currentUserId) && (
+                        <BookmarkIcon className="h-3 w-3 text-[#E01E5A] fill-[#E01E5A] ml-1" />
+                    )}
                 </div>
                 <div className="text-[15px] text-slate-900 leading-relaxed group/edit">
                     {isEditing ? (
@@ -325,23 +346,39 @@ export function SlackMessage({
                 >
                     <MessageSquare className="h-4 w-4" />
                 </Button>
-                {isOwner && (
-                    <DropdownMenu onOpenChange={setMenuOpen}>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                                <Pencil className="h-4 w-4 mr-2" /> Edit message
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
-                                <Trash className="h-4 w-4 mr-2" /> Delete message
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                <DropdownMenu onOpenChange={setMenuOpen}>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                            <MoreVertical className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52">
+                        <DropdownMenuItem onClick={() => onBookmark?.(message._id)}>
+                            {message.bookmarkedBy?.includes(currentUserId) ? (
+                                <><BookmarkIcon className="h-4 w-4 mr-2 text-[#E01E5A] fill-[#E01E5A]" /> Remove bookmark</>
+                            ) : (
+                                <><Bookmark className="h-4 w-4 mr-2" /> Add to bookmarks</>
+                            )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onPin?.(message._id)}>
+                            {message.isPinned ? (
+                                <><PinOff className="h-4 w-4 mr-2" /> Unpin from channel</>
+                            ) : (
+                                <><Pin className="h-4 w-4 mr-2 rotate-45" /> Pin to channel</>
+                            )}
+                        </DropdownMenuItem>
+                        {isOwner && (
+                            <>
+                                <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                    <Pencil className="h-4 w-4 mr-2" /> Edit message
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={handleDelete}>
+                                    <Trash className="h-4 w-4 mr-2" /> Delete message
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
     );

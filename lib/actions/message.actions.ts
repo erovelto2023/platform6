@@ -437,3 +437,92 @@ export async function searchMessages(query: string, userId: string) {
         };
     }
 }
+
+export async function togglePinMessage(messageId: string, userId: string) {
+    try {
+        await connectToDatabase();
+        const message = await Message.findById(messageId);
+        if (!message) return { success: false, error: "Message not found" };
+
+        if (message.isPinned) {
+            message.isPinned = false;
+            message.pinnedBy = undefined;
+        } else {
+            message.isPinned = true;
+            message.pinnedBy = userId;
+        }
+
+        await message.save();
+        revalidatePath("/messages");
+
+        return { success: true, data: JSON.parse(JSON.stringify(message)) };
+    } catch (error) {
+        console.error("[TOGGLE_PIN]", error);
+        return { success: false, error: "Failed to toggle pin" };
+    }
+}
+
+export async function toggleBookmarkMessage(messageId: string, userId: string) {
+    try {
+        await connectToDatabase();
+        const message = await Message.findById(messageId);
+        if (!message) return { success: false, error: "Message not found" };
+
+        const bookmarkedBy = message.bookmarkedBy || [];
+        const index = bookmarkedBy.indexOf(userId);
+
+        if (index > -1) {
+            bookmarkedBy.splice(index, 1);
+        } else {
+            bookmarkedBy.push(userId);
+        }
+
+        message.bookmarkedBy = bookmarkedBy;
+        await message.save();
+        revalidatePath("/messages");
+
+        return { success: true, data: JSON.parse(JSON.stringify(message)) };
+    } catch (error) {
+        console.error("[TOGGLE_BOOKMARK]", error);
+        return { success: false, error: "Failed to toggle bookmark" };
+    }
+}
+
+export async function getPinnedMessages(channelId?: string, conversationId?: string) {
+    try {
+        await connectToDatabase();
+        const query: any = { isPinned: true };
+        if (channelId) query.channelId = channelId;
+        if (conversationId) query.conversationId = conversationId;
+
+        const messages = await Message.find(query)
+            .populate('sender', 'firstName lastName profileImage')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return { success: true, data: JSON.parse(JSON.stringify(messages)) };
+    } catch (error) {
+        console.error("[GET_PINNED]", error);
+        return { success: false, error: "Failed to fetch pinned messages" };
+    }
+}
+
+export async function getBookmarkedMessages(userId: string) {
+    try {
+        await connectToDatabase();
+        const messages = await Message.find({ bookmarkedBy: userId })
+            .populate('sender', 'firstName lastName profileImage')
+            .populate('channelId', 'name')
+            .populate({
+                path: 'conversationId',
+                populate: { path: 'participants', select: 'firstName lastName' }
+            })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return { success: true, data: JSON.parse(JSON.stringify(messages)) };
+    } catch (error) {
+        console.error("[GET_BOOKMARKED]", error);
+        return { success: false, error: "Failed to fetch bookmarked messages" };
+    }
+}

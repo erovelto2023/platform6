@@ -58,6 +58,18 @@ const MessageSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
     }],
+    isPinned: {
+        type: Boolean,
+        default: false,
+    },
+    pinnedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    bookmarkedBy: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }],
 }, { timestamps: true });
 
 MessageSchema.index({ conversationId: 1, createdAt: 1 });

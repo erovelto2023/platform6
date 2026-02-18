@@ -3,14 +3,14 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { format } from "date-fns";
-import { Hash, Info, Lock, Send, Paperclip, Smile, Plus, UserPlus, X } from "lucide-react";
+import { Hash, Info, Lock, Send, Paperclip, Smile, Plus, UserPlus, X, Pin, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SlackMessage } from "./slack-message";
 import { SlackReactionPicker } from "./slack-reaction-picker";
 import { sendChannelMessage, getChannelMessages, clearChannelUnreads } from "@/lib/actions/channel.actions";
-import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage, markMessagesAsRead } from "@/lib/actions/message.actions";
+import { getMessages, sendMessage, toggleReaction, updateMessage, deleteMessage, markMessagesAsRead, togglePinMessage, toggleBookmarkMessage, getPinnedMessages } from "@/lib/actions/message.actions";
 import { getUsers } from "@/lib/actions/user.actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,10 @@ export function SlackChat({
     const [showMentions, setShowMentions] = useState(false);
     const [mentionIndex, setMentionIndex] = useState(0);
 
+    // Pinned messages state
+    const [showPinned, setShowPinned] = useState(false);
+    const [pinnedMessages, setPinnedMessages] = useState<any[]>([]);
+
     const { startUpload, isUploading } = useUploadThing("messageAttachment", {
         onClientUploadComplete: (res: any) => {
             const urls = res.map((f: any) => f.url);
@@ -93,9 +97,6 @@ export function SlackChat({
             }
 
             if (res.success) {
-                // If silent update, check if we need to scroll (only if at bottom)
-                // For now, simpler approach: just update state
-                // Only scroll on initial load or if user sent message
                 const wasAtBottom = isAtBottom();
                 setMessages(res.data);
                 if (!silent || (wasAtBottom && res.data.length > messages.length)) {
@@ -105,7 +106,7 @@ export function SlackChat({
         } finally {
             if (!silent) setLoading(false);
         }
-    }, [channel?._id, conversation?._id]);
+    }, [channel?._id, conversation?._id, messages.length]);
 
     // Initial fetch
     useEffect(() => {
@@ -152,7 +153,6 @@ export function SlackChat({
         const value = e.target.value;
         setNewMessage(value);
 
-        const lastChar = value[value.length - 1];
         const lastWord = value.split(" ").pop() || "";
 
         if (lastWord.startsWith("@")) {
@@ -186,7 +186,6 @@ export function SlackChat({
         if (!socket) return;
 
         const onNewMessage = (msg: any) => {
-            // Only add if it belongs to the current view
             const isForChannel = channel && msg.channelId === channel._id;
             const isForConversation = conversation && msg.conversationId === conversation._id;
 
@@ -214,7 +213,6 @@ export function SlackChat({
             const element = document.getElementById(`message-${targetMessageId}`);
             if (element && scrollRef.current) {
                 element.scrollIntoView({ behavior: "smooth", block: "center" });
-                // Clear the target after a short delay so highlighting eventually disappears
                 setTimeout(() => {
                     onTargetMessageScrolled?.();
                 }, 2000);
@@ -230,7 +228,7 @@ export function SlackChat({
 
         setPending(true);
         const content = newMessage;
-        setNewMessage(""); // Optimistic clear
+        setNewMessage("");
 
         try {
             let res;
@@ -254,12 +252,10 @@ export function SlackChat({
                 setNewMessage("");
                 setAttachments([]);
 
-                // Emit socket event for real-time update
                 if (socket) {
                     socket.emit("message:new", res.data);
                 }
 
-                // For channels, we also want to trigger an unread update for others
                 if (channel && socket) {
                     socket.emit("unread:update", {
                         channelId: channel._id,
@@ -272,7 +268,6 @@ export function SlackChat({
                     });
                 }
 
-                // Emit notifications for mentions in real-time
                 if (socket && res.data.mentions?.length > 0) {
                     res.data.mentions.forEach((mentionId: string) => {
                         if (mentionId !== currentUser._id) {
@@ -291,7 +286,7 @@ export function SlackChat({
                 fetchMessages(true);
             } else {
                 toast.error("Failed to send message");
-                setNewMessage(content); // Restore on error
+                setNewMessage(content);
             }
         } catch (err) {
             console.error(err);
@@ -334,7 +329,6 @@ export function SlackChat({
         try {
             const res = await toggleReaction(messageId, currentUser._id, emoji);
             if (res.success) {
-                // Update local state for immediate feedback
                 setMessages(prev => prev.map(m => {
                     if (m._id === messageId) {
                         const newReactions = { ...(m.reactions || {}) };
@@ -343,6 +337,7 @@ export function SlackChat({
                         } else {
                             newReactions[currentUser._id] = emoji;
                         }
+                        return { ...m, reactions: newReactions };
                     }
                     return m;
                 }));
@@ -351,6 +346,50 @@ export function SlackChat({
             console.error(err);
         }
     };
+
+    const handlePinMessage = async (messageId: string) => {
+        try {
+            const res = await togglePinMessage(messageId, currentUser._id);
+            if (res.success) {
+                setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isPinned: res.data.isPinned, pinnedBy: res.data.pinnedBy } : m));
+                toast.success(res.data.isPinned ? "Message pinned" : "Message unpinned");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to pin message");
+        }
+    };
+
+    const handleBookmarkMessage = async (messageId: string) => {
+        try {
+            const res = await toggleBookmarkMessage(messageId, currentUser._id);
+            if (res.success) {
+                setMessages(prev => prev.map(m => {
+                    if (m._id === messageId) {
+                        return { ...m, bookmarkedBy: res.data.bookmarkedBy };
+                    }
+                    return m;
+                }));
+                toast.success("Bookmark updated");
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to bookmark message");
+        }
+    };
+
+    const fetchPinnedMessages = useCallback(async () => {
+        const res = await getPinnedMessages(channel?._id, conversation?._id);
+        if (res.success) {
+            setPinnedMessages(res.data);
+        }
+    }, [channel?._id, conversation?._id]);
+
+    useEffect(() => {
+        if (showPinned) {
+            fetchPinnedMessages();
+        }
+    }, [showPinned, fetchPinnedMessages]);
 
     const handleEmojiSelect = (emoji: string) => {
         setNewMessage(prev => prev + emoji);
@@ -386,7 +425,7 @@ export function SlackChat({
     );
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-white">
+        <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
             {/* Header */}
             <div className="h-16 border-b flex items-center justify-between px-5 flex-shrink-0">
                 <div className="flex items-center">
@@ -404,6 +443,18 @@ export function SlackChat({
                     <h3 className="font-bold text-slate-900 truncate max-w-[400px]">{title}</h3>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                            "text-slate-500 hover:text-slate-900 flex items-center gap-2",
+                            showPinned && "bg-slate-100 text-slate-900"
+                        )}
+                        onClick={() => setShowPinned(!showPinned)}
+                    >
+                        <Pin className="w-4 h-4 rotate-45" />
+                        <span className="hidden sm:inline">Pinned</span>
+                    </Button>
                     {channel && (
                         <Button
                             variant="ghost"
@@ -421,165 +472,220 @@ export function SlackChat({
                 </div>
             </div>
 
-            {/* Messages */}
-            <div
-                ref={scrollRef}
-                className="flex-1 overflow-y-auto"
-            >
-                {loading && messages.length === 0 ? (
-                    <div className="flex items-center justify-center h-full text-slate-400">Loading messages...</div>
-                ) : (
-                    <div className="pb-4">
-                        {messages.length === 0 ? (
-                            <div className="p-8 text-slate-500 pb-20">
-                                <h3 className="font-bold text-2xl mb-2">Welcome to #{title}!</h3>
-                                <p>This is the start of the <span className="font-semibold">#{title}</span> channel.</p>
-                            </div>
+            <div className="flex-1 flex overflow-hidden min-h-0 relative">
+                <main className="flex-1 flex flex-col min-w-0 bg-white relative overflow-hidden">
+                    {/* Messages */}
+                    <div
+                        ref={scrollRef}
+                        className="flex-1 overflow-y-auto"
+                    >
+                        {loading && messages.length === 0 ? (
+                            <div className="flex items-center justify-center h-full text-slate-400">Loading messages...</div>
                         ) : (
-                            messages.map((msg, i) => (
-                                <SlackMessage
-                                    key={msg._id}
-                                    message={msg}
-                                    currentUser={currentUser}
-                                    isSameSender={i > 0 && messages[i - 1].sender?._id === msg.sender?._id}
-                                    onThreadClick={onThreadClick}
-                                    onReaction={(emoji) => handleReaction(msg._id, emoji)}
-                                    onShowProfile={() => onShowProfile(msg.sender)}
-                                    onEdit={handleEditMessage}
-                                    onDelete={handleDeleteMessage}
-                                    isTarget={msg._id === targetMessageId}
-                                />
-                            ))
+                            <div className="pb-4">
+                                {messages.length === 0 ? (
+                                    <div className="p-8 text-slate-500 pb-20">
+                                        <h3 className="font-bold text-2xl mb-2">Welcome to #{title}!</h3>
+                                        <p>This is the start of the <span className="font-semibold">#{title}</span> channel.</p>
+                                    </div>
+                                ) : (
+                                    messages.map((msg, i) => (
+                                        <SlackMessage
+                                            key={msg._id}
+                                            message={msg}
+                                            currentUser={currentUser}
+                                            isSameSender={i > 0 && messages[i - 1].sender?._id === msg.sender?._id}
+                                            onThreadClick={onThreadClick}
+                                            onReaction={(emoji) => handleReaction(msg._id, emoji)}
+                                            onShowProfile={() => onShowProfile(msg.sender)}
+                                            onEdit={handleEditMessage}
+                                            onDelete={handleDeleteMessage}
+                                            onPin={handlePinMessage}
+                                            onBookmark={handleBookmarkMessage}
+                                            isTarget={msg._id === targetMessageId}
+                                        />
+                                    ))
+                                )}
+                            </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            {/* Input Area */}
-            <div className="p-5 pt-0">
-                <div className="border border-slate-300 rounded-lg shadow-sm bg-white overflow-hidden focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
-                    {/* Toolbar */}
-                    <div className="flex items-center bg-slate-50 border-b p-1 px-2 gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="font-bold">B</span></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="italic">I</span></Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="line-through">S</span></Button>
-                        <div className="w-px h-4 bg-slate-300 mx-1" />
-                        <label className="cursor-pointer">
-                            <input
-                                type="file"
-                                className="hidden"
-                                multiple
-                                ref={fileInputRef}
-                                onChange={(e) => {
-                                    if (e.target.files) startUpload(Array.from(e.target.files));
-                                }}
-                            />
-                            <div
-                                onClick={handlePlusClick}
-                                className={cn(
-                                    "h-8 w-8 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-200",
-                                    isUploading && "opacity-50 animate-pulse"
-                                )}
-                            >
-                                <Paperclip className="w-4 h-4" />
-                            </div>
-                        </label>
-                    </div>
-
-                    {attachments.length > 0 && (
-                        <div className="p-2 flex flex-wrap gap-2 bg-slate-50 border-b">
-                            {attachments.map((url, i) => (
-                                <div key={i} className="relative group h-20 w-20 border rounded overflow-hidden bg-white">
-                                    <img src={url} alt="Attached" className="h-full w-full object-cover" />
-                                    <button
-                                        type="button"
-                                        onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
-                                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"
+                    {/* Input Area */}
+                    <div className="p-5 pt-0">
+                        <div className="border border-slate-300 rounded-lg shadow-sm bg-white overflow-hidden focus-within:ring-1 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                            {/* Toolbar */}
+                            <div className="flex items-center bg-slate-50 border-b p-1 px-2 gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="font-bold">B</span></Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="italic">I</span></Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600"><span className="line-through">S</span></Button>
+                                <div className="w-px h-4 bg-slate-300 mx-1" />
+                                <label className="cursor-pointer">
+                                    <input
+                                        type="file"
+                                        className="hidden"
+                                        multiple
+                                        ref={fileInputRef}
+                                        onChange={(e) => {
+                                            if (e.target.files) startUpload(Array.from(e.target.files));
+                                        }}
+                                    />
+                                    <div
+                                        onClick={handlePlusClick}
+                                        className={cn(
+                                            "h-8 w-8 flex items-center justify-center rounded-md text-slate-600 hover:bg-slate-200",
+                                            isUploading && "opacity-50 animate-pulse"
+                                        )}
                                     >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSendMessage} className="p-2">
-                        <div className="relative">
-                            <Input
-                                ref={inputRef}
-                                className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
-                                placeholder={`Message #${title}`}
-                                value={newMessage}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                                autoFocus
-                            />
-
-                            {showMentions && filteredMentions.length > 0 && (
-                                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
-                                    <div className="p-2 bg-slate-50 border-b text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                                        Members
+                                        <Paperclip className="w-4 h-4" />
                                     </div>
-                                    <div className="max-h-60 overflow-y-auto">
-                                        {filteredMentions.map((user, i) => (
-                                            <div
-                                                key={user._id}
-                                                className={cn(
-                                                    "flex items-center gap-2 p-2 px-3 cursor-pointer transition-colors",
-                                                    i === mentionIndex ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50"
-                                                )}
-                                                onClick={() => handleMentionSelect(user)}
+                                </label>
+                            </div>
+
+                            {attachments.length > 0 && (
+                                <div className="p-2 flex flex-wrap gap-2 bg-slate-50 border-b">
+                                    {attachments.map((url, i) => (
+                                        <div key={i} className="relative group h-20 w-20 border rounded overflow-hidden bg-white">
+                                            <img src={url} alt="Attached" className="h-full w-full object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setAttachments(prev => prev.filter((_, idx) => idx !== i))}
+                                                className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100"
                                             >
-                                                <div className="h-6 w-6 rounded-full overflow-hidden bg-slate-200">
-                                                    {user.profileImage ? (
-                                                        <img src={user.profileImage} className="h-full w-full object-cover" />
-                                                    ) : (
-                                                        <div className="h-full w-full flex items-center justify-center text-[10px] font-bold">
-                                                            {user.firstName?.[0]}{user.lastName?.[0]}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 truncate">
-                                                    <span className="font-medium text-sm">@{user.username || `${user.firstName}${user.lastName}`.toLowerCase()}</span>
-                                                    <span className="ml-2 text-xs text-slate-400">{user.firstName} {user.lastName}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
-                        </div>
-                        <div className="flex justify-between items-center mt-2">
-                            <div className="flex gap-1">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-slate-500 hover:bg-slate-100"
-                                    onClick={handlePlusClick}
-                                >
-                                    <Plus className="w-5 h-5" />
-                                </Button>
-                                <SlackReactionPicker onSelect={handleEmojiSelect}>
-                                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
-                                        <Smile className="w-5 h-5" />
+
+                            <form onSubmit={handleSendMessage} className="p-2">
+                                <div className="relative">
+                                    <Input
+                                        ref={inputRef}
+                                        className="border-0 focus-visible:ring-0 px-2 py-3 h-auto text-[15px] resize-none shadow-none"
+                                        placeholder={`Message #${title}`}
+                                        value={newMessage}
+                                        onChange={handleInputChange}
+                                        onKeyDown={handleKeyDown}
+                                        autoFocus
+                                    />
+
+                                    {showMentions && filteredMentions.length > 0 && (
+                                        <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden">
+                                            <div className="p-2 bg-slate-50 border-b text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                                                Members
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto">
+                                                {filteredMentions.map((user, i) => (
+                                                    <div
+                                                        key={user._id}
+                                                        className={cn(
+                                                            "flex items-center gap-2 p-2 px-3 cursor-pointer transition-colors",
+                                                            i === mentionIndex ? "bg-indigo-50 text-indigo-600" : "hover:bg-slate-50"
+                                                        )}
+                                                        onClick={() => handleMentionSelect(user)}
+                                                    >
+                                                        <div className="h-6 w-6 rounded-full overflow-hidden bg-slate-200">
+                                                            {user.profileImage ? (
+                                                                <img src={user.profileImage} className="h-full w-full object-cover" />
+                                                            ) : (
+                                                                <div className="h-full w-full flex items-center justify-center text-[10px] font-bold">
+                                                                    {user.firstName?.[0]}{user.lastName?.[0]}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 truncate">
+                                                            <span className="font-medium text-sm">@{user.username || `${user.firstName}${user.lastName}`.toLowerCase()}</span>
+                                                            <span className="ml-2 text-xs text-slate-400">{user.firstName} {user.lastName}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex justify-between items-center mt-2">
+                                    <div className="flex gap-1">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-slate-500 hover:bg-slate-100"
+                                            onClick={handlePlusClick}
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                        </Button>
+                                        <SlackReactionPicker onSelect={handleEmojiSelect}>
+                                            <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:bg-slate-100">
+                                                <Smile className="w-5 h-5" />
+                                            </Button>
+                                        </SlackReactionPicker>
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        size="sm"
+                                        className={cn(
+                                            "transition-colors",
+                                            newMessage.trim() ? "bg-[#007a5a] hover:bg-[#148567]" : "bg-slate-200 text-slate-400 hover:bg-slate-200"
+                                        )}
+                                        disabled={!newMessage.trim() || pending}
+                                    >
+                                        <Send className="w-4 h-4 mr-1" /> Send
                                     </Button>
-                                </SlackReactionPicker>
-                            </div>
-                            <Button
-                                type="submit"
-                                size="sm"
-                                className={cn(
-                                    "transition-colors",
-                                    newMessage.trim() ? "bg-[#007a5a] hover:bg-[#148567]" : "bg-slate-200 text-slate-400 hover:bg-slate-200"
-                                )}
-                                disabled={!newMessage.trim() || pending}
-                            >
-                                <Send className="w-4 h-4 mr-1" /> Send
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </main>
+
+                {showPinned && (
+                    <div className="w-80 border-l border-slate-200 h-full flex flex-col bg-slate-50 relative animate-in slide-in-from-right duration-200">
+                        <div className="p-4 border-b flex items-center justify-between bg-white">
+                            <h4 className="font-bold flex items-center gap-2 text-slate-900">
+                                <Pin className="w-4 h-4 rotate-45" />
+                                Pinned Messages
+                            </h4>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPinned(false)}>
+                                <X className="w-4 h-4" />
                             </Button>
                         </div>
-                    </form>
-                </div>
+                        <ScrollArea className="flex-1">
+                            <div className="p-4 space-y-4">
+                                {pinnedMessages.length === 0 ? (
+                                    <div className="text-center py-10">
+                                        <Pin className="w-10 h-10 mx-auto text-slate-300 mb-2 rotate-45" />
+                                        <p className="text-sm text-slate-500">No pinned messages yet.</p>
+                                    </div>
+                                ) : (
+                                    pinnedMessages.map((msg) => (
+                                        <div
+                                            key={msg._id}
+                                            className="bg-white p-3 rounded-lg border border-slate-200 shadow-sm cursor-pointer hover:border-blue-300 transition-colors"
+                                            onClick={() => {
+                                                const element = document.getElementById(`message-${msg._id}`);
+                                                if (element) {
+                                                    element.scrollIntoView({ behavior: "smooth", block: "center" });
+                                                }
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="font-bold text-xs truncate">
+                                                    {msg.sender?.firstName} {msg.sender?.lastName}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400">
+                                                    {format(new Date(msg.createdAt), "MMM d")}
+                                                </div>
+                                            </div>
+                                            <div className="text-xs text-slate-700 line-clamp-3">
+                                                {msg.content}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                )}
             </div>
         </div>
     );

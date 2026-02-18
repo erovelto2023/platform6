@@ -5,6 +5,7 @@ import { SlackHeader } from "./slack-header";
 import { SlackSidebar } from "./slack-sidebar";
 import { SlackChat } from "./slack-chat";
 import { SlackThread } from "./slack-thread";
+import { SlackSavedItems } from "./slack-saved-items";
 import { SlackProfileModal } from "./slack-profile-modal";
 import { createChannel, generateChannelInvite, getChannels } from "@/lib/actions/channel.actions";
 import { getConversations } from "@/lib/actions/message.actions";
@@ -43,6 +44,7 @@ export function SlackLayout({
     const [activeThreadMessage, setActiveThreadMessage] = useState<any | null>(null);
     const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
     const [targetMessageId, setTargetMessageId] = useState<string | undefined>(undefined);
+    const [activeView, setActiveView] = useState<'chat' | 'saved'>('chat');
 
     const refreshSidebar = async () => {
         const [channelsRes, dmsRes] = await Promise.all([
@@ -116,6 +118,7 @@ export function SlackLayout({
         setActiveChannelId(channelId);
         setActiveConversationId(undefined);
         setActiveThreadMessage(null);
+        setActiveView('chat');
         // router.push(`/messages/channels/${channelId}`); // TODO: Add routing
     };
 
@@ -123,6 +126,7 @@ export function SlackLayout({
         setActiveConversationId(conversationId);
         setActiveChannelId(undefined);
         setActiveThreadMessage(null);
+        setActiveView('chat');
         // router.push(`/messages/dms/${conversationId}`); // TODO: Add routing
     };
 
@@ -185,6 +189,7 @@ export function SlackLayout({
 
         // Set target message for scrolling/highlighting
         setTargetMessageId(message._id);
+        setActiveView('chat');
     };
 
     return (
@@ -213,19 +218,29 @@ export function SlackLayout({
                     onInvite={handleInvite}
                     onShowProfile={(user) => setSelectedProfileUser(user)}
                     onSearchClick={() => setIsSearchOpen(true)}
+                    onSavedItemsClick={() => setActiveView('saved')}
+                    activeView={activeView}
                 />
 
                 <main className="flex-1 flex flex-col min-w-0 bg-white relative">
-                    <SlackChat
-                        channel={activeChannel}
-                        conversation={activeConversation}
-                        currentUser={currentUser}
-                        onInvite={handleInvite}
-                        onThreadClick={(msg) => setActiveThreadMessage(msg)}
-                        onShowProfile={(user) => setSelectedProfileUser(user)}
-                        targetMessageId={targetMessageId}
-                        onTargetMessageScrolled={() => setTargetMessageId(undefined)}
-                    />
+                    {activeView === 'chat' ? (
+                        <SlackChat
+                            channel={activeChannel}
+                            conversation={activeConversation}
+                            currentUser={currentUser}
+                            onInvite={handleInvite}
+                            onThreadClick={(msg) => setActiveThreadMessage(msg)}
+                            onShowProfile={(user) => setSelectedProfileUser(user)}
+                            targetMessageId={targetMessageId}
+                            onTargetMessageScrolled={() => setTargetMessageId(undefined)}
+                        />
+                    ) : (
+                        <SlackSavedItems
+                            currentUser={currentUser}
+                            onClose={() => setActiveView('chat')}
+                            onSelectMessage={handleSelectMessage}
+                        />
+                    )}
 
                     {activeThreadMessage && (
                         <SlackThread
