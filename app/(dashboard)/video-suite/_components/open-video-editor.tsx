@@ -38,7 +38,7 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
     const [isReady, setIsReady] = useState(false);
     const [activeTab, setActiveTab] = useState<'media' | 'text'>('media');
     const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
-    const zoom = 50; // px per second
+    const [zoom, setZoom] = useState(50); // px per second
     const [v, setV] = useState(0); // Force re-render for internal state updates
 
     useEffect(() => {
@@ -78,6 +78,7 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                 studio.on("pause", ({ isPlaying }) => setIsPlaying(isPlaying));
                 studio.on("clip:added", () => setV(v => v + 1));
                 studio.on("clip:removed", () => setV(v => v + 1));
+                studio.on("clip:updated", () => setV(v => v + 1));
                 studio.on("selection:created", ({ selected }) => {
                     if (selected.length > 0) setSelectedClipId(selected[0].id);
                     else setSelectedClipId(null);
@@ -120,11 +121,11 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                 console.log("[OpenVideo] Processing file:", file.name, file.type, file.url);
                 let clip;
                 if (file.type?.startsWith('video')) {
-                    clip = new Video(file.url);
+                    clip = await Video.fromUrl(file.url);
                 } else if (file.type?.startsWith('audio')) {
-                    clip = new Audio(file.url);
+                    clip = await Audio.fromUrl(file.url);
                 } else if (file.type?.startsWith('image')) {
-                    clip = new Image(file.url);
+                    clip = await Image.fromUrl(file.url);
                 }
 
                 if (clip) {
@@ -135,7 +136,9 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                         studioRef.current.addTrack({ name: "Track 1", type: "video" });
                     }
                     const trackId = studioRef.current.tracks[0].id;
-                    console.log("[OpenVideo] Adding clip to track:", trackId);
+                    const startTime = studioRef.current.maxDuration;
+                    clip.display = { from: startTime, to: startTime + clip.duration };
+                    console.log("[OpenVideo] Adding clip to track:", trackId, "at:", startTime);
                     await studioRef.current.addClip(clip, { trackId });
                     console.log("[OpenVideo] Clip added to Studio.");
                 } else {
@@ -159,6 +162,8 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                 studioRef.current.addTrack({ name: "Track 1", type: "video" });
             }
             const textClip = new Text("New Text");
+            const startTime = studioRef.current.maxDuration;
+            textClip.display = { from: startTime, to: startTime + (3 * 1000000) }; // 3 seconds default
             const trackId = studioRef.current.tracks[0].id;
             await studioRef.current.addClip(textClip, { trackId });
             toast.success("Text added");
@@ -265,6 +270,18 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                     >
                         {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
                     </Button>
+                    <div className="h-4 w-[1px] bg-[#303236]" />
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-[#ABABAD] uppercase font-bold tracking-widest">Zoom</span>
+                        <input
+                            type="range"
+                            min="10"
+                            max="200"
+                            value={zoom}
+                            onChange={(e) => setZoom(parseInt(e.target.value))}
+                            className="w-24 accent-purple-500"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -386,9 +403,88 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
                         <h3 className="text-xs font-bold uppercase tracking-wider text-[#ABABAD]">Properties</h3>
                     </div>
                     {selectedClipId ? (
-                        <div className="p-4 space-y-4">
-                            <span className="text-[10px] text-purple-400 uppercase font-bold">Selected: {selectedClipId.slice(0, 8)}</span>
-                            {/* Further properties can be added here */}
+                        <div className="p-4 space-y-6 overflow-y-auto">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-purple-400 uppercase font-bold">ID: {selectedClipId.slice(0, 8)}</span>
+                                <span className="text-xs text-[#ABABAD] font-mono">{studioRef.current?.getClipById(selectedClipId)?.type}</span>
+                            </div>
+
+                            {studioRef.current?.getClipById(selectedClipId)?.type === 'Video' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold text-[#606060]">Volume</label>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="100"
+                                            defaultValue={(studioRef.current?.getClipById(selectedClipId) as any)?.volume * 100 || 100}
+                                            onChange={(e) => {
+                                                const vol = parseInt(e.target.value) / 100;
+                                                studioRef.current?.updateClip(selectedClipId, { volume: vol } as any);
+                                            }}
+                                            className="w-full accent-purple-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {studioRef.current?.getClipById(selectedClipId)?.type === 'Text' && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold text-[#606060]">Content</label>
+                                        <textarea
+                                            className="w-full bg-[#0B0D0F] border border-[#303236] rounded p-2 text-xs text-white focus:outline-none focus:border-purple-500 min-h-[80px]"
+                                            defaultValue={(studioRef.current?.getClipById(selectedClipId) as any)?.text}
+                                            onChange={(e) => {
+                                                studioRef.current?.updateClip(selectedClipId, { text: e.target.value } as any);
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold text-[#606060]">Font Size</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                className="w-full bg-[#0B0D0F] border border-[#303236] rounded p-1 text-xs text-white"
+                                                defaultValue={(studioRef.current?.getClipById(selectedClipId) as any)?.style?.fontSize || 40}
+                                                onChange={(e) => {
+                                                    const currentStyle = (studioRef.current?.getClipById(selectedClipId) as any)?.style || {};
+                                                    studioRef.current?.updateClip(selectedClipId, {
+                                                        style: { ...currentStyle, fontSize: parseInt(e.target.value) }
+                                                    } as any);
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] uppercase font-bold text-[#606060]">Color</label>
+                                        <input
+                                            type="color"
+                                            className="w-full h-8 bg-transparent border-none cursor-pointer"
+                                            defaultValue={(studioRef.current?.getClipById(selectedClipId) as any)?.style?.fill || "#ffffff"}
+                                            onChange={(e) => {
+                                                const currentStyle = (studioRef.current?.getClipById(selectedClipId) as any)?.style || {};
+                                                studioRef.current?.updateClip(selectedClipId, {
+                                                    style: { ...currentStyle, fill: e.target.value }
+                                                } as any);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <Button
+                                variant="destructive"
+                                className="w-full h-8 flex items-center gap-2 text-[10px] uppercase font-bold"
+                                onClick={() => {
+                                    studioRef.current?.removeClip(selectedClipId!).then(() => {
+                                        setSelectedClipId(null);
+                                        setV(v => v + 1);
+                                    });
+                                }}
+                            >
+                                <Trash2 className="w-3 h-3" /> Remove Element
+                            </Button>
                         </div>
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-[#404040]">
