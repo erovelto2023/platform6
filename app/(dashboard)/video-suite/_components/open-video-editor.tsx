@@ -132,11 +132,11 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
     };
 
     const handleSave = async () => {
-        if (!studioRef.current || !params.projectId) return;
+        if (!studioRef.current || !params?.projectId) return;
         setIsSaving(true);
         try {
             const data = studioRef.current.exportToJSON();
-            await updateVideoProject(params.projectId as string, {
+            await updateVideoProject(params?.projectId as string, {
                 studioData: data
             });
             toast.success("Project saved");
@@ -178,7 +178,7 @@ export function OpenVideoEditor({ initialData }: OpenVideoEditorProps) {
 
             const a = document.createElement("a");
             a.href = url;
-            a.download = `project-${params.projectId || 'export'}.mp4`;
+            a.download = `project-${params?.projectId || 'export'}.mp4`;
             a.click();
 
             toast.success("Export complete!", { id: toastId });
