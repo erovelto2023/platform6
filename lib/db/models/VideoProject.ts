@@ -13,6 +13,19 @@ const ClipSchema = new Schema({
     height: { type: Number },
 });
 
+const TextClipSchema = new Schema({
+    id: { type: String, required: true },
+    text: { type: String, required: true },
+    position: { type: Number, default: 0 },
+    duration: { type: Number, default: 3000 },
+    style: {
+        fontSize: { type: Number, default: 24 },
+        color: { type: String, default: '#ffffff' },
+        x: { type: Number, default: 50 },
+        y: { type: Number, default: 50 },
+    }
+});
+
 const VideoProjectSchema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
@@ -28,6 +41,7 @@ const VideoProjectSchema = new Schema({
         type: String,
     },
     clips: [ClipSchema],
+    textClips: [TextClipSchema],
     status: {
         type: String,
         enum: ['draft', 'rendering', 'completed', 'failed'],
@@ -35,6 +49,9 @@ const VideoProjectSchema = new Schema({
     },
     exportUrl: {
         type: String,
+    },
+    studioData: {
+        type: Object, // OpenVideo JSON state
     },
     outputPath: {
         type: String, // Local path on VPS during rendering

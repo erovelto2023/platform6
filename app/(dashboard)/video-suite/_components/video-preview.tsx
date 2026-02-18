@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 export function VideoPreview() {
     const {
         clips,
+        textClips,
         currentTime,
         setCurrentTime,
         isPlaying,
@@ -34,6 +35,12 @@ export function VideoPreview() {
         currentTime < c.position + (c.duration * 1000)
     );
 
+    // Find active text overlays
+    const activeTextOverlays = textClips.filter(t =>
+        currentTime >= t.position &&
+        currentTime < t.position + t.duration
+    );
+
     // Reset ready state when clip changes
     useEffect(() => {
         setIsReady(false);
@@ -41,28 +48,73 @@ export function VideoPreview() {
 
     const handleProgress = (state: any) => {
         if (isPlaying && activeClip) {
-            // Calculate absolute time relative to timeline
             const clipRelativeTime = state.playedSeconds * 1000;
             const newAbsoluteTime = activeClip.position + clipRelativeTime;
-            setCurrentTime(newAbsoluteTime);
+
+            // Smoother time updates
+            if (Math.abs(newAbsoluteTime - currentTime) > 50) {
+                setCurrentTime(newAbsoluteTime);
+            }
+        }
+    };
+
+    const handleOnEnded = () => {
+        // Find next clip or stop
+        const nextClip = clips.find(c => c.position > currentTime);
+        if (nextClip) {
+            setCurrentTime(nextClip.position);
+        } else {
+            setIsPlaying(false);
         }
     };
 
     return (
-        <div className="flex-1 flex flex-col p-4 relative">
-            <div className="flex-1 bg-[#000] rounded-xl border border-[#303236] relative overflow-hidden flex items-center justify-center">
+        <div className="flex-1 flex flex-col p-4 relative h-full">
+            <div className="flex-1 bg-[#000] rounded-xl border border-[#303236] relative overflow-hidden flex items-center justify-center group shadow-2xl">
                 {activeClip ? (
-                    <ReactPlayer
-                        ref={playerRef}
-                        url={activeClip.url}
-                        playing={isPlaying && isReady}
-                        controls={false}
-                        width="100%"
-                        height="100%"
-                        onProgress={(state: any) => handleProgress(state)}
-                        onReady={() => setIsReady(true)}
-                        progressInterval={100}
-                    />
+                    <div className="w-full h-full relative">
+                        <ReactPlayer
+                            ref={playerRef}
+                            url={activeClip.url.startsWith('/') ? `${window.location.origin}${activeClip.url}` : activeClip.url}
+                            playing={isPlaying && isReady}
+                            controls={false}
+                            width="100%"
+                            height="100%"
+                            volume={(activeClip.volume !== undefined ? activeClip.volume : 100) / 100}
+                            onProgress={(state: any) => handleProgress(state)}
+                            onReady={() => {
+                                setIsReady(true);
+                                setDuration(activeClip.duration * 1000);
+                            }}
+                            onEnded={handleOnEnded}
+                            onError={(e: any) => console.error("Player Error:", e)}
+                            progressInterval={50}
+                            playsinline
+                        />
+
+                        {/* Text Overlays Layer */}
+                        <div className="absolute inset-0 pointer-events-none z-10">
+                            {activeTextOverlays.map(text => (
+                                <div
+                                    key={text.id}
+                                    className="absolute transform -translate-x-1/2 -translate-y-1/2 select-none"
+                                    style={{
+                                        left: `${text.style.x}%`,
+                                        top: `${text.style.y}%`,
+                                        fontSize: `${text.style.fontSize}px`,
+                                        color: text.style.color,
+                                        textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                                        fontFamily: 'Inter, sans-serif',
+                                        fontWeight: 'bold',
+                                        textAlign: 'center',
+                                        width: 'max-content'
+                                    }}
+                                >
+                                    {text.text}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 ) : (
                     <div className="text-[#303236] flex flex-col items-center gap-2">
                         <Monitor className="w-16 h-16" />
