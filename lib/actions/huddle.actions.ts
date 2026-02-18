@@ -6,7 +6,7 @@ import User from "@/lib/db/models/User";
 
 const apiKey = process.env.LIVEKIT_API_KEY;
 const apiSecret = process.env.LIVEKIT_API_SECRET;
-const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+const wsUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || process.env.LIVEKIT_URL;
 
 export async function createHuddleToken(
     userId: string,
