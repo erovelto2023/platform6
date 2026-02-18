@@ -105,7 +105,7 @@ export function SlackChat({
         } finally {
             if (!silent) setLoading(false);
         }
-    }, [channel, conversation]);
+    }, [channel?._id, conversation?._id]);
 
     // Initial fetch
     useEffect(() => {

@@ -35,6 +35,7 @@ export function SlackLayout({
 }: SlackLayoutProps) {
     const router = useRouter();
     const [channels, setChannels] = useState(initialChannels);
+    const [conversations, setConversations] = useState(initialConversations);
     const [activeChannelId, setActiveChannelId] = useState<string | undefined>(
         initialChannelId || (initialChannels.length > 0 ? initialChannels[0]._id : undefined)
     );
@@ -42,6 +43,16 @@ export function SlackLayout({
     const [activeThreadMessage, setActiveThreadMessage] = useState<any | null>(null);
     const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
     const [targetMessageId, setTargetMessageId] = useState<string | undefined>(undefined);
+
+    const refreshSidebar = async () => {
+        const [channelsRes, dmsRes] = await Promise.all([
+            getChannels(currentUser._id),
+            getConversations(currentUser._id)
+        ]);
+
+        if (channelsRes.success) setChannels(channelsRes.data);
+        if (dmsRes.success) setConversations(dmsRes.data);
+    };
 
     // Sync user ID for socket notification filtering
     useEffect(() => {
@@ -59,25 +70,15 @@ export function SlackLayout({
         };
 
         heartbeat(); // Initial
-        const interval = setInterval(heartbeat, 30000); // 30s
+        const interval = setInterval(heartbeat, 60000); // 1m for heartbeat
         return () => clearInterval(interval);
     }, [currentUser?._id]);
 
-    // Poll for sidebar updates (unreads and new channels/DMs)
+    // Poll for sidebar updates (unreads and new channels/DMs) - reduced frequency
     useEffect(() => {
         if (!currentUser?._id) return;
 
-        const refreshSidebar = async () => {
-            const [channelsRes, dmsRes] = await Promise.all([
-                getChannels(currentUser._id),
-                getConversations(currentUser._id)
-            ]);
-
-            if (channelsRes.success) setChannels(channelsRes.data);
-            if (dmsRes.success) setConversations(dmsRes.data);
-        };
-
-        const interval = setInterval(refreshSidebar, 5000); // 5s poll for sidebar
+        const interval = setInterval(refreshSidebar, 30000); // 30s poll instead of 5s
         return () => clearInterval(interval);
     }, [currentUser?._id]);
 
@@ -87,28 +88,22 @@ export function SlackLayout({
         if (!socket || !currentUser?._id) return;
 
         const onUnreadUpdate = (data: any) => {
-            // If we are already in this channel/conversation, we might not need to update unreads
-            // but simpler to just refresh the sidebar data
-            const refreshSidebar = async () => {
-                const [channelsRes, dmsRes] = await Promise.all([
-                    getChannels(currentUser._id),
-                    getConversations(currentUser._id)
-                ]);
+            refreshSidebar();
+        };
 
-                if (channelsRes.success) setChannels(channelsRes.data);
-                if (dmsRes.success) setConversations(dmsRes.data);
-            };
-
+        const onNewMessage = (msg: any) => {
+            // When any new message arrives, refresh the sidebar to pick up unread counts
             refreshSidebar();
         };
 
         socket.on("unread:update", onUnreadUpdate);
+        socket.on("message:new", onNewMessage);
         return () => {
             socket.off("unread:update", onUnreadUpdate);
+            socket.off("message:new", onNewMessage);
         };
     }, [socket, currentUser?._id]);
 
-    const [conversations, setConversations] = useState(initialConversations);
 
     // Modal state
     const [openCreateChannel, setOpenCreateChannel] = useState(false);
@@ -177,7 +172,7 @@ export function SlackLayout({
     };
 
     const activeChannel = channels.find(c => c._id === activeChannelId);
-    const activeConversation = initialConversations.find(c => c._id === activeConversationId);
+    const activeConversation = conversations.find(c => c._id === activeConversationId);
 
     const handleSelectMessage = (message: any) => {
         if (message.channelId) {
@@ -204,7 +199,7 @@ export function SlackLayout({
             <div className="flex-1 flex overflow-hidden border-t min-h-0">
                 <SlackSidebar
                     channels={channels}
-                    conversations={initialConversations}
+                    conversations={conversations}
                     activeChannelId={activeChannelId}
                     activeConversationId={activeConversationId}
                     onSelectChannel={handleSelectChannel}
