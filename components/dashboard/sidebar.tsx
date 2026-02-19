@@ -121,12 +121,6 @@ const routes = [
         href: "/whiteboard",
         color: "text-pink-500",
     },
-    {
-        label: "Video Suite",
-        icon: Film,
-        href: "/video-suite",
-        color: "text-purple-500",
-    },
 ];
 
 const adminRoutes = [
@@ -237,12 +231,6 @@ const adminRoutes = [
         icon: ShoppingBag,
         href: "/admin/wholesale-directory",
         color: "text-cyan-500",
-    },
-    {
-        label: "Video Suite",
-        icon: Film,
-        href: "/video-suite",
-        color: "text-purple-600",
     },
     {
         label: "Settings",
