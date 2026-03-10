@@ -3,15 +3,9 @@ import { getNicheBoxes } from "@/lib/actions/niche.actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Download, Lightbulb } from "lucide-react";
-import { checkSubscription } from "@/lib/check-subscription";
-import { redirect } from "next/navigation";
 
 export default async function NicheBoxesPage() {
-    // const isPro = await checkSubscription();
-    // 
-    // if (!isPro) {
-    //    return redirect("/upgrade");
-    // }
+    // Niche boxes are now free for all registered users.
 
     const niches = await getNicheBoxes();
 

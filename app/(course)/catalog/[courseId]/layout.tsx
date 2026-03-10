@@ -26,13 +26,7 @@ export default async function CourseLayout({
         return redirect("/");
     }
 
-    // Check if course is premium and user has subscription
-    // if (course.isPremium) {
-    //    const hasSubscription = await checkSubscription();
-    //    if (!hasSubscription) {
-    //        return redirect("/upgrade");
-    //    }
-    // }
+    // All courses are now free.
 
     const progress = await getProgress(courseId);
     const progressCount = progress?.progressPercentage || 0;

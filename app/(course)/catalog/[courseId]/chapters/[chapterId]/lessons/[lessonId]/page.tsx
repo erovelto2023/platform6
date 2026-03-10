@@ -31,7 +31,7 @@ export default async function LessonIdPage({
         return redirect("/");
     }
 
-    const isLocked = !lesson.isFreePreview && false; // TODO: Add purchase check
+    const isLocked = false; // All content is now free
     const isCompleted = progress?.completedLessons?.includes(lessonId);
 
     // Logic to find next lesson

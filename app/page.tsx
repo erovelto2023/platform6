@@ -9,7 +9,7 @@ import {
   ArrowRight, CheckCircle2, BookOpen, Box, Wrench, Search,
   Link as LinkIcon, Zap, Layers, Users, TrendingUp, PenTool,
   ShoppingCart, Image, Sparkles, Rocket, Target, Award, Shield,
-  Check, X, Youtube, Facebook
+  Check, X, Youtube, Facebook, Heart
 } from "lucide-react";
 import {
   Accordion,
@@ -457,7 +457,7 @@ export default function LandingPage() {
               </div>
 
               {[
-                { guru: "High-ticket courses ($2k–$10k)", kba: "Affordable, transparent monthly/yearly access" },
+                { guru: "High-ticket courses ($2k–$10k)", kba: "Completely FREE access to all training" },
                 { guru: "Rented attention (Social Media focus)", kba: "Owned assets (Systems you control)" },
                 { guru: "\"Get-rich-quick\" hype", kba: "\"Get-to-work\" systematic building" },
                 { guru: "Fragmented tools and subscriptions", kba: "One platform for education + tools + execution" },
@@ -484,15 +484,24 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Pricing Section */}
+        {/* Pricing/Support Section */}
         <section className="w-full py-24 bg-slate-900" id="pricing">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Simple, Transparent Pricing</h2>
-              <p className="text-slate-400">Everything we offer, for one simple price. Cancel anytime.</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 italic tracking-tighter">Everything is Free. <br/><span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent not-italic">Support Our Mission.</span></h2>
+              <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+                We believe in democratizing business education. K Business Academy is now free for everyone. 
+                If you find value in our tools and training, consider supporting us with a "Pay what you want" contribution.
+              </p>
             </div>
-            <div className="flex justify-center max-w-5xl mx-auto">
-              <PricingTable />
+            <div className="flex flex-col items-center justify-center max-w-5xl mx-auto">
+                <Link href="/p/pay-your-price">
+                    <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-2xl px-12 h-20 rounded-2xl shadow-2xl shadow-purple-500/30 font-black transition-transform hover:scale-105">
+                        PAY WHAT YOU WANT
+                        <Heart className="ml-2 h-6 w-6 fill-white" />
+                    </Button>
+                </Link>
+                <p className="mt-6 text-slate-500 font-medium uppercase tracking-widest text-sm">Help us keep the academy growing</p>
             </div>
           </div>
         </section>

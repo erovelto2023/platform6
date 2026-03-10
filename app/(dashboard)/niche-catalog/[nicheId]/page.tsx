@@ -1,7 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getNicheBox } from "@/lib/actions/niche.actions";
-import { checkSubscription } from "@/lib/check-subscription";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,9 +21,7 @@ export default async function NicheBoxDetailPage({
         return redirect("/");
     }
 
-    // if (!isPro) {
-    //    return redirect("/upgrade");
-    // }
+    // Niche details are now free for all registered users.
 
     const { nicheId } = await params;
     const niche = await getNicheBox(nicheId);
