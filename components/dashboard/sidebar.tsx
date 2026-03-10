@@ -132,6 +132,42 @@ const adminRoutes = [
         color: "text-sky-500",
     },
     {
+        label: "Glossary & Phrasing",
+        icon: Library,
+        href: "/admin/glossary",
+        color: "text-violet-500",
+    },
+    {
+        label: "Tools & Products",
+        icon: ShoppingBag,
+        href: "/admin/tools-products",
+        color: "text-orange-500",
+    },
+    {
+        label: "Offer Builder",
+        icon: Tag,
+        href: "/admin/offers",
+        color: "text-blue-600",
+    },
+    {
+        label: "FAQs",
+        icon: FileQuestion,
+        href: "/admin/faqs",
+        color: "text-emerald-500",
+    },
+    {
+        label: "Subscribers",
+        icon: Users,
+        href: "/admin/subscribers",
+        color: "text-pink-500",
+    },
+    {
+        label: "Simple Page Builder",
+        icon: FileStack,
+        href: "/admin/page-builder-simple",
+        color: "text-blue-400",
+    },
+    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/admin/affiliates",
@@ -142,24 +178,6 @@ const adminRoutes = [
         icon: FileText,
         href: "/admin/blog",
         color: "text-indigo-500",
-    },
-    {
-        label: "Blog Analytics",
-        icon: BarChart3,
-        href: "/admin/blog/analytics",
-        color: "text-cyan-500",
-    },
-    {
-        label: "Offer Builder",
-        icon: Tag,
-        href: "/admin/offers",
-        color: "text-blue-600",
-    },
-    {
-        label: "Simple Page Builder",
-        icon: FileStack,
-        href: "/admin/page-builder-simple",
-        color: "text-purple-500",
     },
     {
         label: "Courses",
@@ -177,12 +195,6 @@ const adminRoutes = [
         label: "Surveys",
         icon: FileQuestion,
         href: "/admin/surveys",
-        color: "text-orange-500",
-    },
-    {
-        label: "Tools",
-        icon: Wrench,
-        href: "/admin/tools",
         color: "text-orange-500",
     },
     {
