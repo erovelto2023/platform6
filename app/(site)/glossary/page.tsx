@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default async function GlossaryPage() {
     const { terms } = await getGlossaryTerms({ limit: 1000 });
 
-    const categories = Array.from(new Set(terms.map((t: any) => t.category))).sort();
+    const categories = Array.from(new Set(terms.map((t: any) => String(t.category || "General")))).sort() as string[];
 
     return (
         <div className="min-h-screen bg-slate-50">
