@@ -34,6 +34,18 @@ export interface IGlossaryTerm {
     chakraAssociation?: string;   // Linked chakras
     elementalAssociation?: string;// Earth, Water, etc.
     frequencyLevel?: string;      // Symbolic/energetic frequency
+    
+    // --- Monetization & Business (MMO) ---
+    howItMakesMoney?: string;
+    bestFor?: string;
+    gettingStartedChecklist?: string[];
+    commonMistakes?: string;
+    realExamples?: string;
+    startupCost?: '$0' | '<$100' | '$100+';
+    timeToFirstDollar?: string;
+    skillRequired?: 'Beginner' | 'Intermediate' | 'Advanced';
+    platformPreference?: string;
+    lowPhysicalEffort?: boolean;
 
     // --- Relationships & Linking ---
     relatedTermIds: string[];
@@ -115,6 +127,18 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     chakraAssociation: { type: String },
     elementalAssociation: { type: String },
     frequencyLevel: { type: String },
+
+    // Monetization & Business (MMO)
+    howItMakesMoney: { type: String },
+    bestFor: { type: String },
+    gettingStartedChecklist: [String],
+    commonMistakes: { type: String },
+    realExamples: { type: String },
+    startupCost: { type: String, enum: ['$0', '<$100', '$100+'], default: '$0' },
+    timeToFirstDollar: { type: String },
+    skillRequired: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
+    platformPreference: { type: String },
+    lowPhysicalEffort: { type: Boolean, default: false },
 
     // Relationships
     relatedTermIds: [String],

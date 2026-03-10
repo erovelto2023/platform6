@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createGlossaryTerm, updateGlossaryTerm } from "@/lib/actions/glossary.actions";
-import { Save, AlertCircle, Loader2, Link as LinkIcon } from "lucide-react";
+import { Save, AlertCircle, Loader2, Link as LinkIcon, Rocket } from "lucide-react";
 import { IGlossaryTerm } from "@/lib/db/models/GlossaryTerm";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 
@@ -54,7 +54,19 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             keywords: [],
 
             // Relationships
-            recommendedTools: []
+            recommendedTools: [],
+
+            // MMO
+            howItMakesMoney: "",
+            bestFor: "",
+            gettingStartedChecklist: [],
+            commonMistakes: "",
+            realExamples: "",
+            startupCost: "$0",
+            timeToFirstDollar: "",
+            skillRequired: "Beginner",
+            platformPreference: "",
+            lowPhysicalEffort: false
         }
     );
 
@@ -337,58 +349,129 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                 </div>
             </div>
 
-            {/* Beginner & Guidance */}
-            <div className="bg-amber-50 p-6 rounded-xl border border-amber-100 space-y-6">
-                <h3 className="font-bold text-amber-900 border-b border-amber-200 pb-2">Guidance & Experience</h3>
-
-                <div>
-                    <label className="block text-xs font-bold text-amber-800 uppercase mb-1">Beginner's Intro</label>
-                    <textarea
-                        rows={2}
-                        value={formData.beginnerExplanation || ""}
-                        onChange={e => handleChange("beginnerExplanation", e.target.value)}
-                        className="w-full p-2.5 rounded-lg border border-amber-200 text-sm"
-                        placeholder="Imagine the sky..."
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-amber-800 uppercase mb-1">Guided Practice Script</label>
-                    <textarea
-                        rows={3}
-                        value={formData.guidedPractice || ""}
-                        onChange={e => handleChange("guidedPractice", e.target.value)}
-                        className="w-full p-2.5 rounded-lg border border-amber-200 text-sm"
-                        placeholder="Close your eyes..."
-                    />
-                </div>
-                <div>
-                    <label className="block text-xs font-bold text-amber-800 uppercase mb-1">Daily Affirmations</label>
-                    <textarea
-                        rows={2}
-                        value={formData.affirmations || ""}
-                        onChange={e => handleChange("affirmations", e.target.value)}
-                        className="w-full p-2.5 rounded-lg border border-amber-200 text-sm"
-                        placeholder="I am pure awareness..."
-                    />
-                </div>
+            {/* Monetization & Business (MMO) */}
+            <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100 space-y-6">
+                <h3 className="font-bold text-emerald-900 border-b border-emerald-200 pb-2 flex items-center gap-2">
+                    <Rocket size={18} />
+                    Monetization & Business (MMO)
+                </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-xs font-bold text-amber-800 uppercase mb-1">Warnings / Notes</label>
-                        <input
-                            type="text"
-                            value={formData.warningsOrNotes || ""}
-                            onChange={e => handleChange("warningsOrNotes", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-amber-200 text-sm"
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">How It Makes Money</label>
+                        <textarea
+                            rows={2}
+                            value={formData.howItMakesMoney || ""}
+                            onChange={e => handleChange("howItMakesMoney", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm focus:ring-emerald-500"
+                            placeholder="e.g. Earn commissions by promoting third-party products..."
                         />
                     </div>
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Best For (Target Audience)</label>
+                        <textarea
+                            rows={2}
+                            value={formData.bestFor || ""}
+                            onChange={e => handleChange("bestFor", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm focus:ring-emerald-500"
+                            placeholder="e.g. Beginners with no product of their own..."
+                        />
+                    </div>
+
                     <div>
-                        <label className="block text-xs font-bold text-amber-800 uppercase mb-1">Common Misconceptions</label>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Startup Cost</label>
+                        <select
+                            value={formData.startupCost || "$0"}
+                            onChange={e => handleChange("startupCost", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                        >
+                            <option value="$0">$0</option>
+                            <option value="<$100">&lt;$100</option>
+                            <option value="$100+">$100+</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Skill Level Required</label>
+                        <select
+                            value={formData.skillRequired || "Beginner"}
+                            onChange={e => handleChange("skillRequired", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                        >
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Time to First Dollar</label>
                         <input
                             type="text"
-                            value={formData.misconceptions || ""}
-                            onChange={e => handleChange("misconceptions", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-amber-200 text-sm"
+                            value={formData.timeToFirstDollar || ""}
+                            onChange={e => handleChange("timeToFirstDollar", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                            placeholder="e.g. 1-30 days"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Platform Preference</label>
+                        <input
+                            type="text"
+                            value={formData.platformPreference || ""}
+                            onChange={e => handleChange("platformPreference", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                            placeholder="e.g. Mobile-first, WordPress, Shopify"
+                        />
+                    </div>
+
+                    <div className="col-span-full flex items-center gap-3 p-4 bg-white rounded-lg border border-emerald-100 shadow-sm">
+                        <div className="flex-1">
+                            <h4 className="font-bold text-slate-800 text-sm">Low-Physical-Effort Path</h4>
+                            <p className="text-xs text-slate-500">Enable this to highlight this path for users with physical limitations or chronic pain.</p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                checked={formData.lowPhysicalEffort || false}
+                                onChange={e => handleChange("lowPhysicalEffort", e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </label>
+                    </div>
+
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Getting Started Checklist (One per line)</label>
+                        <textarea
+                            rows={4}
+                            value={formData.gettingStartedChecklist?.join("\n") || ""}
+                            onChange={e => handleChange("gettingStartedChecklist", e.target.value.split("\n").filter(l => l.trim() !== ""))}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                            placeholder="Choose a niche&#10;Join an affiliate program&#10;Create content"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Common Mistakes</label>
+                        <textarea
+                            rows={3}
+                            value={formData.commonMistakes || ""}
+                            onChange={e => handleChange("commonMistakes", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                            placeholder="Ignoring audience trust..."
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-bold text-emerald-800 uppercase mb-1">Real Example / Case Study</label>
+                        <textarea
+                            rows={3}
+                            value={formData.realExamples || ""}
+                            onChange={e => handleChange("realExamples", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-emerald-200 text-sm"
+                            placeholder="Short case study of a real person..."
                         />
                     </div>
                 </div>

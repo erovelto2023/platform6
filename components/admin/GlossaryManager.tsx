@@ -3,10 +3,11 @@
 import { useState, useTransition } from 'react';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm } from '@/lib/actions/glossary.actions';
+import { seedMMOGlossary } from '@/lib/actions/mmo-seeder';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -37,6 +38,19 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleSeedMMO = () => {
+        if (!confirm('This will seed the glossary with 100 MMO-related terms. Continue?')) return;
+        startTransition(async () => {
+            const res = await seedMMOGlossary();
+            if (res.success) {
+                alert(`Successfully seeded ${res.count} terms!`);
+                window.location.reload();
+            } else {
+                alert('Error seeding: ' + res.error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -44,6 +58,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
                         <div className="flex gap-2">
+                            <button
+                                onClick={handleSeedMMO}
+                                disabled={isPending}
+                                className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50"
+                            >
+                                <Rocket size={16} /> Seed MMO
+                            </button>
                             <button
                                 onClick={() => { setEditingTerm(undefined); setView('create'); }}
                                 className="bg-black text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-slate-800 transition-all"
