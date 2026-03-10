@@ -132,7 +132,7 @@ const adminRoutes = [
         color: "text-sky-500",
     },
     {
-        label: "Glossary & Phrasing",
+        label: "Glossary",
         icon: Library,
         href: "/admin/glossary",
         color: "text-violet-500",

@@ -28,12 +28,6 @@ export interface IGlossaryTerm {
     useCases?: string;         // Real-world applications
     whoUsesIt?: string;        // Practitioners/Audiences
 
-    // --- Energy & Consciousness ---
-    energyType?: string;          // Subtle, biofield, etc.
-    consciousnessLevel?: string;  // Awakening, Grounding, etc.
-    chakraAssociation?: string;   // Linked chakras
-    elementalAssociation?: string;// Earth, Water, etc.
-    frequencyLevel?: string;      // Symbolic/energetic frequency
     
     // --- Monetization & Business (MMO) ---
     howItMakesMoney?: string;
@@ -121,12 +115,8 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     useCases: { type: String },
     whoUsesIt: { type: String },
 
-    // Energy & Consciousness
-    energyType: { type: String },
-    consciousnessLevel: { type: String },
-    chakraAssociation: { type: String },
-    elementalAssociation: { type: String },
-    frequencyLevel: { type: String },
+
+    // Monetization & Business (MMO)
 
     // Monetization & Business (MMO)
     howItMakesMoney: { type: String },

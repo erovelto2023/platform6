@@ -35,12 +35,6 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             commonPractices: "",
             useCases: "",
 
-            // Energy & Consciousness
-            energyType: "Subtle",
-            consciousnessLevel: "",
-            chakraAssociation: "",
-            elementalAssociation: "",
-            frequencyLevel: "",
 
             // Learning & Guidance
             beginnerExplanation: "",
@@ -288,66 +282,7 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                 </div>
             </div>
 
-            {/* Energy & Consciousness */}
-            <div className="bg-purple-50 p-6 rounded-xl border border-purple-100 space-y-6">
-                <h3 className="font-bold text-purple-900 border-b border-purple-200 pb-2">Energy & Consciousness</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">Energy Type</label>
-                        <select
-                            value={formData.energyType || "Subtle"}
-                            onChange={e => handleChange("energyType", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm"
-                        >
-                            <option value="Subtle">Subtle</option>
-                            <option value="Biofield">Biofield</option>
-                            <option value="Physical">Physical</option>
-                            <option value="Cosmic">Cosmic</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">Consciousness Level</label>
-                        <input
-                            type="text"
-                            value={formData.consciousnessLevel || ""}
-                            onChange={e => handleChange("consciousnessLevel", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm"
-                            placeholder="e.g. Turiya"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">Frequency</label>
-                        <input
-                            type="text"
-                            value={formData.frequencyLevel || ""}
-                            onChange={e => handleChange("frequencyLevel", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm"
-                            placeholder="e.g. Beyond measurable"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">Chakra</label>
-                        <input
-                            type="text"
-                            value={formData.chakraAssociation || ""}
-                            onChange={e => handleChange("chakraAssociation", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm"
-                            placeholder="e.g. Crown"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">Element</label>
-                        <input
-                            type="text"
-                            value={formData.elementalAssociation || ""}
-                            onChange={e => handleChange("elementalAssociation", e.target.value)}
-                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm"
-                            placeholder="e.g. Ether"
-                        />
-                    </div>
-                </div>
-            </div>
 
             {/* Monetization & Business (MMO) */}
             <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-100 space-y-6">
