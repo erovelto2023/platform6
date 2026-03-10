@@ -1,6 +1,6 @@
 import { getGlossaryTerms } from "@/lib/actions/glossary.actions";
 import Link from "next/link";
-import { Search, Filter, BookOpen, Rocket, Heart, Zap, Clock, ThumbsUp } from "lucide-react";
+import { Search, Filter, Rocket, Heart, Zap, Clock, ThumbsUp } from "lucide-react";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,9 +9,15 @@ export const metadata: Metadata = {
 };
 
 export default async function GlossaryPage() {
-    const { terms } = await getGlossaryTerms({ limit: 1000 });
+    const result = await getGlossaryTerms({ limit: 1000 }) as any;
+    const terms = result?.terms || [];
 
-    const categories = Array.from(new Set<string>(terms.map((t: any) => String(t.category || "General")))).sort();
+    // Explicitly derive categories to avoid Set/Array.from inference issues in some TS environments
+    const categorySet = new Set<string>();
+    terms.forEach((t: any) => {
+        categorySet.add(String(t.category || "General"));
+    });
+    const categories: string[] = Array.from(categorySet).sort();
 
     return (
         <div className="min-h-screen bg-slate-50">
