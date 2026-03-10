@@ -1,7 +1,5 @@
 import { getPageBySlug } from "@/lib/actions/page-builder.actions";
 import { notFound } from "next/navigation";
-import { SectionRenderer } from "@/app/admin/page-builder/[id]/_components/section-renderer";
-import { defaultTemplates } from "@/lib/constants/page-builder-templates";
 import { Metadata } from "next";
 
 export async function generateMetadata({
@@ -38,17 +36,24 @@ export default async function PublicPageView({
 
     return (
         <div className="min-h-screen bg-white">
+            <style dangerouslySetInnerHTML={{ __html: `
+                /* Reset/Isolation for custom HTML */
+                .custom-html-wrapper {
+                    all: revert;
+                }
+            `}} />
+            
             {page.sections?.map((section: any, index: number) => {
-                const template = defaultTemplates.find((t) => t.id === section.templateId);
-                if (!template) return null;
-
-                return (
-                    <SectionRenderer
-                        key={section._id || index}
-                        section={section}
-                        template={template}
-                    />
-                );
+                if (section.customHTML) {
+                    return (
+                        <div 
+                            key={section._id || index}
+                            className="custom-html-wrapper"
+                            dangerouslySetInnerHTML={{ __html: section.customHTML }}
+                        />
+                    );
+                }
+                return null;
             })}
 
             {(!page.sections || page.sections.length === 0) && (

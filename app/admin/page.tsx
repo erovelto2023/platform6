@@ -19,7 +19,8 @@ import {
     ShoppingBag,
     LayoutTemplate,
     Link as LinkIcon,
-    Layers
+    Layers,
+    Tag
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/actions/dashboard.actions";
@@ -62,13 +63,22 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-cyan-600"
         },
         {
-            title: "Content Templates",
-            description: "Manage templates",
-            href: "/admin/content-templates",
-            icon: Layers,
-            color: "text-pink-600",
-            bg: "bg-pink-100",
-            hover: "group-hover:bg-pink-600"
+            title: "Offer Builder",
+            description: "Advanced sales & marketing offers",
+            href: "/admin/offers",
+            icon: Tag,
+            color: "text-blue-600",
+            bg: "bg-blue-100",
+            hover: "group-hover:bg-blue-600"
+        },
+        {
+            title: "Simple Page Builder",
+            description: "Paste pure HTML pages",
+            href: "/admin/page-builder-simple",
+            icon: FileStack,
+            color: "text-purple-600",
+            bg: "bg-purple-100",
+            hover: "group-hover:bg-purple-600"
         },
         {
             title: "Courses",
@@ -97,7 +107,6 @@ export default async function AdminDashboardPage() {
             bg: "bg-emerald-100",
             hover: "group-hover:bg-emerald-600"
         },
-
         {
             title: "Niche Business in a Box",
             description: "Business blueprints",

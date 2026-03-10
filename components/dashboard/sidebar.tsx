@@ -24,7 +24,8 @@ import {
     Library,
     Wrench,
     PenTool,
-    Film
+    Film,
+    Tag
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -149,64 +150,22 @@ const adminRoutes = [
         color: "text-cyan-500",
     },
     {
-        label: "BrandBaser",
-        icon: Sparkles,
-        href: "/admin/brand-baser",
-        color: "text-violet-500",
+        label: "Offer Builder",
+        icon: Tag,
+        href: "/admin/offers",
+        color: "text-blue-600",
     },
     {
-        label: "Content Templates",
-        icon: FileText,
-        href: "/admin/content-templates",
-        color: "text-pink-500",
+        label: "Simple Page Builder",
+        icon: FileStack,
+        href: "/admin/page-builder-simple",
+        color: "text-purple-500",
     },
     {
         label: "Courses",
         icon: BookOpen,
         href: "/admin/courses",
         color: "text-violet-500",
-    },
-    {
-        label: "Events",
-        icon: Calendar,
-        href: "/admin/events",
-        color: "text-rose-500",
-    },
-    {
-        label: "Groups",
-        icon: Users,
-        href: "/admin/groups",
-        color: "text-emerald-500",
-    },
-    {
-        label: "Library Manager",
-        icon: Library,
-        href: "/admin/docs",
-        color: "text-blue-600",
-    },
-    {
-        label: "Niche Business in a Box",
-        icon: Compass,
-        href: "/admin/niche-boxes",
-        color: "text-pink-700",
-    },
-    {
-        label: "Page Builder",
-        icon: FileStack,
-        href: "/admin/page-builder",
-        color: "text-purple-500",
-    },
-    {
-        label: "Resources",
-        icon: BookOpen,
-        href: "/admin/resources",
-        color: "text-blue-500",
-    },
-    {
-        label: "Section Templates",
-        icon: LayoutDashboard,
-        href: "/admin/section-templates",
-        color: "text-indigo-500",
     },
     {
         label: "Support Tickets",
