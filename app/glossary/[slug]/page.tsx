@@ -5,16 +5,15 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
 import { 
-    ChevronLeft, 
-    Rocket, 
-    Target, 
-    CheckCircle2, 
-    Wrench, 
-    AlertTriangle, 
-    Star, 
-    ArrowRight,
-    Sparkles,
-    Heart
+    ArrowLeft, 
+    Calculator, 
+    Lightbulb,
+    Bookmark,
+    Share2,
+    Info,
+    ExternalLink,
+    Heart,
+    Rocket
 } from "lucide-react";
 
 interface Props {
@@ -46,178 +45,158 @@ export default async function GlossaryTermPage({ params }: Props) {
     const { terms: allTerms } = await getGlossaryTerms({ limit: 1000 });
     const relatedTerms = allTerms.filter((t: any) => 
         t.category === term.category && t.id !== term.id
-    ).slice(0, 3);
+    ).slice(0, 5); // get up to 5 related items
+
+    const updatedDate = term.lastUpdated ? new Date(term.lastUpdated).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "March 2026";
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20">
-            {/* Navigation Header */}
-            <div className="bg-white border-b border-slate-200 py-4 sticky top-0 z-50">
-                <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
-                    <Link href="/glossary" className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 font-bold transition-colors">
-                        <ChevronLeft size={20} />
-                        Back to Library
-                    </Link>
-                    <div className="flex items-center gap-2">
-                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 py-1 bg-slate-100 rounded">
-                            {term.category}
-                        </span>
+        <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-900 dark:text-white pb-20">
+            <div className="max-w-5xl mx-auto px-6 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <Link 
+                    href="/glossary"
+                    className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-8 group font-bold w-fit"
+                >
+                    <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+                    Back to Glossary
+                </Link>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    {/* Content Column */}
+                    <div className="lg:col-span-2">
+                        <div className="flex items-center flex-wrap gap-3 mb-4">
+                            <span className="text-xs font-bold px-3 py-1 rounded-full text-white bg-emerald-500 uppercase tracking-widest">
+                                {term.category || 'General'}
+                            </span>
+                            <span className="text-slate-400 text-sm italic">Updated {updatedDate}</span>
+                            
+                            {term.lowPhysicalEffort && (
+                                <span className="flex items-center gap-1.5 px-3 py-1 bg-rose-50 border border-rose-100 dark:bg-rose-900/30 dark:border-rose-800 rounded-full text-rose-600 dark:text-rose-400 text-xs font-bold">
+                                    <Heart size={14} /> Low Physical Effort
+                                </span>
+                            )}
+                            {term.startupCost && term.startupCost !== '$0' && (
+                                <span className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-800 rounded-full text-blue-600 dark:text-blue-400 text-xs font-bold">
+                                    <Rocket size={14} /> {term.startupCost} Startup
+                                </span>
+                            )}
+                        </div>
+                        
+                        <h1 className="text-4xl md:text-6xl font-black mb-2 leading-tight">{term.term}</h1>
+                        <h2 className="text-2xl font-medium mb-8 text-slate-500 dark:text-slate-400 line-clamp-2">
+                            {term.shortDefinition}
+                        </h2>
+
+                        <div className="prose prose-lg dark:prose-invert max-w-none prose-emerald">
+                            <p className="text-xl leading-relaxed mb-8 text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                                {term.definition}
+                            </p>
+
+                            {(term.howItMakesMoney || term.howItWorks) && (
+                                <div className="p-8 rounded-3xl mb-10 border-2 border-dashed bg-emerald-50 border-emerald-200 dark:bg-slate-800/50 dark:border-slate-700">
+                                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold mb-4">
+                                        <Calculator size={20} />
+                                        How It Makes Money
+                                    </div>
+                                    <p className="text-lg font-medium text-slate-800 dark:text-slate-200">
+                                        {term.howItMakesMoney || term.howItWorks}
+                                    </p>
+                                </div>
+                            )}
+
+                            {term.gettingStartedChecklist && term.gettingStartedChecklist.length > 0 && (
+                                <>
+                                    <h3 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                                        <Lightbulb className="text-amber-500" />
+                                        Key Takeaways & Getting Started
+                                    </h3>
+                                    <ul className="space-y-4 mb-10 list-none pl-0">
+                                        {term.gettingStartedChecklist.map((item: string, idx: number) => (
+                                            <li key={idx} className="flex gap-4 items-start m-0">
+                                                <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                                <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                            
+                            {term.commonMistakes && (
+                                <div className="p-6 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-100 dark:border-rose-900/50 mt-8 mb-8 not-prose">
+                                    <h4 className="font-bold text-rose-800 dark:text-rose-400 mb-2 flex items-center gap-2">
+                                        Common Mistakes
+                                    </h4>
+                                    <p className="text-rose-700 dark:text-rose-300/80 text-sm">{term.commonMistakes}</p>
+                                </div>
+                            )}
+                            
+                            {term.realExamples && (
+                                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/50 mb-8 not-prose">
+                                    <h4 className="font-bold text-blue-800 dark:text-blue-400 mb-2 flex items-center gap-2">
+                                        Real Example
+                                    </h4>
+                                    <p className="text-blue-700 dark:text-blue-300/80 text-sm italic">"{term.realExamples}"</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Sidebar / Metadata */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 p-8 rounded-3xl border bg-white border-slate-200 shadow-xl shadow-slate-200/50 dark:bg-slate-800/50 dark:border-slate-700 dark:shadow-none">
+                            <h4 className="font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
+                                <Info size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                Details & Actions
+                            </h4>
+                            
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                                    <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">Skill Level</span>
+                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{term.skillRequired || "Beginner"}</span>
+                                </div>
+                                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+                                    <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">Time to Entry</span>
+                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{term.timeToFirstDollar || "Varies"}</span>
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-3 mb-8">
+                                <button className="w-full py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-sm">
+                                    <Bookmark size={18} /> Save for later
+                                </button>
+                                <button className="w-full py-3 px-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-colors border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm">
+                                    <Share2 size={18} /> Share term
+                                </button>
+                            </div>
+
+                            <hr className="mb-8 border-slate-100 dark:border-slate-700" />
+
+                            <h4 className="font-bold mb-4 text-slate-800 dark:text-white text-sm">Related Paths</h4>
+                            {relatedTerms.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {relatedTerms.map((r: any) => (
+                                        <Link 
+                                            key={r.id}
+                                            href={`/glossary/${r.slug}`}
+                                            className="text-xs px-3 py-1.5 rounded-lg border transition-all border-slate-200 hover:border-emerald-500 hover:text-emerald-600 dark:border-slate-700 dark:hover:border-emerald-500 dark:text-slate-300 font-medium"
+                                        >
+                                            {r.term}
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-slate-400 italic">No related paths found.</p>
+                            )}
+
+                            <div className="mt-10 p-4 rounded-2xl text-xs text-center transform transition-all bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                                <p className="text-slate-500 dark:text-slate-400 mb-2">Notice a typo or want to improve this definition?</p>
+                                <Link href="/contact" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline inline-flex items-center gap-1">
+                                    Suggest Edit <ExternalLink size={12} />
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <article className="max-w-4xl mx-auto px-4 mt-12">
-                {/* Hero / Header */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-3 mb-6">
-                         {term.lowPhysicalEffort && (
-                            <div className="flex items-center gap-2 px-3 py-1 bg-rose-50 border border-rose-100 rounded-full text-rose-600 text-xs font-bold">
-                                <Heart size={14} /> Low Physical Effort
-                            </div>
-                        )}
-                        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full text-emerald-600 text-xs font-bold">
-                            <Rocket size={14} /> {term.startupCost || "$0"} Startup
-                        </div>
-                    </div>
-                    
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
-                        {term.term}
-                    </h1>
-                    
-                    <div className="p-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl text-white shadow-xl shadow-slate-200 relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h3 className="flex items-center gap-2 text-emerald-400 font-bold text-sm uppercase tracking-widest mb-3">
-                                <Sparkles size={16} /> 60-Second AI Summary
-                            </h3>
-                            <p className="text-lg text-slate-100 leading-relaxed italic">
-                                "{term.shortDefinition}"
-                            </p>
-                        </div>
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-12">
-                    {/* What It Is */}
-                    <section>
-                        <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                            <span className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center text-slate-400 text-sm">01</span>
-                            What It Is
-                        </h2>
-                        <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed whitespace-pre-wrap">
-                            {term.definition}
-                        </div>
-                    </section>
-
-                    {/* How It Makes Money */}
-                    <section className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                        <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                            <Target className="text-emerald-500" />
-                            How It Makes Money
-                        </h2>
-                        <p className="text-slate-600 leading-relaxed mb-6">
-                            {term.howItMakesMoney || `The primary way to generate income with ${term.term} is through value creation and delivery to a specific audience.`}
-                        </p>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">Skill Level</span>
-                                <span className="font-bold text-slate-800">{term.skillRequired || "Beginner"}</span>
-                            </div>
-                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">Time to Entry</span>
-                                <span className="font-bold text-slate-800">{term.timeToFirstDollar || "1-30 Days"}</span>
-                            </div>
-                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                <span className="block text-[10px] font-black uppercase text-slate-400 mb-1">Platform</span>
-                                <span className="font-bold text-slate-800">{term.platformPreference || "Universal"}</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Getting Started Checklist */}
-                    <section>
-                        <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-                            <CheckCircle2 className="text-emerald-500" />
-                            Getting Started Checklist
-                        </h2>
-                        <div className="space-y-3">
-                            {(term.gettingStartedChecklist && term.gettingStartedChecklist.length > 0) ? (
-                                term.gettingStartedChecklist.map((item: string, i: number) => (
-                                    <div key={i} className="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm group hover:border-emerald-200 transition-all">
-                                        <div className="w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center text-[10px] font-black text-slate-300 group-hover:border-emerald-500 group-hover:text-emerald-500 transition-all">
-                                            {i + 1}
-                                        </div>
-                                        <span className="font-bold text-slate-700">{item}</span>
-                                    </div>
-                                ))
-                            ) : (
-                                <p className="text-slate-500 italic">Checklist coming soon for this path.</p>
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Recommended Tools */}
-                    <section className="bg-emerald-900 rounded-3xl p-8 text-white">
-                        <h2 className="text-2xl font-black mb-6 flex items-center gap-3">
-                            <Wrench className="text-emerald-400" />
-                            Recommended Tools
-                        </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-6 bg-white/10 rounded-2xl border border-white/10 hover:bg-white/20 transition-all cursor-pointer">
-                                <h4 className="font-black text-lg mb-1">Keyword Atlas</h4>
-                                <p className="text-sm text-emerald-100/70 mb-4">Essential for finding high-intent niches in {term.term}.</p>
-                                <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-400">
-                                    Explore Tool <ArrowRight size={14} />
-                                </span>
-                            </div>
-                            <div className="p-6 bg-white/10 rounded-2xl border border-white/10 hover:bg-white/20 transition-all cursor-pointer">
-                                <h4 className="font-black text-lg mb-1">Social Analyzer</h4>
-                                <p className="text-sm text-emerald-100/70 mb-4">Track viral trends and content performance for this strategy.</p>
-                                <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-400">
-                                    Explore Tool <ArrowRight size={14} />
-                                </span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Mistakes & Examples */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <section className="p-8 bg-rose-50 rounded-3xl border border-rose-100">
-                            <h2 className="text-xl font-black text-rose-900 mb-6 flex items-center gap-3">
-                                <AlertTriangle size={24} />
-                                Common Mistakes
-                            </h2>
-                            <p className="text-rose-800/80 leading-relaxed text-sm whitespace-pre-wrap">
-                                {term.commonMistakes || "Information about common pitfalls for this path will be updated shortly."}
-                            </p>
-                        </section>
-                        <section className="p-8 bg-amber-50 rounded-3xl border border-amber-100">
-                            <h2 className="text-xl font-black text-amber-900 mb-6 flex items-center gap-3">
-                                <Star size={24} />
-                                Real Example
-                            </h2>
-                            <p className="text-amber-800/80 leading-relaxed text-sm italic">
-                                {term.realExamples || `Many successful entrepreneurs have leveraged ${term.term} to escape the 9-5 and build lasting financial independence.`}
-                            </p>
-                        </section>
-                    </div>
-
-                    {/* Next Steps */}
-                    <section className="text-center py-12 border-t border-slate-200">
-                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Explore Related Paths</h3>
-                        <div className="flex flex-wrap justify-center gap-3">
-                            {relatedTerms.map((t: any) => (
-                                <Link 
-                                    key={t.id}
-                                    href={`/glossary/${t.slug}`}
-                                    className="px-6 py-3 bg-white border border-slate-200 rounded-full font-bold text-slate-600 hover:border-emerald-500 hover:text-emerald-600 transition-all text-sm"
-                                >
-                                    {t.term}
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                </div>
-            </article>
         </div>
     );
 }

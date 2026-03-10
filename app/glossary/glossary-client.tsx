@@ -1,0 +1,204 @@
+"use client";
+
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { 
+  Search, Book, Calculator, TrendingUp, Zap, ChevronRight, Clock, Heart, ThumbsUp
+} from 'lucide-react';
+
+interface GlossaryClientProps {
+  initialTerms: any[];
+  categories: string[];
+}
+
+export default function GlossaryClient({ initialTerms, categories }: GlossaryClientProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+
+  // Filter terms based on search and selected letter
+  const filteredTerms = useMemo(() => {
+    return initialTerms.filter(term => {
+      const matchesSearch = term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            term.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            term.shortDefinition?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesLetter = activeLetter ? term.term.toUpperCase().startsWith(activeLetter) : true;
+      
+      return matchesSearch && matchesLetter;
+    });
+  }, [initialTerms, searchQuery, activeLetter]);
+
+  const toggleLetter = (letter: string) => {
+    if (activeLetter === letter) {
+      setActiveLetter(null);
+    } else {
+      setActiveLetter(letter);
+      setSearchQuery(''); // Clear search when picking a letter
+    }
+  };
+
+  const trendingTerms = initialTerms.filter(t => t.isFeatured).slice(0, 3);
+  if (trendingTerms.length === 0) trendingTerms.push(...initialTerms.slice(0, 3)); // fallback
+
+  const dailySpark = initialTerms.length > 0 ? initialTerms[Math.floor(initialTerms.length / 2)] : null;
+
+  return (
+    <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
+      <header className="max-w-6xl mx-auto px-6 py-16 text-center">
+        <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight">
+          Master the <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Language</span> of Freedom.
+        </h1>
+        <p className="text-xl mb-10 max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
+          The definitive dictionary for digital entrepreneurs, simplified and interactive for building your Make Money Online journey.
+        </p>
+        
+        <div className="relative max-w-2xl mx-auto group">
+          <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+            <Search className="text-slate-400 group-focus-within:text-emerald-600 transition-colors" size={24} />
+          </div>
+          <input 
+            type="text"
+            placeholder="Search 100+ business terms... (Try 'Affiliate Marketing')"
+            className="w-full py-5 pl-14 pr-6 rounded-2xl border-2 outline-none transition-all shadow-xl text-lg bg-white border-slate-100 focus:border-emerald-600 dark:bg-slate-800 dark:border-slate-700 dark:focus:border-emerald-500"
+            value={searchQuery}
+            onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value) setActiveLetter(null);
+            }}
+          />
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-6 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Main Glossary Card */}
+          <div className="md:col-span-2 md:row-span-2 rounded-3xl p-8 flex flex-col justify-between overflow-hidden relative group bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
+            <div>
+              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex items-center justify-center mb-6">
+                <Book size={24} />
+              </div>
+              <h3 className="text-3xl font-bold mb-3">Browse A-Z</h3>
+              <p className="text-slate-600 dark:text-slate-400">
+                Explore terminology organized by letter for quick discovery.
+              </p>
+            </div>
+            <div className="mt-8 grid grid-cols-6 gap-2">
+              {Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l => (
+                <button 
+                  key={l} 
+                  onClick={() => toggleLetter(l)}
+                  className={`aspect-square flex items-center justify-center rounded-lg border transition-all font-bold text-sm
+                    ${activeLetter === l 
+                        ? 'bg-emerald-600 text-white border-emerald-600' 
+                        : 'border-slate-200 dark:border-slate-700 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-300'
+                    }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <Link href="/tools" className="md:col-span-2 rounded-3xl p-8 flex items-center gap-6 group cursor-pointer bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
+            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Calculator size={28} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Business Calculators</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">ROI, LTV, and startup costs.</p>
+            </div>
+            <ChevronRight className="ml-auto text-slate-300" />
+          </Link>
+
+          <div className="rounded-3xl p-6 flex flex-col gap-4 bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
+            <div className="flex items-center gap-2 text-orange-500 font-bold text-sm uppercase tracking-wider">
+              <TrendingUp size={16} />
+              Trending Now
+            </div>
+            <div className="space-y-3">
+              {trendingTerms.slice(0, 3).map((t, i) => (
+                <Link key={i} href={`/glossary/${t.slug}`} className="block text-sm font-semibold hover:text-emerald-600 transition-colors">
+                  {t.term}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {dailySpark && (
+            <Link href={`/glossary/${dailySpark.slug}`} className="rounded-3xl p-6 bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-colors block">
+              <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-widest opacity-80 mb-2">
+                <Zap size={14} />
+                Daily Spark
+              </div>
+              <h4 className="text-xl font-black mb-1 truncate">{dailySpark.term}</h4>
+              <p className="text-xs leading-relaxed opacity-90 line-clamp-2">{dailySpark.shortDefinition}</p>
+            </Link>
+          )}
+        </div>
+
+        <section className="mt-20">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">
+              {activeLetter ? `Terms starting with "${activeLetter}"` : searchQuery ? 'Search Results' : 'Essential Terms'}
+            </h2>
+            <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+              {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'}
+            </div>
+          </div>
+          
+          {filteredTerms.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredTerms.map((term: any) => (
+                <Link 
+                  href={`/glossary/${term.slug}`} 
+                  key={term.id}
+                  className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all hover:-translate-y-2 hover:shadow-xl dark:bg-slate-800 dark:border-slate-700 flex flex-col h-full"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-md text-emerald-700 bg-emerald-50 dark:bg-emerald-900/40 dark:text-emerald-300 uppercase tracking-tighter">
+                      {term.category || 'General'}
+                    </span>
+                    {term.lowPhysicalEffort && (
+                        <Heart size={14} className="text-rose-400" />
+                    )}
+                  </div>
+                  <h4 className="text-2xl font-black mb-2 text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors">{term.term}</h4>
+                  <p className="text-sm line-clamp-3 text-slate-600 dark:text-slate-400 mb-4 flex-1">
+                    {term.shortDefinition}
+                  </p>
+                  
+                  <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between text-xs text-slate-400 font-bold uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5">
+                        <Clock size={12} />
+                        {term.timeToFirstDollar ? "Time tracked" : "Varies"}
+                    </div>
+                    {term.startupCost && (
+                      <div className="flex items-center gap-1.5">
+                          <Zap size={12} className="text-amber-400" />
+                          {term.startupCost}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700">
+                <Book size={48} className="mx-auto text-slate-300 mb-4" />
+                <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">No terms found</h3>
+                <p className="text-slate-500 dark:text-slate-400 mt-2">Try adjusting your search or selecting a different letter.</p>
+                {(searchQuery || activeLetter) && (
+                    <button 
+                        onClick={() => { setSearchQuery(''); setActiveLetter(null); }}
+                        className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700"
+                    >
+                        Clear Filters
+                    </button>
+                )}
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
+  );
+}
