@@ -18,12 +18,13 @@ import {
 } from "lucide-react";
 
 interface Props {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
     await connectToDatabase();
-    const term = await GlossaryTerm.findOne({ slug: params.slug }).lean();
+    const term = await GlossaryTerm.findOne({ slug }).lean();
 
     if (!term) return { title: "Term Not Found" };
 
@@ -35,8 +36,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function GlossaryTermPage({ params }: Props) {
+    const { slug } = await params;
     await connectToDatabase();
-    const term = await GlossaryTerm.findOne({ slug: params.slug }).lean() as any;
+    const term = await GlossaryTerm.findOne({ slug }).lean() as any;
 
     if (!term) notFound();
 

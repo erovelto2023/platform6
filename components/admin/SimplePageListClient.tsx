@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { 
     Plus, Search, Edit, Trash2, Globe, Eye, 
-    ArrowUpRight, FileStack, Layout, Laptop, Smartphone 
+    ArrowUpRight, FileStack, Layout, Laptop, Smartphone,
+    ExternalLink
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,8 +88,13 @@ export default function SimplePageListClient({ initialPages }: SimplePageListCli
 
                                 <div className="flex items-center gap-2 pt-4">
                                     <Link href={`/admin/page-builder-simple/${page._id}`} className="flex-1">
-                                        <Button variant="outline" className="w-full rounded-xl gap-2 font-black text-xs uppercase tracking-widest h-11">
+                                        <Button variant="outline" className="w-full rounded-xl gap-2 font-black text-xs uppercase tracking-widest h-11 border-slate-200">
                                             <Edit size={14} /> Edit HTML
+                                        </Button>
+                                    </Link>
+                                    <Link href={`/p/${page.slug}`} target="_blank">
+                                        <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl text-emerald-600 border-emerald-100 bg-emerald-50 hover:bg-emerald-100" title="Visit Page">
+                                            <ExternalLink size={16} />
                                         </Button>
                                     </Link>
                                     <Button 

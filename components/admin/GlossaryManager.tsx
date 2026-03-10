@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm } from '@/lib/actions/glossary.actions';
@@ -116,9 +117,12 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[10px] font-mono bg-slate-50 p-1 rounded border border-slate-100 italic">/glossary/{term.slug}</span>
-                                                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/glossary/${term.slug}`); alert('Copied!'); }} className="text-slate-300 hover:text-black">
+                                                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/glossary/${term.slug}`); alert('Copied!'); }} className="text-slate-300 hover:text-black" title="Copy Link">
                                                     <Copy size={12} />
                                                 </button>
+                                                <Link href={`/glossary/${term.slug}`} target="_blank" className="text-slate-300 hover:text-emerald-600 transition-colors" title="Visit Page">
+                                                    <ExternalLink size={12} />
+                                                </Link>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
