@@ -110,6 +110,9 @@ export default function LandingPage() {
           <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
             Blog
           </Link>
+          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/glossary">
+            Glossary
+          </Link>
 
           <div className="flex items-center gap-3 border-l border-slate-700 pl-6 h-6 mx-2">
             <Link href="https://www.facebook.com/erovelto" target="_blank" rel="noopener noreferrer">
