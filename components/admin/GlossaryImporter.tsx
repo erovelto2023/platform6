@@ -190,7 +190,7 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "metaDescription": "SEO meta description under 160 characters",
     "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"],
     "isFeatured": false,
-    "status": "published",
+    "status": "Published",
     "aiTrainingEligible": true,
     "niche": "Internet Marketing / Online Business"
   }

@@ -4,11 +4,10 @@ import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms } from '@/lib/actions/glossary.actions';
-import { seedMMOGlossary } from '@/lib/actions/mmo-seeder';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -85,15 +84,28 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         }
     };
 
-    const handleSeedMMO = () => {
-        if (!confirm('This will seed the glossary with 100 MMO-related terms. Continue?')) return;
+    const handleFlushGlossary = () => {
+        if (!confirm('⚠️ WARNING: This will delete ALL glossary terms and cannot be undone. This will also clear any cached data. Continue?')) return;
         startTransition(async () => {
-            const res = await seedMMOGlossary();
+            // Delete all terms by selecting all IDs
+            const allIds = initialTerms.map(t => t.id);
+            if (allIds.length === 0) {
+                alert('No terms to delete.');
+                return;
+            }
+            
+            const res = await deleteGlossaryTerms(allIds);
             if (res.success) {
-                alert(`Successfully seeded ${res.count} terms!`);
+                // Clear any client-side storage
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('glossary-mastered');
+                    sessionStorage.clear();
+                }
+                
+                alert(`Successfully flushed ${allIds.length} terms from glossary! Cache cleared.`);
                 window.location.reload();
             } else {
-                alert('Error seeding: ' + res.error);
+                alert('Error flushing glossary: ' + (res as any).error);
             }
         });
     };
@@ -106,11 +118,11 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
                         <div className="flex gap-2">
                             <button
-                                onClick={handleSeedMMO}
-                                disabled={isPending}
-                                className="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50"
+                                onClick={handleFlushGlossary}
+                                disabled={isPending || initialTerms.length === 0}
+                                className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50"
                             >
-                                <Rocket size={16} /> Seed MMO
+                                <RotateCcw size={16} /> Flush All
                             </button>
                             <button
                                 onClick={() => { setEditingTerm(undefined); setView('create'); }}
