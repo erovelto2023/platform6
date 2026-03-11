@@ -30,6 +30,19 @@ export async function getNiches() {
     }
 }
 
+// Coerce string values in object-array fields to {name, url} shape
+function normalizeObjectArrayFields(term: any) {
+    const objectArrayFields = ['amazonProducts', 'websitesRanking', 'podcastsRanking'];
+    for (const field of objectArrayFields) {
+        if (Array.isArray(term[field])) {
+            term[field] = term[field].map((item: any) =>
+                typeof item === 'string' ? { name: item, url: '' } : item
+            );
+        }
+    }
+    return term;
+}
+
 export async function bulkCreateGlossaryTerms(terms: any[]) {
     try {
         await connectToDatabase();
@@ -42,8 +55,9 @@ export async function bulkCreateGlossaryTerms(terms: any[]) {
             const baseSlug = slugify(term.term || term.id);
             const slug = makeUniqueSlug(baseSlug, existingSlugs);
             existingSlugs.push(slug);
+            const normalized = normalizeObjectArrayFields({ ...term });
             return {
-                ...term,
+                ...normalized,
                 id: term.id || `g-bulk-${Date.now()}-${index}`,
                 slug
             };
