@@ -44,7 +44,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(100);
+  const [itemsPerPage, setItemsPerPage] = useState(1000);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -62,6 +62,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
       setSelectedDifficulty('all');
       setSearchQuery('');
       setActiveLetter(null);
+      setCurrentPage(1);
     }
     
     if (categoryParam) {
@@ -70,9 +71,8 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
       setSelectedDifficulty('all');
       setSearchQuery('');
       setActiveLetter(null);
+      setCurrentPage(1);
     }
-    
-    setCurrentPage(1);
   }, [searchParams]);
 
   // Filter terms based on search and selected letter
@@ -97,12 +97,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
   }, [terms, searchQuery, activeLetter, selectedCategory, selectedDifficulty, selectedTag]);
 
   const toggleLetter = (letter: string) => {
-    if (activeLetter === letter) {
-      setActiveLetter(null);
-    } else {
-      setActiveLetter(letter);
-      setSearchQuery(''); // Clear search when picking a letter
-    }
+    setActiveLetter(activeLetter === letter ? null : letter);
     setCurrentPage(1);
   };
 
@@ -283,7 +278,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
                   </select>
                </div>
                <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap">
-                 {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'}
+                 {filteredTerms.length} terms
                </div>
             </div>
           </div>
