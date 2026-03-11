@@ -31,6 +31,12 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
 
   // Initialize and shuffle terms only on client
   useEffect(() => {
+    // Reset to empty array if no terms
+    if (!initialTerms || initialTerms.length === 0) {
+      setTerms([]);
+      return;
+    }
+    
     const shuffled = shuffleArray(initialTerms);
     setTerms(shuffled);
   }, [initialTerms]);
@@ -120,14 +126,28 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
 
   const dailySpark = terms.length > 0 ? terms[0] : null;
 
-  // Show loading state while terms are being initialized
+  // Show empty state when no terms exist
   if (terms.length === 0) {
     return (
-      <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 dark:text-slate-400">Loading glossary...</p>
-        </div>
+      <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
+        <header className="max-w-6xl mx-auto px-6 py-16 text-center">
+          <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Internet Marketing</span> & Online Business Terms
+          </h1>
+          <p className="text-xl mb-10 max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
+            Your definitive reference for digital marketing, affiliate marketing, and online business — simplified and searchable.
+          </p>
+        </header>
+        
+        <main className="max-w-6xl mx-auto px-6">
+          <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700">
+            <Book size={48} className="mx-auto text-slate-300 mb-4" />
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">No glossary terms found</h3>
+            <p className="text-slate-500 dark:text-slate-400">
+              The glossary is currently empty. Check back later for new terms.
+            </p>
+          </div>
+        </main>
       </div>
     );
   }
@@ -425,12 +445,14 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
         </section>
 
         {/* Tag Cloud Section */}
-        <section className="mt-20">
-          <TagCloud terms={terms} />
-        </section>
+        {terms.length > 0 && (
+          <section className="mt-20">
+            <TagCloud terms={terms} />
+          </section>
+        )}
 
         {/* Test Section (Development Only) */}
-        {process.env.NODE_ENV === 'development' && (
+        {process.env.NODE_ENV === 'development' && terms.length > 0 && (
           <section className="mt-20">
             <GlossaryTest />
           </section>
