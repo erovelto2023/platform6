@@ -139,7 +139,10 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
 [
   {
     "term": "The Keyword",
-    "category": "Broad Category (e.g. Marketing, Development)",
+    "slug": "url-friendly-version-of-the-keyword",
+    "category": "Broad Category (e.g. Marketing, Development, Email Marketing, Social Media)",
+    "skillRequired": "Must be exactly one of: 'Beginner', 'Intermediate', or 'Advanced'",
+    "tags": ["tag1", "tag2", "tag3", "relevant-keywords"],
     "shortDefinition": "1-2 sentence quick definition under 50 words.",
     "definition": "Simple, beginner-friendly explanation of what it means, why it exists, and where it is used.",
     "origin": "History, Origin, and Etymology of the term.",
@@ -150,7 +153,6 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "howItMakesMoney": "A detailed explanation of how this concept generates revenue.",
     "bestFor": "The ideal target audience or type of person best suited for this.",
     "startupCost": "Must be exactly one of: '$0', '<$100', or '$100+'",
-    "skillRequired": "Must be exactly one of: 'Beginner', 'Intermediate', or 'Advanced'",
     "timeToFirstDollar": "Estimated time it realistically takes to make the first dollar.",
     "platformPreference": "The preferred software, platform, or environment.",
     "gettingStartedChecklist": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"],
@@ -180,21 +182,29 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "caseStudies": [
       {"title": "Example Case Study", "description": "Short explanation of the case study in practice."}
     ],
+    "relatedTermIds": ["slug-of-related-term-1", "slug-of-related-term-2", "slug-of-related-term-3"],
+    "synonyms": ["Alternative Name 1", "Alternative Name 2"],
+    "antonyms": ["Opposite Concept 1"],
+    "seeAlso": ["Related Concept 1", "Related Concept 2"],
     "metaTitle": "SEO Optimized Meta Title under 60 characters",
-    "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"]
+    "metaDescription": "SEO meta description under 160 characters",
+    "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"],
+    "isFeatured": false,
+    "status": "published",
+    "aiTrainingEligible": true,
+    "niche": "Internet Marketing / Online Business"
   }
 ]
 
 Please generate the robust JSON array for the following terms:
 1.
 2.
-3.
-`);
-                                    alert('Prompt copied!');
+3.`);
+                                    alert('Enhanced prompt copied with all new fields!');
                                 }}
                                 className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-md hover:bg-emerald-200 transition-colors flex items-center gap-1 text-[10px]"
                             >
-                                <Copy size={12} /> Copy Prompt
+                                <Copy size={12} /> Copy Enhanced Prompt
                             </button>
                         </h3>
 
