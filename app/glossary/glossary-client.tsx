@@ -277,9 +277,6 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
                       <option value={1000}>All</option>
                   </select>
                </div>
-               <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap">
-                 {filteredTerms.length} terms
-               </div>
             </div>
           </div>
 
