@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Search, Book, Calculator, TrendingUp, Zap, ChevronRight, Clock, Heart, ThumbsUp, Bookmark
 } from 'lucide-react';
+import TagCloud from '../../components/glossary/TagCloud';
+import TermOfTheDay from '../../components/glossary/TermOfTheDay';
+import GlossaryTest from '../../components/glossary/GlossaryTest';
 
 interface GlossaryClientProps {
   initialTerms: any[];
@@ -21,26 +25,70 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 export default function GlossaryClient({ initialTerms, categories }: GlossaryClientProps) {
-  // Shuffle once on mount — new random order every page refresh
-  const [terms] = useState<any[]>(() => shuffleArray(initialTerms));
+  const searchParams = useSearchParams();
+  // Store terms in state and shuffle only on client side
+  const [terms, setTerms] = useState<any[]>([]);
+
+  // Initialize and shuffle terms only on client
+  useEffect(() => {
+    const shuffled = shuffleArray(initialTerms);
+    setTerms(shuffled);
+  }, [initialTerms]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
+  const [selectedTag, setSelectedTag] = useState<string>('all');
+
+  // Handle URL parameters for tag filtering
+  useEffect(() => {
+    if (!searchParams) return;
+    
+    const tagParam = searchParams.get('tag');
+    const categoryParam = searchParams.get('category');
+    
+    if (tagParam) {
+      setSelectedTag(tagParam);
+      setSelectedCategory('all');
+      setSelectedDifficulty('all');
+      setSearchQuery('');
+      setActiveLetter(null);
+    }
+    
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+      setSelectedTag('all');
+      setSelectedDifficulty('all');
+      setSearchQuery('');
+      setActiveLetter(null);
+    }
+    
+    setCurrentPage(1);
+  }, [searchParams]);
 
   // Filter terms based on search and selected letter
   const filteredTerms = useMemo(() => {
+    if (!terms.length) return [];
     return terms.filter(term => {
       const matchesSearch = term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             term.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             term.shortDefinition?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesLetter = activeLetter ? term.term.toUpperCase().startsWith(activeLetter) : true;
+      const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
+      const matchesDifficulty = selectedDifficulty === 'all' || 
+                               (term.contentLevel === selectedDifficulty) || 
+                               (term.skillRequired === selectedDifficulty);
+      const matchesTag = selectedTag === 'all' || 
+                        term.category === selectedTag || 
+                        (term.tags && term.tags.includes(selectedTag));
       
-      return matchesSearch && matchesLetter;
+      return matchesSearch && matchesLetter && matchesCategory && matchesDifficulty && matchesTag;
     });
-  }, [terms, searchQuery, activeLetter]);
+  }, [terms, searchQuery, activeLetter, selectedCategory, selectedDifficulty, selectedTag]);
 
   const toggleLetter = (letter: string) => {
     if (activeLetter === letter) {
@@ -52,16 +100,37 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
     setCurrentPage(1);
   };
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setActiveLetter(null);
+    setSelectedCategory('all');
+    setSelectedDifficulty('all');
+    setSelectedTag('all');
+    setCurrentPage(1);
+  };
+
   const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
   const paginatedTerms = filteredTerms.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const trendingTerms = terms.filter(t => t.isFeatured).slice(0, 3);
-  if (trendingTerms.length === 0) trendingTerms.push(...terms.slice(0, 3)); // fallback
+  const trendingTerms = terms.length > 0 ? terms.filter(t => t.isFeatured).slice(0, 3) : [];
+  if (trendingTerms.length === 0 && terms.length > 0) trendingTerms.push(...terms.slice(0, 3)); // fallback
 
   const dailySpark = terms.length > 0 ? terms[0] : null;
+
+  // Show loading state while terms are being initialized
+  if (terms.length === 0) {
+    return (
+      <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading glossary...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
@@ -167,6 +236,11 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
           )}
         </div>
 
+        {/* Term of the Day */}
+        <div className="mt-8">
+          <TermOfTheDay terms={terms} />
+        </div>
+
         <section className="mt-20">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
@@ -190,6 +264,61 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
                  {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'}
                </div>
             </div>
+          </div>
+
+          {/* Filter Controls */}
+          <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Category</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Difficulty</label>
+                <select
+                  value={selectedDifficulty}
+                  onChange={(e) => { setSelectedDifficulty(e.target.value); setCurrentPage(1); }}
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  <option value="all">All Levels</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tag Filter</label>
+                <input
+                  type="text"
+                  placeholder="Filter by tag..."
+                  value={selectedTag === 'all' ? '' : selectedTag}
+                  onChange={(e) => { setSelectedTag(e.target.value || 'all'); setCurrentPage(1); }}
+                  className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-3 py-2 font-bold outline-none focus:border-emerald-500"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={resetFilters}
+                  className="w-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 font-bold py-2 px-4 rounded-lg transition-colors"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+            {selectedTag !== 'all' && (
+              <div className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+                Currently filtering by tag: <span className="font-semibold text-emerald-600">{selectedTag}</span>
+              </div>
+            )}
           </div>
           
           {filteredTerms.length > 0 ? (
@@ -283,9 +412,9 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
                 <Book size={48} className="mx-auto text-slate-300 mb-4" />
                 <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">No terms found</h3>
                 <p className="text-slate-500 dark:text-slate-400 mt-2">Try adjusting your search or selecting a different letter.</p>
-                {(searchQuery || activeLetter) && (
+                {(searchQuery || activeLetter || selectedCategory !== 'all' || selectedDifficulty !== 'all' || selectedTag !== 'all') && (
                     <button 
-                        onClick={() => { setSearchQuery(''); setActiveLetter(null); }}
+                        onClick={resetFilters}
                         className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700"
                     >
                         Clear Filters
@@ -294,6 +423,18 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
             </div>
           )}
         </section>
+
+        {/* Tag Cloud Section */}
+        <section className="mt-20">
+          <TagCloud terms={terms} />
+        </section>
+
+        {/* Test Section (Development Only) */}
+        {process.env.NODE_ENV === 'development' && (
+          <section className="mt-20">
+            <GlossaryTest />
+          </section>
+        )}
       </main>
     </div>
   );
