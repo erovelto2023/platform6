@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Search, Book, Calculator, TrendingUp, Zap, ChevronRight, Clock, Heart, ThumbsUp
+  Search, Book, Calculator, TrendingUp, Zap, ChevronRight, Clock, Heart, ThumbsUp, Bookmark
 } from 'lucide-react';
 
 interface GlossaryClientProps {
@@ -76,6 +76,15 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
                 setCurrentPage(1);
             }}
           />
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Link
+            href="/glossary/bookmarks"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+          >
+            <Bookmark size={16} />
+            My Saved Glossary
+          </Link>
         </div>
       </header>
 

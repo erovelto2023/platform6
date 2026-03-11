@@ -8,6 +8,7 @@ import {
     ArrowLeft, Calculator, Lightbulb, Bookmark, Share2, Info, ExternalLink, Heart, Rocket,
     Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles
 } from "lucide-react";
+import GlossaryActions from "@/components/glossary/GlossaryActions";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -435,14 +436,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     </div>
                                 )}
                                 
-                                <div className="space-y-3 mt-8">
-                                    <button className="w-full py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2 text-sm">
-                                        <Bookmark size={18} /> Bookmark Guide
-                                    </button>
-                                    <button className="w-full py-3 px-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-colors border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm">
-                                        <Share2 size={18} /> Share Guide
-                                    </button>
-                                </div>
+                                <GlossaryActions slug={term.slug} term={term.term} />
                             </div>
 
                             {/* Related Terms (Internal Linking Gold) */}

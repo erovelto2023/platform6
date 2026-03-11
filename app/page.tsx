@@ -123,6 +123,9 @@ export default function LandingPage() {
             <Link href="https://www.youtube.com/@KBusinessAcademy" target="_blank" rel="noopener noreferrer">
               <Youtube className="h-4 w-4 text-slate-400 hover:text-red-500 transition-colors" />
             </Link>
+            <Link href="https://www.instagram.com/kbusinessacademy/" target="_blank" rel="noopener noreferrer">
+              <svg className="h-4 w-4 text-slate-400 hover:text-pink-400 transition-colors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            </Link>
           </div>
 
           <Link href="/sign-in">
@@ -598,6 +601,15 @@ export default function LandingPage() {
           >
             <Youtube className="h-5 w-5" />
             <span className="hidden sm:inline text-xs font-medium">YouTube</span>
+          </Link>
+          <Link
+            href="https://www.instagram.com/kbusinessacademy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-slate-500 hover:text-pink-400 transition-colors flex items-center gap-2"
+          >
+            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+            <span className="hidden sm:inline text-xs font-medium">Instagram</span>
           </Link>
           <Link className="text-sm text-slate-500 hover:text-white transition-colors" href="#">
             Terms of Service
