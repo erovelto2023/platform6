@@ -14,6 +14,8 @@ interface GlossaryClientProps {
 export default function GlossaryClient({ initialTerms, categories }: GlossaryClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Filter terms based on search and selected letter
   const filteredTerms = useMemo(() => {
@@ -35,7 +37,14 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
       setActiveLetter(letter);
       setSearchQuery(''); // Clear search when picking a letter
     }
+    setCurrentPage(1);
   };
+
+  const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
+  const paginatedTerms = filteredTerms.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const trendingTerms = initialTerms.filter(t => t.isFeatured).slice(0, 3);
   if (trendingTerms.length === 0) trendingTerms.push(...initialTerms.slice(0, 3)); // fallback
@@ -64,6 +73,7 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
             onChange={(e) => {
                 setSearchQuery(e.target.value);
                 if (e.target.value) setActiveLetter(null);
+                setCurrentPage(1);
             }}
           />
         </div>
@@ -137,18 +147,34 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
         </div>
 
         <section className="mt-20">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
               {activeLetter ? `Terms starting with "${activeLetter}"` : searchQuery ? 'Search Results' : 'Essential Terms'}
             </h2>
-            <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-              {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'}
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2 text-sm max-sm:hidden">
+                  <span className="text-slate-500 dark:text-slate-400 font-medium">Show:</span>
+                  <select 
+                      value={itemsPerPage} 
+                      onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg px-2 py-1 font-bold outline-none focus:border-emerald-500 cursor-pointer"
+                  >
+                      <option value={10}>10 per page</option>
+                      <option value={20}>20 per page</option>
+                      <option value={50}>50 per page</option>
+                      <option value={100}>100 per page</option>
+                  </select>
+               </div>
+               <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap">
+                 {filteredTerms.length} {filteredTerms.length === 1 ? 'term' : 'terms'}
+               </div>
             </div>
           </div>
           
           {filteredTerms.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredTerms.map((term: any) => (
+            <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {paginatedTerms.map((term: any) => (
                 <Link 
                   href={`/glossary/${term.slug}`} 
                   key={term.id}
@@ -182,6 +208,55 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
                 </Link>
               ))}
             </div>
+
+            {totalPages > 1 && (
+                <div className="mt-12 flex justify-center items-center gap-2">
+                    <button 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-600 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        Prev
+                    </button>
+                    
+                    <div className="flex items-center gap-1 max-sm:hidden">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                            if (
+                                page === 1 || 
+                                page === totalPages || 
+                                (page >= currentPage - 1 && page <= currentPage + 1)
+                            ) {
+                                return (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center transition-colors ${
+                                            currentPage === page 
+                                            ? 'bg-emerald-600 text-white border-emerald-600' 
+                                            : 'border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                );
+                            }
+                            if (page === currentPage - 2 || page === currentPage + 2) {
+                                return <span key={page} className="text-slate-400 px-1">...</span>;
+                            }
+                            return null;
+                        })}
+                    </div>
+
+                    <button 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-slate-600 dark:text-slate-300 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
+            </>
           ) : (
             <div className="text-center py-20 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700">
                 <Book size={48} className="mx-auto text-slate-300 mb-4" />

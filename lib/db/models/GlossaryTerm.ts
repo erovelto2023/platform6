@@ -61,6 +61,20 @@ export interface IGlossaryTerm {
     audioOrVideoResources?: string; // Embeds/Links
 
     // --- SEO & Content ---
+    whyItMatters?: string;
+    videoUrl?: string;
+    faqs?: { question: string; answer: string }[];
+    caseStudies?: { title: string; description: string; url?: string }[];
+    takeaways?: string[];
+    
+    headlines?: string[];
+    youtubeTitles?: string[];
+    pinterestIdeas?: string[];
+    instagramIdeas?: string[];
+    amazonProducts?: { name: string; url?: string }[];
+    websitesRanking?: { name: string; url?: string }[];
+    podcastsRanking?: { name: string; url?: string }[];
+
     keywords?: string[];
     searchIntent?: string;
     metaTitle?: string;
@@ -150,6 +164,20 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     audioOrVideoResources: { type: String },
 
     // SEO
+    whyItMatters: { type: String },
+    videoUrl: { type: String },
+    faqs: [{ question: String, answer: String }],
+    caseStudies: [{ title: String, description: String, url: String }],
+    takeaways: [String],
+
+    headlines: [String],
+    youtubeTitles: [String],
+    pinterestIdeas: [String],
+    instagramIdeas: [String],
+    amazonProducts: [{ name: String, url: String }],
+    websitesRanking: [{ name: String, url: String }],
+    podcastsRanking: [{ name: String, url: String }],
+
     keywords: [String],
     searchIntent: { type: String },
     metaTitle: { type: String },

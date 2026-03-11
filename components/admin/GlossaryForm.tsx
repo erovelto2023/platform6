@@ -60,7 +60,19 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             timeToFirstDollar: "",
             skillRequired: "Beginner",
             platformPreference: "",
-            lowPhysicalEffort: false
+            // SEO & Social Gen
+            faqs: [],
+            caseStudies: [],
+            takeaways: [],
+            headlines: [],
+            youtubeTitles: [],
+            pinterestIdeas: [],
+            instagramIdeas: [],
+            amazonProducts: [],
+            websitesRanking: [],
+            podcastsRanking: [],
+            whyItMatters: "",
+            videoUrl: ""
         }
     );
 
@@ -412,19 +424,137 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                 </div>
             </div>
 
-            {/* Metadata */}
+            {/* Metadata & SEO Expansion */}
             <div className="bg-gray-50 p-6 rounded-xl border border-gray-100 space-y-6">
-                <h3 className="font-bold text-gray-900 border-b border-gray-200 pb-2">SEO Metadata</h3>
-                <div>
-                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Meta Title</label>
+                <h3 className="font-bold text-gray-900 border-b border-gray-200 pb-2 flex items-center gap-2">
+                    <Rocket size={18} /> SEO & Content Generation Sandbox
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Why It Matters</label>
+                        <textarea
+                            rows={2}
+                            value={formData.whyItMatters || ""}
+                            onChange={e => handleChange("whyItMatters", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                            placeholder="Explain why someone should care..."
+                        />
+                    </div>
+
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Video URL (YouTube Embed)</label>
+                        <input
+                            type="text"
+                            value={formData.videoUrl || ""}
+                            onChange={e => handleChange("videoUrl", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                    </div>
+
+                    <div className="col-span-full">
+                        <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Key Takeaways (One per line)</label>
+                        <textarea
+                            rows={3}
+                            value={formData.takeaways?.join("\n") || ""}
+                            onChange={e => handleChange("takeaways", e.target.value.split("\n").filter(l => l.trim() !== ""))}
+                            className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                        />
+                    </div>
+
+                    {/* Array Generation Fields (Strings only) */}
+                    {['headlines', 'youtubeTitles', 'pinterestIdeas', 'instagramIdeas'].map((fieldKey) => (
+                        <div key={fieldKey}>
+                            <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
+                                {fieldKey.replace(/([A-Z])/g, ' $1').trim()} (One per line)
+                            </label>
+                            <textarea
+                                rows={3}
+                                value={(formData[fieldKey as keyof IGlossaryTerm] as string[])?.join("\n") || ""}
+                                onChange={e => handleChange(fieldKey as keyof IGlossaryTerm, e.target.value.split("\n").filter(l => l.trim() !== ""))}
+                                className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                            />
+                        </div>
+                    ))}
+                    
+                    <div className="col-span-full mt-4 p-4 border border-blue-200 bg-blue-50 rounded-xl">
+                        <h4 className="font-bold text-blue-900 text-sm mb-2">Advanced Structured Data (JSON)</h4>
+                        <p className="text-xs text-blue-700 mb-4">Paste valid JSON arrays to populate FAQs and Case Studies.</p>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-bold text-blue-800 uppercase mb-1">FAQs (JSON Array)</label>
+                                <textarea
+                                    rows={4}
+                                    value={JSON.stringify(formData.faqs || [], null, 2)}
+                                    onChange={e => {
+                                        try { handleChange("faqs", JSON.parse(e.target.value)); } catch(err) {} 
+                                    }}
+                                    className="w-full p-2.5 rounded-lg border border-blue-200 text-xs font-mono"
+                                    placeholder='[{"question": "Q?", "answer": "A"}]'
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-blue-800 uppercase mb-1">Case Studies (JSON Array)</label>
+                                <textarea
+                                    rows={4}
+                                    value={JSON.stringify(formData.caseStudies || [], null, 2)}
+                                    onChange={e => {
+                                        try { handleChange("caseStudies", JSON.parse(e.target.value)); } catch(err) {} 
+                                    }}
+                                    className="w-full p-2.5 rounded-lg border border-blue-200 text-xs font-mono"
+                                    placeholder='[{"title": "Title", "description": "Desc"}]'
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-blue-800 uppercase mb-1">Amazon Products (JSON Array)</label>
+                                <textarea
+                                    rows={4}
+                                    value={JSON.stringify(formData.amazonProducts || [], null, 2)}
+                                    onChange={e => {
+                                        try { handleChange("amazonProducts", JSON.parse(e.target.value)); } catch(err) {} 
+                                    }}
+                                    className="w-full p-2.5 rounded-lg border border-blue-200 text-xs font-mono"
+                                    placeholder='[{"name": "Product", "url": "https..."}]'
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-blue-800 uppercase mb-1">Websites Ranking (JSON Array)</label>
+                                <textarea
+                                    rows={4}
+                                    value={JSON.stringify(formData.websitesRanking || [], null, 2)}
+                                    onChange={e => {
+                                        try { handleChange("websitesRanking", JSON.parse(e.target.value)); } catch(err) {} 
+                                    }}
+                                    className="w-full p-2.5 rounded-lg border border-blue-200 text-xs font-mono"
+                                    placeholder='[{"name": "Site", "url": "https..."}]'
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-blue-800 uppercase mb-1">Podcasts Ranking (JSON Array)</label>
+                                <textarea
+                                    rows={4}
+                                    value={JSON.stringify(formData.podcastsRanking || [], null, 2)}
+                                    onChange={e => {
+                                        try { handleChange("podcastsRanking", JSON.parse(e.target.value)); } catch(err) {} 
+                                    }}
+                                    className="w-full p-2.5 rounded-lg border border-blue-200 text-xs font-mono"
+                                    placeholder='[{"name": "Podcast", "url": "https..."}]'
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-6 mt-6 border-t border-gray-200">
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Standard Meta Title</label>
                     <input
                         type="text"
                         value={formData.metaTitle || ""}
                         onChange={e => handleChange("metaTitle", e.target.value)}
-                        className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
+                        className="w-full p-2.5 rounded-lg border border-gray-200 text-sm mb-4"
                     />
-                </div>
-                <div>
                     <label className="block text-xs font-bold text-gray-600 uppercase mb-1">Keywords (comma separated)</label>
                     <input
                         type="text"
