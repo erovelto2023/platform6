@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     description: "Explore 100+ business and marketing terms, strategies, and methodologies for building your income online.",
 };
 
-export default async function GlossaryPage() {
+export default async function GlossaryPageServer() {
     console.log("=== SERVER-SIDE GLOSSARY PAGE LOADING ===");
     
     try {
