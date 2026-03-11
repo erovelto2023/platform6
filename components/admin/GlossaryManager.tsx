@@ -4,10 +4,10 @@ import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms } from '@/lib/actions/glossary.actions';
 import { seedMMOGlossary } from '@/lib/actions/mmo-seeder';
 
 interface GlossaryManagerProps {
@@ -22,6 +22,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [isPending, startTransition] = useTransition();
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
     const filteredTerms = useMemo(() => initialTerms.filter(t =>
         t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -42,6 +43,46 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                 alert('Error: ' + res.error);
             }
         });
+    };
+
+    const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        if (!confirm(`Delete ${selectedIds.size} selected term${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`)) return;
+        startTransition(async () => {
+            const res = await deleteGlossaryTerms(Array.from(selectedIds));
+            if (res.success) {
+                alert(`Deleted ${selectedIds.size} terms.`);
+                window.location.reload();
+            } else {
+                alert('Error: ' + (res as any).error);
+            }
+        });
+    };
+
+    const toggleSelect = (id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    const allPageSelected = paginatedTerms.length > 0 && paginatedTerms.every(t => selectedIds.has(t.id));
+
+    const toggleSelectAll = () => {
+        if (allPageSelected) {
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                paginatedTerms.forEach(t => next.delete(t.id));
+                return next;
+            });
+        } else {
+            setSelectedIds(prev => {
+                const next = new Set(prev);
+                paginatedTerms.forEach(t => next.add(t.id));
+                return next;
+            });
+        }
     };
 
     const handleSeedMMO = () => {
@@ -115,10 +156,39 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     </div>
 
+                    {/* Bulk action bar */}
+                    {selectedIds.size > 0 && (
+                        <div className="mb-4 flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                            <span className="text-sm font-bold text-red-700">
+                                {selectedIds.size} term{selectedIds.size > 1 ? 's' : ''} selected
+                            </span>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setSelectedIds(new Set())}
+                                    className="text-xs text-red-500 hover:underline font-semibold"
+                                >
+                                    Deselect All
+                                </button>
+                                <button
+                                    onClick={handleBulkDelete}
+                                    disabled={isPending}
+                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                                >
+                                    <Trash size={15} /> Delete {selectedIds.size} Selected
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-slate-50">
                                 <tr>
+                                    <th className="pl-4 pr-2 py-4 w-10">
+                                        <button onClick={toggleSelectAll} className="text-slate-400 hover:text-black transition-colors">
+                                            {allPageSelected ? <CheckSquare size={18} className="text-black" /> : <Square size={18} />}
+                                        </button>
+                                    </th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Term</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Category</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Slug</th>
@@ -127,7 +197,12 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-100">
                                 {paginatedTerms.map(term => (
-                                    <tr key={term.id}>
+                                    <tr key={term.id} className={selectedIds.has(term.id) ? 'bg-red-50' : 'hover:bg-slate-50'}>
+                                        <td className="pl-4 pr-2 py-4">
+                                            <button onClick={() => toggleSelect(term.id)} className="text-slate-400 hover:text-black transition-colors">
+                                                {selectedIds.has(term.id) ? <CheckSquare size={16} className="text-red-600" /> : <Square size={16} />}
+                                            </button>
+                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-bold text-slate-900">{term.term}</div>
                                             <div className="text-xs text-slate-500 truncate max-w-xs">{term.shortDefinition}</div>

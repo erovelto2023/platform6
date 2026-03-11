@@ -76,6 +76,7 @@ export interface IGlossaryTerm {
     podcastsRanking?: { name: string; url?: string }[];
 
     keywords?: string[];
+    tags?: string[];         // Freeform tags for tag cloud
     searchIntent?: string;
     metaTitle?: string;
     metaDescription?: string;
@@ -179,6 +180,7 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     podcastsRanking: [{ name: String, url: String }],
 
     keywords: [String],
+    tags: [String],
     searchIntent: { type: String },
     metaTitle: { type: String },
     metaDescription: { type: String },
