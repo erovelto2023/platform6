@@ -10,7 +10,7 @@ export async function getGlossaryTerms(options: { limit?: number; niche?: string
         const query = options.niche ? { niche: options.niche } : {};
         const terms = await GlossaryTerm.find(query)
             .sort({ term: 1 })
-            .limit(options.limit || 0)
+            .limit(options.limit || 10000) // Increase default limit to ensure all terms are fetched
             .lean();
         return { terms: JSON.parse(JSON.stringify(terms)) };
     } catch (e) {

@@ -8,17 +8,11 @@ export const metadata: Metadata = {
 };
 
 export default async function GlossaryPage() {
-    console.log("=== SERVER-SIDE GLOSSARY PAGE LOADING ===");
-    
     try {
         const result = await getGlossaryTerms() as any;
         const terms = result?.terms || [];
         
-        console.log("Server-side - Raw result from database:", result);
-        console.log("Server-side - Number of terms:", terms.length);
-        
         if (terms.length === 0) {
-            console.log("Server-side - No terms found, returning empty state");
             return (
                 <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
                     <header className="max-w-6xl mx-auto px-6 py-16 text-center">
@@ -48,9 +42,6 @@ export default async function GlossaryPage() {
             categorySet.add(String(t.category || "General"));
         });
         const categories: string[] = Array.from(categorySet).sort();
-
-        console.log("Server-side - Categories derived:", categories);
-        console.log("Server-side - Passing to client component");
 
         return <GlossaryClient initialTerms={terms} categories={categories} />;
         
