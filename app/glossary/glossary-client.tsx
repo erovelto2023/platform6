@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -24,7 +24,7 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-export default function GlossaryClient({ initialTerms, categories }: GlossaryClientProps) {
+function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) {
   const searchParams = useSearchParams();
   // Store terms in state and shuffle only on client side
   const [terms, setTerms] = useState<any[]>([]);
@@ -437,5 +437,20 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
         )}
       </main>
     </div>
+  );
+}
+
+export default function GlossaryClient(props: GlossaryClientProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Loading glossary...</p>
+        </div>
+      </div>
+    }>
+      <GlossaryClientInner {...props} />
+    </Suspense>
   );
 }
