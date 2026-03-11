@@ -44,7 +44,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(100);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -278,6 +278,8 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
                       <option value={20}>20 per page</option>
                       <option value={50}>50 per page</option>
                       <option value={100}>100 per page</option>
+                      <option value={500}>500 per page</option>
+                      <option value={1000}>All</option>
                   </select>
                </div>
                <div className="text-sm font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full whitespace-nowrap">
