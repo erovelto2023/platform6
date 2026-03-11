@@ -11,7 +11,19 @@ interface GlossaryClientProps {
   categories: string[];
 }
 
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function GlossaryClient({ initialTerms, categories }: GlossaryClientProps) {
+  // Shuffle once on mount — new random order every page refresh
+  const [terms] = useState<any[]>(() => shuffleArray(initialTerms));
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,7 +31,7 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
 
   // Filter terms based on search and selected letter
   const filteredTerms = useMemo(() => {
-    return initialTerms.filter(term => {
+    return terms.filter(term => {
       const matchesSearch = term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             term.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             term.shortDefinition?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -28,7 +40,7 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
       
       return matchesSearch && matchesLetter;
     });
-  }, [initialTerms, searchQuery, activeLetter]);
+  }, [terms, searchQuery, activeLetter]);
 
   const toggleLetter = (letter: string) => {
     if (activeLetter === letter) {
@@ -46,19 +58,19 @@ export default function GlossaryClient({ initialTerms, categories }: GlossaryCli
     currentPage * itemsPerPage
   );
 
-  const trendingTerms = initialTerms.filter(t => t.isFeatured).slice(0, 3);
-  if (trendingTerms.length === 0) trendingTerms.push(...initialTerms.slice(0, 3)); // fallback
+  const trendingTerms = terms.filter(t => t.isFeatured).slice(0, 3);
+  if (trendingTerms.length === 0) trendingTerms.push(...terms.slice(0, 3)); // fallback
 
-  const dailySpark = initialTerms.length > 0 ? initialTerms[Math.floor(initialTerms.length / 2)] : null;
+  const dailySpark = terms.length > 0 ? terms[0] : null;
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
       <header className="max-w-6xl mx-auto px-6 py-16 text-center">
         <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight leading-tight">
-          Master the <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Language</span> of Freedom.
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Internet Marketing</span> & Online Business Terms
         </h1>
         <p className="text-xl mb-10 max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
-          The definitive dictionary for digital entrepreneurs, simplified and interactive for building your Make Money Online journey.
+          Your definitive reference for digital marketing, affiliate marketing, and online business — simplified and searchable.
         </p>
         
         <div className="relative max-w-2xl mx-auto group">

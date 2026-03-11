@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, Rocket, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm } from '@/lib/actions/glossary.actions';
@@ -20,11 +20,16 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [editingTerm, setEditingTerm] = useState<IGlossaryTerm | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
     const [isPending, startTransition] = useTransition();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
 
-    const filteredTerms = initialTerms.filter(t =>
+    const filteredTerms = useMemo(() => initialTerms.filter(t =>
         t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (t.category && t.category.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    ), [initialTerms, searchTerm]);
+
+    const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
+    const paginatedTerms = filteredTerms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleDelete = (id: string) => {
         if (!confirm('Are you sure you want to delete this term?')) return;
@@ -81,16 +86,32 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     </div>
 
-                    <div className="mb-4">
-                        <div className="relative">
+                    <div className="mb-4 flex gap-3 items-center">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search terms or categories..."
                                 className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-slate-500 whitespace-nowrap">
+                            <span>Per page:</span>
+                            {[10, 20, 50, 100].map(n => (
+                                <button
+                                    key={n}
+                                    onClick={() => { setItemsPerPage(n); setCurrentPage(1); }}
+                                    className={`px-3 py-1.5 rounded-lg border font-bold text-xs transition-all ${
+                                        itemsPerPage === n
+                                            ? 'bg-black text-white border-black'
+                                            : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {n}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
@@ -105,7 +126,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-100">
-                                {filteredTerms.map(term => (
+                                {paginatedTerms.map(term => (
                                     <tr key={term.id}>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-bold text-slate-900">{term.term}</div>
@@ -141,7 +162,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredTerms.length === 0 && (
+                                {paginatedTerms.length === 0 && (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold uppercase text-xs tracking-widest">No terms found.</td>
                                     </tr>
@@ -149,6 +170,52 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
+                            <p className="text-sm text-slate-500">
+                                Showing <strong>{(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTerms.length)}</strong> of <strong>{filteredTerms.length}</strong> terms
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                    // Show pages around current page
+                                    let page: number;
+                                    if (totalPages <= 7) page = i + 1;
+                                    else if (currentPage <= 4) page = i + 1;
+                                    else if (currentPage >= totalPages - 3) page = totalPages - 6 + i;
+                                    else page = currentPage - 3 + i;
+                                    return (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-9 h-9 rounded-lg border text-sm font-bold transition-all ${
+                                                currentPage === page
+                                                    ? 'bg-black text-white border-black'
+                                                    : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    );
+                                })}
+                                <button
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
 
