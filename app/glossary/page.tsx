@@ -11,7 +11,7 @@ export default async function GlossaryPage() {
     console.log("=== SERVER-SIDE GLOSSARY PAGE LOADING ===");
     
     try {
-        const result = await getGlossaryTerms({ limit: 1000 }) as any;
+        const result = await getGlossaryTerms() as any;
         const terms = result?.terms || [];
         
         console.log("Server-side - Raw result from database:", result);

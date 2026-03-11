@@ -5,7 +5,7 @@ export async function GET() {
     try {
         console.log('=== API TEST ENDPOINT CALLED ===');
         
-        const result = await getGlossaryTerms({ limit: 10 });
+        const result = await getGlossaryTerms();
         console.log('API Test - Raw database result:', result);
         
         const response = {

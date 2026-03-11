@@ -5,7 +5,7 @@ export default async function DebugPage() {
     
     try {
         // Test database connection
-        const result = await getGlossaryTerms({ limit: 10 });
+        const result = await getGlossaryTerms();
         console.log("Raw result from database:", result);
         console.log("Number of terms:", result?.terms?.length || 0);
         
