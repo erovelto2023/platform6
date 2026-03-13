@@ -45,6 +45,8 @@ export default function NicheBoxesCatalog() {
   const [competitionFilter, setCompetitionFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchNiches();
@@ -93,6 +95,16 @@ export default function NicheBoxesCatalog() {
       }
     });
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter, competitionFilter, sortBy]);
+
+  const totalPages = Math.ceil(filteredAndSortedNiches.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentNiches = filteredAndSortedNiches.slice(startIndex, endIndex);
+
   const categories = Array.from(new Set(niches.map(n => n.category)));
   const featuredNiches = niches.filter(n => n.featured);
 
@@ -120,11 +132,6 @@ export default function NicheBoxesCatalog() {
               Skip the research phase and jump straight into execution.
             </p>
             <div className="flex justify-center gap-4">
-              <Link href="/sign-up">
-                <Button size="lg" className="bg-indigo-600 text-white hover:bg-indigo-500 rounded-2xl px-8 py-6 text-lg font-black uppercase tracking-widest transition-all">
-                  Get Started
-                </Button>
-              </Link>
               <Button size="lg" variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-50 rounded-2xl px-8 py-6 text-lg font-black uppercase tracking-widest transition-all">
                   Browse All Niches
               </Button>
@@ -255,7 +262,7 @@ export default function NicheBoxesCatalog() {
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredAndSortedNiches.map((niche) => (
+              {currentNiches.map((niche) => (
                 <NicheBoxCard 
                   key={niche._id} 
                   niche={niche} 
@@ -264,12 +271,52 @@ export default function NicheBoxesCatalog() {
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredAndSortedNiches.map((niche) => (
+              {currentNiches.map((niche) => (
                 <NicheBoxListItem 
                   key={niche._id} 
                   niche={niche} 
                 />
               ))}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12">
+              <Button
+                variant="outline"
+                className="rounded-xl border-slate-200 text-slate-600"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              
+              <div className="flex items-center gap-1 mx-4">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <Button
+                    key={i}
+                    variant={currentPage === i + 1 ? "default" : "ghost"}
+                    className={`w-10 h-10 rounded-xl ${
+                      currentPage === i + 1 
+                        ? "bg-indigo-600 text-white hover:bg-indigo-500" 
+                        : "text-slate-500 hover:bg-slate-100"
+                    }`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                className="rounded-xl border-slate-200 text-slate-600"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
             </div>
           )}
         </section>
