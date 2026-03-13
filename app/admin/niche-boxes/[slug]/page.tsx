@@ -559,7 +559,7 @@ export default function NicheBoxEdit() {
       }
     };
     fetchNicheBox();
-  }, [slug, toast]);
+  }, [slug]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveNicheBox = async () => {
     setIsSaving(true);
