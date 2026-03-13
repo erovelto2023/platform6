@@ -5,13 +5,15 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import {
   Layers, Package, CheckCircle, TrendingUp, Users, DollarSign,
-  Target, Zap, Lock, BookOpen, Star, Copy, ExternalLink, Lightbulb, UserCircle, Map as MapIcon
+  Target, Zap, Lock, BookOpen, Star, Copy, ExternalLink, Lightbulb, UserCircle, Map as MapIcon,
+  FileText, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function NicheBoxDetail() {
   const params = useParams();
@@ -22,6 +24,7 @@ export default function NicheBoxDetail() {
   
   const [niche, setNiche] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedKeywords, setSelectedKeywords] = useState<number[]>([]);
 
   useEffect(() => {
     if (!slug) return;
@@ -40,6 +43,77 @@ export default function NicheBoxDetail() {
     };
     fetchNiche();
   }, [slug, router, toast]);
+
+  const handleSelectAllKeywords = (checked: boolean) => {
+    if (checked && niche?.keywords) {
+      setSelectedKeywords(niche.keywords.map((_: any, i: number) => i));
+    } else {
+      setSelectedKeywords([]);
+    }
+  };
+
+  const handleSelectKeyword = (index: number, checked: boolean) => {
+    if (checked) {
+      setSelectedKeywords(prev => [...prev, index]);
+    } else {
+      setSelectedKeywords(prev => prev.filter(i => i !== index));
+    }
+  };
+
+  const handleExportCSV = () => {
+    if (!niche?.keywords || selectedKeywords.length === 0) return;
+    
+    const selectedData = selectedKeywords.map(index => niche.keywords[index]);
+    
+    // Create CSV header
+    const headers = ['Keyword', 'Search Volume', 'Search Intent', 'Avg CPC', 'KD %', 'SERP Features'];
+    const csvRows = [headers.join(',')];
+    
+    // Add rows
+    selectedData.forEach((seo: any) => {
+      const row = [
+        `"${seo.keyword || ''}"`,
+        `"${seo.searchVolume || ''}"`,
+        `"${seo.searchIntent || ''}"`,
+        `"${seo.cpc || ''}"`,
+        `"${seo.competitionDifficulty || ''}"`,
+        `"${seo.serpFeatures || ''}"`
+      ];
+      csvRows.push(row.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${niche.nicheSlug}-keywords.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({ title: 'Export Successful', description: `Exported ${selectedKeywords.length} keywords to CSV.` });
+  };
+
+  const handleExportText = () => {
+    if (!niche?.keywords || selectedKeywords.length === 0) return;
+    
+    const selectedData = selectedKeywords.map(index => niche.keywords[index]);
+    const textContent = selectedData.map((seo: any) => seo.keyword).join('\n');
+    
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${niche.nicheSlug}-keywords.txt`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({ title: 'Export Successful', description: `Exported ${selectedKeywords.length} keywords to Text.` });
+  };
 
   if (loading) {
     return (
@@ -291,15 +365,43 @@ export default function NicheBoxDetail() {
 
              {/* SEO Vault Section */}
              <TabsContent value="seo" className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-                 <div className="flex items-center gap-3 mb-8">
-                     <TrendingUp className="text-indigo-600" size={32} />
-                     <h3 className="text-3xl font-black text-slate-900 italic tracking-tighter">SEO KEYWORD VAULT</h3>
+                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                     <div className="flex items-center gap-3">
+                         <TrendingUp className="text-indigo-600" size={32} />
+                         <h3 className="text-3xl font-black text-slate-900 italic tracking-tighter">SEO KEYWORD VAULT</h3>
+                     </div>
+                     <div className="flex items-center gap-3">
+                        <Button 
+                           variant="outline" 
+                           className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 font-bold tracking-widest text-xs h-10 px-4 rounded-xl shadow-sm transition-colors"
+                           onClick={handleExportText}
+                           disabled={selectedKeywords.length === 0}
+                        >
+                           <FileText className="w-4 h-4 mr-2" />
+                           EXPORT TEXT
+                        </Button>
+                        <Button 
+                           className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold tracking-widest text-xs h-10 px-4 rounded-xl shadow-sm transition-colors"
+                           onClick={handleExportCSV}
+                           disabled={selectedKeywords.length === 0}
+                        >
+                           <Download className="w-4 h-4 mr-2" />
+                           EXPORT CSV {selectedKeywords.length > 0 && `(${selectedKeywords.length})`}
+                        </Button>
+                     </div>
                  </div>
                  <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
                     <div className="overflow-x-auto">
                        <table className="w-full text-sm text-left">
                           <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-100 tracking-widest font-black">
                              <tr>
+                                <th className="px-6 py-4 w-12 text-center">
+                                   <Checkbox 
+                                     checked={niche.keywords?.length > 0 && selectedKeywords.length === niche.keywords.length}
+                                     onCheckedChange={handleSelectAllKeywords}
+                                     className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600 rounded"
+                                   />
+                                </th>
                                 <th className="px-6 py-4">Keyword</th>
                                 <th className="px-6 py-4">Search Volume</th>
                                 <th className="px-6 py-4">Search Intent</th>
@@ -310,7 +412,14 @@ export default function NicheBoxDetail() {
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                              {niche.keywords?.map((seo: any, i: number) => (
-                                <tr key={i} className="hover:bg-slate-50 transition-colors">
+                                <tr key={i} className={`transition-colors ${selectedKeywords.includes(i) ? 'bg-indigo-50/50' : 'hover:bg-slate-50'}`}>
+                                   <td className="px-6 py-4 text-center">
+                                      <Checkbox 
+                                        checked={selectedKeywords.includes(i)}
+                                        onCheckedChange={(checked) => handleSelectKeyword(i, checked === true)}
+                                        className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600 rounded"
+                                      />
+                                   </td>
                                    <td className="px-6 py-4 font-bold text-slate-800">{seo.keyword}</td>
                                    <td className="px-6 py-4 text-slate-600 font-mono">{seo.searchVolume}</td>
                                    <td className="px-6 py-4">
