@@ -607,65 +607,47 @@ export default function NicheBoxCreator() {
   };
 
   const removeAsset = (index: number) => {
-    updateField('assets', data.assets.filter((_, i) => i !== index));
+    updateField('assets', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
   const addPhase = () => {
-    const newPhase: RoadmapPhase = {
-      id: Date.now(),
-      name: 'New Phase',
-      duration: '4 weeks',
-      budget: '$500',
-      description: '',
-      tasks: ['']
-    };
-    updateField('phases', [...data.phases, newPhase]);
+    const newPhase: RoadmapPhase = { id: Date.now(), name: 'New Phase', duration: '4 weeks', budget: '$500', description: '', tasks: [''] };
+    updateField('phases', (prev: any[]) => [...(prev || []), newPhase]);
   };
-
   const removePhase = (id: number) => {
-    updateField('phases', data.phases.filter(p => p.id !== id));
+    updateField('phases', (prev: any[]) => (prev || []).filter((p: any) => p.id !== id));
   };
-
   const addTask = (phaseIndex: number) => {
-    const newPhases = data.phases.map((p, i) => 
-      i === phaseIndex ? { ...p, tasks: [...p.tasks, ''] } : p
+    updateField('phases', (prev: any[]) =>
+      (prev || []).map((p: any, i: number) => i === phaseIndex ? { ...p, tasks: [...(p.tasks || []), ''] } : p)
     );
-    updateField('phases', newPhases);
   };
-
   const removeTask = (phaseIndex: number, taskIndex: number) => {
-    const newPhases = data.phases.map((p, i) => 
-      i === phaseIndex ? { ...p, tasks: p.tasks.filter((_, ti) => ti !== taskIndex) } : p
+    updateField('phases', (prev: any[]) =>
+      (prev || []).map((p: any, i: number) => i === phaseIndex ? { ...p, tasks: (p.tasks || []).filter((_: any, ti: number) => ti !== taskIndex) } : p)
     );
-    updateField('phases', newPhases);
   };
 
   const addTrend = (type: 'top' | 'rising') => {
-    const newTrend: MarketTrend = { query: '', search: '', interest: '', increase: '' };
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    updateField(path, [...data.research[type === 'top' ? 'topTrends' : 'risingTrends'], newTrend]);
+    updateField(path, (prev: any[]) => [...(prev || []), { query: '', search: '', interest: '', increase: '' }]);
   };
-
   const removeTrend = (type: 'top' | 'rising', index: number) => {
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    const trends = data.research[type === 'top' ? 'topTrends' : 'risingTrends'];
-    updateField(path, trends.filter((_, i) => i !== index));
+    updateField(path, (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
   const addBusinessModel = () => {
-    updateField('businessModels', [...data.businessModels, { name: '', description: '', profitPotential: '' }]);
+    updateField('businessModels', (prev: any[]) => [...(prev || []), { name: '', description: '', profitPotential: '' }]);
   };
-
   const removeBusinessModel = (index: number) => {
-    updateField('businessModels', data.businessModels.filter((_, i) => i !== index));
+    updateField('businessModels', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
-
   const addRecommendedTool = () => {
-    updateField('recommendedTools', [...data.recommendedTools, { toolName: '', cost: '', purpose: '', priority: 'Medium', affiliateLink: '' }]);
+    updateField('recommendedTools', (prev: any[]) => [...(prev || []), { toolName: '', cost: '', purpose: '', priority: 'Medium', affiliateLink: '' }]);
   };
-
   const removeRecommendedTool = (index: number) => {
-    updateField('recommendedTools', data.recommendedTools.filter((_, i) => i !== index));
+    updateField('recommendedTools', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
   const saveNicheBox = async () => {

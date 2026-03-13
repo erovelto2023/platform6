@@ -515,15 +515,42 @@ export default function NicheBoxEdit() {
         if (!response.ok) throw new Error('Failed to fetch');
         const boxData = await response.json();
         
-        // Deep merge with initial state to ensure all fields exist
+        // Deep merge: initial state provides defaults for any missing fields
         setData(prev => {
-           const merged = { ...prev };
-           Object.keys(boxData).forEach(k => {
-             if (boxData[k] !== undefined && boxData[k] !== null) {
-                (merged as any)[k] = boxData[k];
-             }
-           });
-           return merged;
+          const merged = JSON.parse(JSON.stringify(prev)) as typeof prev;
+          // Merge top-level scalar fields
+          const scalarKeys = ['status','nicheName','nicheSlug','category','competition','marketSize','growthRate','estimatedValue','thumbnailImage','heroImage'];
+          scalarKeys.forEach(k => { if (boxData[k] != null) (merged as any)[k] = boxData[k]; });
+          // Merge research (deep)
+          if (boxData.research) {
+            if (boxData.research.marketOverview != null) merged.research.marketOverview = boxData.research.marketOverview;
+            if (Array.isArray(boxData.research.topTrends) && boxData.research.topTrends.length > 0) merged.research.topTrends = boxData.research.topTrends;
+            if (Array.isArray(boxData.research.risingTrends) && boxData.research.risingTrends.length > 0) merged.research.risingTrends = boxData.research.risingTrends;
+            if (Array.isArray(boxData.research.opportunities)) merged.research.opportunities = boxData.research.opportunities;
+          }
+          // Merge customerAvatar (deep)
+          if (boxData.customerAvatar) {
+            const avatarSections = ['demographics','psychographics','professional','psychology','informationDiet','buyingBehavior'] as const;
+            avatarSections.forEach(section => {
+              if (boxData.customerAvatar[section]) {
+                (merged.customerAvatar as any)[section] = { ...(merged.customerAvatar as any)[section], ...boxData.customerAvatar[section] };
+              }
+            });
+          }
+          // Merge arrays (only overwrite if data has them)
+          if (Array.isArray(boxData.keywords)) merged.keywords = boxData.keywords;
+          if (Array.isArray(boxData.assets)) merged.assets = boxData.assets;
+          if (Array.isArray(boxData.phases) && boxData.phases.length > 0) merged.phases = boxData.phases;
+          if (Array.isArray(boxData.businessModels)) merged.businessModels = boxData.businessModels;
+          if (Array.isArray(boxData.recommendedTools)) merged.recommendedTools = boxData.recommendedTools;
+          // Merge ideas (deep)
+          if (boxData.ideas) {
+            Object.keys(boxData.ideas).forEach(k => {
+              const val = boxData.ideas[k];
+              if (val != null) (merged.ideas as any)[k] = Array.isArray(val) ? val.join('\n') : val;
+            });
+          }
+          return merged;
         });
       } catch (error) {
         toast({ title: "Error", description: "Could not load niche box data", variant: "destructive" });
@@ -632,73 +659,66 @@ export default function NicheBoxEdit() {
     reader.readAsText(file);
   };
 
+  // ─── Asset helpers ───
   const addAsset = (name: string, category: string) => {
-    const newAsset = { category, name, title: '', description: '', type: 'Document', fileUrl: '', link: '', fileName: '' };
-    updateField('assets', [...data.assets, newAsset]);
+    const newAsset = { category, name, title: name, description: '', type: 'Document', fileUrl: '', link: '', fileName: '' };
+    updateField('assets', (prev: any[]) => [...(prev || []), newAsset]);
   };
-
   const removeAsset = (index: number) => {
-    updateField('assets', data.assets.filter((_, i) => i !== index));
+    updateField('assets', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
+  // ─── Phase/Task helpers ───
   const addPhase = () => {
     const newPhase = { id: Date.now(), name: 'New Phase', duration: '4 weeks', budget: '$500', description: '', tasks: [''] };
-    updateField('phases', [...data.phases, newPhase]);
+    updateField('phases', (prev: any[]) => [...(prev || []), newPhase]);
   };
-
   const removePhase = (id: number) => {
-    updateField('phases', data.phases.filter(p => p.id !== id));
+    updateField('phases', (prev: any[]) => (prev || []).filter((p: any) => p.id !== id));
   };
-
   const addTask = (phaseIndex: number) => {
-    const newPhases = data.phases.map((p, i) => 
-      i === phaseIndex ? { ...p, tasks: [...p.tasks, ''] } : p
+    updateField('phases', (prev: any[]) =>
+      (prev || []).map((p: any, i: number) => i === phaseIndex ? { ...p, tasks: [...(p.tasks || []), ''] } : p)
     );
-    updateField('phases', newPhases);
   };
-
   const removeTask = (phaseIndex: number, taskIndex: number) => {
-    const newPhases = data.phases.map((p, i) => 
-      i === phaseIndex ? { ...p, tasks: p.tasks.filter((_, ti) => ti !== taskIndex) } : p
+    updateField('phases', (prev: any[]) =>
+      (prev || []).map((p: any, i: number) => i === phaseIndex ? { ...p, tasks: (p.tasks || []).filter((_: any, ti: number) => ti !== taskIndex) } : p)
     );
-    updateField('phases', newPhases);
   };
 
+  // ─── Trend helpers ───
   const addTrend = (type: 'top' | 'rising') => {
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    const current = type === 'top' ? data.research.topTrends : data.research.risingTrends;
-    updateField(path, [...current, { query: '', search: '', interest: '', increase: '' }]);
+    updateField(path, (prev: any[]) => [...(prev || []), { query: '', search: '', interest: '', increase: '' }]);
   };
-
   const removeTrend = (type: 'top' | 'rising', index: number) => {
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    const current = type === 'top' ? data.research.topTrends : data.research.risingTrends;
-    updateField(path, current.filter((_, i) => i !== index));
+    updateField(path, (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
+  // ─── Opportunity helpers ───
   const addOpportunity = () => {
-    updateField('research.opportunities', [...(data.research.opportunities || []), '']);
+    updateField('research.opportunities', (prev: any[]) => [...(prev || []), '']);
   };
-
   const removeOpportunity = (index: number) => {
-    const opps = data.research.opportunities || [];
-    updateField('research.opportunities', opps.filter((_, i) => i !== index));
+    updateField('research.opportunities', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
+  // ─── Business Model helpers ───
   const addBusinessModel = () => {
-    updateField('businessModels', [...data.businessModels, { name: '', description: '', profitPotential: '' }]);
+    updateField('businessModels', (prev: any[]) => [...(prev || []), { name: '', description: '', profitPotential: '' }]);
   };
-
   const removeBusinessModel = (index: number) => {
-    updateField('businessModels', data.businessModels.filter((_, i) => i !== index));
+    updateField('businessModels', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
+  // ─── Recommended Tool helpers ───
   const addRecommendedTool = () => {
-    updateField('recommendedTools', [...data.recommendedTools, { toolName: '', cost: '', purpose: '', priority: 'Medium', affiliateLink: '' }]);
+    updateField('recommendedTools', (prev: any[]) => [...(prev || []), { toolName: '', cost: '', purpose: '', priority: 'Medium', affiliateLink: '' }]);
   };
-
   const removeRecommendedTool = (index: number) => {
-    updateField('recommendedTools', data.recommendedTools.filter((_, i) => i !== index));
+    updateField('recommendedTools', (prev: any[]) => (prev || []).filter((_: any, i: number) => i !== index));
   };
 
 
@@ -850,8 +870,8 @@ export default function NicheBoxEdit() {
                       <div key={i} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative group">
                         <button onClick={() => removeTrend('top', i)} className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 border border-slate-200 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={12}/></button>
                         <div className="grid grid-cols-2 gap-2">
-                          <StableInput className="h-9" placeholder="Query" value={t.query} onChange={(v) => { const nt = [...data.research.topTrends]; nt[i].query = v; updateField('research.topTrends', nt); }} />
-                          <StableInput className="h-9" placeholder="Vol" value={t.search} onChange={(v) => { const nt = [...data.research.topTrends]; nt[i].search = v; updateField('research.topTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Query" value={t.query} onChange={(v) => updateField(`research.topTrends.${i}.query`, v)} />
+                          <StableInput className="h-9" placeholder="Vol" value={t.search} onChange={(v) => updateField(`research.topTrends.${i}.search`, v)} />
                         </div>
                       </div>
                     ))}
@@ -865,8 +885,8 @@ export default function NicheBoxEdit() {
                       <div key={i} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative group">
                         <button onClick={() => removeTrend('rising', i)} className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 border border-slate-200 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={12}/></button>
                         <div className="grid grid-cols-2 gap-2">
-                          <StableInput className="h-9" placeholder="Rising Query" value={t.query} onChange={(v) => { const nt = [...data.research.risingTrends]; nt[i].query = v; updateField('research.risingTrends', nt); }} />
-                          <StableInput className="h-9" placeholder="Score" value={t.search} onChange={(v) => { const nt = [...data.research.risingTrends]; nt[i].search = v; updateField('research.risingTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Rising Query" value={t.query} onChange={(v) => updateField(`research.risingTrends.${i}.query`, v)} />
+                          <StableInput className="h-9" placeholder="Score" value={t.search} onChange={(v) => updateField(`research.risingTrends.${i}.search`, v)} />
                         </div>
                       </div>
                     ))}
@@ -885,11 +905,7 @@ export default function NicheBoxEdit() {
                           className="flex-1 h-10" 
                           placeholder="e.g. Expand into B2B consulting..." 
                           value={opp} 
-                          onChange={(v) => {
-                            const newOpp = [...(data.research.opportunities || [])]; 
-                            newOpp[i] = v; 
-                            updateField('research.opportunities', newOpp);
-                          }} 
+                          onChange={(v) => updateField(`research.opportunities.${i}`, v)} 
                         />
                         <Button 
                           onClick={() => removeOpportunity(i)}
@@ -1084,11 +1100,7 @@ export default function NicheBoxEdit() {
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Asset Type</Label>
                           <Select 
                             value={asset.type || 'Document'} 
-                            onValueChange={(value) => {
-                              const newA = [...data.assets]; 
-                              newA[i].type = value; 
-                              updateField('assets', newA);
-                            }}
+                            onValueChange={(value) => updateField(`assets.${i}.type`, value)}
                           >
                             <SelectTrigger className="bg-slate-50 border-slate-200 rounded-xl text-xs h-10 focus:ring-1 focus:ring-black">
                               <SelectValue placeholder="Asset Type" />
@@ -1110,11 +1122,7 @@ export default function NicheBoxEdit() {
                           className="w-full bg-slate-50 border-slate-200 rounded-xl p-3 text-xs min-h-[80px] text-slate-900 focus:ring-1 focus:ring-black"
                           placeholder="Briefly describe what this asset is and how it helps the user..."
                           value={asset.description || ''}
-                          onChange={(e) => {
-                             const newA = [...data.assets]; 
-                             newA[i].description = e.target.value; 
-                             updateField('assets', newA);
-                          }}
+                          onChange={(e) => updateField(`assets.${i}.description`, e.target.value)}
                         />
                       </div>
 
@@ -1128,10 +1136,8 @@ export default function NicheBoxEdit() {
                               placeholder="File URL or Link" 
                               value={asset.link || asset.fileUrl || ''} 
                               onChange={(e) => {
-                                const newA = [...data.assets]; 
-                                newA[i].link = e.target.value; 
-                                newA[i].fileUrl = e.target.value; 
-                                updateField('assets', newA);
+                                updateField(`assets.${i}.link`, e.target.value);
+                                updateField(`assets.${i}.fileUrl`, e.target.value);
                               }} 
                             />
                           </div>
@@ -1145,12 +1151,8 @@ export default function NicheBoxEdit() {
                               type="file" 
                               className="hidden" 
                               onChange={(e) => {
-                                const newA = [...data.assets]; 
                                 const file = e.target.files?.[0];
-                                if (file) {
-                                  newA[i].fileName = file.name; 
-                                  updateField('assets', newA);
-                                }
+                                if (file) updateField(`assets.${i}.fileName`, file.name);
                               }} 
                             />
                           </label>
@@ -1222,11 +1224,7 @@ export default function NicheBoxEdit() {
                               <StableInput 
                                 className="flex-1 h-10" 
                                 value={task} 
-                                onChange={(newValue) => {
-                                  const newP = [...data.phases]; 
-                                  newP[i].tasks[ti] = newValue; 
-                                  updateField('phases', newP);
-                                }} 
+                                onChange={(newValue) => updateField(`phases.${i}.tasks.${ti}`, newValue)} 
                                 placeholder="Task description..."
                               />
                               <Button 
