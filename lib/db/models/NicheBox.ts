@@ -286,7 +286,7 @@ const NicheBoxSchema = new mongoose.Schema({
 
 // Clear mongoose model in development to ensure HMR picks up schema changes
 if (mongoose.models.NicheBox) {
-  delete mongoose.models.NicheBox;
+  mongoose.deleteModel('NicheBox');
 }
 
 // Create and export the model
