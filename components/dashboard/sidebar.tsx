@@ -25,7 +25,8 @@ import {
     Wrench,
     PenTool,
     Film,
-    Tag
+    Tag,
+    FolderOpen
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -93,9 +94,9 @@ const routes = [
         color: "text-blue-500",
     },
     {
-        label: "Niche Business in a Box",
+        label: "Niche Research Hub",
         icon: Compass,
-        href: "/niche-catalog",
+        href: "/niche-boxes",
         color: "text-pink-700",
     },
     {
@@ -136,6 +137,12 @@ const adminRoutes = [
         icon: Library,
         href: "/admin/glossary",
         color: "text-violet-500",
+    },
+    {
+        label: "Niches in a Box",
+        icon: Compass,
+        href: "/admin/niche-boxes",
+        color: "text-pink-700",
     },
     {
         label: "Tools & Products",
@@ -180,6 +187,12 @@ const adminRoutes = [
         color: "text-indigo-500",
     },
     {
+        label: "Blog Analytics",
+        icon: BarChart3,
+        href: "/admin/blog/analytics",
+        color: "text-cyan-600",
+    },
+    {
         label: "Courses",
         icon: BookOpen,
         href: "/admin/courses",
@@ -196,6 +209,24 @@ const adminRoutes = [
         icon: FileQuestion,
         href: "/admin/surveys",
         color: "text-orange-500",
+    },
+    {
+        label: "Events",
+        icon: Calendar,
+        href: "/admin/events",
+        color: "text-pink-600",
+    },
+    {
+        label: "Groups",
+        icon: Users,
+        href: "/admin/groups",
+        color: "text-emerald-600",
+    },
+    {
+        label: "Resources",
+        icon: FolderOpen,
+        href: "/admin/resources",
+        color: "text-amber-600",
     },
     {
         label: "Wholesale Dir.",

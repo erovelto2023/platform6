@@ -271,7 +271,7 @@ export default async function AdminDashboardPage() {
                         { label: "Courses", count: stats.breakdown.courses, color: "text-indigo-600" },
                         { label: "Events", count: stats.breakdown.events, color: "text-pink-600" },
                         { label: "Groups", count: stats.breakdown.groups, color: "text-emerald-600" },
-                        { label: "Niche Boxes", count: stats.breakdown.nicheBoxes, color: "text-purple-600" },
+                        { label: "Offers", count: stats.breakdown.offers, color: "text-purple-600" },
                         { label: "Surveys", count: stats.breakdown.surveys, color: "text-orange-600" },
                         { label: "Wholesale Partners", count: stats.breakdown.wholesaleSuppliers, color: "text-cyan-600" },
                         { label: "Resources", count: stats.breakdown.resources, color: "text-amber-600" },

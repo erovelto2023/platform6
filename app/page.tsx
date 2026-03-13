@@ -39,8 +39,8 @@ export default function LandingPage() {
       title: 'Research. Roadmap. Results.',
       subtitle: 'Skip the 200-hour niche deep dive. We hand you validated models ready to execute.',
       backgroundImage: '/heroimages/962464e7-62e7-4974-866e-52b2e00976f7.png',
-      ctaText: 'View Niche Boxes',
-      ctaLink: '/niche-boxes',
+      ctaText: 'Get Started',
+      ctaLink: '/sign-up',
     },
     {
       title: 'Action. Analytics. Advancement.',
@@ -104,8 +104,8 @@ export default function LandingPage() {
           <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
             Affiliate CRM
           </Link>
-          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/niche-boxes">
-            Niche Boxes
+          <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
+            Dashboard
           </Link>
           <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
             Blog
@@ -262,7 +262,7 @@ export default function LandingPage() {
                   <ul className="space-y-3">
                     {[
                       "Getting started online (even from zero)",
-                      "Niche selection and validation",
+                      "Market research and validation",
                       "Content creation & monetization",
                       "Affiliate marketing",
                       "Digital products and services",
@@ -522,7 +522,7 @@ export default function LandingPage() {
 
             <Accordion type="single" collapsible className="w-full space-y-4">
               {[
-                { q: "Is this just another course?", a: "No. It’s a business-building ecosystem. We provide the tools and the blueprints (Niche Boxes) alongside the education." },
+                { q: "Is this just another course?", a: "No. It’s a business-building ecosystem. We provide the tools and the blueprints alongside the education." },
                 { q: "Do I really get all courses for free?", a: "Yes. As long as you are a member, you never pay for a new training module again." },
                 { q: "I’m a total beginner. Can I join?", a: "Absolutely. We specialize in taking you from \"understanding nothing\" to making your first sale using leverage, not luck." },
                 { q: "What if the algorithm changes?", a: "That’s why we teach you to build foundations. Trends fade; assets appreciate. We focus on platforms you own." }

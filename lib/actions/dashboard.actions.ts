@@ -3,7 +3,6 @@
 import connectDB from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
 import Course from "@/lib/db/models/Course";
-import NicheBox from "@/lib/db/models/NicheBox";
 
 import Offer from "@/lib/db/models/Offer";
 import Resource from "@/lib/db/models/Resource";
@@ -49,7 +48,6 @@ export async function getDashboardStats() {
 
         // Content counts
         const totalCourses = await Course.countDocuments();
-        const totalNicheBoxes = await NicheBox.countDocuments();
         const totalOffers = await Offer.countDocuments();
         const totalResources = await Resource.countDocuments();
         const totalAffiliatePartners = await AffiliateCompany.countDocuments();
@@ -58,12 +56,11 @@ export async function getDashboardStats() {
         const totalWholesaleSuppliers = await Supplier.countDocuments();
 
         // Calculate total content items
-        const totalContent = totalCourses + totalNicheBoxes + totalOffers + totalResources;
+        const totalContent = totalCourses + totalOffers + totalResources;
 
         // Content from last month
         const contentLastMonth =
             await Course.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
-            await NicheBox.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
 
             await Offer.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
             await Resource.countDocuments({ createdAt: { $lt: thirtyDaysAgo } });
@@ -106,7 +103,6 @@ export async function getDashboardStats() {
             contentGrowth: parseFloat(contentGrowth as string),
             breakdown: {
                 courses: totalCourses,
-                nicheBoxes: totalNicheBoxes,
                 offers: totalOffers,
                 resources: totalResources,
                 events: await CommunityEvent.countDocuments({ startDate: { $gte: new Date() } }),
@@ -132,7 +128,6 @@ export async function getDashboardStats() {
             contentGrowth: 0,
             breakdown: {
                 courses: 0,
-                nicheBoxes: 0,
                 offers: 0,
                 resources: 0,
                 events: 0,

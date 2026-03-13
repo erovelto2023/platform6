@@ -1,379 +1,391 @@
 'use client';
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { SimpleHeroSlideshow } from "@/components/animations";
-import { motion } from "framer-motion";
-import {
-    Box, Target, Map, Video, BookOpen, Users, Search, Download,
-    CheckCircle2, TrendingUp, Zap, Lightbulb, Rocket, Award
-} from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Search, Download, Star, Grid, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function NicheBoxesPage() {
-    // Hero slides for niche boxes page
-    const heroSlides = [
-        {
-            title: 'Research. Roadmap. Results.',
-            subtitle: 'Skip the 200-hour niche deep dive. We hand you validated models ready to execute.',
-            backgroundImage: '/heroimages/962464e7-62e7-4974-866e-52b2e00976f7.png',
-            ctaText: 'Explore Niches',
-            ctaLink: '/sign-up',
-        },
-        {
-            title: 'Validate. Create. Convert.',
-            subtitle: 'Stop building in the dark. Start building what people actually buy.',
-            backgroundImage: '/heroimages/a400fc81-bf6f-4c22-be56-c83b91b26693.png',
-            ctaText: 'Get Started',
-            ctaLink: '/sign-up',
-        },
-        {
-            title: 'Your niche isn\'t "make money online."',
-            subtitle: 'It\'s what you build inside it. We help you find—and profit from—both.',
-            backgroundImage: '/heroimages/b5c8e145-1407-4ae8-b41a-b2d30d4fafc1.png',
-            ctaText: 'View Niche Boxes',
-            ctaLink: '/sign-up',
-        },
-        {
-            title: 'The best marketing tool?',
-            subtitle: 'A product people actually want. We help you build both—simultaneously.',
-            backgroundImage: '/heroimages/eab09a8e-8f04-4422-9e63-e49b80dce334.png',
-            ctaText: 'Join Now',
-            ctaLink: '/sign-up',
-        },
-    ];
+interface NicheBox {
+  _id: string;
+  nicheName: string;
+  nicheSlug: string;
+  category: string;
+  competition: string;
+  marketSize: string;
+  growthRate: string;
+  status: 'draft' | 'published' | 'archived';
+  featured: boolean;
+  downloadCount: number;
+  createdAt: string;
+  updatedAt: string;
+  research?: {
+    marketOverview: string;
+  };
+  keywords?: Array<{
+    keyword: string;
+    searchVolume: string;
+  }>;
+  phases?: Array<{
+    name: string;
+    duration: string;
+    budget: string;
+  }>;
+}
 
-    // Animation variants
-    const fadeInUp = {
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0 }
-    };
+export default function NicheBoxesCatalog() {
+  const [niches, setNiches] = useState<NicheBox[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [competitionFilter, setCompetitionFilter] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<string>('newest');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    const staggerContainer = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
+  useEffect(() => {
+    fetchNiches();
+  }, []);
 
-    const scaleIn = {
-        hidden: { opacity: 0, scale: 0.8 },
-        visible: { opacity: 1, scale: 1 }
-    };
+  const fetchNiches = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/niche-boxes/public');
+      if (response.ok) {
+        const data = await response.json();
+        setNiches(data.filter((n: NicheBox) => n.status === 'published'));
+      } else {
+        // Fallback to mock data if API doesn't exist yet
+        setNiches([]);
+      }
+    } catch (error) {
+      console.error('Error fetching niche boxes:', error);
+      setNiches([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+
+  const filteredAndSortedNiches = niches
+    .filter(niche => 
+      niche.nicheName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      niche.nicheSlug.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      niche.category.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(niche => categoryFilter === 'all' || niche.category === categoryFilter)
+    .filter(niche => competitionFilter === 'all' || niche.competition === competitionFilter)
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'oldest':
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        case 'popular':
+          return b.downloadCount - a.downloadCount;
+        case 'name':
+          return a.nicheName.localeCompare(b.nicheName);
+        default:
+          return 0;
+      }
+    });
+
+  const categories = Array.from(new Set(niches.map(n => n.category)));
+  const featuredNiches = niches.filter(n => n.featured);
+
+  if (loading) {
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950">
-            {/* Navbar - Dark Theme */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
-                            K
-                        </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
-                    </Link>
-                </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
-                        Courses
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
-                        Library
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
-                        Resources
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
-                        Affiliate CRM
-                    </Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/niche-boxes">
-                        Niche Boxes
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
-                        Blog
-                    </Link>
-                    <Link href="/sign-in">
-                        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
-                            Log In
-                        </Button>
-                    </Link>
-                    <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
-                            Get Started
-                        </Button>
-                    </Link>
-                </nav>
-                <div className="ml-auto md:hidden">
-                    <Link href="/sign-up">
-                        <Button size="sm">Get Started</Button>
-                    </Link>
-                </div>
-            </header>
-
-            <main className="flex-1">
-                {/* Animated Hero Section */}
-                <SimpleHeroSlideshow slides={heroSlides} autoplay={true} interval={6000} />
-
-                {/* What Is It - Dark Theme */}
-                <section className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
-
-                    <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-                            <motion.div
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeInUp}
-                                transition={{ duration: 0.6 }}
-                            >
-                                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">What Is a Niche Business in a Box?</h2>
-                                <p className="text-slate-400 mb-6 text-lg">
-                                    A Niche Business in a Box is a complete, done-for-you business blueprint built around a specific niche market.
-                                    Most people fail because they don't know what niche to choose or how everything fits together. We eliminate that problem.
-                                </p>
-                                <ul className="space-y-4">
-                                    {[
-                                        { icon: Lightbulb, text: "Understand the niche deeply" },
-                                        { icon: Target, text: "See multiple business angles you can pursue" },
-                                        { icon: Users, text: "Know exactly who you're targeting" },
-                                        { icon: Map, text: "Follow a clear strategy instead of guessing" }
-                                    ].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3">
-                                            <div className="p-2 bg-purple-500/20 rounded-lg">
-                                                <item.icon className="h-5 w-5 text-purple-400" />
-                                            </div>
-                                            <span className="text-slate-300">{item.text}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <p className="mt-6 font-semibold text-white bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    This is not theory. This is execution-ready structure.
-                                </p>
-                            </motion.div>
-
-                            <motion.div
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeInUp}
-                                transition={{ duration: 0.6, delay: 0.2 }}
-                                className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700"
-                            >
-                                <h3 className="text-2xl font-bold mb-4 text-white">Explore Profitable Niche Markets with Clarity</h3>
-                                <p className="text-slate-400 mb-6">
-                                    Every Niche Business in a Box walks you through:
-                                </p>
-                                <div className="space-y-4">
-                                    {[
-                                        { icon: Target, title: "The Niche & Why It Works", desc: "Problems, desires, and motivations of the audience." },
-                                        { icon: Map, title: "Business Models & Angles", desc: "How to position yourself without reinventing the wheel." },
-                                        { icon: Zap, title: "Multiple Paths", desc: "You're not locked into one idea—choose what fits you best." }
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex gap-3 p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/30">
-                                                <item.icon className="h-5 w-5 text-white" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-white mb-1">{item.title}</h4>
-                                                <p className="text-sm text-slate-400">{item.desc}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Features Grid - Dark Theme */}
-                <section className="w-full py-20 bg-slate-950">
-                    <div className="container px-4 md:px-6 mx-auto">
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
-                        >
-                            Everything You Need to Launch
-                        </motion.h2>
-
-                        <motion.div
-                            variants={staggerContainer}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
-                        >
-                            {[
-                                {
-                                    icon: Video,
-                                    title: "In-Depth Video Walkthroughs",
-                                    desc: "Detailed breakdowns that explain the niche, show how pieces connect, and walk you through opportunities step by step.",
-                                    highlight: "Remove confusion and overwhelm.",
-                                    color: "blue"
-                                },
-                                {
-                                    icon: Map,
-                                    title: "Proven Strategies & Roadmaps",
-                                    desc: "Step-by-step playbooks, roadmaps showing what to focus on first, and action plans you can follow immediately.",
-                                    highlight: "You'll always know what to do next.",
-                                    color: "emerald"
-                                },
-                                {
-                                    icon: Users,
-                                    title: "Customer Avatar Research",
-                                    desc: "Defined avatars, pain points, desires, and buying motivations. Create offers and content that actually resonate.",
-                                    highlight: "Understanding your audience is everything.",
-                                    color: "purple"
-                                },
-                                {
-                                    icon: Search,
-                                    title: "Keyword Research Included",
-                                    desc: "Curated keywords, marketing angles, and topics for content and products. No guessing or random ideas.",
-                                    highlight: "Get a head start in visibility.",
-                                    color: "orange"
-                                },
-                                {
-                                    icon: Download,
-                                    title: "Downloadable Assets",
-                                    desc: "Ready-to-use guides, templates, worksheets, and reference materials to save you time and effort.",
-                                    highlight: "Move faster and build with confidence.",
-                                    color: "pink"
-                                },
-                                {
-                                    icon: TrendingUp,
-                                    title: "Built for Growth",
-                                    desc: "A repeatable framework you can use again and again. Whether launching your first business or adding a new stream.",
-                                    highlight: "Just focused, structured execution.",
-                                    color: "indigo"
-                                }
-                            ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={scaleIn}
-                                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                                    className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all hover:shadow-2xl hover:shadow-purple-500/20 group"
-                                >
-                                    <div className={`w-12 h-12 bg-gradient-to-br from-${item.color}-500 to-${item.color}-600 rounded-lg flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                                        <item.icon className="h-6 w-6 text-white" />
-                                    </div>
-                                    <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
-                                    <p className="text-sm text-slate-400 mb-4">{item.desc}</p>
-                                    <p className={`text-xs font-medium text-${item.color}-400`}>{item.highlight}</p>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </section>
-
-                {/* Why It Works - Gradient Section */}
-                <section className="w-full py-20 bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-                    <div className="container px-4 md:px-6 mx-auto text-center relative z-10">
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="text-3xl md:text-4xl font-bold mb-12 text-white"
-                        >
-                            Why Niche Business in a Box Works
-                        </motion.h2>
-
-                        <motion.div
-                            variants={staggerContainer}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            className="flex flex-wrap justify-center gap-6"
-                        >
-                            {[
-                                "Research is already done",
-                                "Multiple angles instead of one rigid idea",
-                                "Clear steps instead of confusion",
-                                "Assets instead of empty outlines",
-                                "Built to scale, not stall"
-                            ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={fadeInUp}
-                                    className="flex items-center gap-3 bg-white/10 backdrop-blur-sm px-6 py-4 rounded-full border border-white/20 hover:bg-white/20 transition-all"
-                                >
-                                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                                    <span className="font-medium text-white">{item}</span>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-
-                        <motion.p
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.3 }}
-                            className="mt-12 text-2xl font-light text-white/90"
-                        >
-                            This is how smart entrepreneurs move faster.
-                        </motion.p>
-                    </div>
-                </section>
-
-                {/* CTA - Gradient */}
-                <section className="w-full py-24 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden border-t border-slate-800">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-3xl" />
-
-                    <div className="container px-4 md:px-6 mx-auto text-center relative z-10">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-                                Start with Structure. <br />
-                                Build with Confidence.
-                            </h2>
-                            <div className="max-w-2xl mx-auto text-xl text-slate-300 mb-10 space-y-2">
-                                <p>If you want to stop guessing and start building—</p>
-                                <p>If you want a business foundation that actually makes sense—</p>
-                                <p className="font-semibold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    Niche Business in a Box is your shortcut to momentum.
-                                </p>
-                            </div>
-                            <div className="flex flex-col items-center gap-6">
-                                <Link href="/sign-up">
-                                    <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xl px-12 h-16 shadow-2xl shadow-purple-500/50">
-                                        Get Access Now
-                                    </Button>
-                                </Link>
-                                <p className="text-sm font-medium text-slate-400">
-                                    Build smarter. Launch faster. Grow with purpose.
-                                </p>
-                            </div>
-                        </motion.div>
-                    </div>
-                </section>
-            </main>
-
-            {/* Footer - Dark Theme */}
-            <footer className="flex flex-col gap-2 sm:flex-row py-8 w-full shrink-0 items-center px-4 md:px-6 border-t border-slate-800 bg-slate-950">
-                <p className="text-xs text-slate-500">© 2025 K Business Academy. All rights reserved.</p>
-                <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-                    <Link className="text-xs text-slate-500 hover:text-slate-300 transition-colors" href="#">
-                        Terms of Service
-                    </Link>
-                    <Link className="text-xs text-slate-500 hover:text-slate-300 transition-colors" href="#">
-                        Privacy
-                    </Link>
-                </nav>
-            </footer>
+      <div className="min-h-screen bg-slate-50 text-slate-900 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-slate-400">Loading niche boxes...</div>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200 py-16">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="text-center">
+            <h1 className="text-5xl font-black mb-4 tracking-tighter text-slate-900 italic">NICHE BUSINESS <span className="text-indigo-600">IN A BOX</span></h1>
+            <p className="text-xl text-slate-500 mb-8 max-w-3xl mx-auto font-medium">
+              Complete business blueprints with research, keywords, content assets, and implementation roadmaps. 
+              Skip the research phase and jump straight into execution.
+            </p>
+            <div className="flex justify-center gap-4">
+              <Link href="/sign-up">
+                <Button size="lg" className="bg-indigo-600 text-white hover:bg-indigo-500 rounded-2xl px-8 py-6 text-lg font-black uppercase tracking-widest transition-all">
+                  Get Started
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="border-slate-200 text-slate-900 hover:bg-slate-50 rounded-2xl px-8 py-6 text-lg font-black uppercase tracking-widest transition-all">
+                  Browse All Niches
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-8 py-12">
+        {/* Featured Niches */}
+        {featuredNiches.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+              <Star className="w-6 h-6 text-yellow-500" />
+              Featured Niche Boxes
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredNiches.slice(0, 3).map((niche) => (
+                <NicheBoxCard 
+                  key={niche._id} 
+                  niche={niche} 
+                  featured={true}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Filters and Search */}
+        <section className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            <div className="flex-1 max-w-2xl">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Input
+                  placeholder="Search niche boxes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-12 bg-white border-slate-200 text-slate-900 placeholder-slate-400 h-12 rounded-2xl focus:ring-indigo-500/20"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-4 items-center">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-48 bg-white border-slate-200 text-slate-900 rounded-xl">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="all" className="text-slate-900">All Categories</SelectItem>
+                  {categories.map(cat => (
+                    <SelectItem key={cat} value={cat} className="text-slate-900">{cat}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={competitionFilter} onValueChange={setCompetitionFilter}>
+                <SelectTrigger className="w-40 bg-white border-slate-200 text-slate-900 rounded-xl">
+                  <SelectValue placeholder="Competition" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="all" className="text-slate-900">All Levels</SelectItem>
+                  <SelectItem value="Low" className="text-slate-900">Low</SelectItem>
+                  <SelectItem value="Medium" className="text-slate-900">Medium</SelectItem>
+                  <SelectItem value="Hard" className="text-slate-900">Hard</SelectItem>
+                  <SelectItem value="Master" className="text-slate-900">Master</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-40 bg-white border-slate-200 text-slate-900 rounded-xl">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="newest" className="text-slate-900">Newest</SelectItem>
+                  <SelectItem value="oldest" className="text-slate-900">Oldest</SelectItem>
+                  <SelectItem value="popular" className="text-slate-900">Most Popular</SelectItem>
+                  <SelectItem value="name" className="text-slate-900">Name</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <div className="flex bg-white border border-slate-200 rounded-xl overflow-hidden p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={viewMode === 'grid' ? 'bg-black text-white rounded-lg' : 'text-slate-400 hover:text-black'}
+                >
+                  <Grid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={viewMode === 'list' ? 'bg-black text-white rounded-lg' : 'text-slate-400 hover:text-black'}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Results */}
+        <section>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">
+              {filteredAndSortedNiches.length} Niche Box{filteredAndSortedNiches.length !== 1 ? 'es' : ''} Found
+            </h2>
+          </div>
+
+          {filteredAndSortedNiches.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-slate-500 text-lg mb-4">
+                No niche boxes found matching your criteria.
+              </div>
+              <Button 
+                onClick={() => {
+                  setSearchTerm('');
+                  setCategoryFilter('all');
+                  setCompetitionFilter('all');
+                }}
+                variant="outline"
+                className="border-slate-700 text-white"
+              >
+                Clear Filters
+              </Button>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAndSortedNiches.map((niche) => (
+                <NicheBoxCard 
+                  key={niche._id} 
+                  niche={niche} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredAndSortedNiches.map((niche) => (
+                <NicheBoxListItem 
+                  key={niche._id} 
+                  niche={niche} 
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function NicheBoxCard({ niche, featured = false }: { 
+  niche: NicheBox; 
+  featured?: boolean;
+}) {
+  return (
+    <Card className={`bg-white border-slate-200 hover:border-indigo-500 hover:shadow-xl transition-all duration-300 rounded-3xl overflow-hidden group ${
+      featured ? 'ring-2 ring-amber-500/50' : ''
+    }`}>
+      {featured && (
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-3 py-1.5 text-center uppercase tracking-widest italic">
+          ⭐ PREMIER BLUEPRINT
+        </div>
+      )}
+      <CardHeader className="pb-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-slate-900 text-xl mb-2 font-black italic tracking-tight uppercase">{niche.nicheName}</CardTitle>
+            <p className="text-slate-400 text-xs font-black uppercase tracking-widest">{niche.category}</p>
+          </div>
+          <Badge className={`rounded-lg py-1 px-3 text-[10px] font-black uppercase tracking-widest
+            ${niche.competition === 'Low' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : ''}
+            ${niche.competition === 'Medium' ? 'bg-amber-50 text-amber-600 border-amber-100' : ''}
+            ${niche.competition === 'Hard' ? 'bg-orange-50 text-orange-600 border-orange-100' : ''}
+            ${niche.competition === 'Master' ? 'bg-rose-50 text-rose-600 border-rose-100' : ''}
+          `}>
+            {niche.competition}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-xs text-slate-500 space-y-2 font-bold uppercase tracking-wide">
+          {niche.marketSize && (
+            <div className="flex justify-between border-b border-slate-50 pb-2">
+              <span className="text-slate-400">Audience:</span>
+              <span className="text-slate-900">{niche.marketSize}</span>
+            </div>
+          )}
+          {niche.growthRate && (
+            <div className="flex justify-between border-b border-slate-50 pb-2">
+              <span className="text-slate-400">Growth:</span>
+              <span className="text-indigo-600">{niche.growthRate}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-slate-400">Resources:</span>
+            <span className="text-slate-900">{(niche.keywords?.length || 0) + (niche.phases?.length || 0)} Assets</span>
+          </div>
+        </div>
+        
+        {niche.research?.marketOverview && (
+          <p className="text-slate-400 text-xs leading-relaxed line-clamp-2 italic">
+            {niche.research.marketOverview}
+          </p>
+        )}
+        
+        <div className="flex gap-2 pt-2">
+          <Link href={`/niche-boxes/${niche.nicheSlug}`} className="w-full">
+            <Button className="w-full bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest text-[10px] py-6 rounded-2xl transition-all shadow-lg group-hover:-translate-y-1">
+              View Blueprint Details
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function NicheBoxListItem({ niche }: { niche: NicheBox }) {
+  return (
+    <Card className="bg-slate-900 border-slate-800 hover:border-indigo-500/50 transition-all duration-300">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-xl font-bold text-white">{niche.nicheName}</h3>
+              <Badge className={`
+                ${niche.competition === 'Low' ? 'bg-green-500/20 text-green-500 border-green-500/30' : ''}
+                ${niche.competition === 'Medium' ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30' : ''}
+                ${niche.competition === 'Hard' ? 'bg-orange-500/20 text-orange-500 border-orange-500/30' : ''}
+                ${niche.competition === 'Master' ? 'bg-red-500/20 text-red-500 border-red-500/30' : ''}
+              `}>
+                {niche.competition}
+              </Badge>
+              <span className="text-slate-400 text-sm">{niche.category}</span>
+            </div>
+            
+            <div className="flex gap-6 text-sm text-slate-300 mb-3">
+              {niche.marketSize && <span>Market: {niche.marketSize}</span>}
+              {niche.growthRate && <span className="text-green-500">Growth: {niche.growthRate}</span>}
+              <span>Keywords: {niche.keywords?.length || 0}</span>
+              <span>Phases: {niche.phases?.length || 0}</span>
+              <span>Downloads: {niche.downloadCount}</span>
+            </div>
+            
+            {niche.research?.marketOverview && (
+              <p className="text-slate-400 text-sm line-clamp-2 mb-3">
+                {niche.research.marketOverview}
+              </p>
+            )}
+          </div>
+          
+            <Link href={`/niche-boxes/${niche.nicheSlug}`}>
+              <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 font-bold uppercase tracking-widest text-xs">
+                View Blueprint
+              </Button>
+            </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
