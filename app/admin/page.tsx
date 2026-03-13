@@ -63,6 +63,15 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-cyan-600"
         },
         {
+            title: "Library",
+            description: "Manage documentation",
+            href: "/admin/docs",
+            icon: Library,
+            color: "text-violet-600",
+            bg: "bg-violet-100",
+            hover: "group-hover:bg-violet-600"
+        },
+        {
             title: "Simple Page Builder",
             description: "Paste pure HTML pages",
             href: "/admin/page-builder-simple",
