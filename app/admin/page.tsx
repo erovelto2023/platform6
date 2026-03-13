@@ -20,7 +20,8 @@ import {
     LayoutTemplate,
     Link as LinkIcon,
     Layers,
-    Tag
+    Tag,
+    Wrench
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/actions/dashboard.actions";
@@ -70,6 +71,15 @@ export default async function AdminDashboardPage() {
             color: "text-violet-600",
             bg: "bg-violet-100",
             hover: "group-hover:bg-violet-600"
+        },
+        {
+            title: "Tools & Apps",
+            description: "Enable or disable user tools",
+            href: "/admin/tools",
+            icon: Wrench,
+            color: "text-orange-600",
+            bg: "bg-orange-100",
+            hover: "group-hover:bg-orange-600"
         },
         {
             title: "Simple Page Builder",

@@ -151,6 +151,12 @@ const adminRoutes = [
         color: "text-pink-700",
     },
     {
+        label: "Tools & Apps",
+        icon: Wrench,
+        href: "/admin/tools",
+        color: "text-orange-500",
+    },
+    {
         label: "Tools & Products",
         icon: ShoppingBag,
         href: "/admin/tools-products",
