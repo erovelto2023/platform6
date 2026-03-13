@@ -82,6 +82,12 @@ const routes = [
         color: "text-blue-600",
     },
     {
+        label: "Glossary",
+        icon: BookOpen,
+        href: "/glossary",
+        color: "text-teal-600",
+    },
+    {
         label: "Member Search",
         icon: Search,
         href: "/community/members",
