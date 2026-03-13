@@ -63,15 +63,6 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-cyan-600"
         },
         {
-            title: "Offer Builder",
-            description: "Advanced sales & marketing offers",
-            href: "/admin/offers",
-            icon: Tag,
-            color: "text-blue-600",
-            bg: "bg-blue-100",
-            hover: "group-hover:bg-blue-600"
-        },
-        {
             title: "Simple Page Builder",
             description: "Paste pure HTML pages",
             href: "/admin/page-builder-simple",
@@ -271,7 +262,6 @@ export default async function AdminDashboardPage() {
                         { label: "Courses", count: stats.breakdown.courses, color: "text-indigo-600" },
                         { label: "Events", count: stats.breakdown.events, color: "text-pink-600" },
                         { label: "Groups", count: stats.breakdown.groups, color: "text-emerald-600" },
-                        { label: "Offers", count: stats.breakdown.offers, color: "text-purple-600" },
                         { label: "Surveys", count: stats.breakdown.surveys, color: "text-orange-600" },
                         { label: "Wholesale Partners", count: stats.breakdown.wholesaleSuppliers, color: "text-cyan-600" },
                         { label: "Resources", count: stats.breakdown.resources, color: "text-amber-600" },

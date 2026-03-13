@@ -151,12 +151,6 @@ const adminRoutes = [
         color: "text-orange-500",
     },
     {
-        label: "Offer Builder",
-        icon: Tag,
-        href: "/admin/offers",
-        color: "text-blue-600",
-    },
-    {
         label: "FAQs",
         icon: FileQuestion,
         href: "/admin/faqs",
