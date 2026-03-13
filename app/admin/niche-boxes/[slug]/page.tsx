@@ -19,6 +19,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import NicheImporter from '@/components/admin/NicheImporter';
 
+const NicheBoxContext = React.createContext<{ data: NicheBoxData; updateField: (path: string, value: any) => void } | null>(null);
+
 interface SEOKeyword {
   keyword: string;
   searchVolume: string;
@@ -362,6 +364,32 @@ const StableInput = React.memo(({
   );
 });
 
+const InputField = React.memo(({ label, path, placeholder, type = "text" }: {
+  label: string;
+  path: string;
+  placeholder: string;
+  type?: string;
+}) => {
+  const ctx = React.useContext(NicheBoxContext);
+  if (!ctx) return null;
+  const { data, updateField } = ctx;
+  const keys = path.split('.');
+  let value: any = data;
+  keys.forEach(k => value = value?.[k]);
+  
+  return (
+    <div className="space-y-1">
+      <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</Label>
+      <StableInput 
+        value={value || ''} 
+        onChange={(newValue) => updateField(path, newValue)}
+        placeholder={placeholder} 
+        type={type}
+      />
+    </div>
+  );
+});
+
 export default function NicheBoxEdit() {
   const params = useParams();
   const slug = params?.slug as string;
@@ -534,11 +562,11 @@ export default function NicheBoxEdit() {
           buyingBehavior: { ...prevData.customerAvatar.buyingBehavior, ...(jsonData.customerAvatar?.buyingBehavior || {}) }
         },
         
-        keywords: jsonData.keywords || prevData.keywords || [],
-        assets: jsonData.assets || prevData.assets || [],
-        phases: jsonData.phases || prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }],
-        businessModels: jsonData.businessModels || prevData.businessModels || [],
-        recommendedTools: jsonData.recommendedTools || prevData.recommendedTools || [],
+        keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : (prevData.keywords || []),
+        assets: Array.isArray(jsonData.assets) ? jsonData.assets : (prevData.assets || []),
+        phases: Array.isArray(jsonData.phases) ? jsonData.phases : (prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }]),
+        businessModels: Array.isArray(jsonData.businessModels) ? jsonData.businessModels : (prevData.businessModels || []),
+        recommendedTools: Array.isArray(jsonData.recommendedTools) ? jsonData.recommendedTools : (prevData.recommendedTools || []),
         
         ideas: {
           ...prevData.ideas,
@@ -602,6 +630,15 @@ export default function NicheBoxEdit() {
     updateField(path, data.research[type === 'top' ? 'topTrends' : 'risingTrends'].filter((_, i) => i !== index));
   };
 
+  const addOpportunity = () => {
+    updateField('research.opportunities', [...(data.research.opportunities || []), '']);
+  };
+
+  const removeOpportunity = (index: number) => {
+    const opps = data.research.opportunities || [];
+    updateField('research.opportunities', opps.filter((_, i) => i !== index));
+  };
+
   const addBusinessModel = () => {
     updateField('businessModels', [...data.businessModels, { name: '', description: '', profitPotential: '' }]);
   };
@@ -618,26 +655,12 @@ export default function NicheBoxEdit() {
     updateField('recommendedTools', data.recommendedTools.filter((_, i) => i !== index));
   };
 
-  const InputField = useCallback(({ label, path, placeholder, type = "text" }: {
-    label: string;
-    path: string;
-    placeholder: string;
-    type?: string;
-  }) => {
-    const keys = path.split('.');
-    let value: any = data;
-    keys.forEach(k => value = value?.[k]);
-    return (
-      <div className="space-y-1">
-        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</Label>
-        <StableInput value={value || ''} onChange={(newValue) => updateField(path, newValue)} placeholder={placeholder} type={type} />
-      </div>
-    );
-  }, [data, updateField]);
+
 
   if (isLoading) return <div className="h-screen flex items-center justify-center bg-white text-slate-500">Loading blueprint...</div>;
 
   return (
+    <NicheBoxContext.Provider value={{ data, updateField }}>
     <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
       {/* Sidebar - Same as Creator */}
       <div className="w-72 bg-white border-r border-slate-200 flex flex-col p-6 shrink-0 shadow-sm">
@@ -781,8 +804,8 @@ export default function NicheBoxEdit() {
                       <div key={i} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative group">
                         <button onClick={() => removeTrend('top', i)} className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 border border-slate-200 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={12}/></button>
                         <div className="grid grid-cols-2 gap-2">
-                          <Input className="bg-slate-50 border-slate-100 text-xs h-9" placeholder="Query" value={t.query} onChange={(e) => { const nt = [...data.research.topTrends]; nt[i].query = e.target.value; updateField('research.topTrends', nt); }} />
-                          <Input className="bg-slate-50 border-slate-100 text-xs h-9" placeholder="Vol" value={t.search} onChange={(e) => { const nt = [...data.research.topTrends]; nt[i].search = e.target.value; updateField('research.topTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Query" value={t.query} onChange={(v) => { const nt = [...data.research.topTrends]; nt[i].query = v; updateField('research.topTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Vol" value={t.search} onChange={(v) => { const nt = [...data.research.topTrends]; nt[i].search = v; updateField('research.topTrends', nt); }} />
                         </div>
                       </div>
                     ))}
@@ -796,12 +819,49 @@ export default function NicheBoxEdit() {
                       <div key={i} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm relative group">
                         <button onClick={() => removeTrend('rising', i)} className="absolute -top-2 -right-2 bg-white text-slate-400 hover:text-red-500 border border-slate-200 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={12}/></button>
                         <div className="grid grid-cols-2 gap-2">
-                          <Input className="bg-slate-50 border-slate-100 text-xs h-9" placeholder="Rising Query" value={t.query} onChange={(e) => { const nt = [...data.research.risingTrends]; nt[i].query = e.target.value; updateField('research.risingTrends', nt); }} />
-                          <Input className="bg-slate-50 border-slate-100 text-xs h-9" placeholder="Score" value={t.search} onChange={(e) => { const nt = [...data.research.risingTrends]; nt[i].search = e.target.value; updateField('research.risingTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Rising Query" value={t.query} onChange={(v) => { const nt = [...data.research.risingTrends]; nt[i].query = v; updateField('research.risingTrends', nt); }} />
+                          <StableInput className="h-9" placeholder="Score" value={t.search} onChange={(v) => { const nt = [...data.research.risingTrends]; nt[i].search = v; updateField('research.risingTrends', nt); }} />
                         </div>
                       </div>
                     ))}
                     <Button onClick={() => addTrend('rising')} variant="outline" className="w-full border-dashed border-slate-300 text-[10px] font-black uppercase tracking-widest h-11 transition-all hover:border-indigo-600 hover:text-indigo-600 bg-white">+ ADD RISING</Button>
+                  </div>
+                </div>
+
+                <div className="space-y-6 pt-8 border-t border-slate-100">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 flex items-center gap-2">
+                    <Target size={16} className="text-indigo-600"/> MARKET OPPORTUNITIES
+                  </h3>
+                  <div className="space-y-4">
+                    {data.research.opportunities?.map((opp, i) => (
+                      <div key={i} className="flex gap-3">
+                        <StableInput 
+                          className="flex-1 h-10" 
+                          placeholder="e.g. Expand into B2B consulting..." 
+                          value={opp} 
+                          onChange={(v) => {
+                            const newOpp = [...(data.research.opportunities || [])]; 
+                            newOpp[i] = v; 
+                            updateField('research.opportunities', newOpp);
+                          }} 
+                        />
+                        <Button 
+                          onClick={() => removeOpportunity(i)}
+                          variant="ghost"
+                          size="icon"
+                          className="h-10 w-10 text-slate-300 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 size={14}/>
+                        </Button>
+                      </div>
+                    ))}
+                    <Button 
+                      onClick={addOpportunity}
+                      variant="outline"
+                      className="w-full border-dashed border-slate-300 text-slate-400 hover:text-indigo-600 hover:border-indigo-600 rounded-2xl h-12 uppercase text-[10px] font-black tracking-widest transition-all bg-white"
+                    >
+                      <Plus size={14} className="mr-2" /> ADD OPPORTUNITY
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -874,13 +934,90 @@ export default function NicheBoxEdit() {
                 </div>
                 <div className="col-span-8 space-y-4">
                   {data.assets.map((asset, i) => (
-                    <Card key={i} className="p-6 bg-white border border-slate-200 rounded-3xl group relative shadow-sm">
-                      <button onClick={() => removeAsset(i)} className="absolute top-4 right-4 text-slate-300 hover:text-red-500"><Trash2 size={14}/></button>
-                      <div className="flex gap-4">
-                         <div className="w-full space-y-3">
-                            <InputField label="Asset Title" path={`assets.${i}.title`} placeholder="..." />
-                            <InputField label="Asset Subtitle / Desc" path={`assets.${i}.description`} placeholder="..." />
-                         </div>
+                    <Card key={i} className="p-6 bg-white border border-slate-200 rounded-3xl group relative shadow-sm hover:shadow-md transition-all">
+                      <button onClick={() => removeAsset(i)} className="absolute top-6 right-6 text-slate-300 hover:text-red-500 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center">
+                        <Trash2 size={16}/>
+                      </button>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="col-span-1">
+                          <InputField label="Asset Title / Name" path={`assets.${i}.title`} placeholder="e.g. Niche Profit Checklist" />
+                        </div>
+                        <div className="col-span-1 space-y-1">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Asset Type</Label>
+                          <Select 
+                            value={asset.type || 'Document'} 
+                            onValueChange={(value) => {
+                              const newA = [...data.assets]; 
+                              newA[i].type = value; 
+                              updateField('assets', newA);
+                            }}
+                          >
+                            <SelectTrigger className="bg-slate-50 border-slate-200 rounded-xl text-xs h-10 focus:ring-1 focus:ring-black">
+                              <SelectValue placeholder="Asset Type" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white border-slate-200 text-xs text-slate-900">
+                              <SelectItem value="Document">Document</SelectItem>
+                              <SelectItem value="Link">External Link</SelectItem>
+                              <SelectItem value="Video">Video</SelectItem>
+                              <SelectItem value="Audio">Audio</SelectItem>
+                              <SelectItem value="Image">Image</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 mb-4">
+                        <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Description</Label>
+                        <Textarea
+                          className="w-full bg-slate-50 border-slate-200 rounded-xl p-3 text-xs min-h-[80px] text-slate-900 focus:ring-1 focus:ring-black"
+                          placeholder="Briefly describe what this asset is and how it helps the user..."
+                          value={asset.description || ''}
+                          onChange={(e) => {
+                             const newA = [...data.assets]; 
+                             newA[i].description = e.target.value; 
+                             updateField('assets', newA);
+                          }}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Source Link</Label>
+                          <div className="relative">
+                            <LinkIcon size={14} className="absolute left-3.5 top-3 text-slate-400" />
+                            <Input 
+                              className="w-full bg-slate-50 border-slate-200 rounded-xl p-3 pl-10 text-xs text-slate-900 focus:ring-1 focus:ring-black h-10" 
+                              placeholder="File URL or Link" 
+                              value={asset.link || asset.fileUrl || ''} 
+                              onChange={(e) => {
+                                const newA = [...data.assets]; 
+                                newA[i].link = e.target.value; 
+                                newA[i].fileUrl = e.target.value; 
+                                updateField('assets', newA);
+                              }} 
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">File Attachment</Label>
+                          <label className="flex items-center gap-2 bg-slate-50 border border-slate-200 border-dashed rounded-xl p-3 text-xs text-slate-500 cursor-pointer hover:bg-slate-100 justify-center h-10 transition-colors">
+                            <Paperclip size={14} /> 
+                            <span className="truncate max-w-[150px]">{asset.fileName || "Upload File"}</span>
+                            <input 
+                              type="file" 
+                              className="hidden" 
+                              onChange={(e) => {
+                                const newA = [...data.assets]; 
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  newA[i].fileName = file.name; 
+                                  updateField('assets', newA);
+                                }
+                              }} 
+                            />
+                          </label>
+                        </div>
                       </div>
                     </Card>
                   ))}
@@ -900,35 +1037,421 @@ export default function NicheBoxEdit() {
             </div>
           )}
 
-          {/* Add other tabs like Roadmap, Business, Tools as simplified versions of creator or fully matching */}
+          {/* Form 5: Roadmap Builder */}
           {activeTab === 'roadmap' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-               <header className="flex justify-between items-center">
-                 <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none">ROADMAP</h2>
-                 <Button onClick={addPhase} variant="outline" className="border-slate-900 text-[10px] font-black px-6 py-5 rounded-xl">+ PHASE</Button>
-               </header>
-               <div className="space-y-6">
-                 {data.phases.map((phase, i) => (
-                   <Card key={phase.id} className="p-8 bg-white border border-slate-200 rounded-3xl relative">
-                     <button onClick={() => removePhase(phase.id)} className="absolute top-6 right-6 text-slate-300 hover:text-red-500"><Trash2 size={16}/></button>
-                     <div className="grid grid-cols-2 gap-6">
-                        <InputField label="Phase Name" path={`phases.${i}.name`} placeholder="..." />
-                        <InputField label="Duration" path={`phases.${i}.duration`} placeholder="..." />
-                     </div>
-                   </Card>
-                 ))}
-               </div>
+              <header className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">IMPLEMENTATION ROADMAP</h2>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">Step-by-step execution plan for the business</p>
+                </div>
+                <Button onClick={addPhase} className="bg-slate-900 hover:bg-black text-white px-8 py-5 rounded-2xl text-[10px] font-black tracking-widest flex items-center gap-3 shadow-xl transition-transform hover:-translate-y-1">
+                  <Plus size={16} /> ADD PHASE
+                </Button>
+              </header>
+              <div className="space-y-6">
+                {data.phases.map((phase, i) => (
+                  <Card key={phase.id} className="bg-white border border-slate-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
+                    <Button 
+                      onClick={() => removePhase(phase.id)}
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-6 right-6 text-slate-300 hover:text-red-500 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={18}/>
+                    </Button>
+                    <div className="grid grid-cols-12 gap-8">
+                      <div className="col-span-6 space-y-6">
+                        <div className="grid grid-cols-12 gap-4">
+                          <div className="col-span-12">
+                            <InputField label="Phase Name" path={`phases.${i}.name`} placeholder="Phase Name" />
+                          </div>
+                          <div className="col-span-6">
+                            <InputField label="Duration" path={`phases.${i}.duration`} placeholder="e.g. 4 weeks" />
+                          </div>
+                          <div className="col-span-6">
+                            <InputField label="Budget" path={`phases.${i}.budget`} placeholder="e.g. $500" />
+                          </div>
+                        </div>
+                        <InputField label="Phase Description" path={`phases.${i}.description`} type="textarea" placeholder="Describe this phase..." />
+                      </div>
+                      <div className="col-span-6 border-l border-slate-100 pl-8 space-y-4">
+                        <Label className="text-[10px] font-black text-slate-900 uppercase tracking-widest border-b border-slate-100 pb-2 flex items-center justify-between">
+                          TASKS <span className="text-slate-300 font-normal">{phase.tasks.length} total</span>
+                        </Label>
+                        <div className="space-y-2">
+                          {phase.tasks.map((task, ti) => (
+                            <div key={ti} className="flex gap-2 group/task">
+                              <StableInput 
+                                className="flex-1 h-10" 
+                                value={task} 
+                                onChange={(newValue) => {
+                                  const newP = [...data.phases]; 
+                                  newP[i].tasks[ti] = newValue; 
+                                  updateField('phases', newP);
+                                }} 
+                                placeholder="Task description..."
+                              />
+                              <Button 
+                                onClick={() => removeTask(i, ti)}
+                                variant="ghost"
+                                size="icon"
+                                className="h-10 w-10 text-slate-300 hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 size={14}/>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        <Button 
+                          onClick={() => addTask(i)}
+                          variant="outline"
+                          className="w-full text-[10px] font-black uppercase tracking-widest border-dashed border-slate-300 text-slate-400 hover:text-indigo-600 hover:border-indigo-600 transition-all bg-white mt-2"
+                        >
+                          + ADD TASK
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
 
-          {['business', 'tools', 'ideas'].includes(activeTab) && (
-             <div className="py-20 text-center space-y-4">
-                <p className="text-slate-400 italic text-sm">This section is ready for refinement. Matching creator UI...</p>
-                <Button onClick={() => setActiveTab('niche')} variant="outline">Back to Setup</Button>
-             </div>
+          {/* Form 6: Business Models */}
+          {activeTab === 'business' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+              <header className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">BUSINESS MODELS</h2>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">Monetization strategies for this niche</p>
+                </div>
+                <Button onClick={addBusinessModel} className="bg-slate-900 hover:bg-black text-white px-8 py-5 rounded-2xl text-[10px] font-black tracking-widest flex items-center gap-3 shadow-xl transition-transform hover:-translate-y-1">
+                  <Plus size={16} /> ADD MODEL
+                </Button>
+              </header>
+              <div className="space-y-6">
+                {data.businessModels.map((model, i) => (
+                  <Card key={i} className="bg-white border border-slate-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
+                    <Button 
+                      onClick={() => removeBusinessModel(i)}
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-6 right-6 text-slate-300 hover:text-red-500 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={18}/>
+                    </Button>
+                    <div className="grid grid-cols-2 gap-6">
+                      <InputField label="Business Model Name" path={`businessModels.${i}.name`} placeholder="e.g. Affiliate Marketing, Digital Products..." />
+                      <InputField label="Profit Potential" path={`businessModels.${i}.profitPotential`} placeholder="e.g. $1k - $5k / Month" />
+                      <div className="col-span-2">
+                        <InputField label="Model Description" path={`businessModels.${i}.description`} placeholder="Describe how this monetization model works for this niche..." type="textarea" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {data.businessModels.length === 0 && (
+                   <div className="h-64 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 italic gap-3 bg-slate-50">
+                      <Layers size={32} className="opacity-20" />
+                      <p className="text-xs text-center">Add a business model to show how users can monetize this niche</p>
+                   </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Form 7: Recommended Tools */}
+          {activeTab === 'tools' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+              <header className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">RECOMMENDED TOOLS</h2>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">Software & resources to help users succeed</p>
+                </div>
+                <Button onClick={addRecommendedTool} className="bg-slate-900 hover:bg-black text-white px-8 py-5 rounded-2xl text-[10px] font-black tracking-widest flex items-center gap-3 shadow-xl transition-transform hover:-translate-y-1">
+                  <Plus size={16} /> ADD TOOL
+                </Button>
+              </header>
+              <div className="space-y-6">
+                {data.recommendedTools?.map((tool, i) => (
+                  <Card key={i} className="bg-white border border-slate-200 rounded-3xl p-8 relative overflow-hidden group shadow-sm hover:shadow-md transition-all">
+                    <Button 
+                      onClick={() => removeRecommendedTool(i)}
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-6 right-6 text-slate-300 hover:text-red-500 h-10 w-10 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={18}/>
+                    </Button>
+                    <div className="grid grid-cols-2 gap-6">
+                      <InputField label="Tool Name" path={`recommendedTools.${i}.toolName`} placeholder="e.g. ConvertKit, Jasper..." />
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Priority / Type</Label>
+                        <Select value={tool.priority} onValueChange={(value) => updateField(`recommendedTools.${i}.priority`, value)}>
+                          <SelectTrigger className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs h-11 focus:ring-1 focus:ring-black">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white border-slate-200 text-xs text-slate-900">
+                             <SelectItem value="High">Essential / High Priority</SelectItem>
+                             <SelectItem value="Medium">Recommended</SelectItem>
+                             <SelectItem value="Low">Optional</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <InputField label="Cost / Pricing" path={`recommendedTools.${i}.cost`} placeholder="e.g. Free Tier, $29/mo..." />
+                      <InputField label="Affiliate Link" path={`recommendedTools.${i}.affiliateLink`} placeholder="https://..." />
+                      <div className="col-span-2">
+                        <InputField label="Purpose & Use Case" path={`recommendedTools.${i}.purpose`} placeholder="Why does the user need this tool?..." type="textarea" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {(data.recommendedTools?.length === 0 || !data.recommendedTools) && (
+                   <div className="h-64 border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-400 italic gap-3 bg-slate-50">
+                      <Layers size={32} className="opacity-20" />
+                      <p className="text-xs text-center">Share what tools someone needs to succeed in this niche (include your affiliate links!)</p>
+                   </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Form 8: Content Ideas */}
+          {activeTab === 'ideas' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+              <header>
+                <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">CONTENT STRATEGY</h2>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">Plan your content ecosystem and audience engagement</p>
+              </header>
+              <div className="grid grid-cols-2 gap-8">
+                
+                {/* Visual & Brand Assets */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Layers size={16} className="text-indigo-600"/> VISUAL & BRAND ASSETS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Infographic Ideas" path="ideas.infographic" type="textarea" placeholder="..." />
+                    <InputField label="Visual Guide Ideas" path="ideas.visualGuide" type="textarea" placeholder="..." />
+                    <InputField label="Data Visualization Ideas" path="ideas.dataVisualization" type="textarea" placeholder="..." />
+                    <InputField label="Mind Map Ideas" path="ideas.mindMap" type="textarea" placeholder="..." />
+                    <InputField label="Flowchart Ideas" path="ideas.flowchart" type="textarea" placeholder="..." />
+                    <InputField label="Brand Story Ideas" path="ideas.brandStory" type="textarea" placeholder="..." />
+                    <InputField label="Founder Story Ideas" path="ideas.founderStory" type="textarea" placeholder="..." />
+                    <InputField label="Behind The Scenes" path="ideas.behindScenes" type="textarea" placeholder="..." />
+                    <InputField label="Day In The Life" path="ideas.dayInLife" type="textarea" placeholder="..." />
+                    <InputField label="Process Breakdown" path="ideas.processBreakdown" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Social Media Post Ideas */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Rss size={16} className="text-indigo-600"/> SOCIAL MEDIA POST IDEAS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Pinterest Pin Ideas" path="ideas.pinterest" type="textarea" placeholder="..." />
+                    <InputField label="Instagram Post Ideas" path="ideas.instagram" type="textarea" placeholder="..." />
+                    <InputField label="Facebook Post Ideas" path="ideas.facebook" type="textarea" placeholder="..." />
+                    <InputField label="LinkedIn Post Ideas" path="ideas.linkedin" type="textarea" placeholder="..." />
+                    <InputField label="Twitter / X Ideas" path="ideas.twitter" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Social Media Video Ideas */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Video size={16} className="text-indigo-600"/> SOCIAL MEDIA VIDEO IDEAS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="YouTube Video Ideas" path="ideas.youtube" type="textarea" placeholder="..." />
+                    <InputField label="TikTok Video Ideas" path="ideas.tiktok" type="textarea" placeholder="..." />
+                    <InputField label="Instagram Reel Ideas" path="ideas.instagramReel" type="textarea" placeholder="..." />
+                    <InputField label="Short Form Video Ideas" path="ideas.shortForm" type="textarea" placeholder="..." />
+                    <InputField label="Long Form Video Ideas" path="ideas.longForm" type="textarea" placeholder="..." />
+                    <InputField label="Live Stream Ideas" path="ideas.liveStream" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Product Ideas */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <ShoppingBag size={16} className="text-indigo-600"/> PRODUCT IDEAS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Amazon Products" path="ideas.amazon" type="textarea" placeholder="..." />
+                    <InputField label="Etsy Product Ideas" path="ideas.etsy" type="textarea" placeholder="..." />
+                    <InputField label="Digital Product Ideas" path="ideas.digital" type="textarea" placeholder="..." />
+                    <InputField label="Print on Demand Ideas" path="ideas.printOnDemand" type="textarea" placeholder="..." />
+                    <InputField label="Merchandise Ideas" path="ideas.merchandise" type="textarea" placeholder="..." />
+                    <InputField label="Course Ideas" path="ideas.course" type="textarea" placeholder="..." />
+                    <InputField label="Mini Course Ideas" path="ideas.miniCourse" type="textarea" placeholder="..." />
+                    <InputField label="Membership Ideas" path="ideas.membership" type="textarea" placeholder="..." />
+                    <InputField label="Subscription Products" path="ideas.subscription" type="textarea" placeholder="..." />
+                    <InputField label="Bundle Product Ideas" path="ideas.bundle" type="textarea" placeholder="..." />
+                    <InputField label="Template Ideas" path="ideas.template" type="textarea" placeholder="..." />
+                    <InputField label="Printable Ideas" path="ideas.printable" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Written Content Ideas */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <FileText size={16} className="text-indigo-600"/> WRITTEN CONTENT IDEAS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Blog Post Ideas" path="ideas.blogPost" type="textarea" placeholder="..." />
+                    <InputField label="Article Ideas" path="ideas.article" type="textarea" placeholder="..." />
+                    <InputField label="Guide Ideas" path="ideas.guide" type="textarea" placeholder="..." />
+                    <InputField label="Tutorial Ideas" path="ideas.tutorial" type="textarea" placeholder="..." />
+                    <InputField label="Case Study Ideas" path="ideas.caseStudy" type="textarea" placeholder="..." />
+                    <InputField label="Listicle Ideas" path="ideas.listicle" type="textarea" placeholder="..." />
+                    <InputField label="Opinion Piece Ideas" path="ideas.opinion" type="textarea" placeholder="..." />
+                    <InputField label="Beginner Guides" path="ideas.beginnerGuide" type="textarea" placeholder="..." />
+                    <InputField label="Advanced Strategies" path="ideas.advancedStrategy" type="textarea" placeholder="..." />
+                    <InputField label="Step-by-Step Instructions" path="ideas.stepByStep" type="textarea" placeholder="..." />
+                    <InputField label="Comparison Articles" path="ideas.comparison" type="textarea" placeholder="..." />
+                    <InputField label="Review Articles" path="ideas.review" type="textarea" placeholder="..." />
+                    <InputField label="Best Tools Lists" path="ideas.toolsList" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Questions People Ask */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <HelpCircle size={16} className="text-indigo-600"/> QUESTIONS PEOPLE ASK
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Frequently Asked Questions" path="ideas.faq" type="textarea" placeholder="..." />
+                    <InputField label="Beginner Questions" path="ideas.beginnerQuestions" type="textarea" placeholder="..." />
+                    <InputField label="Advanced Questions" path="ideas.advancedQuestions" type="textarea" placeholder="..." />
+                    <InputField label="Expert Questions" path="ideas.expertQuestions" type="textarea" placeholder="..." />
+                    <InputField label="Troubleshooting" path="ideas.troubleshooting" type="textarea" placeholder="..." />
+                    <InputField label="Problem Solving" path="ideas.problemSolving" type="textarea" placeholder="..." />
+                    <InputField label="Myth vs Fact" path="ideas.mythVsFact" type="textarea" placeholder="..." />
+                    <InputField label="Debate Questions" path="ideas.debate" type="textarea" placeholder="..." />
+                    <InputField label="What vs Why" path="ideas.whatVsWhy" type="textarea" placeholder="..." />
+                    <InputField label="How To Questions" path="ideas.howTo" type="textarea" placeholder="..." />
+                    <InputField label="When To Questions" path="ideas.whenTo" type="textarea" placeholder="..." />
+                    <InputField label="Where To Questions" path="ideas.whereTo" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Lead Magnet Ideas */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Target size={16} className="text-indigo-600"/> LEAD MAGNET IDEAS
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Lead Magnet Ideas (General)" path="ideas.leadMagnet" type="textarea" placeholder="..." />
+                    <InputField label="eBook Ideas" path="ideas.ebook" type="textarea" placeholder="..." />
+                    <InputField label="Workbook Ideas" path="ideas.workbook" type="textarea" placeholder="..." />
+                    <InputField label="Checklist Ideas" path="ideas.checklist" type="textarea" placeholder="..." />
+                    <InputField label="Cheat Sheet Ideas" path="ideas.cheatSheet" type="textarea" placeholder="..." />
+                    <InputField label="Framework Ideas" path="ideas.framework" type="textarea" placeholder="..." />
+                    <InputField label="Swipe File Ideas" path="ideas.swipeFile" type="textarea" placeholder="..." />
+                    <InputField label="Resource List Ideas" path="ideas.resourceList" type="textarea" placeholder="..." />
+                    <InputField label="Toolkit Ideas" path="ideas.toolkit" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Community & Audience */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Users size={16} className="text-indigo-600"/> COMMUNITY & AUDIENCE
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Community Discussions" path="ideas.communityDiscussion" type="textarea" placeholder="..." />
+                    <InputField label="Forum Threads" path="ideas.forumThread" type="textarea" placeholder="..." />
+                    <InputField label="Poll Ideas" path="ideas.poll" type="textarea" placeholder="..." />
+                    <InputField label="Survey Ideas" path="ideas.survey" type="textarea" placeholder="..." />
+                    <InputField label="AMA Questions" path="ideas.ama" type="textarea" placeholder="..." />
+                    <InputField label="Customer Pain Points" path="ideas.painPoints" type="textarea" placeholder="..." />
+                    <InputField label="Customer Problems" path="ideas.problems" type="textarea" placeholder="..." />
+                    <InputField label="Customer Goals" path="ideas.goals" type="textarea" placeholder="..." />
+                    <InputField label="Customer Desires" path="ideas.desires" type="textarea" placeholder="..." />
+                    <InputField label="Customer Objections" path="ideas.objections" type="textarea" placeholder="..." />
+                    <InputField label="Customer Mistakes" path="ideas.mistakes" type="textarea" placeholder="..." />
+                    <InputField label="Customer Fears" path="ideas.fears" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Themes & Series */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <TrendingUp size={16} className="text-indigo-600"/> THEMES & SERIES
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Trending Topics" path="ideas.trending" type="textarea" placeholder="..." />
+                    <InputField label="Seasonal Topics" path="ideas.seasonal" type="textarea" placeholder="..." />
+                    <InputField label="Evergreen Topics" path="ideas.evergreen" type="textarea" placeholder="..." />
+                    <InputField label="Content Series" path="ideas.contentSeries" type="textarea" placeholder="..." />
+                    <InputField label="Challenge Ideas" path="ideas.challenge" type="textarea" placeholder="..." />
+                    <InputField label="Daily Content Ideas" path="ideas.daily" type="textarea" placeholder="..." />
+                    <InputField label="Weekly Content Ideas" path="ideas.weekly" type="textarea" placeholder="..." />
+                    <InputField label="Educational Series" path="ideas.educationalSeries" type="textarea" placeholder="..." />
+                    <InputField label="Storytelling Ideas" path="ideas.storytelling" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Industry & Metrics */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Globe size={16} className="text-indigo-600"/> INDUSTRY & AUTHORITY
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Industry Trends" path="ideas.industryTrend" type="textarea" placeholder="..." />
+                    <InputField label="Market Analysis" path="ideas.marketAnalysis" type="textarea" placeholder="..." />
+                    <InputField label="Future Predictions" path="ideas.futurePredictions" type="textarea" placeholder="..." />
+                    <InputField label="Innovation Ideas" path="ideas.innovation" type="textarea" placeholder="..." />
+                    <InputField label="Tool Lists" path="ideas.toolList" type="textarea" placeholder="..." />
+                    <InputField label="Resource Roundups" path="ideas.resourceRoundup" type="textarea" placeholder="..." />
+                    <InputField label="Software Comparisons" path="ideas.softwareComparison" type="textarea" placeholder="..." />
+                    <InputField label="Workflow Ideas" path="ideas.workflow" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Mindset & Productivity */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <BrainCircuit size={16} className="text-indigo-600"/> MINDSET & PRODUCTIVITY
+                  </h3>
+                  <div className="space-y-4">
+                    <InputField label="Habit Ideas" path="ideas.habit" type="textarea" placeholder="..." />
+                    <InputField label="Productivity Tips" path="ideas.productivity" type="textarea" placeholder="..." />
+                    <InputField label="Goal Setting Ideas" path="ideas.goalSetting" type="textarea" placeholder="..." />
+                    <InputField label="Mindset Tips" path="ideas.mindset" type="textarea" placeholder="..." />
+                    <InputField label="Success Principles" path="ideas.successPrinciples" type="textarea" placeholder="..." />
+                    <InputField label="Myth Busting" path="ideas.mythBusting" type="textarea" placeholder="..." />
+                    <InputField label="Common Mistakes" path="ideas.commonMistakes" type="textarea" placeholder="..." />
+                    <InputField label="Beginner Pitfalls" path="ideas.beginnerPitfalls" type="textarea" placeholder="..." />
+                    <InputField label="Expert Secrets" path="ideas.expertSecrets" type="textarea" placeholder="..." />
+                    <InputField label="Little Known Tips" path="ideas.littleKnownTips" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+
+                {/* Older / Generic Fields grouped */}
+                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 space-y-6 col-span-2">
+                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest pb-4 border-b border-slate-200 flex items-center gap-2">
+                     <Database size={16} className="text-indigo-600"/> MISC / PODCAST & WEB
+                  </h3>
+                  <div className="grid grid-cols-2 gap-8">
+                    <InputField label="Social Media (General)" path="ideas.social" type="textarea" placeholder="..." />
+                    <InputField label="Video (General)" path="ideas.video" type="textarea" placeholder="..." />
+                    <InputField label="Products (General)" path="ideas.products" type="textarea" placeholder="..." />
+                    <InputField label="Articles (General)" path="ideas.articles" type="textarea" placeholder="..." />
+                    <InputField label="Questions (General)" path="ideas.questions" type="textarea" placeholder="..." />
+                    <InputField label="Audience (General)" path="ideas.audience" type="textarea" placeholder="..." />
+                    <InputField label="Visuals (General)" path="ideas.visual" type="textarea" placeholder="..." />
+                    <InputField label="Podcast Ideas" path="ideas.podcast" type="textarea" placeholder="..." />
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
     </div>
+    </NicheBoxContext.Provider>
   );
 }

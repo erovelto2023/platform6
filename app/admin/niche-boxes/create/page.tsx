@@ -18,6 +18,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import NicheImporter from '@/components/admin/NicheImporter';
 
+const NicheBoxContext = React.createContext<{ data: NicheBoxData; updateField: (path: string, value: any) => void } | null>(null);
+
 interface SEOKeyword {
   keyword: string;
   searchVolume: string;
@@ -362,6 +364,32 @@ const StableInput = React.memo(({
   );
 });
 
+const InputField = React.memo(({ label, path, placeholder, type = "text" }: {
+  label: string;
+  path: string;
+  placeholder: string;
+  type?: string;
+}) => {
+  const ctx = React.useContext(NicheBoxContext);
+  if (!ctx) return null;
+  const { data, updateField } = ctx;
+  const keys = path.split('.');
+  let value: any = data;
+  keys.forEach(k => value = value?.[k]);
+  
+  return (
+    <div className="space-y-1">
+      <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</Label>
+      <StableInput 
+        value={value || ''} 
+        onChange={(newValue) => updateField(path, newValue)}
+        placeholder={placeholder} 
+        type={type}
+      />
+    </div>
+  );
+});
+
 export default function NicheBoxCreator() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('niche');
@@ -510,11 +538,11 @@ export default function NicheBoxCreator() {
           buyingBehavior: { ...prevData.customerAvatar.buyingBehavior, ...(jsonData.customerAvatar?.buyingBehavior || {}) }
         },
         
-        keywords: jsonData.keywords || prevData.keywords || [],
-        assets: jsonData.assets || prevData.assets || [],
-        phases: jsonData.phases || prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }],
-        businessModels: jsonData.businessModels || prevData.businessModels || [],
-        recommendedTools: jsonData.recommendedTools || prevData.recommendedTools || [],
+        keywords: Array.isArray(jsonData.keywords) ? jsonData.keywords : (prevData.keywords || []),
+        assets: Array.isArray(jsonData.assets) ? jsonData.assets : (prevData.assets || []),
+        phases: Array.isArray(jsonData.phases) ? jsonData.phases : (prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }]),
+        businessModels: Array.isArray(jsonData.businessModels) ? jsonData.businessModels : (prevData.businessModels || []),
+        recommendedTools: Array.isArray(jsonData.recommendedTools) ? jsonData.recommendedTools : (prevData.recommendedTools || []),
         
         ideas: {
           ...prevData.ideas,
@@ -755,31 +783,9 @@ export default function NicheBoxCreator() {
     });
   };
 
-  const InputField = useCallback(({ label, path, placeholder, type = "text" }: {
-    label: string;
-    path: string;
-    placeholder: string;
-    type?: string;
-  }) => {
-    const keys = path.split('.');
-    let value: any = data;
-    keys.forEach(k => value = value?.[k]);
-    
-    return (
-      <div className="space-y-1">
-        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</Label>
-        <StableInput 
-          value={value || ''} 
-          onChange={(newValue) => updateField(path, newValue)}
-          placeholder={placeholder} 
-          type={type}
-        />
-      </div>
-    );
-  }, [data, updateField]);
-
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
+    <NicheBoxContext.Provider value={{ data, updateField }}>
+      <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
       {/* Sidebar */}
       <div className="w-72 bg-white border-r border-slate-200 flex flex-col p-6 shrink-0 shadow-sm">
         <div className="flex items-center space-x-3 px-2 mb-10">
@@ -925,43 +931,43 @@ export default function NicheBoxCreator() {
                             <Trash2 size={12} />
                           </button>
                           <div className="grid grid-cols-2 gap-3">
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Search Query" 
                               value={t.query} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.topTrends]; 
-                                newT[i].query = e.target.value; 
+                                newT[i].query = v; 
                                 updateField('research.topTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Monthly Vol" 
                               value={t.search} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.topTrends]; 
-                                newT[i].search = e.target.value; 
+                                newT[i].search = v; 
                                 updateField('research.topTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Interest" 
                               value={t.interest} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.topTrends]; 
-                                newT[i].interest = e.target.value; 
+                                newT[i].interest = v; 
                                 updateField('research.topTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-green-600 font-bold rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="text-green-600 font-bold h-10" 
                               placeholder="+ % Growth" 
                               value={t.increase} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.topTrends]; 
-                                newT[i].increase = e.target.value; 
+                                newT[i].increase = v; 
                                 updateField('research.topTrends', newT);
                               }} 
                             />
@@ -992,43 +998,43 @@ export default function NicheBoxCreator() {
                             <Trash2 size={12} />
                           </button>
                           <div className="grid grid-cols-2 gap-3">
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Rising Query" 
                               value={t.query} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.risingTrends]; 
-                                newT[i].query = e.target.value; 
+                                newT[i].query = v; 
                                 updateField('research.risingTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Trend Score" 
                               value={t.search} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.risingTrends]; 
-                                newT[i].search = e.target.value; 
+                                newT[i].search = v; 
                                 updateField('research.risingTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-slate-900 rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="h-10" 
                               placeholder="Monthly Vol" 
                               value={t.interest} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.risingTrends]; 
-                                newT[i].interest = e.target.value; 
+                                newT[i].interest = v; 
                                 updateField('research.risingTrends', newT);
                               }} 
                             />
-                            <Input 
-                              className="bg-slate-50 border-slate-200 text-indigo-600 font-bold rounded-xl h-10 text-xs" 
+                            <StableInput 
+                              className="text-indigo-600 font-bold h-10" 
                               placeholder="+ % Surge" 
                               value={t.increase} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newT = [...data.research.risingTrends]; 
-                                newT[i].increase = e.target.value; 
+                                newT[i].increase = v; 
                                 updateField('research.risingTrends', newT);
                               }} 
                             />
@@ -1052,13 +1058,13 @@ export default function NicheBoxCreator() {
                   </h3>
                   {data.research.opportunities?.map((opp, i) => (
                     <div key={i} className="flex gap-3">
-                      <Input 
-                        className="flex-1 bg-white border border-slate-200 rounded-xl p-3 text-xs focus:ring-2 focus:ring-indigo-500 transition-all font-medium text-slate-900" 
+                      <StableInput 
+                        className="flex-1 h-10" 
                         placeholder="e.g. Expand into B2B consulting..." 
                         value={opp} 
-                        onChange={(e) => {
+                        onChange={(v) => {
                           const newOpp = [...(data.research.opportunities || [])]; 
-                          newOpp[i] = e.target.value; 
+                          newOpp[i] = v; 
                           updateField('research.opportunities', newOpp);
                         }} 
                       />
@@ -1378,14 +1384,14 @@ export default function NicheBoxCreator() {
                           <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Source Link</Label>
                           <div className="relative">
                             <LinkIcon size={14} className="absolute left-3.5 top-3 text-slate-400" />
-                            <Input 
-                              className="w-full bg-slate-50 border-slate-200 rounded-xl p-3 pl-10 text-xs text-slate-900 focus:ring-1 focus:ring-black h-10" 
+                            <StableInput 
+                              className="flex-1 h-10 pl-10" 
                               placeholder="File URL or Link" 
                               value={asset.link || asset.fileUrl || ''} 
-                              onChange={(e) => {
+                              onChange={(v) => {
                                 const newA = [...data.assets]; 
-                                newA[i].link = e.target.value; 
-                                newA[i].fileUrl = e.target.value; 
+                                newA[i].link = v; 
+                                newA[i].fileUrl = v; 
                                 updateField('assets', newA);
                               }} 
                             />
@@ -1463,14 +1469,15 @@ export default function NicheBoxCreator() {
                         <div className="space-y-2">
                           {phase.tasks.map((task, ti) => (
                             <div key={ti} className="flex gap-2 group/task">
-                              <Input 
-                                className="flex-1 bg-slate-50 border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:ring-1 focus:ring-black h-10" 
+                              <StableInput 
+                                className="flex-1 h-10" 
                                 value={task} 
-                                onChange={(e) => {
+                                onChange={(newValue) => {
                                   const newP = [...data.phases]; 
-                                  newP[i].tasks[ti] = e.target.value; 
+                                  newP[i].tasks[ti] = newValue; 
                                   updateField('phases', newP);
                                 }} 
+                                placeholder="Task description..."
                               />
                               <Button 
                                 onClick={() => removeTask(i, ti)}
@@ -1854,5 +1861,6 @@ export default function NicheBoxCreator() {
         </div>
       </div>
     </div>
+    </NicheBoxContext.Provider>
   );
 }
