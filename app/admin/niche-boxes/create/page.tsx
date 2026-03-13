@@ -472,6 +472,58 @@ export default function NicheBoxCreator() {
     reader.readAsText(file);
   };
 
+  const processImportData = useCallback((jsonData: any) => {
+    setData(prevData => {
+      const ideasObj = jsonData.ideas ? { ...jsonData.ideas } : {};
+      Object.keys(ideasObj).forEach(key => {
+        if (Array.isArray(ideasObj[key])) {
+          ideasObj[key] = ideasObj[key].join('\n');
+        }
+      });
+
+      return {
+        ...prevData,
+        status: jsonData.status || prevData.status || 'published',
+        nicheName: jsonData.nicheName || prevData.nicheName || '',
+        nicheSlug: jsonData.nicheSlug || prevData.nicheSlug || '',
+        category: jsonData.category || prevData.category || '',
+        competition: jsonData.competition || prevData.competition || 'Medium',
+        marketSize: jsonData.marketSize || prevData.marketSize || '',
+        growthRate: jsonData.growthRate || prevData.growthRate || '',
+        estimatedValue: jsonData.estimatedValue || prevData.estimatedValue || '',
+        thumbnailImage: jsonData.thumbnailImage || prevData.thumbnailImage || '',
+        heroImage: jsonData.heroImage || prevData.heroImage || '',
+        
+        research: {
+          marketOverview: jsonData.research?.marketOverview || prevData.research.marketOverview || '',
+          topTrends: jsonData.research?.topTrends || prevData.research.topTrends || [{ query: '', search: '', interest: '', increase: '' }],
+          risingTrends: jsonData.research?.risingTrends || prevData.research.risingTrends || [{ query: '', search: '', interest: '', increase: '' }],
+          opportunities: jsonData.research?.opportunities || prevData.research.opportunities || []
+        },
+        
+        customerAvatar: {
+          demographics: { ...prevData.customerAvatar.demographics, ...(jsonData.customerAvatar?.demographics || {}) },
+          psychographics: { ...prevData.customerAvatar.psychographics, ...(jsonData.customerAvatar?.psychographics || {}) },
+          professional: { ...prevData.customerAvatar.professional, ...(jsonData.customerAvatar?.professional || {}) },
+          psychology: { ...prevData.customerAvatar.psychology, ...(jsonData.customerAvatar?.psychology || {}) },
+          informationDiet: { ...prevData.customerAvatar.informationDiet, ...(jsonData.customerAvatar?.informationDiet || {}) },
+          buyingBehavior: { ...prevData.customerAvatar.buyingBehavior, ...(jsonData.customerAvatar?.buyingBehavior || {}) }
+        },
+        
+        keywords: jsonData.keywords || prevData.keywords || [],
+        assets: jsonData.assets || prevData.assets || [],
+        phases: jsonData.phases || prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }],
+        businessModels: jsonData.businessModels || prevData.businessModels || [],
+        recommendedTools: jsonData.recommendedTools || prevData.recommendedTools || [],
+        
+        ideas: {
+          ...prevData.ideas,
+          ...ideasObj
+        }
+      };
+    });
+  }, []);
+
   const handleJsonImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -480,191 +532,8 @@ export default function NicheBoxCreator() {
     reader.onload = (evt) => {
       try {
         const jsonData = JSON.parse(evt.target?.result as string);
+        processImportData(jsonData);
 
-        // Map arrays in ideas to newline-separated strings to meet the mongoose String schema
-        if (jsonData.ideas) {
-          Object.keys(jsonData.ideas).forEach(key => {
-            if (Array.isArray(jsonData.ideas[key])) {
-              jsonData.ideas[key] = jsonData.ideas[key].join('\n');
-            }
-          });
-        }
-
-        // Validate and map the imported data to our structure
-        const importedData: Partial<NicheBoxData> = {
-          status: jsonData.status || 'published',
-          // Form 1 - Niche Setup
-          nicheName: jsonData.nicheName || '',
-          nicheSlug: jsonData.nicheSlug || '',
-          category: jsonData.category || '',
-          competition: jsonData.competition || 'Medium',
-          marketSize: jsonData.marketSize || '',
-          growthRate: jsonData.growthRate || '',
-          estimatedValue: jsonData.estimatedValue || '',
-          thumbnailImage: jsonData.thumbnailImage || '',
-          heroImage: jsonData.heroImage || '',
-          
-          // Form 2 - Research
-          research: {
-            marketOverview: jsonData.research?.marketOverview || '',
-            topTrends: jsonData.research?.topTrends || [{ query: '', search: '', interest: '', increase: '' }],
-            risingTrends: jsonData.research?.risingTrends || [{ query: '', search: '', interest: '', increase: '' }],
-            opportunities: jsonData.research?.opportunities || []
-          },
-          
-          // Form 2.5 - Avatar
-          customerAvatar: jsonData.customerAvatar || {
-            demographics: { age: '', gender: '', location: '', educationLevel: '', incomeLevel: '', familyStatus: '' },
-            psychographics: { coreValues: '', beliefs: '', interestsHobbies: '', lifestyleTraits: '', personalityType: '' },
-            professional: { occupation: '', industry: '', jobTitle: '', dailyResponsibilities: '' },
-            psychology: { painPoints: '', frustrations: '', biggestChallenges: '', obstaclesToSuccess: '', primaryGoals: '', deepestDesires: '', aspirations: '', fears: '', whatKeepsThemUpAtNight: '', commonObjections: '', buyingHesitations: '' },
-            informationDiet: { favoriteBlogsWebsites: '', topPodcasts: '', gurusInfluencers: '', primarySocialMedia: '', booksMagazines: '' },
-            buyingBehavior: { decisionMakingProcess: '', priceSensitivity: '', keyPurchasingDrivers: '', brandAffinities: '' }
-          },
-          
-          // Form 3 - SEO Keywords
-          keywords: jsonData.keywords || [],
-          
-          // Form 4 - Content Assets
-          assets: jsonData.assets || [],
-          
-          // Form 5 - Roadmap
-          phases: jsonData.phases || [
-            { id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }
-          ],
-          
-          // Form 6 - Business Models
-          businessModels: jsonData.businessModels || [],
-
-          // Form 7 - Tools
-          recommendedTools: jsonData.recommendedTools || [],
-
-          // Form 8 - Content Ideas
-          ideas: {
-            social: jsonData.ideas?.social || '',
-            video: jsonData.ideas?.video || '',
-            products: jsonData.ideas?.products || '',
-            articles: jsonData.ideas?.articles || '',
-            questions: jsonData.ideas?.questions || '',
-            audience: jsonData.ideas?.audience || '',
-            visual: jsonData.ideas?.visual || '',
-            pinterest: jsonData.ideas?.pinterest || '',
-            youtube: jsonData.ideas?.youtube || '',
-            tiktok: jsonData.ideas?.tiktok || '',
-            instagram: jsonData.ideas?.instagram || '',
-            instagramReel: jsonData.ideas?.instagramReel || '',
-            facebook: jsonData.ideas?.facebook || '',
-            linkedin: jsonData.ideas?.linkedin || '',
-            twitter: jsonData.ideas?.twitter || '',
-            podcast: jsonData.ideas?.podcast || '',
-            shortForm: jsonData.ideas?.shortForm || '',
-            longForm: jsonData.ideas?.longForm || '',
-            liveStream: jsonData.ideas?.liveStream || '',
-            amazon: jsonData.ideas?.amazon || '',
-            etsy: jsonData.ideas?.etsy || '',
-            digital: jsonData.ideas?.digital || '',
-            printOnDemand: jsonData.ideas?.printOnDemand || '',
-            merchandise: jsonData.ideas?.merchandise || '',
-            course: jsonData.ideas?.course || '',
-            miniCourse: jsonData.ideas?.miniCourse || '',
-            membership: jsonData.ideas?.membership || '',
-            subscription: jsonData.ideas?.subscription || '',
-            bundle: jsonData.ideas?.bundle || '',
-            template: jsonData.ideas?.template || '',
-            printable: jsonData.ideas?.printable || '',
-            blogPost: jsonData.ideas?.blogPost || '',
-            article: jsonData.ideas?.article || '',
-            guide: jsonData.ideas?.guide || '',
-            tutorial: jsonData.ideas?.tutorial || '',
-            caseStudy: jsonData.ideas?.caseStudy || '',
-            listicle: jsonData.ideas?.listicle || '',
-            opinion: jsonData.ideas?.opinion || '',
-            beginnerGuide: jsonData.ideas?.beginnerGuide || '',
-            advancedStrategy: jsonData.ideas?.advancedStrategy || '',
-            stepByStep: jsonData.ideas?.stepByStep || '',
-            comparison: jsonData.ideas?.comparison || '',
-            review: jsonData.ideas?.review || '',
-            toolsList: jsonData.ideas?.toolsList || '',
-            leadMagnet: jsonData.ideas?.leadMagnet || '',
-            ebook: jsonData.ideas?.ebook || '',
-            workbook: jsonData.ideas?.workbook || '',
-            checklist: jsonData.ideas?.checklist || '',
-            cheatSheet: jsonData.ideas?.cheatSheet || '',
-            framework: jsonData.ideas?.framework || '',
-            swipeFile: jsonData.ideas?.swipeFile || '',
-            resourceList: jsonData.ideas?.resourceList || '',
-            toolkit: jsonData.ideas?.toolkit || '',
-            faq: jsonData.ideas?.faq || '',
-            beginnerQuestions: jsonData.ideas?.beginnerQuestions || '',
-            advancedQuestions: jsonData.ideas?.advancedQuestions || '',
-            expertQuestions: jsonData.ideas?.expertQuestions || '',
-            troubleshooting: jsonData.ideas?.troubleshooting || '',
-            problemSolving: jsonData.ideas?.problemSolving || '',
-            mythVsFact: jsonData.ideas?.mythVsFact || '',
-            debate: jsonData.ideas?.debate || '',
-            whatVsWhy: jsonData.ideas?.whatVsWhy || '',
-            howTo: jsonData.ideas?.howTo || '',
-            whenTo: jsonData.ideas?.whenTo || '',
-            whereTo: jsonData.ideas?.whereTo || '',
-            trending: jsonData.ideas?.trending || '',
-            seasonal: jsonData.ideas?.seasonal || '',
-            evergreen: jsonData.ideas?.evergreen || '',
-            communityDiscussion: jsonData.ideas?.communityDiscussion || '',
-            forumThread: jsonData.ideas?.forumThread || '',
-            poll: jsonData.ideas?.poll || '',
-            survey: jsonData.ideas?.survey || '',
-            ama: jsonData.ideas?.ama || '',
-            painPoints: jsonData.ideas?.painPoints || '',
-            problems: jsonData.ideas?.problems || '',
-            goals: jsonData.ideas?.goals || '',
-            desires: jsonData.ideas?.desires || '',
-            objections: jsonData.ideas?.objections || '',
-            mistakes: jsonData.ideas?.mistakes || '',
-            fears: jsonData.ideas?.fears || '',
-            contentSeries: jsonData.ideas?.contentSeries || '',
-            challenge: jsonData.ideas?.challenge || '',
-            daily: jsonData.ideas?.daily || '',
-            weekly: jsonData.ideas?.weekly || '',
-            educationalSeries: jsonData.ideas?.educationalSeries || '',
-            storytelling: jsonData.ideas?.storytelling || '',
-            infographic: jsonData.ideas?.infographic || '',
-            visualGuide: jsonData.ideas?.visualGuide || '',
-            dataVisualization: jsonData.ideas?.dataVisualization || '',
-            mindMap: jsonData.ideas?.mindMap || '',
-            flowchart: jsonData.ideas?.flowchart || '',
-            brandStory: jsonData.ideas?.brandStory || '',
-            founderStory: jsonData.ideas?.founderStory || '',
-            behindScenes: jsonData.ideas?.behindScenes || '',
-            dayInLife: jsonData.ideas?.dayInLife || '',
-            processBreakdown: jsonData.ideas?.processBreakdown || '',
-            industryTrend: jsonData.ideas?.industryTrend || '',
-            marketAnalysis: jsonData.ideas?.marketAnalysis || '',
-            futurePredictions: jsonData.ideas?.futurePredictions || '',
-            innovation: jsonData.ideas?.innovation || '',
-            toolList: jsonData.ideas?.toolList || '',
-            resourceRoundup: jsonData.ideas?.resourceRoundup || '',
-            softwareComparison: jsonData.ideas?.softwareComparison || '',
-            workflow: jsonData.ideas?.workflow || '',
-            habit: jsonData.ideas?.habit || '',
-            productivity: jsonData.ideas?.productivity || '',
-            goalSetting: jsonData.ideas?.goalSetting || '',
-            mindset: jsonData.ideas?.mindset || '',
-            successPrinciples: jsonData.ideas?.successPrinciples || '',
-            mythBusting: jsonData.ideas?.mythBusting || '',
-            commonMistakes: jsonData.ideas?.commonMistakes || '',
-            beginnerPitfalls: jsonData.ideas?.beginnerPitfalls || '',
-            expertSecrets: jsonData.ideas?.expertSecrets || '',
-            littleKnownTips: jsonData.ideas?.littleKnownTips || ''
-          }
-        };
-        
-        // Update all fields with imported data
-        Object.keys(importedData).forEach(key => {
-          if (importedData[key as keyof NicheBoxData] !== undefined) {
-            updateField(key, importedData[key as keyof NicheBoxData]);
-          }
-        });
-        
         toast({
           title: "JSON Imported Successfully",
           description: "All form fields have been populated with the imported data",
@@ -998,6 +867,9 @@ export default function NicheBoxCreator() {
                       {CATEGORIES.map(cat => (
                         <SelectItem key={cat} value={cat} className="text-slate-900 hover:bg-slate-50">{cat}</SelectItem>
                       ))}
+                      {data.category && !CATEGORIES.includes(data.category) && (
+                        <SelectItem value={data.category} className="text-slate-900 hover:bg-slate-50">{data.category}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -1972,7 +1844,7 @@ export default function NicheBoxCreator() {
                 </Button>
               </header>
               <NicheImporter onImport={(jsonData) => {
-                setData(jsonData);
+                processImportData(jsonData);
                 toast({ title: "Blueprint Loaded", description: "Successfully populated form from JSON data." });
                 setActiveTab('niche');
               }} />

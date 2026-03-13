@@ -496,6 +496,58 @@ export default function NicheBoxEdit() {
     URL.revokeObjectURL(url);
   };
 
+  const processImportData = useCallback((jsonData: any) => {
+    setData(prevData => {
+      const ideasObj = jsonData.ideas ? { ...jsonData.ideas } : {};
+      Object.keys(ideasObj).forEach(key => {
+        if (Array.isArray(ideasObj[key])) {
+          ideasObj[key] = ideasObj[key].join('\n');
+        }
+      });
+
+      return {
+        ...prevData,
+        status: jsonData.status || prevData.status || 'published',
+        nicheName: jsonData.nicheName || prevData.nicheName || '',
+        nicheSlug: jsonData.nicheSlug || prevData.nicheSlug || '',
+        category: jsonData.category || prevData.category || '',
+        competition: jsonData.competition || prevData.competition || 'Medium',
+        marketSize: jsonData.marketSize || prevData.marketSize || '',
+        growthRate: jsonData.growthRate || prevData.growthRate || '',
+        estimatedValue: jsonData.estimatedValue || prevData.estimatedValue || '',
+        thumbnailImage: jsonData.thumbnailImage || prevData.thumbnailImage || '',
+        heroImage: jsonData.heroImage || prevData.heroImage || '',
+        
+        research: {
+          marketOverview: jsonData.research?.marketOverview || prevData.research.marketOverview || '',
+          topTrends: jsonData.research?.topTrends || prevData.research.topTrends || [{ query: '', search: '', interest: '', increase: '' }],
+          risingTrends: jsonData.research?.risingTrends || prevData.research.risingTrends || [{ query: '', search: '', interest: '', increase: '' }],
+          opportunities: jsonData.research?.opportunities || prevData.research.opportunities || []
+        },
+        
+        customerAvatar: {
+          demographics: { ...prevData.customerAvatar.demographics, ...(jsonData.customerAvatar?.demographics || {}) },
+          psychographics: { ...prevData.customerAvatar.psychographics, ...(jsonData.customerAvatar?.psychographics || {}) },
+          professional: { ...prevData.customerAvatar.professional, ...(jsonData.customerAvatar?.professional || {}) },
+          psychology: { ...prevData.customerAvatar.psychology, ...(jsonData.customerAvatar?.psychology || {}) },
+          informationDiet: { ...prevData.customerAvatar.informationDiet, ...(jsonData.customerAvatar?.informationDiet || {}) },
+          buyingBehavior: { ...prevData.customerAvatar.buyingBehavior, ...(jsonData.customerAvatar?.buyingBehavior || {}) }
+        },
+        
+        keywords: jsonData.keywords || prevData.keywords || [],
+        assets: jsonData.assets || prevData.assets || [],
+        phases: jsonData.phases || prevData.phases || [{ id: 1, name: 'Phase 1', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }],
+        businessModels: jsonData.businessModels || prevData.businessModels || [],
+        recommendedTools: jsonData.recommendedTools || prevData.recommendedTools || [],
+        
+        ideas: {
+          ...prevData.ideas,
+          ...ideasObj
+        }
+      };
+    });
+  }, []);
+
   const handleJsonImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -503,17 +555,7 @@ export default function NicheBoxEdit() {
     reader.onload = (evt) => {
       try {
         const jsonData = JSON.parse(evt.target?.result as string);
-        
-        // Map arrays in ideas to newline-separated strings
-        if (jsonData.ideas) {
-          Object.keys(jsonData.ideas).forEach(key => {
-            if (Array.isArray(jsonData.ideas[key])) {
-              jsonData.ideas[key] = jsonData.ideas[key].join('\n');
-            }
-          });
-        }
-        
-        setData(prev => ({ ...prev, ...jsonData }));
+        processImportData(jsonData);
         toast({ title: "Success", description: "JSON imported successfully" });
       } catch (error) {
         toast({ title: "Error", description: "Failed to parse JSON", variant: "destructive" });
@@ -676,6 +718,9 @@ export default function NicheBoxEdit() {
                       {CATEGORIES.map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
+                      {data.category && !CATEGORIES.includes(data.category) && (
+                        <SelectItem value={data.category}>{data.category}</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -848,7 +893,7 @@ export default function NicheBoxEdit() {
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">AI IMPORTER LAB</h2>
                <NicheImporter onImport={(jsonData) => {
-                 setData(jsonData);
+                 processImportData(jsonData);
                  toast({ title: "Blueprint Updated", description: "Successfully updated from JSON data." });
                  setActiveTab('niche');
                }} />
