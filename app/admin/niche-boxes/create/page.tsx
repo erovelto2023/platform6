@@ -458,19 +458,35 @@ export default function NicheBoxCreator() {
     }
   });
 
-  const updateField = useCallback((path: string, value: any) => {
+  const updateField = useCallback((path: string, valueOrUpdater: any) => {
     setData(prev => {
-      const newData = JSON.parse(JSON.stringify(prev)); // Deep copy to avoid reference issues
-      const keys = path.split('.');
-      let current: any = newData;
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) current[keys[i]] = {};
-        current = current[keys[i]];
+      try {
+        const newData = JSON.parse(JSON.stringify(prev));
+        const keys = path.split('.');
+        let current = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (!current[keys[i]]) current[keys[i]] = {};
+          current = current[keys[i]];
+        }
+        
+        const lastKey = keys[keys.length - 1];
+        if (typeof valueOrUpdater === 'function') {
+          current[lastKey] = valueOrUpdater(current[lastKey]);
+        } else {
+          current[lastKey] = valueOrUpdater;
+        }
+        
+        return newData;
+      } catch (e) {
+        console.error("Error updating field:", path, e);
+        return prev;
       }
-      current[keys[keys.length - 1]] = value;
-      return newData;
     });
   }, []);
+
+  const addKeyword = () => {
+    updateField('keywords', (prev: any[]) => [...(prev || []), { keyword: 'New Keyword', searchVolume: '0', searchIntent: 'Informational', serpFeatures: '', cpc: '$0', competitionDifficulty: '10' }]);
+  };
 
   const handleKeywordImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -491,7 +507,7 @@ export default function NicheBoxCreator() {
           competitionDifficulty: c[5] || '' 
         };
       }).filter(k => k.keyword);
-      updateField('keywords', [...data.keywords, ...keywords]);
+      updateField('keywords', (prev: any[]) => [...(prev || []), ...keywords]);
       toast({
         title: "Keywords Imported",
         description: `Successfully imported ${keywords.length} keywords`,
@@ -611,14 +627,16 @@ export default function NicheBoxCreator() {
   };
 
   const addTask = (phaseIndex: number) => {
-    const newPhases = [...data.phases];
-    newPhases[phaseIndex].tasks.push('');
+    const newPhases = data.phases.map((p, i) => 
+      i === phaseIndex ? { ...p, tasks: [...p.tasks, ''] } : p
+    );
     updateField('phases', newPhases);
   };
 
   const removeTask = (phaseIndex: number, taskIndex: number) => {
-    const newPhases = [...data.phases];
-    newPhases[phaseIndex].tasks = newPhases[phaseIndex].tasks.filter((_, i) => i !== taskIndex);
+    const newPhases = data.phases.map((p, i) => 
+      i === phaseIndex ? { ...p, tasks: p.tasks.filter((_, ti) => ti !== taskIndex) } : p
+    );
     updateField('phases', newPhases);
   };
 
@@ -1205,10 +1223,15 @@ export default function NicheBoxCreator() {
                   <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">SEO KEYWORDS</h2>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">High-traffic search terms for this niche</p>
                 </div>
-                <label className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest cursor-pointer flex items-center gap-2 shadow-lg transition-transform hover:-translate-y-1 uppercase">
-                  <Upload size={16} /> IMPORT CSV 
-                  <input type="file" className="hidden" accept=".csv" onChange={handleKeywordImport} />
-                </label>
+                <div className="flex gap-2">
+                  <Button onClick={addKeyword} className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest flex items-center gap-2 shadow-sm transition-transform hover:-translate-y-1 uppercase">
+                    <Plus size={16} /> ADD KEYWORD
+                  </Button>
+                  <label className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest cursor-pointer flex items-center gap-2 shadow-lg transition-transform hover:-translate-y-1 uppercase">
+                    <Upload size={16} /> IMPORT CSV 
+                    <input type="file" className="hidden" accept=".csv" onChange={handleKeywordImport} />
+                  </label>
+                </div>
               </header>
               <Card className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
@@ -1227,25 +1250,70 @@ export default function NicheBoxCreator() {
                     <tbody className="divide-y divide-slate-100">
                       {data.keywords.length > 0 ? data.keywords.map((kw, i) => (
                         <tr key={i} className="hover:bg-slate-50 transition-colors">
-                          <td className="p-5 font-bold text-slate-900">{kw.keyword}</td>
-                          <td className="p-5 font-black text-indigo-600">{kw.searchVolume}</td>
-                          <td className="p-5 text-slate-500 font-medium">{kw.searchIntent}</td>
-                          <td className="p-5 text-slate-400 uppercase tracking-tighter font-bold">{kw.serpFeatures}</td>
-                          <td className="p-5 text-green-600 font-mono font-bold">{kw.cpc}</td>
                           <td className="p-5">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm ${
-                              parseInt(kw.competitionDifficulty) > 50 
-                                ? 'bg-red-50 text-red-600 border border-red-100' 
-                                : 'bg-green-50 text-green-600 border border-green-100'
-                            }`}>
-                              {kw.competitionDifficulty}/100
-                            </span>
+                            <StableInput 
+                              className="h-8 text-[11px] font-bold" 
+                              value={kw.keyword} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.keyword`, v);
+                              }}
+                              placeholder="Keyword..."
+                            />
+                          </td>
+                          <td className="p-5 text-indigo-600 font-black">
+                            <StableInput 
+                              className="h-8 text-[11px]" 
+                              value={kw.searchVolume} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.searchVolume`, v);
+                              }}
+                              placeholder="Vol..."
+                            />
+                          </td>
+                          <td className="p-5 text-slate-500 font-medium">
+                            <StableInput 
+                              className="h-8 text-[11px]" 
+                              value={kw.searchIntent} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.searchIntent`, v);
+                              }}
+                              placeholder="Intent..."
+                            />
+                          </td>
+                          <td className="p-5 text-slate-400 uppercase tracking-tighter font-bold">
+                            <StableInput 
+                              className="h-8 text-[11px]" 
+                              value={kw.serpFeatures} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.serpFeatures`, v);
+                              }}
+                              placeholder="Features..."
+                            />
+                          </td>
+                          <td className="p-5 text-green-600 font-mono font-bold">
+                            <StableInput 
+                              className="h-8 text-[11px]" 
+                              value={kw.cpc} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.cpc`, v);
+                              }}
+                              placeholder="CPC..."
+                            />
+                          </td>
+                          <td className="p-5">
+                             <StableInput 
+                              className="h-8 text-[11px]" 
+                              value={kw.competitionDifficulty} 
+                              onChange={(v) => {
+                                updateField(`keywords.${i}.competitionDifficulty`, v);
+                              }}
+                              placeholder="Diff..."
+                            />
                           </td>
                           <td className="p-5">
                             <Button 
                               onClick={() => {
-                                const newKeywords = data.keywords.filter((_, idx) => idx !== i);
-                                updateField('keywords', newKeywords);
+                                updateField('keywords', (prev: any[]) => prev.filter((_, idx) => idx !== i));
                               }}
                               variant="outline"
                               size="icon"

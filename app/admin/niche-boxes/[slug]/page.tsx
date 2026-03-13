@@ -453,19 +453,59 @@ export default function NicheBoxEdit() {
     }
   });
 
-  const updateField = useCallback((path: string, value: any) => {
+  const updateField = useCallback((path: string, valueOrUpdater: any) => {
     setData(prev => {
-      const newData = JSON.parse(JSON.stringify(prev));
-      const keys = path.split('.');
-      let current: any = newData;
-      for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) current[keys[i]] = {};
-        current = current[keys[i]];
+      try {
+        const newData = JSON.parse(JSON.stringify(prev));
+        const keys = path.split('.');
+        let current = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          if (!current[keys[i]]) current[keys[i]] = {};
+          current = current[keys[i]];
+        }
+        
+        const lastKey = keys[keys.length - 1];
+        if (typeof valueOrUpdater === 'function') {
+          current[lastKey] = valueOrUpdater(current[lastKey]);
+        } else {
+          current[lastKey] = valueOrUpdater;
+        }
+        
+        return newData;
+      } catch (e) {
+        console.error("Error updating field:", path, e);
+        return prev;
       }
-      current[keys[keys.length - 1]] = value;
-      return newData;
     });
   }, []);
+
+  const addKeyword = () => {
+    updateField('keywords', (prev: any[]) => [...(prev || []), { keyword: 'New Keyword', searchVolume: '0', searchIntent: 'Informational', serpFeatures: '', cpc: '$0', competitionDifficulty: '10' }]);
+  };
+
+  const handleKeywordImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target?.result as string;
+      const rows = text.split('\n').slice(1);
+      const keywords = rows.map(r => {
+        const c = r.split(',');
+        return { 
+          keyword: c[0] || '', 
+          searchVolume: c[1] || '', 
+          searchIntent: c[2] || '', 
+          serpFeatures: c[3] || '', 
+          cpc: c[4] || '', 
+          competitionDifficulty: c[5] || '' 
+        };
+      }).filter(k => k.keyword);
+      updateField('keywords', (prev: any[]) => [...(prev || []), ...keywords]);
+      toast({ title: "Keywords Imported", description: `Successfully imported ${keywords.length} keywords` });
+    };
+    reader.readAsText(file);
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -593,7 +633,8 @@ export default function NicheBoxEdit() {
   };
 
   const addAsset = (name: string, category: string) => {
-    updateField('assets', [...data.assets, { category, name, title: '', description: '', type: 'Document', fileUrl: '', link: '', fileName: '' }]);
+    const newAsset = { category, name, title: '', description: '', type: 'Document', fileUrl: '', link: '', fileName: '' };
+    updateField('assets', [...data.assets, newAsset]);
   };
 
   const removeAsset = (index: number) => {
@@ -601,7 +642,8 @@ export default function NicheBoxEdit() {
   };
 
   const addPhase = () => {
-    updateField('phases', [...data.phases, { id: Date.now(), name: 'New Phase', duration: '4 weeks', budget: '$500', description: '', tasks: [''] }]);
+    const newPhase = { id: Date.now(), name: 'New Phase', duration: '4 weeks', budget: '$500', description: '', tasks: [''] };
+    updateField('phases', [...data.phases, newPhase]);
   };
 
   const removePhase = (id: number) => {
@@ -609,25 +651,29 @@ export default function NicheBoxEdit() {
   };
 
   const addTask = (phaseIndex: number) => {
-    const newPhases = [...data.phases];
-    newPhases[phaseIndex].tasks.push('');
+    const newPhases = data.phases.map((p, i) => 
+      i === phaseIndex ? { ...p, tasks: [...p.tasks, ''] } : p
+    );
     updateField('phases', newPhases);
   };
 
   const removeTask = (phaseIndex: number, taskIndex: number) => {
-    const newPhases = [...data.phases];
-    newPhases[phaseIndex].tasks = newPhases[phaseIndex].tasks.filter((_, i) => i !== taskIndex);
+    const newPhases = data.phases.map((p, i) => 
+      i === phaseIndex ? { ...p, tasks: p.tasks.filter((_, ti) => ti !== taskIndex) } : p
+    );
     updateField('phases', newPhases);
   };
 
   const addTrend = (type: 'top' | 'rising') => {
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    updateField(path, [...data.research[type === 'top' ? 'topTrends' : 'risingTrends'], { query: '', search: '', interest: '', increase: '' }]);
+    const current = type === 'top' ? data.research.topTrends : data.research.risingTrends;
+    updateField(path, [...current, { query: '', search: '', interest: '', increase: '' }]);
   };
 
   const removeTrend = (type: 'top' | 'rising', index: number) => {
     const path = type === 'top' ? 'research.topTrends' : 'research.risingTrends';
-    updateField(path, data.research[type === 'top' ? 'topTrends' : 'risingTrends'].filter((_, i) => i !== index));
+    const current = type === 'top' ? data.research.topTrends : data.research.risingTrends;
+    updateField(path, current.filter((_, i) => i !== index));
   };
 
   const addOpportunity = () => {
@@ -888,48 +934,139 @@ export default function NicheBoxEdit() {
             </div>
           )}
 
-          {activeTab === 'seo' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
-               <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">SEO VAULT</h2>
-               <Card className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
-                 <table className="w-full text-left text-[11px]">
-                   <thead className="bg-slate-50 text-slate-500 uppercase font-black tracking-widest text-[9px]">
-                     <tr>
-                       <th className="p-5">Keyword</th>
-                       <th className="p-5">Volume</th>
-                       <th className="p-5">Difficulty</th>
-                       <th className="p-5"></th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-slate-100 font-sans">
-                     {data.keywords.map((kw, i) => (
-                       <tr key={i} className="hover:bg-slate-50">
-                         <td className="p-5 font-bold text-slate-900">{kw.keyword}</td>
-                         <td className="p-5 font-black text-indigo-600">{kw.searchVolume}</td>
-                         <td className="p-5">{kw.competitionDifficulty}</td>
-                         <td className="p-5">
-                            <Button onClick={() => updateField('keywords', data.keywords.filter((_, idx) => idx !== i))} variant="ghost" className="text-slate-300 hover:text-red-500"><Trash2 size={14}/></Button>
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </Card>
-            </div>
-          )}
+              {activeTab === 'seo' && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                  <header className="flex justify-between items-center">
+                    <div>
+                      <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">SEO VAULT</h2>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic leading-none">High-traffic search terms for this niche</p>
+                    </div>
+                    <div className="flex gap-2">
+                       <Button onClick={addKeyword} className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest flex items-center gap-2 shadow-sm transition-transform hover:-translate-y-1 uppercase">
+                         <Plus size={16} /> ADD KEYWORD
+                       </Button>
+                       <label className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-2xl text-[10px] font-black tracking-widest cursor-pointer flex items-center gap-2 shadow-lg transition-transform hover:-translate-y-1 uppercase">
+                         <Upload size={16} /> IMPORT CSV 
+                         <input type="file" className="hidden" accept=".csv" onChange={handleKeywordImport} />
+                       </label>
+                    </div>
+                  </header>
+                  <Card className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-[11px]">
+                        <thead className="bg-slate-50 text-slate-500 uppercase font-black tracking-widest text-[9px]">
+                          <tr>
+                            <th className="p-5">Keyword</th>
+                            <th className="p-5">Vol.</th>
+                            <th className="p-5">Intent</th>
+                            <th className="p-5">Features</th>
+                            <th className="p-5">CPC</th>
+                            <th className="p-5">Difficulty</th>
+                            <th className="p-5"></th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {data.keywords.length > 0 ? data.keywords.map((kw, i) => (
+                            <tr key={i} className="hover:bg-slate-50 transition-colors">
+                              <td className="p-5">
+                                <StableInput 
+                                  className="h-8 text-[11px] font-bold" 
+                                  value={kw.keyword} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.keyword`, v);
+                                  }}
+                                  placeholder="Keyword..."
+                                />
+                              </td>
+                              <td className="p-5 text-indigo-600 font-black">
+                                <StableInput 
+                                  className="h-8 text-[11px]" 
+                                  value={kw.searchVolume} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.searchVolume`, v);
+                                  }}
+                                  placeholder="Vol..."
+                                />
+                              </td>
+                              <td className="p-5">
+                                <StableInput 
+                                  className="h-8 text-[11px]" 
+                                  value={kw.searchIntent} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.searchIntent`, v);
+                                  }}
+                                  placeholder="Intent..."
+                                />
+                              </td>
+                              <td className="p-5">
+                                <StableInput 
+                                  className="h-8 text-[11px]" 
+                                  value={kw.serpFeatures} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.serpFeatures`, v);
+                                  }}
+                                  placeholder="Features..."
+                                />
+                              </td>
+                              <td className="p-5">
+                                <StableInput 
+                                  className="h-8 text-[11px] text-green-600 font-bold" 
+                                  value={kw.cpc} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.cpc`, v);
+                                  }}
+                                  placeholder="CPC..."
+                                />
+                              </td>
+                              <td className="p-5">
+                                <StableInput 
+                                  className="h-8 text-[11px]" 
+                                  value={kw.competitionDifficulty} 
+                                  onChange={(v) => {
+                                    updateField(`keywords.${i}.competitionDifficulty`, v);
+                                  }}
+                                  placeholder="Diff..."
+                                />
+                              </td>
+                              <td className="p-5">
+                                <Button onClick={() => updateField('keywords', (prev: any[]) => prev.filter((_, idx) => idx !== i))} variant="ghost" className="text-slate-300 hover:text-red-500"><Trash2 size={14}/></Button>
+                              </td>
+                            </tr>
+                          )) : (
+                            <tr>
+                              <td colSpan={7} className="p-10 text-center text-slate-400 italic">No keywords imported. Click Import or Add to start.</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </Card>
+                </div>
+              )}
 
           {activeTab === 'assets' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
               <h2 className="text-4xl font-black text-slate-900 italic tracking-tighter uppercase leading-none mb-1">CONTENT ASSETS</h2>
               <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-4 bg-slate-50 p-6 rounded-3xl border border-slate-200 h-fit space-y-4">
-                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-200 pb-2">PRESETS</h4>
-                  <div className="max-h-96 overflow-y-auto custom-scrollbar pr-2 space-y-1">
-                    {ASSET_LIBRARY["Written Content"].slice(0, 10).map(item => (
-                      <Button key={item} onClick={() => addAsset(item, "Written")} variant="ghost" className="w-full justify-between text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:text-indigo-600 group">
-                        {item} <Plus size={10} className="opacity-0 group-hover:opacity-100"/>
-                      </Button>
-                    ))}
+                <div className="col-span-4 bg-slate-50 p-6 rounded-3xl border border-slate-200 h-fit space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                  {Object.entries(ASSET_LIBRARY).map(([cat, list]) => (
+                    <div key={cat} className="space-y-1 mb-4">
+                      <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-100 pb-2 mb-2">{cat}</h4>
+                      {list.map(item => (
+                        <Button key={item} onClick={() => addAsset(item, cat)} variant="ghost" className="w-full justify-between text-[10px] font-bold uppercase tracking-wider text-slate-600 hover:text-indigo-600 group hover:bg-white h-8">
+                          {item} <Plus size={10} className="opacity-0 group-hover:opacity-100"/>
+                        </Button>
+                      ))}
+                    </div>
+                  ))}
+                  <div className="pt-4 border-t border-slate-200 mt-6">
+                    <Button 
+                      onClick={() => addAsset('New Asset', 'Custom')}
+                      variant="outline"
+                      className="w-full text-[10px] font-black uppercase tracking-widest border-dashed border-slate-300 text-slate-400 hover:text-indigo-600 hover:border-indigo-600 transition-all bg-white"
+                    >
+                      + ADD CUSTOM ASSET
+                    </Button>
                   </div>
                 </div>
                 <div className="col-span-8 space-y-4">
