@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import NicheImporter from '@/components/admin/NicheImporter';
+import { UploadButton } from '@/lib/uploadthing';
 
 const NicheBoxContext = React.createContext<{ data: NicheBoxData; updateField: (path: string, value: any) => void } | null>(null);
 
@@ -1143,19 +1144,40 @@ export default function NicheBoxEdit() {
                           </div>
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">File Attachment</Label>
-                          <label className="flex items-center gap-2 bg-slate-50 border border-slate-200 border-dashed rounded-xl p-3 text-xs text-slate-500 cursor-pointer hover:bg-slate-100 justify-center h-10 transition-colors">
-                            <Paperclip size={14} /> 
-                            <span className="truncate max-w-[150px]">{asset.fileName || "Upload File"}</span>
-                            <input 
-                              type="file" 
-                              className="hidden" 
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) updateField(`assets.${i}.fileName`, file.name);
-                              }} 
+                          <Label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1 flex justify-between">
+                            <span>File Attachment</span>
+                            {asset.fileName && <span className="text-indigo-600 truncate max-w-[100px]" title={asset.fileName}>{asset.fileName}</span>}
+                          </Label>
+                          <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-2 flex items-center justify-center min-h-[40px]">
+                            <UploadButton
+                              endpoint="nicheDownload"
+                              onClientUploadComplete={(res: any) => {
+                                if (res?.[0]) {
+                                  updateField(`assets.${i}.fileName`, res[0].name);
+                                  updateField(`assets.${i}.fileUrl`, res[0].ufsUrl || res[0].url);
+                                  toast({
+                                    title: "Asset Uploaded",
+                                    description: `${res[0].name} successfully attached.`
+                                  });
+                                }
+                              }}
+                              onUploadError={(error: Error) => {
+                                toast({
+                                  title: "Upload Error",
+                                  description: error.message,
+                                  variant: "destructive"
+                                });
+                              }}
+                              appearance={{
+                                button: "bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] uppercase font-black tracking-widest h-8 px-4 rounded-lg w-full transition-colors",
+                                container: "w-full",
+                                allowedContent: "hidden"
+                              }}
+                              content={{
+                                button: asset.fileName ? "REPLACE FILE" : "UPLOAD FILE"
+                              }}
                             />
-                          </label>
+                          </div>
                         </div>
                       </div>
                     </Card>
