@@ -86,7 +86,7 @@ export default function GlossaryActions({ slug, term }: Props) {
                 {shared ? "Link Copied!" : "Share Guide"}
             </button>
             <button
-                onClick={() => window.print()}
+                onClick={() => window.open(`/glossary/${slug}/print`, '_blank')}
                 className="w-full py-3 px-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-colors border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm"
             >
                 <FileDown size={18} />
