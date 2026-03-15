@@ -7,7 +7,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -110,6 +110,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleRemoveDuplicates = () => {
+        if (!confirm('Scan for duplicate terms and delete extras? The oldest copy of each term will be kept. This cannot be undone.')) return;
+        startTransition(async () => {
+            const res = await removeDuplicateGlossaryTerms();
+            if ('removed' in res && res.success) {
+                if (res.removed === 0) {
+                    alert('✅ No duplicate terms found! Your glossary is clean.');
+                } else {
+                    alert(`✅ Removed ${res.removed} duplicate term${res.removed !== 1 ? 's' : ''}. Page will reload.`);
+                    window.location.reload();
+                }
+            } else {
+                alert('Error: ' + (res as any).error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -118,11 +135,18 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
                         <div className="flex gap-2">
                             <button
+                                onClick={handleRemoveDuplicates}
+                                disabled={isPending || initialTerms.length === 0}
+                                className="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-amber-600 transition-all disabled:opacity-50 text-sm"
+                            >
+                                <Copy size={15} /> Remove Duplicates
+                            </button>
+                            <button
                                 onClick={handleFlushGlossary}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-red-600 text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50"
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50 text-sm"
                             >
-                                <RotateCcw size={16} /> Flush All
+                                <RotateCcw size={15} /> Flush All
                             </button>
                             <button
                                 onClick={() => { setEditingTerm(undefined); setView('create'); }}

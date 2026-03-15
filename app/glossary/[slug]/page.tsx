@@ -33,8 +33,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 // Helper to reliably render arrays
-const renderList = (items: any[] | undefined, icon: React.ReactNode, title: string) => {
+// requireUrl: if true, only show items that have a real URL (hides dead/empty-URL entries)
+const renderList = (items: any[] | undefined, icon: React.ReactNode, title: string, requireUrl = false) => {
     if (!items || items.length === 0) return null;
+
+    const displayItems = requireUrl
+        ? items.filter((item: any) => {
+            const url = typeof item === 'object' && item.url ? item.url.trim() : '';
+            return url.length > 0 && url !== '#';
+          })
+        : items;
+
+    if (displayItems.length === 0) return null;
+
     return (
         <div className="mb-8">
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-slate-800 dark:text-slate-100">
@@ -42,7 +53,7 @@ const renderList = (items: any[] | undefined, icon: React.ReactNode, title: stri
                 {title}
             </h3>
             <ul className="space-y-3">
-                {items.map((item, i) => {
+                {displayItems.map((item, i) => {
                     const label = typeof item === 'string' ? item : item.name;
                     const url = typeof item === 'object' && item.url ? item.url : null;
                     
@@ -63,6 +74,7 @@ const renderList = (items: any[] | undefined, icon: React.ReactNode, title: stri
         </div>
     );
 };
+
 
 export default async function GlossaryTermPage({ params }: Props) {
     const { slug } = await params;
@@ -388,9 +400,9 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     {renderList(serializedTerm.youtubeTitles, <Youtube className="text-red-500" size={20} />, "YouTube Titles")}
                                     {renderList(serializedTerm.pinterestIdeas, <span className="text-[#E60023] font-bold text-lg leading-none">P</span>, "Pinterest Pins")}
                                     {renderList(serializedTerm.instagramIdeas, <Instagram className="text-pink-500" size={20} />, "Instagram Posts")}
-                                    {renderList(serializedTerm.amazonProducts, <ShoppingBag className="text-orange-500" size={20} />, "Related Products")}
-                                    {renderList(serializedTerm.websitesRanking, <Globe className="text-blue-500" size={20} />, "Websites")}
-                                    {renderList(serializedTerm.podcastsRanking, <Podcast className="text-purple-500" size={20} />, "Ranked Podcasts")}
+                                    {renderList(serializedTerm.amazonProducts, <ShoppingBag className="text-orange-500" size={20} />, "Related Products", true)}
+                                    {renderList(serializedTerm.websitesRanking, <Globe className="text-blue-500" size={20} />, "Websites", true)}
+                                    {renderList(serializedTerm.podcastsRanking, <Podcast className="text-purple-500" size={20} />, "Ranked Podcasts", true)}
                                 </div>
                             </div>
                         </div>

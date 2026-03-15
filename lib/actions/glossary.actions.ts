@@ -174,3 +174,47 @@ export async function findDuplicateGlossaryTerms(category?: string) {
         return { error: error.message || "Failed to find duplicates" };
     }
 }
+
+export async function removeDuplicateGlossaryTerms() {
+    try {
+        await connectToDatabase();
+        // Find all duplicate groups (case-insensitive term match)
+        const duplicates = await GlossaryTerm.aggregate([
+            {
+                $group: {
+                    _id: { $toLower: "$term" },
+                    count: { $sum: 1 },
+                    docs: { $push: { id: "$id", _id: "$_id", createdAt: "$createdAt" } }
+                }
+            },
+            { $match: { count: { $gt: 1 } } }
+        ]);
+
+        if (duplicates.length === 0) return { success: true, removed: 0 };
+
+        // For each duplicate group, keep the first/oldest, delete the rest
+        const idsToDelete: string[] = [];
+        for (const group of duplicates) {
+            // Sort so oldest is first (keep it), delete the rest
+            const sorted = group.docs.sort((a: any, b: any) =>
+                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+            // Skip the first (oldest), mark the rest for deletion
+            for (let i = 1; i < sorted.length; i++) {
+                idsToDelete.push(sorted[i].id);
+            }
+        }
+
+        if (idsToDelete.length > 0) {
+            await GlossaryTerm.deleteMany({ id: { $in: idsToDelete } });
+        }
+
+        revalidatePath('/admin/glossary');
+        revalidatePath('/glossary');
+        return { success: true, removed: idsToDelete.length };
+    } catch (error: any) {
+        console.error("Error removing duplicate glossary terms:", error);
+        return { error: error.message || "Failed to remove duplicates" };
+    }
+}
+

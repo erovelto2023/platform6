@@ -181,3 +181,62 @@
 
 .html-content body { min-height: 100vh; }
 .html-content html, .html-content body { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+
+/* ── Print / Save as PDF ─────────────────────────────────────────────────── */
+@media print {
+  /* Hide navigation chrome */
+  nav,
+  header:not(.glossary-print-header),
+  aside,
+  [data-sidebar],
+  [class*="sidebar"],
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Expand content to full page width */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Make glossary grid a single column */
+  .lg\:grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Hide sticky sidebar column + action buttons */
+  .lg\:col-span-1 {
+    display: none !important;
+  }
+
+  .lg\:col-span-2 {
+    grid-column: 1 / -1 !important;
+  }
+
+  /* Hide back link, action buttons */
+  a[href="/glossary"],
+  button {
+    display: none !important;
+  }
+
+  /* Avoid page breaks inside cards */
+  div, section, p {
+    page-break-inside: avoid;
+  }
+
+  /* Force links to show their URL when printed */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555;
+  }
+
+  /* But suppress URL display for internal UI links */
+  a[href^="/"]::after {
+    content: "";
+  }
+}
+

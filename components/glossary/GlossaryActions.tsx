@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { Bookmark, Share2, Check, BookmarkCheck, Lock } from "lucide-react";
+import { Bookmark, Share2, Check, BookmarkCheck, Lock, FileDown } from "lucide-react";
 
 interface Props {
     slug: string;
@@ -84,6 +84,13 @@ export default function GlossaryActions({ slug, term }: Props) {
             >
                 {shared ? <Check size={18} className="text-emerald-500" /> : <Share2 size={18} />}
                 {shared ? "Link Copied!" : "Share Guide"}
+            </button>
+            <button
+                onClick={() => window.print()}
+                className="w-full py-3 px-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-colors border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm"
+            >
+                <FileDown size={18} />
+                Save as PDF
             </button>
 
             {/* Sign-in prompt shown when guest tries to bookmark/share */}
