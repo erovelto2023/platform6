@@ -4,7 +4,7 @@ import GlossaryForm from "@/components/admin/GlossaryForm";
 import GlossaryManager from "../../../components/admin/GlossaryManager";
 
 export default async function GlossaryAdminPage() {
-    const { terms } = await getGlossaryTerms({ limit: 1000 });
+    const { terms } = await getGlossaryTerms({});
     const { products } = await getDirectoryProducts();
 
     return (

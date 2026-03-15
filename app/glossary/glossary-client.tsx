@@ -44,7 +44,7 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(1000);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
