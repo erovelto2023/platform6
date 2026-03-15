@@ -184,30 +184,57 @@
 
 /* ── Print / Save as PDF ─────────────────────────────────────────────────── */
 @media print {
-  /* Hide navigation chrome */
+  /* Reset body sizing — prevents blank first page from min-height/padding */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide all chrome: sidebar, nav, header, footer, buttons, back link */
   nav,
-  header:not(.glossary-print-header),
+  header,
   aside,
-  [data-sidebar],
-  [class*="sidebar"],
   footer,
-  .no-print {
+  [data-sidebar],
+  .no-print,
+  button,
+  a[href="/glossary"],
+  [class*="sidebar"] {
     display: none !important;
   }
 
-  /* Expand content to full page width */
-  body {
-    background: white !important;
-    color: black !important;
-    font-size: 12pt;
+  /* Remove any fixed/sticky positioning that causes blank pages */
+  * {
+    position: static !important;
+    float: none !important;
+    box-shadow: none !important;
   }
 
-  /* Make glossary grid a single column */
-  .lg\:grid-cols-3 {
+  /* Expand main wrapper to full width */
+  main,
+  .max-w-5xl,
+  .max-w-6xl,
+  [class*="max-w"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+
+  /* Collapse grid to single column */
+  .lg\:grid-cols-3,
+  [class*="grid-cols"] {
     grid-template-columns: 1fr !important;
   }
 
-  /* Hide sticky sidebar column + action buttons */
+  /* Hide the right actions sidebar, show only main content */
   .lg\:col-span-1 {
     display: none !important;
   }
@@ -216,27 +243,23 @@
     grid-column: 1 / -1 !important;
   }
 
-  /* Hide back link, action buttons */
-  a[href="/glossary"],
-  button {
-    display: none !important;
-  }
-
-  /* Avoid page breaks inside cards */
-  div, section, p {
+  /* Clean page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
     page-break-inside: avoid;
   }
 
-  /* Force links to show their URL when printed */
-  a[href]::after {
-    content: " (" attr(href) ")";
-    font-size: 9pt;
-    color: #555;
+  p, li, blockquote, div {
+    page-break-inside: avoid;
+    orphans: 3;
+    widows: 3;
   }
 
-  /* But suppress URL display for internal UI links */
-  a[href^="/"]::after {
-    content: "";
+  /* Show external link URLs inline */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #666;
   }
 }
 
