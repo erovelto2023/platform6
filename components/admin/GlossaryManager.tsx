@@ -7,7 +7,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -161,6 +161,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleAffiliateAudit = () => {
+        if (!confirm('This will scan all Glossary Terms and Directory Products for Amazon links and automatically attach your affiliate ID (weightlo0f57d-20) where missing. Continue?')) return;
+        startTransition(async () => {
+            const res = await backfillAffiliateTags();
+            if (res.success) {
+                if (res.glossaryUpdated === 0 && res.productUpdated === 0) {
+                    alert('✅ All Amazon links already have your affiliate tag! No updates needed.');
+                } else {
+                    alert(`✅ Done! Updated ${res.glossaryUpdated} Glossary Terms and ${res.productUpdated} Directory Products. Page will reload.`);
+                    window.location.reload();
+                }
+            } else {
+                alert('Error updating affiliate tags: ' + (res as any).error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -181,6 +198,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 text-sm"
                             >
                                 <ExternalLink size={15} /> Scrub URLs
+                            </button>
+                            <button
+                                onClick={handleAffiliateAudit}
+                                disabled={isPending}
+                                className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                                <ExternalLink size={15} /> Affiliate Audit
                             </button>
                             <button
                                 onClick={handleRemoveDuplicates}

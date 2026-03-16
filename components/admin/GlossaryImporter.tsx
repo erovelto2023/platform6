@@ -59,11 +59,22 @@ export default function GlossaryImporter() {
                     return;
                 }
 
-                // Scrub URLs in the JSON data
+                // Scrub URLs and append affiliate tag to Amazon links
                 parsedData = parsedData.map((item: any) => {
                     const newItem = { ...item };
+                    const affiliateId = "weightlo0f57d-20";
+
                     if (newItem.amazonProducts) {
-                        newItem.amazonProducts = newItem.amazonProducts.map((p: any) => ({ ...p, url: cleanUrl(p.url) }));
+                        newItem.amazonProducts = newItem.amazonProducts.map((p: any) => {
+                            let url = cleanUrl(p.url);
+                            if (url && url.includes("amazon.com")) {
+                                const separator = url.includes("?") ? "&" : "?";
+                                if (!url.includes("tag=")) {
+                                    url = `${url}${separator}tag=${affiliateId}`;
+                                }
+                            }
+                            return { ...p, url };
+                        });
                     }
                     if (newItem.websitesRanking) {
                         newItem.websitesRanking = newItem.websitesRanking.map((w: any) => ({ ...w, url: cleanUrl(w.url) }));
@@ -208,8 +219,8 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "pinterestIdeas": ["Pin 1", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
     "instagramIdeas": ["IG 1", "IG 2", "IG 3", "IG 4", "IG 5"],
     "amazonProducts": [
-      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \"\""},
-      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \"\""}
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or \"\""},
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or \"\""}
     ],
     "websitesRanking": [
       {"name": "Real Authority Website Name", "url": "Actual LIVE URL"},
@@ -329,8 +340,8 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "pinterestIdeas": ["Pin 1", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
     "instagramIdeas": ["IG 1", "IG 2", "IG 3", "IG 4", "IG 5"],
     "amazonProducts": [
-      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \\"\\""},
-      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \\"\\""}
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or \\"\\""},
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or \\"\\""}
     ],
     "websitesRanking": [
       {"name": "Real Authority Website Name", "url": "Actual LIVE URL"},

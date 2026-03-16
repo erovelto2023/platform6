@@ -251,8 +251,6 @@ export async function scrubGlossaryUrls() {
             for (const field of objectArrayFields) {
                 const array = term[field as keyof typeof term];
                 if (Array.isArray(array)) {
-                    const originalLength = array.length;
-                    // Filter out items with scrubbed/invalid URLs
                     const cleanedArray = array.map((item: any) => {
                         const originalUrl = item.url;
                         const cleanedUrl = cleanUrl(originalUrl);
@@ -296,6 +294,60 @@ export async function scrubGlossaryUrls() {
     } catch (error: any) {
         console.error("Error scrubbing glossary URLs:", error);
         return { error: error.message || "Failed to scrub URLs" };
+    }
+}
+
+export async function backfillAffiliateTags() {
+    try {
+        await connectToDatabase();
+        const affiliateId = "weightlo0f57d-20";
+        let glossaryUpdated = 0;
+        let productUpdated = 0;
+
+        // 1. Update Glossary Terms
+        const terms = await GlossaryTerm.find({ 
+            amazonProducts: { $exists: true, $ne: [] } 
+        });
+
+        for (const term of terms) {
+            let hasChanges = false;
+            if (term.amazonProducts) {
+                term.amazonProducts = term.amazonProducts.map((p: any) => {
+                    if (p.url && p.url.includes("amazon.com") && !p.url.includes(`tag=${affiliateId}`)) {
+                        const separator = p.url.includes("?") ? "&" : "?";
+                        p.url = `${p.url}${separator}tag=${affiliateId}`;
+                        hasChanges = true;
+                    }
+                    return p;
+                });
+            }
+            if (hasChanges) {
+                await term.save();
+                glossaryUpdated++;
+            }
+        }
+
+        // 2. Update Directory Products
+        const DirectoryProduct = (await import("@/lib/db/models/DirectoryProduct")).default;
+        const products = await DirectoryProduct.find({
+            affiliateLink: { $regex: /amazon\.com/ }
+        });
+
+        for (const product of products) {
+            if (product.affiliateLink && !product.affiliateLink.includes(`tag=${affiliateId}`)) {
+                const separator = product.affiliateLink.includes("?") ? "&" : "?";
+                product.affiliateLink = `${product.affiliateLink}${separator}tag=${affiliateId}`;
+                await product.save();
+                productUpdated++;
+            }
+        }
+
+        revalidatePath('/admin/glossary');
+        revalidatePath('/glossary');
+        return { success: true, glossaryUpdated, productUpdated };
+    } catch (error: any) {
+        console.error("Error backfilling affiliate tags:", error);
+        return { error: error.message || "Failed to backfill affiliate tags" };
     }
 }
 
