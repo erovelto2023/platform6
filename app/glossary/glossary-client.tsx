@@ -9,10 +9,12 @@ import {
 import TagCloud from '../../components/glossary/TagCloud';
 import TermOfTheDay from '../../components/glossary/TermOfTheDay';
 import GlossaryTest from '../../components/glossary/GlossaryTest';
+import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
 
 interface GlossaryClientProps {
   initialTerms: any[];
   categories: string[];
+  products?: any[];
 }
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -24,7 +26,7 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) {
+function GlossaryClientInner({ initialTerms, categories, products = [] }: GlossaryClientProps) {
   const searchParams = useSearchParams();
   // Store terms in state and shuffle only on client side
   const [terms, setTerms] = useState<any[]>([]);
@@ -224,6 +226,8 @@ function GlossaryClientInner({ initialTerms, categories }: GlossaryClientProps) 
             </div>
             <ChevronRight className="ml-auto text-slate-300" />
           </Link>
+
+          <RotatingAffiliateBanner products={products} />
 
           <div className="rounded-3xl p-6 flex flex-col gap-4 bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
             <div className="flex items-center gap-2 text-orange-500 font-bold text-sm uppercase tracking-wider">

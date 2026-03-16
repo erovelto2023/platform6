@@ -12,6 +12,8 @@ export default async function GlossaryPage() {
         const result = await getGlossaryTerms() as any;
         const terms = result?.terms || [];
         
+        const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
+        
         if (terms.length === 0) {
             return (
                 <div className="min-h-screen transition-colors duration-300 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white">
@@ -43,7 +45,7 @@ export default async function GlossaryPage() {
         });
         const categories: string[] = Array.from(categorySet).sort();
 
-        return <GlossaryClient initialTerms={terms} categories={categories} />;
+        return <GlossaryClient initialTerms={terms} categories={categories} products={products} />;
         
     } catch (error) {
         console.error("Server-side error loading glossary:", error);
