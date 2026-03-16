@@ -216,18 +216,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
             </div>
           </div>
 
-          <Link href="/tools" className="md:col-span-2 rounded-3xl p-8 flex items-center gap-6 group cursor-pointer bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
-            <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Calculator size={28} />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold">Business Calculators</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">ROI, LTV, and startup costs.</p>
-            </div>
-            <ChevronRight className="ml-auto text-slate-300" />
-          </Link>
-
-          <RotatingAffiliateBanner products={products} />
+          <RotatingAffiliateBanner products={products} className="md:col-span-2" />
 
           <div className="rounded-3xl p-6 flex flex-col gap-4 bg-white border border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700">
             <div className="flex items-center gap-2 text-orange-500 font-bold text-sm uppercase tracking-wider">

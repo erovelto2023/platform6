@@ -6,9 +6,10 @@ import { ExternalLink, Sparkles, Zap } from 'lucide-react';
 
 interface RotatingAffiliateBannerProps {
     products: any[];
+    className?: string;
 }
 
-export default function RotatingAffiliateBanner({ products }: RotatingAffiliateBannerProps) {
+export default function RotatingAffiliateBanner({ products, className = "" }: RotatingAffiliateBannerProps) {
     const [randomProduct, setRandomProduct] = useState<any>(null);
 
     useEffect(() => {
@@ -25,7 +26,7 @@ export default function RotatingAffiliateBanner({ products }: RotatingAffiliateB
     if (!randomProduct) return null;
 
     return (
-        <div className="relative group overflow-hidden rounded-3xl p-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md transition-all">
+        <div className={`relative group overflow-hidden rounded-3xl p-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md transition-all ${className}`}>
             {/* Background Decorative Element */}
             <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/5 rounded-full blur-3xl group-hover:bg-emerald-500/10 transition-colors"></div>
             
