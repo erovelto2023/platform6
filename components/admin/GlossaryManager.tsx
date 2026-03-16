@@ -7,7 +7,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -127,6 +127,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleScrubUrls = () => {
+        if (!confirm('Scan all terms and remove placeholder URLs like "example.com"? This will also clean up dead links in podcasts and authority sites. Continue?')) return;
+        startTransition(async () => {
+            const res = await scrubGlossaryUrls();
+            if (res.success) {
+                if (res.updatedTerms === 0) {
+                    alert('✅ All URLs are already clean! No placeholders found.');
+                } else {
+                    alert(`✅ Successfully scrubbed ${res.scrubbedFields} invalid fields across ${res.updatedTerms} terms. Page will reload.`);
+                    window.location.reload();
+                }
+            } else {
+                alert('Error scrubbing URLs: ' + (res as any).error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -134,6 +151,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
                         <div className="flex gap-2">
+                            <button
+                                onClick={handleScrubUrls}
+                                disabled={isPending || initialTerms.length === 0}
+                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                                <ExternalLink size={15} /> Scrub URLs
+                            </button>
                             <button
                                 onClick={handleRemoveDuplicates}
                                 disabled={isPending || initialTerms.length === 0}

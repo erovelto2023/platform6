@@ -218,3 +218,83 @@ export async function removeDuplicateGlossaryTerms() {
     }
 }
 
+
+export async function scrubGlossaryUrls() {
+    try {
+        await connectToDatabase();
+        const terms = await GlossaryTerm.find({});
+        let updatedCount = 0;
+        let scrubbedFieldCount = 0;
+
+        const cleanUrl = (url: any) => {
+            if (!url || typeof url !== 'string') return "";
+            const u = url.trim().toLowerCase();
+            if (
+                u === "" ||
+                u === "#" ||
+                u.includes("example.com") ||
+                u.includes("yoursite.com") ||
+                u.includes("mysite.com") ||
+                u.includes("domain.com") ||
+                u.includes("insert_url") ||
+                u === "http://" ||
+                u === "https://"
+            ) return "";
+            return url.trim();
+        };
+
+        for (const term of terms) {
+            let hasChanges = false;
+
+            // Arrays of objects
+            const objectArrayFields = ['amazonProducts', 'websitesRanking', 'podcastsRanking'];
+            for (const field of objectArrayFields) {
+                const array = term[field as keyof typeof term];
+                if (Array.isArray(array)) {
+                    const originalLength = array.length;
+                    // Filter out items with scrubbed/invalid URLs
+                    const cleanedArray = array.map((item: any) => {
+                        const originalUrl = item.url;
+                        const cleanedUrl = cleanUrl(originalUrl);
+                        if (originalUrl !== cleanedUrl) {
+                            hasChanges = true;
+                            scrubbedFieldCount++;
+                            return { ...item, url: cleanedUrl };
+                        }
+                        return item;
+                    });
+                    
+                    if (hasChanges) {
+                        (term as any)[field] = cleanedArray;
+                    }
+                }
+            }
+
+            // Single string fields
+            const stringFields = ['videoUrl'];
+            for (const field of stringFields) {
+                const val = term[field as keyof typeof term];
+                if (typeof val === 'string') {
+                    const cleaned = cleanUrl(val);
+                    if (val !== cleaned) {
+                        (term as any)[field] = cleaned;
+                        hasChanges = true;
+                        scrubbedFieldCount++;
+                    }
+                }
+            }
+
+            if (hasChanges) {
+                await term.save();
+                updatedCount++;
+            }
+        }
+
+        revalidatePath('/admin/glossary');
+        revalidatePath('/glossary');
+        return { success: true, updatedTerms: updatedCount, scrubbedFields: scrubbedFieldCount };
+    } catch (error: any) {
+        console.error("Error scrubbing glossary URLs:", error);
+        return { error: error.message || "Failed to scrub URLs" };
+    }
+}
