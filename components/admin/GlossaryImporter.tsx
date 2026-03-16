@@ -10,6 +10,24 @@ export default function GlossaryImporter() {
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
+    // Safety net: Scrub common placeholder URLs
+    const cleanUrl = (url: any) => {
+        if (!url || typeof url !== 'string') return "";
+        const u = url.trim().toLowerCase();
+        if (
+            u === "" ||
+            u === "#" ||
+            u.includes("example.com") ||
+            u.includes("yoursite.com") ||
+            u.includes("mysite.com") ||
+            u.includes("domain.com") ||
+            u.includes("insert_url") ||
+            u === "http://" ||
+            u === "https://"
+        ) return "";
+        return url.trim();
+    };
+
     const handleImport = async () => {
         if (!importData.trim()) {
             setMessage("Please paste some data first.");
@@ -19,7 +37,7 @@ export default function GlossaryImporter() {
 
         let parsedData;
         let trimmedData = importData.trim();
-        
+
         // Strip markdown blocks if AI generated them
         if (trimmedData.startsWith('```')) {
             const lines = trimmedData.split('\n');
@@ -28,7 +46,7 @@ export default function GlossaryImporter() {
                 trimmedData = lines.slice(1, -1).join('\n').trim();
             }
         }
-        
+
         const isJsonPrompt = trimmedData.startsWith('[') || trimmedData.startsWith('{');
 
         try {
@@ -39,6 +57,25 @@ export default function GlossaryImporter() {
                     setStatus("error");
                     return;
                 }
+
+                // Scrub URLs in the JSON data
+                parsedData = parsedData.map((item: any) => {
+                    const newItem = { ...item };
+                    if (newItem.amazonProducts) {
+                        newItem.amazonProducts = newItem.amazonProducts.map((p: any) => ({ ...p, url: cleanUrl(p.url) }));
+                    }
+                    if (newItem.websitesRanking) {
+                        newItem.websitesRanking = newItem.websitesRanking.map((w: any) => ({ ...w, url: cleanUrl(w.url) }));
+                    }
+                    if (newItem.podcastsRanking) {
+                        newItem.podcastsRanking = newItem.podcastsRanking.map((p: any) => ({ ...p, url: cleanUrl(p.url) }));
+                    }
+                    if (newItem.videoUrl) {
+                        newItem.videoUrl = cleanUrl(newItem.videoUrl);
+                    }
+                    return newItem;
+                });
+
             } else {
                 throw new Error("Fallback to text");
             }
@@ -134,6 +171,12 @@ export default function GlossaryImporter() {
                                 onClick={() => {
                                     navigator.clipboard.writeText(`Generate a strict JSON array containing exactly ONE object for each of the keywords at the bottom of this prompt.
 
+CRITICAL URL GUIDELINES:
+1. FIND REAL, LIVE URLs: You MUST find actual, functional URLs for authority websites, popular podcasts, and real Amazon products related to the keyword.
+2. DO NOT HALLUCINATE OR PROTECT: Do not use "example.com", "yoursite.com", "test.com", "yoursocial.com", or any other placeholder domain. 
+3. EMPTY IS BETTER THAN FAKE: If you cannot find a verified, live URL for an item, leave the "url" field as an empty string ("") or omit the item entirely.
+4. USER VALUE: I need real resources that a human user can actually click and visit right now.
+
 The JSON MUST conform precisely to this schema structure and nothing else. Output ONLY the JSON array inside a standard code block, do not include any conversational text:
 
 [
@@ -157,23 +200,23 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "platformPreference": "The preferred software, platform, or environment.",
     "gettingStartedChecklist": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"],
     "whyItMatters": "1-3 sentences explaining why someone in business/marketing should care.",
-    "videoUrl": "",
+    "videoUrl": "Actual Video URL",
     "takeaways": ["Takeaway 1", "Takeaway 2", "Takeaway 3"],
     "headlines": ["Headline 1", "Headline 2", "Headline 3", "Headline 4", "Headline 5"],
     "youtubeTitles": ["YT 1", "YT 2", "YT 3", "YT 4", "YT 5"],
     "pinterestIdeas": ["Pin 1", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
     "instagramIdeas": ["IG 1", "IG 2", "IG 3", "IG 4", "IG 5"],
     "amazonProducts": [
-      {"name": "Product or Book Name 1", "url": ""},
-      {"name": "Product or Book Name 2", "url": ""}
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \"\""},
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \"\""}
     ],
     "websitesRanking": [
-      {"name": "Competitor/Authority Website 1", "url": "https://example.com"},
-      {"name": "Competitor/Authority Website 2", "url": "https://example.com"}
+      {"name": "Real Authority Website Name", "url": "Actual LIVE URL"},
+      {"name": "Real Authority Website Name", "url": "Actual LIVE URL"}
     ],
     "podcastsRanking": [
-      {"name": "Podcast Name 1", "url": "https://example.com"},
-      {"name": "Podcast Name 2", "url": "https://example.com"}
+      {"name": "Real Podcast Name", "url": "Actual Podcast URL"},
+      {"name": "Real Podcast Name", "url": "Actual Podcast URL"}
     ],
     "faqs": [
       {"question": "Common Question 1?", "answer": "Answer 1"},
@@ -213,6 +256,12 @@ Please generate the robust JSON array for the following terms:
                                 <pre className="bg-slate-900 text-slate-300 p-4 rounded-xl text-[10px] overflow-x-auto font-mono whitespace-pre-wrap">
                                     Click "Copy Prompt" above. Paste it into ChatGPT/Claude, add your target keywords at the bottom, and then paste the resulting JSON code directly into the Data Input box on the left.
                                 </pre>
+                            </div>
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex items-start gap-2">
+                                <AlertCircle size={14} className="text-amber-600 mt-0.5 shrink-0" />
+                                <p className="text-[10px] text-amber-700 leading-tight">
+                                    <strong>Safety Filter Active:</strong> This importer automatically detects and removes common placeholders (like example.com). Only real URLs will be saved.
+                                </p>
                             </div>
                         </div>
                     </div>
