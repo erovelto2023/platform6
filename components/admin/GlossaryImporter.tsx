@@ -7,6 +7,7 @@ import { FileText, Save, List, AlertCircle, CheckCircle, Copy, Bot } from "lucid
 export default function GlossaryImporter() {
     const [isPending, startTransition] = useTransition();
     const [importData, setImportData] = useState("");
+    const [bulkKeywords, setBulkKeywords] = useState("");
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
@@ -272,15 +273,112 @@ Please generate the robust JSON array for the following terms:
                     <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 font-bold">
                         <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <List size={14} />
-                            Fallback Formats
+                            Bulk Prompt Assistant
                         </h3>
 
                         <div className="space-y-4">
-                            <div>
-                                <p className="text-[10px] text-slate-600 font-mono bg-white p-3 rounded-lg border border-slate-100 leading-relaxed">
-                                    Plain Text: Term | Category | Short Def | Full Def
-                                </p>
-                            </div>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                                Paste your long list of keywords here:
+                            </p>
+                            <textarea 
+                                value={bulkKeywords}
+                                onChange={(e) => setBulkKeywords(e.target.value)}
+                                placeholder="One keyword per line..."
+                                className="w-full h-32 p-3 rounded-xl border border-slate-200 text-xs focus:ring-1 focus:ring-black outline-none bg-white font-mono"
+                            />
+                            <button 
+                                onClick={() => {
+                                    const keywords = bulkKeywords.split('\n').filter(k => k.trim()).slice(0, 20).join('\n');
+                                    if (!keywords) { alert('Please paste some keywords first.'); return; }
+                                    
+                                    const masterPrompt = `Generate a strict JSON array containing exactly ONE object for each of the keywords at the bottom of this prompt.
+
+CRITICAL URL GUIDELINES:
+1. FIND REAL, LIVE URLs: You MUST find actual, functional URLs for authority websites, popular podcasts, and real Amazon products related to the keyword.
+2. DO NOT HALLUCINATE OR PROTECT: Do not use "example.com", "yoursite.com", "test.com", "yoursocial.com", or any other placeholder domain. 
+3. EMPTY IS BETTER THAN FAKE: If you cannot find a verified, live URL for an item, leave the "url" field as an empty string ("") or omit the item entirely.
+4. USER VALUE: I need real resources that a human user can actually click and visit right now.
+
+The JSON MUST conform precisely to this schema structure and nothing else. Output ONLY the JSON array inside a standard code block, do not include any conversational text:
+
+[
+  {
+    "term": "The Keyword",
+    "slug": "url-friendly-version-of-the-keyword",
+    "category": "Broad Category (e.g. Marketing, Development, Email Marketing, Social Media)",
+    "skillRequired": "Must be exactly one of: 'Beginner', 'Intermediate', or 'Advanced'",
+    "tags": ["tag1", "tag2", "tag3", "relevant-keywords"],
+    "shortDefinition": "1-2 sentence quick definition under 50 words.",
+    "definition": "Simple, beginner-friendly explanation of what it means, why it exists, and where it is used.",
+    "origin": "History, Origin, and Etymology of the term.",
+    "traditionalMeaning": "The traditional or classic meaning of the term.",
+    "expandedExplanation": "Expanded history and a deeper explanation of the concept context.",
+    "commonPractices": "Common practices or exercises related to this term.",
+    "useCases": "A real-world use case or practical application.",
+    "howItMakesMoney": "A detailed explanation of how this concept generates revenue.",
+    "bestFor": "The ideal target audience or type of person best suited for this.",
+    "startupCost": "Must be exactly one of: '$0', '<$100', or '$100+'",
+    "timeToFirstDollar": "Estimated time it realistically takes to make the first dollar.",
+    "platformPreference": "The preferred software, platform, or environment.",
+    "gettingStartedChecklist": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"],
+    "whyItMatters": "1-3 sentences explaining why someone in business/marketing should care.",
+    "videoUrl": "Actual Video URL",
+    "takeaways": ["Takeaway 1", "Takeaway 2", "Takeaway 3"],
+    "headlines": ["Headline 1", "Headline 2", "Headline 3", "Headline 4", "Headline 5"],
+    "youtubeTitles": ["YT 1", "YT 2", "YT 3", "YT 4", "YT 5"],
+    "pinterestIdeas": ["Pin 1", "Pin 2", "Pin 3", "Pin 4", "Pin 5"],
+    "instagramIdeas": ["IG 1", "IG 2", "IG 3", "IG 4", "IG 5"],
+    "amazonProducts": [
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \\"\\""},
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL or \\"\\""}
+    ],
+    "websitesRanking": [
+      {"name": "Real Authority Website Name", "url": "Actual LIVE URL"},
+      {"name": "Real Authority Website Name", "url": "Actual LIVE URL"}
+    ],
+    "podcastsRanking": [
+      {"name": "Real Podcast Name", "url": "Actual Podcast URL"},
+      {"name": "Real Podcast Name", "url": "Actual Podcast URL"}
+    ],
+    "faqs": [
+      {"question": "Common Question 1?", "answer": "Answer 1"},
+      {"question": "Common Question 2?", "answer": "Answer 2"}
+    ],
+    "caseStudies": [
+      {"title": "Example Case Study", "description": "Short explanation of the case study in practice."}
+    ],
+    "relatedTermIds": ["slug-of-related-term-1", "slug-of-related-term-2", "slug-of-related-term-3"],
+    "synonyms": ["Alternative Name 1", "Alternative Name 2"],
+    "antonyms": ["Opposite Concept 1"],
+    "seeAlso": ["Related Concept 1", "Related Concept 2"],
+    "metaTitle": "SEO Optimized Meta Title under 60 characters",
+    "metaDescription": "SEO meta description under 160 characters",
+    "keywords": ["keyword 1", "keyword 2", "keyword 3", "keyword 4", "keyword 5"],
+    "imagePrompt": "A detailed AI image generation prompt (e.g. for Midjourney/DALL-E) that captures the essence of this term.",
+    "productPrompt": "A prompt for an AI to help the user brainstorm or create a digital/physical product related to this keyword.",
+    "socialPrompt": "A prompt for an AI to generate a viral social media content strategy or related marketing material for this keyword.",
+    "isFeatured": false,
+    "status": "Published",
+    "aiTrainingEligible": true,
+    "niche": "Internet Marketing / Online Business"
+  }
+]
+
+Please generate the robust JSON array for the following terms:
+${keywords}`;
+
+                                    navigator.clipboard.writeText(masterPrompt);
+                                    
+                                    // Remove the processed keywords from the list
+                                    const remaining = bulkKeywords.split('\n').filter(k => k.trim()).slice(20).join('\n');
+                                    setBulkKeywords(remaining);
+                                    
+                                    alert('Prompt for 20 keywords copied! Paste it into AI, then paste the result into the Import box. The keywords have been removed from the list below so you can do the next batch.');
+                                }}
+                                className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Bot size={16} /> Copy Prompt (Next 20)
+                            </button>
                         </div>
                     </div>
                 </div>
