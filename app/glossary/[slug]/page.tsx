@@ -13,6 +13,7 @@ import GlossaryProgressTracker from "@/components/glossary/GlossaryProgressTrack
 import RelatedTerms from "@/components/glossary/RelatedTerms";
 import GlossaryTermStructuredData from "@/components/glossary/StructuredData";
 import AIPromptsSection from "@/components/glossary/AIPromptsSection";
+import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
 
 interface Props {
@@ -85,6 +86,7 @@ export default async function GlossaryTermPage({ params }: Props) {
     if (!term) notFound();
 
     const { terms: allTerms } = await getGlossaryTerms({ limit: 1000 });
+    const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
 
     // Convert MongoDB documents to plain objects
     const serializedTerm = JSON.parse(JSON.stringify(term));
@@ -472,6 +474,9 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 )}
                                 
                                 <GlossaryActions slug={serializedTerm.slug} term={serializedTerm.term} />
+                                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                                    <RotatingAffiliateBanner products={products} />
+                                </div>
                             </div>
 
                             {/* Related Terms */}
