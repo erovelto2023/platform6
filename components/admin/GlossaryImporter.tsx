@@ -283,14 +283,22 @@ Please generate the robust JSON array for the following terms:
                 </div>
             </div>
 
-            <div className="flex flex-col gap-4">
-                <button
-                    onClick={handleImport}
-                    disabled={isPending || !importData}
-                    className="w-full bg-black hover:bg-slate-800 disabled:opacity-50 text-white font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
-                >
-                    {isPending ? "Processing..." : "Import Glossary Terms"}
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={handleImport}
+                        disabled={isPending || !importData}
+                        className="flex-1 bg-black hover:bg-slate-800 disabled:opacity-50 text-white font-black py-4 rounded-xl shadow-xl transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+                    >
+                        {isPending ? "Processing..." : "Import Glossary Terms"}
+                    </button>
+                    <button
+                        onClick={() => { setImportData(""); setMessage(""); setStatus("idle"); }}
+                        disabled={isPending || !importData}
+                        className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl border border-slate-200 transition-all uppercase tracking-widest text-xs"
+                    >
+                        Clear Data
+                    </button>
+                </div>
 
                 {status !== 'idle' && (
                     <div className={`p-4 rounded-xl flex items-center gap-3 font-bold ${status === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -299,6 +307,5 @@ Please generate the robust JSON array for the following terms:
                     </div>
                 )}
             </div>
-        </div>
     );
 }
