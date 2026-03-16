@@ -298,3 +298,41 @@ export async function scrubGlossaryUrls() {
         return { error: error.message || "Failed to scrub URLs" };
     }
 }
+
+export async function backfillAiPrompts() {
+    try {
+        await connectToDatabase();
+        const terms = await GlossaryTerm.find({});
+        let updatedCount = 0;
+
+        for (const term of terms) {
+            let hasChanges = false;
+            const termName = term.term;
+
+            if (!term.imagePrompt || term.imagePrompt.trim() === "") {
+                term.imagePrompt = `A high-quality, professional 3D render or cinematic photograph representing ${termName}, designed for a modern business and marketing blog background. Clean composition, vibrant but professional colors, 4k resolution.`;
+                hasChanges = true;
+            }
+            if (!term.productPrompt || term.productPrompt.trim() === "") {
+                term.productPrompt = `I want to create a unique product related to "${termName}". Please brainstorm 5 distinct product ideas, ranging from digital downloads (ebooks/templates) to physical goods. For each idea, explain the target audience and the primary value proposition.`;
+                hasChanges = true;
+            }
+            if (!term.socialPrompt || term.socialPrompt.trim() === "") {
+                term.socialPrompt = `Create a comprehensive 7-day social media content plan for "${termName}". Include hooks for TikTok/Reels, educational captions for Instagram, and a thought-leadership thread for X (Twitter). Focus on how this topic helps small business owners.`;
+                hasChanges = true;
+            }
+
+            if (hasChanges) {
+                await term.save();
+                updatedCount++;
+            }
+        }
+
+        revalidatePath('/admin/glossary');
+        revalidatePath('/glossary');
+        return { success: true, updatedCount };
+    } catch (error: any) {
+        console.error("Error backfilling AI prompts:", error);
+        return { error: error.message || "Failed to backfill prompts" };
+    }
+}

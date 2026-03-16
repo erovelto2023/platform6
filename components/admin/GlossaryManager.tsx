@@ -4,10 +4,10 @@ import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -127,6 +127,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleBackfillPrompts = () => {
+        if (!confirm('This will automatically generate Image, Product, and Social prompts for all terms that are currently missing them. Continue?')) return;
+        startTransition(async () => {
+            const res = await backfillAiPrompts();
+            if (res.success) {
+                if (res.updatedCount === 0) {
+                    alert('✅ All terms already have AI prompts! No updates needed.');
+                } else {
+                    alert(`✅ Successfully added/updated prompts for ${res.updatedCount} terms. Page will reload.`);
+                    window.location.reload();
+                }
+            } else {
+                alert('Error: ' + (res as any).error);
+            }
+        });
+    };
+
     const handleScrubUrls = () => {
         if (!confirm('Scan all terms and remove placeholder URLs like "example.com"? This will also clean up dead links in podcasts and authority sites. Continue?')) return;
         startTransition(async () => {
@@ -151,6 +168,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
                         <div className="flex gap-2">
+                            <button
+                                onClick={handleBackfillPrompts}
+                                disabled={isPending || initialTerms.length === 0}
+                                className="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-purple-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                                <Sparkles size={15} /> Backfill Prompts
+                            </button>
                             <button
                                 onClick={handleScrubUrls}
                                 disabled={isPending || initialTerms.length === 0}

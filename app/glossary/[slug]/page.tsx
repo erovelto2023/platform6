@@ -12,6 +12,7 @@ import GlossaryActions from "@/components/glossary/GlossaryActions";
 import GlossaryProgressTracker from "@/components/glossary/GlossaryProgressTracker";
 import RelatedTerms from "@/components/glossary/RelatedTerms";
 import GlossaryTermStructuredData from "@/components/glossary/StructuredData";
+import AIPromptsSection from "@/components/glossary/AIPromptsSection";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
 
 interface Props {
@@ -404,6 +405,13 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     {renderList(serializedTerm.websitesRanking, <Globe className="text-blue-500" size={20} />, "Websites", true)}
                                     {renderList(serializedTerm.podcastsRanking, <Podcast className="text-purple-500" size={20} />, "Ranked Podcasts", true)}
                                 </div>
+
+                                <AIPromptsSection 
+                                    term={serializedTerm.term}
+                                    imagePrompt={serializedTerm.imagePrompt}
+                                    productPrompt={serializedTerm.productPrompt}
+                                    socialPrompt={serializedTerm.socialPrompt}
+                                />
                             </div>
                         </div>
                     </div>

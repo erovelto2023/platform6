@@ -101,6 +101,9 @@ export interface IGlossaryTerm {
     recommendedTools: IRecommendedTool[];
     imageUrl?: string;
     isFeatured?: boolean;
+    imagePrompt?: string;
+    productPrompt?: string;
+    socialPrompt?: string;
 
     // --- Timestamps (Mongoose) ---
     createdAt?: Date;
@@ -207,7 +210,12 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
         context: String
     }],
     imageUrl: { type: String },
-    isFeatured: { type: Boolean, default: false }
+    isFeatured: { type: Boolean, default: false },
+
+    // AI Prompts
+    imagePrompt: { type: String },
+    productPrompt: { type: String },
+    socialPrompt: { type: String }
 }, { timestamps: true });
 
 GlossaryTermSchema.pre('save', async function () {

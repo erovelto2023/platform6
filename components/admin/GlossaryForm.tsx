@@ -72,7 +72,10 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             websitesRanking: [],
             podcastsRanking: [],
             whyItMatters: "",
-            videoUrl: ""
+            videoUrl: "",
+            imagePrompt: "",
+            productPrompt: "",
+            socialPrompt: ""
         }
     );
 
@@ -562,6 +565,46 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                         onChange={e => handleChange("keywords", e.target.value.split(",").map(s => s.trim()))}
                         className="w-full p-2.5 rounded-lg border border-gray-200 text-sm"
                     />
+                </div>
+            </div>
+
+            {/* AI Prompts Section */}
+            <div className="bg-purple-50 p-6 rounded-xl border border-purple-100 space-y-6">
+                <h3 className="font-bold text-purple-900 border-b border-purple-200 pb-2 flex items-center gap-2">
+                    <Rocket size={18} /> AI Generation Prompts
+                </h3>
+                
+                <div className="grid grid-cols-1 gap-6">
+                    <div>
+                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">AI Image Prompt (Midjourney/DALL-E)</label>
+                        <textarea
+                            rows={3}
+                            value={formData.imagePrompt || ""}
+                            onChange={e => handleChange("imagePrompt", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm focus:ring-purple-500"
+                            placeholder="A detailed visual description for AI image generation..."
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">AI Product Idea Prompt</label>
+                        <textarea
+                            rows={3}
+                            value={formData.productPrompt || ""}
+                            onChange={e => handleChange("productPrompt", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm focus:ring-purple-500"
+                            placeholder="A prompt to help the user brainstorm product ideas for this keyword..."
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-purple-800 uppercase mb-1">AI Content/Social Logic Prompt</label>
+                        <textarea
+                            rows={3}
+                            value={formData.socialPrompt || ""}
+                            onChange={e => handleChange("socialPrompt", e.target.value)}
+                            className="w-full p-2.5 rounded-lg border border-purple-200 text-sm focus:ring-purple-500"
+                            placeholder="A strategy prompt for viral social content or content planning..."
+                        />
+                    </div>
                 </div>
             </div>
 
