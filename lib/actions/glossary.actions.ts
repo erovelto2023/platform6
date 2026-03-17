@@ -388,3 +388,100 @@ export async function backfillAiPrompts() {
         return { error: error.message || "Failed to backfill prompts" };
     }
 }
+
+export async function verifyYouTubeLinks() {
+    try {
+        await connectToDatabase();
+        const terms = await GlossaryTerm.find({ videoUrl: { $exists: true, $ne: "" } }, { id: 1, term: 1, videoUrl: 1 }).lean();
+        
+        const brokenTerms: { id: string; term: string; videoUrl: string; reason: string }[] = [];
+        
+        // Process in small batches to avoid rate limiting
+        for (const term of terms) {
+            if (!term.videoUrl) continue;
+            
+            try {
+                const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(term.videoUrl)}&format=json`);
+                if (res.status === 404 || res.status === 400) {
+                    brokenTerms.push({
+                        id: term.id,
+                        term: term.term,
+                        videoUrl: term.videoUrl,
+                        reason: "Video not found or unavailable"
+                    });
+                } else if (!res.ok) {
+                   // Some other error, maybe rate limit or temporary issue, but 404/400 are definitive
+                }
+            } catch (err) {
+                // Network error or fetch failed
+                brokenTerms.push({
+                    id: term.id,
+                    term: term.term,
+                    videoUrl: term.videoUrl,
+                    reason: "Verification failed (network error)"
+                });
+            }
+        }
+        
+        return { success: true, count: terms.length, brokenCount: brokenTerms.length, brokenTerms };
+    } catch (error: any) {
+        console.error("Error verifying YouTube links:", error);
+        return { error: error.message || "Failed to verify links" };
+    }
+}
+
+export async function normalizeGlossaryData() {
+    try {
+        await connectToDatabase();
+        const collection = GlossaryTerm.collection;
+        const terms = await collection.find({}).toArray();
+        let updatedCount = 0;
+
+        const objectArrayFields = ['amazonProducts', 'websitesRanking', 'podcastsRanking'];
+
+        for (const term of terms) {
+            let termHasChanges = false;
+            const updateObj: any = {};
+            
+            for (const field of objectArrayFields) {
+                const array = term[field];
+                if (Array.isArray(array)) {
+                    let fieldHasChanges = false;
+                    const normalized = array.map((item: any) => {
+                        if (typeof item === 'string') {
+                            fieldHasChanges = true;
+                            termHasChanges = true;
+                            return { name: item, url: "" };
+                        }
+                        if (!item || typeof item !== 'object') {
+                            fieldHasChanges = true;
+                            termHasChanges = true;
+                            return { name: String(item || ""), url: "" };
+                        }
+                        if (item.name === undefined || item.url === undefined) {
+                            fieldHasChanges = true;
+                            termHasChanges = true;
+                            return { name: item.name || item.title || item.label || String(JSON.stringify(item)), url: item.url || item.link || "" };
+                        }
+                        return item;
+                    });
+                    
+                    if (fieldHasChanges) {
+                        updateObj[field] = normalized;
+                    }
+                }
+            }
+
+            if (termHasChanges) {
+                await collection.updateOne({ _id: term._id }, { $set: updateObj });
+                updatedCount++;
+            }
+        }
+
+        revalidatePath('/admin/glossary');
+        return { success: true, updatedCount };
+    } catch (error: any) {
+        console.error("Error normalizing glossary data:", error);
+        return { error: error.message || "Failed to normalize data" };
+    }
+}

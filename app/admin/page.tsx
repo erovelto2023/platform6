@@ -153,6 +153,15 @@ export default async function AdminDashboardPage() {
             bg: "bg-cyan-100",
             hover: "group-hover:bg-cyan-600"
         },
+        {
+            title: "Link Checker",
+            description: "Centralized external URL manager",
+            href: "/admin/link-checker",
+            icon: LinkIcon,
+            color: "text-indigo-600",
+            bg: "bg-indigo-100",
+            hover: "group-hover:bg-indigo-600"
+        },
     ];
 
     return (

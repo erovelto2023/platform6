@@ -4,10 +4,10 @@ import { useState, useTransition, useMemo } from 'react';
 import Link from 'next/link';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinks, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -22,6 +22,8 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [brokenVideos, setBrokenVideos] = useState<{ id: string; term: string; videoUrl: string; reason: string }[]>([]);
+    const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
 
     const filteredTerms = useMemo(() => initialTerms.filter(t =>
         t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -178,6 +180,25 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleVideoAudit = () => {
+        startTransition(async () => {
+            setAuditStatus("running");
+            const res = await verifyYouTubeLinks();
+            setAuditStatus("done");
+            if (res.success) {
+                if (res.brokenCount === 0) {
+                    alert('✅ All YouTube videos are live and available!');
+                    setBrokenVideos([]);
+                } else {
+                    setBrokenVideos(res.brokenTerms || []);
+                    alert(`⚠️ Found ${res.brokenCount} broken or unavailable YouTube links. See the report below.`);
+                }
+            } else {
+                alert('Error verifying videos: ' + (res as any).error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -191,6 +212,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 className="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-purple-700 transition-all disabled:opacity-50 text-sm"
                             >
                                 <Sparkles size={15} /> Backfill Prompts
+                            </button>
+                            <button
+                                onClick={handleVideoAudit}
+                                disabled={isPending || initialTerms.length === 0 || auditStatus === "running"}
+                                className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-rose-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                                {auditStatus === "running" ? "Auditing..." : "Video Audit"}
                             </button>
                             <button
                                 onClick={handleScrubUrls}
@@ -214,6 +242,24 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 <Copy size={15} /> Remove Duplicates
                             </button>
                             <button
+                                onClick={() => {
+                                    if (!confirm('This will fix data structural issues (converting strings to objects in podcast/product lists) to prevent save errors. Continue?')) return;
+                                    startTransition(async () => {
+                                        const res = await normalizeGlossaryData();
+                                        if (res.success) {
+                                            alert(`✅ Successfully normalized ${res.updatedCount} terms. Save errors should be fixed now.`);
+                                            window.location.reload();
+                                        } else {
+                                            alert('Error: ' + (res as any).error);
+                                        }
+                                    });
+                                }}
+                                disabled={isPending || initialTerms.length === 0}
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                                <RotateCcw size={15} /> Normalize Data
+                            </button>
+                            <button
                                 onClick={handleFlushGlossary}
                                 disabled={isPending || initialTerms.length === 0}
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50 text-sm"
@@ -234,6 +280,38 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                             </button>
                         </div>
                     </div>
+                    
+                    {/* Broken Videos Report */}
+                    {brokenVideos.length > 0 && (
+                        <div className="mb-6 p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                            <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <AlertCircle size={16} />
+                                Broken YouTube Links Found ({brokenVideos.length})
+                            </h3>
+                            <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                {brokenVideos.map((item) => (
+                                    <div key={item.id} className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">
+                                        <div>
+                                            <p className="text-sm font-black text-slate-900">{item.term}</p>
+                                            <p className="text-xs text-rose-500 font-mono truncate max-w-lg">{item.videoUrl}</p>
+                                        </div>
+                                        <button 
+                                            onClick={() => {
+                                                const term = initialTerms.find(t => t.id === item.id);
+                                                if (term) {
+                                                    setEditingTerm(term);
+                                                    setView('edit');
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-slate-800 transition-all"
+                                        >
+                                            Fix Now
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="mb-4 flex gap-3 items-center">
                         <div className="relative flex-1">
