@@ -115,45 +115,31 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-10">
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
-                <LayoutList size={14} /> Categories
-              </h3>
-              <div className="flex flex-col gap-1">
-                {['all', ...categories].map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => { setSelectedCategory(cat); setSelectedTag('all'); setCurrentPage(1); }}
-                    className={`px-4 py-3 rounded-xl text-left font-bold transition-all flex items-center justify-between group ${
-                      selectedCategory === cat ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:bg-white dark:hover:bg-slate-800 hover:text-emerald-600'
-                    }`}
-                  >
-                    <span className="capitalize">{cat === 'all' ? 'All Areas' : cat}</span>
-                    <ChevronRight className={`transition-opacity ${selectedCategory === cat ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} size={16} />
-                  </button>
-                ))}
-              </div>
+        <div className="flex flex-col gap-12">
+          
+          {/* Top Controls: Categories & A-Z */}
+          <div className="space-y-8">
+            {/* Category Bar */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mr-2">Category:</span>
+              {['all', ...categories].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => { setSelectedCategory(cat); setSelectedTag('all'); setCurrentPage(1); }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                    selectedCategory === cat 
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' 
+                      : 'bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:border-emerald-500 hover:text-emerald-600'
+                  }`}
+                >
+                  <span className="capitalize">{cat === 'all' ? 'All Areas' : cat}</span>
+                </button>
+              ))}
             </div>
 
-            <div className="p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><Trophy size={60} className="text-white" /></div>
-              <h4 className="text-white font-black text-xl mb-2 relative z-10">My Saved Terms</h4>
-              <p className="text-slate-400 text-xs mb-6 relative z-10 leading-relaxed">Continue where you left off in our interactive study engine.</p>
-              <Link href="/glossary-bookmarks" className="flex items-center justify-center gap-2 w-full py-3 bg-white text-slate-900 rounded-xl font-black text-sm hover:bg-emerald-400 transition-colors relative z-10">
-                <Bookmark size={16} className="fill-current" /> Open Library
-              </Link>
-            </div>
-
-            <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); }} activeTag={selectedTag} />
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
             {/* A-Z Bar */}
-            <div className="flex flex-wrap gap-1 mb-10 pb-6 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex flex-wrap gap-1 pb-6 border-b border-slate-200 dark:border-slate-800">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 w-full mb-3">Browse A-Z:</span>
               {Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l => (
                 <button 
                   key={l}
@@ -167,46 +153,95 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
               ))}
               {activeLetter && <button onClick={() => setActiveLetter(null)} className="px-3 h-9 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase hover:bg-red-100">Clear</button>}
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {currentItems.map((term: any, idx: number) => (
-                <Link 
-                  key={term.slug}
-                  href={`/glossary/${term.slug}`}
-                  className="bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-2xl transition-all group animate-in fade-in slide-in-from-bottom-4 flex flex-col h-full"
-                >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-slate-50 dark:bg-slate-900 text-slate-400 group-hover:text-emerald-500 transition-colors">{term.category || 'General'}</div>
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300"><Clock size={12} /> {Math.round((term.shortDefinition?.length || 100) / 100) + 1}m</div>
-                  </div>
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors">{term.term}</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3 mb-8 flex-grow font-medium">{term.shortDefinition}</p>
-                  <div className="pt-6 border-t border-slate-50 dark:border-slate-700/50 flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-emerald-500 font-black text-xs uppercase tracking-wider">Learn More <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" /></div>
-                    {term.views > 0 && <div className="flex items-center gap-1 text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-lg"><TrendingUp size={12} /> {term.views}</div>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {filteredTerms.length === 0 && (
-              <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-700">
-                <Search size={40} className="mx-auto text-slate-200 mb-4" />
-                <h3 className="text-xl font-bold mb-2">No terms found</h3>
-                <p className="text-slate-500">Try a different search or clear your filters.</p>
-                <button onClick={resetFilters} className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors">Clear All Filters</button>
-              </div>
-            )}
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="mt-12 flex justify-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => setCurrentPage(p)} className={`w-10 h-10 rounded-xl font-bold transition-all ${currentPage === p ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600'}`}>{p}</button>
+          {/* Main Grid Area */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Results Grid */}
+            <div className="lg:col-span-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {currentItems.map((term: any) => (
+                  <Link 
+                    key={term.slug}
+                    href={`/glossary/${term.slug}`}
+                    className="bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-2xl transition-all group animate-in fade-in slide-in-from-bottom-4 flex flex-col h-full"
+                  >
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded bg-slate-50 dark:bg-slate-900 text-slate-400 group-hover:text-emerald-500 transition-colors">{term.category || 'General'}</div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300"><Clock size={12} /> {Math.round((term.shortDefinition?.length || 100) / 100) + 1}m</div>
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors">{term.term}</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed line-clamp-3 mb-8 flex-grow font-medium">{term.shortDefinition}</p>
+                    <div className="pt-6 border-t border-slate-50 dark:border-slate-700/50 flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-emerald-500 font-black text-xs uppercase tracking-wider">Learn More <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" /></div>
+                      {term.views > 0 && <div className="flex items-center gap-1 text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-900 px-2 py-1 rounded-lg"><TrendingUp size={12} /> {term.views}</div>}
+                    </div>
+                  </Link>
                 ))}
               </div>
-            )}
+
+              {filteredTerms.length === 0 && (
+                <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-700">
+                  <Search size={40} className="mx-auto text-slate-200 mb-4" />
+                  <h3 className="text-xl font-bold mb-2">No terms found</h3>
+                  <p className="text-slate-500">Try a different search or clear your filters.</p>
+                  <button onClick={resetFilters} className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors">Clear All Filters</button>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-12 flex justify-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                    <button key={p} onClick={() => setCurrentPage(p)} className={`w-10 h-10 rounded-xl font-bold transition-all ${currentPage === p ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600'}`}>{p}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Compact Right Sidebar for Sticky Tools */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                <div className="p-6 bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><Trophy size={60} className="text-white" /></div>
+                  <h4 className="text-white font-black text-xl mb-2 relative z-10">Saved Terms</h4>
+                  <p className="text-slate-400 text-xs mb-6 relative z-10 leading-relaxed">Master your library.</p>
+                  <Link href="/glossary-bookmarks" className="flex items-center justify-center gap-2 w-full py-3 bg-white text-slate-900 rounded-xl font-black text-sm hover:bg-emerald-400 transition-colors relative z-10">
+                    <Bookmark size={16} className="fill-current" /> Open Library
+                  </Link>
+                </div>
+                
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Quick Stats</h4>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500">Total Terms</span>
+                      <span className="font-bold">{initialTerms.length}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500">Categories</span>
+                      <span className="font-bold">{categories.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* Bottom Discovery Section */}
+          <div className="pt-20 border-t border-slate-200 dark:border-slate-800">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); }} activeTag={selectedTag} />
+              <div className="flex flex-col justify-center">
+                <h3 className="text-2xl font-black mb-4">Master Your Niche</h3>
+                <p className="text-slate-500 mb-8 leading-relaxed">Our comprehensive glossary is designed to give you the competitive edge in digital business. Explore trending topics and master high-income skills.</p>
+                <div className="bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700">
+                   <RotatingAffiliateBanner products={products} />
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
