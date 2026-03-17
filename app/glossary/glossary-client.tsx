@@ -114,154 +114,192 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="flex flex-col gap-8">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="flex flex-col gap-10">
           
-          {/* Filtering Controls */}
-          <div className="flex flex-col md:flex-row items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="flex-1 w-full">
-                <label className="text-[10px] font-black uppercase text-slate-400 mb-1.5 block px-1">Category</label>
-                <select 
-                    value={selectedCategory}
-                    onChange={(e) => { setSelectedCategory(e.target.value); setSelectedTag('all'); setCurrentPage(1); }}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer"
-                >
-                    <option value="all">All Categories</option>
-                    {categories.map(cat => (
-                        <option key={cat} value={cat} className="capitalize">{cat}</option>
-                    ))}
-                </select>
+          {/* Top Cards Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Browse A-Z Card */}
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Book size={20} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white">Browse A-Z</h3>
+                  <p className="text-xs text-slate-400 font-bold">Select a letter to find terms</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-7 sm:grid-cols-9 gap-1.5">
+                {Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l => (
+                  <button 
+                    key={l}
+                    onClick={() => { setActiveLetter(activeLetter === l ? null : l); setCurrentPage(1); }}
+                    className={`h-8 rounded-lg flex items-center justify-center text-[10px] font-black transition-all border ${
+                      activeLetter === l 
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
+                        : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-700 text-slate-400 hover:border-emerald-500 hover:text-emerald-600 shadow-sm'
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="flex-1 w-full">
-                <label className="text-[10px] font-black uppercase text-slate-400 mb-1.5 block px-1">Topic Tag</label>
-                <select 
-                    value={selectedTag}
-                    onChange={(e) => { setSelectedTag(e.target.value); setSelectedCategory('all'); setCurrentPage(1); }}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:border-emerald-500 transition-all appearance-none cursor-pointer"
-                >
-                    <option value="all">All Tags</option>
-                    {Array.from(new Set(terms.flatMap(t => t.tags || []))).sort().map(tag => (
-                        <option key={tag} value={tag}>{tag}</option>
-                    ))}
-                </select>
-            </div>
-            <div className="pt-5 flex gap-2">
-                <button 
-                    onClick={resetFilters}
-                    className="p-2.5 text-slate-400 hover:text-red-500 transition-colors"
-                    title="Clear All Filters"
-                >
-                    <Clock size={20} className="rotate-180" />
-                </button>
+
+            {/* Main Categories Card */}
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-center">
+               <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <LayoutList size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black">Search Categories</h3>
+                    <p className="text-sm text-slate-400 font-medium">Filter by core busines areas</p>
+                  </div>
+               </div>
+               <div className="flex flex-wrap gap-2 mt-2">
+                  {categories.slice(0, 4).map(cat => (
+                    <span key={cat} className="px-3 py-1 bg-slate-100 dark:bg-slate-900 text-slate-500 text-[10px] font-black uppercase rounded-lg">#{cat}</span>
+                  ))}
+                  <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase rounded-lg">Browse All</span>
+               </div>
             </div>
           </div>
 
-          {/* A-Z Bar - Compact */}
-          <div className="flex flex-wrap justify-center gap-1 py-4 border-y border-slate-100 dark:border-slate-800">
-            {Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l => (
+          {/* Action Driven Marketing CTA (Large Green Card) */}
+          <div className="bg-emerald-600 p-8 rounded-[2.5rem] relative overflow-hidden group shadow-2xl shadow-emerald-500/20">
+            <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12"><Zap size={140} className="text-white fill-current" /></div>
+            <div className="relative z-10 max-w-2xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest mb-4">
+                <Trophy className="w-3 h-3" /> Mastery System v2.0
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-white mb-6 leading-tight">Action Driven Marketing</h2>
+              <p className="text-emerald-50/80 text-lg font-medium mb-8">Master your market knowledge. Turn terms into tactics with our personalized study engine.</p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/glossary/study" className="px-10 py-4 bg-white text-emerald-600 rounded-2xl font-black text-sm hover:scale-105 transition-all shadow-xl">
+                  Start Learning
+                </Link>
+                <Link href="/glossary-bookmarks" className="px-10 py-4 bg-emerald-700 text-white rounded-2xl font-black text-sm hover:bg-emerald-800 transition-all border border-emerald-500/30">
+                  Open Library
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Bar Row */}
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-4 py-6 border-b border-slate-200 dark:border-slate-800">
+            <h4 className="text-xl font-black text-slate-900 dark:text-white shrink-0">Essential Terms</h4>
+            
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+              {/* Dropdown Filters */}
+              <div className="flex-1 lg:flex-none">
+                  <select 
+                      value={selectedCategory}
+                      onChange={(e) => { setSelectedCategory(e.target.value); setSelectedTag('all'); setCurrentPage(1); }}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 transition-all cursor-pointer"
+                  >
+                      <option value="all">Category: All</option>
+                      {categories.map(cat => (
+                          <option key={cat} value={cat}>{cat.toUpperCase()}</option>
+                      ))}
+                  </select>
+              </div>
+              <div className="flex-1 lg:flex-none">
+                  <select 
+                      value={activeLetter || 'all'}
+                      onChange={(e) => { setActiveLetter(e.target.value === 'all' ? null : e.target.value); setCurrentPage(1); }}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 transition-all cursor-pointer"
+                  >
+                      <option value="all">Letter: All</option>
+                      {Array.from("ABCDEFGHIJKLMNOPQRSTUVWXYZ").map(l => (
+                          <option key={l} value={l}>{l}</option>
+                      ))}
+                  </select>
+              </div>
+              <div className="flex-1 lg:flex-none">
+                  <select 
+                      value={selectedTag}
+                      onChange={(e) => { setSelectedTag(e.target.value); setSelectedCategory('all'); setCurrentPage(1); }}
+                      className="w-full bg-slate-100 dark:bg-slate-900 border border-transparent rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-emerald-500 transition-all cursor-pointer"
+                  >
+                      <option value="all">Tag: All</option>
+                      {Array.from(new Set(terms.flatMap(t => t.tags || []))).sort().map(tag => (
+                          <option key={tag} value={tag}>{tag.toUpperCase()}</option>
+                      ))}
+                  </select>
+              </div>
               <button 
-                key={l}
-                onClick={() => { setActiveLetter(activeLetter === l ? null : l); setCurrentPage(1); }}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black transition-all ${
-                  activeLetter === l ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
+                  onClick={resetFilters}
+                  className="px-6 py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-300 transition-all"
               >
-                {l}
+                  Clear Filters
               </button>
-            ))}
+            </div>
           </div>
 
-          {/* Results Info */}
-          <div className="flex items-center justify-between text-xs font-bold text-slate-400 px-2 mt-4">
-            <p>Showing <span className="text-slate-900 dark:text-white">{filteredTerms.length}</span> terms</p>
-            {activeLetter || selectedCategory !== 'all' || selectedTag !== 'all' ? (
-                <span className="text-emerald-500">Filtered view active</span>
-            ) : (
-                <span>All terms</span>
-            )}
-          </div>
-
-          {/* Terms Grid - Centered & Premium */}
-          <div className="grid grid-cols-1 gap-4">
+          {/* 4-Column Term Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentItems.map((term: any) => (
               <Link 
                 key={term.slug}
                 href={`/glossary/${term.slug}`}
-                className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-xl transition-all group animate-in fade-in slide-in-from-bottom-2 flex items-center gap-6"
+                className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:shadow-2xl transition-all group animate-in fade-in slide-in-from-bottom-4 flex flex-col h-full overflow-hidden relative"
               >
-                <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-emerald-500 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                    <Book size={20} />
+                <div className="text-[9px] font-black uppercase tracking-tighter text-emerald-600 mb-3">{term.category}</div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3 group-hover:text-emerald-500 transition-colors leading-tight">{term.term}</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed line-clamp-3 mb-6 flex-grow font-medium">{term.shortDefinition}</p>
+                <div className="pt-4 border-t border-slate-50 dark:border-slate-700/50 flex items-center justify-between mt-auto">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-300"><Clock size={10} /> {Math.round((term.shortDefinition?.length || 100) / 100) + 1}m</div>
+                  {term.views > 0 && <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><TrendingUp size={10} /> {term.views}</div>}
                 </div>
-                <div className="flex-grow min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white truncate">{term.term}</h3>
-                        <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded">{term.category}</span>
-                    </div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 truncate font-medium">{term.shortDefinition}</p>
-                </div>
-                <ChevronRight size={18} className="text-slate-300 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
           </div>
 
           {filteredTerms.length === 0 && (
-            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+            <div className="text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200 dark:border-slate-700">
               <Search size={40} className="mx-auto text-slate-200 mb-4" />
-              <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">No terms found</h3>
-              <p className="text-slate-500">Try adjusting your filters or search query.</p>
-              <button onClick={resetFilters} className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold">Show All Terms</button>
+              <h3 className="text-xl font-bold mb-2">No terms found</h3>
+              <p className="text-slate-500">Try a different search or clear your filters.</p>
+              <button onClick={resetFilters} className="mt-6 px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold">Clear All Filters</button>
             </div>
           )}
 
-          {/* Pagination - Clean & Centered */}
+          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="mt-8 flex justify-center items-center gap-2">
+            <div className="mt-12 flex justify-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                 <button 
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:bg-slate-50"
+                  key={p} 
+                  onClick={() => setCurrentPage(p)} 
+                  className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                    currentPage === p 
+                      ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' 
+                      : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600'
+                  }`}
                 >
-                    <ChevronRight size={16} className="rotate-180" />
+                  {p}
                 </button>
-                <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                        <button 
-                            key={p} 
-                            onClick={() => setCurrentPage(p)} 
-                            className={`w-9 h-9 rounded-lg text-xs font-black transition-all ${
-                                currentPage === p 
-                                    ? 'bg-emerald-600 text-white shadow-md' 
-                                    : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-emerald-600'
-                            }`}
-                        >
-                            {p}
-                        </button>
-                    ))}
-                </div>
-                <button 
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 disabled:opacity-30 hover:bg-slate-50"
-                >
-                    <ChevronRight size={16} />
-                </button>
+              ))}
             </div>
           )}
-          
-          {/* Study Mode Call to Action - Integrated Footer */}
-          <div className="mt-20 p-8 bg-slate-900 rounded-[2.5rem] border border-slate-800 relative overflow-hidden text-center">
-            <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12"><Zap size={120} className="text-emerald-500" /></div>
-            <h4 className="text-2xl font-black text-white mb-4 relative z-10">Master the Library</h4>
-            <p className="text-slate-400 text-sm mb-8 max-w-md mx-auto relative z-10">Done reading? Turn these terms into permanent knowledge with our interactive study engine.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                <Link href="/glossary/study" className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-black text-sm hover:scale-105 transition-all shadow-lg shadow-emerald-500/20">
-                    Enter Study Mode
-                </Link>
-                <Link href="/glossary-bookmarks" className="px-8 py-3 bg-white/10 text-white hover:bg-white/20 rounded-xl font-black text-sm transition-all border border-white/10">
-                    View My Saved Terms
-                </Link>
+
+          {/* Footer Discovery / Random Tools Section */}
+          <div className="mt-20 pt-20 border-t border-slate-200 dark:border-slate-800">
+            <div className="bg-white dark:bg-slate-800 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-700 shadow-sm">
+                <div className="flex flex-col lg:flex-row gap-12">
+                   <div className="lg:w-2/3">
+                      <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-4">Inside The Library</h4>
+                      <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); }} activeTag={selectedTag} />
+                   </div>
+                   <div className="lg:w-1/3 flex flex-col justify-center">
+                      <RotatingAffiliateBanner products={products} />
+                   </div>
+                </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
