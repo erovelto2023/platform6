@@ -3,9 +3,8 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Search, Book, Calculator, TrendingUp, Zap, ChevronRight, Clock, Bookmark, LayoutList, Trophy, ArrowRight
-} from 'lucide-react';
+import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart } from 'lucide-react';
+import { PaymentSupport } from '@/components/PaymentSupport';
 import TagCloud from '../../components/glossary/TagCloud';
 import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
 
@@ -90,6 +89,9 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
+      {/* Payment Support Ticker at Top */}
+      <PaymentSupport variant="minimal" className="relative z-[60]" />
+
       {/* Hero / Header Section */}
       <div className="pt-24 pb-12 px-6 text-center border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-4xl mx-auto">
@@ -319,11 +321,15 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
           {/* Footer Discovery - Popular Tags */}
           <div className="mt-24 pt-24 border-t border-slate-100 dark:border-slate-800">
-             <div className="max-w-4xl mx-auto text-center">
-                <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-8">Popular Keyword Topics</h4>
-                <div className="bg-slate-50 dark:bg-slate-900 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800">
-                    <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} activeTag={selectedTag} />
+             <div className="max-w-4xl mx-auto space-y-16">
+                <div className="text-center">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-8">Popular Keyword Topics</h4>
+                    <div className="bg-slate-50 dark:bg-slate-900 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800">
+                        <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} activeTag={selectedTag} />
+                    </div>
                 </div>
+
+                <PaymentSupport className="border-none bg-slate-50 dark:bg-slate-900 shadow-none" />
              </div>
           </div>
 

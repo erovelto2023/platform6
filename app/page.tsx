@@ -11,6 +11,7 @@ import {
   ShoppingCart, Image, Sparkles, Rocket, Target, Award, Shield,
   Check, X, Youtube, Facebook, Heart
 } from "lucide-react";
+import { PaymentSupport } from "@/components/PaymentSupport";
 import {
   Accordion,
   AccordionContent,
@@ -81,8 +82,11 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 font-sans">
+      {/* Payment Support Ticker at Top */}
+      <PaymentSupport variant="minimal" className="relative z-[60]" />
+
       {/* Navbar - Dark Theme */}
-      <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
+      <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] md:top-[34px] z-50">
         <div className="flex items-center gap-2 font-bold text-xl text-white">
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
             K
@@ -507,7 +511,10 @@ export default function LandingPage() {
                         <Heart className="ml-2 h-6 w-6 fill-white" />
                     </Button>
                 </Link>
-                <p className="mt-6 text-slate-500 font-medium uppercase tracking-widest text-sm">Help us keep the academy growing</p>
+                <p className="mt-6 text-slate-500 font-medium uppercase tracking-widest text-sm mb-12">Help us keep the academy growing</p>
+                
+                {/* Specific Payment Options Card */}
+                <PaymentSupport className="max-w-3xl w-full" />
             </div>
           </div>
         </section>
