@@ -82,9 +82,6 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 font-sans">
-      {/* Payment Support Ticker at Top */}
-      <PaymentSupport variant="minimal" className="relative z-[60]" />
-
       {/* Navbar - Dark Theme */}
       <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] md:top-[34px] z-50">
         <div className="flex items-center gap-2 font-bold text-xl text-white">

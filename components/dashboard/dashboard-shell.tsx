@@ -17,7 +17,7 @@ export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
     return (
         <div className="h-full relative">
             <div className={cn(
-                "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[80] bg-gray-900 transition-all duration-300 ease-in-out",
+                "hidden h-full md:flex md:flex-col md:fixed md:top-[34px] md:bottom-0 md:left-0 z-[80] bg-gray-900 transition-all duration-300 ease-in-out",
                 isCollapsed ? "md:w-20" : "md:w-72"
             )}>
                 <Sidebar userRole={userRole} />

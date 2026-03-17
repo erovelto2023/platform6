@@ -38,7 +38,7 @@ export default function LibraryPage() {
     return (
         <div className="flex flex-col min-h-screen bg-slate-950">
             {/* Navbar - copied from landing page for consistency */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
+            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
                 <div className="flex items-center gap-2 font-bold text-xl text-white">
                     <Link href="/" className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">

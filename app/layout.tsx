@@ -8,6 +8,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfettiProvider } from "@/components/providers/confetti-provider";
 import { SocketProvider } from "@/components/providers/socket-provider";
+import { PaymentSupport } from "@/components/PaymentSupport";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
           <SocketProvider>
+            <PaymentSupport variant="minimal" className="sticky top-0 z-[100]" />
             {children}
             <ConfettiProvider />
             <Toaster />

@@ -89,9 +89,6 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
-      {/* Payment Support Ticker at Top */}
-      <PaymentSupport variant="minimal" className="relative z-[60]" />
-
       {/* Hero / Header Section */}
       <div className="pt-24 pb-12 px-6 text-center border-b border-slate-100 dark:border-slate-800">
         <div className="max-w-4xl mx-auto">

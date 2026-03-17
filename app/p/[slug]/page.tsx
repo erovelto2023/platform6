@@ -1,6 +1,7 @@
 import { getPageBySlug } from "@/lib/actions/page-builder.actions";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
 
 export async function generateMetadata({
     params,
@@ -46,10 +47,10 @@ export default async function PublicPageView({
             {page.sections?.map((section: any, index: number) => {
                 if (section.customHTML) {
                     return (
-                        <div 
+                        <CustomHTMLRenderer 
                             key={section._id || index}
                             className="custom-html-wrapper"
-                            dangerouslySetInnerHTML={{ __html: section.customHTML }}
+                            html={section.customHTML}
                         />
                     );
                 }

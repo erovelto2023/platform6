@@ -107,11 +107,10 @@ export default async function BlogPage() {
 
                 {/* Blog Posts Section */}
                 <section id="posts" className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
                     <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
 
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="text-center mb-12 max-w-2xl mx-auto">
+                        <div className="text-center mb-12 max-w-2xl mx-auto sticky top-[34px] z-20 bg-slate-900/80 backdrop-blur-md border border-slate-800 p-8 rounded-3xl shadow-xl">
                             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                                 The Blog
                             </h2>
