@@ -34,6 +34,8 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [keywordOfTheDay, setKeywordOfTheDay] = useState<any>(null);
+  const [showLetters, setShowLetters] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
 
   useEffect(() => {
     if (!initialTerms) return;
@@ -55,7 +57,8 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       const matchesSearch = !searchQuery || 
                             term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             term.shortDefinition?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesLetter = !activeLetter || term.term.toUpperCase().startsWith(activeLetter);
+      const matchesLetter = !activeLetter || 
+                            (activeLetter === '0-9' ? /^[0-9]/.test(term.term) : term.term.toUpperCase().startsWith(activeLetter));
       const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
       const matchesTag = selectedTag === 'all' || (term.tags && term.tags.includes(selectedTag));
       return matchesSearch && matchesLetter && matchesCategory && matchesTag;
@@ -71,7 +74,11 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
     setSelectedCategory('all');
     setSelectedTag('all');
     setCurrentPage(1);
+    setShowLetters(false);
+    setShowCategories(false);
   };
+
+  const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
@@ -96,13 +103,19 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
             />
           </div>
 
-          {/* Inline Navigation */}
+          {/* Inline Navigation Row */}
           <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-black uppercase tracking-widest text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-8 mt-4">
-             <button onClick={() => { setSearchQuery(''); setActiveLetter(null); }} className="hover:text-emerald-600 transition-colors flex items-center gap-2">
+             <button 
+                onClick={() => { setShowLetters(!showLetters); setShowCategories(false); }} 
+                className={`hover:text-emerald-600 transition-colors flex items-center gap-2 ${showLetters ? 'text-emerald-500' : ''}`}
+             >
                 <Book size={14} /> Browse A-Z
              </button>
              <span className="text-slate-200">|</span>
-             <button onClick={() => { setSelectedCategory('all'); }} className="hover:text-emerald-600 transition-colors flex items-center gap-2">
+             <button 
+                onClick={() => { setShowCategories(!showCategories); setShowLetters(false); }} 
+                className={`hover:text-emerald-600 transition-colors flex items-center gap-2 ${showCategories ? 'text-emerald-500' : ''}`}
+             >
                 <LayoutList size={14} /> Search Categories
              </button>
              <span className="text-slate-200">|</span>
@@ -110,6 +123,52 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                 <Zap size={14} className="fill-current" /> Enter Study Mode
              </Link>
           </div>
+
+          {/* Sub-Nav: Letters */}
+          {showLetters && (
+            <div className="mt-8 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                {characters.map(char => (
+                    <button 
+                        key={char}
+                        onClick={() => { setActiveLetter(activeLetter === char ? null : char); setCurrentPage(1); }}
+                        className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all border ${
+                            activeLetter === char 
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
+                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
+                        }`}
+                    >
+                        {char}
+                    </button>
+                ))}
+            </div>
+          )}
+
+          {/* Sub-Nav: Categories */}
+          {showCategories && (
+            <div className="mt-8 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                <button 
+                    onClick={() => { setSelectedCategory('all'); setCurrentPage(1); }}
+                    className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
+                        selectedCategory === 'all' ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'
+                    }`}
+                >
+                    ALL AREAS
+                </button>
+                {categories.map(cat => (
+                    <button 
+                        key={cat}
+                        onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
+                            selectedCategory === cat 
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
+                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
+                        }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+          )}
         </div>
       </div>
 
