@@ -4,12 +4,18 @@ import connectToDatabase from "@/lib/db/connect";
 import GlossaryTerm from "@/lib/db/models/GlossaryTerm";
 import { revalidatePath } from "next/cache";
 
-export async function getGlossaryTerms(options: { limit?: number; niche?: string } = {}) {
+export async function getGlossaryTerms(options: { limit?: number; niche?: string; sortBy?: "term" | "views" } = {}) {
     try {
         await connectToDatabase();
         const query = options.niche ? { niche: options.niche } : {};
+        
+        let sortConfig: any = { term: 1 };
+        if (options.sortBy === "views") {
+            sortConfig = { views: -1 };
+        }
+
         const terms = await GlossaryTerm.find(query)
-            .sort({ term: 1 })
+            .sort(sortConfig)
             .limit(options.limit || 10000) // Increase default limit to ensure all terms are fetched
             .lean();
         return { terms: JSON.parse(JSON.stringify(terms)) };

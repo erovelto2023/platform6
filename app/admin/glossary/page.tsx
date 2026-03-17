@@ -4,7 +4,7 @@ import GlossaryForm from "@/components/admin/GlossaryForm";
 import GlossaryManager from "../../../components/admin/GlossaryManager";
 
 export default async function GlossaryAdminPage() {
-    const { terms } = await getGlossaryTerms({});
+    const { terms } = await getGlossaryTerms({ sortBy: "views" });
     const { products } = await getDirectoryProducts();
 
     return (
