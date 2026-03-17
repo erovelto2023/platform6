@@ -36,6 +36,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const [keywordOfTheDay, setKeywordOfTheDay] = useState<any>(null);
   const [showLetters, setShowLetters] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
+  const [categoryActiveLetter, setCategoryActiveLetter] = useState<string | null>(null);
 
   useEffect(() => {
     if (!initialTerms) return;
@@ -73,12 +74,19 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
     setActiveLetter(null);
     setSelectedCategory('all');
     setSelectedTag('all');
+    setCategoryActiveLetter(null);
     setCurrentPage(1);
     setShowLetters(false);
     setShowCategories(false);
   };
 
   const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+  const filteredCategories = useMemo(() => {
+    if (!categoryActiveLetter) return [];
+    return categories.filter(cat => cat.toUpperCase().startsWith(categoryActiveLetter));
+  }, [categoryActiveLetter]);
 
   return (
     <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
@@ -113,7 +121,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
              </button>
              <span className="text-slate-200">|</span>
              <button 
-                onClick={() => { setShowCategories(!showCategories); setShowLetters(false); }} 
+                onClick={() => { setShowCategories(!showCategories); setShowLetters(false); setCategoryActiveLetter(null); }} 
                 className={`hover:text-emerald-600 transition-colors flex items-center gap-2 ${showCategories ? 'text-emerald-500' : ''}`}
              >
                 <LayoutList size={14} /> Search Categories
@@ -143,30 +151,56 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
             </div>
           )}
 
-          {/* Sub-Nav: Categories */}
+          {/* Sub-Nav: Categories (Hierarchical) */}
           {showCategories && (
-            <div className="mt-8 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                <button 
-                    onClick={() => { setSelectedCategory('all'); setCurrentPage(1); }}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
-                        selectedCategory === 'all' ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-slate-50 dark:bg-slate-900 text-slate-400'
-                    }`}
-                >
-                    ALL AREAS
-                </button>
-                {categories.map(cat => (
+            <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                {/* Step 1: Letter selection for categories */}
+                <div className="flex flex-wrap justify-center gap-1.5 max-w-2xl mx-auto">
                     <button 
-                        key={cat}
-                        onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
-                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all border ${
-                            selectedCategory === cat 
-                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
-                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
-                        }`}
+                         onClick={() => { setSelectedCategory('all'); setCurrentPage(1); setCategoryActiveLetter(null); }}
+                         className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
+                             selectedCategory === 'all' && !categoryActiveLetter ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 dark:bg-slate-100/5 text-slate-400'
+                         }`}
                     >
-                        {cat}
+                        ALL
                     </button>
-                ))}
+                    {alphabet.map(letter => (
+                        <button 
+                            key={letter}
+                            onClick={() => setCategoryActiveLetter(categoryActiveLetter === letter ? null : letter)}
+                            className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border ${
+                                categoryActiveLetter === letter 
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
+                                    : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
+                            }`}
+                        >
+                            {letter}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Step 2: Display filtered categories */}
+                {categoryActiveLetter && (
+                    <div className="flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                        {filteredCategories.length > 0 ? (
+                            filteredCategories.map(cat => (
+                                <button 
+                                    key={cat}
+                                    onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
+                                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase transition-all border ${
+                                        selectedCategory === cat 
+                                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xl' 
+                                            : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600'
+                                    }`}
+                                >
+                                    {cat}
+                                </button>
+                            ))
+                        ) : (
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No categories starting with "{categoryActiveLetter}"</p>
+                        )}
+                    </div>
+                )}
             </div>
           )}
         </div>
