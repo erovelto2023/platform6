@@ -478,12 +478,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                                             <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{serializedTerm.startupCost}</span>
                                         </div>
                                     )}
-                                    <div className="col-span-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/50">
-                                        <span className="block text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
-                                            <TrendingUp size={10} /> Popularity
-                                        </span>
-                                        <span className="font-bold text-blue-900 dark:text-blue-100 text-sm">{serializedTerm.views || 0} Views</span>
-                                    </div>
                                     {serializedTerm.platformPreference && (
                                         <div className="col-span-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                                             <span className="block text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Platform / Software</span>

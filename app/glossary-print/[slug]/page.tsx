@@ -260,6 +260,32 @@ export default async function GlossaryPrintPage({ params }: Props) {
                     </>
                 )}
 
+                {(t.imagePrompt || t.productPrompt || t.socialPrompt) && (
+                    <>
+                        <h2>AI Content Prompts</h2>
+                        <div className="section-grid">
+                            {t.imagePrompt && (
+                                <div className="card" style={{ gridColumn: "1/-1" }}>
+                                    <h4>Visual / Image Generation Prompt</h4>
+                                    <p style={{ fontSize: "0.85rem", fontStyle: "italic" }}>{t.imagePrompt}</p>
+                                </div>
+                            )}
+                            {t.productPrompt && (
+                                <div className="card">
+                                    <h4>Product Opportunity Prompt</h4>
+                                    <p style={{ fontSize: "0.85rem", fontStyle: "italic" }}>{t.productPrompt}</p>
+                                </div>
+                            )}
+                            {t.socialPrompt && (
+                                <div className="card">
+                                    <h4>Social Media Hooks Prompt</h4>
+                                    <p style={{ fontSize: "0.85rem", fontStyle: "italic" }}>{t.socialPrompt}</p>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
+
                 <div className="footer-note">
                     Copyright © 2026 K Business Academy. All rights reserved.
                 </div>

@@ -352,8 +352,8 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     </div>
 
-                    {/* Bulk action bar */}
-                    {selectedIds.size > 0 && (
+                    {/* Bulk action bar or Icon Legend */}
+                    {selectedIds.size > 0 ? (
                         <div className="mb-4 flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                             <span className="text-sm font-bold text-red-700">
                                 {selectedIds.size} term{selectedIds.size > 1 ? 's' : ''} selected
@@ -374,6 +374,28 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 </button>
                             </div>
                         </div>
+                    ) : (
+                        <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center gap-6">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Icon Legend:</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <Video size={14} className="text-rose-500" /> Video
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <ShoppingCart size={14} className="text-amber-500" /> Products
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <Globe size={14} className="text-blue-500" /> Website
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <Mic size={14} className="text-purple-500" /> Podcast
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <FileText size={14} className="text-emerald-500" /> Case Study
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                                <Lightbulb size={14} className="text-indigo-500" /> AI Prompts
+                            </div>
+                        </div>
                     )}
 
                     <div className="overflow-x-auto">
@@ -387,6 +409,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                     </th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Term</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Category</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Views</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Slug</th>
                                     <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Actions</th>
                                 </tr>
@@ -403,13 +426,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                             <div className="flex items-center gap-2">
                                                 <div className="text-sm font-bold text-slate-900">{term.term}</div>
                                                 <div className="flex items-center gap-1">
-                                                    {term.videoUrl && <Video size={12} className="text-rose-500" />}
-                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <ShoppingCart size={12} className="text-amber-500" />}
-                                                    {term.websitesRanking && term.websitesRanking.length > 0 && <Globe size={12} className="text-blue-500" />}
-                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <Mic size={12} className="text-purple-500" />}
-                                                    {term.caseStudies && term.caseStudies.length > 0 && <FileText size={12} className="text-emerald-500" />}
+                                                    {term.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-500" /></span>}
+                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <span title="Has Products"><ShoppingCart size={12} className="text-amber-500" /></span>}
+                                                    {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={12} className="text-blue-500" /></span>}
+                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-purple-500" /></span>}
+                                                    {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={12} className="text-emerald-500" /></span>}
                                                     {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0)) && (
-                                                        <Lightbulb size={12} className="text-indigo-500" />
+                                                        <span title="Has Social Prompts"><Lightbulb size={12} className="text-indigo-500" /></span>
                                                     )}
                                                 </div>
                                             </div>
@@ -417,6 +440,9 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">
                                             <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">{term.category}</span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-sm font-bold text-slate-700">{(term as any).views || 0}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
