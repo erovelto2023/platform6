@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinks, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
@@ -24,6 +25,20 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [brokenVideos, setBrokenVideos] = useState<{ id: string; term: string; videoUrl: string; reason: string }[]>([]);
     const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
+    const searchParams = useSearchParams();
+
+    // Auto-edit from query param
+    useEffect(() => {
+        if (!searchParams) return;
+        const editId = searchParams.get('edit');
+        if (editId && initialTerms.length > 0) {
+            const term = initialTerms.find(t => t.id === editId || (t as any)._id === editId);
+            if (term) {
+                setEditingTerm(term);
+                setView('edit');
+            }
+        }
+    }, [searchParams, initialTerms]);
 
     const filteredTerms = useMemo(() => initialTerms.filter(t =>
         t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -295,18 +310,13 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                             <p className="text-sm font-black text-slate-900">{item.term}</p>
                                             <p className="text-xs text-rose-500 font-mono truncate max-w-lg">{item.videoUrl}</p>
                                         </div>
-                                        <button 
-                                            onClick={() => {
-                                                const term = initialTerms.find(t => t.id === item.id);
-                                                if (term) {
-                                                    setEditingTerm(term);
-                                                    setView('edit');
-                                                }
-                                            }}
+                                        <Link
+                                            href={`/admin/glossary?edit=${item.id}`}
+                                            target="_blank"
                                             className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-slate-800 transition-all"
                                         >
                                             Fix Now
-                                        </button>
+                                        </Link>
                                     </div>
                                 ))}
                             </div>
@@ -390,7 +400,19 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                             </button>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-slate-900">{term.term}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-sm font-bold text-slate-900">{term.term}</div>
+                                                <div className="flex items-center gap-1">
+                                                    {term.videoUrl && <Video size={12} className="text-rose-500" />}
+                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <ShoppingCart size={12} className="text-amber-500" />}
+                                                    {term.websitesRanking && term.websitesRanking.length > 0 && <Globe size={12} className="text-blue-500" />}
+                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <Mic size={12} className="text-purple-500" />}
+                                                    {term.caseStudies && term.caseStudies.length > 0 && <FileText size={12} className="text-emerald-500" />}
+                                                    {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0)) && (
+                                                        <Lightbulb size={12} className="text-indigo-500" />
+                                                    )}
+                                                </div>
+                                            </div>
                                             <div className="text-xs text-slate-500 truncate max-w-xs">{term.shortDefinition}</div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">

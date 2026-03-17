@@ -1,4 +1,4 @@
-import { getGlossaryTerms } from "@/lib/actions/glossary.actions";
+import { getGlossaryTerms, incrementGlossaryView } from "@/lib/actions/glossary.actions";
 import GlossaryTerm from "@/lib/db/models/GlossaryTerm";
 import connectToDatabase from "@/lib/db/connect";
 import { notFound } from "next/navigation";
@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { 
     ArrowLeft, Calculator, Lightbulb, Bookmark, Share2, Info, ExternalLink, Heart, Rocket,
-    Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles, Clock
+    Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles, Clock, TrendingUp
 } from "lucide-react";
 import GlossaryActions from "@/components/glossary/GlossaryActions";
 import GlossaryProgressTracker from "@/components/glossary/GlossaryProgressTracker";
@@ -15,6 +15,7 @@ import GlossaryTermStructuredData from "@/components/glossary/StructuredData";
 import AIPromptsSection from "@/components/glossary/AIPromptsSection";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
+import { autoLinkContent } from "@/lib/utils/glossary-utils";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -88,9 +89,24 @@ export default async function GlossaryTermPage({ params }: Props) {
     const { terms: allTerms } = await getGlossaryTerms({ limit: 1000 });
     const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
 
+    // Increment view count asynchronously
+    incrementGlossaryView(slug);
+
     // Convert MongoDB documents to plain objects
     const serializedTerm = JSON.parse(JSON.stringify(term));
     const serializedAllTerms = JSON.parse(JSON.stringify(allTerms));
+
+    // Build Term Map for auto-linking
+    const termMap = new Map<string, string>();
+    serializedAllTerms.forEach((t: any) => {
+        if (t.slug !== slug) {
+            termMap.set(t.term.toLowerCase(), t.slug);
+            // Also link synonyms
+            if (t.synonyms) {
+                t.synonyms.forEach((syn: string) => termMap.set(syn.toLowerCase(), t.slug));
+            }
+        }
+    });
 
     const updatedDate = serializedTerm.lastUpdated ? new Date(serializedTerm.lastUpdated).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "March 2026";
     const readingTime = getReadingTimeEstimate(serializedTerm);
@@ -140,31 +156,39 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                         {/* 2. Quick Definition (Featured Snippet Ready) */}
                         {serializedTerm.shortDefinition && (
-                            <div className="p-6 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-2xl dark:bg-emerald-950/30 dark:border-emerald-500 mb-10 shadow-sm">
-                                <p className="text-xl font-medium text-emerald-900 dark:text-emerald-100 leading-relaxed">
-                                    <strong className="font-black">Definition:</strong> {serializedTerm.shortDefinition}
+                            <div className="p-8 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700 mb-10 shadow-xl shadow-emerald-500/5 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
+                                <p className="text-2xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed relative z-10">
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-black mr-2">Definition:</span> 
+                                    {autoLinkContent(serializedTerm.shortDefinition, termMap)}
                                 </p>
                             </div>
                         )}
 
                         <div className="prose prose-lg dark:prose-invert max-w-none prose-emerald">
                             {/* 3. Simple Explanation */}
-                            <h2 className="text-2xl font-bold mt-10 mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                <BookOpen className="text-emerald-500" /> What is {serializedTerm.term}?
+                            <h2 className="text-3xl font-black mt-10 mb-6 text-slate-900 dark:text-white flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                                    <BookOpen size={20} />
+                                </div>
+                                What is {serializedTerm.term}?
                             </h2>
-                            <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-                                {serializedTerm.definition}
-                            </p>
+                            <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap space-y-4">
+                                {autoLinkContent(serializedTerm.definition, termMap)}
+                            </div>
 
                             {/* Expanded Explanation */}
                             {serializedTerm.expandedExplanation && (
                                 <>
-                                    <h2 className="text-2xl font-bold mt-10 mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <Sparkles className="text-purple-500" /> Deeper Dive
+                                    <h2 className="text-3xl font-black mt-10 mb-6 text-slate-900 dark:text-white flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                                            <Sparkles size={20} />
+                                        </div>
+                                        Deeper Dive
                                     </h2>
-                                    <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-                                        {serializedTerm.expandedExplanation}
-                                    </p>
+                                    <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap space-y-4">
+                                        {autoLinkContent(serializedTerm.expandedExplanation, termMap)}
+                                    </div>
                                 </>
                             )}
 
@@ -195,12 +219,15 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {/* 4. Why This Term Matters */}
                             {serializedTerm.whyItMatters && (
                                 <>
-                                    <h2 className="text-2xl font-bold mt-10 mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <AlertTriangle className="text-amber-500" /> Why {serializedTerm.term} Matters
+                                    <h2 className="text-3xl font-black mt-10 mb-6 text-slate-900 dark:text-white flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                                            <AlertTriangle size={20} />
+                                        </div>
+                                        Why {serializedTerm.term} Matters
                                     </h2>
-                                    <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300">
-                                        {serializedTerm.whyItMatters}
-                                    </p>
+                                    <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300">
+                                        {autoLinkContent(serializedTerm.whyItMatters, termMap)}
+                                    </div>
                                 </>
                             )}
 
@@ -212,7 +239,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                         How It Works & Makes Money
                                     </div>
                                     <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
-                                        {serializedTerm.howItWorks || serializedTerm.howItMakesMoney}
+                                        {autoLinkContent(serializedTerm.howItWorks || serializedTerm.howItMakesMoney, termMap)}
                                     </p>
                                 </div>
                             )}
@@ -451,6 +478,12 @@ export default async function GlossaryTermPage({ params }: Props) {
                                             <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">{serializedTerm.startupCost}</span>
                                         </div>
                                     )}
+                                    <div className="col-span-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/50">
+                                        <span className="block text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                                            <TrendingUp size={10} /> Popularity
+                                        </span>
+                                        <span className="font-bold text-blue-900 dark:text-blue-100 text-sm">{serializedTerm.views || 0} Views</span>
+                                    </div>
                                     {serializedTerm.platformPreference && (
                                         <div className="col-span-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
                                             <span className="block text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Platform / Software</span>

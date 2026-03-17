@@ -9,6 +9,7 @@ interface GlossaryTermStructuredDataProps {
     keywords?: string[];
     lastUpdated?: Date | string;
     imageUrl?: string;
+    faqs?: { question: string; answer: string }[];
   };
   baseUrl: string;
 }
@@ -102,6 +103,20 @@ export default function GlossaryTermStructuredData({ term, baseUrl }: GlossaryTe
     ]
   };
 
+  // Add FAQ Schema if FAQs exist
+  const faqSchema = term.faqs && term.faqs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": term.faqs.map((faq: any) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
   return (
     <>
       <script
@@ -112,6 +127,12 @@ export default function GlossaryTermStructuredData({ term, baseUrl }: GlossaryTe
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData, null, 2) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema, null, 2) }}
+        />
+      )}
     </>
   );
 }

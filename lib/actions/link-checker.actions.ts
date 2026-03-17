@@ -25,7 +25,7 @@ export async function getAggregatedLinks() {
         // 1. Fetch Glossary Term links
         const terms = await GlossaryTerm.find({}).lean();
         terms.forEach((term: any) => {
-            const baseAdminLink = `/admin/glossary`;
+            const baseAdminLink = `/admin/glossary?edit=${term._id.toString()}`;
             if (term.videoUrl) {
                 links.push({
                     id: term._id.toString(),

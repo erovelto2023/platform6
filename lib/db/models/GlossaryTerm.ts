@@ -104,6 +104,7 @@ export interface IGlossaryTerm {
     imagePrompt?: string;
     productPrompt?: string;
     socialPrompt?: string;
+    views?: number;
 
     // --- Timestamps (Mongoose) ---
     createdAt?: Date;
@@ -215,7 +216,8 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     // AI Prompts
     imagePrompt: { type: String },
     productPrompt: { type: String },
-    socialPrompt: { type: String }
+    socialPrompt: { type: String },
+    views: { type: Number, default: 0 }
 }, { timestamps: true });
 
 GlossaryTermSchema.pre('save', async function () {

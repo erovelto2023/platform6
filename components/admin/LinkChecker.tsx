@@ -192,6 +192,7 @@ export default function LinkChecker({ initialLinks }: LinkCheckerProps) {
                                                 </Link>
                                                 <Link
                                                     href={link.adminLink}
+                                                    target="_blank"
                                                     className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-50 transition-all"
                                                 >
                                                     Source

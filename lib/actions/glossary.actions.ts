@@ -485,3 +485,54 @@ export async function normalizeGlossaryData() {
         return { error: error.message || "Failed to normalize data" };
     }
 }
+
+export async function incrementGlossaryView(slug: string) {
+    try {
+        await connectToDatabase();
+        await GlossaryTerm.findOneAndUpdate({ slug }, { $inc: { views: 1 } });
+        return { success: true };
+    } catch (error) {
+        console.error("Error incrementing glossary view:", error);
+        return { success: false };
+    }
+}
+
+export async function getGlossaryHealthData() {
+    try {
+        await connectToDatabase();
+        const terms = await GlossaryTerm.find({}).lean();
+        
+        const categories = [...new Set(terms.map((t: any) => t.category).filter(Boolean))];
+        const healthData = categories.map(cat => {
+            const catTerms = terms.filter((t: any) => t.category === cat);
+            const total = catTerms.length;
+            
+            const withVideo = catTerms.filter((t: any) => t.videoUrl).length;
+            const withProducts = catTerms.filter((t: any) => t.amazonProducts && t.amazonProducts.length > 0).length;
+            const withFaqs = catTerms.filter((t: any) => t.faqs && t.faqs.length > 0).length;
+            const withChecklist = catTerms.filter((t: any) => t.gettingStartedChecklist && t.gettingStartedChecklist.length > 0).length;
+            
+            const totalViews = catTerms.reduce((sum: number, t: any) => sum + (t.views || 0), 0);
+
+            return {
+                category: cat,
+                count: total,
+                videoProgress: Math.round((withVideo / total) * 100),
+                productProgress: Math.round((withProducts / total) * 100),
+                faqProgress: Math.round((withFaqs / total) * 100),
+                checklistProgress: Math.round((withChecklist / total) * 100),
+                engagementScore: totalViews,
+                overallCompletion: Math.round(((withVideo + withProducts + withFaqs + withChecklist) / (total * 4)) * 100)
+            };
+        });
+
+        return { 
+            healthData: healthData.sort((a, b) => b.overallCompletion - a.overallCompletion),
+            totalTerms: terms.length,
+            totalViews: terms.reduce((sum: number, t: any) => sum + (t.views || 0), 0)
+        };
+    } catch (error) {
+        console.error("Error fetching glossary health data:", error);
+        return { error: "Failed to fetch health data" };
+    }
+}
