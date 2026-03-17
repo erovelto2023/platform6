@@ -9,9 +9,11 @@ interface Props {
     tags?: string[];
     category?: string;
   }>;
+  onSelectTag?: (tag: string) => void;
+  activeTag?: string;
 }
 
-export default function TagCloud({ terms }: Props) {
+export default function TagCloud({ terms, onSelectTag, activeTag }: Props) {
   const tagCounts = useMemo(() => {
     const counts = new Map<string, number>();
     
@@ -75,16 +77,26 @@ export default function TagCloud({ terms }: Props) {
     <div className="bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 p-8">
       <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-white">Popular Tags</h3>
       <div className="flex flex-wrap gap-3 items-center">
-        {tagCounts.map(([tag, count], index) => (
-          <Link
-            key={tag}
-            href={`/glossary?tag=${encodeURIComponent(tag)}`}
-            className={`${getTagSize(count)} ${getTagColor(index)} transition-colors duration-200 underline-offset-2 hover:underline`}
-          >
-            {tag}
-            <span className="text-xs font-normal opacity-60 ml-1">({count})</span>
-          </Link>
-        ))}
+        {tagCounts.map(([tag, count], index) => {
+          const isActive = activeTag === tag;
+          const TagElement = onSelectTag ? 'button' : Link;
+          const tagProps = onSelectTag 
+            ? { onClick: () => onSelectTag(tag), type: 'button' as const } 
+            : { href: `/glossary?tag=${encodeURIComponent(tag)}` };
+
+          return (
+            <TagElement
+              key={tag}
+              {...(tagProps as any)}
+              className={`${getTagSize(count)} ${getTagColor(index)} block transition-all duration-200 underline-offset-2 hover:underline px-2 py-1 rounded-lg ${
+                isActive ? 'bg-emerald-100 dark:bg-emerald-900/40 ring-2 ring-emerald-500 underline' : ''
+              }`}
+            >
+              {tag}
+              <span className="text-xs font-normal opacity-60 ml-1">({count})</span>
+            </TagElement>
+          );
+        })}
       </div>
       <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
         <p className="text-xs text-slate-500 dark:text-slate-400">
