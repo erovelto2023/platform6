@@ -192,14 +192,14 @@ export class CensusService {
                 population: totalPop,
                 medianIncome: parseInt(matchingRow1[2]) || 0,
                 gender: {
-                    male: Math.round((malePop / totalPop) * 100),
-                    female: Math.round((femalePop / totalPop) * 100)
+                    male: malePop,
+                    female: femalePop
                 },
                 ethnicity: {
-                    white: Math.round(((parseInt(matchingRow1[5]) || 0) / totalPop) * 100),
-                    black: Math.round(((parseInt(matchingRow1[6]) || 0) / totalPop) * 100),
-                    asian: Math.round(((parseInt(matchingRow1[7]) || 0) / totalPop) * 100),
-                    hispanic: Math.round(((parseInt(matchingRow1[8]) || 0) / totalPop) * 100)
+                    white: parseInt(matchingRow1[5]) || 0,
+                    black: parseInt(matchingRow1[6]) || 0,
+                    asian: parseInt(matchingRow1[7]) || 0,
+                    hispanic: parseInt(matchingRow1[8]) || 0
                 },
                 audience: {
                     medianAge: parseFloat(matchingRow1[9]) || 0,
