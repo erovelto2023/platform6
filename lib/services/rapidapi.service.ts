@@ -47,12 +47,18 @@ export class RapidApiService {
             }
 
             const data = await response.json();
+            console.log(`[RapidAPI] Raw metadata response for ${stateName}:`, JSON.stringify(data).substring(0, 200));
             
-            // The API usually returns an array or a single object.
-            // Based on research, it's likely an array of results if using a query.
-            const result = Array.isArray(data) ? data[0] : data;
+            // Handle various response wrappers
+            let result = data;
+            if (data.results && Array.isArray(data.results)) result = data.results[0];
+            else if (Array.isArray(data)) result = data[0];
+            else if (data.data) result = data.data; // Sometimes RapidAPI wraps in .data
             
-            if (!result) return null;
+            if (!result || typeof result !== 'object') {
+                console.warn(`[RapidAPI] No valid result object found in response for ${stateName}`);
+                return null;
+            }
 
             return {
                 name: result.name,
@@ -94,8 +100,18 @@ export class RapidApiService {
 
             if (!response.ok) return null;
             const data = await response.json();
-            const result = Array.isArray(data) ? data[0] : data;
-            
+            console.log(`[RapidAPI] Raw symbols response for ${abbr}:`, JSON.stringify(data).substring(0, 200));
+
+            let result = data;
+            if (data.results && Array.isArray(data.results)) result = data.results[0];
+            else if (Array.isArray(data)) result = data[0];
+            else if (data.data) result = data.data;
+
+            if (!result || typeof result !== 'object') {
+                console.warn(`[RapidAPI] No valid symbols object found for ${abbr}`);
+                return null;
+            }
+
             return {
                 bird: result.bird,
                 flower: result.flower,
@@ -127,10 +143,15 @@ export class RapidApiService {
 
             if (!response.ok) return null;
             const data = await response.json();
+            console.log(`[RapidAPI] Raw subdivisions response for ${abbr}:`, JSON.stringify(data).substring(0, 200));
+
+            let list = data;
+            if (data.results && Array.isArray(data.results)) list = data.results;
+            else if (data.subdivisions && Array.isArray(data.subdivisions)) list = data.subdivisions;
+            else if (data.data && Array.isArray(data.data)) list = data.data;
             
-            // Expected format: Array of strings or objects with a 'name' property
-            if (Array.isArray(data)) {
-                return data.map((item: any) => typeof item === 'string' ? item : item.name);
+            if (Array.isArray(list)) {
+                return list.map((item: any) => typeof item === 'string' ? item : (item.name || item.text || item.label));
             }
             return null;
         } catch (error) {

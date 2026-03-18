@@ -93,9 +93,14 @@ export async function syncStateData(stateSlug: string) {
         const state = await Location.findOne({ slug: stateSlug, type: 'state' });
         if (!state) throw new Error("State not found");
 
+        console.log(`[Sync] Starting sync for state: ${state.name} (${stateSlug})`);
+
         // Fetch from RapidAPI
         const meta = await RapidApiService.fetchStateMetadata(state.name);
-        if (!meta) return { success: false, error: "No basic metadata found from API" };
+        if (!meta) {
+            console.error(`[Sync] Failed to fetch basic metadata for ${state.name}`);
+            return { success: false, error: "No basic metadata found from API" };
+        }
 
         const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
         let symbols = null;
@@ -152,9 +157,14 @@ export async function syncLegislativeData(stateSlug: string) {
         const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
         if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
 
+        console.log(`[Sync] Starting legislative sync for: ${state.name} (${stateAbbr})`);
+
         // Fetch from Open States
         const data = await OpenStatesService.fetchLegislativeData(stateAbbr);
-        if (!data) return { success: false, message: "No legislative data found" };
+        if (!data) {
+            console.error(`[Sync] Failed to fetch legislative data for ${stateAbbr}`);
+            return { success: false, error: "No legislative data found" };
+        }
 
         // Update database
         state.legislativeData = {

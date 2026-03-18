@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncStateData, syncLegislativeData } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers, AlertTriangle } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -48,19 +48,26 @@ export default async function StatePage({
         notFound();
     }
 
+    let syncError = null;
+
     // Auto-sync State Metadata if missing
     if (!state.stateData) {
-        // We call the sync action directly on the server
-        await syncStateData(stateSlug);
-        // Refresh the state object to get the new data
-        state = await getLocation(stateSlug) || state;
+        const result = await syncStateData(stateSlug);
+        if (!result.success) {
+            syncError = result.error;
+        } else {
+            state = await getLocation(stateSlug) || state;
+        }
     }
 
     // Auto-sync Legislative Data if missing
     if (!state.legislativeData) {
-        await syncLegislativeData(stateSlug);
-        // Refresh the state object again
-        state = await getLocation(stateSlug) || state;
+        const result = await syncLegislativeData(stateSlug);
+        if (!result.success && !syncError) {
+            syncError = result.error;
+        } else if (result.success) {
+            state = await getLocation(stateSlug) || state;
+        }
     }
 
     const cities = await getCitiesByState(stateSlug, query);
@@ -110,6 +117,25 @@ export default async function StatePage({
                                     <Search placeholder={`Search cities in ${state.name}...`} />
                                 </Suspense>
                             </div>
+
+                            {/* Sync Error Display */}
+                            {syncError && (
+                                <div className="mt-8 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl max-w-2xl flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <AlertTriangle className="h-5 w-5 text-red-500" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">Data Expansion Error</div>
+                                        <div className="text-sm font-bold text-slate-300 leading-tight">{syncError}</div>
+                                    </div>
+                                    <SyncButton 
+                                        action={syncStateData} 
+                                        slug={stateSlug} 
+                                        label="Retry Sync" 
+                                        className="bg-red-500 hover:bg-red-400 text-white border-none font-black px-4 h-9 text-[10px] rounded-lg"
+                                    />
+                                </div>
+                            )}
 
                             {/* State Fast Facts Section */}
                             {state.stateData && (

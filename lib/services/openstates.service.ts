@@ -93,10 +93,19 @@ export class OpenStatesService {
                 return null;
             }
 
-            const { data } = await response.json();
+            const { data, errors } = await response.json();
+            console.log(`[OpenStates] Raw response for ${jurisdictionId}:`, JSON.stringify(data).substring(0, 200));
+            
+            if (errors) {
+                console.error("[OpenStates] GraphQL Errors:", errors);
+            }
+
             const jurisdiction = data?.jurisdiction;
 
-            if (!jurisdiction) return null;
+            if (!jurisdiction) {
+                console.warn(`[OpenStates] No jurisdiction found for ID: ${jurisdictionId}`);
+                return null;
+            }
 
             return {
                 jurisdictionId,
