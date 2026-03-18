@@ -4,7 +4,11 @@ const RAPIDAPI_HOST = "us-states.p.rapidapi.com";
 export interface RapidStateMetadata {
     name: string;
     abbreviation: string;
-    capital: string;
+    capital: {
+        name: string;
+        latitude?: string;
+        longitude?: string;
+    };
     statehood_date: string;
     population: number;
     nickname: string;
@@ -60,10 +64,19 @@ export class RapidApiService {
                 return null;
             }
 
+            const rawCapital = result.capital;
+            const capital = typeof rawCapital === 'string' 
+                ? { name: rawCapital } 
+                : { 
+                    name: rawCapital?.name || "Unknown", 
+                    latitude: rawCapital?.latitude?.toString(), 
+                    longitude: rawCapital?.longitude?.toString() 
+                };
+
             return {
                 name: result.name,
                 abbreviation: result.abbreviation,
-                capital: result.capital,
+                capital,
                 statehood_date: result.statehood_date,
                 population: result.population,
                 nickname: result.nickname,

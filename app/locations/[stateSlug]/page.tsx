@@ -146,7 +146,7 @@ export default async function StatePage({
                                                 <Landmark className="h-3 w-3 text-purple-400" />
                                                 <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
                                             </div>
-                                            <div className="text-sm font-black text-white italic">{state.stateData.capital}</div>
+                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.capital?.name}>{state.stateData.capital?.name}</div>
                                         </div>
                                         <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                             <div className="flex items-center gap-2 mb-2">

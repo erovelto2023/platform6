@@ -10,7 +10,11 @@ export interface ILocation extends Document {
     metaDescription?: string;
     image?: string;
     stateData?: {
-        capital?: string;
+        capital?: {
+            name: string;
+            latitude?: string;
+            longitude?: string;
+        };
         nickname?: string;
         statehoodDate?: string;
         fipsCode?: string;
@@ -79,7 +83,11 @@ const LocationSchema = new Schema<ILocation>(
         metaDescription: String,
         image: String,
         stateData: {
-            capital: String,
+            capital: {
+                name: String,
+                latitude: String,
+                longitude: String,
+            },
             nickname: String,
             statehoodDate: String,
             fipsCode: String,
