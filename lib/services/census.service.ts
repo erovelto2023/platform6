@@ -99,12 +99,6 @@ export class CensusService {
             const stateFips = STATE_FIPS[stateName.toLowerCase()];
             if (!stateFips) return null;
 
-            // Massive Variable List (Phase 1 & 2)
-            const vars = [
-                "NAME", "B01003_001E", "B19013_001E", // 0, 1, 2 (Pop, MedInc)
-                "B01001_002E", "B01001_026E",         // 3, 4 (M/F total)
-                "B03002_003E", "B03002_004E", "B03002_006E", "B03002_012E", // 5-8 (eth)
-                "B01002_001E",                        // 9 (MedAge)
             // Census API has a limit of 50 variables per request. We'll split into two batches.
             const batch1 = [
                 "NAME", "B01001_001E", "B19013_001E", "B01001_002E", "B01001_026E", // 0-4 (NAME, Total Pop, MedInc, Male Pop, Female Pop)
@@ -137,9 +131,6 @@ export class CensusService {
                 "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 27-31 (Edu Total, Bachelors, Masters, Prof, Doctorate)
                 "B16001_001E", "B16001_003E", // 32, 33 (Language Total, Spanish)
             ].join(",");
-
-            const stateFips = STATE_FIPS[stateName.toLowerCase()];
-            if (!stateFips) return null;
 
             const year = "2022";
             const baseUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
@@ -247,7 +238,7 @@ export class CensusService {
             baseStats.nicheInsights = this.calculateNicheInsights(baseStats);
 
             // Step 2: Fetch ABS Business Owner Stats
-            const placeFips = matchingRow[matchingRow.length - 1]; 
+            const placeFips = matchingRow1[matchingRow1.length - 1]; 
             baseStats.ownerStats = await this.getBusinessOwnerStats(stateFips, placeFips);
 
             return baseStats;
