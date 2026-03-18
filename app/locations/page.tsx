@@ -3,6 +3,8 @@ import { getStates } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function LocationsPage() {
     const states = await getStates();
 
@@ -49,26 +51,36 @@ export default async function LocationsPage() {
                 </section>
 
                 {/* States Grid */}
-                <section className="w-full py-12 bg-slate-900">
+                <section className="w-full py-12 bg-slate-900 min-h-[400px]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                            {states.map((state: any) => (
-                                <Link 
-                                    key={state.slug}
-                                    href={`/locations/${state.slug}`}
-                                    className="group relative overflow-hidden bg-slate-800 hover:bg-slate-700 p-6 rounded-2xl border border-slate-700/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                                            <MapPin size={20} />
+                        {states.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-12 border border-slate-700/50 bg-slate-800/30 rounded-3xl text-center">
+                                <MapPin className="h-12 w-12 text-slate-600 mb-4" />
+                                <h2 className="text-xl font-bold text-slate-400 uppercase italic">No Locations Found</h2>
+                                <p className="text-slate-500 mt-2 max-w-sm">
+                                    Our directory is currently being updated. Please check back shortly for full access.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                {states.map((state: any) => (
+                                    <Link 
+                                        key={state.slug}
+                                        href={`/locations/${state.slug}`}
+                                        className="group relative overflow-hidden bg-slate-800 hover:bg-slate-700 p-6 rounded-2xl border border-slate-700/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                                                <MapPin size={20} />
+                                            </div>
+                                            <span className="font-bold text-white group-hover:text-purple-400 transition-colors">
+                                                {state.name}
+                                            </span>
                                         </div>
-                                        <span className="font-bold text-white group-hover:text-purple-400 transition-colors">
-                                            {state.name}
-                                        </span>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
             </main>

@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocation } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Building2, Lightbulb, Users, Search } from "lucide-react";
+import { MapPin, ChevronLeft, ArrowLeft, Building2, Lightbulb, Users, Search, Globe, ExternalLink } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 export default async function CityPage({
     params,
