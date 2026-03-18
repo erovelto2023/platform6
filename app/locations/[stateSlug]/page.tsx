@@ -557,11 +557,12 @@ export default async function StatePage({
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
                                     {uniqueLabels.map((label, idx) => {
                                         const val = getFieldValue(label, state);
-                                        const isMissing = val === "Not Specified";
+                                        if (val === "Not Specified") return null;
+                                        
                                         return (
                                             <div key={label + idx} className="bg-slate-950/60 border border-slate-800/60 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/30 transition-colors">
                                                 <div className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest mb-2">{label}</div>
-                                                <div className={`text-sm font-bold ${isMissing ? 'text-slate-600 italic' : 'text-slate-200'}`} suppressHydrationWarning>
+                                                <div className="text-sm font-bold text-slate-200" suppressHydrationWarning>
                                                     {val}
                                                 </div>
                                             </div>
