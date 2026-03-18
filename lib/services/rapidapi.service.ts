@@ -74,19 +74,19 @@ export class RapidApiService {
                 };
 
             return {
-                name: result.name,
-                abbreviation: result.abbreviation,
+                name: result.name || result.Name || "Unknown",
+                abbreviation: (result.abbreviation || result.Abbreviation || result.abbr || "").toUpperCase(),
                 capital,
-                statehood_date: result.statehood_date,
-                population: result.population,
-                nickname: result.nickname,
-                fips_code: result.fips_code,
-                demonym: result.demonym,
-                elevation_max_feet: result.elevation_max_feet,
-                elevation_min_feet: result.elevation_min_feet,
-                timezone: result.timezone,
-                region: result.region,
-                division: result.division
+                statehood_date: result.statehood_date || result.statehoodDate || result.date_of_statehood || "",
+                population: result.population || result.Population || 0,
+                nickname: result.nickname || result.Nickname || "",
+                fips_code: result.fips_code || result.fipsCode || "",
+                demonym: result.demonym || result.Demonym || "",
+                elevation_max_feet: result.elevation_max_feet || result.elevationMaxFeet || result.max_elevation || 0,
+                elevation_min_feet: result.elevation_min_feet || result.elevationMinFeet || result.min_elevation || 0,
+                timezone: result.timezone || result.timeZone || result.time_zone || "",
+                region: result.region || result.Region || "",
+                division: result.division || result.Division || ""
             };
 
         } catch (error) {
@@ -126,11 +126,11 @@ export class RapidApiService {
             }
 
             return {
-                bird: result.bird,
-                flower: result.flower,
-                tree: result.tree,
-                motto: result.motto,
-                song: result.song
+                bird: result.bird || result.Bird || result.state_bird || "",
+                flower: result.flower || result.Flower || result.state_flower || "",
+                tree: result.tree || result.Tree || result.state_tree || "",
+                motto: result.motto || result.Motto || result.state_motto || "",
+                song: result.song || result.Song || result.state_song || ""
             };
         } catch (error) {
             console.error("Error fetching state symbols:", error);
