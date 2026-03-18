@@ -54,49 +54,46 @@ export default async function GlossaryPrintPage({ params }: Props) {
         : "2026";
 
     return (
-        <html lang="en">
-            <head>
-                <meta charSet="utf-8" />
-                <title>{t.term} – K Business Academy Glossary</title>
-                <style>{`
-                    * { box-sizing: border-box; margin: 0; padding: 0; }
-                    body {
-                        font-family: Georgia, 'Times New Roman', serif;
-                        font-size: 11pt;
-                        color: #111;
-                        background: white;
-                        padding: 2cm 2.5cm;
-                        max-width: 900px;
-                        margin: 0 auto;
-                    }
-                    h1 { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; line-height: 1.2; }
-                    h2 { font-size: 1.2rem; font-weight: 700; margin: 1.5rem 0 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
-                    h3 { font-size: 1rem; font-weight: 700; margin: 1rem 0 0.4rem; }
-                    p, li { line-height: 1.7; margin-bottom: 0.5rem; color: #333; }
-                    ul { padding-left: 1.25rem; }
-                    a { color: #059669; }
-                    .badge { display: inline-block; background: #d1fae5; color: #065f46; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-                    .definition-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0 1.5rem; }
-                    .definition-box p { color: #064e3b; margin: 0; font-size: 1.05rem; }
-                    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0 1.5rem; }
-                    .meta-item { background: #f8fafc; border: 1px solid #e5e7eb; padding: 0.6rem 0.8rem; border-radius: 6px; }
-                    .meta-item span:first-child { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 2px; }
-                    .meta-item span:last-child { font-weight: 700; font-size: 0.9rem; }
-                    .highlight-box { background: #fef3c7; border: 1px solid #fcd34d; padding: 0.75rem 1rem; border-radius: 8px; margin: 1rem 0; }
-                    .highlight-box p { color: #92400e; margin: 0; }
-                    .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
-                    .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.875rem; }
-                    .card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; }
-                    .footer-note { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #6b7280; }
-                    @media print {
-                        body { padding: 0; }
-                        @page { margin: 1.5cm 2cm; }
-                        h1, h2, h3 { page-break-after: avoid; }
-                        p, li { page-break-inside: avoid; }
-                    }
-                `}</style>
-            </head>
-            <body>
+        <>
+            <title>{t.term} – K Business Academy Glossary</title>
+            <style>{`
+                * { box-sizing: border-box; margin: 0; padding: 0; }
+                body {
+                    font-family: Georgia, 'Times New Roman', serif;
+                    font-size: 11pt;
+                    color: #111;
+                    background: white;
+                    padding: 2cm 2.5cm;
+                    max-width: 900px;
+                    margin: 0 auto;
+                }
+                h1 { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; line-height: 1.2; }
+                h2 { font-size: 1.2rem; font-weight: 700; margin: 1.5rem 0 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25rem; }
+                h3 { font-size: 1rem; font-weight: 700; margin: 1rem 0 0.4rem; }
+                p, li { line-height: 1.7; margin-bottom: 0.5rem; color: #333; }
+                ul { padding-left: 1.25rem; }
+                a { color: #059669; }
+                .badge { display: inline-block; background: #d1fae5; color: #065f46; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+                .definition-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0 1.5rem; }
+                .definition-box p { color: #064e3b; margin: 0; font-size: 1.05rem; }
+                .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 1rem 0 1.5rem; }
+                .meta-item { background: #f8fafc; border: 1px solid #e5e7eb; padding: 0.6rem 0.8rem; border-radius: 6px; }
+                .meta-item span:first-child { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 2px; }
+                .meta-item span:last-child { font-weight: 700; font-size: 0.9rem; }
+                .highlight-box { background: #fef3c7; border: 1px solid #fcd34d; padding: 0.75rem 1rem; border-radius: 8px; margin: 1rem 0; }
+                .highlight-box p { color: #92400e; margin: 0; }
+                .section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+                .card { border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.875rem; }
+                .card h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; }
+                .footer-note { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #6b7280; }
+                @media print {
+                    body { padding: 0; }
+                    @page { margin: 1.5cm 2cm; }
+                    h1, h2, h3 { page-break-after: avoid; }
+                    p, li { page-break-inside: avoid; }
+                }
+            `}</style>
+            <div className="print-page-wrapper">
                 <PrintTrigger />
 
                 <div className="badge">{t.category || "General"}</div>
@@ -257,7 +254,7 @@ export default async function GlossaryPrintPage({ params }: Props) {
                 <div className="footer-note">
                     Generated from kbusinessacademy.com/glossary/{slug}
                 </div>
-            </body>
-        </html>
+            </div>
+        </>
     );
 }
