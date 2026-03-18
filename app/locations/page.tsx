@@ -53,13 +53,25 @@ export default async function LocationsPage() {
                 {/* States Grid */}
                 <section className="w-full py-12 bg-slate-900 min-h-[400px]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        {states.length === 0 ? (
+                        {(!states || states.length === 0) ? (
                             <div className="flex flex-col items-center justify-center p-12 border border-slate-700/50 bg-slate-800/30 rounded-3xl text-center">
                                 <MapPin className="h-12 w-12 text-slate-600 mb-4" />
                                 <h2 className="text-xl font-bold text-slate-400 uppercase italic">No Locations Found</h2>
                                 <p className="text-slate-500 mt-2 max-w-sm">
                                     Our directory is currently being updated. Please check back shortly for full access.
                                 </p>
+                                
+                                {/* TEMPORARY DEBUG INFO - ONLY FOR INVESTIGATION */}
+                                <div className="mt-12 p-4 bg-slate-900/50 border border-slate-800 rounded-lg text-left text-[10px] font-mono text-slate-600 max-w-md overflow-hidden">
+                                    <p className="font-bold border-b border-slate-800 mb-2 pb-1">DATABASE DIAGNOSTICS</p>
+                                    <p>Connected: {String(!!states)}</p>
+                                    <p>States Array Type: {typeof states}</p>
+                                    <p>States Count: {states?.length ?? 'undefined'}</p>
+                                    <p>Current Time: {new Date().toISOString()}</p>
+                                    <p className="mt-2 text-[8px] opacity-50 italic text-wrap break-all">
+                                        Check system logs for "DEBUG: getStates"
+                                    </p>
+                                </div>
                             </div>
                         ) : (
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

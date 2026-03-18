@@ -1,7 +1,7 @@
 import { getTools, seedTools } from "@/lib/actions/tool.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ToolToggle, SeedToolsButton } from "./_components";
+import { ToolToggle, SeedToolsButton, SeedLocationsButton } from "./_components";
 
 export default async function AdminToolsPage() {
     const { data: tools } = await getTools(false);
@@ -15,7 +15,10 @@ export default async function AdminToolsPage() {
                         Enable or disable tools to control what users can access
                     </p>
                 </div>
-                <SeedToolsButton />
+                <div className="flex gap-2">
+                    <SeedLocationsButton />
+                    <SeedToolsButton />
+                </div>
             </div>
 
             {!tools || tools.length === 0 ? (
