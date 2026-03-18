@@ -105,89 +105,118 @@ export class CensusService {
                 "B01001_002E", "B01001_026E",         // 3, 4 (M/F total)
                 "B03002_003E", "B03002_004E", "B03002_006E", "B03002_012E", // 5-8 (eth)
                 "B01002_001E",                        // 9 (MedAge)
-                "B11005_001E", "B11005_002E",         // 10, 11 (HH, HH w/ children)
-                "B25010_001E",                        // 12 (Avg HH Size)
-                "B17001_001E", "B17001_002E",         // 13, 14 (Poverty total, below)
-                "B19301_001E",                        // 15 (Per Capita)
-                "B25003_001E", "B25003_002E",         // 16, 17 (Housing total, owner)
-                "B25058_001E", "B25088_002E",         // 18, 19 (Rent, Mortgage)
+            // Census API has a limit of 50 variables per request. We'll split into two batches.
+            const batch1 = [
+                "NAME", "B01001_001E", "B19013_001E", "B01001_002E", "B01001_026E", // 0-4 (NAME, Total Pop, MedInc, Male Pop, Female Pop)
+                "B02001_002E", "B02001_003E", "B02001_005E", "B03001_003E", // 5-8 (White, Black, Asian, Hispanic)
+                "B01002_001E", "B11001_001E", "B11005_001E", "B25010_001E", // 9-12 (MedAge, Total HH, HH w/ children, Avg HH Size)
+                "B17001_001E", "B17001_002E", "B19301_001E", // 13-15 (Poverty Total, Poverty Below, Per Capita Income)
+                "B25003_001E", "B25003_002E", "B25058_001E", "B25088_002E", // 16-19 (Housing Total, Owner Occupied, Median Rent, Median Mortgage)
                 // Cost Burden Renter (30-34.9, 35-39.9, 40-49.9, 50+) - B25070_007 to 010
                 "B25070_007E", "B25070_008E", "B25070_009E", "B25070_010E", // 20-23
                 // Cost Burden Owner - B25091_008 to 011
                 "B25091_008E", "B25091_009E", "B25091_010E", "B25091_011E", // 24-27
                 // Income Brackets B19001 (02-17)
-                "B19001_002E", "B19001_003E", "B19001_004E", "B19001_005E",
-                "B19001_006E", "B19001_007E", "B19001_008E", "B19001_009E", "B19001_010E",
-                "B19001_011E", "B19001_012E",
-                "B19001_013E", "B19001_014E", "B19001_015E", "B19001_016E", "B19001_017E", // 28-43
-                // Age segments for under 18 & 65+
-                "B01001_003E", "B01001_004E", "B01001_005E", "B01001_006E", // 44-47 (M 0-17)
-                "B01001_027E", "B01001_028E", "B01001_029E", "B01001_030E", // 48-51 (F 0-17)
-                "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", // 52-57 (M 65+)
-                "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", // 58-63 (F 65+)
-                // Phase 3 & 4: Digital & Logistics
-                "B28002_001E", "B28002_002E",         // 64, 65 (Internet Total, Has Internet)
-                "B28001_011E",                        // 66 (Smartphone Only)
-                "B08006_001E", "B08006_017E",         // 67, 68 (Workers total, Worked at home)
-                "B08303_001E",                        // 69 (Aggregate Commute)
-                "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 70-74 (Edu)
-                "B16001_001E", "B16001_003E",         // 75, 76 (Language Total, Spanish)
+                "B19001_002E", "B19001_003E", "B19001_004E", "B19001_005E", // 28-31 (<10k, 10-14k, 15-19k, 20-24k)
+                "B19001_006E", "B19001_007E", "B19001_008E", "B19001_009E", // 32-35 (25-29k, 30-34k, 35-39k, 40-44k)
+                "B19001_010E", "B19001_011E", "B19001_012E", // 36-38 (45-49k, 50-59k, 60-74k)
+                "B19001_013E", "B19001_014E", "B19001_015E", "B19001_016E", "B19001_017E", // 39-43 (75-99k, 100-124k, 125-149k, 150-199k, 200k+)
             ].join(",");
 
+            const batch2 = [
+                "NAME", // 0 (NAME - for matching)
+                "B01001_003E", "B01001_004E", "B01001_005E", "B01001_006E", // 1-4 (M 0-4, M 5-9, M 10-14, M 15-17)
+                "B01001_027E", "B01001_028E", "B01001_029E", "B01001_030E", // 5-8 (F 0-4, F 5-9, F 10-14, F 15-17)
+                "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", // 9-14 (M 65-69, M 70-74, M 75-79, M 80-84, M 85+)
+                "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", // 15-20 (F 65-69, F 70-74, F 75-79, F 80-84, F 85+)
+                // Phase 3 & 4: Digital & Logistics
+                "B28002_001E", "B28002_002E", // 21, 22 (Internet Total, Has Internet)
+                "B28001_011E", // 23 (Smartphone Only)
+                "B08006_001E", "B08006_017E", // 24, 25 (Workers total, Worked at home)
+                "B08303_001E", // 26 (Aggregate Commute)
+                "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 27-31 (Edu Total, Bachelors, Masters, Prof, Doctorate)
+                "B16001_001E", "B16001_003E", // 32, 33 (Language Total, Spanish)
+            ].join(",");
+
+            const stateFips = STATE_FIPS[stateName.toLowerCase()];
+            if (!stateFips) return null;
+
             const year = "2022";
-            const url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=${vars}&for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+            const baseUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Census API error: ${response.statusText}`);
+            const [res1, res2] = await Promise.all([
+                fetch(`${baseUrl}&get=${batch1}`),
+                fetch(`${baseUrl}&get=${batch2}`)
+            ]);
 
-            const data = await response.json();
-            const matchingRow = data.find((row: string[]) => 
+            if (!res1.ok || !res2.ok) {
+                console.error("Census API fetch failed", { status1: res1.status, status2: res2.status });
+                return null;
+            }
+
+            const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
+
+            const matchingRow1 = data1.find((row: string[]) => 
+                row[0].toLowerCase().startsWith(cityName.toLowerCase())
+            );
+            const matchingRow2 = data2.find((row: string[]) => 
                 row[0].toLowerCase().startsWith(cityName.toLowerCase())
             );
 
-            if (!matchingRow) return null;
+            if (!matchingRow1 || !matchingRow2) return null;
 
-            const totalPop = parseInt(matchingRow[1]) || 0;
-            const toddlers = (parseInt(matchingRow[44]) || 0) + (parseInt(matchingRow[48]) || 0); // Strictly <5
-            const under18 = matchingRow.slice(44, 48).concat(matchingRow.slice(48, 52)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
-            const over65 = matchingRow.slice(52, 58).concat(matchingRow.slice(58, 64)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
+            const totalPop = parseInt(matchingRow1[1]) || 1;
+            const malePop = parseInt(matchingRow1[3]) || 0;
+            const femalePop = parseInt(matchingRow1[4]) || 0;
 
-            // Income Brackets Summation
-            const inc20 = matchingRow.slice(28, 32).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // <25k
-            const inc25 = matchingRow.slice(32, 37).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 25-50k
-            const inc50 = matchingRow.slice(37, 39).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 50-75k
-            const inc75 = matchingRow.slice(39, 44).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 75k+
+            const under18 = (
+                (parseInt(matchingRow2[1]) || 0) + (parseInt(matchingRow2[2]) || 0) + (parseInt(matchingRow2[3]) || 0) + (parseInt(matchingRow2[4]) || 0) +
+                (parseInt(matchingRow2[5]) || 0) + (parseInt(matchingRow2[6]) || 0) + (parseInt(matchingRow2[7]) || 0) + (parseInt(matchingRow2[8]) || 0)
+            );
 
-            // Cost Burden Summation
-            const burdenedCount = matchingRow.slice(20, 24).concat(matchingRow.slice(24, 28)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
-            const totalHH = parseInt(matchingRow[10]) || 1;
+            const over65 = (
+                (parseInt(matchingRow2[9]) || 0) + (parseInt(matchingRow2[10]) || 0) + (parseInt(matchingRow2[11]) || 0) + (parseInt(matchingRow2[12]) || 0) + (parseInt(matchingRow2[13]) || 0) + (parseInt(matchingRow2[14]) || 0) +
+                (parseInt(matchingRow2[15]) || 0) + (parseInt(matchingRow2[16]) || 0) + (parseInt(matchingRow2[17]) || 0) + (parseInt(matchingRow2[18]) || 0) + (parseInt(matchingRow2[19]) || 0) + (parseInt(matchingRow2[20]) || 0)
+            );
+
+            const toddlers = ((parseInt(matchingRow2[1]) || 0) + (parseInt(matchingRow2[5]) || 0));
+            
+            const totalHH = parseInt(matchingRow1[10]) || 1;
+            const burdenedCount = 
+                (parseInt(matchingRow1[20]) || 0) + (parseInt(matchingRow1[21]) || 0) + (parseInt(matchingRow1[22]) || 0) + (parseInt(matchingRow1[23]) || 0) +
+                (parseInt(matchingRow1[24]) || 0) + (parseInt(matchingRow1[25]) || 0) + (parseInt(matchingRow1[26]) || 0) + (parseInt(matchingRow1[27]) || 0);
+
+            const inc20 = (parseInt(matchingRow1[28]) || 0) + (parseInt(matchingRow1[29]) || 0) + (parseInt(matchingRow1[30]) || 0) + (parseInt(matchingRow1[31]) || 0); // <25k
+            const inc25 = (parseInt(matchingRow1[32]) || 0) + (parseInt(matchingRow1[33]) || 0) + (parseInt(matchingRow1[34]) || 0) + (parseInt(matchingRow1[35]) || 0) + (parseInt(matchingRow1[36]) || 0); // 25-59k
+            const inc50 = (parseInt(matchingRow1[37]) || 0) + (parseInt(matchingRow1[38]) || 0); // 60-74k
+            const inc75 = (parseInt(matchingRow1[39]) || 0) + (parseInt(matchingRow1[40]) || 0) + (parseInt(matchingRow1[41]) || 0) + (parseInt(matchingRow1[42]) || 0) + (parseInt(matchingRow1[43]) || 0); // 75k+
 
             const baseStats: CityStats = {
                 population: totalPop,
-                medianIncome: parseInt(matchingRow[2]) || 0,
+                medianIncome: parseInt(matchingRow1[2]) || 0,
                 gender: {
-                    male: parseInt(matchingRow[3]) || 0,
-                    female: parseInt(matchingRow[4]) || 0,
+                    male: Math.round((malePop / totalPop) * 100),
+                    female: Math.round((femalePop / totalPop) * 100)
                 },
                 ethnicity: {
-                    white: parseInt(matchingRow[5]) || 0,
-                    black: parseInt(matchingRow[6]) || 0,
-                    asian: parseInt(matchingRow[7]) || 0,
-                    hispanic: parseInt(matchingRow[8]) || 0,
+                    white: Math.round(((parseInt(matchingRow1[5]) || 0) / totalPop) * 100),
+                    black: Math.round(((parseInt(matchingRow1[6]) || 0) / totalPop) * 100),
+                    asian: Math.round(((parseInt(matchingRow1[7]) || 0) / totalPop) * 100),
+                    hispanic: Math.round(((parseInt(matchingRow1[8]) || 0) / totalPop) * 100)
                 },
                 audience: {
-                    medianAge: parseFloat(matchingRow[9]) || 0,
-                    under18Pct: Math.round((under18 / totalPop) * 100) || 0,
-                    over65Pct: Math.round((over65 / totalPop) * 100) || 0,
-                    householdsWithChildrenPct: Math.round((parseInt(matchingRow[11]) / totalHH) * 100) || 0,
-                    avgHouseholdSize: parseFloat(matchingRow[12]) || 0,
+                    medianAge: parseFloat(matchingRow1[9]) || 0,
+                    under18Pct: Math.round((under18 / totalPop) * 100),
+                    over65Pct: Math.round((over65 / totalPop) * 100),
+                    householdsWithChildrenPct: Math.round(((parseInt(matchingRow1[11]) || 0) / totalHH) * 100),
+                    avgHouseholdSize: parseFloat(matchingRow1[12]) || 0,
                 },
                 affordability: {
-                    povertyRate: Math.round((parseInt(matchingRow[14]) / parseInt(matchingRow[13])) * 100) || 0,
-                    perCapitaIncome: parseInt(matchingRow[15]) || 0,
-                    homeownershipRate: Math.round((parseInt(matchingRow[17]) / parseInt(matchingRow[16])) * 100) || 0,
-                    medianRent: parseInt(matchingRow[18]) || 0,
-                    medianMortgage: parseInt(matchingRow[19]) || 0,
+                    povertyRate: Math.round(((parseInt(matchingRow1[14]) || 0) / (parseInt(matchingRow1[13]) || 1)) * 100),
+                    perCapitaIncome: parseInt(matchingRow1[15]) || 0,
+                    homeownershipRate: Math.round(((parseInt(matchingRow1[17]) || 0) / (parseInt(matchingRow1[16]) || 1)) * 100),
+                    medianRent: parseInt(matchingRow1[18]) || 0,
+                    medianMortgage: parseInt(matchingRow1[19]) || 0,
                     costBurdenedPct: Math.round((burdenedCount / totalHH) * 100) || 0,
                     incomeBrackets: {
                         under25k: Math.round((inc20 / totalHH) * 100),
@@ -199,17 +228,17 @@ export class CensusService {
                 segments: {
                     toddlers: toddlers,
                     seniors: over65,
-                    highEarners: parseInt(matchingRow[43]) || 0
+                    highEarners: (parseInt(matchingRow1[43]) || 0) // B19001_017E is 200k+
                 },
                 digital: {
-                    broadbandPct: Math.round((parseInt(matchingRow[65]) / (parseInt(matchingRow[64]) || 1)) * 100),
-                    smartphoneOnlyPct: Math.round((parseInt(matchingRow[66]) / (parseInt(matchingRow[64]) || 1)) * 100),
-                    workFromHomePct: Math.round((parseInt(matchingRow[68]) / (parseInt(matchingRow[67]) || 1)) * 100),
-                    meanCommuteMinutes: Math.round(parseInt(matchingRow[69]) / ((parseInt(matchingRow[67]) - parseInt(matchingRow[68])) || 1))
+                    broadbandPct: Math.round(((parseInt(matchingRow2[22]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
+                    smartphoneOnlyPct: Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
+                    workFromHomePct: Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100),
+                    meanCommuteMinutes: Math.round((parseInt(matchingRow2[26]) || 0) / ((parseInt(matchingRow2[24]) || 0) - (parseInt(matchingRow2[25]) || 0) || 1))
                 },
                 logistics: {
-                    bachelorsDegreePct: Math.round(((parseInt(matchingRow[71]) + parseInt(matchingRow[72]) + parseInt(matchingRow[73]) + parseInt(matchingRow[74])) / (parseInt(matchingRow[70]) || 1)) * 100),
-                    speakSpanishPct: Math.round((parseInt(matchingRow[76]) / (parseInt(matchingRow[75]) || 1)) * 100)
+                    bachelorsDegreePct: Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100),
+                    speakSpanishPct: Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100)
                 },
                 year: year
             };
