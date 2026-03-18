@@ -164,21 +164,21 @@ export default async function StatePage({
                                                     <Landmark className="h-3 w-3 text-purple-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.capital?.name}>{state.capital?.name}</div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.capital?.name} suppressHydrationWarning>{state.capital?.name}</div>
                                             </div>
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Star className="h-3 w-3 text-pink-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.nickname}>{state.nickname}</div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.nickname} suppressHydrationWarning>{state.nickname}</div>
                                             </div>
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Calendar className="h-3 w-3 text-emerald-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic">{state.date}</div>
+                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.date}</div>
                                             </div>
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">

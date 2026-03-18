@@ -36,6 +36,8 @@ export class RapidApiService {
             // Use the cleaner /name/{stateName} endpoint for better specificity
             const url = `https://${RAPIDAPI_HOST}/name/${encodeURIComponent(stateName)}`;
             
+            console.log(`[RapidAPI] Fetching metadata for ${stateName} from: ${url}`);
+            
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
@@ -44,6 +46,8 @@ export class RapidApiService {
                 },
                 cache: 'no-store'
             });
+
+            console.log(`[RapidAPI] Response status: ${response.status} ${response.statusText}`);
 
             if (!response.ok) {
                 console.error("RapidAPI fetch failed:", response.status, response.statusText);
@@ -74,6 +78,7 @@ export class RapidApiService {
                     longitude: rawCapital?.longitude?.toString() 
                 };
 
+            console.log(`[RapidAPI] Successfully parsed metadata for ${stateName}`);
             return {
                 name: result.name || result.Name || "Unknown",
                 abbreviation: (result.abbreviation || result.Abbreviation || result.abbr || "").toUpperCase(),
