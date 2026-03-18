@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { Input } from "@/components/ui/input";
 import { Search as SearchIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -34,19 +35,28 @@ export function Search({ placeholder = "Search..." }: { placeholder?: string }) 
     // Actually, React usage requires useEffect or a ref for debounce to persist across renders.
     // Let's just use a simple timer in the onChange.
 
-    let debounceTimer: NodeJS.Timeout;
+    const timerRef = React.useRef<NodeJS.Timeout>(null);
+
     const onInputChange = (term: string) => {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+        timerRef.current = setTimeout(() => {
             handleSearch(term);
-        }, 300);
+        }, 500);
     };
+
+    React.useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
 
     return (
         <div className="relative flex-1 flex-shrink-0">
-            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <Input
-                className="pl-9 bg-white"
+                className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 rounded-xl h-12 focus:ring-purple-500/20"
                 placeholder={placeholder}
                 onChange={(e) => onInputChange(e.target.value)}
                 defaultValue={searchParams?.get('query')?.toString()}

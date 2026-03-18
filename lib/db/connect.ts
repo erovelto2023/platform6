@@ -23,18 +23,12 @@ if (!cached) {
 }
 
 async function connectDB() {
-  const logPath = path.join(process.cwd(), "debug_db.log");
-  const log = (msg: string) => {
-    const time = new Date().toISOString();
-    fs.appendFileSync(logPath, `[${time}] ${msg}\n`);
-  };
-
   // Validate MONGODB_URI at runtime, not at module import time
   const MONGODB_URI = process.env.MONGODB_URI;
-  log(`connectDB called, MONGODB_URI: ${MONGODB_URI ? 'FOUND (starts with ' + MONGODB_URI.substring(0, 15) + '...)' : 'MISSING'}`);
+  console.log(`DEBUG: connectDB called, MONGODB_URI: ${MONGODB_URI ? 'FOUND' : 'MISSING'}`);
 
   if (!MONGODB_URI) {
-    log("ERROR: MONGODB_URI is missing");
+    console.error("DEBUG: ERROR: MONGODB_URI is missing");
     throw new Error(
       'Please define the MONGODB_URI environment variable inside .env.local'
     );
