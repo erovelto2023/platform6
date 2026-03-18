@@ -1,4 +1,4 @@
-import { TrendingUp, Users, DollarSign, Activity, Target } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -16,6 +16,19 @@ interface CityCensusStatsProps {
             black: number;
             asian: number;
             hispanic: number;
+        };
+        ownerStats?: {
+            totalFirms: number;
+            womenOwned: { count: number; pct: number };
+            veteranOwned: { count: number; pct: number };
+            minorityOwned: { count: number; pct: number };
+            isStateLevel: boolean;
+        };
+        nicheInsights?: {
+            pottyTraining: { score: number; label: string };
+            seniorCare: { score: number; label: string };
+            luxuryLuxury: { score: number; label: string };
+            pricingStrategy: { type: string; description: string };
         };
         year: string;
     } | null;
@@ -46,7 +59,7 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
      .sort((a, b) => b.value - a.value);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Population Card */}
                 <Card className="bg-slate-900/40 border-slate-800 rounded-3xl overflow-hidden group hover:border-purple-500/50 transition-all duration-500">
@@ -108,8 +121,181 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                 </Card>
             </div>
 
+            {/* Niche Recommendation Engine */}
+            {data.nicheInsights && (
+                <section className="space-y-6">
+                    <div className="flex items-end justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <Badge className="bg-purple-500 text-white rounded-md mb-2 font-black text-[10px] uppercase px-2 py-0">Experimental AI</Badge>
+                            <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">
+                                Niche Explorer <span className="text-slate-700">for {cityName}</span>
+                            </h2>
+                        </div>
+                        <div className="text-right hidden md:block">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Pricing Roadmap</p>
+                            <p className="text-sm font-bold text-emerald-400 italic">{data.nicheInsights.pricingStrategy.description}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Potty Training / Parenting */}
+                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
+                            <CardHeader className="pb-2">
+                                <div className="p-2 w-fit bg-blue-500/10 rounded-lg mb-2">
+                                    <Activity className="h-4 w-4 text-blue-400" />
+                                </div>
+                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Parenting / Kids</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
+                                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${data.nicheInsights.pottyTraining.score * 10}%` }} />
+                                    </div>
+                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.pottyTraining.score}/10</span>
+                                </div>
+                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
+                                    {data.nicheInsights.pottyTraining.label}: Potty Training Products
+                                </Badge>
+                            </CardContent>
+                        </Card>
+
+                        {/* Senior Care */}
+                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
+                            <CardHeader className="pb-2">
+                                <div className="p-2 w-fit bg-emerald-500/10 rounded-lg mb-2">
+                                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                                </div>
+                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Senior Services</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
+                                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${data.nicheInsights.seniorCare.score * 10}%` }} />
+                                    </div>
+                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.seniorCare.score}/10</span>
+                                </div>
+                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
+                                    {data.nicheInsights.seniorCare.label}: Assisted Living / Health
+                                </Badge>
+                            </CardContent>
+                        </Card>
+
+                        {/* Luxury / Hobbies */}
+                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
+                            <CardHeader className="pb-2">
+                                <div className="p-2 w-fit bg-orange-500/10 rounded-lg mb-2">
+                                    <Award className="h-4 w-4 text-orange-400" />
+                                </div>
+                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Premium Hobbies</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
+                                        <div className="h-full bg-orange-500 rounded-full" style={{ width: `${data.nicheInsights.luxuryLuxury.score * 10}%` }} />
+                                    </div>
+                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.luxuryLuxury.score}/10</span>
+                                </div>
+                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
+                                    {data.nicheInsights.luxuryLuxury.label}: Luxury Goods / Model Making
+                                </Badge>
+                            </CardContent>
+                        </Card>
+
+                        {/* Pricing Strategy */}
+                        <Card className="bg-emerald-500/5 border-emerald-500/20 border-dashed border-2 rounded-2xl overflow-hidden">
+                            <CardHeader className="pb-2">
+                                <div className="p-2 w-fit bg-emerald-500/20 rounded-lg mb-2">
+                                    <Briefcase className="h-4 w-4 text-emerald-400" />
+                                </div>
+                                <CardTitle className="text-sm font-black uppercase tracking-wide text-emerald-400">Pricing Strategy</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-lg font-black text-white italic tracking-tight mb-1 uppercase">
+                                    {data.nicheInsights.pricingStrategy.type.replace("-", " ")}
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-500 uppercase leading-relaxed">
+                                    Recommended based on purchasing power & disposable income.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </section>
+            )}
+
+            {/* Entrepreneurial Profile (ABS Data) */}
+            {data.ownerStats && (
+                <section className="space-y-6">
+                    <div className="flex items-center gap-3 border-l-4 border-emerald-500 pl-4">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                            Entrepreneurial Profile
+                        </h2>
+                        {data.ownerStats.isStateLevel && (
+                            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] uppercase font-black">
+                                State-Level Benchmark
+                            </Badge>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Women Owned */}
+                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-pink-500">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <Award className="h-3 w-3 text-pink-400" />
+                                    Women-Owned Firms
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
+                                    {data.ownerStats.womenOwned.pct}%
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-600 uppercase">
+                                    {data.ownerStats.womenOwned.count.toLocaleString()} registered firms
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        {/* Veteran Owned */}
+                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-blue-500">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <ShieldCheck className="h-3 w-3 text-blue-400" />
+                                    Veteran-Owned Firms
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
+                                    {data.ownerStats.veteranOwned.pct}%
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-600 uppercase">
+                                    {data.ownerStats.veteranOwned.count.toLocaleString()} registered firms
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        {/* Minority Owned */}
+                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-emerald-500">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                                    <Briefcase className="h-3 w-3 text-emerald-400" />
+                                    Minority-Owned Firms
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
+                                    {data.ownerStats.minorityOwned.pct}%
+                                </div>
+                                <p className="text-[10px] font-bold text-slate-600 uppercase">
+                                    {data.ownerStats.minorityOwned.count.toLocaleString()} registered firms
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </section>
+            )}
+
             {/* Ethnicity Ratios */}
-            <div className="p-8 rounded-[2.5rem] bg-slate-900/20 border border-slate-800/50">
+            <div className="p-8 rounded-[3rem] bg-slate-900/20 border border-slate-800/50">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                     <div>
                         <h3 className="text-xl font-black uppercase italic text-white flex items-center gap-2">

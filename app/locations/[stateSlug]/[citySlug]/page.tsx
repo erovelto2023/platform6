@@ -76,9 +76,10 @@ export default async function CityPage({
                     <CityCensusStats data={censusData} cityName={city.name} />
                 </section>
 
-                <section className="p-10 border border-dashed border-slate-800 rounded-[2.5rem] bg-slate-900/20 text-center">
-                    <p className="text-slate-500 font-medium italic">
-                        The foundation for {city.name} has been established using US Census data. Detailed niche analysis coming soon.
+                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
+                    <h4 className="text-xl font-black uppercase text-emerald-400 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
+                    <p className="text-slate-400 font-medium italic max-w-2xl mx-auto text-sm">
+                        Use the data above to determine your product market fit. Whether it&apos;s a $50 guide for toddlers or a $10,000 premium course for high-earning seniors, {city.name} has clear signals for your next big move.
                     </p>
                 </section>
             </main>
