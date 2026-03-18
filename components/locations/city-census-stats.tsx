@@ -1,4 +1,4 @@
-import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info, Smartphone, Wifi, MapPin, School, Globe, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -44,6 +44,16 @@ interface CityCensusStatsProps {
             seniorCare: { score: number; label: string };
             luxuryLuxury: { score: number; label: string };
             pricingStrategy: { type: string; description: string };
+        };
+        digital: {
+            broadbandPct: number;
+            smartphoneOnlyPct: number;
+            workFromHomePct: number;
+            meanCommuteMinutes: number;
+        };
+        logistics: {
+            bachelorsDegreePct: number;
+            speakSpanishPct: number;
         };
         year: string;
     } | null;
@@ -124,6 +134,9 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </TabsTrigger>
                     <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
                         Targeting Intelligence
+                    </TabsTrigger>
+                    <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                        Channel & Logistics
                     </TabsTrigger>
                     <TabsTrigger value="profile" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
                         Owner Profiles
@@ -317,6 +330,83 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                         <Progress value={(e.val / totalPop) * 100} className="h-1 bg-slate-800" indicatorClassName={e.color} />
                                     </div>
                                 ))}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* Channel & Logistics Tab */}
+                <TabsContent value="logistics" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Digital Connectivity */}
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <Wifi className="h-4 w-4 text-cyan-400" />
+                                    Digital Connectivity
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
+                                        <span>Broadband Access</span>
+                                        <span>{data.digital.broadbandPct}%</span>
+                                    </div>
+                                    <Progress value={data.digital.broadbandPct} className="h-1 bg-slate-800" indicatorClassName="bg-cyan-500" />
+                                </div>
+                                <div className="flex items-center justify-between p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                    <div className="flex items-center gap-2">
+                                        <Smartphone className="h-3 w-3 text-slate-500" />
+                                        <span className="text-[10px] font-black text-slate-500 uppercase">Smartphone Only</span>
+                                    </div>
+                                    <span className="text-sm font-black text-white">{data.digital.smartphoneOnlyPct}%</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Commute & Mobility */}
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <Clock className="h-4 w-4 text-cyan-400" />
+                                    Work Mobility
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
+                                        <span>Worked from Home</span>
+                                        <span>{data.digital.workFromHomePct}%</span>
+                                    </div>
+                                    <Progress value={data.digital.workFromHomePct} className="h-1 bg-slate-800" indicatorClassName="bg-cyan-400" />
+                                </div>
+                                <div className="pt-2">
+                                    <div className="text-2xl font-black text-white italic">{data.digital.meanCommuteMinutes} MIN</div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase">Avg Commute Time</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Education & Language */}
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl lg:col-span-1 md:col-span-2">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <School className="h-4 w-4 text-cyan-400" />
+                                    Skillset & reach
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center justify-between p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="h-3 w-3 text-cyan-500" />
+                                        <span className="text-[10px] font-black text-slate-500 uppercase">Spanish Speakers</span>
+                                    </div>
+                                    <span className="text-sm font-black text-white">{data.logistics.speakSpanishPct}%</span>
+                                </div>
+                                <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
+                                    <div className="text-xl font-black text-cyan-400 italic">{data.logistics.bachelorsDegreePct}%</div>
+                                    <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Bachelor's Degree or Higher</p>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>

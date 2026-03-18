@@ -70,6 +70,16 @@ export interface CityStats {
     ethnicity: { white: number; black: number; asian: number; hispanic: number };
     audience: AudienceStats;
     affordability: AffordabilityStats;
+    digital: {
+        broadbandPct: number;
+        smartphoneOnlyPct: number;
+        workFromHomePct: number;
+        meanCommuteMinutes: number;
+    };
+    logistics: {
+        bachelorsDegreePct: number;
+        speakSpanishPct: number;
+    };
     segments: {
         toddlers: number;
         seniors: number;
@@ -115,6 +125,13 @@ export class CensusService {
                 "B01001_027E", "B01001_028E", "B01001_029E", "B01001_030E", // 48-51 (F 0-17)
                 "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", // 52-57 (M 65+)
                 "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", // 58-63 (F 65+)
+                // Phase 3 & 4: Digital & Logistics
+                "B28002_001E", "B28002_002E",         // 64, 65 (Internet Total, Has Internet)
+                "B28001_011E",                        // 66 (Smartphone Only)
+                "B08006_001E", "B08006_017E",         // 67, 68 (Workers total, Worked at home)
+                "B08303_001E",                        // 69 (Aggregate Commute)
+                "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 70-74 (Edu)
+                "B16001_001E", "B16001_003E",         // 75, 76 (Language Total, Spanish)
             ].join(",");
 
             const year = "2022";
@@ -183,6 +200,16 @@ export class CensusService {
                     toddlers: toddlers,
                     seniors: over65,
                     highEarners: parseInt(matchingRow[43]) || 0
+                },
+                digital: {
+                    broadbandPct: Math.round((parseInt(matchingRow[65]) / (parseInt(matchingRow[64]) || 1)) * 100),
+                    smartphoneOnlyPct: Math.round((parseInt(matchingRow[66]) / (parseInt(matchingRow[64]) || 1)) * 100),
+                    workFromHomePct: Math.round((parseInt(matchingRow[68]) / (parseInt(matchingRow[67]) || 1)) * 100),
+                    meanCommuteMinutes: Math.round(parseInt(matchingRow[69]) / ((parseInt(matchingRow[67]) - parseInt(matchingRow[68])) || 1))
+                },
+                logistics: {
+                    bachelorsDegreePct: Math.round(((parseInt(matchingRow[71]) + parseInt(matchingRow[72]) + parseInt(matchingRow[73]) + parseInt(matchingRow[74])) / (parseInt(matchingRow[70]) || 1)) * 100),
+                    speakSpanishPct: Math.round((parseInt(matchingRow[76]) / (parseInt(matchingRow[75]) || 1)) * 100)
                 },
                 year: year
             };
