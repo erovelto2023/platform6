@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncStateData, syncLegislativeData } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink } from "lucide-react";
@@ -90,7 +91,9 @@ export default async function StatePage({
                             </p>
                             
                             <div className="max-w-xl">
-                                <Search placeholder={`Search cities in ${state.name}...`} />
+                                <Suspense fallback={<div className="h-12 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />}>
+                                    <Search placeholder={`Search cities in ${state.name}...`} />
+                                </Suspense>
                             </div>
 
                             {/* State Fast Facts Section */}
