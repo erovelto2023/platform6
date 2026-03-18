@@ -8,9 +8,10 @@ import { cn } from "@/lib/utils";
 interface DashboardShellProps {
     children: React.ReactNode;
     userRole?: string | null;
+    states?: any[];
 }
 
-export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
+export const DashboardShell = ({ children, userRole, states }: DashboardShellProps) => {
     // Force sidebar update
     const { isCollapsed } = useSidebarStore();
 
@@ -20,7 +21,7 @@ export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
                 "hidden h-full md:flex md:flex-col md:fixed md:top-[34px] md:bottom-0 md:left-0 z-[80] bg-gray-900 transition-all duration-300 ease-in-out",
                 isCollapsed ? "md:w-20" : "md:w-72"
             )}>
-                <Sidebar userRole={userRole} />
+                <Sidebar userRole={userRole} states={states} />
             </div>
             <main className={cn(
                 "h-full transition-all duration-300 ease-in-out",

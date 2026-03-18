@@ -31,6 +31,8 @@ import {
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { ChevronDown, MapPin } from "lucide-react";
 
 const routes = [
     {
@@ -262,10 +264,12 @@ const adminRoutes = [
 
 interface SidebarProps {
     userRole?: string | null;
+    states?: any[];
 }
 
-export const Sidebar = ({ userRole }: SidebarProps) => {
+export const Sidebar = ({ userRole, states = [] }: SidebarProps) => {
     const pathname = usePathname();
+    const [isLocationsOpen, setIsLocationsOpen] = useState(false);
     const isAdmin = pathname?.startsWith("/admin");
 
     // Filter routes based on user role - remove Admin link if user is not an admin
@@ -305,6 +309,44 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
                             </div>
                         </Link>
                     ))}
+
+                    {/* Locations Section */}
+                    <div className="pt-2">
+                        <button
+                            onClick={() => !isCollapsed && setIsLocationsOpen(!isLocationsOpen)}
+                            className={cn(
+                                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                        >
+                            <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
+                                <MapPin className={cn("h-5 w-5 text-emerald-400", isCollapsed ? "mr-0" : "mr-3")} />
+                                {!isCollapsed && (
+                                    <>
+                                        <span>Locations</span>
+                                        <ChevronDown className={cn("h-4 w-4 ml-auto transition-transform", isLocationsOpen && "rotate-180")} />
+                                    </>
+                                )}
+                            </div>
+                        </button>
+                        
+                        {!isCollapsed && isLocationsOpen && (
+                            <div className="mt-1 space-y-1 pl-10 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                {states.map((state) => (
+                                    <Link
+                                        key={state.slug}
+                                        href={`/locations/${state.slug}`}
+                                        className={cn(
+                                            "block text-xs py-2 text-zinc-400 hover:text-white transition",
+                                            pathname === `/locations/${state.slug}` && "text-white font-bold"
+                                        )}
+                                    >
+                                        {state.name}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 
