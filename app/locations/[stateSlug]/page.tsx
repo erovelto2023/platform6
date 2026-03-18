@@ -1,13 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getLocation, getCitiesByState, syncStateData } from "@/lib/actions/location.actions";
-import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers, AlertTriangle, DollarSign, TrendingUp } from "lucide-react";
+import { getLocation, getCitiesByState } from "@/lib/actions/location.actions";
+import { MapPin, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { SyncButton } from "@/components/locations/SyncButton";
 import { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +29,415 @@ export async function generateMetadata({
     };
 }
 
+// Massive requested state facts array
+const STATE_FACTS = [
+        "State Capital",
+        "State Flag",
+        "State Seal",
+        "State Motto",
+        "State Nickname",
+        "State Song",
+        "State Colors",
+        "State Bird",
+        "State Mammal",
+        "State Fish",
+        "State Insect",
+        "State Butterfly",
+        "State Reptile",
+        "State Amphibian",
+        "State Crustacean",
+        "State Mollusk",
+        "State Fossil",
+        "State Flower",
+        "State Tree",
+        "State Grass",
+        "State Plant",
+        "State Shrub",
+        "State Wildflower",
+        "State Gemstone",
+        "State Mineral",
+        "State Rock",
+        "State Stone",
+        "State Soil",
+        "State Fruit",
+        "State Vegetable",
+        "State Grain",
+        "State Herb",
+        "State Nut",
+        "State Beverage",
+        "State Food",
+        "State Dish",
+        "State Pie",
+        "State Dessert",
+        "State Snack",
+        "State Dance",
+        "State Folk Dance",
+        "State Musical Instrument",
+        "State Sport",
+        "State Game",
+        "State Theater",
+        "State Film",
+        "State Poem",
+        "State Literature",
+        "State Artwork",
+        "State Tartan",
+        "State Fabric",
+        "State Dinosaur",
+        "State Prehistoric Animal",
+        "State Microbe",
+        "State Mushroom",
+        "State Lichen",
+        "State Moss",
+        "State Shell",
+        "State Star",
+        "State Route",
+        "State Highway",
+        "State Ship",
+        "State Firearm",
+        "State Toy",
+        "State Coin",
+        "State Currency",
+        "State Airplane",
+        "State Railroad",
+        "State Dog",
+        "State Horse",
+        "State Cat",
+        "State Bear",
+        "State Wolf",
+        "State Bison",
+        "State Deer",
+        "State Whale",
+        "State Marine Mammal",
+        "State Raptor",
+        "State Waterfowl",
+        "State Game Bird",
+        "State Freshwater Fish",
+        "State Saltwater Fish",
+        "State Butterfly (additional)",
+        "State Spider",
+        "State Scorpion",
+        "State Snake",
+        "State Turtle",
+        "State Crocodilian",
+        "State Dinosaur Species",
+        "State Historic Event",
+        "State Historic Site",
+        "State Landmark",
+        "State Park",
+        "State Forest",
+        "State River",
+        "State Lake",
+        "State Mountain",
+        "State Cave",
+        "State Waterfall",
+        "State Beach",
+        "State Trail",
+        "State Scenic Byway",
+        "State Festival",
+        "State Fair",
+        "State Holiday",
+        "State Day",
+        "State Week",
+        "State Month",
+        "State Season",
+        "State Motto (Latin)",
+        "State Pledge",
+        "State Oath",
+        "State Prayer",
+        "State Hymn",
+        "State Lullaby",
+        "State March",
+        "State Polka",
+        "State Jazz Piece",
+        "State Country Song",
+        "State Rock Song",
+        "State Folk Song",
+        "State Children's Song",
+        "State Anthem (alternative)",
+        "State Official Language",
+        "State Second Language",
+        "State Sign Language",
+        "State Alphabet",
+        "State Numeral",
+        "State Mathematical Concept",
+        "State Scientific Discovery",
+        "State Invention",
+        "State Industry",
+        "State Agricultural Product",
+        "State Dairy Product",
+        "State Cheese",
+        "State Ice Cream",
+        "State Candy",
+        "State Chocolate",
+        "State Coffee",
+        "State Tea",
+        "State Beer",
+        "State Wine",
+        "State Cocktail",
+        "State Bread",
+        "State Pancake",
+        "State Waffle",
+        "State Cookie",
+        "State Cake",
+        "State Pastry",
+        "State Sandwich",
+        "State Pizza",
+        "State Taco",
+        "State Burrito",
+        "State Chili",
+        "State Soup",
+        "State Salad",
+        "State Sauce",
+        "State Condiment",
+        "State Spice",
+        "State Pepper",
+        "State Bean",
+        "State Potato",
+        "State Tomato",
+        "State Onion",
+        "State Garlic",
+        "State Mushroom (culinary)",
+        "State Berry",
+        "State Citrus",
+        "State Melon",
+        "State Stone Fruit",
+        "State Tropical Fruit",
+        "State Dried Fruit",
+        "State Juice",
+        "State Smoothie",
+        "State Milk (type)",
+        "State Yogurt",
+        "State Butter",
+        "State Oil",
+        "State Vinegar",
+        "State Honey",
+        "State Syrup",
+        "State Jam",
+        "State Jelly",
+        "State Pickle",
+        "State Sauerkraut",
+        "State Kimchi",
+        "State Salsa",
+        "State Guacamole",
+        "State Hummus",
+        "State Dip",
+        "State Spread",
+        "State Topping",
+        "State Filling",
+        "State Crust",
+        "State Dough",
+        "State Batter",
+        "State Frosting",
+        "State Icing",
+        "State Glaze",
+        "State Sprinkle",
+        "State Chip",
+        "State Cracker",
+        "State Pretzel",
+        "State Popcorn",
+        "State Nut Mix",
+        "State Trail Mix",
+        "State Granola",
+        "State Cereal",
+        "State Oatmeal",
+        "State Porridge",
+        "State Grits",
+        "State Polenta",
+        "State Couscous",
+        "State Quinoa",
+        "State Rice",
+        "State Pasta",
+        "State Noodle",
+        "State Dumpling",
+        "State Empanada",
+        "State Samosa",
+        "State Spring Roll",
+        "State Sushi",
+        "State Ramen",
+        "State Pho",
+        "State Curry",
+        "State Stir Fry",
+        "State Kebob",
+        "State BBQ",
+        "State Brisket",
+        "State Ribs",
+        "State Pulled Pork",
+        "State Fried Chicken",
+        "State Roast",
+        "State Steak",
+        "State Burger",
+        "State Hot Dog",
+        "State Sausage",
+        "State Bacon",
+        "State Ham",
+        "State Turkey",
+        "State Duck",
+        "State Goose",
+        "State Quail",
+        "State Pheasant",
+        "State Grouse",
+        "State Ptarmigan",
+        "State Partridge",
+        "State Dove",
+        "State Pigeon",
+        "State Swan",
+        "State Crane",
+        "State Heron",
+        "State Egret",
+        "State Ibis",
+        "State Spoonbill",
+        "State Flamingo",
+        "State Pelican",
+        "State Cormorant",
+        "State Loon",
+        "State Grebe",
+        "State Albatross",
+        "State Petrel",
+        "State Shearwater",
+        "State Tern",
+        "State Gull",
+        "State Skimmer",
+        "State Jaeger",
+        "State Skua",
+        "State Auk",
+        "State Murre",
+        "State Puffin",
+        "State Guillemot",
+        "State Murrelet",
+        "State Kittiwake",
+        "State Phalarope",
+        "State Sandpiper",
+        "State Plover",
+        "State Oystercatcher",
+        "State Avocet",
+        "State Stilts",
+        "State Lapwing",
+        "State Dotterel",
+        "State Courser",
+        "State Pratincole",
+        "State Thicknee",
+        "State Stone Curlew",
+        "State Bustard",
+        "State Buttonquail",
+        "State Megapode",
+        "State Curassow",
+        "State Guan",
+        "State Chachalaca",
+        "State Tinamou",
+        "State Cassowary",
+        "State Emu",
+        "State Kiwi",
+        "State Ostrich",
+        "State Rhea",
+        "State Penguin",
+        "State Loon (additional)",
+        "State Grebe (additional)",
+        "State Cormorant (additional)",
+        "State Anhinga",
+        "State Frigatebird",
+        "State Booby",
+        "State Gannet",
+        "State Tropicbird",
+        "State Storm Petrel",
+        "State Diving Petrel",
+        "State Fairy Prion",
+        "State Broad-billed Prion",
+        "State Antarctic Prion",
+        "State Slender-billed Prion",
+        "State Fairy Tern",
+        "State Noddy",
+        "State Brown Noddy",
+        "State Black Noddy",
+        "State Blue-gray Noddy",
+        "State White Tern",
+        "State Crested Tern",
+        "State Sandwich Tern",
+        "State Royal Tern",
+        "State Elegant Tern",
+        "State Least Tern",
+        "State Roseate Tern",
+        "State Arctic Tern",
+        "State Common Tern",
+        "State Forster's Tern",
+        "State Caspian Tern",
+        "State Gull-billed Tern",
+        "State Black Skimmer",
+        "State Laughing Gull",
+        "State Franklin's Gull",
+        "State Bonaparte's Gull",
+        "State Little Gull",
+        "State Ross's Gull",
+        "State Ivory Gull",
+        "State Sabine's Gull",
+        "State Black-legged Kittiwake",
+        "State Red-legged Kittiwake",
+        "State Mew Gull",
+        "State Ring-billed Gull",
+        "State California Gull",
+        "State Herring Gull",
+        "State American Herring Gull",
+        "State European Herring Gull",
+        "State Lesser Black-backed Gull",
+        "State Great Black-backed Gull",
+        "State Kelp Gull",
+        "State Glaucous Gull",
+        "State Iceland Gull",
+        "State Thayer's Gull",
+        "State Glaucous-winged Gull",
+        "State Western Gull",
+        "State Yellow-footed Gull",
+        "State Heermann's Gull",
+        "State Franklin's Gull (additional)",
+        "State Swallow-tailed Gull",
+        "State Lava Gull",
+        "State Dolphin Gull",
+        "State Gray Gull",
+        "State Belcher's Gull",
+        "State Olrog's Gull",
+        "State Atlantic Yellow-nosed Albatross",
+        "State Black-browed Albatross",
+        "State Shy Albatross",
+        "State Campbell Albatross",
+        "State Grey-headed Albatross",
+        "State Light-mantled Albatross",
+        "State Salvin's Albatross",
+        "State Chatham Albatross",
+        "State Buller's Albatross",
+        "State White-capped Albatross",
+        "State Shy Albatross (additional)",
+        "State Wandering Albatross",
+        "State Royal Albatross",
+        "State Northern Royal Albatross",
+        "State Southern Royal Albatross",
+        "State Laysan Albatross",
+        "State Black-footed Albatross",
+        "State Short-tailed Albatross",
+        "State Sooty Albatross",
+        "State Light-mantled Albatross (additional)",
+        "State Atlantic Petrel",
+        "State Bermuda Petrel",
+        "State Black-capped Petrel",
+        "State Cook's Petrel",
+        "State Stejneger's Petrel",
+        "State Herald Petrel",
+        "State Murphy's Petrel",
+        "State Phoenix Petrel",
+        "State Kermadec Petrel",
+        "State Juan Fernandez Petrel",
+        "State White-necked Petrel",
+        "State Barau's Petrel",
+        "State Mottled Petrel",
+        "State Black-winged Petrel",
+        "State Collared Petrel",
+        "State Tahiti Petrel",
+        "State Providence Petrel",
+        "State Gould's Petrel",
+        "State Chatham Petrel",
+        "State Magenta Petrel",
+        "State Pycroft's Petrel",
+        "State Parkinson's Petrel"
+];
+
 export default async function StatePage({
     params,
     searchParams,
@@ -42,33 +448,33 @@ export default async function StatePage({
     const { stateSlug } = await params;
     const { query } = await searchParams;
     
-    let state = await getLocation(stateSlug);
+    const state = await getLocation(stateSlug);
 
     if (!state) {
         notFound();
     }
 
-    let syncError = null;
-
-    // Auto-sync State Metadata if missing or partial (missing capital is our indicator)
-    if (!state.capital?.name) {
-        try {
-            const result = await syncStateData(stateSlug, false);
-            if (!result.success) {
-                console.error(`[Sync Error] State metadata sync failed for ${stateSlug}:`, result.error);
-                syncError = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
-            } else {
-                console.log(`[Sync] Metadata sync successful for ${stateSlug}`);
-                state = await getLocation(stateSlug) || state;
-            }
-        } catch (error) {
-            console.error(`[Sync Error] Exception during state metadata sync for ${stateSlug}:`, error);
-            syncError = error instanceof Error ? error.message : 'Unknown sync error';
-        }
-    }
-
-
     const cities = await getCitiesByState(stateSlug, query);
+
+    // Create a dummy mapping of lowercase labels to available data, if needed
+    // Otherwise fallback to "Not Specified"
+    const getFieldValue = (label: string, state: any) => {
+        if (label === "State Capital" && state.capital?.name) return state.capital.name;
+        if (label === "State Motto" && state.symbols?.motto) return state.symbols.motto;
+        if (label === "State Nickname" && state.nickname) return state.nickname;
+        if (label === "State Song" && state.symbols?.song) return state.symbols.song;
+        if (label === "State Bird" && state.symbols?.bird) return state.symbols.bird;
+        if (label === "State Flower" && state.symbols?.flower) return state.symbols.flower;
+        if (label === "State Tree" && state.symbols?.tree) return state.symbols.tree;
+        
+        // For custom mapped extendedFacts dynamically added in the future:
+        if (state.extendedFacts) {
+            const found = state.extendedFacts.find((f: any) => f.label === label);
+            if (found && found.value) return found.value;
+        }
+        
+        return "Not Specified";
+    };
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950">
@@ -115,26 +521,6 @@ export default async function StatePage({
                                     <Search placeholder={`Search cities in ${state.name}...`} />
                                 </Suspense>
                             </div>
-
-                            {/* Sync Error Display */}
-                            {syncError && (
-                                <div className="mt-8 bg-red-500/10 border border-red-500/20 p-4 rounded-2xl max-w-2xl flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
-                                        <AlertTriangle className="h-5 w-5 text-red-500" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="text-[10px] font-black text-red-500 uppercase tracking-widest mb-1">Data Expansion Error</div>
-                                        <div className="text-sm font-bold text-slate-300 leading-tight">{syncError}</div>
-                                    </div>
-                                    <SyncButton 
-                                        action={syncStateData} 
-                                        slug={stateSlug} 
-                                        label="Retry Sync" 
-                                        className="bg-red-500 hover:bg-red-400 text-white border-none font-black px-4 h-9 text-[10px] rounded-lg"
-                                    />
-                                </div>
-                            )}
-
                         </div>
                     </div>
                 </section>
@@ -142,15 +528,40 @@ export default async function StatePage({
                 {/* Market & State Details Section */}
                 <section className="w-full py-12 bg-slate-900 min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <Tabs defaultValue="cities" className="w-full">
-                            <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start h-auto">
-                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
-                                    Market Cities
-                                </TabsTrigger>
+                        <Tabs defaultValue="details" className="w-full">
+                            <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start flex-wrap h-auto">
                                 <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
                                     State Details
                                 </TabsTrigger>
+                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    Market Cities
+                                </TabsTrigger>
                             </TabsList>
+
+                            {/* State Details Tab Content */}
+                            <TabsContent value="details" className="space-y-8 w-full max-w-full" suppressHydrationWarning>
+                                <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-4 mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">State Information Details</h2>
+                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Comprehensive Directory of State Heritage</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
+                                    {STATE_FACTS.map((label, idx) => {
+                                        const val = getFieldValue(label, state);
+                                        const isMissing = val === "Not Specified";
+                                        return (
+                                            <div key={label + idx} className="bg-slate-950/60 border border-slate-800/60 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/30 transition-colors">
+                                                <div className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest mb-2">{label}</div>
+                                                <div className={`text-sm font-bold ${isMissing ? 'text-slate-600 italic' : 'text-slate-200'}`} suppressHydrationWarning>
+                                                    {val}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </TabsContent>
 
                             {/* Cities Tab Content */}
                             <TabsContent value="cities" className="space-y-8">
@@ -195,272 +606,6 @@ export default async function StatePage({
                                         </p>
                                     </div>
                                 )}
-                            </TabsContent>
-
-                            {/* State Details Tab Content */}
-                            <TabsContent value="details" className="space-y-12 w-full max-w-full" suppressHydrationWarning>
-                                <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-4 mb-4">
-                                    <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">State Information</h2>
-                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Key Metrics & Cultural Details</p>
-                                    </div>
-                                </div>
-                            {/* State Data Section */}
-                            <div className="w-full" suppressHydrationWarning>
-                                {state.capital?.name && (
-                                    <div className="w-full" suppressHydrationWarning>
-                                        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Landmark className="h-3 w-3 text-purple-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.capital?.name} suppressHydrationWarning>{state.capital?.name}</div>
-                                            </div>
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Star className="h-3 w-3 text-pink-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.nickname} suppressHydrationWarning>{state.nickname}</div>
-                                            </div>
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Calendar className="h-3 w-3 text-emerald-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.date}</div>
-                                            </div>
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Compass className="h-3 w-3 text-blue-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.census_bureau?.region}</div>
-                                            </div>
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Globe2 className="h-3 w-3 text-cyan-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.time_zones?.[0]} suppressHydrationWarning>{state.time_zones?.[0]}</div>
-                                            </div>
-                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Users className="h-3 w-3 text-orange-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
-                                                </div>
-                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.demonym}</div>
-                                            </div>
-                                            {state.subdivisions && (
-                                                <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Layers className="h-3 w-3 text-emerald-400" />
-                                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Subdivisions</span>
-                                                    </div>
-                                                    <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.subdivisions.length} Counties/Units</div>
-                                                </div>
-                                            )}
-                                            {state.population?.total && (
-                                                <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <Users className="h-3 w-3 text-green-400" />
-                                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Population</span>
-                                                    </div>
-                                                    <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.population.total}</div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Economic Data Section */}
-                                        {(state.per_capita_income || state.median_household_income) && (
-                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
-                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
-                                                    <DollarSign className="h-3 w-3" /> Economic Indicators
-                                                </h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {state.per_capita_income && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <TrendingUp className="h-3 w-3 text-green-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Per Capita Income</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic" suppressHydrationWarning>{state.per_capita_income}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.median_household_income && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <DollarSign className="h-3 w-3 text-blue-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Median Household Income</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic" suppressHydrationWarning>{state.median_household_income}</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Geographic Data Section */}
-                                        {(state.area?.total_km || state.elevation?.max_ft) && (
-                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
-                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
-                                                    <Globe2 className="h-3 w-3" /> Geographic Data
-                                                </h3>
-                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                                    {state.area?.total_km && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <MapPin className="h-3 w-3 text-purple-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Total Area</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.area.total_km} km²</div>
-                                                        </div>
-                                                    )}
-                                                    {state.area?.land_percent && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Layers className="h-3 w-3 text-emerald-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Land Percentage</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.area.land_percent}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.elevation?.max_ft && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <TrendingUp className="h-3 w-3 text-orange-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Highest Point</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.elevation.max_ft} ft</div>
-                                                        </div>
-                                                    )}
-                                                    {state.elevation?.min_ft && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <TrendingUp className="h-3 w-3 text-cyan-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Lowest Point</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.elevation.min_ft}</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* State Symbols Section */}
-                                        {state.symbols && (
-                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
-                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
-                                                    <Star className="h-3 w-3" /> State Cultural Symbols
-                                                </h3>
-                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                                    {state.symbols.bird && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Bird className="h-3 w-3 text-sky-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Bird</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.bird}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.flower && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Flower2 className="h-3 w-3 text-pink-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Flower</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.flower}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.tree && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <TreeDeciduous className="h-3 w-3 text-emerald-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Tree</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.tree}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.motto && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Quote className="h-3 w-3 text-purple-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Motto</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.symbols.motto}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.song && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Music className="h-3 w-3 text-amber-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Song</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.symbols.song}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.folk_dance && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Music className="h-3 w-3 text-purple-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Folk Dance</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.folk_dance}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.hero && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Users className="h-3 w-3 text-blue-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Hero</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.hero}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.fossil && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Layers className="h-3 w-3 text-orange-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Fossil</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.fossil}</div>
-                                                        </div>
-                                                    )}
-                                                    {state.symbols.mineral && (
-                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Layers className="h-3 w-3 text-cyan-400" />
-                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Mineral</span>
-                                                            </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.mineral}</div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Major Cities Section */}
-                                        {state.cities && state.cities.length > 0 && (
-                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
-                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
-                                                    <MapPin className="h-3 w-3" /> Major Cities
-                                                </h3>
-                                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                                                    {state.cities.slice(0, 10).map((city: any, i: number) => (
-                                                        <div key={i} className="bg-slate-950/40 border border-slate-800/50 p-3 rounded-xl">
-                                                            <div className="text-xs font-bold text-slate-300 italic truncate" title={city.name}>{city.name}</div>
-                                                            {city.population && (
-                                                                <div className="text-[8px] text-slate-500 mt-1">{city.population}</div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
                             </TabsContent>
                         </Tabs>
                     </div>
