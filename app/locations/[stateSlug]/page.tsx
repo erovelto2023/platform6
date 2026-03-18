@@ -453,6 +453,8 @@ export default async function StatePage({
     if (!state) {
         notFound();
     }
+    
+    console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
 
     const cities = await getCitiesByState(stateSlug, query);
 
