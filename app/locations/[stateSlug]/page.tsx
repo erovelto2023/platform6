@@ -122,14 +122,14 @@ export default async function StatePage({
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> All States
                         </Link>
                         <div className="text-left max-w-4xl">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-white uppercase italic leading-tight">
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-white uppercase italic leading-tight" suppressHydrationWarning>
                                 {state.name} <span className="text-purple-500">Business Hub</span>
                             </h1>
-                            <p className="text-slate-400 text-lg md:text-xl mb-10 font-medium max-w-2xl">
+                            <p className="text-slate-400 text-lg md:text-xl mb-10 font-medium max-w-2xl" suppressHydrationWarning>
                                 Discover all city-level business insights and local resources across the state of {state.name}.
                             </p>
                             
-                            <div className="max-w-xl">
+                            <div className="max-w-xl" suppressHydrationWarning>
                                 <Suspense fallback={<div className="h-12 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />}>
                                     <Search placeholder={`Search cities in ${state.name}...`} />
                                 </Suspense>
@@ -157,7 +157,7 @@ export default async function StatePage({
                             {/* State Data Section */}
                             <div className="w-full" suppressHydrationWarning>
                                 {state.capital?.name && (
-                                    <div className="w-full">
+                                    <div className="w-full" suppressHydrationWarning>
                                         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
@@ -185,21 +185,21 @@ export default async function StatePage({
                                                     <Compass className="h-3 w-3 text-blue-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic">{state.census_bureau?.region}</div>
+                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.census_bureau?.region}</div>
                                             </div>
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Globe2 className="h-3 w-3 text-cyan-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic truncate" title={state.time_zones?.[0]}>{state.time_zones?.[0]}</div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.time_zones?.[0]} suppressHydrationWarning>{state.time_zones?.[0]}</div>
                                             </div>
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <Users className="h-3 w-3 text-orange-400" />
                                                     <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic">{state.demonym}</div>
+                                                <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.demonym}</div>
                                             </div>
                                             {state.subdivisions && (
                                                 <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
@@ -207,7 +207,7 @@ export default async function StatePage({
                                                         <Layers className="h-3 w-3 text-emerald-400" />
                                                         <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Subdivisions</span>
                                                     </div>
-                                                    <div className="text-sm font-black text-white italic">{state.subdivisions.length} Counties/Units</div>
+                                                    <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.subdivisions.length} Counties/Units</div>
                                                 </div>
                                             )}
                                             {state.population?.total && (
@@ -216,7 +216,7 @@ export default async function StatePage({
                                                         <Users className="h-3 w-3 text-green-400" />
                                                         <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Population</span>
                                                     </div>
-                                                    <div className="text-sm font-black text-white italic">{state.population.total}</div>
+                                                    <div className="text-sm font-black text-white italic" suppressHydrationWarning>{state.population.total}</div>
                                                 </div>
                                             )}
                                         </div>
@@ -234,7 +234,7 @@ export default async function StatePage({
                                                                 <TrendingUp className="h-3 w-3 text-green-400" />
                                                                 <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Per Capita Income</span>
                                                             </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.per_capita_income}</div>
+                                                            <div className="text-xs font-bold text-slate-300 italic" suppressHydrationWarning>{state.per_capita_income}</div>
                                                         </div>
                                                     )}
                                                     {state.median_household_income && (
@@ -243,7 +243,7 @@ export default async function StatePage({
                                                                 <DollarSign className="h-3 w-3 text-blue-400" />
                                                                 <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Median Household Income</span>
                                                             </div>
-                                                            <div className="text-xs font-bold text-slate-300 italic">{state.median_household_income}</div>
+                                                            <div className="text-xs font-bold text-slate-300 italic" suppressHydrationWarning>{state.median_household_income}</div>
                                                         </div>
                                                     )}
                                                 </div>
