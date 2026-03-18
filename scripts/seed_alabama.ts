@@ -97,7 +97,7 @@ async function seed() {
     // Safety check: ensure schema has extendedFacts even if compiled without it
     const facts = [];
     
-    for (let line of alabamaData.split('\\n')) {
+    for (let line of alabamaData.split('\n')) {
         line = line.trim();
         if (!line) continue;
         
@@ -108,11 +108,11 @@ async function seed() {
                 value: parts.slice(1).join(':').trim()
             });
         } else if (line.startsWith('State ')) {
-            const match = line.match(/(State [a-zA-Z\\s]+) \\((.*?)\\)/);
+            const match = line.match(/(State [a-zA-Z\s]+) \((.*?)\)/);
             if (match) {
                 facts.push({
                     label: match[1].trim(),
-                    value: \`Established ${{match[2]}}\`
+                    value: `Established ${match[2]}`
                 });
             } else {
                 facts.push({
