@@ -33,10 +33,16 @@ export interface OwnerStats {
     isStateLevel: boolean; // Flag to indicate if we're showing state averages
 }
 
+export interface NicheCandidate {
+    id: string;
+    label: string;
+    score: number;
+    sublabel: string;
+    description: string;
+}
+
 export interface NicheInsight {
-    pottyTraining: { score: number; label: string };
-    seniorCare: { score: number; label: string };
-    luxuryLuxury: { score: number; label: string };
+    candidates: NicheCandidate[];
     pricingStrategy: { type: "high-ticket" | "standard" | "mass-market"; description: string };
 }
 
@@ -250,19 +256,86 @@ export class CensusService {
 
     private static calculateNicheInsights(stats: CityStats): NicheInsight {
         const totalPop = stats.population || 1;
-        const toddlerPct = (stats.segments.toddlers / totalPop) * 100;
-        const seniorPct = (stats.segments.seniors / totalPop) * 100;
-        const highEarnerPct = (stats.segments.highEarners / (totalPop / 2.5)) * 100; // Households est.
+        const candidates: NicheCandidate[] = [];
 
-        const getScore = (pct: number, threshold: number) => {
-            const score = Math.round((pct / threshold) * 8); 
-            if (score > 10) return 10;
-            return Math.max(1, score);
+        const getScore = (val: number, threshold: number, max = 10) => {
+            const s = Math.round((val / threshold) * 8);
+            return Math.min(max, Math.max(1, s));
         };
 
-        const pottyScore = getScore(toddlerPct, 6); // 6% is avg
-        const seniorScore = getScore(seniorPct, 15); // 15% is avg
-        const luxuryScore = getScore(highEarnerPct, 8); // 8% is high earner avg
+        // 1. Parenting & Kids
+        const toddlerPct = (stats.segments.toddlers / totalPop) * 100;
+        const pScore = getScore(toddlerPct, 6);
+        candidates.push({
+            id: "parenting",
+            label: "Parenting & Kids",
+            score: pScore,
+            sublabel: pScore > 7 ? "High Demand" : "Steady Market",
+            description: "Potty training, early learning, and toddler safety products."
+        });
+
+        // 2. Senior Services
+        const seniorPct = (stats.segments.seniors / totalPop) * 100;
+        const sScore = getScore(seniorPct, 15);
+        candidates.push({
+            id: "seniors",
+            label: "Senior Services",
+            score: sScore,
+            sublabel: sScore > 7 ? "Booming Demographic" : "Average Demand",
+            description: "Assisted living, mobility aids, and senior health coaching."
+        });
+
+        // 3. Remote Work & Tech
+        const wfhPct = stats.digital.workFromHomePct;
+        const rScore = getScore(wfhPct, 15);
+        if (wfhPct > 10) {
+            candidates.push({
+                id: "remote-work",
+                label: "Remote Professional",
+                score: rScore,
+                sublabel: wfhPct > 20 ? "Tech Hub Potential" : "Growing Segment",
+                description: "Home office ergonomics, async productivity, and remote-first gear."
+            });
+        }
+
+        // 4. Luxury & High-Ticket
+        const highEarnerPct = (stats.segments.highEarners / (totalPop / 2.5)) * 100;
+        const lScore = getScore(highEarnerPct, 10);
+        if (stats.medianIncome > 85000 || highEarnerPct > 12) {
+            candidates.push({
+                id: "luxury",
+                label: "Premium Hobbies",
+                score: lScore,
+                sublabel: lScore > 8 ? "High Luxury" : "Premium Tier",
+                description: "High-ticket courses, luxury goods, and specialized hobby coaching."
+            });
+        }
+
+        // 5. Bilingual / Multicultural
+        const spanishPct = stats.logistics.speakSpanishPct;
+        if (spanishPct > 15) {
+            const bScore = getScore(spanishPct, 25);
+            candidates.push({
+                id: "multicultural",
+                label: "Hispanic Market",
+                score: bScore,
+                sublabel: "Hyper-Localized",
+                description: "Bilingual education, cultural goods, and Spanish-first digital services."
+            });
+        }
+
+        // 6. Home Services
+        const homeScore = getScore(stats.affordability.homeownershipRate, 65);
+        candidates.push({
+            id: "home-office",
+            label: "Home Optimization",
+            score: homeScore,
+            sublabel: stats.affordability.homeownershipRate > 70 ? "Homeowner Dense" : "Stable",
+            description: "Smart home, DIY maintenance, and family-oriented home office gear."
+        });
+
+        // Sort by score
+        candidates.sort((a, b) => b.score - a.score);
 
         let pricing: NicheInsight["pricingStrategy"] = {
             type: "standard",
@@ -282,9 +355,7 @@ export class CensusService {
         }
 
         return {
-            pottyTraining: { score: pottyScore, label: pottyScore > 7 ? "Hot Niche" : "Stable" },
-            seniorCare: { score: seniorScore, label: seniorScore > 7 ? "Booming" : "Average" },
-            luxuryLuxury: { score: luxuryScore, label: luxuryScore > 7 ? "Premium" : "Low" },
+            candidates: candidates.slice(0, 3), // Keep top 3 for UI
             pricingStrategy: pricing
         };
     }

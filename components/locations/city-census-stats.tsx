@@ -40,9 +40,13 @@ interface CityCensusStatsProps {
             isStateLevel: boolean;
         };
         nicheInsights?: {
-            pottyTraining: { score: number; label: string };
-            seniorCare: { score: number; label: string };
-            luxuryLuxury: { score: number; label: string };
+            candidates: Array<{
+                id: string;
+                label: string;
+                score: number;
+                sublabel: string;
+                description: string;
+            }>;
             pricingStrategy: { type: string; description: string };
         };
         digital: {
@@ -126,19 +130,19 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
             {/* Layered Intelligence Tabs */}
             <Tabs defaultValue="audience" className="w-full">
                 <TabsList className="bg-slate-900/40 border border-slate-800 p-1 rounded-xl mb-8 w-full justify-start overflow-x-auto h-auto no-scrollbar">
-                    <TabsTrigger value="audience" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                    <TabsTrigger value="audience" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Audience Validation
                     </TabsTrigger>
-                    <TabsTrigger value="affordability" className="px-6 py-2 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                    <TabsTrigger value="affordability" className="px-6 py-2 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Affordability & Pricing
                     </TabsTrigger>
-                    <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                    <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Targeting Intelligence
                     </TabsTrigger>
-                    <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                    <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Channel & Logistics
                     </TabsTrigger>
-                    <TabsTrigger value="profile" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                    <TabsTrigger value="profile" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Owner Profiles
                     </TabsTrigger>
                 </TabsList>
@@ -223,9 +227,9 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                             <CardContent>
                                 <div className="space-y-4 pt-2">
                                     {[
-                                        { label: "Under $25k", val: data.affordability.incomeBrackets.under25k, color: "bg-red-500/50" },
-                                        { label: "$25k - $50k", val: data.affordability.incomeBrackets.k25_50, color: "bg-orange-500/50" },
-                                        { label: "$50k - $75k", val: data.affordability.incomeBrackets.k50_75, color: "bg-emerald-500/50" },
+                                        { label: "Under $25k", val: data.affordability.incomeBrackets.under25k, color: "bg-red-500" },
+                                        { label: "$25k - $50k", val: data.affordability.incomeBrackets.k25_50, color: "bg-orange-500" },
+                                        { label: "$50k - $75k", val: data.affordability.incomeBrackets.k50_75, color: "bg-emerald-400" },
                                         { label: "$75k+", val: data.affordability.incomeBrackets.over75k, color: "bg-emerald-500" },
                                     ].map(b => (
                                         <div key={b.label} className="space-y-1">
@@ -452,73 +456,33 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                 </TabsContent>
             </Tabs>
 
-            {/* Niche Insights (Static spotlight) */}
+            {/* Niche Opportunity Spotlight */}
             {data.nicheInsights && (
-                <section className="space-y-6">
-                    <div className="flex items-center gap-3 border-l-4 border-purple-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">Niche Opportunity Spotlight</h2>
-                        <Badge className="bg-purple-500 text-white rounded-md text-[8px] uppercase font-black">AI Scored</Badge>
+                <div className="mt-12 space-y-6">
+                    <div className="flex items-center gap-2">
+                        <Target className="h-5 w-5 text-purple-400" />
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white">Niche Opportunity Spotlight</h3>
+                        <Badge variant="outline" className="ml-auto bg-purple-500/10 text-purple-400 border-purple-500/20 text-[8px] uppercase font-black">AI Scored</Badge>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Potty Training / Parenting */}
-                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
-                            <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-blue-500/10 rounded-lg mb-2"><Activity className="h-4 w-4 text-blue-400" /></div>
-                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Parenting / Kids</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
-                                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${data.nicheInsights.pottyTraining.score * 10}%` }} />
+                        {data.nicheInsights.candidates.map((niche) => (
+                            <Card key={niche.id} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all border-b-2 border-b-purple-500/20">
+                                <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between">
+                                    <CardTitle className="text-[10px] font-black uppercase text-slate-400">{niche.label}</CardTitle>
+                                    <span className={`text-sm font-black italic ${niche.score >= 8 ? "text-emerald-400" : niche.score >= 5 ? "text-blue-400" : "text-amber-400"}`}>{niche.score}/10</span>
+                                </CardHeader>
+                                <CardContent className="p-4">
+                                    <div className="text-lg font-black text-white italic leading-tight mb-2 uppercase">{niche.sublabel}</div>
+                                    <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase">{niche.description}</p>
+                                    <div className="mt-4">
+                                        <Progress value={niche.score * 10} className="h-1 bg-slate-800" indicatorClassName={niche.score >= 8 ? "bg-emerald-500" : niche.score >= 5 ? "bg-blue-500" : "bg-amber-500"} />
                                     </div>
-                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.pottyTraining.score}/10</span>
-                                </div>
-                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
-                                    {data.nicheInsights.pottyTraining.label}: Potty Training Products
-                                </Badge>
-                            </CardContent>
-                        </Card>
-
-                        {/* Senior Care */}
-                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
-                            <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-emerald-500/10 rounded-lg mb-2"><ShieldCheck className="h-4 w-4 text-emerald-400" /></div>
-                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Senior Services</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
-                                        <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${data.nicheInsights.seniorCare.score * 10}%` }} />
-                                    </div>
-                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.seniorCare.score}/10</span>
-                                </div>
-                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
-                                    {data.nicheInsights.seniorCare.label}: Assisted Living / Health
-                                </Badge>
-                            </CardContent>
-                        </Card>
-
-                        {/* Luxury / Hobbies */}
-                        <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
-                            <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-orange-500/10 rounded-lg mb-2"><Award className="h-4 w-4 text-orange-400" /></div>
-                                <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Premium Hobbies</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="flex-1 h-1.5 bg-slate-800 rounded-full">
-                                        <div className="h-full bg-orange-500 rounded-full" style={{ width: `${data.nicheInsights.luxuryLuxury.score * 10}%` }} />
-                                    </div>
-                                    <span className="text-xs font-black text-slate-500">{data.nicheInsights.luxuryLuxury.score}/10</span>
-                                </div>
-                                <Badge variant="secondary" className="bg-slate-800 text-slate-300 border-none font-bold text-[10px] uppercase">
-                                    {data.nicheInsights.luxuryLuxury.label}: Luxury Goods / Model Making
-                                </Badge>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
-                </section>
+                </div>
             )}
 
             {/* Quality & Footer */}
@@ -529,7 +493,7 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                         Data sourced from ACS 2018-2022 5-Year Estimates. 
                         {isSmallTown && (
                           <span className="block text-orange-400 font-bold mt-1">
-                            <AlertTriangle className="h-2 w-2 inline mr-1" /> Small population detected. Margin of error may be ±15-20%.
+                            <AlertTriangle className="h-3 w-3 inline mr-1" /> Small population detected. Margin of error may be higher.
                           </span>
                         )}
                     </p>
