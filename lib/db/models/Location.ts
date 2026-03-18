@@ -263,6 +263,9 @@ const LocationSchema = new Schema<ILocation>(
 // Compound index for city within a state
 LocationSchema.index({ slug: 1, stateSlug: 1 });
 
+if (process.env.NODE_ENV !== 'production') {
+    delete mongoose.models.Location;
+}
 const Location = mongoose.models.Location || mongoose.model<ILocation>('Location', LocationSchema);
 
 export default Location;
