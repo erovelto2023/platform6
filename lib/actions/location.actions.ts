@@ -6,6 +6,9 @@ import path from "path";
 
 import connectToDatabase from "@/lib/db/connect";
 import Location from "@/lib/db/models/Location";
+import { RapidApiService } from "@/lib/services/rapidapi.service";
+import { OpenStatesService } from "@/lib/services/openstates.service";
+import { STATE_NAME_TO_ABBR } from "@/lib/utils/state-mapping";
 
 /**
  * Fetch all states from the database with optional search.
@@ -77,6 +80,80 @@ export async function getLocation(slug: string, stateSlug?: string) {
     } catch (error) {
         console.error("Error fetching location:", error);
         return null;
+    }
+}
+
+/**
+ * Sync state metadata from RapidAPI for a specific state.
+ */
+export async function syncStateData(stateSlug: string) {
+    try {
+        await connectToDatabase();
+        
+        const state = await Location.findOne({ slug: stateSlug, type: 'state' });
+        if (!state) throw new Error("State not found");
+
+        // Fetch from RapidAPI
+        const meta = await RapidApiService.fetchStateMetadata(state.name);
+        if (!meta) return { success: false, message: "No metadata found from API" };
+
+        // Update database
+        state.stateData = {
+            capital: meta.capital,
+            nickname: meta.nickname,
+            statehoodDate: meta.statehood_date,
+            fipsCode: meta.fips_code,
+            demonym: meta.demonym,
+            elevation: {
+                maxFeet: meta.elevation_max_feet,
+                minFeet: meta.elevation_min_feet
+            },
+            timezone: meta.timezone,
+            region: meta.region,
+            division: meta.division
+        };
+
+        await state.save();
+        revalidatePath(`/locations/${stateSlug}`);
+        
+        return { success: true, data: JSON.parse(JSON.stringify(state)) };
+    } catch (error: any) {
+        console.error("Error syncing state data:", error);
+        return { success: false, error: error?.message };
+    }
+}
+
+/**
+ * Sync legislative data from Open States.
+ */
+export async function syncLegislativeData(stateSlug: string) {
+    try {
+        await connectToDatabase();
+        
+        const state = await Location.findOne({ slug: stateSlug, type: 'state' });
+        if (!state) throw new Error("State not found");
+
+        const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
+        if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
+
+        // Fetch from Open States
+        const data = await OpenStatesService.fetchLegislativeData(stateAbbr);
+        if (!data) return { success: false, message: "No legislative data found" };
+
+        // Update database
+        state.legislativeData = {
+            jurisdictionId: data.jurisdictionId,
+            legislators: data.legislators,
+            recentBills: data.recentBills
+        };
+
+        await state.save();
+        revalidatePath(`/locations/${stateSlug}`);
+        
+        return { success: true, data: JSON.parse(JSON.stringify(state)) };
+    } catch (error: any) {
+        console.error("Error syncing legislative data:", error);
+        return { success: false, error: error?.message };
     }
 }
 
