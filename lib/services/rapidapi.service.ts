@@ -75,4 +75,67 @@ export class RapidApiService {
             return null;
         }
     }
+
+    /**
+     * Fetch state symbols (bird, flower, etc.)
+     */
+    static async fetchStateSymbols(abbr: string) {
+        if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
+
+        try {
+            const url = `https://${RAPIDAPI_HOST}/symbols/${abbr.toUpperCase()}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': RAPIDAPI_KEY,
+                    'x-rapidapi-host': RAPIDAPI_HOST
+                }
+            });
+
+            if (!response.ok) return null;
+            const data = await response.json();
+            const result = Array.isArray(data) ? data[0] : data;
+            
+            return {
+                bird: result.bird,
+                flower: result.flower,
+                tree: result.tree,
+                motto: result.motto,
+                song: result.song
+            };
+        } catch (error) {
+            console.error("Error fetching state symbols:", error);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch state subdivisions (counties)
+     */
+    static async fetchStateSubdivisions(abbr: string) {
+        if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
+
+        try {
+            const url = `https://${RAPIDAPI_HOST}/subdivisions/${abbr.toUpperCase()}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': RAPIDAPI_KEY,
+                    'x-rapidapi-host': RAPIDAPI_HOST
+                }
+            });
+
+            if (!response.ok) return null;
+            const data = await response.json();
+            
+            // Expected format: Array of strings or objects with a 'name' property
+            if (Array.isArray(data)) {
+                return data.map((item: any) => typeof item === 'string' ? item : item.name);
+            }
+            return null;
+        } catch (error) {
+            console.error("Error fetching subdivisions:", error);
+            return null;
+        }
+    }
 }

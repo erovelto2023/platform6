@@ -19,6 +19,14 @@ export interface ILocation extends Document {
         timezone?: string;
         region?: string;
         division?: string;
+        symbols?: {
+            bird?: string;
+            flower?: string;
+            tree?: string;
+            motto?: string;
+            song?: string;
+        };
+        subdivisions?: string[];
     };
     legislativeData?: {
         jurisdictionId?: string;
@@ -83,6 +91,14 @@ const LocationSchema = new Schema<ILocation>(
             timezone: String,
             region: String,
             division: String,
+            symbols: {
+                bird: String,
+                flower: String,
+                tree: String,
+                motto: String,
+                song: String,
+            },
+            subdivisions: [String],
         },
         legislativeData: {
             jurisdictionId: String,

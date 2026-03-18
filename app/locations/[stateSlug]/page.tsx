@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncStateData, syncLegislativeData } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -98,50 +98,117 @@ export default async function StatePage({
 
                             {/* State Fast Facts Section */}
                             {state.stateData ? (
-                                <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Landmark className="h-3 w-3 text-purple-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
+                                <>
+                                    <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Landmark className="h-3 w-3 text-purple-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic">{state.stateData.capital}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic">{state.stateData.capital}</div>
-                                    </div>
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Star className="h-3 w-3 text-pink-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Star className="h-3 w-3 text-pink-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.nickname}>{state.stateData.nickname}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic truncate" title={state.stateData.nickname}>{state.stateData.nickname}</div>
-                                    </div>
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Calendar className="h-3 w-3 text-emerald-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Calendar className="h-3 w-3 text-emerald-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic">{state.stateData.statehoodDate}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic">{state.stateData.statehoodDate}</div>
-                                    </div>
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Compass className="h-3 w-3 text-blue-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Compass className="h-3 w-3 text-blue-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic">{state.stateData.region}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic">{state.stateData.region}</div>
-                                    </div>
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Globe2 className="h-3 w-3 text-cyan-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Globe2 className="h-3 w-3 text-cyan-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.timezone}>{state.stateData.timezone}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic truncate" title={state.stateData.timezone}>{state.stateData.timezone}</div>
-                                    </div>
-                                    <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <Users className="h-3 w-3 text-orange-400" />
-                                            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
+                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Users className="h-3 w-3 text-orange-400" />
+                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
+                                            </div>
+                                            <div className="text-sm font-black text-white italic">{state.stateData.demonym}</div>
                                         </div>
-                                        <div className="text-sm font-black text-white italic">{state.stateData.demonym}</div>
+                                        {state.stateData.subdivisions && (
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Layers className="h-3 w-3 text-emerald-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Subdivisions</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic">{state.stateData.subdivisions.length} Counties/Units</div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
+
+                                    {/* State Symbols Section */}
+                                    {state.stateData.symbols && (
+                                        <div className="mt-8 pt-8 border-t border-slate-800/50">
+                                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
+                                                <Star className="h-3 w-3" /> State Cultural Symbols
+                                            </h3>
+                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                {state.stateData.symbols.bird && (
+                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Bird className="h-3 w-3 text-sky-400" />
+                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Bird</span>
+                                                        </div>
+                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.bird}</div>
+                                                    </div>
+                                                )}
+                                                {state.stateData.symbols.flower && (
+                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Flower2 className="h-3 w-3 text-pink-400" />
+                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Flower</span>
+                                                        </div>
+                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.flower}</div>
+                                                    </div>
+                                                )}
+                                                {state.stateData.symbols.tree && (
+                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <TreeDeciduous className="h-3 w-3 text-emerald-400" />
+                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Tree</span>
+                                                        </div>
+                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.tree}</div>
+                                                    </div>
+                                                )}
+                                                {state.stateData.symbols.motto && (
+                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Quote className="h-3 w-3 text-purple-400" />
+                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Motto</span>
+                                                        </div>
+                                                        <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.stateData.symbols.motto}</div>
+                                                    </div>
+                                                )}
+                                                {state.stateData.symbols.song && (
+                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Music className="h-3 w-3 text-amber-400" />
+                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Song</span>
+                                                        </div>
+                                                        <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.stateData.symbols.song}</div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="mt-12">
                                     <SyncButton 

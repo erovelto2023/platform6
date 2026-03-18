@@ -95,7 +95,21 @@ export async function syncStateData(stateSlug: string) {
 
         // Fetch from RapidAPI
         const meta = await RapidApiService.fetchStateMetadata(state.name);
-        if (!meta) return { success: false, message: "No metadata found from API" };
+        if (!meta) return { success: false, message: "No basic metadata found from API" };
+
+        const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
+        let symbols = null;
+        let subdivisions = null;
+
+        if (stateAbbr) {
+            // Fetch symbols and subdivisions in parallel
+            const [symbolsRes, subdivisionsRes] = await Promise.all([
+                RapidApiService.fetchStateSymbols(stateAbbr),
+                RapidApiService.fetchStateSubdivisions(stateAbbr)
+            ]);
+            symbols = symbolsRes;
+            subdivisions = subdivisionsRes;
+        }
 
         // Update database
         state.stateData = {
@@ -110,7 +124,9 @@ export async function syncStateData(stateSlug: string) {
             },
             timezone: meta.timezone,
             region: meta.region,
-            division: meta.division
+            division: meta.division,
+            symbols: symbols,
+            subdivisions: subdivisions
         };
 
         await state.save();
