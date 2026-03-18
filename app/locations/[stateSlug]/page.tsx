@@ -52,24 +52,38 @@ export default async function StatePage({
 
     // Auto-sync State Metadata if missing or partial (missing capital is our indicator)
     if (!state.capital?.name) {
-        const result = await syncStateData(stateSlug, false);
-        if (!result.success) {
-            syncError = result.error;
-        } else {
-            console.log(`[Sync] Metadata sync successful for ${stateSlug}`);
-            state = await getLocation(stateSlug) || state;
+        try {
+            const result = await syncStateData(stateSlug, false);
+            if (!result.success) {
+                console.error(`[Sync Error] State metadata sync failed for ${stateSlug}:`, result.error);
+                syncError = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+            } else {
+                console.log(`[Sync] Metadata sync successful for ${stateSlug}`);
+                state = await getLocation(stateSlug) || state;
+            }
+        } catch (error) {
+            console.error(`[Sync Error] Exception during state metadata sync for ${stateSlug}:`, error);
+            syncError = error instanceof Error ? error.message : 'Unknown sync error';
         }
     }
 
     // Auto-sync Legislative Data if missing or empty
     if (!state.legislativeData || !state.legislativeData.legislators || state.legislativeData.legislators.length === 0) {
-        const result = await syncLegislativeData(stateSlug, false);
-        if (!result.success && !syncError) {
-            // Only show second error if first sync didn't fail
-            syncError = result.error;
-        } else if (result.success) {
-            console.log(`[Sync] Legislative sync successful for ${stateSlug}`);
-            state = await getLocation(stateSlug) || state;
+        try {
+            const result = await syncLegislativeData(stateSlug, false);
+            if (!result.success && !syncError) {
+                // Only show second error if first sync didn't fail
+                console.error(`[Sync Error] Legislative sync failed for ${stateSlug}:`, result.error);
+                syncError = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
+            } else if (result.success) {
+                console.log(`[Sync] Legislative sync successful for ${stateSlug}`);
+                state = await getLocation(stateSlug) || state;
+            }
+        } catch (error) {
+            console.error(`[Sync Error] Exception during legislative sync for ${stateSlug}:`, error);
+            if (!syncError) {
+                syncError = error instanceof Error ? error.message : 'Unknown legislative sync error';
+            }
         }
     }
 
