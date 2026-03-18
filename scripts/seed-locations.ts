@@ -1,3 +1,6 @@
+import * as dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 import connectToDatabase from "../lib/db/connect";
 import Location from "../lib/db/models/Location";
 

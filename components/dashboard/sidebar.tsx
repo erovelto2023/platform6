@@ -313,11 +313,19 @@ export const Sidebar = ({ userRole, states = [] }: SidebarProps) => {
                     {/* Locations Section */}
                     <div className="pt-2">
                         <button
-                            onClick={() => !isCollapsed && setIsLocationsOpen(!isLocationsOpen)}
+                            onClick={() => {
+                                if (isCollapsed) {
+                                    toggle();
+                                    setIsLocationsOpen(true);
+                                } else {
+                                    setIsLocationsOpen(!isLocationsOpen);
+                                }
+                            }}
                             className={cn(
                                 "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400",
                                 isCollapsed && "justify-center px-2"
                             )}
+                            title={isCollapsed ? "Locations" : undefined}
                         >
                             <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
                                 <MapPin className={cn("h-5 w-5 text-emerald-400", isCollapsed ? "mr-0" : "mr-3")} />
@@ -332,18 +340,24 @@ export const Sidebar = ({ userRole, states = [] }: SidebarProps) => {
                         
                         {!isCollapsed && isLocationsOpen && (
                             <div className="mt-1 space-y-1 pl-10 max-h-[300px] overflow-y-auto custom-scrollbar">
-                                {states.map((state) => (
-                                    <Link
-                                        key={state.slug}
-                                        href={`/locations/${state.slug}`}
-                                        className={cn(
-                                            "block text-xs py-2 text-zinc-400 hover:text-white transition",
-                                            pathname === `/locations/${state.slug}` && "text-white font-bold"
-                                        )}
-                                    >
-                                        {state.name}
-                                    </Link>
-                                ))}
+                                {states && states.length > 0 ? (
+                                    states.map((state) => (
+                                        <Link
+                                            key={state.slug}
+                                            href={`/locations/${state.slug}`}
+                                            className={cn(
+                                                "block text-xs py-2 text-zinc-400 hover:text-white transition",
+                                                pathname === `/locations/${state.slug}` && "text-white font-bold"
+                                            )}
+                                        >
+                                            {state.name}
+                                        </Link>
+                                    ))
+                                ) : (
+                                    <div className="text-[10px] text-zinc-500 py-2 italic font-medium">
+                                        Loading locations...
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
