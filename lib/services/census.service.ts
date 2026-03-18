@@ -28,7 +28,16 @@ export const STATE_FIPS: Record<string, string> = {
 export interface CityStats {
     population: number;
     medianIncome: number;
-    businessCount?: number;
+    gender: {
+        male: number;
+        female: number;
+    };
+    ethnicity: {
+        white: number;
+        black: number;
+        asian: number;
+        hispanic: number;
+    };
     year: string;
 }
 
@@ -41,20 +50,21 @@ export class CensusService {
             const stateFips = STATE_FIPS[stateName.toLowerCase()];
             if (!stateFips) return null;
 
-            // Step 1: Resolve the Place FIPS code for the city name
-            // We search in the ACS 5-year data for all places in the state
-            const year = "2022"; // Latest stable ACS 5-year dataset
-            const url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=NAME,B01003_001E,B19013_001E&for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+            // Variables: 
+            // NAME, Total Pop, Median Income, 
+            // Male, Female, 
+            // White (non-hispanic), Black (non-hispanic), Asian (non-hispanic), Hispanic
+            const vars = "NAME,B01003_001E,B19013_001E,B01001_002E,B01001_026E,B03002_003E,B03002_004E,B03002_006E,B03002_012E";
+            
+            const year = "2022";
+            const url = `${CENSUS_API_BASE}/${year}/acs/acs5?get=${vars}&for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
 
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Census API error: ${response.statusText}`);
 
             const data = await response.json();
-            // data format: [ [header], [row1], [row2], ... ]
-            // headers: ["NAME", "B01003_001E", "B19013_001E", "state", "place"]
+            // headers: ["NAME", "B01003_001E", "B19013_001E", "B01001_002E", "B01001_026E", "B03002_003E", "B03002_004E", "B03002_006E", "B03002_012E", "state", "place"]
 
-            // Step 2: Find the matching city row
-            // City names in Census often look like "Birmingham city, Alabama" or "Anchorage municipality, Alaska"
             const matchingRow = data.find((row: string[]) => 
                 row[0].toLowerCase().startsWith(cityName.toLowerCase())
             );
@@ -64,6 +74,16 @@ export class CensusService {
             return {
                 population: parseInt(matchingRow[1]) || 0,
                 medianIncome: parseInt(matchingRow[2]) || 0,
+                gender: {
+                    male: parseInt(matchingRow[3]) || 0,
+                    female: parseInt(matchingRow[4]) || 0,
+                },
+                ethnicity: {
+                    white: parseInt(matchingRow[5]) || 0,
+                    black: parseInt(matchingRow[6]) || 0,
+                    asian: parseInt(matchingRow[7]) || 0,
+                    hispanic: parseInt(matchingRow[8]) || 0,
+                },
                 year: year
             };
         } catch (error) {
