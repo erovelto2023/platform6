@@ -45,10 +45,13 @@ export function SyncButton({
                     setMessage(result.message || result.error || "Sync failed");
                     console.error("Sync Error:", result);
                 }
-            } catch (err) {
-                setStatus("error");
-                setMessage("An unexpected error occurred");
+            } catch (err: any) {
                 console.error("Sync Exception:", err);
+                setStatus("error");
+                const errorText = typeof err === 'string' 
+                    ? err 
+                    : (err?.message || "An unexpected error occurred. Please check your API keys.");
+                setMessage(errorText);
             }
         });
     };

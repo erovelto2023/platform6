@@ -95,7 +95,7 @@ export async function syncStateData(stateSlug: string) {
 
         // Fetch from RapidAPI
         const meta = await RapidApiService.fetchStateMetadata(state.name);
-        if (!meta) return { success: false, message: "No basic metadata found from API" };
+        if (!meta) return { success: false, error: "No basic metadata found from API" };
 
         const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
         let symbols = null;

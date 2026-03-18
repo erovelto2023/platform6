@@ -42,10 +42,25 @@ export default async function StatePage({
     const { stateSlug } = await params;
     const { query } = await searchParams;
     
-    const state = await getLocation(stateSlug);
+    let state = await getLocation(stateSlug);
 
     if (!state) {
         notFound();
+    }
+
+    // Auto-sync State Metadata if missing
+    if (!state.stateData) {
+        // We call the sync action directly on the server
+        await syncStateData(stateSlug);
+        // Refresh the state object to get the new data
+        state = await getLocation(stateSlug) || state;
+    }
+
+    // Auto-sync Legislative Data if missing
+    if (!state.legislativeData) {
+        await syncLegislativeData(stateSlug);
+        // Refresh the state object again
+        state = await getLocation(stateSlug) || state;
     }
 
     const cities = await getCitiesByState(stateSlug, query);
@@ -97,7 +112,7 @@ export default async function StatePage({
                             </div>
 
                             {/* State Fast Facts Section */}
-                            {state.stateData ? (
+                            {state.stateData && (
                                 <>
                                     <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
                                         <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
@@ -207,19 +222,9 @@ export default async function StatePage({
                                                 )}
                                             </div>
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="mt-12">
-                                    <SyncButton 
-                                        action={syncStateData} 
-                                        slug={stateSlug} 
-                                        label="Load State Metadata" 
-                                        icon={<Globe2 className="h-3 w-3" />}
-                                        className="bg-slate-900/40 border-slate-800 text-slate-500 hover:text-purple-400 hover:border-purple-500/50 transition-all font-black uppercase tracking-widest text-[10px] h-10 px-6 rounded-xl"
-                                    />
-                                </div>
-                            )}
+                                )}
+                            </>
+                        )}
                         </div>
                     </div>
                 </section>
@@ -366,18 +371,10 @@ export default async function StatePage({
                                 ) : (
                                     <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-800 bg-slate-800/20 rounded-[2rem] text-center">
                                         <Gavel className="h-12 w-12 text-slate-800 mb-4" />
-                                        <h2 className="text-xl font-bold text-slate-600 uppercase italic">Legislation Not Synced</h2>
+                                        <h2 className="text-xl font-bold text-slate-600 uppercase italic">Legislation Not Available</h2>
                                         <p className="text-slate-700 mt-2 max-w-sm text-sm uppercase font-bold tracking-tighter">
-                                            Pull real-time legislator data and active business bills for {state.name}.
+                                            We were unable to pull legislative data for {state.name}. Please check back later.
                                         </p>
-                                        <div className="mt-8">
-                                            <SyncButton 
-                                                action={syncLegislativeData} 
-                                                slug={stateSlug} 
-                                                label="Sync Legislation Hub" 
-                                                className="bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-[10px] h-12 px-10 rounded-xl shadow-lg shadow-blue-500/20"
-                                            />
-                                        </div>
                                     </div>
                                 )}
                             </TabsContent>
