@@ -117,60 +117,63 @@ export async function syncStateData(stateSlug: string, shouldRevalidate: boolean
             subdivisions = subdivisionsRes;
         }
 
-        // Update database with flat structure - only map available fields
-        state.postal = (meta as any).postal || stateAbbr;
+        // Update database with structured data from RapidAPI
+        state.postal = meta.postal || stateAbbr;
         state.capital = meta.capital;
-        state.date = meta.statehood_date;
-        state.nickname = meta.nickname;
-        state.fips = meta.fips_code;
-        state.demonym = meta.demonym;
         
-        // Map available elevation data
-        if (meta.elevation_max_feet || meta.elevation_min_feet) {
-            const minFeet = meta.elevation_min_feet;
-            const maxFeet = meta.elevation_max_feet;
-            
-            state.elevation = {
-                min_ft: minFeet,
-                min_m: minFeet ? String(Math.round(Number(minFeet) * 0.3048)) : undefined,
-                max_ft: maxFeet,
-                max_m: maxFeet ? String(Math.round(Number(maxFeet) * 0.3048)) : undefined,
-                // Default values for missing fields
-                mean_ft: undefined,
-                max_rank: undefined,
-                span_ft: undefined,
-                mean_rank: undefined,
-                span_m: undefined,
-                mean_m: undefined,
-            };
+        // Handle variations in field names
+        state.date = meta.date || meta.statehood_date || meta.date_of_statehood;
+        state.nickname = meta.nickname || meta.Nickname;
+        state.fips = meta.fips || meta.fips_code || meta.fipsCode;
+        state.demonym = meta.demonym || meta.Demonym;
+        state.status = meta.status || 'state';
+        
+        // If meta fully matches schema, map direct objects
+        if (meta.population) state.population = meta.population;
+        if (meta.elevation) state.elevation = meta.elevation;
+        if (meta.area) state.area = meta.area;
+        if (meta.website) state.website = meta.website;
+        if (meta.per_capita_income) state.per_capita_income = meta.per_capita_income;
+        if (meta.median_household_income) state.median_household_income = meta.median_household_income;
+        if (meta.lowest_point) state.lowest_point = meta.lowest_point;
+        if (meta.highest_point) state.highest_point = meta.highest_point;
+        if (meta.other_nicknames) state.other_nicknames = meta.other_nicknames;
+        if (meta.standard_federal_region) state.standard_federal_region = meta.standard_federal_region;
+        if (meta.census_bureau) state.census_bureau = meta.census_bureau;
+        if (meta.koppen_climate) state.koppen_climate = meta.koppen_climate;
+        if (meta.motto) state.motto = meta.motto;
+        if (meta.ap_abbreviation) state.ap_abbreviation = meta.ap_abbreviation;
+        if (meta.gpo_abbreviation) state.gpo_abbreviation = meta.gpo_abbreviation;
+        if (meta.representatives) state.representatives = meta.representatives;
+        if (meta.cities && Array.isArray(meta.cities)) state.cities = meta.cities;
+        
+        // Timezones can be array or string
+        if (meta.time_zones && Array.isArray(meta.time_zones)) {
+            state.time_zones = meta.time_zones;
+        } else if (meta.timezone || meta.timeZone || meta.time_zone) {
+            state.time_zones = [meta.timezone || meta.timeZone || meta.time_zone];
         }
         
-        // Map timezone to array format
-        if (meta.timezone) {
-            state.time_zones = [meta.timezone];
-        }
-        
-        // Map census bureau data
-        if (meta.region || meta.division) {
+        // Census bureau fallback mapping just in case
+        if (!state.census_bureau && (meta.region || meta.division)) {
             state.census_bureau = {
-                region: meta.region,
-                division: meta.division
+                region: meta.region || meta.Region,
+                division: meta.division || meta.Division
             };
         }
-        
+
         // Map available symbols
-        if (symbols) {
+        if (meta.symbols) {
+            state.symbols = meta.symbols;
+        } else if (symbols) {
             state.symbols = symbols;
         }
         
         // Map subdivisions
-        if (subdivisions) {
+        if (meta.subdivisions) {
+            state.subdivisions = meta.subdivisions;
+        } else if (subdivisions) {
             state.subdivisions = subdivisions;
-        }
-        
-        // Set default status if not present
-        if (!state.status) {
-            state.status = 'state';
         }
 
         await state.save();

@@ -2,30 +2,14 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const RAPIDAPI_HOST = "us-states.p.rapidapi.com";
 
 export interface RapidStateMetadata {
-    name: string;
-    abbreviation: string;
-    capital: {
-        name: string;
-        latitude?: string;
-        longitude?: string;
-    };
-    statehood_date: string;
-    population: number;
-    nickname: string;
-    fips_code: string;
-    demonym: string;
-    elevation_max_feet: number;
-    elevation_min_feet: number;
-    timezone: string;
-    region: string;
-    division: string;
+    [key: string]: any;
 }
 
 export class RapidApiService {
     /**
      * Fetch detailed state metadata from RapidAPI.
      */
-    static async fetchStateMetadata(stateName: string): Promise<RapidStateMetadata | null> {
+    static async fetchStateMetadata(stateName: string): Promise<any | null> {
         if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) {
             const errorMessage = "RapidAPI key is missing or not configured. Please set RAPIDAPI_KEY environment variable.";
             console.error(errorMessage);
@@ -68,32 +52,8 @@ export class RapidApiService {
                 return null;
             }
 
-            // Capital can be a string or an object
-            const rawCapital = result.capital || result.Capital;
-            const capital = typeof rawCapital === 'string' 
-                ? { name: rawCapital } 
-                : { 
-                    name: rawCapital?.name || "Unknown", 
-                    latitude: rawCapital?.latitude?.toString(), 
-                    longitude: rawCapital?.longitude?.toString() 
-                };
-
             console.log(`[RapidAPI] Successfully parsed metadata for ${stateName}`);
-            return {
-                name: result.name || result.Name || "Unknown",
-                abbreviation: (result.abbreviation || result.Abbreviation || result.abbr || "").toUpperCase(),
-                capital,
-                statehood_date: (result.statehood_date || result.statehoodDate || result.date_of_statehood || "").toString(),
-                population: Number(result.population || result.Population || 0),
-                nickname: result.nickname || result.Nickname || "",
-                fips_code: result.fips_code || result.fipsCode || "",
-                demonym: result.demonym || result.Demonym || "",
-                elevation_max_feet: Number(result.elevation_max_feet || result.elevationMaxFeet || result.max_elevation || 0),
-                elevation_min_feet: Number(result.elevation_min_feet || result.elevationMinFeet || result.min_elevation || 0),
-                timezone: result.timezone || result.timeZone || result.time_zone || "",
-                region: result.region || result.Region || "",
-                division: result.division || result.Division || ""
-            };
+            return result;
 
         } catch (error) {
             console.error("Error in RapidApiService.fetchStateMetadata:", error);
