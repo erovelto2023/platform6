@@ -9,29 +9,89 @@ export interface ILocation extends Document {
     metaTitle?: string;
     metaDescription?: string;
     image?: string;
-    stateData?: {
-        capital?: {
-            name: string;
-            latitude?: string;
-            longitude?: string;
-        };
-        nickname?: string;
-        statehoodDate?: string;
-        fipsCode?: string;
-        demonym?: string;
-        elevation?: { maxFeet: number; minFeet: number };
-        timezone?: string;
+    // Comprehensive state data matching the JSON template
+    postal?: string;
+    capital?: {
+        name: string;
+        latitude?: string;
+        longitude?: string;
+    };
+    date?: string; // Statehood date
+    population?: {
+        density_km?: string;
+        total?: string;
+        density_mi?: string;
+    };
+    nickname?: string;
+    fips?: string;
+    demonym?: string;
+    cities?: Array<{
+        name: string;
+        population?: string;
+    }>;
+    lowest_point?: string;
+    highest_point?: string;
+    elevation?: {
+        min_ft?: string;
+        min_m?: string;
+        mean_ft?: string;
+        max_rank?: string;
+        max_ft?: string;
+        span_ft?: string;
+        mean_rank?: string;
+        span_m?: string;
+        mean_m?: string;
+        max_m?: string;
+    };
+    area?: {
+        total_mi?: string;
+        land_rank?: string;
+        land_km?: string;
+        water_rank?: string;
+        total_rank?: string;
+        land_mi?: string;
+        water_km?: string;
+        total_km?: string;
+        land_percent?: string;
+        water_mi?: string;
+        water_percent?: string;
+    };
+    website?: string;
+    per_capita_income?: string;
+    median_household_income?: string;
+    status?: string;
+    other_nicknames?: string[];
+    standard_federal_region?: string;
+    census_bureau?: {
         region?: string;
         division?: string;
-        symbols?: {
-            bird?: string;
-            flower?: string;
-            tree?: string;
-            motto?: string;
-            song?: string;
-        };
-        subdivisions?: string[];
     };
+    ap_abbreviation?: string;
+    gpo_abbreviation?: string;
+    representatives?: string;
+    time_zones?: string[];
+    koppen_climate?: string[];
+    motto?: string;
+    symbols?: {
+        song?: string;
+        tartan?: string;
+        tree?: string;
+        folk_dance?: string;
+        hero?: string;
+        fossil?: string;
+        flower?: string;
+        shellfish?: string;
+        childrens_flower?: string;
+        bird?: string;
+        fish?: string;
+        insect?: string;
+        heroine?: string;
+        dinosaur?: string;
+        mineral?: string;
+        polka?: string;
+    };
+    subdivisions?: string[];
+    // Legislative data for business intelligence
     legislativeData?: {
         jurisdictionId?: string;
         legislators: Array<{
@@ -82,32 +142,89 @@ const LocationSchema = new Schema<ILocation>(
         metaTitle: String,
         metaDescription: String,
         image: String,
-        stateData: {
-            capital: {
-                name: String,
-                latitude: String,
-                longitude: String,
-            },
-            nickname: String,
-            statehoodDate: String,
-            fipsCode: String,
-            demonym: String,
-            elevation: {
-                maxFeet: Number,
-                minFeet: Number,
-            },
-            timezone: String,
+        // Comprehensive state data
+        postal: String,
+        capital: {
+            name: String,
+            latitude: String,
+            longitude: String,
+        },
+        date: String, // Statehood date
+        population: {
+            density_km: String,
+            total: String,
+            density_mi: String,
+        },
+        nickname: String,
+        fips: String,
+        demonym: String,
+        cities: [{
+            name: String,
+            population: String,
+        }],
+        lowest_point: String,
+        highest_point: String,
+        elevation: {
+            min_ft: String,
+            min_m: String,
+            mean_ft: String,
+            max_rank: String,
+            max_ft: String,
+            span_ft: String,
+            mean_rank: String,
+            span_m: String,
+            mean_m: String,
+            max_m: String,
+        },
+        area: {
+            total_mi: String,
+            land_rank: String,
+            land_km: String,
+            water_rank: String,
+            total_rank: String,
+            land_mi: String,
+            water_km: String,
+            total_km: String,
+            land_percent: String,
+            water_mi: String,
+            water_percent: String,
+        },
+        website: String,
+        per_capita_income: String,
+        median_household_income: String,
+        status: String,
+        other_nicknames: [String],
+        standard_federal_region: String,
+        census_bureau: {
             region: String,
             division: String,
-            symbols: {
-                bird: String,
-                flower: String,
-                tree: String,
-                motto: String,
-                song: String,
-            },
-            subdivisions: [String],
         },
+        ap_abbreviation: String,
+        gpo_abbreviation: String,
+        representatives: String,
+        time_zones: [String],
+        koppen_climate: [String],
+        motto: String,
+        symbols: {
+            song: String,
+            tartan: String,
+            tree: String,
+            folk_dance: String,
+            hero: String,
+            fossil: String,
+            flower: String,
+            shellfish: String,
+            childrens_flower: String,
+            bird: String,
+            fish: String,
+            insect: String,
+            heroine: String,
+            dinosaur: String,
+            mineral: String,
+            polka: String,
+        },
+        subdivisions: [String],
+        // Legislative data for business intelligence
         legislativeData: {
             jurisdictionId: String,
             legislators: [{

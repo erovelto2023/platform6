@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncStateData, syncLegislativeData } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers, AlertTriangle } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers, AlertTriangle, DollarSign, TrendingUp } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -50,22 +50,25 @@ export default async function StatePage({
 
     let syncError = null;
 
-    // Auto-sync State Metadata if missing
-    if (!state.stateData) {
-        const result = await syncStateData(stateSlug);
+    // Auto-sync State Metadata if missing or partial (missing capital is our indicator)
+    if (!state.capital?.name) {
+        const result = await syncStateData(stateSlug, false);
         if (!result.success) {
             syncError = result.error;
         } else {
+            console.log(`[Sync] Metadata sync successful for ${stateSlug}`);
             state = await getLocation(stateSlug) || state;
         }
     }
 
-    // Auto-sync Legislative Data if missing
-    if (!state.legislativeData) {
-        const result = await syncLegislativeData(stateSlug);
+    // Auto-sync Legislative Data if missing or empty
+    if (!state.legislativeData || !state.legislativeData.legislators || state.legislativeData.legislators.length === 0) {
+        const result = await syncLegislativeData(stateSlug, false);
         if (!result.success && !syncError) {
+            // Only show second error if first sync didn't fail
             syncError = result.error;
         } else if (result.success) {
+            console.log(`[Sync] Legislative sync successful for ${stateSlug}`);
             state = await getLocation(stateSlug) || state;
         }
     }
@@ -137,120 +140,262 @@ export default async function StatePage({
                                 </div>
                             )}
 
-                            {/* State Fast Facts Section */}
-                            {state.stateData && (
-                                <>
-                                    <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Landmark className="h-3 w-3 text-purple-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.capital?.name}>{state.stateData.capital?.name}</div>
-                                        </div>
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Star className="h-3 w-3 text-pink-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.nickname}>{state.stateData.nickname}</div>
-                                        </div>
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Calendar className="h-3 w-3 text-emerald-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic">{state.stateData.statehoodDate}</div>
-                                        </div>
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Compass className="h-3 w-3 text-blue-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic">{state.stateData.region}</div>
-                                        </div>
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Globe2 className="h-3 w-3 text-cyan-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic truncate" title={state.stateData.timezone}>{state.stateData.timezone}</div>
-                                        </div>
-                                        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Users className="h-3 w-3 text-orange-400" />
-                                                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
-                                            </div>
-                                            <div className="text-sm font-black text-white italic">{state.stateData.demonym}</div>
-                                        </div>
-                                        {state.stateData.subdivisions && (
+                            {/* State Data Section */}
+                            <div className="w-full" suppressHydrationWarning>
+                                {state.capital?.name && (
+                                    <div className="w-full">
+                                        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl">
                                             <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
                                                 <div className="flex items-center gap-2 mb-2">
-                                                    <Layers className="h-3 w-3 text-emerald-400" />
-                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Subdivisions</span>
+                                                    <Landmark className="h-3 w-3 text-purple-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Capital</span>
                                                 </div>
-                                                <div className="text-sm font-black text-white italic">{state.stateData.subdivisions.length} Counties/Units</div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.capital?.name}>{state.capital?.name}</div>
+                                            </div>
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Star className="h-3 w-3 text-pink-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Nickname</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.nickname}>{state.nickname}</div>
+                                            </div>
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Calendar className="h-3 w-3 text-emerald-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Statehood</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic">{state.date}</div>
+                                            </div>
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Compass className="h-3 w-3 text-blue-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Region</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic">{state.census_bureau?.region}</div>
+                                            </div>
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Globe2 className="h-3 w-3 text-cyan-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Timezone</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic truncate" title={state.time_zones?.[0]}>{state.time_zones?.[0]}</div>
+                                            </div>
+                                            <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <Users className="h-3 w-3 text-orange-400" />
+                                                    <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Demonym</span>
+                                                </div>
+                                                <div className="text-sm font-black text-white italic">{state.demonym}</div>
+                                            </div>
+                                            {state.subdivisions && (
+                                                <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Layers className="h-3 w-3 text-emerald-400" />
+                                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Subdivisions</span>
+                                                    </div>
+                                                    <div className="text-sm font-black text-white italic">{state.subdivisions.length} Counties/Units</div>
+                                                </div>
+                                            )}
+                                            {state.population?.total && (
+                                                <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-2xl">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Users className="h-3 w-3 text-green-400" />
+                                                        <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Population</span>
+                                                    </div>
+                                                    <div className="text-sm font-black text-white italic">{state.population.total}</div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Economic Data Section */}
+                                        {(state.per_capita_income || state.median_household_income) && (
+                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
+                                                    <DollarSign className="h-3 w-3" /> Economic Indicators
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {state.per_capita_income && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <TrendingUp className="h-3 w-3 text-green-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Per Capita Income</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.per_capita_income}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.median_household_income && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <DollarSign className="h-3 w-3 text-blue-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Median Household Income</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.median_household_income}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Geographic Data Section */}
+                                        {(state.area?.total_km || state.elevation?.max_ft) && (
+                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
+                                                    <Globe2 className="h-3 w-3" /> Geographic Data
+                                                </h3>
+                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                    {state.area?.total_km && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <MapPin className="h-3 w-3 text-purple-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Total Area</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.area.total_km} km²</div>
+                                                        </div>
+                                                    )}
+                                                    {state.area?.land_percent && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Layers className="h-3 w-3 text-emerald-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Land Percentage</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.area.land_percent}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.elevation?.max_ft && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <TrendingUp className="h-3 w-3 text-orange-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Highest Point</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.elevation.max_ft} ft</div>
+                                                        </div>
+                                                    )}
+                                                    {state.elevation?.min_ft && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <TrendingUp className="h-3 w-3 text-cyan-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Lowest Point</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.elevation.min_ft}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* State Symbols Section */}
+                                        {state.symbols && (
+                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
+                                                    <Star className="h-3 w-3" /> State Cultural Symbols
+                                                </h3>
+                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                    {state.symbols.bird && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Bird className="h-3 w-3 text-sky-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Bird</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.bird}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.flower && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Flower2 className="h-3 w-3 text-pink-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Flower</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.flower}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.tree && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <TreeDeciduous className="h-3 w-3 text-emerald-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Tree</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.tree}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.motto && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Quote className="h-3 w-3 text-purple-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Motto</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.symbols.motto}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.song && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Music className="h-3 w-3 text-amber-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Song</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.symbols.song}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.folk_dance && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Music className="h-3 w-3 text-purple-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">Folk Dance</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.folk_dance}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.hero && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Users className="h-3 w-3 text-blue-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Hero</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.hero}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.fossil && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Layers className="h-3 w-3 text-orange-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Fossil</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.fossil}</div>
+                                                        </div>
+                                                    )}
+                                                    {state.symbols.mineral && (
+                                                        <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Layers className="h-3 w-3 text-cyan-400" />
+                                                                <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Mineral</span>
+                                                            </div>
+                                                            <div className="text-xs font-bold text-slate-300 italic">{state.symbols.mineral}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Major Cities Section */}
+                                        {state.cities && state.cities.length > 0 && (
+                                            <div className="mt-8 pt-8 border-t border-slate-800/50">
+                                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
+                                                    <MapPin className="h-3 w-3" /> Major Cities
+                                                </h3>
+                                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                                    {state.cities.slice(0, 10).map((city: any, i: number) => (
+                                                        <div key={i} className="bg-slate-950/40 border border-slate-800/50 p-3 rounded-xl">
+                                                            <div className="text-xs font-bold text-slate-300 italic truncate" title={city.name}>{city.name}</div>
+                                                            {city.population && (
+                                                                <div className="text-[8px] text-slate-500 mt-1">{city.population}</div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </div>
-
-                                    {/* State Symbols Section */}
-                                    {state.stateData.symbols && (
-                                        <div className="mt-8 pt-8 border-t border-slate-800/50">
-                                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 mb-6 flex items-center gap-2">
-                                                <Star className="h-3 w-3" /> State Cultural Symbols
-                                            </h3>
-                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                                {state.stateData.symbols.bird && (
-                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Bird className="h-3 w-3 text-sky-400" />
-                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Bird</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.bird}</div>
-                                                    </div>
-                                                )}
-                                                {state.stateData.symbols.flower && (
-                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Flower2 className="h-3 w-3 text-pink-400" />
-                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Flower</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.flower}</div>
-                                                    </div>
-                                                )}
-                                                {state.stateData.symbols.tree && (
-                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <TreeDeciduous className="h-3 w-3 text-emerald-400" />
-                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Tree</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-300 italic">{state.stateData.symbols.tree}</div>
-                                                    </div>
-                                                )}
-                                                {state.stateData.symbols.motto && (
-                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Quote className="h-3 w-3 text-purple-400" />
-                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Motto</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.stateData.symbols.motto}</div>
-                                                    </div>
-                                                )}
-                                                {state.stateData.symbols.song && (
-                                                    <div className="bg-slate-950/40 border border-slate-800/50 p-4 rounded-2xl">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Music className="h-3 w-3 text-amber-400" />
-                                                            <span className="text-[8px] font-black uppercase text-slate-600 tracking-widest">State Song</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-300 italic line-clamp-1">{state.stateData.symbols.song}</div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
                                 )}
-                            </>
-                        )}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -314,7 +459,7 @@ export default async function StatePage({
                             </TabsContent>
 
                             {/* Legislative Intelligence Tab Content */}
-                            <TabsContent value="legislation" className="space-y-12">
+                            <TabsContent value="legislation" className="space-y-12" suppressHydrationWarning>
                                 <div className="flex items-center justify-between border-l-4 border-blue-500 pl-4">
                                     <div>
                                         <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Legislative Intelligence</h2>
@@ -344,7 +489,7 @@ export default async function StatePage({
                                                             <div className="text-sm font-black text-white italic truncate">{leg.name}</div>
                                                             <div className="flex items-center gap-2 mt-1">
                                                                 <Badge className={`${leg.party === 'Democratic' ? 'bg-blue-600' : 'bg-red-600'} text-white text-[8px] font-black uppercase px-1.5 h-4`}>
-                                                                    {leg.party.substring(0, 1)}
+                                                                    {leg.party ? leg.party.substring(0, 1) : "?"}
                                                                 </Badge>
                                                                 <span className="text-[10px] font-bold text-slate-500 uppercase truncate">
                                                                     {leg.chamber} / Dist. {leg.district}
@@ -412,7 +557,7 @@ export default async function StatePage({
             {/* Footer */}
             <footer className="py-12 border-t border-slate-800 bg-slate-950">
                 <div className="container px-4 md:px-6 mx-auto text-center">
-                    <p className="text-xs text-slate-500 font-bold tracking-widest uppercase">
+                    <p className="text-xs text-slate-500 font-bold tracking-widest uppercase" suppressHydrationWarning>
                         © 2025 K Business Academy. All rights reserved.
                     </p>
                 </div>

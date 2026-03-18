@@ -29,20 +29,20 @@ export class RapidApiService {
         if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) {
             const errorMessage = "RapidAPI key is missing or not configured. Please set RAPIDAPI_KEY environment variable.";
             console.error(errorMessage);
-            throw new Error(errorMessage); // Throw an error to indicate a critical configuration issue
+            throw new Error(errorMessage);
         }
 
         try {
-            // The API expects the state name or abbreviation. 
-            // Endpoint: /basic?name=California
-            const url = `https://${RAPIDAPI_HOST}/basic?name=${encodeURIComponent(stateName)}`;
+            // Use the cleaner /name/{stateName} endpoint for better specificity
+            const url = `https://${RAPIDAPI_HOST}/name/${encodeURIComponent(stateName)}`;
             
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'x-rapidapi-key': RAPIDAPI_KEY,
                     'x-rapidapi-host': RAPIDAPI_HOST
-                }
+                },
+                cache: 'no-store'
             });
 
             if (!response.ok) {
@@ -57,14 +57,15 @@ export class RapidApiService {
             let result = data;
             if (data.results && Array.isArray(data.results)) result = data.results[0];
             else if (Array.isArray(data)) result = data[0];
-            else if (data.data) result = data.data; // Sometimes RapidAPI wraps in .data
+            else if (data.data) result = data.data;
             
             if (!result || typeof result !== 'object') {
                 console.warn(`[RapidAPI] No valid result object found in response for ${stateName}`);
                 return null;
             }
 
-            const rawCapital = result.capital;
+            // Capital can be a string or an object
+            const rawCapital = result.capital || result.Capital;
             const capital = typeof rawCapital === 'string' 
                 ? { name: rawCapital } 
                 : { 
@@ -77,13 +78,13 @@ export class RapidApiService {
                 name: result.name || result.Name || "Unknown",
                 abbreviation: (result.abbreviation || result.Abbreviation || result.abbr || "").toUpperCase(),
                 capital,
-                statehood_date: result.statehood_date || result.statehoodDate || result.date_of_statehood || "",
-                population: result.population || result.Population || 0,
+                statehood_date: (result.statehood_date || result.statehoodDate || result.date_of_statehood || "").toString(),
+                population: Number(result.population || result.Population || 0),
                 nickname: result.nickname || result.Nickname || "",
                 fips_code: result.fips_code || result.fipsCode || "",
                 demonym: result.demonym || result.Demonym || "",
-                elevation_max_feet: result.elevation_max_feet || result.elevationMaxFeet || result.max_elevation || 0,
-                elevation_min_feet: result.elevation_min_feet || result.elevationMinFeet || result.min_elevation || 0,
+                elevation_max_feet: Number(result.elevation_max_feet || result.elevationMaxFeet || result.max_elevation || 0),
+                elevation_min_feet: Number(result.elevation_min_feet || result.elevationMinFeet || result.min_elevation || 0),
                 timezone: result.timezone || result.timeZone || result.time_zone || "",
                 region: result.region || result.Region || "",
                 division: result.division || result.Division || ""
@@ -99,7 +100,7 @@ export class RapidApiService {
      * Fetch state symbols (bird, flower, etc.)
      */
     static async fetchStateSymbols(abbr: string) {
-        if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
+        if (!RAPIDAPI_KEY || !abbr || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
 
         try {
             const url = `https://${RAPIDAPI_HOST}/symbols/${abbr.toUpperCase()}`;
@@ -108,7 +109,8 @@ export class RapidApiService {
                 headers: {
                     'x-rapidapi-key': RAPIDAPI_KEY,
                     'x-rapidapi-host': RAPIDAPI_HOST
-                }
+                },
+                cache: 'no-store'
             });
 
             if (!response.ok) return null;
@@ -142,7 +144,7 @@ export class RapidApiService {
      * Fetch state subdivisions (counties)
      */
     static async fetchStateSubdivisions(abbr: string) {
-        if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
+        if (!RAPIDAPI_KEY || !abbr || RAPIDAPI_KEY.includes("REPLACE_WITH")) return null;
 
         try {
             const url = `https://${RAPIDAPI_HOST}/subdivisions/${abbr.toUpperCase()}`;
@@ -151,7 +153,8 @@ export class RapidApiService {
                 headers: {
                     'x-rapidapi-key': RAPIDAPI_KEY,
                     'x-rapidapi-host': RAPIDAPI_HOST
-                }
+                },
+                cache: 'no-store'
             });
 
             if (!response.ok) return null;

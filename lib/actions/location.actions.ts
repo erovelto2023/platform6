@@ -86,7 +86,7 @@ export async function getLocation(slug: string, stateSlug?: string) {
 /**
  * Sync state metadata from RapidAPI for a specific state.
  */
-export async function syncStateData(stateSlug: string) {
+export async function syncStateData(stateSlug: string, shouldRevalidate: boolean = true) {
     try {
         await connectToDatabase();
         
@@ -116,26 +116,66 @@ export async function syncStateData(stateSlug: string) {
             subdivisions = subdivisionsRes;
         }
 
-        // Update database
-        state.stateData = {
-            capital: meta.capital,
-            nickname: meta.nickname,
-            statehoodDate: meta.statehood_date,
-            fipsCode: meta.fips_code,
-            demonym: meta.demonym,
-            elevation: {
-                maxFeet: meta.elevation_max_feet,
-                minFeet: meta.elevation_min_feet
-            },
-            timezone: meta.timezone,
-            region: meta.region,
-            division: meta.division,
-            symbols: symbols,
-            subdivisions: subdivisions
-        };
+        // Update database with flat structure - only map available fields
+        state.postal = (meta as any).postal || stateAbbr;
+        state.capital = meta.capital;
+        state.date = meta.statehood_date;
+        state.nickname = meta.nickname;
+        state.fips = meta.fips_code;
+        state.demonym = meta.demonym;
+        
+        // Map available elevation data
+        if (meta.elevation_max_feet || meta.elevation_min_feet) {
+            const minFeet = meta.elevation_min_feet;
+            const maxFeet = meta.elevation_max_feet;
+            
+            state.elevation = {
+                min_ft: minFeet,
+                min_m: minFeet ? String(Math.round(Number(minFeet) * 0.3048)) : undefined,
+                max_ft: maxFeet,
+                max_m: maxFeet ? String(Math.round(Number(maxFeet) * 0.3048)) : undefined,
+                // Default values for missing fields
+                mean_ft: undefined,
+                max_rank: undefined,
+                span_ft: undefined,
+                mean_rank: undefined,
+                span_m: undefined,
+                mean_m: undefined,
+            };
+        }
+        
+        // Map timezone to array format
+        if (meta.timezone) {
+            state.time_zones = [meta.timezone];
+        }
+        
+        // Map census bureau data
+        if (meta.region || meta.division) {
+            state.census_bureau = {
+                region: meta.region,
+                division: meta.division
+            };
+        }
+        
+        // Map available symbols
+        if (symbols) {
+            state.symbols = symbols;
+        }
+        
+        // Map subdivisions
+        if (subdivisions) {
+            state.subdivisions = subdivisions;
+        }
+        
+        // Set default status if not present
+        if (!state.status) {
+            state.status = 'state';
+        }
 
         await state.save();
-        revalidatePath(`/locations/${stateSlug}`);
+        if (shouldRevalidate) {
+            revalidatePath(`/locations/${stateSlug}`);
+        }
         
         return { success: true, data: JSON.parse(JSON.stringify(state)) };
     } catch (error: any) {
@@ -147,7 +187,7 @@ export async function syncStateData(stateSlug: string) {
 /**
  * Sync legislative data from Open States.
  */
-export async function syncLegislativeData(stateSlug: string) {
+export async function syncLegislativeData(stateSlug: string, shouldRevalidate: boolean = true) {
     try {
         await connectToDatabase();
         
@@ -174,7 +214,9 @@ export async function syncLegislativeData(stateSlug: string) {
         };
 
         await state.save();
-        revalidatePath(`/locations/${stateSlug}`);
+        if (shouldRevalidate) {
+            revalidatePath(`/locations/${stateSlug}`);
+        }
         
         return { success: true, data: JSON.parse(JSON.stringify(state)) };
     } catch (error: any) {
