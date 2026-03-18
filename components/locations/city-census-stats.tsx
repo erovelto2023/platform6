@@ -1,21 +1,36 @@
-import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 interface CityCensusStatsProps {
     data: {
         population: number;
         medianIncome: number;
-        gender: {
-            male: number;
-            female: number;
+        gender: { male: number; female: number };
+        ethnicity: { white: number; black: number; asian: number; hispanic: number };
+        audience: {
+            medianAge: number;
+            under18Pct: number;
+            over65Pct: number;
+            householdsWithChildrenPct: number;
+            avgHouseholdSize: number;
         };
-        ethnicity: {
-            white: number;
-            black: number;
-            asian: number;
-            hispanic: number;
+        affordability: {
+            povertyRate: number;
+            perCapitaIncome: number;
+            homeownershipRate: number;
+            medianRent: number;
+            medianMortgage: number;
+            costBurdenedPct: number;
+            incomeBrackets: {
+                under25k: number;
+                k25_50: number;
+                k50_75: number;
+                over75k: number;
+            };
         };
         ownerStats?: {
             totalFirms: number;
@@ -47,103 +62,319 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
     }
 
     const totalPop = data.population || 1;
-    const malePct = Math.round((data.gender.male / totalPop) * 100);
-    const femalePct = Math.round((data.gender.female / totalPop) * 100);
-
-    const ethStats = [
-        { label: "White", value: data.ethnicity.white, color: "bg-blue-500" },
-        { label: "Black", value: data.ethnicity.black, color: "bg-emerald-500" },
-        { label: "Hispanic", value: data.ethnicity.hispanic, color: "bg-orange-500" },
-        { label: "Asian", value: data.ethnicity.asian, color: "bg-purple-500" },
-    ].map(s => ({ ...s, pct: Math.round((s.value / totalPop) * 100) }))
-     .sort((a, b) => b.value - a.value);
+    const isSmallTown = totalPop < 5000;
 
     return (
         <div className="space-y-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Population Card */}
-                <Card className="bg-slate-900/40 border-slate-800 rounded-3xl overflow-hidden group hover:border-purple-500/50 transition-all duration-500">
+            {/* Market Scorecard (Quick Stats) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center justify-between">
-                            Total Population
-                            <Users className="h-4 w-4 text-purple-400" />
-                        </CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase text-slate-500">Population Reach</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-black italic tracking-tighter text-white mb-2">
-                            {data.population.toLocaleString()}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-none rounded-lg font-black text-[10px] uppercase">
-                                {data.year} Official Data
-                            </Badge>
-                        </div>
+                        <div className="text-2xl font-black text-white italic tracking-tighter">{data.population.toLocaleString()}</div>
+                        <Badge variant="outline" className="mt-2 text-[8px] bg-purple-500/10 text-purple-400 border-none font-black uppercase">
+                            {isSmallTown ? "Small Market" : "Active Market"}
+                        </Badge>
                     </CardContent>
                 </Card>
 
-                {/* Income Card */}
-                <Card className="bg-slate-900/40 border-slate-800 rounded-3xl overflow-hidden group hover:border-pink-500/50 transition-all duration-500">
+                <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center justify-between">
-                            Median Household Income
-                            <DollarSign className="h-4 w-4 text-pink-400" />
-                        </CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase text-slate-500">Median Income</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-black italic tracking-tighter text-white mb-2">
-                            ${data.medianIncome.toLocaleString()}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="bg-pink-500/10 text-pink-400 border-none rounded-lg font-black text-[10px] uppercase">
-                                Spending Power: {data.medianIncome > 75000 ? "High" : "Moderate"}
-                            </Badge>
-                        </div>
+                        <div className="text-2xl font-black text-white italic tracking-tighter">${data.medianIncome.toLocaleString()}</div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Per Year / Household</p>
                     </CardContent>
                 </Card>
 
-                {/* Targeting Card */}
-                <Card className="bg-slate-900/40 border-slate-800 rounded-3xl overflow-hidden group hover:border-blue-500/50 transition-all duration-500 lg:col-span-1 md:col-span-2">
+                <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center justify-between">
-                            Ad Targeting Reach
-                            <Target className="h-4 w-4 text-blue-400" />
-                        </CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase text-slate-500">Median Age</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-black italic tracking-tighter text-white mb-2">
-                            {malePct}% Male / {femalePct}% Female
-                        </div>
-                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden flex">
-                            <div className="h-full bg-blue-500" style={{ width: `${malePct}%` }} />
-                            <div className="h-full bg-pink-500" style={{ width: `${femalePct}%` }} />
-                        </div>
+                        <div className="text-2xl font-black text-white italic tracking-tighter">{data.audience.medianAge} YRS</div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">
+                            {data.audience.medianAge < 35 ? "Young Demo" : data.audience.medianAge > 50 ? "Mature Demo" : "Mixed Demo"}
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-emerald-500/20">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-[10px] font-black uppercase text-emerald-400">Pricing Ceiling</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-black text-white italic tracking-tighter uppercase">{data.nicheInsights?.pricingStrategy.type.replace("-", " ")}</div>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Optimal Strategy</p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Niche Recommendation Engine */}
-            {data.nicheInsights && (
-                <section className="space-y-6">
-                    <div className="flex items-end justify-between border-b border-slate-800 pb-4">
-                        <div>
-                            <Badge className="bg-purple-500 text-white rounded-md mb-2 font-black text-[10px] uppercase px-2 py-0">Experimental AI</Badge>
-                            <h2 className="text-3xl font-black uppercase italic tracking-tighter text-white">
-                                Niche Explorer <span className="text-slate-700">for {cityName}</span>
-                            </h2>
-                        </div>
-                        <div className="text-right hidden md:block">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Pricing Roadmap</p>
-                            <p className="text-sm font-bold text-emerald-400 italic">{data.nicheInsights.pricingStrategy.description}</p>
+            {/* Layered Intelligence Tabs */}
+            <Tabs defaultValue="audience" className="w-full">
+                <TabsList className="bg-slate-900/40 border border-slate-800 p-1 rounded-xl mb-8 w-full justify-start overflow-x-auto h-auto no-scrollbar">
+                    <TabsTrigger value="audience" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                        Audience Validation
+                    </TabsTrigger>
+                    <TabsTrigger value="affordability" className="px-6 py-2 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                        Affordability & Pricing
+                    </TabsTrigger>
+                    <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                        Targeting Intelligence
+                    </TabsTrigger>
+                    <TabsTrigger value="profile" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest">
+                        Owner Profiles
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Audience Validation Tab */}
+                <TabsContent value="audience" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <Baby className="h-4 w-4 text-purple-400" />
+                                    Family Density
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div>
+                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
+                                        <span>HH with Children Under 18</span>
+                                        <span>{data.audience.householdsWithChildrenPct}%</span>
+                                    </div>
+                                    <Progress value={data.audience.householdsWithChildrenPct} className="h-1 bg-slate-800" />
+                                </div>
+                                <div className="pt-2">
+                                    <div className="text-2xl font-black text-white italic">{data.audience.avgHouseholdSize}</div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase">Avg Household Size</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <Users className="h-4 w-4 text-blue-400" />
+                                    Age Brackets
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="text-xl font-black text-white italic">{data.audience.under18Pct}%</div>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Under 18</p>
+                                    </div>
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="text-xl font-black text-white italic">{data.audience.over65Pct}%</div>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">65+ Senior</p>
+                                    </div>
+                                </div>
+                                <p className="text-[10px] font-medium text-slate-600 italic">
+                                    {data.audience.under18Pct > 25 ? "High concentration of families. Hot market for parenting and toys." : "Mature population. Focus on wealth management and health services."}
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-950/20 border-slate-800/50 rounded-2xl lg:col-span-1 md:col-span-2">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <UserCheck className="h-4 w-4 text-emerald-400" />
+                                    Messaging Tone
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl">
+                                    <h4 className="text-sm font-black text-emerald-400 uppercase italic">Recommended Persona</h4>
+                                    <p className="text-xs text-slate-400 font-medium leading-relaxed mt-2">
+                                        {data.audience.medianAge < 35 
+                                          ? "Use energetic, digital-first, and trend-aware copy. Focus on efficiency and 'the hustle'." 
+                                          : "Use grounded, professional, and value-oriented messaging. Prioritize trust and long-term results."}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* Affordability & Pricing Tab */}
+                <TabsContent value="affordability" className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl lg:col-span-2">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase text-white">Household Income Distribution</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4 pt-2">
+                                    {[
+                                        { label: "Under $25k", val: data.affordability.incomeBrackets.under25k, color: "bg-red-500/50" },
+                                        { label: "$25k - $50k", val: data.affordability.incomeBrackets.k25_50, color: "bg-orange-500/50" },
+                                        { label: "$50k - $75k", val: data.affordability.incomeBrackets.k50_75, color: "bg-emerald-500/50" },
+                                        { label: "$75k+", val: data.affordability.incomeBrackets.over75k, color: "bg-emerald-500" },
+                                    ].map(b => (
+                                        <div key={b.label} className="space-y-1">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                                <span>{b.label}</span>
+                                                <span>{b.val}%</span>
+                                            </div>
+                                            <Progress value={b.val} className={`h-1.5 bg-slate-800`} indicatorClassName={b.color} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <div className="space-y-6">
+                            <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                        <Home className="h-4 w-4 text-emerald-400" />
+                                        Housing Reality
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="flex justify-between items-center py-2 border-b border-slate-800/50">
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase">Median Rent</span>
+                                        <span className="text-sm font-black text-white">${data.affordability.medianRent.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-2 border-b border-slate-800/50">
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase">Median Mortgage</span>
+                                        <span className="text-sm font-black text-white">${data.affordability.medianMortgage.toLocaleString()}</span>
+                                    </div>
+                                    <div className="pt-2">
+                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-1">
+                                            <span>Housing Cost Burden ({">"}30%)</span>
+                                            <span className={data.affordability.costBurdenedPct > 35 ? "text-red-400" : "text-emerald-400"}>{data.affordability.costBurdenedPct}%</span>
+                                        </div>
+                                        <Progress value={data.affordability.costBurdenedPct} className="h-1 bg-slate-800" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="bg-slate-900/60 border-slate-800 rounded-2xl border-l-4 border-l-emerald-500">
+                                <CardContent className="pt-6">
+                                    <div className="text-2xl font-black text-white italic tracking-tighter">${data.affordability.perCapitaIncome.toLocaleString()}</div>
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase">Per Capita Income</p>
+                                    <div className="mt-4 flex items-center gap-2">
+                                        <TrendingUp className="h-3 w-3 text-emerald-400" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                                            Disposable Power: {data.affordability.povertyRate < 10 ? "High" : "Mixed"}
+                                        </span>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     </div>
+                </TabsContent>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Targeting Intelligence Tab */}
+                <TabsContent value="targeting" className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <Target className="h-4 w-4 text-blue-400" />
+                                    Gender Split
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-3xl font-black italic tracking-tighter text-white mb-2">
+                                    {Math.round((data.gender.male / totalPop) * 100)}% M / {Math.round((data.gender.female / totalPop) * 100)}% F
+                                </div>
+                                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-blue-500" style={{ width: `${(data.gender.male / totalPop) * 100}%` }} />
+                                    <div className="h-full bg-pink-500" style={{ width: `${(data.gender.female / totalPop) * 100}%` }} />
+                                </div>
+                                <div className="mt-4 grid grid-cols-2 text-[10px] font-bold uppercase text-slate-500">
+                                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> {data.gender.male.toLocaleString()} Male</div>
+                                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-pink-500 rounded-full" /> {data.gender.female.toLocaleString()} Female</div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <PieChart className="h-4 w-4 text-emerald-400" />
+                                    Ethnicity Ratios
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {[
+                                    { label: "White", val: data.ethnicity.white, color: "bg-blue-500" },
+                                    { label: "Black", val: data.ethnicity.black, color: "bg-emerald-500" },
+                                    { label: "Hispanic", val: data.ethnicity.hispanic, color: "bg-orange-500" },
+                                    { label: "Asian", val: data.ethnicity.asian, color: "bg-purple-500" },
+                                ].sort((a, b) => b.val - a.val).map(e => (
+                                    <div key={e.label} className="space-y-1">
+                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                            <span>{e.label}</span>
+                                            <span>{Math.round((e.val / totalPop) * 100)}%</span>
+                                        </div>
+                                        <Progress value={(e.val / totalPop) * 100} className="h-1 bg-slate-800" indicatorClassName={e.color} />
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* Owner Profiles Tab */}
+                <TabsContent value="profile" className="space-y-6">
+                    {data.ownerStats ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-pink-500">
+                                <CardHeader className="p-4 pb-2">
+                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Women-Owned</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.womenOwned.pct}%</div>
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.womenOwned.count.toLocaleString()} firms</p>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-blue-500">
+                                <CardHeader className="p-4 pb-2">
+                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Veteran-Owned</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.veteranOwned.pct}%</div>
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.veteranOwned.count.toLocaleString()} firms</p>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-emerald-500">
+                                <CardHeader className="p-4 pb-2">
+                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Minority-Owned</CardTitle>
+                                </CardHeader>
+                                <CardContent className="p-4 pt-0">
+                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.minorityOwned.pct}%</div>
+                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.minorityOwned.count.toLocaleString()} firms</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    ) : (
+                        <div className="p-12 text-center bg-slate-900/20 rounded-2xl border border-dashed border-slate-800">
+                            <p className="text-slate-500 text-sm font-medium italic italic">Entrepreneurial profile data restricted for this locality.</p>
+                        </div>
+                    )}
+                </TabsContent>
+            </Tabs>
+
+            {/* Niche Insights (Static spotlight) */}
+            {data.nicheInsights && (
+                <section className="space-y-6">
+                    <div className="flex items-center gap-3 border-l-4 border-purple-500 pl-4">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">Niche Opportunity Spotlight</h2>
+                        <Badge className="bg-purple-500 text-white rounded-md text-[8px] uppercase font-black">AI Scored</Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Potty Training / Parenting */}
                         <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
                             <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-blue-500/10 rounded-lg mb-2">
-                                    <Activity className="h-4 w-4 text-blue-400" />
-                                </div>
+                                <div className="p-2 w-fit bg-blue-500/10 rounded-lg mb-2"><Activity className="h-4 w-4 text-blue-400" /></div>
                                 <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Parenting / Kids</CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -162,9 +393,7 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                         {/* Senior Care */}
                         <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
                             <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-emerald-500/10 rounded-lg mb-2">
-                                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                                </div>
+                                <div className="p-2 w-fit bg-emerald-500/10 rounded-lg mb-2"><ShieldCheck className="h-4 w-4 text-emerald-400" /></div>
                                 <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Senior Services</CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -183,9 +412,7 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                         {/* Luxury / Hobbies */}
                         <Card className="bg-slate-900/60 border-slate-800 rounded-2xl overflow-hidden hover:bg-slate-900 transition-colors">
                             <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-orange-500/10 rounded-lg mb-2">
-                                    <Award className="h-4 w-4 text-orange-400" />
-                                </div>
+                                <div className="p-2 w-fit bg-orange-500/10 rounded-lg mb-2"><Award className="h-4 w-4 text-orange-400" /></div>
                                 <CardTitle className="text-sm font-black uppercase tracking-wide text-white">Premium Hobbies</CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -200,128 +427,26 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 </Badge>
                             </CardContent>
                         </Card>
-
-                        {/* Pricing Strategy */}
-                        <Card className="bg-emerald-500/5 border-emerald-500/20 border-dashed border-2 rounded-2xl overflow-hidden">
-                            <CardHeader className="pb-2">
-                                <div className="p-2 w-fit bg-emerald-500/20 rounded-lg mb-2">
-                                    <Briefcase className="h-4 w-4 text-emerald-400" />
-                                </div>
-                                <CardTitle className="text-sm font-black uppercase tracking-wide text-emerald-400">Pricing Strategy</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-lg font-black text-white italic tracking-tight mb-1 uppercase">
-                                    {data.nicheInsights.pricingStrategy.type.replace("-", " ")}
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-500 uppercase leading-relaxed">
-                                    Recommended based on purchasing power & disposable income.
-                                </p>
-                            </CardContent>
-                        </Card>
                     </div>
                 </section>
             )}
 
-            {/* Entrepreneurial Profile (ABS Data) */}
-            {data.ownerStats && (
-                <section className="space-y-6">
-                    <div className="flex items-center gap-3 border-l-4 border-emerald-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
-                            Entrepreneurial Profile
-                        </h2>
-                        {data.ownerStats.isStateLevel && (
-                            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] uppercase font-black">
-                                State-Level Benchmark
-                            </Badge>
+            {/* Quality & Footer */}
+            <div className="pt-12 border-t border-slate-900 flex flex-col md:flex-row justify-between gap-6 opacity-60 transition-opacity hover:opacity-100">
+                <div className="flex items-start gap-3 max-w-lg">
+                    <Info className="h-4 w-4 text-slate-500 mt-1" />
+                    <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase tracking-tighter">
+                        Data sourced from ACS 2018-2022 5-Year Estimates. 
+                        {isSmallTown && (
+                          <span className="block text-orange-400 font-bold mt-1">
+                            <AlertTriangle className="h-2 w-2 inline mr-1" /> Small population detected. Margin of error may be ±15-20%.
+                          </span>
                         )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Women Owned */}
-                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-pink-500">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                                    <Award className="h-3 w-3 text-pink-400" />
-                                    Women-Owned Firms
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
-                                    {data.ownerStats.womenOwned.pct}%
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase">
-                                    {data.ownerStats.womenOwned.count.toLocaleString()} registered firms
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        {/* Veteran Owned */}
-                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-blue-500">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                                    <ShieldCheck className="h-3 w-3 text-blue-400" />
-                                    Veteran-Owned Firms
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
-                                    {data.ownerStats.veteranOwned.pct}%
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase">
-                                    {data.ownerStats.veteranOwned.count.toLocaleString()} registered firms
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        {/* Minority Owned */}
-                        <Card className="bg-slate-900/40 border-slate-800/50 rounded-3xl overflow-hidden border-b-4 border-emerald-500">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
-                                    <Briefcase className="h-3 w-3 text-emerald-400" />
-                                    Minority-Owned Firms
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-4xl font-black text-white italic tracking-tighter mb-1">
-                                    {data.ownerStats.minorityOwned.pct}%
-                                </div>
-                                <p className="text-[10px] font-bold text-slate-600 uppercase">
-                                    {data.ownerStats.minorityOwned.count.toLocaleString()} registered firms
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </section>
-            )}
-
-            {/* Ethnicity Ratios */}
-            <div className="p-8 rounded-[3rem] bg-slate-900/20 border border-slate-800/50">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-                    <div>
-                        <h3 className="text-xl font-black uppercase italic text-white flex items-center gap-2">
-                            <Activity className="h-5 w-5 text-emerald-400" />
-                            Targeting Intelligence
-                        </h3>
-                        <p className="text-slate-500 text-sm font-medium mt-1">Detailed ethnic distribution for localized advertising campaigns.</p>
-                    </div>
+                    </p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {ethStats.map((stat) => (
-                        <div key={stat.label} className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-black uppercase tracking-widest text-slate-400">{stat.label}</span>
-                                <span className="text-lg font-black text-white italic">{stat.pct}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                <div className={`h-full ${stat.color} transition-all duration-1000`} style={{ width: `${stat.pct}%` }} />
-                            </div>
-                            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
-                                {stat.value.toLocaleString()} residents
-                            </p>
-                        </div>
-                    ))}
-                </div>
+                <Badge variant="outline" className="h-fit bg-slate-900 border-slate-800 text-slate-600 text-[8px] font-black uppercase py-0.5">
+                    Ref ID: {data.year}-ACS5-PLACE-{cityName.toUpperCase()}
+                </Badge>
             </div>
         </div>
     );

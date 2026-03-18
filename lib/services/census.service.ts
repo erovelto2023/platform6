@@ -40,11 +40,36 @@ export interface NicheInsight {
     pricingStrategy: { type: "high-ticket" | "standard" | "mass-market"; description: string };
 }
 
+export interface AudienceStats {
+    medianAge: number;
+    under18Pct: number;
+    over65Pct: number;
+    householdsWithChildrenPct: number;
+    avgHouseholdSize: number;
+}
+
+export interface AffordabilityStats {
+    povertyRate: number;
+    perCapitaIncome: number;
+    homeownershipRate: number;
+    medianRent: number;
+    medianMortgage: number;
+    costBurdenedPct: number; // Households spending >30% on housing
+    incomeBrackets: {
+        under25k: number;
+        k25_50: number;
+        k50_75: number;
+        over75k: number;
+    };
+}
+
 export interface CityStats {
     population: number;
     medianIncome: number;
     gender: { male: number; female: number };
     ethnicity: { white: number; black: number; asian: number; hispanic: number };
+    audience: AudienceStats;
+    affordability: AffordabilityStats;
     segments: {
         toddlers: number;
         seniors: number;
@@ -64,15 +89,32 @@ export class CensusService {
             const stateFips = STATE_FIPS[stateName.toLowerCase()];
             if (!stateFips) return null;
 
-            // Step 1: Resolve the Place FIPS code for the city name
+            // Massive Variable List (Phase 1 & 2)
             const vars = [
-                "NAME", "B01003_001E", "B19013_001E", // 0, 1, 2
+                "NAME", "B01003_001E", "B19013_001E", // 0, 1, 2 (Pop, MedInc)
                 "B01001_002E", "B01001_026E",         // 3, 4 (M/F total)
-                "B03002_003E", "B03002_004E", "B03002_006E", "B03002_012E", // 5, 6, 7, 8 (eth)
-                "B01001_003E", "B01001_027E",         // 9, 10 (<5)
-                "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", // 11-16 (M 65+)
-                "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", // 17-22 (F 65+)
-                "B19001_017E"                         // 23 (200k+)
+                "B03002_003E", "B03002_004E", "B03002_006E", "B03002_012E", // 5-8 (eth)
+                "B01002_001E",                        // 9 (MedAge)
+                "B11005_001E", "B11005_002E",         // 10, 11 (HH, HH w/ children)
+                "B25010_001E",                        // 12 (Avg HH Size)
+                "B17001_001E", "B17001_002E",         // 13, 14 (Poverty total, below)
+                "B19301_001E",                        // 15 (Per Capita)
+                "B25003_001E", "B25003_002E",         // 16, 17 (Housing total, owner)
+                "B25058_001E", "B25088_002E",         // 18, 19 (Rent, Mortgage)
+                // Cost Burden Renter (30-34.9, 35-39.9, 40-49.9, 50+) - B25070_007 to 010
+                "B25070_007E", "B25070_008E", "B25070_009E", "B25070_010E", // 20-23
+                // Cost Burden Owner - B25091_008 to 011
+                "B25091_008E", "B25091_009E", "B25091_010E", "B25091_011E", // 24-27
+                // Income Brackets B19001 (02-17)
+                "B19001_002E", "B19001_003E", "B19001_004E", "B19001_005E",
+                "B19001_006E", "B19001_007E", "B19001_008E", "B19001_009E", "B19001_010E",
+                "B19001_011E", "B19001_012E",
+                "B19001_013E", "B19001_014E", "B19001_015E", "B19001_016E", "B19001_017E", // 28-43
+                // Age segments for under 18 & 65+
+                "B01001_003E", "B01001_004E", "B01001_005E", "B01001_006E", // 44-47 (M 0-17)
+                "B01001_027E", "B01001_028E", "B01001_029E", "B01001_030E", // 48-51 (F 0-17)
+                "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", // 52-57 (M 65+)
+                "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", // 58-63 (F 65+)
             ].join(",");
 
             const year = "2022";
@@ -88,11 +130,23 @@ export class CensusService {
 
             if (!matchingRow) return null;
 
-            const male65Plus = matchingRow.slice(11, 17).reduce((a: any, b: any) => a + (parseInt(b) || 0), 0);
-            const female65Plus = matchingRow.slice(17, 23).reduce((a: any, b: any) => a + (parseInt(b) || 0), 0);
+            const totalPop = parseInt(matchingRow[1]) || 0;
+            const toddlers = (parseInt(matchingRow[44]) || 0) + (parseInt(matchingRow[48]) || 0); // Strictly <5
+            const under18 = matchingRow.slice(44, 48).concat(matchingRow.slice(48, 52)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
+            const over65 = matchingRow.slice(52, 58).concat(matchingRow.slice(58, 64)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
+
+            // Income Brackets Summation
+            const inc20 = matchingRow.slice(28, 32).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // <25k
+            const inc25 = matchingRow.slice(32, 37).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 25-50k
+            const inc50 = matchingRow.slice(37, 39).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 50-75k
+            const inc75 = matchingRow.slice(39, 44).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0); // 75k+
+
+            // Cost Burden Summation
+            const burdenedCount = matchingRow.slice(20, 24).concat(matchingRow.slice(24, 28)).reduce((a: number, b: string) => a + (parseInt(b) || 0), 0);
+            const totalHH = parseInt(matchingRow[10]) || 1;
 
             const baseStats: CityStats = {
-                population: parseInt(matchingRow[1]) || 0,
+                population: totalPop,
                 medianIncome: parseInt(matchingRow[2]) || 0,
                 gender: {
                     male: parseInt(matchingRow[3]) || 0,
@@ -104,10 +158,31 @@ export class CensusService {
                     asian: parseInt(matchingRow[7]) || 0,
                     hispanic: parseInt(matchingRow[8]) || 0,
                 },
+                audience: {
+                    medianAge: parseFloat(matchingRow[9]) || 0,
+                    under18Pct: Math.round((under18 / totalPop) * 100) || 0,
+                    over65Pct: Math.round((over65 / totalPop) * 100) || 0,
+                    householdsWithChildrenPct: Math.round((parseInt(matchingRow[11]) / totalHH) * 100) || 0,
+                    avgHouseholdSize: parseFloat(matchingRow[12]) || 0,
+                },
+                affordability: {
+                    povertyRate: Math.round((parseInt(matchingRow[14]) / parseInt(matchingRow[13])) * 100) || 0,
+                    perCapitaIncome: parseInt(matchingRow[15]) || 0,
+                    homeownershipRate: Math.round((parseInt(matchingRow[17]) / parseInt(matchingRow[16])) * 100) || 0,
+                    medianRent: parseInt(matchingRow[18]) || 0,
+                    medianMortgage: parseInt(matchingRow[19]) || 0,
+                    costBurdenedPct: Math.round((burdenedCount / totalHH) * 100) || 0,
+                    incomeBrackets: {
+                        under25k: Math.round((inc20 / totalHH) * 100),
+                        k25_50: Math.round((inc25 / totalHH) * 100),
+                        k50_75: Math.round((inc50 / totalHH) * 100),
+                        over75k: Math.round((inc75 / totalHH) * 100),
+                    }
+                },
                 segments: {
-                    toddlers: (parseInt(matchingRow[9]) || 0) + (parseInt(matchingRow[10]) || 0),
-                    seniors: male65Plus + female65Plus,
-                    highEarners: parseInt(matchingRow[23]) || 0
+                    toddlers: toddlers,
+                    seniors: over65,
+                    highEarners: parseInt(matchingRow[43]) || 0
                 },
                 year: year
             };
@@ -116,7 +191,7 @@ export class CensusService {
             baseStats.nicheInsights = this.calculateNicheInsights(baseStats);
 
             // Step 2: Fetch ABS Business Owner Stats
-            const placeFips = matchingRow[matchingRow.length - 1]; // "place" is last column
+            const placeFips = matchingRow[matchingRow.length - 1]; 
             baseStats.ownerStats = await this.getBusinessOwnerStats(stateFips, placeFips);
 
             return baseStats;
