@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getLocation, getCitiesByState, syncStateData, syncLegislativeData } from "@/lib/actions/location.actions";
+import { getLocation, getCitiesByState, syncStateData } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Globe2, Compass, Users, Gavel, Scale, Mail, Phone, ExternalLink, Bird, Flower2, TreeDeciduous, Quote, Music, Layers, AlertTriangle, DollarSign, TrendingUp } from "lucide-react";
 import { Search } from "@/components/ui/Search";
@@ -67,25 +67,6 @@ export default async function StatePage({
         }
     }
 
-    // Auto-sync Legislative Data if missing or empty
-    if (!state.legislativeData || !state.legislativeData.legislators || state.legislativeData.legislators.length === 0) {
-        try {
-            const result = await syncLegislativeData(stateSlug, false);
-            if (!result.success && !syncError) {
-                // Only show second error if first sync didn't fail
-                console.error(`[Sync Error] Legislative sync failed for ${stateSlug}:`, result.error);
-                syncError = typeof result.error === 'string' ? result.error : JSON.stringify(result.error);
-            } else if (result.success) {
-                console.log(`[Sync] Legislative sync successful for ${stateSlug}`);
-                state = await getLocation(stateSlug) || state;
-            }
-        } catch (error) {
-            console.error(`[Sync Error] Exception during legislative sync for ${stateSlug}:`, error);
-            if (!syncError) {
-                syncError = error instanceof Error ? error.message : 'Unknown legislative sync error';
-            }
-        }
-    }
 
     const cities = await getCitiesByState(stateSlug, query);
 
@@ -154,6 +135,76 @@ export default async function StatePage({
                                 </div>
                             )}
 
+                        </div>
+                    </div>
+                </section>
+
+                {/* Market & State Details Section */}
+                <section className="w-full py-12 bg-slate-900 min-h-[600px]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <Tabs defaultValue="cities" className="w-full">
+                            <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start h-auto">
+                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    Market Cities
+                                </TabsTrigger>
+                                <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    State Details
+                                </TabsTrigger>
+                            </TabsList>
+
+                            {/* Cities Tab Content */}
+                            <TabsContent value="cities" className="space-y-8">
+                                <div className="flex items-center justify-between mb-6 border-l-4 border-purple-500 pl-4">
+                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
+                                        {query ? `Results for "${query}"` : 'Explore Market Locations'}
+                                    </h2>
+                                    <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full">
+                                        {cities.length} Cities Found
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {cities.map((city: any) => (
+                                        <Link 
+                                            key={city.slug}
+                                            href={`/locations/${stateSlug}/${city.slug}`}
+                                            className="group relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 p-6 rounded-2xl border border-slate-700/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10 active:scale-95"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                                                        <MapPin size={20} />
+                                                    </div>
+                                                    <span className="font-bold text-slate-200 group-hover:text-white transition-colors">
+                                                        {city.name}
+                                                    </span>
+                                                </div>
+                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-purple-400 -translate-x-2 group-hover:translate-x-0" size={16} />
+                                            </div>
+                                            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </Link>
+                                    ))}
+                                </div>
+                                
+                                {cities.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-700 bg-slate-800/20 rounded-[2rem] text-center">
+                                        <SearchIcon className="h-12 w-12 text-slate-700 mb-4" />
+                                        <h2 className="text-xl font-bold text-slate-500 uppercase italic">No Cities Found</h2>
+                                        <p className="text-slate-600 mt-2 max-w-sm text-sm">
+                                            We couldn't find any cities matching your search.
+                                        </p>
+                                    </div>
+                                )}
+                            </TabsContent>
+
+                            {/* State Details Tab Content */}
+                            <TabsContent value="details" className="space-y-12 w-full max-w-full" suppressHydrationWarning>
+                                <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-4 mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">State Information</h2>
+                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Key Metrics & Cultural Details</p>
+                                    </div>
+                                </div>
                             {/* State Data Section */}
                             <div className="w-full" suppressHydrationWarning>
                                 {state.capital?.name && (
@@ -410,158 +461,6 @@ export default async function StatePage({
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Market & Advocacy Insights Section */}
-                <section className="w-full py-12 bg-slate-900 min-h-[600px]">
-                    <div className="container px-4 md:px-6 mx-auto">
-                        <Tabs defaultValue="cities" className="w-full">
-                            <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start h-auto">
-                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
-                                    Market Cities
-                                </TabsTrigger>
-                                <TabsTrigger value="legislation" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
-                                    Legislative Intelligence
-                                </TabsTrigger>
-                            </TabsList>
-
-                            {/* Cities Tab Content */}
-                            <TabsContent value="cities" className="space-y-8">
-                                <div className="flex items-center justify-between mb-6 border-l-4 border-purple-500 pl-4">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
-                                        {query ? `Results for "${query}"` : 'Explore Market Locations'}
-                                    </h2>
-                                    <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full">
-                                        {cities.length} Cities Found
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                    {cities.map((city: any) => (
-                                        <Link 
-                                            key={city.slug}
-                                            href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 p-6 rounded-2xl border border-slate-700/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10 active:scale-95"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
-                                                        <MapPin size={20} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-200 group-hover:text-white transition-colors">
-                                                        {city.name}
-                                                    </span>
-                                                </div>
-                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-purple-400 -translate-x-2 group-hover:translate-x-0" size={16} />
-                                            </div>
-                                            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        </Link>
-                                    ))}
-                                </div>
-                                
-                                {cities.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-700 bg-slate-800/20 rounded-[2rem] text-center">
-                                        <SearchIcon className="h-12 w-12 text-slate-700 mb-4" />
-                                        <h2 className="text-xl font-bold text-slate-500 uppercase italic">No Cities Found</h2>
-                                        <p className="text-slate-600 mt-2 max-w-sm text-sm">
-                                            We couldn't find any cities matching your search.
-                                        </p>
-                                    </div>
-                                )}
-                            </TabsContent>
-
-                            {/* Legislative Intelligence Tab Content */}
-                            <TabsContent value="legislation" className="space-y-12" suppressHydrationWarning>
-                                <div className="flex items-center justify-between border-l-4 border-blue-500 pl-4">
-                                    <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Legislative Intelligence</h2>
-                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Regulatory Climate & Direct Advocacy</p>
-                                    </div>
-                                    <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[8px] uppercase font-black h-fit">Open States Data</Badge>
-                                </div>
-
-                                {state.legislativeData ? (
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                        {/* Legislators List */}
-                                        <div className="lg:col-span-2 space-y-6">
-                                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                                <Users className="h-4 w-4 text-blue-400" /> Key Representatives
-                                            </h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {state.legislativeData.legislators.map((leg: any, i: number) => (
-                                                    <div key={i} className="bg-slate-800/20 border border-slate-800 p-4 rounded-2xl flex items-center gap-4 hover:border-blue-500/30 transition-all">
-                                                        <div className="w-14 h-14 rounded-xl bg-slate-800 overflow-hidden flex-shrink-0 border border-slate-700">
-                                                            {leg.photo ? (
-                                                                <img src={leg.photo} alt={leg.name} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-full h-full flex items-center justify-center text-slate-600"><Users size={24} /></div>
-                                                            )}
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <div className="text-sm font-black text-white italic truncate">{leg.name}</div>
-                                                            <div className="flex items-center gap-2 mt-1">
-                                                                <Badge className={`${leg.party === 'Democratic' ? 'bg-blue-600' : 'bg-red-600'} text-white text-[8px] font-black uppercase px-1.5 h-4`}>
-                                                                    {leg.party ? leg.party.substring(0, 1) : "?"}
-                                                                </Badge>
-                                                                <span className="text-[10px] font-bold text-slate-500 uppercase truncate">
-                                                                    {leg.chamber} / Dist. {leg.district}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex gap-2 mt-2">
-                                                                {leg.email && <a href={`mailto:${leg.email}`} className="text-slate-500 hover:text-blue-400 transition-colors"><Mail size={14} /></a>}
-                                                                {leg.phone && <a href={`tel:${leg.phone}`} className="text-slate-500 hover:text-blue-400 transition-colors"><Phone size={14} /></a>}
-                                                                {leg.url && <a href={leg.url} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-blue-400 transition-colors"><ExternalLink size={14} /></a>}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        {/* Recent Bills */}
-                                        <div className="space-y-6">
-                                            <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                                <Gavel className="h-4 w-4 text-blue-400" /> Business Bills
-                                            </h3>
-                                            <div className="space-y-3">
-                                                {state.legislativeData.recentBills.map((bill: any, i: number) => (
-                                                    <div key={i} className="bg-slate-950/50 border border-slate-800 p-4 rounded-2xl hover:border-blue-500/20 transition-all group">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-tighter">{bill.identifier}</span>
-                                                            <span className="text-[8px] font-black text-slate-600 uppercase">{bill.lastActionDate}</span>
-                                                        </div>
-                                                        <div className="text-xs font-bold text-slate-200 line-clamp-2 leading-relaxed mb-3 group-hover:text-blue-400 transition-colors">{bill.title}</div>
-                                                        <div className="flex items-center justify-between">
-                                                            <Badge variant="outline" className="border-slate-800 text-[8px] text-slate-500 font-black uppercase">{bill.status?.substring(0, 20)}...</Badge>
-                                                            <a href={bill.url} target="_blank" rel="noopener noreferrer" className="text-slate-600 hover:text-white transition-colors"><ExternalLink size={12} /></a>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <Scale className="h-3 w-3 text-blue-400" />
-                                                    <span className="text-[10px] font-black uppercase text-blue-400 tracking-widest">Risk Analysis</span>
-                                                </div>
-                                                <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase">
-                                                    {state.legislativeData.recentBills.length > 0 
-                                                        ? "Active business legislation detected. Review tax and labor bills for operational impact."
-                                                        : "No significant business-related bills pending in recent sessions."}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-800 bg-slate-800/20 rounded-[2rem] text-center">
-                                        <Gavel className="h-12 w-12 text-slate-800 mb-4" />
-                                        <h2 className="text-xl font-bold text-slate-600 uppercase italic">Legislation Not Available</h2>
-                                        <p className="text-slate-700 mt-2 max-w-sm text-sm uppercase font-bold tracking-tighter">
-                                            We were unable to pull legislative data for {state.name}. Please check back later.
-                                        </p>
-                                    </div>
-                                )}
                             </TabsContent>
                         </Tabs>
                     </div>
