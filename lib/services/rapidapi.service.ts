@@ -34,8 +34,10 @@ export class RapidApiService {
             console.log(`[RapidAPI] Response status: ${response.status} ${response.statusText}`);
 
             if (!response.ok) {
-                console.error("RapidAPI fetch failed:", response.status, response.statusText);
-                return null;
+                const errorData = await response.json().catch(() => ({}));
+                const msg = errorData.message || response.statusText;
+                console.error("RapidAPI fetch failed:", response.status, msg);
+                throw new Error(`RapidAPI Error ${response.status}: ${msg}. Please check your RapidAPI key subscription or quota.`);
             }
 
             const data = await response.json();
@@ -49,7 +51,7 @@ export class RapidApiService {
             
             if (!result || typeof result !== 'object') {
                 console.warn(`[RapidAPI] No valid result object found in response for ${stateName}`);
-                return null;
+                throw new Error("No valid data object found in RapidAPI response.");
             }
 
             console.log(`[RapidAPI] Successfully parsed metadata for ${stateName}`);
@@ -57,7 +59,7 @@ export class RapidApiService {
 
         } catch (error) {
             console.error("Error in RapidApiService.fetchStateMetadata:", error);
-            return null;
+            throw error;
         }
     }
 

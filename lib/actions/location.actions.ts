@@ -99,8 +99,7 @@ export async function syncStateData(stateSlug: string, shouldRevalidate: boolean
         const meta = await RapidApiService.fetchStateMetadata(state.name);
         if (!meta) {
             console.error(`[Sync] Failed to fetch basic metadata for ${state.name} - API returned null`);
-            // Don't throw error, just return success with existing data
-            return { success: true, data: JSON.parse(JSON.stringify(state)), warning: "API data not available, using existing data" };
+            return { success: false, error: "No data returned from RapidAPI. The API key might be invalid or exhausted." };
         }
 
         const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
