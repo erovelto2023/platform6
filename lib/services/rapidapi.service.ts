@@ -22,9 +22,10 @@ export class RapidApiService {
      * Fetch detailed state metadata from RapidAPI.
      */
     static async fetchStateMetadata(stateName: string): Promise<RapidStateMetadata | null> {
-        if (!RAPIDAPI_KEY) {
-            console.warn("RAPIDAPI_KEY not found in environment variables.");
-            return null;
+        if (!RAPIDAPI_KEY || RAPIDAPI_KEY.includes("REPLACE_WITH")) {
+            const errorMessage = "RapidAPI key is missing or not configured. Please set RAPIDAPI_KEY environment variable.";
+            console.error(errorMessage);
+            throw new Error(errorMessage); // Throw an error to indicate a critical configuration issue
         }
 
         try {

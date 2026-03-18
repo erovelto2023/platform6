@@ -6,6 +6,7 @@ import { MapPin, ArrowLeft, Search as SearchIcon, Landmark, Star, Calendar, Glob
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { SyncButton } from "@/components/locations/SyncButton";
 import { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
@@ -140,14 +141,13 @@ export default async function StatePage({
                                 </div>
                             ) : (
                                 <div className="mt-12">
-                                    <form action={async () => {
-                                        "use server";
-                                        await syncStateData(stateSlug);
-                                    }}>
-                                        <Button variant="outline" className="bg-slate-900/40 border-slate-800 text-slate-500 hover:text-purple-400 hover:border-purple-500/50 transition-all font-black uppercase tracking-widest text-[10px] h-10 px-6 rounded-xl">
-                                            <Globe2 className="mr-2 h-3 w-3" /> Load State Metadata
-                                        </Button>
-                                    </form>
+                                    <SyncButton 
+                                        action={syncStateData} 
+                                        slug={stateSlug} 
+                                        label="Load State Metadata" 
+                                        icon={<Globe2 className="h-3 w-3" />}
+                                        className="bg-slate-900/40 border-slate-800 text-slate-500 hover:text-purple-400 hover:border-purple-500/50 transition-all font-black uppercase tracking-widest text-[10px] h-10 px-6 rounded-xl"
+                                    />
                                 </div>
                             )}
                         </div>
@@ -300,14 +300,14 @@ export default async function StatePage({
                                         <p className="text-slate-700 mt-2 max-w-sm text-sm uppercase font-bold tracking-tighter">
                                             Pull real-time legislator data and active business bills for {state.name}.
                                         </p>
-                                        <form className="mt-8" action={async () => {
-                                            "use server";
-                                            await syncLegislativeData(stateSlug);
-                                        }}>
-                                            <Button className="bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-[10px] h-12 px-10 rounded-xl shadow-lg shadow-blue-500/20">
-                                                Sync Legislation Hub
-                                            </Button>
-                                        </form>
+                                        <div className="mt-8">
+                                            <SyncButton 
+                                                action={syncLegislativeData} 
+                                                slug={stateSlug} 
+                                                label="Sync Legislation Hub" 
+                                                className="bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest text-[10px] h-12 px-10 rounded-xl shadow-lg shadow-blue-500/20"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </TabsContent>

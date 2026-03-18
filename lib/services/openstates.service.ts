@@ -30,9 +30,10 @@ export class OpenStatesService {
      * Fetch legislators and business-related bills from Open States.
      */
     static async fetchLegislativeData(stateAbbr: string) {
-        if (!OPENSTATES_API_KEY) {
-            console.warn("OPENSTATES_API_KEY not found.");
-            return null;
+        if (!OPENSTATES_API_KEY || OPENSTATES_API_KEY.includes("REPLACE_WITH")) {
+            const errorMessage = "Open States API key is missing or not configured. Please set OPENSTATES_API_KEY environment variable.";
+            console.error(errorMessage);
+            throw new Error(errorMessage);
         }
 
         const jurisdictionId = `ocd-jurisdiction/country:us/state:${stateAbbr.toLowerCase()}/government`;
