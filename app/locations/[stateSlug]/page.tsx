@@ -456,6 +456,11 @@ export default async function StatePage({
 
     const cities = await getCitiesByState(stateSlug, query);
 
+    const uniqueLabels = Array.from(new Set([
+        ...STATE_FACTS,
+        ...(state.extendedFacts ? state.extendedFacts.map((f: any) => f.label) : [])
+    ]));
+
     // Create a dummy mapping of lowercase labels to available data, if needed
     // Otherwise fallback to "Not Specified"
     const getFieldValue = (label: string, state: any) => {
@@ -548,7 +553,7 @@ export default async function StatePage({
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-                                    {STATE_FACTS.map((label, idx) => {
+                                    {uniqueLabels.map((label, idx) => {
                                         const val = getFieldValue(label, state);
                                         const isMissing = val === "Not Specified";
                                         return (

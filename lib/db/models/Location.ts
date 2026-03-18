@@ -91,6 +91,10 @@ export interface ILocation extends Document {
         polka?: string;
     };
     subdivisions?: string[];
+    extendedFacts?: Array<{
+        label: string;
+        value: string;
+    }>;
     // Legislative data for business intelligence
     legislativeData?: {
         jurisdictionId?: string;
@@ -224,6 +228,10 @@ const LocationSchema = new Schema<ILocation>(
             polka: String,
         },
         subdivisions: [String],
+        extendedFacts: [{
+            label: String,
+            value: String,
+        }],
         // Legislative data for business intelligence
         legislativeData: {
             jurisdictionId: String,
