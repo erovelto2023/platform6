@@ -65,14 +65,19 @@ export default async function CityPage({
         console.error("Failed to fetch market pulse:", error);
     }
 
-    // Fallback newspapers from state if city has none
-    let displayNewspapers = city.newspapers || [];
-    if (displayNewspapers.length === 0 && city.type === 'city') {
-        const stateDoc = await getLocation(stateSlug, "");
-        if (stateDoc && stateDoc.newspapers) {
-            displayNewspapers = stateDoc.newspapers;
+    // Fetch state newspapers for fallback/aggregation
+    const stateDoc = await getLocation(stateSlug, "");
+    const stateNewspapers = stateDoc?.newspapers || [];
+    
+    // Merge city and state newspapers, removing duplicates by name
+    const allNewspapers = [...(city.newspapers || []), ...stateNewspapers];
+    const uniqueNewspapersMap = new Map();
+    allNewspapers.forEach(n => {
+        if (!uniqueNewspapersMap.has(n.name)) {
+            uniqueNewspapersMap.set(n.name, n);
         }
-    }
+    });
+    const displayNewspapers = Array.from(uniqueNewspapersMap.values());
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-20">
