@@ -153,7 +153,7 @@ export class CensusService {
                 "B28002_001E", "B28002_002E", // 21, 22 (Internet Total, Has Internet)
                 "B28001_011E", // 23 (Smartphone Only)
                 "B08006_001E", "B08006_017E", // 24, 25 (Workers total, Worked at home)
-                "S0801_C01_046E", // 26 (Mean Commute Minutes)
+                "B08136_001E", // 26 (Aggregate Commute Minutes - Reverted from invalid S0801)
                 "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 27-31 (Edu Total, Bachelors, Masters, Prof, Doctorate)
                 "B16001_001E", "B16001_003E", // 32, 33 (Language Total, Spanish)
             ].join(",");
@@ -190,23 +190,22 @@ export class CensusService {
                     fetch(`${dpUrl}&get=${batch3}`)
                 ]);
 
-                if (!res1.ok || !res2.ok || !res3.ok) continue;
-
-                const data1 = await res1.json();
-                const data2 = await res2.json();
-                const data3 = await res3.json();
+                const data1 = res1.ok ? await res1.json() : null;
+                const data2 = res2.ok ? await res2.json() : null;
+                const data3 = res3.ok ? await res3.json() : null;
                 
-                matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
-                matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
-                matchingRow3 = this.findMatchingRow(data3, cityName, stateName);
+                if (data1) matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
+                if (data2) matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
+                if (data3) matchingRow3 = this.findMatchingRow(data3, cityName, stateName);
 
-                if (matchingRow1 && matchingRow2 && matchingRow3) {
+                // Batch 1 is the anchor (has population and basic names)
+                if (matchingRow1) {
                     console.log(`[CensusService] Found match for ${cityName} as ${geoType}`);
                     break;
                 }
             }
 
-            if (!matchingRow1 || !matchingRow2 || !matchingRow3) {
+            if (!matchingRow1) {
                 console.warn(`[CensusService] No match found for ${cityName}, ${stateName} in any geo table.`);
                 return null;
             }
@@ -221,17 +220,17 @@ export class CensusService {
             const malePop = sanitizeValue(matchingRow1[3]);
             const femalePop = sanitizeValue(matchingRow1[4]);
 
-            const under18 = (
+            const under18 = matchingRow2 ? (
                 (parseInt(matchingRow2[1]) || 0) + (parseInt(matchingRow2[2]) || 0) + (parseInt(matchingRow2[3]) || 0) + (parseInt(matchingRow2[4]) || 0) +
                 (parseInt(matchingRow2[5]) || 0) + (parseInt(matchingRow2[6]) || 0) + (parseInt(matchingRow2[7]) || 0) + (parseInt(matchingRow2[8]) || 0)
-            );
+            ) : 0;
 
-            const over65 = (
+            const over65 = matchingRow2 ? (
                 (parseInt(matchingRow2[9]) || 0) + (parseInt(matchingRow2[10]) || 0) + (parseInt(matchingRow2[11]) || 0) + (parseInt(matchingRow2[12]) || 0) + (parseInt(matchingRow2[13]) || 0) + (parseInt(matchingRow2[14]) || 0) +
                 (parseInt(matchingRow2[15]) || 0) + (parseInt(matchingRow2[16]) || 0) + (parseInt(matchingRow2[17]) || 0) + (parseInt(matchingRow2[18]) || 0) + (parseInt(matchingRow2[19]) || 0) + (parseInt(matchingRow2[20]) || 0)
-            );
+            ) : 0;
 
-            const toddlers = (sanitizeValue(matchingRow2[1]) + sanitizeValue(matchingRow2[5]));
+            const toddlers = matchingRow2 ? (sanitizeValue(matchingRow2[1]) + sanitizeValue(matchingRow2[5])) : 0;
             
             const totalHH = parseInt(matchingRow1[10]) || 1;
             const burdenedCount = 
@@ -283,24 +282,24 @@ export class CensusService {
                     highEarners: (parseInt(matchingRow1[43]) || 0) // B19001_017E is 200k+
                 },
                 digital: {
-                    broadbandPct: Math.round(((parseInt(matchingRow2[22]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
-                    smartphoneOnlyPct: Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
-                    workFromHomePct: Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100),
-                    meanCommuteMinutes: sanitizeValue(matchingRow2[26])
+                    broadbandPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[22]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100) : 0,
+                    smartphoneOnlyPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100) : 0,
+                    workFromHomePct: matchingRow2 ? Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100) : 0,
+                    meanCommuteMinutes: matchingRow2 ? Math.round((parseInt(matchingRow2[26]) || 0) / ((parseInt(matchingRow2[24]) || 0) - (parseInt(matchingRow2[25]) || 0) || 1)) : 0
                 },
                 logistics: {
-                    bachelorsDegreePct: Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100),
-                    speakSpanishPct: Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100)
+                    bachelorsDegreePct: matchingRow2 ? Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100) : 0,
+                    speakSpanishPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100) : 0
                 },
                 economy: {
-                    topOccupations: [
+                    topOccupations: matchingRow3 ? [
                         { name: "Management/Arts", pct: sanitizeValue(matchingRow3[1]) },
                         { name: "Service", pct: sanitizeValue(matchingRow3[2]) },
                         { name: "Sales/Office", pct: sanitizeValue(matchingRow3[3]) },
                         { name: "Natural Resources/Construction", pct: sanitizeValue(matchingRow3[4]) },
                         { name: "Production/Transport", pct: sanitizeValue(matchingRow3[5]) }
-                    ].sort((a, b) => b.pct - a.pct),
-                    topIndustries: [
+                    ].sort((a, b) => b.pct - a.pct) : [],
+                    topIndustries: matchingRow3 ? [
                         { name: "Agri/Mining", pct: sanitizeValue(matchingRow3[6]) },
                         { name: "Construction", pct: sanitizeValue(matchingRow3[7]) },
                         { name: "Manufacturing", pct: sanitizeValue(matchingRow3[8]) },
@@ -314,11 +313,11 @@ export class CensusService {
                         { name: "Arts/Food", pct: sanitizeValue(matchingRow3[16]) },
                         { name: "Other Services", pct: sanitizeValue(matchingRow3[17]) },
                         { name: "Public Admin", pct: sanitizeValue(matchingRow3[18]) }
-                    ].sort((a, b) => b.pct - a.pct).slice(0, 5),
+                    ].sort((a, b) => b.pct - a.pct).slice(0, 5) : [],
                     employmentType: {
-                        private: sanitizeValue(matchingRow3[19]),
-                        public: sanitizeValue(matchingRow3[20]),
-                        selfEmployed: sanitizeValue(matchingRow3[21])
+                        private: matchingRow3 ? sanitizeValue(matchingRow3[19]) : 0,
+                        public: matchingRow3 ? sanitizeValue(matchingRow3[20]) : 0,
+                        selfEmployed: matchingRow3 ? sanitizeValue(matchingRow3[21]) : 0
                     }
                 },
                 year: year
