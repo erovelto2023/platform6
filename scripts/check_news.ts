@@ -7,18 +7,11 @@ import Location from "../lib/db/models/Location";
 async function check() {
     await connectToDatabase();
     
-    console.log("Checking Allegany, NY...");
-    const allegany = await Location.findOne({ name: "Allegany", stateSlug: "new-york" });
-    if (allegany) {
-        console.log(`Newspapers count: ${allegany.newspapers?.length || 0}`);
-        allegany.newspapers?.forEach((n: any) => console.log(`- ${n.name} (${n.type})`));
-    }
-    
-    console.log("\nChecking New York State...");
-    const ny = await Location.findOne({ slug: "new-york", type: "state" });
-    if (ny) {
-        console.log(`Newspapers count: ${ny.newspapers?.length || 0}`);
-        ny.newspapers?.slice(0, 3).forEach((n: any) => console.log(`- ${n.name} (${n.type})`));
+    console.log("Checking Alabama State...");
+    const al = await Location.findOne({ slug: "alabama", type: "state" });
+    if (al) {
+        console.log(`Newspapers count: ${al.newspapers?.length || 0}`);
+        al.newspapers?.forEach((n: any) => console.log(`- ${n.name} (${n.type})`));
     }
 
     process.exit(0);
