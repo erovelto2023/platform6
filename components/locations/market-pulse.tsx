@@ -87,41 +87,8 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                     </div>
                 </div>
 
-                {/* Local Events & Density */}
+                {/* Density Column */}
                 <div className="space-y-6">
-                    <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
-                                <Calendar className="h-4 w-4 text-orange-400" />
-                                Community & Niche Events
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4 mt-4">
-                                {events.length > 0 ? (
-                                    events.map((event, i) => (
-                                        <div key={i} className="border-b border-slate-800 pb-3 last:border-0 last:pb-0 hover:bg-slate-800/20 transition-colors p-1 rounded-sm">
-                                            <div className="text-[10px] font-black text-white uppercase line-clamp-1">{event.name}</div>
-                                            <div className="flex justify-between items-center mt-1">
-                                                <span className="text-[8px] font-bold text-slate-500 uppercase">{event.date}</span>
-                                                <Badge variant="outline" className="text-[7px] border-orange-500/30 text-orange-400 font-bold uppercase py-0 px-1 leading-tight">
-                                                    {event.venue}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="p-4 bg-slate-950/40 rounded-xl border border-slate-800 border-dashed text-center">
-                                        <p className="text-[10px] text-slate-600 font-bold uppercase italic leading-relaxed px-2">
-                                            No major craft fairs or parades in current API window. <br/>
-                                            <span className="text-blue-500/60 mt-2 block">Check local Facebook Groups for hyper-local niches.</span>
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-
                     <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-cyan-500">
                          <CardHeader className="pb-2">
                             <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
