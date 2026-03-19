@@ -10,6 +10,7 @@ interface MarketPulseProps {
 }
 
 export function MarketPulse({ data, cityName }: MarketPulseProps) {
+    console.log(`[MarketPulse] Rendering for ${cityName}:`, !!data);
     if (!data) return null;
 
     const { searchIntent, monthlyMomentum, events, businessDensity } = data;
@@ -86,24 +87,29 @@ export function MarketPulse({ data, cityName }: MarketPulseProps) {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
                                 <Calendar className="h-4 w-4 text-orange-400" />
-                                Upcoming Events
+                                Community & Niche Events
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4 mt-4">
                                 {events.length > 0 ? (
                                     events.map((event, i) => (
-                                        <div key={i} className="border-b border-slate-800 pb-3 last:border-0 last:pb-0">
+                                        <div key={i} className="border-b border-slate-800 pb-3 last:border-0 last:pb-0 hover:bg-slate-800/20 transition-colors p-1 rounded-sm">
                                             <div className="text-[10px] font-black text-white uppercase line-clamp-1">{event.name}</div>
                                             <div className="flex justify-between items-center mt-1">
                                                 <span className="text-[8px] font-bold text-slate-500 uppercase">{event.date}</span>
-                                                <span className="text-[8px] font-bold text-orange-400 uppercase">{event.venue}</span>
+                                                <Badge variant="outline" className="text-[7px] border-orange-500/30 text-orange-400 font-bold uppercase py-0 px-1 leading-tight">
+                                                    {event.venue}
+                                                </Badge>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="p-4 bg-slate-950/40 rounded-xl border border-slate-800 border-dashed text-center">
-                                        <p className="text-[10px] text-slate-600 font-bold uppercase italic leading-relaxed"> No upcoming major events detected. <br/> Visit local news for small gatherings.</p>
+                                        <p className="text-[10px] text-slate-600 font-bold uppercase italic leading-relaxed px-2">
+                                            No major craft fairs or parades in current API window. <br/>
+                                            <span className="text-blue-500/60 mt-2 block">Check local Facebook Groups for hyper-local niches.</span>
+                                        </p>
                                     </div>
                                 )}
                             </div>

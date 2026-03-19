@@ -31,51 +31,67 @@ export class MarketService {
      * Get city momentum based on Wikipedia Pageviews (Free)
      */
     static async getCityMomentum(city: string, state: string): Promise<number> {
-        try {
-            // Wikipedia article titles usually follow "City,_State" format
-            const article = encodeURIComponent(`${city},_${state}`);
-            const end = new Date();
-            const start = new Date();
-            start.setDate(end.getDate() - 30);
-            
-            const formatDate = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '');
-            const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${article}/daily/${formatDate(start)}/${formatDate(end)}`;
-            
-            const res = await fetch(url);
-            const data = await res.json();
-            
-            if (data.items) {
-                return data.items.reduce((acc: number, item: any) => acc + item.views, 0);
-            }
-            return 0;
-        } catch (error) {
-            return 0;
+        const fetchViews = async (title: string) => {
+            try {
+                const article = encodeURIComponent(title.replace(/ /g, "_"));
+                const end = new Date();
+                const start = new Date();
+                start.setDate(end.getDate() - 30);
+                
+                const formatDate = (d: Date) => d.toISOString().split('T')[0].replace(/-/g, '');
+                const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${article}/daily/${formatDate(start)}/${formatDate(end)}`;
+                
+                const res = await fetch(url);
+                if (!res.ok) return 0;
+                const data = await res.json();
+                
+                if (data.items) {
+                    return data.items.reduce((acc: number, item: any) => acc + item.views, 0);
+                }
+                return 0;
+            } catch (e) { return 0; }
+        };
+
+        // Try City, State first
+        let views = await fetchViews(`${city},_${state}`);
+        // If 0, try just City
+        if (views === 0) {
+            views = await fetchViews(city);
         }
+        return views;
     }
 
     /**
      * Get upcoming events via Ticketmaster (Free Tier)
+     * Broadened to include craft fairs, parades, and conferences.
      */
     static async getUpcomingEvents(city: string, stateCode: string): Promise<any[]> {
+        const apiKey = process.env.TICKETMASTER_API_KEY;
+        if (!apiKey) {
+            console.warn("[MarketService] No TICKETMASTER_API_KEY found in .env.local");
+            return [];
+        }
+
         try {
-            // Ticketmaster uses stateCode (e.g. NY, WY)
-            const url = `https://app.ticketmaster.com/discovery/v2/events.json?city=${encodeURIComponent(city)}&stateCode=${stateCode}&size=5&apikey=7elvnst9999`; // Placeholder or user key
-            // Note: I'll use a placeholder for now, but in a real app the user would provide their own free key.
-            // For the purpose of this task, I'll return a mock if no key is provided.
+            // Search with keywords for community events
+            const keywords = encodeURIComponent("craft fair parade festival conference");
+            const url = `https://app.ticketmaster.com/discovery/v2/events.json?city=${encodeURIComponent(city)}&stateCode=${stateCode}&keyword=${keywords}&size=10&sort=date,asc&apikey=${apiKey}`;
             
             const res = await fetch(url);
+            if (!res.ok) return [];
             const data = await res.json();
             
             if (data._embedded && data._embedded.events) {
                 return data._embedded.events.map((e: any) => ({
                     name: e.name,
                     date: e.dates.start.localDate,
-                    venue: e._embedded.venues[0].name,
+                    venue: e._embedded?.venues?.[0]?.name || "Local Venue",
                     url: e.url
                 }));
             }
             return [];
         } catch (error) {
+            console.error("[MarketService] Events fetch error:", error);
             return [];
         }
     }
@@ -94,14 +110,19 @@ export class MarketService {
         const results: Record<string, number> = {};
         
         try {
-            // Simple approach: Use bounding box or named area
-            // To keep it robust, we'll try named area with state suffix
             for (const [label, tag] of Object.entries(categories)) {
-                const query = `[out:json];area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"]->.a;(node[${tag}](area.a);way[${tag}](area.a););out count;`;
+                // Try a simpler area search first
+                const query = `[out:json][timeout:10];area[name="${city}"]->.a;(node[${tag}](area.a);way[${tag}](area.a););out count;`;
                 const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-                const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
-                const data = await res.json();
-                if (data.elements && data.elements[0]) {
+                
+                const res = await fetch(url).catch(() => null);
+                if (!res || !res.ok) {
+                    results[label] = 0;
+                    continue;
+                }
+                
+                const data = await res.json().catch(() => null);
+                if (data && data.elements && data.elements[0]) {
                     results[label] = parseInt(data.elements[0].tags.total) || 0;
                 } else {
                     results[label] = 0;
@@ -109,11 +130,13 @@ export class MarketService {
             }
             return results;
         } catch (error) {
+            console.error("[MarketService] Business density error:", error);
             return results;
         }
     }
     
     static async getMarketPulse(city: string, state: string, stateCode: string): Promise<MarketPulseData> {
+        console.log(`[MarketService] Fetching pulse for ${city}, ${state} (${stateCode})`);
         const [searchIntent, monthlyMomentum, events, businessDensity] = await Promise.all([
             this.getSearchIntent(city, state),
             this.getCityMomentum(city, state),
@@ -121,6 +144,12 @@ export class MarketService {
             this.getBusinessDensity(city, stateCode)
         ]);
         
+        console.log(`[MarketService] Results: 
+          - Intent: ${searchIntent.length} 
+          - Momentum: ${monthlyMomentum} 
+          - Events: ${events.length} 
+          - Density: ${Object.keys(businessDensity).length} categories`);
+
         return { searchIntent, monthlyMomentum, events, businessDensity };
     }
 }
