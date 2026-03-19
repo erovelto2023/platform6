@@ -105,6 +105,11 @@ export interface CityStats {
             public: number;
             selfEmployed: number;
         };
+        medianHousingValue: number;
+        vehiclesAvailable: {
+            zero: number;
+            one: number;
+        };
     };
     segments: {
         toddlers: number;
@@ -141,6 +146,8 @@ export class CensusService {
                 "B19001_006E", "B19001_007E", "B19001_008E", "B19001_009E", // 32-35 (25-29k, 30-34k, 35-39k, 40-44k)
                 "B19001_010E", "B19001_011E", "B19001_012E", // 36-38 (45-49k, 50-59k, 60-74k)
                 "B19001_013E", "B19001_014E", "B19001_015E", "B19001_016E", "B19001_017E", // 39-43 (75-99k, 100-124k, 125-149k, 150-199k, 200k+)
+                "B25077_001E", // 44 (Median Housing Value)
+                "B25044_003E", "B25044_004E", "B25044_009E", "B25044_010E", // 45-48 (Owner 0, Owner 1, Renter 0, Renter 1 vehicles)
             ].join(",");
 
             const batch2 = [
@@ -318,6 +325,11 @@ export class CensusService {
                         private: matchingRow3 ? sanitizeValue(matchingRow3[19]) : 0,
                         public: matchingRow3 ? sanitizeValue(matchingRow3[20]) : 0,
                         selfEmployed: matchingRow3 ? sanitizeValue(matchingRow3[21]) : 0
+                    },
+                    medianHousingValue: sanitizeValue(matchingRow1[44]),
+                    vehiclesAvailable: {
+                        zero: (parseInt(matchingRow1[45]) || 0) + (parseInt(matchingRow1[47]) || 0),
+                        one: (parseInt(matchingRow1[46]) || 0) + (parseInt(matchingRow1[48]) || 0)
                     }
                 },
                 year: year

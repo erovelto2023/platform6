@@ -1,9 +1,10 @@
-import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info, Smartphone, Wifi, MapPin, School, Globe, Clock } from "lucide-react";
+import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info, Smartphone, Wifi, MapPin, School, Globe, Clock, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { AIBusinessAdvisor } from "./ai-business-advisor";
 
 interface CityCensusStatsProps {
     data: {
@@ -149,6 +150,10 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </TabsTrigger>
                     <TabsTrigger value="economy" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Economy & Skills
+                    </TabsTrigger>
+                    <TabsTrigger value="advisor" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors flex items-center gap-2">
+                        <Sparkles className="h-3 w-3" />
+                        Business Advisor
                     </TabsTrigger>
                 </TabsList>
 
@@ -553,6 +558,11 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
+
+                {/* AI Business Advisor Tab */}
+                <TabsContent value="advisor" className="space-y-6">
+                    <AIBusinessAdvisor data={data} cityName={cityName} />
                 </TabsContent>
 
             </Tabs>
