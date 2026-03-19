@@ -40,17 +40,22 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-3 mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                                 {searchIntent.length > 0 ? (
-                                    searchIntent.slice(0, 5).map((query, i) => (
-                                        <div key={i} className="flex items-center gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:bg-slate-800/50 transition-colors group">
-                                            <div className="text-blue-500 font-black italic text-sm">#0{i+1}</div>
-                                            <div className="text-xs font-bold text-slate-300 uppercase tracking-tight group-hover:text-white">{query}</div>
-                                            <Target className="h-3 w-3 text-slate-700 ml-auto group-hover:text-blue-500 transition-colors" />
+                                    searchIntent.map((intent, i) => (
+                                        <div key={i} className="flex items-center gap-3 p-3 bg-slate-950/40 border border-slate-800 rounded-xl group hover:border-blue-500/30 transition-all">
+                                            <div className="h-6 w-6 rounded-full bg-blue-500/10 flex items-center justify-center text-[10px] font-black text-blue-400 group-hover:bg-blue-500/20">
+                                                {i + 1}
+                                            </div>
+                                            <span className="text-[10px] font-bold text-slate-300 uppercase italic tracking-tight leading-none truncate">
+                                                {intent}
+                                            </span>
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="text-xs text-slate-500 italic">No recent search patterns detected. Try again later.</p>
+                                    <div className="col-span-full py-6 text-center text-slate-600 font-bold uppercase italic text-[10px]">
+                                        No recent search patterns detected. Try again later.
+                                    </div>
                                 )}
                             </div>
                         </CardContent>
@@ -84,8 +89,6 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                             </CardContent>
                         </Card>
                     </div>
-                </div>
-
                 </div>
             </div>
 
@@ -132,8 +135,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
             <div className="p-6 bg-slate-900/20 border border-slate-800 rounded-2xl flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-500 mt-1" />
                 <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase">
-                    MARKET PULSE USES 100% FREE AND OPEN DATA FROM **GOOGLE AUTOCOMPLETE**, **WIKIMEDIA**, AND **OPENSTREETMAP**. 
-                    UNLIKE CENSUS DATA WHICH IS HISTORICAL, THESE INDICATORS REFLECT REAL-TIME MOMENTUM.
+                    Market Pulse uses 100% free and open data from **Google Autocomplete**, **Wikimedia**, and **OpenStreetMap**. Unlike Census data which is historical, these indicators reflect real-time momentum.
                 </p>
             </div>
         </div>
