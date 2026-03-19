@@ -1,4 +1,4 @@
-import { TrendingUp, Target, Calendar, BarChart3, Search, Info } from "lucide-react";
+import { TrendingUp, Target, BarChart3, Search, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -19,7 +19,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
     console.log(`[MarketPulse] Rendering for ${cityName}:`, !!data);
     if (!data) return null;
 
-    const { searchIntent, monthlyMomentum, events, businessDensity } = data;
+    const { searchIntent, monthlyMomentum, businessDensity } = data;
 
     return (
         <div className="space-y-12 mt-12">

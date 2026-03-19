@@ -1,13 +1,7 @@
 export interface MarketPulseData {
     searchIntent: string[];
     monthlyMomentum: number;
-    events: Array<{
-        name: string;
-        date: string;
-        venue: string;
-        url: string;
-    }>;
-    businessDensity?: Record<string, number>;
+    businessDensity: Record<string, number>;
 }
 
 export class MarketService {
@@ -163,19 +157,17 @@ export class MarketService {
     
     static async getMarketPulse(city: string, state: string, stateCode: string): Promise<MarketPulseData> {
         console.log(`[MarketService] Fetching pulse for ${city}, ${state} (${stateCode})`);
-        const [searchIntent, monthlyMomentum, events, businessDensity] = await Promise.all([
+        const [searchIntent, monthlyMomentum, businessDensity] = await Promise.all([
             this.getSearchIntent(city, state),
             this.getCityMomentum(city, state),
-            this.getUpcomingEvents(city, stateCode),
             this.getBusinessDensity(city, stateCode)
         ]);
         
         console.log(`[MarketService] Results: 
           - Intent: ${searchIntent.length} 
           - Momentum: ${monthlyMomentum} 
-          - Events: ${events.length} 
           - Density: ${Object.keys(businessDensity).length} categories`);
 
-        return { searchIntent, monthlyMomentum, events, businessDensity };
+        return { searchIntent, monthlyMomentum, businessDensity };
     }
 }
