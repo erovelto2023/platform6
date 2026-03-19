@@ -151,34 +151,12 @@ export class CensusService {
                 return null;
             }
 
-            const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
+            const data1 = await res1.json();
+            const data2 = await res2.json();
+            if (!data1 || !data2) return null;
 
-            const findMatchingRow = (rows: string[][], name: string, state: string) => {
-                const searchLower = name.toLowerCase();
-                const stateLower = state.toLowerCase();
-                
-                // Try exact match first (e.g., "Boise city, Idaho")
-                let match = rows.find(row => {
-                    const rowLower = row[0].toLowerCase();
-                    return rowLower === `${searchLower} city, ${stateLower}` || 
-                           rowLower === `${searchLower} town, ${stateLower}` ||
-                           rowLower === `${searchLower} cdp, ${stateLower}` ||
-                           rowLower === `${searchLower}, ${stateLower}`;
-                });
-
-                // If no exact match, try broad containment
-                if (!match) {
-                    match = rows.find(row => {
-                        const rowLower = row[0].toLowerCase();
-                        return rowLower.includes(searchLower) && rowLower.includes(stateLower);
-                    });
-                }
-
-                return match;
-            };
-
-            const matchingRow1 = findMatchingRow(data1, cityName, stateName);
-            const matchingRow2 = findMatchingRow(data2, cityName, stateName);
+            const matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
+            const matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
 
             if (!matchingRow1 || !matchingRow2) return null;
 
@@ -271,7 +249,7 @@ export class CensusService {
 
             // Step 2: Fetch ABS Business Owner Stats
             const placeFips = matchingRow1[matchingRow1.length - 1]; 
-            baseStats.ownerStats = await this.getBusinessOwnerStats(stateFips, placeFips);
+            baseStats.ownerStats = await this.getBusinessOwnerStats(stateFips, placeFips, cityName);
 
             return baseStats;
         } catch (error) {
@@ -386,11 +364,38 @@ export class CensusService {
         };
     }
 
+    private static findMatchingRow(rows: string[][], name: string, state: string) {
+        if (!rows || !Array.isArray(rows)) return null;
+        const searchLower = name.toLowerCase();
+        const stateLower = state.toLowerCase();
+        
+        // Try exact match first (e.g., "Boise city, Idaho")
+        let match = rows.find(row => {
+            if (!row[0]) return false;
+            const rowLower = row[0].toLowerCase();
+            return rowLower === `${searchLower} city, ${stateLower}` || 
+                   rowLower === `${searchLower} town, ${stateLower}` ||
+                   rowLower === `${searchLower} cdp, ${stateLower}` ||
+                   rowLower === `${searchLower}, ${stateLower}`;
+        });
+
+        // If no exact match, try broad containment
+        if (!match) {
+            match = rows.find(row => {
+                if (!row[0]) return false;
+                const rowLower = row[0].toLowerCase();
+                return rowLower.includes(searchLower) && rowLower.includes(stateLower);
+            });
+        }
+
+        return match;
+    }
+
     /**
      * Fetch detailed business owner demographics from ABS.
      * Includes fallback logic to State-level if Economic Place data is unavailable.
      */
-    private static async getBusinessOwnerStats(stateFips: string, placeFips: string): Promise<OwnerStats | undefined> {
+    private static async getBusinessOwnerStats(stateFips: string, placeFips: string, cityName: string): Promise<OwnerStats | undefined> {
         try {
             const year = "2022";
             const baseUrl = `${CENSUS_API_BASE}/${year}/abscs?get=NAME,FIRMPDEMP&NAICS2022=00&key=${API_KEY}`;
@@ -405,24 +410,45 @@ export class CensusService {
                 return parseInt(data[1][1]) || 0;
             };
 
+            // Get state name for matching
+            const stateName = Object.entries(STATE_FIPS).find(([_, code]) => code === stateFips)?.[0];
+            if (!stateName) return undefined;
+
             // Strategy: 
-            // 1. Try Economic Place (city level)
-            // 2. If no data, Fallback to State level
-            let geo = `economic%20place:${placeFips}&in=state:${stateFips}`;
-            let total = await fetchGroup(geo);
+            // 1. Fetch all economic places in the state
+            // 2. Match by city name (same robust logic as ACS)
+            // 3. Fallback to State level if not found
+            
+            const fetchAllPlaces = async (sex = "001", vet = "001", race = "001", eth = "001") => {
+                const url = `${baseUrl}&for=economic%20place:*&in=state:${stateFips}&SEX=${sex}&VET_GROUP=${vet}&RACE_GROUP=${race}&ETH_GROUP=${eth}`;
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                return await res.json();
+            };
+
+            const data = await fetchAllPlaces();
+            let matchingRow = data ? this.findMatchingRow(data, cityName, stateName) : null;
             let isStateLevel = false;
 
-            if (total === 0) {
-                geo = `state:${stateFips}`;
-                total = await fetchGroup(geo);
+            if (!matchingRow) {
+                // Fallback to State level
+                const stateData = await fetch(`${baseUrl}&for=state:${stateFips}&SEX=001&VET_GROUP=001&RACE_GROUP=001&ETH_GROUP=001`).then(r => r.json());
+                matchingRow = stateData?.[1];
                 isStateLevel = true;
             }
 
+            if (!matchingRow) return undefined;
+
+            const total = parseInt(matchingRow[1]) || 0;
             if (total === 0) return undefined;
+
+            // Get segments (we can either fetch state-level or try to match in full place data if we fetched it)
+            // For simplicity and accuracy of fallback, let's use the matchingRow's geography
+            const geo = isStateLevel ? `state:${stateFips}` : `economic%20place:${matchingRow[matchingRow.length - 1]}&in=state:${stateFips}`;
 
             const women = await fetchGroup(geo, "002");
             const veteran = await fetchGroup(geo, "001", "002");
-            const minority = await fetchGroup(geo, "001", "001", "001", "002"); // Minority uses ETH_GROUP=002 (Hispanic) or RACE_GROUP filters
+            const minority = await fetchGroup(geo, "001", "001", "001", "002");
 
             return {
                 totalFirms: total,
