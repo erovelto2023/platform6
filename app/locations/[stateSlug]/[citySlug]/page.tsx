@@ -58,7 +58,12 @@ export default async function CityPage({
         "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
     };
     const stateCode = STATE_CODES[state.name] || "";
-    const marketPulse = await MarketService.getMarketPulse(city.name, state.name, stateCode);
+    let marketPulse = null;
+    try {
+        marketPulse = await MarketService.getMarketPulse(city.name, state.name, stateCode);
+    } catch (error) {
+        console.error("Failed to fetch market pulse:", error);
+    }
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-20">

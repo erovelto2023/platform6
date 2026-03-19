@@ -15,16 +15,25 @@ export class MarketService {
      * Get real-time search intent using Google Autocomplete (Free)
      */
     static async getSearchIntent(city: string, state: string): Promise<string[]> {
-        try {
-            const query = encodeURIComponent(`best business to start in ${city} ${state}`);
-            const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${query}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            return data[1] || [];
-        } catch (error) {
-            console.error("Error fetching search intent:", error);
-            return [];
+        const fetchIntent = async (q: string) => {
+            try {
+                const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(q)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                return data[1] || [];
+            } catch (e) { return []; }
+        };
+
+        // Try specific first
+        let suggestions = await fetchIntent(`best business to start in ${city} ${state}`);
+        // Fallback to broader if empty
+        if (suggestions.length === 0) {
+            suggestions = await fetchIntent(`${city} ${state} business`);
         }
+        if (suggestions.length === 0) {
+            suggestions = await fetchIntent(`${city} ${state}`);
+        }
+        return suggestions;
     }
 
     /**
@@ -111,8 +120,15 @@ export class MarketService {
         
         try {
             for (const [label, tag] of Object.entries(categories)) {
-                // Try a simpler area search first
-                const query = `[out:json][timeout:10];area[name="${city}"]->.a;(node[${tag}](area.a);way[${tag}](area.a););out count;`;
+                // Try a very broad area search based on name alone if specific fails
+                const query = `[out:json][timeout:15];
+                    (
+                      area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"];
+                      area["name"="${city} city"]["ISO3166-2"="US-${stateSuffix}"];
+                      area["name"="${city} village"]["ISO3166-2"="US-${stateSuffix}"];
+                    )->.a;
+                    (node[${tag}](area.a);way[${tag}](area.a););
+                    out count;`;
                 const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
                 
                 const res = await fetch(url).catch(() => null);
