@@ -6,6 +6,8 @@ import { MapPin, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
+import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
+import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 
 export const dynamic = 'force-dynamic';
 
@@ -483,6 +485,9 @@ export default async function StatePage({
         return "Not Specified";
     };
 
+    const stateDoc = await getLocation(stateSlug, "");
+    const { products } = await getDirectoryProducts();
+
     return (
         <div className="flex flex-col min-h-screen bg-slate-950">
             {/* Header */}
@@ -535,6 +540,18 @@ export default async function StatePage({
                 {/* Market & State Details Section */}
                 <section className="w-full py-12 bg-slate-900 min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
+                        {/* Recommended Resources / Rotating Banner */}
+                        {products && products.length > 0 && (
+                            <div className="mb-12 max-w-2xl mx-auto">
+                                <div className="flex items-center gap-3 mb-6 border-l-4 border-emerald-500 pl-4">
+                                    <h2 className="text-xl font-black uppercase italic tracking-tight text-white">
+                                        Partner Recommendations
+                                    </h2>
+                                </div>
+                                <RotatingAffiliateBanner products={products} />
+                            </div>
+                        )}
+
                         <Tabs defaultValue="details" className="w-full">
                             <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start flex-wrap h-auto">
                                 <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">

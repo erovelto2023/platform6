@@ -7,6 +7,8 @@ import { CityCensusStats } from "@/components/locations/city-census-stats";
 import { MarketPulse } from "@/components/locations/market-pulse";
 import { ArrowLeft } from "lucide-react";
 import { Metadata } from "next";
+import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
+import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +44,7 @@ export default async function CityPage({
 
 // Fetch live market data from US Census
     const censusData = await CensusService.getCityDemographics(city.name, state.name);
+    const { products } = await getDirectoryProducts();
 
     // Fetch Market Pulse (Free/Open Data)
     // Map state name to code for Ticketmaster/OSM
@@ -114,6 +117,20 @@ export default async function CityPage({
                     <CityCensusStats data={censusData} cityName={city.name} />
                     <MarketPulse data={marketPulse} cityName={city.name} newspapers={displayNewspapers} />
                 </section>
+
+                {/* Recommended Resources / Rotating Banner */}
+                {products && products.length > 0 && (
+                    <section className="mb-12">
+                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                                Recommended Resources
+                            </h2>
+                        </div>
+                        <div className="max-w-2xl mx-auto">
+                            <RotatingAffiliateBanner products={products} />
+                        </div>
+                    </section>
+                )}
 
                 <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
                     <h4 className="text-xl font-black uppercase text-emerald-400 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
