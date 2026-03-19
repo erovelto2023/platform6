@@ -116,6 +116,7 @@ export interface CityStats {
         seniors: number;
         highEarners: number;
     };
+    isStateLevel?: boolean; // True if this is state-level data due to city-level unavailability
     ownerStats?: OwnerStats;
     nicheInsights?: NicheInsight;
     year: string;
@@ -205,18 +206,49 @@ export class CensusService {
                 if (data2) matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
                 if (data3) matchingRow3 = this.findMatchingRow(data3, cityName, stateName);
 
-                // Batch 1 is the anchor (has population and basic names)
+                if (matchingRow1) break;
+            }
+
+            // Fallback to State data if city not found
+            if (!matchingRow1) {
+                console.log(`[CensusService] No city match for ${cityName}. Falling back to State data for ${stateName}.`);
+                const stateUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+                const stateDpUrl = `${CENSUS_API_BASE}/${year}/acs/acs5/profile?for=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+                
+                const [sRes1, sRes2, sRes3] = await Promise.all([
+                    fetch(`${stateUrl}&get=${batch1}`),
+                    fetch(`${stateUrl}&get=${batch2}`),
+                    fetch(`${stateDpUrl}&get=${batch3}`)
+                ]);
+
+                const sData1 = sRes1.ok ? await sRes1.json() : null;
+                const sData2 = sRes2.ok ? await sRes2.json() : null;
+                const sData3 = sRes3.ok ? await sRes3.json() : null;
+
+                if (sData1 && sData1[1]) matchingRow1 = sData1[1];
+                if (sData2 && sData2[1]) matchingRow2 = sData2[1];
+                if (sData3 && sData3[1]) matchingRow3 = sData3[1];
+                
                 if (matchingRow1) {
-                    console.log(`[CensusService] Found match for ${cityName} as ${geoType}`);
-                    break;
+                    const stats = this.processRows(matchingRow1, matchingRow2, matchingRow3, year);
+                    if (stats) {
+                        stats.isStateLevel = true;
+                        return stats;
+                    }
                 }
             }
 
-            if (!matchingRow1) {
-                console.warn(`[CensusService] No match found for ${cityName}, ${stateName} in any geo table.`);
-                return null;
-            }
+            if (!matchingRow1) return null;
 
+            return this.processRows(matchingRow1, matchingRow2, matchingRow3, year);
+        } catch (error) {
+            console.error("Error fetching demographics:", error);
+            return null;
+        }
+    }
+
+    private static processRows(matchingRow1: string[], matchingRow2: string[] | null | undefined, matchingRow3: string[] | null | undefined, year: string): CityStats | null {
+        try {
             const sanitizeValue = (val: string | number) => {
                 const num = typeof val === 'string' ? parseFloat(val) : val;
                 if (isNaN(num) || num <= -666666666) return 0;
@@ -234,7 +266,7 @@ export class CensusService {
 
             const over65 = matchingRow2 ? (
                 (parseInt(matchingRow2[9]) || 0) + (parseInt(matchingRow2[10]) || 0) + (parseInt(matchingRow2[11]) || 0) + (parseInt(matchingRow2[12]) || 0) + (parseInt(matchingRow2[13]) || 0) + (parseInt(matchingRow2[14]) || 0) +
-                (parseInt(matchingRow2[15]) || 0) + (parseInt(matchingRow2[16]) || 0) + (parseInt(matchingRow2[17]) || 0) + (parseInt(matchingRow2[18]) || 0) + (parseInt(matchingRow2[19]) || 0) + (parseInt(matchingRow2[20]) || 0)
+                (parseInt(matchingRow2[15]) || 0) + (parseInt(matchingRow2[16]) || 0) + (parseInt(matchingRow2[17]) || 0) + (parseInt(matchingRow2[18]) || 0) + (parseInt(matchingRow2[19]) || 0) + (parseInt(matchingRow2[21]) || 0)
             ) : 0;
 
             const toddlers = matchingRow2 ? (sanitizeValue(matchingRow2[1]) + sanitizeValue(matchingRow2[5])) : 0;
@@ -335,12 +367,10 @@ export class CensusService {
                 year: year
             };
 
-            // Calculate Niche Insights
             baseStats.nicheInsights = this.calculateNicheInsights(baseStats);
-
             return baseStats;
-        } catch (error) {
-            console.error("Error fetching demographics:", error);
+        } catch (e) {
+            console.error("Error processing rows:", e);
             return null;
         }
     }

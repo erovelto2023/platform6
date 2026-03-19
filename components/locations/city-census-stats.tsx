@@ -65,6 +65,7 @@ interface CityCensusStatsProps {
                 selfEmployed: number;
             };
         };
+        isStateLevel?: boolean;
         year: string;
     } | null;
     cityName: string;
@@ -86,6 +87,19 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
 
     return (
         <div className="space-y-12">
+            {data.isStateLevel && (
+                <div className="p-4 border border-orange-500/20 rounded-2xl bg-orange-500/5 flex items-center gap-4">
+                    <div className="p-2 bg-orange-500/10 rounded-xl">
+                        <AlertTriangle className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div>
+                        <h4 className="text-sm font-bold text-orange-500">Regional Profile Active</h4>
+                        <p className="text-xs text-slate-400">
+                            Specific Census data for {cityName} is limited. We're displaying state-wide averages as a regional benchmark for your business planning.
+                        </p>
+                    </div>
+                </div>
+            )}
             {/* Market Scorecard (Quick Stats) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
@@ -94,8 +108,8 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-black text-white italic tracking-tighter">{data.population.toLocaleString()}</div>
-                        <Badge variant="outline" className="mt-2 text-[8px] bg-purple-500/10 text-purple-400 border-none font-black uppercase">
-                            {isSmallTown ? "Small Market" : "Active Market"}
+                        <Badge variant="outline" className={`mt-2 text-[8px] border-none font-black uppercase ${data.isStateLevel ? 'bg-orange-500/10 text-orange-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                            {data.isStateLevel ? "Regional Profile" : (isSmallTown ? "Small Market" : "Active Market")}
                         </Badge>
                     </CardContent>
                 </Card>
