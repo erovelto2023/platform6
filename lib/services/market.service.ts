@@ -1,6 +1,14 @@
+import { MARKET_CATEGORIES } from "../constants/market-categories";
+
 export interface MarketPulseData {
     searchIntent: string[];
     monthlyMomentum: number;
+    competitors?: {
+        parenting: string[];
+        seniors: string[];
+        home: string[];
+    };
+    dominance?: Record<string, { count: number; sector: string }>;
 }
 
 export class MarketService {
@@ -154,17 +162,166 @@ export class MarketService {
         }
     }
     
+    static async getCompetitorLandscape(city: string, stateSuffix: string): Promise<MarketPulseData['competitors']> {
+        const queries = {
+            parenting: '["amenity"~"kindergarten|school"]',
+            seniors: '["amenity"="social_facility"]["social_facility:for"="senior"]',
+            home: '["shop"~"hardware|doityourself"]'
+        };
+        
+        const results = { parenting: [] as string[], seniors: [] as string[], home: [] as string[] };
+        
+        try {
+            const cityQuery = `[out:json][timeout:10];
+                (
+                  node["name"="${city}"]["addr:state"="${stateSuffix}"];
+                  node["name"="${city}"]["is_in:state_code"="${stateSuffix}"];
+                  node["name"="${city}"][place~"city|town|village|hamlet"];
+                );
+                out body 1;`;
+            // Use a more stable mirror
+            const OVERPASS_MIRROR = "https://lz4.overpass-api.de/api/interpreter";
+            const cityUrl = `${OVERPASS_MIRROR}?data=${encodeURIComponent(cityQuery)}`;
+            const cityRes = await fetch(cityUrl).catch(() => null);
+            let latLonFilter = `area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"];->.a;`; // Fallback
+
+            if (cityRes && cityRes.ok) {
+                const text = await cityRes.text();
+                if (text.includes("<?xml") || text.includes("<html")) {
+                    console.warn("[MarketService] Overpass mirror returned non-JSON. Skipping coords.");
+                } else {
+                    const cityData = JSON.parse(text);
+                    if (cityData?.elements?.[0]) {
+                        const { lat, lon } = cityData.elements[0];
+                        latLonFilter = `(around:16000,${lat},${lon});`; // 16km (~10 miles) around city center
+                    }
+                }
+            }
+
+            for (const [key, tag] of Object.entries(queries)) {
+                const query = `[out:json][timeout:15];
+                    nwr${tag}${latLonFilter}
+                    out body 10;`;
+                const url = `${OVERPASS_MIRROR}?data=${encodeURIComponent(query)}`;
+                const res = await fetch(url).catch(() => null);
+                if (res && res.ok) {
+                    const text = await res.text();
+                    if (!text.includes("<?xml") && !text.includes("<html")) {
+                        const data = JSON.parse(text);
+                        if (data && data.elements) {
+                            results[key as keyof typeof results] = data.elements
+                                .map((e: any) => e.tags.name)
+                                .filter((name: string) => !!name);
+                        }
+                    }
+                }
+            }
+            return results;
+        } catch (error) {
+            console.error("[MarketService] Competitor fetch error:", error);
+            return results;
+        }
+    }
+    
+    static async getMarketDominance(city: string, stateSuffix: string): Promise<MarketPulseData['dominance']> {
+        try {
+            // Step 1: Find city coordinates (flexible search)
+            const cityQuery = `[out:json][timeout:15];
+                (
+                  node["name"="${city}"]["addr:state"="${stateSuffix}"];
+                  node["name"="${city}"]["is_in:state_code"="${stateSuffix}"];
+                  node["name"="${city}"][place~"city|town|village|hamlet"];
+                );
+                out body 1;`;
+            const OVERPASS_MIRROR = "https://lz4.overpass-api.de/api/interpreter";
+            const cityUrl = `${OVERPASS_MIRROR}?data=${encodeURIComponent(cityQuery)}`;
+            const cityRes = await fetch(cityUrl).catch(() => null);
+            
+            let lat: number = 0, lon: number = 0;
+            if (cityRes && cityRes.ok) {
+                const text = await cityRes.text();
+                if (!text.includes("<?xml") && !text.includes("<html")) {
+                    const cityData = JSON.parse(text);
+                    if (cityData?.elements?.[0]) {
+                        lat = cityData.elements[0].lat;
+                        lon = cityData.elements[0].lon;
+                    }
+                }
+            }
+
+            if (!lat || !lon) return {};
+
+            const latLonFilter = `(around:16000,${lat},${lon})`;
+
+            // Step 2: Bulk fetch all 50 categories using proximity
+            // Combine tags for efficiency
+            const amenityTags = MARKET_CATEGORIES.filter(c => c.tag.startsWith('amenity=')).map(c => c.tag.split('=')[1]).join('|');
+            const shopTags = MARKET_CATEGORIES.filter(c => c.tag.startsWith('shop=')).map(c => c.tag.split('=')[1]).join('|');
+            const officeTags = MARKET_CATEGORIES.filter(c => c.tag.startsWith('office=')).map(c => c.tag.split('=')[1]).join('|');
+            const craftTags = MARKET_CATEGORIES.filter(c => c.tag.startsWith('craft=')).map(c => c.tag.split('=')[1]).join('|');
+            const tourismTags = MARKET_CATEGORIES.filter(c => c.tag.startsWith('tourism=')).map(c => c.tag.split('=')[1]).join('|');
+
+            const bulkQuery = `[out:json][timeout:30];
+                (
+                  node["amenity"~"${amenityTags}"]${latLonFilter};
+                  node["shop"~"${shopTags}"]${latLonFilter};
+                  node["office"~"${officeTags}"]${latLonFilter};
+                  node["craft"~"${craftTags}"]${latLonFilter};
+                  node["tourism"~"${tourismTags}"]${latLonFilter};
+                  way["amenity"~"${amenityTags}"]${latLonFilter};
+                  way["shop"~"${shopTags}"]${latLonFilter};
+                );
+                out tags;`;
+            
+            const bulkUrl = `${OVERPASS_MIRROR}?data=${encodeURIComponent(bulkQuery)}`;
+            const bulkRes = await fetch(bulkUrl).catch(() => null);
+            
+            const counts: Record<string, { count: number; sector: string }> = {};
+            // Initialize counts
+            MARKET_CATEGORIES.forEach(c => {
+                counts[c.label] = { count: 0, sector: c.sector };
+            });
+
+            if (bulkRes && bulkRes.ok) {
+                const text = await bulkRes.text();
+                if (!text.includes("<?xml") && !text.includes("<html")) {
+                    const data = JSON.parse(text);
+                    if (data.elements) {
+                        data.elements.forEach((e: any) => {
+                            const tags = e.tags || {};
+                            // Match tags to categories
+                            MARKET_CATEGORIES.forEach(cat => {
+                                const [key, val] = cat.tag.split('=');
+                                if (tags[key] === val || (cat.label === "Pizza" && tags.amenity === "pizzeria")) {
+                                    counts[cat.label].count++;
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+            return counts;
+        } catch (error) {
+            console.error("[MarketService] Market dominance error:", error);
+            return {};
+        }
+    }
+    
     static async getMarketPulse(city: string, state: string, stateCode: string): Promise<MarketPulseData> {
         console.log(`[MarketService] Fetching pulse for ${city}, ${state} (${stateCode})`);
-        const [searchIntent, monthlyMomentum] = await Promise.all([
+        const [searchIntent, monthlyMomentum, competitors, dominance] = await Promise.all([
             this.getSearchIntent(city, state),
-            this.getCityMomentum(city, state)
+            this.getCityMomentum(city, state),
+            this.getCompetitorLandscape(city, stateCode),
+            this.getMarketDominance(city, stateCode)
         ]);
         
         console.log(`[MarketService] Results: 
           - Intent: ${searchIntent.length} 
-          - Momentum: ${monthlyMomentum}`);
+          - Momentum: ${monthlyMomentum}
+          - Competitors: Ready
+          - Dominance: Found ${Object.keys(dominance || {}).length} categories`);
 
-        return { searchIntent, monthlyMomentum };
+        return { searchIntent, monthlyMomentum, competitors, dominance };
     }
 }

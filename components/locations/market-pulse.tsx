@@ -1,9 +1,10 @@
 "use client";
 
-import { TrendingUp, Target, Search, Info } from "lucide-react";
+import { TrendingUp, Target, Search, Info, PieChart, BarChart3, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MarketPulseData } from "@/lib/services/market.service";
+import { MarketDominance } from "./market-dominance";
 
 interface MarketPulseProps {
     data: MarketPulseData | null;
@@ -124,6 +125,88 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                     </div>
                 </div>
             </div>
+
+            {/* Market Dominance Section - New Dashboard */}
+            <div className="mt-12">
+                <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                    <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                        Market Dominance & Gap Analysis
+                    </h2>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] uppercase font-black tracking-widest">50-Category Scan</Badge>
+                </div>
+                <MarketDominance dominance={data?.dominance} cityName={cityName} />
+            </div>
+
+            {/* Competitive Landscape Section */}
+            {data?.competitors && (
+                <section className="mb-12">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-amber-500 pl-4">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                            Competitive Landscape
+                        </h2>
+                        <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[8px] uppercase font-black tracking-widest">Market Density</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            { key: 'parenting', label: 'Parenting & Kids', color: 'purple' },
+                            { key: 'seniors', label: 'Senior Services', color: 'blue' },
+                            { key: 'home', label: 'Home Optimization', color: 'emerald' }
+                        ].map((niche) => {
+                            const list = (data.competitors as any)[niche.key] || [];
+                            const saturation = list.length === 0 ? "Untapped" : list.length < 3 ? "Low" : "Saturated";
+                            const satColor = saturation === "Untapped" ? "text-emerald-400" : saturation === "Low" ? "text-blue-400" : "text-amber-400";
+
+                            return (
+                                <Card key={niche.key} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden border-t-2 border-t-slate-800 hover:border-amber-500/20 transition-all">
+                                    <CardHeader className="pb-2">
+                                        <div className="flex items-center justify-between">
+                                            <CardTitle className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-2">
+                                                <Target className="h-3 w-3" />
+                                                {niche.label}
+                                            </CardTitle>
+                                            <Badge className={`bg-slate-950 text-[8px] font-black uppercase border-slate-800 ${satColor}`}>
+                                                {saturation}
+                                            </Badge>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                        {list.length > 0 ? (
+                                            <ul className="space-y-1.5 min-h-[100px]">
+                                                {list.slice(0, 5).map((name: string, j: number) => (
+                                                    <li key={j} className="text-[11px] font-bold text-white flex items-center gap-2">
+                                                        <div className={`h-1.5 w-1.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] ${
+                                                            niche.key === 'parenting' ? 'bg-purple-500' :
+                                                            niche.key === 'seniors' ? 'bg-blue-500' : 'bg-emerald-500'
+                                                        }`} />
+                                                        <span className="truncate">{name}</span>
+                                                    </li>
+                                                ))}
+                                                {list.length > 5 && (
+                                                    <li className="text-[9px] font-black text-slate-600 uppercase italic">
+                                                        + {list.length - 5} more detected
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        ) : (
+                                            <div className="py-8 text-center border-2 border-dashed border-slate-800/40 rounded-xl">
+                                                <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest italic leading-tight">
+                                                    No direct competitors<br/>found in OSM data
+                                                </p>
+                                            </div>
+                                        )}
+                                        <p className="text-[9px] font-bold text-slate-600 uppercase leading-relaxed mt-2 italic">
+                                            {saturation === "Untapped" 
+                                                ? `🚀 High Opportunity: No ${niche.label.toLowerCase()} centers found in ${cityName}.`
+                                                : `⚖️ ${saturation} Saturation: ${list.length} existing entities. Check for service gaps.`}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </section>
+            )}
 
             {/* Local Media & Newspapers */}
             {newspapers.length > 0 && (
