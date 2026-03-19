@@ -32,13 +32,6 @@ interface CityCensusStatsProps {
                 over75k: number;
             };
         };
-        ownerStats?: {
-            totalFirms: number;
-            womenOwned: { count: number; pct: number };
-            veteranOwned: { count: number; pct: number };
-            minorityOwned: { count: number; pct: number };
-            isStateLevel: boolean;
-        };
         nicheInsights?: {
             candidates: Array<{
                 id: string;
@@ -143,9 +136,6 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </TabsTrigger>
                     <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Channel & Logistics
-                    </TabsTrigger>
-                    <TabsTrigger value="profile" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
-                        Owner Profiles
                     </TabsTrigger>
                 </TabsList>
 
@@ -428,44 +418,6 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </div>
                 </TabsContent>
 
-                {/* Owner Profiles Tab */}
-                <TabsContent value="profile" className="space-y-6">
-                    {data.ownerStats ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-pink-500">
-                                <CardHeader className="p-4 pb-2">
-                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Women-Owned</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.womenOwned.pct}%</div>
-                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.womenOwned.count.toLocaleString()} firms</p>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-blue-500">
-                                <CardHeader className="p-4 pb-2">
-                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Veteran-Owned</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.veteranOwned.pct}%</div>
-                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.veteranOwned.count.toLocaleString()} firms</p>
-                                </CardContent>
-                            </Card>
-                            <Card className="bg-slate-900/40 border-slate-800/50 rounded-2xl border-b-4 border-emerald-500">
-                                <CardHeader className="p-4 pb-2">
-                                    <CardTitle className="text-[10px] font-black uppercase text-slate-500">Minority-Owned</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-4 pt-0">
-                                    <div className="text-3xl font-black text-white italic tracking-tighter">{data.ownerStats.minorityOwned.pct}%</div>
-                                    <p className="text-[10px] font-bold text-slate-600 uppercase mt-1">{data.ownerStats.minorityOwned.count.toLocaleString()} firms</p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    ) : (
-                        <div className="p-12 text-center bg-slate-900/20 rounded-2xl border border-dashed border-slate-800">
-                            <p className="text-slate-500 text-sm font-medium italic italic">Entrepreneurial profile data restricted for this locality.</p>
-                        </div>
-                    )}
-                </TabsContent>
             </Tabs>
 
             {/* Niche Opportunity Spotlight */}

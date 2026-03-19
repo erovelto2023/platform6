@@ -247,10 +247,6 @@ export class CensusService {
             // Calculate Niche Insights
             baseStats.nicheInsights = this.calculateNicheInsights(baseStats);
 
-            // Step 2: Fetch ABS Business Owner Stats
-            const placeFips = matchingRow1[matchingRow1.length - 1]; 
-            baseStats.ownerStats = await this.getBusinessOwnerStats(stateFips, placeFips, cityName);
-
             return baseStats;
         } catch (error) {
             console.error("Error fetching demographics:", error);
@@ -389,79 +385,6 @@ export class CensusService {
         }
 
         return match;
-    }
-
-    /**
-     * Fetch detailed business owner demographics from ABS.
-     * Includes fallback logic to State-level if Economic Place data is unavailable.
-     */
-    private static async getBusinessOwnerStats(stateFips: string, placeFips: string, cityName: string): Promise<OwnerStats | undefined> {
-        try {
-            const year = "2022";
-            const baseUrl = `${CENSUS_API_BASE}/${year}/abscs?get=NAME,FIRMPDEMP&NAICS2022=00&key=${API_KEY}`;
-            
-            // We need to fetch multiple groups: Total, Women, Veteran, Minority
-            const fetchGroup = async (geoParam: string, sex = "001", vet = "001", race = "001", eth = "001") => {
-                const url = `${baseUrl}&for=${geoParam}&SEX=${sex}&VET_GROUP=${vet}&RACE_GROUP=${race}&ETH_GROUP=${eth}`;
-                const res = await fetch(url);
-                if (!res.ok) return 0;
-                const data = await res.json();
-                if (!data || data.length < 2) return 0;
-                return parseInt(data[1][1]) || 0;
-            };
-
-            // Get state name for matching
-            const stateName = Object.entries(STATE_FIPS).find(([_, code]) => code === stateFips)?.[0];
-            if (!stateName) return undefined;
-
-            // Strategy: 
-            // 1. Fetch all economic places in the state
-            // 2. Match by city name (same robust logic as ACS)
-            // 3. Fallback to State level if not found
-            
-            const fetchAllPlaces = async (sex = "001", vet = "001", race = "001", eth = "001") => {
-                const url = `${baseUrl}&for=economic%20place:*&in=state:${stateFips}&SEX=${sex}&VET_GROUP=${vet}&RACE_GROUP=${race}&ETH_GROUP=${eth}`;
-                const res = await fetch(url);
-                if (!res.ok) return null;
-                return await res.json();
-            };
-
-            const data = await fetchAllPlaces();
-            let matchingRow = data ? this.findMatchingRow(data, cityName, stateName) : null;
-            let isStateLevel = false;
-
-            if (!matchingRow) {
-                // Fallback to State level
-                const stateData = await fetch(`${baseUrl}&for=state:${stateFips}&SEX=001&VET_GROUP=001&RACE_GROUP=001&ETH_GROUP=001`).then(r => r.json());
-                matchingRow = stateData?.[1];
-                isStateLevel = true;
-            }
-
-            if (!matchingRow) return undefined;
-
-            const total = parseInt(matchingRow[1]) || 0;
-            if (total === 0) return undefined;
-
-            // Get segments (we can either fetch state-level or try to match in full place data if we fetched it)
-            // For simplicity and accuracy of fallback, let's use the matchingRow's geography
-            const geo = isStateLevel ? `state:${stateFips}` : `economic%20place:${matchingRow[matchingRow.length - 1]}&in=state:${stateFips}`;
-
-            const women = await fetchGroup(geo, "002");
-            const veteran = await fetchGroup(geo, "001", "002");
-            const minority = await fetchGroup(geo, "001", "001", "001", "002");
-
-            return {
-                totalFirms: total,
-                womenOwned: { count: women, pct: Math.round((women / total) * 100) },
-                veteranOwned: { count: veteran, pct: Math.round((veteran / total) * 100) },
-                minorityOwned: { count: minority, pct: Math.round((minority / total) * 100) },
-                isStateLevel
-            };
-
-        } catch (error) {
-            console.error("ABS fetch error:", error);
-            return undefined;
-        }
     }
 
     /**
