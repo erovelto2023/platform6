@@ -99,7 +99,9 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                         <CardTitle className="text-[10px] font-black uppercase text-slate-500">Median Income</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-black text-white italic tracking-tighter">${data.medianIncome.toLocaleString()}</div>
+                        <div className="text-2xl font-black text-white italic tracking-tighter">
+                            {data.medianIncome > 0 ? `$${data.medianIncome.toLocaleString()}` : "N/A"}
+                        </div>
                         <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">Per Year / Household</p>
                     </CardContent>
                 </Card>
@@ -255,11 +257,19 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 <CardContent className="space-y-3">
                                     <div className="flex justify-between items-center py-2 border-b border-slate-800/50">
                                         <span className="text-[10px] font-bold text-slate-500 uppercase">Median Rent</span>
-                                        <span className="text-sm font-black text-white">${data.affordability.medianRent.toLocaleString()}</span>
+                                        <span className="text-sm font-black text-white">
+                                            {data.affordability.medianRent > 0 
+                                                ? `$${data.affordability.medianRent.toLocaleString()}` 
+                                                : "N/A"}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center py-2 border-b border-slate-800/50">
                                         <span className="text-[10px] font-bold text-slate-500 uppercase">Median Mortgage</span>
-                                        <span className="text-sm font-black text-white">${data.affordability.medianMortgage.toLocaleString()}</span>
+                                        <span className="text-sm font-black text-white">
+                                            {data.affordability.medianMortgage > 0 
+                                                ? `$${data.affordability.medianMortgage.toLocaleString()}` 
+                                                : "N/A"}
+                                        </span>
                                     </div>
                                     <div className="pt-2">
                                         <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400 mb-1">
@@ -273,7 +283,9 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
 
                             <Card className="bg-slate-900/60 border-slate-800 rounded-2xl border-l-4 border-l-emerald-500">
                                 <CardContent className="pt-6">
-                                    <div className="text-2xl font-black text-white italic tracking-tighter">${data.affordability.perCapitaIncome.toLocaleString()}</div>
+                                    <div className="text-2xl font-black text-white italic tracking-tighter">
+                                        {data.affordability.perCapitaIncome > 0 ? `$${data.affordability.perCapitaIncome.toLocaleString()}` : "N/A"}
+                                    </div>
                                     <p className="text-[10px] font-bold text-slate-500 uppercase">Per Capita Income</p>
                                     <div className="mt-4 flex items-center gap-2">
                                         <TrendingUp className="h-3 w-3 text-emerald-400" />

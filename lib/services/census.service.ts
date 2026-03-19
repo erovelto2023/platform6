@@ -153,18 +153,44 @@ export class CensusService {
 
             const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 
-            const matchingRow1 = data1.find((row: string[]) => 
-                row[0].toLowerCase().startsWith(cityName.toLowerCase())
-            );
-            const matchingRow2 = data2.find((row: string[]) => 
-                row[0].toLowerCase().startsWith(cityName.toLowerCase())
-            );
+            const findMatchingRow = (rows: string[][], name: string, state: string) => {
+                const searchLower = name.toLowerCase();
+                const stateLower = state.toLowerCase();
+                
+                // Try exact match first (e.g., "Boise city, Idaho")
+                let match = rows.find(row => {
+                    const rowLower = row[0].toLowerCase();
+                    return rowLower === `${searchLower} city, ${stateLower}` || 
+                           rowLower === `${searchLower} town, ${stateLower}` ||
+                           rowLower === `${searchLower} cdp, ${stateLower}` ||
+                           rowLower === `${searchLower}, ${stateLower}`;
+                });
+
+                // If no exact match, try broad containment
+                if (!match) {
+                    match = rows.find(row => {
+                        const rowLower = row[0].toLowerCase();
+                        return rowLower.includes(searchLower) && rowLower.includes(stateLower);
+                    });
+                }
+
+                return match;
+            };
+
+            const matchingRow1 = findMatchingRow(data1, cityName, stateName);
+            const matchingRow2 = findMatchingRow(data2, cityName, stateName);
 
             if (!matchingRow1 || !matchingRow2) return null;
 
-            const totalPop = parseInt(matchingRow1[1]) || 1;
-            const malePop = parseInt(matchingRow1[3]) || 0;
-            const femalePop = parseInt(matchingRow1[4]) || 0;
+            const sanitizeValue = (val: string | number) => {
+                const num = typeof val === 'string' ? parseFloat(val) : val;
+                if (isNaN(num) || num <= -666666666) return 0;
+                return num;
+            };
+
+            const totalPop = sanitizeValue(matchingRow1[1]) || 1;
+            const malePop = sanitizeValue(matchingRow1[3]);
+            const femalePop = sanitizeValue(matchingRow1[4]);
 
             const under18 = (
                 (parseInt(matchingRow2[1]) || 0) + (parseInt(matchingRow2[2]) || 0) + (parseInt(matchingRow2[3]) || 0) + (parseInt(matchingRow2[4]) || 0) +
@@ -176,7 +202,7 @@ export class CensusService {
                 (parseInt(matchingRow2[15]) || 0) + (parseInt(matchingRow2[16]) || 0) + (parseInt(matchingRow2[17]) || 0) + (parseInt(matchingRow2[18]) || 0) + (parseInt(matchingRow2[19]) || 0) + (parseInt(matchingRow2[20]) || 0)
             );
 
-            const toddlers = ((parseInt(matchingRow2[1]) || 0) + (parseInt(matchingRow2[5]) || 0));
+            const toddlers = (sanitizeValue(matchingRow2[1]) + sanitizeValue(matchingRow2[5]));
             
             const totalHH = parseInt(matchingRow1[10]) || 1;
             const burdenedCount = 
@@ -190,7 +216,7 @@ export class CensusService {
 
             const baseStats: CityStats = {
                 population: totalPop,
-                medianIncome: parseInt(matchingRow1[2]) || 0,
+                medianIncome: sanitizeValue(matchingRow1[2]),
                 gender: {
                     male: malePop,
                     female: femalePop
@@ -202,7 +228,7 @@ export class CensusService {
                     hispanic: parseInt(matchingRow1[8]) || 0
                 },
                 audience: {
-                    medianAge: parseFloat(matchingRow1[9]) || 0,
+                    medianAge: sanitizeValue(matchingRow1[9]),
                     under18Pct: Math.round((under18 / totalPop) * 100),
                     over65Pct: Math.round((over65 / totalPop) * 100),
                     householdsWithChildrenPct: Math.round(((parseInt(matchingRow1[11]) || 0) / totalHH) * 100),
@@ -210,10 +236,10 @@ export class CensusService {
                 },
                 affordability: {
                     povertyRate: Math.round(((parseInt(matchingRow1[14]) || 0) / (parseInt(matchingRow1[13]) || 1)) * 100),
-                    perCapitaIncome: parseInt(matchingRow1[15]) || 0,
+                    perCapitaIncome: sanitizeValue(matchingRow1[15]),
                     homeownershipRate: Math.round(((parseInt(matchingRow1[17]) || 0) / (parseInt(matchingRow1[16]) || 1)) * 100),
-                    medianRent: parseInt(matchingRow1[18]) || 0,
-                    medianMortgage: parseInt(matchingRow1[19]) || 0,
+                    medianRent: sanitizeValue(matchingRow1[18]),
+                    medianMortgage: sanitizeValue(matchingRow1[19]),
                     costBurdenedPct: Math.round((burdenedCount / totalHH) * 100) || 0,
                     incomeBrackets: {
                         under25k: Math.round((inc20 / totalHH) * 100),
