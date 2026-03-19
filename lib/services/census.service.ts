@@ -393,14 +393,15 @@ export class CensusService {
     private static async getBusinessOwnerStats(stateFips: string, placeFips: string): Promise<OwnerStats | undefined> {
         try {
             const year = "2022";
-            const baseUrl = `${CENSUS_API_BASE}/${year}/abscs?get=NAME,FIRMPDEMP&FIRMPDEMP_F=null&key=${API_KEY}`;
+            const baseUrl = `${CENSUS_API_BASE}/${year}/abscs?get=NAME,FIRMPDEMP&NAICS2022=00&key=${API_KEY}`;
             
             // We need to fetch multiple groups: Total, Women, Veteran, Minority
-            const fetchGroup = async (geoParam: string, sex = "001", vet = "001", race = "001") => {
-                const url = `${baseUrl}&for=${geoParam}&SEX=${sex}&VET_GROUP=${vet}&RACE_GROUP=${race}`;
+            const fetchGroup = async (geoParam: string, sex = "001", vet = "001", race = "001", eth = "001") => {
+                const url = `${baseUrl}&for=${geoParam}&SEX=${sex}&VET_GROUP=${vet}&RACE_GROUP=${race}&ETH_GROUP=${eth}`;
                 const res = await fetch(url);
                 if (!res.ok) return 0;
                 const data = await res.json();
+                if (!data || data.length < 2) return 0;
                 return parseInt(data[1][1]) || 0;
             };
 
@@ -421,7 +422,7 @@ export class CensusService {
 
             const women = await fetchGroup(geo, "002");
             const veteran = await fetchGroup(geo, "001", "002");
-            const minority = await fetchGroup(geo, "001", "001", "030");
+            const minority = await fetchGroup(geo, "001", "001", "001", "002"); // Minority uses ETH_GROUP=002 (Hispanic) or RACE_GROUP filters
 
             return {
                 totalFirms: total,
