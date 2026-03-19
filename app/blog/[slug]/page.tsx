@@ -59,8 +59,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <Link className="text-sm font-medium hover:underline underline-offset-4" href="/library">Library</Link>
                     <Link className="text-sm font-medium hover:underline underline-offset-4" href="/business-resources">Resources</Link>
                     <Link className="text-sm font-medium hover:underline underline-offset-4" href="/affiliate-crm">Affiliate CRM</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/niche-boxes">Niche Boxes</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/dashboard">Dashboard</Link>
                     <Link className="text-sm font-medium hover:underline underline-offset-4 text-indigo-600" href="/blog">Blog</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/glossary">Glossary</Link>
+                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/locations">Market Intelligence</Link>
                     <Link href="/sign-in"><Button variant="ghost" size="sm">Log In</Button></Link>
                     <Link href="/sign-up"><Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Get Started</Button></Link>
                 </nav>

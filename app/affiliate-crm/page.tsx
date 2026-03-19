@@ -61,11 +61,17 @@ export default function AffiliatePage() {
                     <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/affiliate-crm">
                         Affiliate CRM
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/niche-boxes">
-                        Niche Boxes
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
+                        Dashboard
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
                         Blog
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/glossary">
+                        Glossary
+                    </Link>
+                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/locations">
+                        Market Intelligence
                     </Link>
                     <Link href="/sign-in">
                         <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
