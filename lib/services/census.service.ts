@@ -139,26 +139,35 @@ export class CensusService {
             ].join(",");
 
             const year = "2022";
-            const baseUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=place:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+            const geoTypes = ["place", "county subdivision"];
+            let matchingRow1: string[] | null | undefined = null;
+            let matchingRow2: string[] | null | undefined = null;
 
-            const [res1, res2] = await Promise.all([
-                fetch(`${baseUrl}&get=${batch1}`),
-                fetch(`${baseUrl}&get=${batch2}`)
-            ]);
+            for (const geoType of geoTypes) {
+                const baseUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+                const [res1, res2] = await Promise.all([
+                    fetch(`${baseUrl}&get=${batch1}`),
+                    fetch(`${baseUrl}&get=${batch2}`)
+                ]);
 
-            if (!res1.ok || !res2.ok) {
-                console.error("Census API fetch failed", { status1: res1.status, status2: res2.status });
-                return null;
+                if (!res1.ok || !res2.ok) continue;
+
+                const data1 = await res1.json();
+                const data2 = await res2.json();
+                
+                matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
+                matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
+
+                if (matchingRow1 && matchingRow2) {
+                    console.log(`[CensusService] Found match for ${cityName} as ${geoType}`);
+                    break;
+                }
             }
 
-            const data1 = await res1.json();
-            const data2 = await res2.json();
-            if (!data1 || !data2) return null;
-
-            const matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
-            const matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
-
-            if (!matchingRow1 || !matchingRow2) return null;
+            if (!matchingRow1 || !matchingRow2) {
+                console.warn(`[CensusService] No match found for ${cityName}, ${stateName} in any geo table.`);
+                return null;
+            }
 
             const sanitizeValue = (val: string | number) => {
                 const num = typeof val === 'string' ? parseFloat(val) : val;
@@ -362,25 +371,33 @@ export class CensusService {
 
     private static findMatchingRow(rows: string[][], name: string, state: string) {
         if (!rows || !Array.isArray(rows)) return null;
-        const searchLower = name.toLowerCase();
-        const stateLower = state.toLowerCase();
+        const searchLower = name.toLowerCase().trim();
+        const stateLower = state.toLowerCase().trim();
         
-        // Try exact match first (e.g., "Boise city, Idaho")
+        // Suffixes we want to ignore or match against
+        const suffixes = [" city", " town", " cdp", " village", " borough", " (part)"];
+        
+        // Exact match check
         let match = rows.find(row => {
             if (!row[0]) return false;
             const rowLower = row[0].toLowerCase();
-            return rowLower === `${searchLower} city, ${stateLower}` || 
-                   rowLower === `${searchLower} town, ${stateLower}` ||
-                   rowLower === `${searchLower} cdp, ${stateLower}` ||
-                   rowLower === `${searchLower}, ${stateLower}`;
+            
+            // Check variations: "Boise city, Idaho", "Barkhamsted town, Connecticut", etc.
+            if (rowLower === `${searchLower}, ${stateLower}`) return true;
+            for (const s of suffixes) {
+                if (rowLower === `${searchLower}${s}, ${stateLower}`) return true;
+                // Some COUSUBs have deeper grouping: "Barkhamsted town, Northwest Hills Planning Region, Connecticut"
+                if (rowLower.startsWith(`${searchLower}${s},`) && rowLower.endsWith(stateLower)) return true;
+            }
+            return false;
         });
 
-        // If no exact match, try broad containment
+        // If no refined match, try broad containment as a last resort
         if (!match) {
             match = rows.find(row => {
                 if (!row[0]) return false;
                 const rowLower = row[0].toLowerCase();
-                return rowLower.includes(searchLower) && rowLower.includes(stateLower);
+                return rowLower.includes(searchLower) && rowLower.endsWith(stateLower);
             });
         }
 
