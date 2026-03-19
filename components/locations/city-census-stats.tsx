@@ -20,6 +20,14 @@ interface CityCensusStatsProps {
             over65Pct: number;
             householdsWithChildrenPct: number;
             avgHouseholdSize: number;
+            maritalStatus: {
+                marriedPct: number;
+                divorcedPct: number;
+            };
+            familyComposition: {
+                kidsUnder18Count: number;
+                kids18to24Count: number;
+            };
         };
         affordability: {
             povertyRate: number;
@@ -54,7 +62,13 @@ interface CityCensusStatsProps {
         };
         logistics: {
             bachelorsDegreePct: number;
-            speakSpanishPct: number;
+            languages: {
+                spanishPct: number;
+                frenchPct: number;
+                germanPct: number;
+                italianPct: number;
+                chinesePct: number;
+            };
         };
         economy: {
             topIndustries: Array<{ name: string; pct: number }>;
@@ -184,16 +198,35 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
-                                        <span>HH with Children Under 18</span>
-                                        <span>{data.audience.householdsWithChildrenPct}%</span>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="flex justify-between text-[8px] font-black uppercase text-slate-500 mb-1">
+                                            <span>Married</span>
+                                            <span>{data.audience.maritalStatus.marriedPct}%</span>
+                                        </div>
+                                        <Progress value={data.audience.maritalStatus.marriedPct} className="h-1 bg-slate-800" indicatorClassName="bg-purple-500" />
                                     </div>
-                                    <Progress value={data.audience.householdsWithChildrenPct} className="h-1 bg-slate-800" />
+                                    <div>
+                                        <div className="flex justify-between text-[8px] font-black uppercase text-slate-500 mb-1">
+                                            <span>Divorced</span>
+                                            <span>{data.audience.maritalStatus.divorcedPct}%</span>
+                                        </div>
+                                        <Progress value={data.audience.maritalStatus.divorcedPct} className="h-1 bg-slate-800" indicatorClassName="bg-slate-500" />
+                                    </div>
                                 </div>
-                                <div className="pt-2">
-                                    <div className="text-2xl font-black text-white italic">{data.audience.avgHouseholdSize}</div>
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase">Avg Household Size</p>
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="text-xl font-black text-white italic">{data.audience.familyComposition.kidsUnder18Count.toLocaleString()}</div>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Kids 0-18</p>
+                                    </div>
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="text-xl font-black text-white italic">{data.audience.familyComposition.kids18to24Count.toLocaleString()}</div>
+                                        <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Kids 18-24</p>
+                                    </div>
+                                </div>
+                                <div className="pt-2 flex justify-between items-center bg-purple-500/5 p-2 rounded-lg border border-purple-500/10">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase">Avg HH Size</span>
+                                    <span className="text-sm font-black text-purple-400">{data.audience.avgHouseholdSize}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -446,24 +479,28 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between p-3 bg-slate-900/40 rounded-xl border border-slate-800">
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-3 w-3 text-cyan-500" />
-                                        <span className="text-[10px] font-black text-slate-500 uppercase">Spanish Speakers</span>
-                                    </div>
-                                    <span className="text-sm font-black text-white">
-                                        {data.logistics.speakSpanishPct === 0 ? "LOW (<1%)" : `${data.logistics.speakSpanishPct}%`}
-                                    </span>
+                                <div className="space-y-3">
+                                    {[
+                                        { label: "Spanish speakers", val: data.logistics.languages.spanishPct },
+                                        { label: "French speakers", val: data.logistics.languages.frenchPct },
+                                        { label: "Italian speakers", val: data.logistics.languages.italianPct },
+                                        { label: "German speakers", val: data.logistics.languages.germanPct },
+                                        { label: "Chinese speakers", val: data.logistics.languages.chinesePct },
+                                    ].filter(l => l.val > 0 || l.label === "Spanish speakers").map(lang => (
+                                        <div key={lang.label} className="flex items-center justify-between p-2 bg-slate-900/40 rounded-xl border border-slate-800">
+                                            <div className="flex items-center gap-2">
+                                                <Globe className="h-3 w-3 text-cyan-500" />
+                                                <span className="text-[9px] font-black text-slate-500 uppercase">{lang.label}</span>
+                                            </div>
+                                            <span className="text-[10px] font-black text-white">
+                                                {lang.val === 0 ? "< 1%" : `${lang.val}%`}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                                 <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
                                     <div className="text-xl font-black text-cyan-400 italic">{data.logistics.bachelorsDegreePct}%</div>
                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Bachelor's Degree or Higher</p>
-                                </div>
-                                <div className="pt-2 border-t border-slate-800/50">
-                                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Dominant Sector</p>
-                                    <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-[9px] font-black uppercase italic">
-                                        {data.economy.topIndustries[0]?.name}
-                                    </Badge>
                                 </div>
                             </CardContent>
                         </Card>

@@ -53,6 +53,14 @@ export interface AudienceStats {
     over65Pct: number;
     householdsWithChildrenPct: number;
     avgHouseholdSize: number;
+    maritalStatus: {
+        marriedPct: number;
+        divorcedPct: number;
+    };
+    familyComposition: {
+        kidsUnder18Count: number;
+        kids18to24Count: number;
+    };
 }
 
 export interface AffordabilityStats {
@@ -95,7 +103,13 @@ export interface CityStats {
     };
     logistics: {
         bachelorsDegreePct: number;
-        speakSpanishPct: number;
+        languages: {
+            spanishPct: number;
+            frenchPct: number;
+            germanPct: number;
+            italianPct: number;
+            chinesePct: number;
+        };
     };
     economy: {
         topIndustries: IndustryStat[];
@@ -179,7 +193,20 @@ export class CensusService {
                 "DP03_0038PE", "DP03_0039PE", "DP03_0040PE", "DP03_0041PE", "DP03_0042PE", // 11-15
                 "DP03_0043PE", "DP03_0044PE", "DP03_0045PE", // 16-18
                 // Employment Type
-                "DP03_0047PE", "DP03_0048PE", "DP03_0049PE" // 19-21: Private, Public, Self-employed
+                "DP03_0047PE", "DP03_0048PE", "DP03_0049PE", // 19-21: Private, Public, Self-employed
+                "DP03_0025E" // 22: Mean travel time to work
+            ].join(",");
+
+            const batch4 = [
+                "NAME", 
+                "B12001_004E", "B12001_013E", // 1, 2 (Married M/F)
+                "B12001_006E", "B12001_015E", // 3, 4 (Divorced M/F)
+                "B11003_002E", // 5 (Married-couple families with own children < 18)
+                "B01001_007E", "B01001_008E", "B01001_009E", // 6,7,8 (M 18-19, 20, 21)
+                "B01001_010E", // 9 (M 22-24)
+                "B01001_031E", "B01001_032E", "B01001_033E", // 10,11,12 (F 18-19, 20, 21)
+                "B01001_034E", // 13 (F 22-24)
+                "B16001_006E", "B16001_012E", "B16001_009E", "B16001_075E" // 14, 15, 16, 17 (French, German, Italian, Chinese)
             ].join(",");
 
             const year = "2022";
@@ -187,24 +214,28 @@ export class CensusService {
             let matchingRow1: string[] | null | undefined = null;
             let matchingRow2: string[] | null | undefined = null;
             let matchingRow3: string[] | null | undefined = null;
+            let matchingRow4: string[] | null | undefined = null;
 
             for (const geoType of geoTypes) {
                 const acsUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
                 const dpUrl = `${CENSUS_API_BASE}/${year}/acs/acs5/profile?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
                 
-                const [res1, res2, res3] = await Promise.all([
+                const [res1, res2, res3, res4] = await Promise.all([
                     fetch(`${acsUrl}&get=${batch1}`),
                     fetch(`${acsUrl}&get=${batch2}`),
-                    fetch(`${dpUrl}&get=${batch3}`)
+                    fetch(`${dpUrl}&get=${batch3}`),
+                    fetch(`${acsUrl}&get=${batch4}`)
                 ]);
 
                 const data1 = res1.ok ? await res1.json() : null;
                 const data2 = res2.ok ? await res2.json() : null;
                 const data3 = res3.ok ? await res3.json() : null;
+                const data4 = res4.ok ? await res4.json() : null;
                 
                 if (data1) matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
                 if (data2) matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
                 if (data3) matchingRow3 = this.findMatchingRow(data3, cityName, stateName);
+                if (data4) matchingRow4 = this.findMatchingRow(data4, cityName, stateName);
 
                 if (matchingRow1) break;
             }
@@ -215,22 +246,25 @@ export class CensusService {
                 const stateUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
                 const stateDpUrl = `${CENSUS_API_BASE}/${year}/acs/acs5/profile?for=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
                 
-                const [sRes1, sRes2, sRes3] = await Promise.all([
+                const [sRes1, sRes2, sRes3, sRes4] = await Promise.all([
                     fetch(`${stateUrl}&get=${batch1}`),
                     fetch(`${stateUrl}&get=${batch2}`),
-                    fetch(`${stateDpUrl}&get=${batch3}`)
+                    fetch(`${stateDpUrl}&get=${batch3}`),
+                    fetch(`${stateUrl}&get=${batch4}`)
                 ]);
 
                 const sData1 = sRes1.ok ? await sRes1.json() : null;
                 const sData2 = sRes2.ok ? await sRes2.json() : null;
                 const sData3 = sRes3.ok ? await sRes3.json() : null;
+                const sData4 = sRes4.ok ? await sRes4.json() : null;
 
                 if (sData1 && sData1[1]) matchingRow1 = sData1[1];
                 if (sData2 && sData2[1]) matchingRow2 = sData2[1];
                 if (sData3 && sData3[1]) matchingRow3 = sData3[1];
+                if (sData4 && sData4[1]) matchingRow4 = sData4[1];
                 
                 if (matchingRow1) {
-                    const stats = this.processRows(matchingRow1, matchingRow2, matchingRow3, year);
+                    const stats = this.processRows(matchingRow1, matchingRow2, matchingRow3, matchingRow4, year);
                     if (stats) {
                         stats.isStateLevel = true;
                         return stats;
@@ -240,14 +274,14 @@ export class CensusService {
 
             if (!matchingRow1) return null;
 
-            return this.processRows(matchingRow1, matchingRow2, matchingRow3, year);
+            return this.processRows(matchingRow1, matchingRow2, matchingRow3, matchingRow4, year);
         } catch (error) {
             console.error("Error fetching demographics:", error);
             return null;
         }
     }
 
-    private static processRows(matchingRow1: string[], matchingRow2: string[] | null | undefined, matchingRow3: string[] | null | undefined, year: string): CityStats | null {
+    private static processRows(matchingRow1: string[], matchingRow2: string[] | null | undefined, matchingRow3: string[] | null | undefined, matchingRow4: string[] | null | undefined, year: string): CityStats | null {
         try {
             const sanitizeValue = (val: string | number) => {
                 const num = typeof val === 'string' ? parseFloat(val) : val;
@@ -281,6 +315,11 @@ export class CensusService {
             const inc50 = (parseInt(matchingRow1[37]) || 0) + (parseInt(matchingRow1[38]) || 0); // 60-74k
             const inc75 = (parseInt(matchingRow1[39]) || 0) + (parseInt(matchingRow1[40]) || 0) + (parseInt(matchingRow1[41]) || 0) + (parseInt(matchingRow1[42]) || 0) + (parseInt(matchingRow1[43]) || 0); // 75k+
 
+            const kids18to24 = matchingRow4 ? (
+                (parseInt(matchingRow4[6]) || 0) + (parseInt(matchingRow4[7]) || 0) + (parseInt(matchingRow4[8]) || 0) + (parseInt(matchingRow4[9]) || 0) +
+                (parseInt(matchingRow4[10]) || 0) + (parseInt(matchingRow4[11]) || 0) + (parseInt(matchingRow4[12]) || 0) + (parseInt(matchingRow4[13]) || 0)
+            ) : 0;
+
             const baseStats: CityStats = {
                 population: totalPop,
                 medianIncome: sanitizeValue(matchingRow1[2]),
@@ -300,6 +339,14 @@ export class CensusService {
                     over65Pct: Math.round((over65 / totalPop) * 100),
                     householdsWithChildrenPct: Math.round(((parseInt(matchingRow1[11]) || 0) / totalHH) * 100),
                     avgHouseholdSize: parseFloat(matchingRow1[12]) || 0,
+                    maritalStatus: {
+                        marriedPct: matchingRow4 ? Math.round(((parseInt(matchingRow4[1]) || 0) + (parseInt(matchingRow4[2]) || 0)) / (totalPop / 2 || 1) * 100) : 0,
+                        divorcedPct: matchingRow4 ? Math.round(((parseInt(matchingRow4[3]) || 0) + (parseInt(matchingRow4[4]) || 0)) / (totalPop / 2 || 1) * 100) : 0
+                    },
+                    familyComposition: {
+                        kidsUnder18Count: parseInt(matchingRow4?.[5] || "0"),
+                        kids18to24Count: kids18to24
+                    }
                 },
                 affordability: {
                     povertyRate: Math.round(((parseInt(matchingRow1[14]) || 0) / (parseInt(matchingRow1[13]) || 1)) * 100),
@@ -324,11 +371,17 @@ export class CensusService {
                     broadbandPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[22]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100) : 0,
                     smartphoneOnlyPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100) : 0,
                     workFromHomePct: matchingRow2 ? Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100) : 0,
-                    meanCommuteMinutes: matchingRow2 ? Math.round((parseInt(matchingRow2[26]) || 0) / ((parseInt(matchingRow2[24]) || 0) - (parseInt(matchingRow2[25]) || 0) || 1)) : 0
+                    meanCommuteMinutes: matchingRow3 ? sanitizeValue(matchingRow3[22]) : 0
                 },
                 logistics: {
                     bachelorsDegreePct: matchingRow2 ? Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100) : 0,
-                    speakSpanishPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100) : 0
+                    languages: {
+                        spanishPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100) : 0,
+                        frenchPct: matchingRow4 ? Math.round((parseInt(matchingRow4[14]) || 0) / (totalPop / 2 || 1) * 100) : 0,
+                        germanPct: matchingRow4 ? Math.round((parseInt(matchingRow4[15]) || 0) / (totalPop / 2 || 1) * 100) : 0,
+                        italianPct: matchingRow4 ? Math.round((parseInt(matchingRow4[16]) || 0) / (totalPop / 2 || 1) * 100) : 0,
+                        chinesePct: matchingRow4 ? Math.round((parseInt(matchingRow4[17]) || 0) / (totalPop / 2 || 1) * 100) : 0,
+                    }
                 },
                 economy: {
                     topOccupations: matchingRow3 ? [
@@ -451,7 +504,7 @@ export class CensusService {
         }
 
         // 5. Bilingual / Multicultural
-        const spanishPct = stats.logistics.speakSpanishPct;
+        const spanishPct = stats.logistics.languages.spanishPct;
         if (spanishPct > 15) {
             const bScore = getScore(spanishPct, 25);
             candidates.push({

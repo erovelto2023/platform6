@@ -8,37 +8,61 @@ import { useState, useMemo } from "react";
 import { ProductRecommender } from "@/lib/services/product-recommender";
 
 interface AIBusinessAdvisorProps {
-    data: any; // CityStats
+    data: {
+        population: number;
+        medianIncome: number;
+        audience: {
+            medianAge: number;
+            maritalStatus: { marriedPct: number; divorcedPct: number };
+            familyComposition: { kidsUnder18Count: number; kids18to24Count: number };
+            avgHouseholdSize: number;
+        };
+        affordability: { povertyRate: number; homeownershipRate: number };
+        economy: { 
+            medianHousingValue: number;
+            topIndustries: Array<{name: string}>;
+            vehiclesAvailable: { zero: number };
+        };
+        digital: { broadbandPct: number; workFromHomePct: number };
+        logistics: { 
+            bachelorsDegreePct: number;
+            languages: { spanishPct: number; frenchPct: number; italianPct: number; germanPct: number; chinesePct: number };
+        };
+        populationReach?: number;
+    };
     cityName: string;
 }
 
 export function AIBusinessAdvisor({ data, cityName }: AIBusinessAdvisorProps) {
     const [copied, setCopied] = useState(false);
-
+    
+    // Derived values for quick analysis
     const povertyRate = data.affordability.povertyRate;
     const medIncome = data.medianIncome;
-    const homeownership = data.affordability.homeownershipRate;
     const vehicleZero = data.economy.vehiclesAvailable.zero;
-    const totalHH = data.population / (data.audience.avgHouseholdSize || 1);
+    const avgHHSize = data.audience.avgHouseholdSize || 2.5;
+    const totalHH = data.population / avgHHSize;
     const zeroVehiclePct = Math.round((vehicleZero / (totalHH || 1)) * 100);
 
-    const recommendations = useMemo(() => ProductRecommender.getRecommendations(data), [data]);
+    const recommendations = useMemo(() => ProductRecommender.getRecommendations(data as any), [data]);
 
     // Pricing Ceiling Logic
     const pricingCeiling = medIncome < 30000 ? "LOW (Mass Market / Budget-First)" : 
                            medIncome < 60000 ? "MODERATE (Value / Middle-Market)" : "HIGH (Premium / High-Ticket)";
 
-    const promptText = `
-Act as a Senior Business Strategist and Niche Market Expert. I am analyzing a business opportunity in ${cityName}, ${data.logistics.speakSpanishPct > 0 ? 'where there is a Spanish-speaking population' : ''}.
+    const promptText = `I am planning to launch a business in ${cityName}. 
+Based on the following hyper-localized market data, please act as a world-class business strategist and product developer.
 
 ### LOCAL MARKET DATA PROFILE:
 - **Population**: ${data.population.toLocaleString()} (Median Age: ${data.audience.medianAge})
+- **Family Structure**: ${data.audience.maritalStatus.marriedPct}% Married, ${data.audience.maritalStatus.divorcedPct}% Divorced.
+- **Audience Blocks**: ${data.audience.familyComposition.kidsUnder18Count.toLocaleString()} children <18, ${data.audience.familyComposition.kids18to24Count.toLocaleString()} young adults (18-24).
 - **Economics**: Median Household Income of $${data.medianIncome.toLocaleString()} with a ${data.affordability.povertyRate}% poverty rate.
-- **Housing**: ${data.affordability.homeownershipRate}% homeownership rate. Median Property Value: $${data.economy.medianHousingValue.toLocaleString()}.
-- **Education**: ${data.logistics.bachelorsDegreePct}% of adults hold a Bachelor's degree or higher.
-- **Top Industries**: ${data.economy.topIndustries.map((i: any) => i.name).join(", ")}.
-- **Connectivity**: ${data.digital.broadbandPct}% Broadband Access, ${data.digital.workFromHomePct}% Work-From-Home rate.
-- **Logistics**: ${zeroVehiclePct}% of households have no vehicle accessible.
+- **Housing**: ${data.affordability.homeownershipRate}% homeownership rate.
+- **Education/Skills**: ${data.logistics.bachelorsDegreePct}% Bachelor's+, Top Industry: ${data.economy.topIndustries[0]?.name}.
+- **Languages**: ${Object.entries(data.logistics.languages).filter(([_, v]) => (v as number) > 0).map(([k, v]) => `${k.replace('Pct', '')} (${v}%)`).join(", ")}.
+- **Connectivity**: ${data.digital.broadbandPct}% Broadband, ${data.digital.workFromHomePct}% WFH rate.
+- **Logistics**: ${zeroVehiclePct}% zero-vehicle households.
 
 ### RECOMMENDED PRODUCT CATEGORIES:
 ${recommendations.map(r => `- **${r.type.toUpperCase()}**: ${r.title} (${r.description})`).join("\n")}
@@ -115,7 +139,7 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                                     {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-400" />}
                                     {rec.type === 'physical' && <Package className="h-3 w-3 text-amber-400" />}
                                     {rec.type === 'saas' && <Zap className="h-3 w-3 text-purple-400" />}
-                                    <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider text-[7px]">{rec.type}</span>
+                                    <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider font-mono">{rec.type}</span>
                                 </div>
                                 <h5 className="text-[10px] font-black text-white uppercase italic leading-tight mb-1">{rec.title}</h5>
                                 <p className="text-[9px] text-slate-400 leading-tight mb-2 h-8 overflow-hidden line-clamp-2">{rec.description}</p>
