@@ -24,16 +24,26 @@ export class MarketService {
             } catch (e) { return []; }
         };
 
-        // Try specific first
-        let suggestions = await fetchIntent(`best business to start in ${city} ${state}`);
-        // Fallback to broader if empty
-        if (suggestions.length === 0) {
-            suggestions = await fetchIntent(`${city} ${state} business`);
+        const queries = [
+            `best business to start in ${city} ${state}`,
+            `${city} ${state} community events`,
+            `${city} ${state} needed services`,
+            `${city} ${state} problems`,
+            `future of ${city} ${state}`
+        ];
+
+        const allResults = await Promise.all(queries.map(q => fetchIntent(q)));
+        // Flatten, deduplicate, and filter for relevance
+        const unified = Array.from(new Set(allResults.flat()))
+            .filter(s => s.toLowerCase().includes(city.toLowerCase()));
+            
+        // If still thin, add one generic fallback
+        if (unified.length < 3) {
+            const fallback = await fetchIntent(`${city} ${state}`);
+            unified.push(...fallback);
         }
-        if (suggestions.length === 0) {
-            suggestions = await fetchIntent(`${city} ${state}`);
-        }
-        return suggestions;
+
+        return Array.from(new Set(unified)).slice(0, 8);
     }
 
     /**
