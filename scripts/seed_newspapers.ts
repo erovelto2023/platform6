@@ -27,32 +27,51 @@ async function fetchStateNewspapers(stateSlug: string) {
         const html = await response.text();
         
         const newspapers: any[] = [];
-        const blocks = html.split(/<h3/);
         
-        for (let i = 1; i < blocks.length; i++) {
-            const block = blocks[i];
-            
-            // Extract title from the rest of the h3 tag
-            const nameMatch = block.match(/.*?>(.*?)<\/h3>/);
-            const name = nameMatch ? nameMatch[1].replace(/<[^>]*>?/gm, '').trim() : "";
-            
-            // Extract first link that isn't an internal/social link
-            const linkMatch = block.match(/href="(http[^"]+)"/);
-            const link = linkMatch ? linkMatch[1].trim() : "";
-            
-            // Extract first paragraph as description
-            const descMatch = block.match(/<p.*?>(.*?)<\/p>/);
-            const description = descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : "";
-            
-            if (name && link && !link.includes('allyoucanread') && !link.includes('facebook') && !link.includes('twitter')) {
-                const lowerName = name.toLowerCase().trim();
-                const blacklist = ["allyoucanread", "statewide media", "regional media", "national media", "copyright", "©", "2001 - 2026", "visit publication"];
-                const isBlacklisted = blacklist.some(b => lowerName.includes(b));
-                const isStateName = ALL_STATES.some(s => s.replace(/-/g, ' ') === lowerName);
+        // 1. Find all H3 headers (Potential Newspapers)
+        const h3Matches = Array.from(html.matchAll(/<h3.*?>\s*([\s\S]*?)\s*<\/h3>/g));
+        
+        // 2. Find all Links with their display text (Potential publication URLs)
+        const linkMatches = Array.from(html.matchAll(/<a.*?href="(http[^"]+)".*?>\s*([\s\S]*?)\s*<\/a>/g));
+        
+        // 3. Find all Paragraphs (Descriptions)
+        const pMatches = Array.from(html.matchAll(/<p.*?>\s*([\s\S]*?)\s*<\/p>/g));
 
-                if (!isBlacklisted && !isStateName && name.length > 3) {
-                    newspapers.push({ name, url: link, description });
-                }
+        for (const h3 of h3Matches) {
+            const rawName = h3[1].replace(/<[^>]*>?/gm, '').trim();
+            if (!rawName) continue;
+
+            // Filter out fluff headers
+            const lowerName = rawName.toLowerCase();
+            const blacklist = ["allyoucanread", "statewide media", "regional media", "national media", "copyright", "©", "2001 - 2026", "visit publication", "top ", " newspapers"];
+            if (blacklist.some(b => lowerName.includes(b))) continue;
+            
+            // Exact state name check + DC
+            const stateNames = [...ALL_STATES, "d.c.", "district of columbia"];
+            if (stateNames.some(s => s.replace(/-/g, ' ') === lowerName)) continue;
+            
+            if (rawName.length < 3) continue;
+
+            // Find the URL
+            const matchingLink = linkMatches.find(l => {
+                const linkText = l[2].replace(/<[^>]*>?/gm, '').trim().toLowerCase();
+                const linkUrl = l[1];
+                return (linkText === lowerName || lowerName.includes(linkText)) && 
+                       !linkUrl.includes('allyoucanread') && 
+                       !linkUrl.includes('facebook') && 
+                       !linkUrl.includes('twitter') &&
+                       !linkUrl.includes('statcounter');
+            });
+
+            const url = matchingLink ? matchingLink[1] : null;
+            
+            // Find description: The first paragraph after this H3's position in the HTML
+            const h3Index = h3.index || 0;
+            const descriptionMatch = pMatches.find(p => (p.index || 0) > h3Index);
+            const description = descriptionMatch ? descriptionMatch[1].replace(/<[^>]*>?/gm, '').trim() : "";
+
+            if (url && rawName) {
+                newspapers.push({ name: rawName, url, description });
             }
         }
         
