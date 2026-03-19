@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, Target, Zap, AlertCircle, CheckCircle2, BarChart3, PieChart, ShoppingBag } from "lucide-react";
+import { TrendingUp, Target, Zap, AlertCircle, CheckCircle2, BarChart3, PieChart, ShoppingBag, Lightbulb } from "lucide-react";
+import { MARKET_CATEGORIES } from "@/lib/constants/market-categories";
 
 interface MarketDominanceProps {
     dominance: Record<string, { count: number; sector: string }> | undefined;
@@ -37,7 +38,13 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
     // 2. Identify Opportunities (Count = 0 or very low)
     const opportunities = Object.entries(dominance)
         .filter(([_, d]) => d.count === 0)
-        .map(([label]) => label)
+        .map(([label]) => {
+            const cat = MARKET_CATEGORIES.find(c => c.label === label);
+            return {
+                label,
+                suggestion: cat?.suggestion || "Ready for immediate business entry."
+            };
+        })
         .slice(0, 10);
 
     const saturated = Object.entries(dominance)
@@ -102,10 +109,16 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                     {opportunities.length > 0 ? (
                         opportunities.map((opt) => (
-                            <div key={opt} className="p-4 bg-slate-900/60 border border-slate-800 rounded-2xl flex flex-col items-center text-center group hover:border-emerald-500/50 transition-all cursor-default">
+                            <div key={opt.label} className="p-4 bg-slate-900/60 border border-slate-800 rounded-3xl flex flex-col items-center text-center group hover:border-emerald-500/50 transition-all cursor-default relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-10 transition-opacity">
+                                    <Lightbulb size={40} className="text-emerald-500" />
+                                </div>
                                 <AlertCircle size={16} className="text-emerald-500 mb-2 opacity-50 group-hover:opacity-100 transition-opacity" />
-                                <span className="text-[10px] font-black uppercase text-slate-300 leading-tight">{opt}</span>
-                                <span className="text-[8px] font-bold text-slate-600 uppercase mt-1">Zero Competition</span>
+                                <span className="text-[10px] font-black uppercase text-slate-100 leading-tight mb-2 tracking-widest">{opt.label}</span>
+                                <Badge className="bg-emerald-500/10 text-emerald-400 border-none text-[8px] mb-3 uppercase font-black px-1.5 py-0">Untapped</Badge>
+                                <p className="text-[9px] font-bold text-slate-400 leading-relaxed italic group-hover:text-emerald-300 transition-colors">
+                                    "{opt.suggestion}"
+                                </p>
                             </div>
                         ))
                     ) : (

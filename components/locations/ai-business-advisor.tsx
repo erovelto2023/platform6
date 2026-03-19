@@ -3,8 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Sparkles, BrainCircuit, Target, ShoppingBag, BarChart4, ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { Copy, Sparkles, BrainCircuit, Target, ShoppingBag, BarChart4, ShieldCheck, Laptop, Globe, Package, Zap } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ProductRecommender } from "@/lib/services/product-recommender";
 
 interface AIBusinessAdvisorProps {
     data: any; // CityStats
@@ -20,6 +21,8 @@ export function AIBusinessAdvisor({ data, cityName }: AIBusinessAdvisorProps) {
     const vehicleZero = data.economy.vehiclesAvailable.zero;
     const totalHH = data.population / (data.audience.avgHouseholdSize || 1);
     const zeroVehiclePct = Math.round((vehicleZero / (totalHH || 1)) * 100);
+
+    const recommendations = useMemo(() => ProductRecommender.getRecommendations(data), [data]);
 
     // Pricing Ceiling Logic
     const pricingCeiling = medIncome < 30000 ? "LOW (Mass Market / Budget-First)" : 
@@ -37,11 +40,14 @@ Act as a Senior Business Strategist and Niche Market Expert. I am analyzing a bu
 - **Connectivity**: ${data.digital.broadbandPct}% Broadband Access, ${data.digital.workFromHomePct}% Work-From-Home rate.
 - **Logistics**: ${zeroVehiclePct}% of households have no vehicle accessible.
 
+### RECOMMENDED PRODUCT CATEGORIES:
+${recommendations.map(r => `- **${r.type.toUpperCase()}**: ${r.title} (${r.description})`).join("\n")}
+
 ### TASK:
-Based on this data, provide a comprehensive Business & Marketing Plan for the following 3 niches: 1) Parenting & Early Childhood, 2) Senior Services, and 3) Home Optimization.
+Based on this data and the recommended categories above, provide a comprehensive Business & Marketing Plan for the following 3 niches: 1) Parenting & Early Childhood, 2) Senior Services, and 3) Home Optimization.
 
 For each niche, please provide:
-1. **The Product/Service Idea**: A specific offer tailored to this city's income level ($${data.medianIncome.toLocaleString()}).
+1. **The Product/Service Idea**: A specific offer tailored to this city's income level ($${data.medianIncome.toLocaleString()}) and the relevant recommended category.
 2. **Pricing Strategy**: Based on the ${pricingCeiling} ceiling. Should I use subscriptions, payment plans, or one-time premium fees?
 3. **Marketing Channel Strategy**: Where should I advertise? (e.g., Facebook groups, Local Senior Centers, Geo-fenced mobile ads based on commute patterns).
 4. **The Messaging Hook**: A specific USP derived from local values (e.g., emphasizing community trust vs. digital convenience).
@@ -91,6 +97,35 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                         <p className="mt-2 text-[9px] font-bold text-slate-500 leading-relaxed uppercase italic">
                             {zeroVehiclePct > 5 ? "High demand for mobile providers or local delivery hubs." : "Preference for central one-stop shopping and local pickup locations."}
                         </p>
+                    </div>
+                </div>
+                
+                {/* Product Opportunities Section */}
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <ShoppingBag className="h-4 w-4 text-emerald-400" />
+                        <h4 className="text-[10px] font-black uppercase text-white tracking-widest">Productization Opportunities</h4>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {recommendations.map((rec) => (
+                            <div key={rec.type} className="p-3 bg-slate-950/40 border border-slate-800/80 rounded-2xl group hover:border-purple-500/50 transition-all">
+                                <div className="flex items-center gap-2 mb-2">
+                                    {rec.type === 'digital' && <Laptop className="h-3 w-3 text-blue-400" />}
+                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-400" />}
+                                    {rec.type === 'physical' && <Package className="h-3 w-3 text-amber-400" />}
+                                    {rec.type === 'saas' && <Zap className="h-3 w-3 text-purple-400" />}
+                                    <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider text-[7px]">{rec.type}</span>
+                                </div>
+                                <h5 className="text-[10px] font-black text-white uppercase italic leading-tight mb-1">{rec.title}</h5>
+                                <p className="text-[9px] text-slate-400 leading-tight mb-2 h-8 overflow-hidden line-clamp-2">{rec.description}</p>
+                                <div className="pt-2 border-t border-slate-800/50">
+                                    <p className="text-[7.5px] font-bold text-slate-600 uppercase italic leading-tight group-hover:text-purple-400 transition-colors">
+                                        Why: {rec.reason}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
