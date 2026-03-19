@@ -9,6 +9,9 @@ export interface ILocation extends Document {
     metaTitle?: string;
     metaDescription?: string;
     image?: string;
+    zipCodes?: string[];
+    areaCodes?: string[];
+    timezone?: string;
     // Comprehensive state data matching the JSON template
     postal?: string;
     capital?: {
@@ -152,6 +155,9 @@ const LocationSchema = new Schema<ILocation>(
         metaTitle: String,
         metaDescription: String,
         image: String,
+        zipCodes: [String],
+        areaCodes: [String],
+        timezone: String,
         // Comprehensive state data
         postal: String,
         capital: {

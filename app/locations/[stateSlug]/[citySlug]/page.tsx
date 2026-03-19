@@ -114,7 +114,13 @@ export default async function CityPage({
                             Market Indicators
                         </h2>
                     </div>
-                    <CityCensusStats data={censusData} cityName={city.name} />
+                    <CityCensusStats 
+                        data={censusData} 
+                        cityName={city.name} 
+                        zipCodes={city.zipCodes}
+                        areaCodes={city.areaCodes}
+                        timezone={city.timezone}
+                    />
                     <MarketPulse data={marketPulse} cityName={city.name} newspapers={displayNewspapers} />
                 </section>
 

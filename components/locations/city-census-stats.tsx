@@ -1,91 +1,25 @@
 "use client";
 
-import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info, Smartphone, Wifi, MapPin, School, Globe, Clock, Sparkles } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrendingUp, Users, DollarSign, Activity, Target, Briefcase, Award, ShieldCheck, Home, Baby, UserCheck, AlertTriangle, PieChart, Info, Smartphone, Wifi, MapPin, School, Globe, Clock, Sparkles, GraduationCap, BarChart3, Zap, Car, Languages, ArrowRight, Search, BrainCircuit, Heart, Hammer, Navigation } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { AIBusinessAdvisor } from "./ai-business-advisor";
+import { CityStats } from "@/lib/services/census.service";
+import { useState, useMemo } from "react";
+
 
 interface CityCensusStatsProps {
-    data: {
-        population: number;
-        medianIncome: number;
-        gender: { male: number; female: number };
-        ethnicity: { white: number; black: number; asian: number; hispanic: number };
-        audience: {
-            medianAge: number;
-            under18Pct: number;
-            over65Pct: number;
-            householdsWithChildrenPct: number;
-            avgHouseholdSize: number;
-            maritalStatus: {
-                marriedPct: number;
-                divorcedPct: number;
-            };
-            familyComposition: {
-                kidsUnder18Count: number;
-                kids18to24Count: number;
-            };
-        };
-        affordability: {
-            povertyRate: number;
-            perCapitaIncome: number;
-            homeownershipRate: number;
-            medianRent: number;
-            medianMortgage: number;
-            costBurdenedPct: number;
-            incomeBrackets: {
-                under25k: number;
-                k25_50: number;
-                k50_75: number;
-                over75k: number;
-            };
-        };
-        nicheInsights?: {
-            candidates: Array<{
-                id: string;
-                label: string;
-                score: number;
-                sublabel: string;
-                description: string;
-                signals: string[];
-            }>;
-            pricingStrategy: { type: string; description: string };
-        };
-        digital: {
-            broadbandPct: number;
-            smartphoneOnlyPct: number;
-            workFromHomePct: number;
-            meanCommuteMinutes: number;
-        };
-        logistics: {
-            bachelorsDegreePct: number;
-            languages: {
-                spanishPct: number;
-                frenchPct: number;
-                germanPct: number;
-                italianPct: number;
-                chinesePct: number;
-            };
-        };
-        economy: {
-            topIndustries: Array<{ name: string; pct: number }>;
-            topOccupations: Array<{ name: string; pct: number }>;
-            employmentType: {
-                private: number;
-                public: number;
-                selfEmployed: number;
-            };
-        };
-        isStateLevel?: boolean;
-        year: string;
-    } | null;
+    data: CityStats | null;
     cityName: string;
+    zipCodes?: string[];
+    areaCodes?: string[];
+    timezone?: string;
 }
 
-export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
+export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [], timezone }: CityCensusStatsProps) {
     if (!data) {
         return (
             <div className="p-6 border border-dashed border-slate-800 rounded-3xl bg-slate-900/10 text-center">
@@ -190,6 +124,43 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                 {/* Audience Validation Tab */}
                 <TabsContent value="audience" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Local Identity Card */}
+                        <Card className="bg-slate-900/40 border-purple-500/20 rounded-2xl border-l-4 border-l-purple-500">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                                    <MapPin className="h-4 w-4 text-purple-400" />
+                                    Local Identity
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase">ZIP Codes</span>
+                                        <div className="flex flex-wrap gap-1 justify-end max-w-[120px]">
+                                            {zipCodes.length > 0 ? zipCodes.slice(0, 3).map(zip => (
+                                                <Badge key={zip} variant="outline" className="text-[9px] h-4 bg-slate-950/50 border-slate-800 text-slate-300">{zip}</Badge>
+                                            )) : <span className="text-[9px] font-bold text-slate-600 italic">No data</span>}
+                                            {zipCodes.length > 3 && <span className="text-[8px] text-slate-600 font-black">+{zipCodes.length - 3}</span>}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase">Area Codes</span>
+                                        <div className="flex gap-1">
+                                            {areaCodes.length > 0 ? areaCodes.map(ac => (
+                                                <Badge key={ac} variant="outline" className="text-[9px] h-4 bg-purple-500/10 border-purple-500/20 text-purple-400">{ac}</Badge>
+                                            )) : <span className="text-[9px] font-bold text-slate-600 italic">No data</span>}
+                                        </div>
+                                    </div>
+                                    {timezone && (
+                                        <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase">Timezone</span>
+                                            <span className="text-[10px] font-black text-white">{timezone}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
                         <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
@@ -447,26 +418,45 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
                                     <Clock className="h-4 w-4 text-cyan-400" />
-                                    Work Mobility
+                                    Daily Mobility
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div>
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
-                                        <span>Worked from Home</span>
-                                        <span>{data.digital.workFromHomePct}%</span>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Car className="h-3 w-3 text-blue-400" />
+                                            <span className="text-[8px] font-black text-slate-500 uppercase">Drive Alone</span>
+                                        </div>
+                                        <div className="text-lg font-black text-white italic">{data.mobility.drivePct}%</div>
                                     </div>
-                                    <Progress value={data.digital.workFromHomePct} className="h-1 bg-slate-800" indicatorClassName="bg-cyan-400" />
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Navigation className="h-3 w-3 text-emerald-400" />
+                                            <span className="text-[8px] font-black text-slate-500 uppercase">Transit</span>
+                                        </div>
+                                        <div className="text-lg font-black text-white italic">{data.mobility.transitPct}%</div>
+                                    </div>
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Heart className="h-3 w-3 text-pink-400" />
+                                            <span className="text-[8px] font-black text-slate-500 uppercase">Walk/Bike</span>
+                                        </div>
+                                        <div className="text-lg font-black text-white italic">{data.mobility.walkPct + data.mobility.bikePct}%</div>
+                                    </div>
+                                    <div className="p-3 bg-slate-900/40 rounded-xl border border-slate-800">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Home className="h-3 w-3 text-purple-400" />
+                                            <span className="text-[8px] font-black text-slate-500 uppercase">WFH</span>
+                                        </div>
+                                        <div className="text-lg font-black text-white italic">{data.digital.workFromHomePct}%</div>
+                                    </div>
                                 </div>
-                                <div className="pt-2">
+                                
+                                <div className="pt-2 border-t border-slate-800/50">
                                     <div className="text-2xl font-black text-white italic">{data.digital.meanCommuteMinutes} MIN</div>
                                     <p className="text-[10px] font-bold text-slate-500 uppercase">Avg Commute Time</p>
                                 </div>
-                                <p className="text-[9px] font-bold text-slate-600 uppercase italic mt-4">
-                                    {data.digital.workFromHomePct > 15 
-                                        ? "🏠 Remote Hub: High demand for productivity tools & home office gear." 
-                                        : "🏢 Traditional 9-5: Best for early-morning or evening marketing pushes."}
-                                </p>
                             </CardContent>
                         </Card>
 
@@ -583,30 +573,52 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 })}
                             </CardContent>
                         </Card>
-
-                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl lg:col-span-2">
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
                             <CardHeader className="pb-2">
-                                <CardTitle className="text-xs font-black uppercase text-white">Employment Character</CardTitle>
+                                <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                    <Heart className="h-4 w-4 text-pink-500" />
+                                    Health & Wellness
+                                </CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-cyan-500">
-                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.private}%</div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Private Sector</p>
+                            <CardContent className="space-y-4">
+                                <div className="p-4 bg-pink-500/5 border border-pink-500/10 rounded-xl">
+                                    <div className="text-2xl font-black text-pink-400 italic">{data.health.insurancePct}%</div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">Health Insurance Coverage</p>
+                                </div>
+                                <p className="text-[9px] font-bold text-slate-600 uppercase italic leading-relaxed">
+                                    {data.health.insurancePct > 90 
+                                        ? "Strong coverage base. High potential for supplemental wellness and fitness services." 
+                                        : "Coverage gap detected. Opportunity for budget-friendly health advocacy programs."}
+                                </p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                    <UserCheck className="h-4 w-4 text-emerald-400" />
+                                    Employment Character
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 gap-2 pt-2">
+                                    <div className="flex items-center justify-between p-2 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-cyan-500">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase uppercase">Private</span>
+                                        <span className="text-sm font-black text-white italic">{data.economy.employmentType.private}%</span>
                                     </div>
-                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-blue-500">
-                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.public}%</div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Government / Public</p>
+                                    <div className="flex items-center justify-between p-2 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-blue-500">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase uppercase">Public</span>
+                                        <span className="text-sm font-black text-white italic">{data.economy.employmentType.public}%</span>
                                     </div>
-                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500">
-                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.selfEmployed}%</div>
-                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Self-Employed / SMB</p>
+                                    <div className="flex items-center justify-between p-2 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500">
+                                        <span className="text-[9px] font-black text-slate-500 uppercase uppercase">SMB/Self</span>
+                                        <span className="text-sm font-black text-white italic">{data.economy.employmentType.selfEmployed}%</span>
                                     </div>
                                 </div>
-                                <p className="mt-6 text-[11px] font-bold text-slate-500 uppercase italic text-center max-w-2xl mx-auto">
+                                <p className="text-[8px] font-bold text-slate-500 uppercase italic leading-tight">
                                     {data.economy.employmentType.selfEmployed > 10 
-                                        ? "Strong entrepreneurial culture detected. High potential for B2B services and coaching." 
-                                        : "Traditional employment hub. Focus on career advancement and professional skill-building."}
+                                        ? "Strong entrepreneurial culture detected." 
+                                        : "Traditional employment hub."}
                                 </p>
                             </CardContent>
                         </Card>
@@ -615,7 +627,13 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
 
                 {/* AI Business Advisor Tab */}
                 <TabsContent value="advisor" className="space-y-6">
-                    <AIBusinessAdvisor data={data} cityName={cityName} />
+                    {data && <AIBusinessAdvisor 
+                        data={data} 
+                        cityName={cityName} 
+                        zipCodes={zipCodes}
+                        areaCodes={areaCodes}
+                        timezone={timezone}
+                    />}
                 </TabsContent>
 
             </Tabs>

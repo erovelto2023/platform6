@@ -6,34 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Copy, Sparkles, BrainCircuit, Target, ShoppingBag, BarChart4, ShieldCheck, Laptop, Globe, Package, Zap } from "lucide-react";
 import { useState, useMemo } from "react";
 import { ProductRecommender } from "@/lib/services/product-recommender";
+import { CityStats } from "@/lib/services/census.service";
 
 interface AIBusinessAdvisorProps {
-    data: {
-        population: number;
-        medianIncome: number;
-        audience: {
-            medianAge: number;
-            maritalStatus: { marriedPct: number; divorcedPct: number };
-            familyComposition: { kidsUnder18Count: number; kids18to24Count: number };
-            avgHouseholdSize: number;
-        };
-        affordability: { povertyRate: number; homeownershipRate: number };
-        economy: { 
-            medianHousingValue: number;
-            topIndustries: Array<{name: string}>;
-            vehiclesAvailable: { zero: number };
-        };
-        digital: { broadbandPct: number; workFromHomePct: number };
-        logistics: { 
-            bachelorsDegreePct: number;
-            languages: { spanishPct: number; frenchPct: number; italianPct: number; germanPct: number; chinesePct: number };
-        };
-        populationReach?: number;
-    };
+    data: CityStats;
     cityName: string;
+    zipCodes?: string[];
+    areaCodes?: string[];
+    timezone?: string;
 }
 
-export function AIBusinessAdvisor({ data, cityName }: AIBusinessAdvisorProps) {
+export function AIBusinessAdvisor({ data, cityName, zipCodes = [], areaCodes = [], timezone }: AIBusinessAdvisorProps) {
     const [copied, setCopied] = useState(false);
     
     // Derived values for quick analysis
@@ -54,15 +37,19 @@ export function AIBusinessAdvisor({ data, cityName }: AIBusinessAdvisorProps) {
 Based on the following hyper-localized market data, please act as a world-class business strategist and product developer.
 
 ### LOCAL MARKET DATA PROFILE:
-- **Population**: ${data.population.toLocaleString()} (Median Age: ${data.audience.medianAge})
+- **Location**: ${cityName}.
+- **Local Identity**: ZIPs: ${zipCodes.join(", ") || "N/A"}, Area Codes: ${areaCodes.join(", ") || "N/A"}, Timezone: ${timezone || "N/A"}.
+- **Audience**: ${data.population.toLocaleString()} people, Median Age: ${data.audience.medianAge}.
 - **Family Structure**: ${data.audience.maritalStatus.marriedPct}% Married, ${data.audience.maritalStatus.divorcedPct}% Divorced.
 - **Audience Blocks**: ${data.audience.familyComposition.kidsUnder18Count.toLocaleString()} children <18, ${data.audience.familyComposition.kids18to24Count.toLocaleString()} young adults (18-24).
 - **Economics**: Median Household Income of $${data.medianIncome.toLocaleString()} with a ${data.affordability.povertyRate}% poverty rate.
 - **Housing**: ${data.affordability.homeownershipRate}% homeownership rate.
 - **Education/Skills**: ${data.logistics.bachelorsDegreePct}% Bachelor's+, Top Industry: ${data.economy.topIndustries[0]?.name}.
-- **Languages**: ${Object.entries(data.logistics.languages).filter(([_, v]) => (v as number) > 0).map(([k, v]) => `${k.replace('Pct', '')} (${v}%)`).join(", ")}.
+- **Languages**: ${Object.entries(data.logistics.languages).filter(([_, v]) => (v as number) > 0).map(([k, v]) => `${k.replace('speakSpanishPct', 'Spanish')} (${v}%)`).join(", ")}.
 - **Connectivity**: ${data.digital.broadbandPct}% Broadband, ${data.digital.workFromHomePct}% WFH rate.
-- **Logistics**: ${zeroVehiclePct}% zero-vehicle households.
+- **Health**: ${data.health.insurancePct}% Health Insurance Coverage.
+- **Logistics**: ${data.mobility.drivePct}% Drive, ${data.mobility.transitPct}% Public Transit, ${data.mobility.bikePct + data.mobility.walkPct}% Walk/Bike.
+- **Vehicle Access**: ${zeroVehiclePct}% zero-vehicle households.
 
 ### RECOMMENDED PRODUCT CATEGORIES:
 ${recommendations.map(r => `- **${r.type.toUpperCase()}**: ${r.title} (${r.description})`).join("\n")}

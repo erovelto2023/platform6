@@ -101,6 +101,15 @@ export interface CityStats {
         workFromHomePct: number;
         meanCommuteMinutes: number;
     };
+    mobility: {
+        drivePct: number;
+        transitPct: number;
+        bikePct: number;
+        walkPct: number;
+    };
+    health: {
+        insurancePct: number;
+    };
     logistics: {
         bachelorsDegreePct: number;
         languages: {
@@ -194,7 +203,8 @@ export class CensusService {
                 "DP03_0043PE", "DP03_0044PE", "DP03_0045PE", // 16-18
                 // Employment Type
                 "DP03_0047PE", "DP03_0048PE", "DP03_0049PE", // 19-21: Private, Public, Self-employed
-                "DP03_0025E" // 22: Mean travel time to work
+                "DP03_0025E", // 22: Mean travel time to work
+                "DP03_0096PE"  // 23: Percent With Health Insurance
             ].join(",");
 
             const batch4 = [
@@ -206,7 +216,8 @@ export class CensusService {
                 "B01001_010E", // 9 (M 22-24)
                 "B01001_031E", "B01001_032E", "B01001_033E", // 10,11,12 (F 18-19, 20, 21)
                 "B01001_034E", // 13 (F 22-24)
-                "B16001_006E", "B16001_012E", "B16001_009E", "B16001_075E" // 14, 15, 16, 17 (French, German, Italian, Chinese)
+                "B16001_006E", "B16001_012E", "B16001_009E", "B16001_075E", // 14, 15, 16, 17 (French, German, Italian, Chinese)
+                "B08301_001E", "B08301_003E", "B08301_010E", "B08301_018E", "B08301_019E" // 18-22 (Commute: Total, Drive Alone, Transit, Bike, Walk)
             ].join(",");
 
             const year = "2022";
@@ -372,6 +383,15 @@ export class CensusService {
                     smartphoneOnlyPct: matchingRow2 ? Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100) : 0,
                     workFromHomePct: matchingRow2 ? Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100) : 0,
                     meanCommuteMinutes: matchingRow3 ? sanitizeValue(matchingRow3[22]) : 0
+                },
+                mobility: {
+                    drivePct: matchingRow4 ? Math.round((parseInt(matchingRow4[19]) / (parseInt(matchingRow4[18]) || 1)) * 100) : 0,
+                    transitPct: matchingRow4 ? Math.round((parseInt(matchingRow4[20]) / (parseInt(matchingRow4[18]) || 1)) * 100) : 0,
+                    bikePct: matchingRow4 ? Math.round((parseInt(matchingRow4[21]) / (parseInt(matchingRow4[18]) || 1)) * 100) : 0,
+                    walkPct: matchingRow4 ? Math.round((parseInt(matchingRow4[22]) / (parseInt(matchingRow4[18]) || 1)) * 100) : 0,
+                },
+                health: {
+                    insurancePct: matchingRow3 ? sanitizeValue(matchingRow3[23]) : 0,
                 },
                 logistics: {
                     bachelorsDegreePct: matchingRow2 ? Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100) : 0,
