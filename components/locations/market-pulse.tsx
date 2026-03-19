@@ -1,7 +1,6 @@
-import { TrendingUp, Target, BarChart3, Search, Info } from "lucide-react";
+import { TrendingUp, Target, Search, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { MarketPulseData } from "@/lib/services/market.service";
 
 interface MarketPulseProps {
@@ -19,7 +18,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
     console.log(`[MarketPulse] Rendering for ${cityName}:`, !!data);
     if (!data) return null;
 
-    const { searchIntent, monthlyMomentum, businessDensity } = data;
+    const { searchIntent, monthlyMomentum } = data;
 
     return (
         <div className="space-y-12 mt-12">
@@ -32,7 +31,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Search Intent & Momentum */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-3 space-y-8">
                     <Card className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden border-t-4 border-t-blue-500">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
@@ -87,27 +86,6 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                     </div>
                 </div>
 
-                {/* Density Column */}
-                <div className="space-y-6">
-                    <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-cyan-500">
-                         <CardHeader className="pb-2">
-                            <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
-                                <BarChart3 className="h-4 w-4 text-cyan-400" />
-                                Niche Density (OSM)
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 mt-4">
-                            {businessDensity && Object.entries(businessDensity).map(([label, count]) => (
-                                <div key={label}>
-                                    <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500 mb-1">
-                                        <span>{label}</span>
-                                        <span className="text-white font-black">{count}</span>
-                                    </div>
-                                    <Progress value={Math.min(100, (count / 50) * 100)} className="h-1 bg-slate-800" indicatorClassName="bg-cyan-500" />
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
 
