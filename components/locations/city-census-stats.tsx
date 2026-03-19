@@ -39,6 +39,7 @@ interface CityCensusStatsProps {
                 score: number;
                 sublabel: string;
                 description: string;
+                signals: string[];
             }>;
             pricingStrategy: { type: string; description: string };
         };
@@ -449,19 +450,35 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {data.economy.topIndustries.map((ind, idx) => (
-                                    <div key={ind.name} className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
-                                            <span>{ind.name}</span>
-                                            <span>{ind.pct}%</span>
+                                {data.economy.topIndustries.map((ind) => {
+                                    const colors: Record<string, string> = {
+                                        "Education/Health": "bg-blue-500",
+                                        "Arts/Food": "bg-pink-500",
+                                        "Retail": "bg-emerald-500",
+                                        "Prof/Admin": "bg-purple-500",
+                                        "Manufacturing": "bg-cyan-500",
+                                        "Public Admin": "bg-slate-400",
+                                        "Finance/Real Estate": "bg-amber-500",
+                                        "Information": "bg-indigo-500",
+                                        "Construction": "bg-orange-500",
+                                        "Wholesale": "bg-lime-500",
+                                        "Agri/Mining": "bg-brown-500", // Fallback color handled below
+                                    };
+                                    const colorClass = colors[ind.name] || "bg-slate-600";
+                                    return (
+                                        <div key={ind.name} className="space-y-1">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                                <span>{ind.name}</span>
+                                                <span>{ind.pct}%</span>
+                                            </div>
+                                            <Progress 
+                                                value={ind.pct} 
+                                                className="h-1 bg-slate-800" 
+                                                indicatorClassName={colorClass} 
+                                            />
                                         </div>
-                                        <Progress 
-                                            value={ind.pct} 
-                                            className="h-1 bg-slate-800" 
-                                            indicatorClassName={idx === 0 ? "bg-orange-500" : "bg-slate-600"} 
-                                        />
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </CardContent>
                         </Card>
 
@@ -473,19 +490,29 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {data.economy.topOccupations.map((occ, idx) => (
-                                    <div key={occ.name} className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
-                                            <span>{occ.name}</span>
-                                            <span>{occ.pct}%</span>
+                                {data.economy.topOccupations.map((occ) => {
+                                    const colors: Record<string, string> = {
+                                        "Management/Arts": "bg-purple-500",
+                                        "Service": "bg-pink-500",
+                                        "Sales/Office": "bg-blue-500",
+                                        "Natural Resources/Construction": "bg-orange-500",
+                                        "Production/Transport": "bg-cyan-400"
+                                    };
+                                    const colorClass = colors[occ.name] || "bg-slate-600";
+                                    return (
+                                        <div key={occ.name} className="space-y-1">
+                                            <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                                <span>{occ.name}</span>
+                                                <span>{occ.pct}%</span>
+                                            </div>
+                                            <Progress 
+                                                value={occ.pct} 
+                                                className="h-1 bg-slate-800" 
+                                                indicatorClassName={colorClass} 
+                                            />
                                         </div>
-                                        <Progress 
-                                            value={occ.pct} 
-                                            className="h-1 bg-slate-800" 
-                                            indicatorClassName={idx === 0 ? "bg-blue-500" : "bg-slate-600"} 
-                                        />
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </CardContent>
                         </Card>
 
@@ -495,7 +522,7 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                             </CardHeader>
                             <CardContent>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-orange-500">
+                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-cyan-500">
                                         <div className="text-2xl font-black text-white italic">{data.economy.employmentType.private}%</div>
                                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Private Sector</p>
                                     </div>
@@ -531,15 +558,27 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {data.nicheInsights.candidates.map((niche) => (
-                            <Card key={niche.id} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all border-b-2 border-b-purple-500/20">
+                            <Card key={niche.id} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all border-b-2 border-b-purple-500/20 flex flex-col">
                                 <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between">
                                     <CardTitle className="text-[10px] font-black uppercase text-slate-400">{niche.label}</CardTitle>
                                     <span className={`text-sm font-black italic ${niche.score >= 8 ? "text-emerald-400" : niche.score >= 5 ? "text-blue-400" : "text-amber-400"}`}>{niche.score}/10</span>
                                 </CardHeader>
-                                <CardContent className="p-4">
+                                <CardContent className="p-4 flex-1 flex flex-col">
                                     <div className="text-lg font-black text-white italic leading-tight mb-2 uppercase">{niche.sublabel}</div>
-                                    <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase">{niche.description}</p>
-                                    <div className="mt-4">
+                                    <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase mb-4">{niche.description}</p>
+                                    
+                                    <div className="mt-auto space-y-3">
+                                        <div className="p-3 bg-slate-950/40 rounded-xl border border-slate-800/50">
+                                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest mb-2">Data Signals</p>
+                                            <ul className="space-y-1">
+                                                {niche.signals.map((signal, idx) => (
+                                                    <li key={idx} className="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase">
+                                                        <div className="w-1 h-1 rounded-full bg-purple-500" />
+                                                        {signal}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                         <Progress value={niche.score * 10} className="h-1 bg-slate-800" indicatorClassName={niche.score >= 8 ? "bg-emerald-500" : niche.score >= 5 ? "bg-blue-500" : "bg-amber-500"} />
                                     </div>
                                 </CardContent>

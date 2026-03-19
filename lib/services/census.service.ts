@@ -39,6 +39,7 @@ export interface NicheCandidate {
     score: number;
     sublabel: string;
     description: string;
+    signals: string[];
 }
 
 export interface NicheInsight {
@@ -350,7 +351,11 @@ export class CensusService {
             label: "Parenting & Kids",
             score: pScore,
             sublabel: pScore > 7 ? "High Demand" : "Steady Market",
-            description: "Potty training, early learning, and toddler safety products."
+            description: "Potty training, early learning, and toddler safety products.",
+            signals: [
+                `Toddler population at ${toddlerPct.toFixed(1)}%`,
+                `High density of young families`
+            ]
         });
 
         // 2. Senior Services
@@ -361,7 +366,11 @@ export class CensusService {
             label: "Senior Services",
             score: sScore,
             sublabel: sScore > 7 ? "Booming Demographic" : "Average Demand",
-            description: "Assisted living, mobility aids, and senior health coaching."
+            description: "Assisted living, mobility aids, and senior health coaching.",
+            signals: [
+                `Senior population at ${seniorPct.toFixed(1)}%`,
+                `Aging market above 15% threshold`
+            ]
         });
 
         // 3. Remote Work & Tech
@@ -373,7 +382,11 @@ export class CensusService {
                 label: "Remote Professional",
                 score: rScore,
                 sublabel: wfhPct > 20 ? "Tech Hub Potential" : "Growing Segment",
-                description: "Home office ergonomics, async productivity, and remote-first gear."
+                description: "Home office ergonomics, async productivity, and remote-first gear.",
+                signals: [
+                    `${wfhPct}% work from home`,
+                    `High digital connectivity demand`
+                ]
             });
         }
 
@@ -386,7 +399,11 @@ export class CensusService {
                 label: "Premium Hobbies",
                 score: lScore,
                 sublabel: lScore > 8 ? "High Luxury" : "Premium Tier",
-                description: "High-ticket courses, luxury goods, and specialized hobby coaching."
+                description: "High-ticket courses, luxury goods, and specialized hobby coaching.",
+                signals: [
+                    `Median income at $${stats.medianIncome.toLocaleString()}`,
+                    `${highEarnerPct.toFixed(1)}% high-earner density`
+                ]
             });
         }
 
@@ -399,7 +416,11 @@ export class CensusService {
                 label: "Hispanic Market",
                 score: bScore,
                 sublabel: "Hyper-Localized",
-                description: "Bilingual education, cultural goods, and Spanish-first digital services."
+                description: "Bilingual education, cultural goods, and Spanish-first digital services.",
+                signals: [
+                    `${spanishPct}% Spanish speaking households`,
+                    `Strong cultural market potential`
+                ]
             });
         }
 
@@ -410,7 +431,11 @@ export class CensusService {
             label: "Home Optimization",
             score: homeScore,
             sublabel: stats.affordability.homeownershipRate > 70 ? "Homeowner Dense" : "Stable",
-            description: "Smart home, DIY maintenance, and family-oriented home office gear."
+            description: "Smart home, DIY maintenance, and family-oriented home office gear.",
+            signals: [
+                `Homeownership at ${stats.affordability.homeownershipRate}%`,
+                `Stable residential asset base`
+            ]
         });
 
         // Sort by score
