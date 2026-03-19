@@ -171,6 +171,8 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     </p>
                                     <a 
                                         href={paper.url} 
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="mt-4 inline-block text-[8px] font-black uppercase tracking-tighter text-rose-500 border-b border-rose-500/20 hover:border-rose-500"
                                     >
                                         Visit Publication
