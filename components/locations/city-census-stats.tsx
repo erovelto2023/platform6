@@ -380,6 +380,11 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                     </div>
                                     <span className="text-sm font-black text-white">{data.digital.smartphoneOnlyPct}%</span>
                                 </div>
+                                <p className="text-[9px] font-bold text-slate-600 uppercase italic mt-4">
+                                    {data.digital.broadbandPct < 75 
+                                        ? "⚠️ Low Broadband: Focus on mobile-first, low-bandwidth funnels." 
+                                        : "🚀 High Connectivity: Great for live streaming and high-def video courses."}
+                                </p>
                             </CardContent>
                         </Card>
 
@@ -403,6 +408,11 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                     <div className="text-2xl font-black text-white italic">{data.digital.meanCommuteMinutes} MIN</div>
                                     <p className="text-[10px] font-bold text-slate-500 uppercase">Avg Commute Time</p>
                                 </div>
+                                <p className="text-[9px] font-bold text-slate-600 uppercase italic mt-4">
+                                    {data.digital.workFromHomePct > 15 
+                                        ? "🏠 Remote Hub: High demand for productivity tools & home office gear." 
+                                        : "🏢 Traditional 9-5: Best for early-morning or evening marketing pushes."}
+                                </p>
                             </CardContent>
                         </Card>
 

@@ -40,9 +40,9 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 text-white">
                                 {searchIntent.length > 0 ? (
-                                    searchIntent.map((intent, i) => (
+                                    searchIntent.slice(0, 8).map((intent, i) => (
                                         <div key={i} className="flex items-center gap-3 p-3 bg-slate-950/40 border border-slate-800 rounded-xl group hover:border-blue-500/30 transition-all">
                                             <div className="h-6 w-6 rounded-full bg-blue-500/10 flex items-center justify-center text-[10px] font-black text-blue-400 group-hover:bg-blue-500/20">
                                                 {i + 1}
@@ -58,11 +58,36 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     </div>
                                 )}
                             </div>
+                            
+                            {searchIntent.length > 0 && (
+                                <div className="mt-8 p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <TrendingUp className="h-3 w-3 text-blue-400" />
+                                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Business Playbook</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <p className="text-[11px] font-black text-white uppercase italic mb-1">Navigation & Intent</p>
+                                            <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">
+                                                High volume for 'map', 'directions', or 'weather' suggests a transit-heavy or tourist-prone audience. 
+                                                <span className="text-blue-400/80 block mt-1 underline">Action: Focus on location-based mobile SEO & local business listings.</span>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-black text-white uppercase italic mb-1">Community Awareness</p>
+                                            <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">
+                                                Queries for 'news' or 'population' point to an active, civic-minded audience.
+                                                <span className="text-blue-400/80 block mt-1 underline">Action: Best for local affiliate news sites & community-driven products.</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
+                         <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-emerald-500">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-[10px] font-black uppercase text-slate-500">City Momentum (30 Days)</CardTitle>
                             </CardHeader>
@@ -74,10 +99,13 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     <TrendingUp className="h-3 w-3 text-emerald-400" />
                                     <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Monthly Wiki Traffic</span>
                                 </div>
+                                <p className="mt-4 text-[9px] font-bold text-slate-600 uppercase italic leading-tight">
+                                    Measures "Curiosity Index". High traffic suggests outsiders or potential movers researching {cityName}.
+                                </p>
                             </CardContent>
                         </Card>
 
-                        <Card className="bg-slate-900/40 border-slate-800 rounded-2xl">
+                        <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-blue-500">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-[10px] font-black uppercase text-slate-500">Opportunity Score</CardTitle>
                             </CardHeader>
@@ -86,6 +114,9 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     {Math.min(99, Math.round((monthlyMomentum / 1000) * 10)) || "--"}/99
                                 </div>
                                 <p className="text-[8px] font-bold text-slate-500 uppercase mt-1">Niche Potential Index</p>
+                                <p className="mt-4 text-[9px] font-bold text-slate-600 uppercase italic leading-tight">
+                                    High score indicates a city with a growing digital footprint but low market saturation.
+                                </p>
                             </CardContent>
                         </Card>
                     </div>

@@ -153,7 +153,7 @@ export class CensusService {
                 "B28002_001E", "B28002_002E", // 21, 22 (Internet Total, Has Internet)
                 "B28001_011E", // 23 (Smartphone Only)
                 "B08006_001E", "B08006_017E", // 24, 25 (Workers total, Worked at home)
-                "B08303_001E", // 26 (Aggregate Commute)
+                "S0801_C01_046E", // 26 (Mean Commute Minutes)
                 "B15003_001E", "B15003_022E", "B15003_023E", "B15003_024E", "B15003_025E", // 27-31 (Edu Total, Bachelors, Masters, Prof, Doctorate)
                 "B16001_001E", "B16001_003E", // 32, 33 (Language Total, Spanish)
             ].join(",");
@@ -286,7 +286,7 @@ export class CensusService {
                     broadbandPct: Math.round(((parseInt(matchingRow2[22]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
                     smartphoneOnlyPct: Math.round(((parseInt(matchingRow2[23]) || 0) / (parseInt(matchingRow2[21]) || 1)) * 100),
                     workFromHomePct: Math.round(((parseInt(matchingRow2[25]) || 0) / (parseInt(matchingRow2[24]) || 1)) * 100),
-                    meanCommuteMinutes: Math.round((parseInt(matchingRow2[26]) || 0) / ((parseInt(matchingRow2[24]) || 0) - (parseInt(matchingRow2[25]) || 0) || 1))
+                    meanCommuteMinutes: sanitizeValue(matchingRow2[26])
                 },
                 logistics: {
                     bachelorsDegreePct: Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100),
@@ -354,7 +354,8 @@ export class CensusService {
             description: "Potty training, early learning, and toddler safety products.",
             signals: [
                 `Toddler population at ${toddlerPct.toFixed(1)}%`,
-                `High density of young families`
+                `High density of young families`,
+                `Opportunity: Early childhood education & potty training guides`
             ]
         });
 
@@ -369,7 +370,8 @@ export class CensusService {
             description: "Assisted living, mobility aids, and senior health coaching.",
             signals: [
                 `Senior population at ${seniorPct.toFixed(1)}%`,
-                `Aging market above 15% threshold`
+                `Aging market above 15% threshold`,
+                `Opportunity: Mobility aids, health coaching, & estate planning`
             ]
         });
 
@@ -434,7 +436,8 @@ export class CensusService {
             description: "Smart home, DIY maintenance, and family-oriented home office gear.",
             signals: [
                 `Homeownership at ${stats.affordability.homeownershipRate}%`,
-                `Stable residential asset base`
+                `Stable residential asset base`,
+                `Opportunity: Smart home installs, DIY maintenance, & home office gear`
             ]
         });
 
