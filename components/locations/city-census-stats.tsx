@@ -52,6 +52,15 @@ interface CityCensusStatsProps {
             bachelorsDegreePct: number;
             speakSpanishPct: number;
         };
+        economy: {
+            topIndustries: Array<{ name: string; pct: number }>;
+            topOccupations: Array<{ name: string; pct: number }>;
+            employmentType: {
+                private: number;
+                public: number;
+                selfEmployed: number;
+            };
+        };
         year: string;
     } | null;
     cityName: string;
@@ -136,6 +145,9 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                     </TabsTrigger>
                     <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
                         Channel & Logistics
+                    </TabsTrigger>
+                    <TabsTrigger value="economy" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-400 hover:text-white transition-colors">
+                        Economy & Skills
                     </TabsTrigger>
                 </TabsList>
 
@@ -407,12 +419,100 @@ export function CityCensusStats({ data, cityName }: CityCensusStatsProps) {
                                         <Globe className="h-3 w-3 text-cyan-500" />
                                         <span className="text-[10px] font-black text-slate-500 uppercase">Spanish Speakers</span>
                                     </div>
-                                    <span className="text-sm font-black text-white">{data.logistics.speakSpanishPct}%</span>
+                                    <span className="text-sm font-black text-white">
+                                        {data.logistics.speakSpanishPct === 0 ? "LOW (<1%)" : `${data.logistics.speakSpanishPct}%`}
+                                    </span>
                                 </div>
                                 <div className="p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-xl">
                                     <div className="text-xl font-black text-cyan-400 italic">{data.logistics.bachelorsDegreePct}%</div>
                                     <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Bachelor's Degree or Higher</p>
                                 </div>
+                                <div className="pt-2 border-t border-slate-800/50">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Dominant Sector</p>
+                                    <Badge className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-[9px] font-black uppercase italic">
+                                        {data.economy.topIndustries[0]?.name}
+                                    </Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </TabsContent>
+
+                {/* Economy & Skills Tab */}
+                <TabsContent value="economy" className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                    <Briefcase className="h-4 w-4 text-orange-400" />
+                                    Top Industries
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {data.economy.topIndustries.map((ind, idx) => (
+                                    <div key={ind.name} className="space-y-1">
+                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                            <span>{ind.name}</span>
+                                            <span>{ind.pct}%</span>
+                                        </div>
+                                        <Progress 
+                                            value={ind.pct} 
+                                            className="h-1 bg-slate-800" 
+                                            indicatorClassName={idx === 0 ? "bg-orange-500" : "bg-slate-600"} 
+                                        />
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                    <Award className="h-4 w-4 text-orange-400" />
+                                    Worker Occupations
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {data.economy.topOccupations.map((occ, idx) => (
+                                    <div key={occ.name} className="space-y-1">
+                                        <div className="flex justify-between text-[10px] font-bold uppercase text-slate-500">
+                                            <span>{occ.name}</span>
+                                            <span>{occ.pct}%</span>
+                                        </div>
+                                        <Progress 
+                                            value={occ.pct} 
+                                            className="h-1 bg-slate-800" 
+                                            indicatorClassName={idx === 0 ? "bg-blue-500" : "bg-slate-600"} 
+                                        />
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+
+                        <Card className="bg-slate-900/20 border-slate-800/50 rounded-2xl lg:col-span-2">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-xs font-black uppercase text-white">Employment Character</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-orange-500">
+                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.private}%</div>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Private Sector</p>
+                                    </div>
+                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-blue-500">
+                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.public}%</div>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Government / Public</p>
+                                    </div>
+                                    <div className="p-4 bg-slate-900/40 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500">
+                                        <div className="text-2xl font-black text-white italic">{data.economy.employmentType.selfEmployed}%</div>
+                                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Self-Employed / SMB</p>
+                                    </div>
+                                </div>
+                                <p className="mt-6 text-[11px] font-bold text-slate-500 uppercase italic text-center max-w-2xl mx-auto">
+                                    {data.economy.employmentType.selfEmployed > 10 
+                                        ? "Strong entrepreneurial culture detected. High potential for B2B services and coaching." 
+                                        : "Traditional employment hub. Focus on career advancement and professional skill-building."}
+                                </p>
                             </CardContent>
                         </Card>
                     </div>

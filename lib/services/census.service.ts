@@ -69,6 +69,16 @@ export interface AffordabilityStats {
     };
 }
 
+export interface IndustryStat {
+    name: string;
+    pct: number;
+}
+
+export interface OccupationStat {
+    name: string;
+    pct: number;
+}
+
 export interface CityStats {
     population: number;
     medianIncome: number;
@@ -85,6 +95,15 @@ export interface CityStats {
     logistics: {
         bachelorsDegreePct: number;
         speakSpanishPct: number;
+    };
+    economy: {
+        topIndustries: IndustryStat[];
+        topOccupations: OccupationStat[];
+        employmentType: {
+            private: number;
+            public: number;
+            selfEmployed: number;
+        };
     };
     segments: {
         toddlers: number;
@@ -138,33 +157,55 @@ export class CensusService {
                 "B16001_001E", "B16001_003E", // 32, 33 (Language Total, Spanish)
             ].join(",");
 
+            const batch3 = [
+                "NAME", // 0
+                // Occupations (DP03_0027PE to DP03_0031PE)
+                "DP03_0027PE", // 1: Management, business, science, and arts
+                "DP03_0028PE", // 2: Service
+                "DP03_0029PE", // 3: Sales and office
+                "DP03_0030PE", // 4: Natural resources, construction, and maintenance
+                "DP03_0031PE", // 5: Production, transportation, and material moving
+                // Industries (DP03_0033PE to DP03_0045PE)
+                "DP03_0033PE", "DP03_0034PE", "DP03_0035PE", "DP03_0036PE", "DP03_0037PE", // 6-10
+                "DP03_0038PE", "DP03_0039PE", "DP03_0040PE", "DP03_0041PE", "DP03_0042PE", // 11-15
+                "DP03_0043PE", "DP03_0044PE", "DP03_0045PE", // 16-18
+                // Employment Type
+                "DP03_0047PE", "DP03_0048PE", "DP03_0049PE" // 19-21: Private, Public, Self-employed
+            ].join(",");
+
             const year = "2022";
             const geoTypes = ["place", "county subdivision"];
             let matchingRow1: string[] | null | undefined = null;
             let matchingRow2: string[] | null | undefined = null;
+            let matchingRow3: string[] | null | undefined = null;
 
             for (const geoType of geoTypes) {
-                const baseUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
-                const [res1, res2] = await Promise.all([
-                    fetch(`${baseUrl}&get=${batch1}`),
-                    fetch(`${baseUrl}&get=${batch2}`)
+                const acsUrl = `${CENSUS_API_BASE}/${year}/acs/acs5?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+                const dpUrl = `${CENSUS_API_BASE}/${year}/acs/acs5/profile?for=${encodeURIComponent(geoType)}:*&in=state:${stateFips}${API_KEY ? `&key=${API_KEY}` : ''}`;
+                
+                const [res1, res2, res3] = await Promise.all([
+                    fetch(`${acsUrl}&get=${batch1}`),
+                    fetch(`${acsUrl}&get=${batch2}`),
+                    fetch(`${dpUrl}&get=${batch3}`)
                 ]);
 
-                if (!res1.ok || !res2.ok) continue;
+                if (!res1.ok || !res2.ok || !res3.ok) continue;
 
                 const data1 = await res1.json();
                 const data2 = await res2.json();
+                const data3 = await res3.json();
                 
                 matchingRow1 = this.findMatchingRow(data1, cityName, stateName);
                 matchingRow2 = this.findMatchingRow(data2, cityName, stateName);
+                matchingRow3 = this.findMatchingRow(data3, cityName, stateName);
 
-                if (matchingRow1 && matchingRow2) {
+                if (matchingRow1 && matchingRow2 && matchingRow3) {
                     console.log(`[CensusService] Found match for ${cityName} as ${geoType}`);
                     break;
                 }
             }
 
-            if (!matchingRow1 || !matchingRow2) {
+            if (!matchingRow1 || !matchingRow2 || !matchingRow3) {
                 console.warn(`[CensusService] No match found for ${cityName}, ${stateName} in any geo table.`);
                 return null;
             }
@@ -249,6 +290,35 @@ export class CensusService {
                 logistics: {
                     bachelorsDegreePct: Math.round((((parseInt(matchingRow2[28]) || 0) + (parseInt(matchingRow2[29]) || 0) + (parseInt(matchingRow2[30]) || 0) + (parseInt(matchingRow2[31]) || 0)) / (parseInt(matchingRow2[27]) || 1)) * 100),
                     speakSpanishPct: Math.round(((parseInt(matchingRow2[33]) || 0) / (parseInt(matchingRow2[32]) || 1)) * 100)
+                },
+                economy: {
+                    topOccupations: [
+                        { name: "Management/Arts", pct: sanitizeValue(matchingRow3[1]) },
+                        { name: "Service", pct: sanitizeValue(matchingRow3[2]) },
+                        { name: "Sales/Office", pct: sanitizeValue(matchingRow3[3]) },
+                        { name: "Natural Resources/Construction", pct: sanitizeValue(matchingRow3[4]) },
+                        { name: "Production/Transport", pct: sanitizeValue(matchingRow3[5]) }
+                    ].sort((a, b) => b.pct - a.pct),
+                    topIndustries: [
+                        { name: "Agri/Mining", pct: sanitizeValue(matchingRow3[6]) },
+                        { name: "Construction", pct: sanitizeValue(matchingRow3[7]) },
+                        { name: "Manufacturing", pct: sanitizeValue(matchingRow3[8]) },
+                        { name: "Wholesale", pct: sanitizeValue(matchingRow3[9]) },
+                        { name: "Retail", pct: sanitizeValue(matchingRow3[10]) },
+                        { name: "Transport/Utilities", pct: sanitizeValue(matchingRow3[11]) },
+                        { name: "Information", pct: sanitizeValue(matchingRow3[12]) },
+                        { name: "Finance/Real Estate", pct: sanitizeValue(matchingRow3[13]) },
+                        { name: "Prof/Admin", pct: sanitizeValue(matchingRow3[14]) },
+                        { name: "Education/Health", pct: sanitizeValue(matchingRow3[15]) },
+                        { name: "Arts/Food", pct: sanitizeValue(matchingRow3[16]) },
+                        { name: "Other Services", pct: sanitizeValue(matchingRow3[17]) },
+                        { name: "Public Admin", pct: sanitizeValue(matchingRow3[18]) }
+                    ].sort((a, b) => b.pct - a.pct).slice(0, 5),
+                    employmentType: {
+                        private: sanitizeValue(matchingRow3[19]),
+                        public: sanitizeValue(matchingRow3[20]),
+                        selfEmployed: sanitizeValue(matchingRow3[21])
+                    }
                 },
                 year: year
             };
