@@ -8,7 +8,7 @@ async function check() {
     await connectToDatabase();
     const ny = await Location.findOne({ slug: "new-york", type: "state" });
     if (ny) {
-        console.log("NY NEWS:", ny.newspapers?.map(n => n.name));
+        console.log("NY NEWS:", ny.newspapers?.map((n: any) => n.name));
     }
     process.exit(0);
 }
