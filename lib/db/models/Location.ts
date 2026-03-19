@@ -117,6 +117,12 @@ export interface ILocation extends Document {
             subjects?: string[];
         }>;
     };
+    newspapers?: Array<{
+        name: string;
+        url: string;
+        description?: string;
+        type?: 'Local' | 'Regional' | 'Statewide';
+    }>;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -254,6 +260,16 @@ const LocationSchema = new Schema<ILocation>(
                 subjects: [String],
             }],
         },
+        newspapers: [{
+            name: String,
+            url: String,
+            description: String,
+            type: {
+                type: String,
+                enum: ['Local', 'Regional', 'Statewide'],
+                default: 'Local',
+            },
+        }],
     },
     {
         timestamps: true,

@@ -65,6 +65,15 @@ export default async function CityPage({
         console.error("Failed to fetch market pulse:", error);
     }
 
+    // Fallback newspapers from state if city has none
+    let displayNewspapers = city.newspapers || [];
+    if (displayNewspapers.length === 0 && city.type === 'city') {
+        const stateDoc = await getLocation(stateSlug, "");
+        if (stateDoc && stateDoc.newspapers) {
+            displayNewspapers = stateDoc.newspapers;
+        }
+    }
+
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-20">
             <header className="mb-12">
@@ -98,7 +107,7 @@ export default async function CityPage({
                         </h2>
                     </div>
                     <CityCensusStats data={censusData} cityName={city.name} />
-                    <MarketPulse data={marketPulse} cityName={city.name} />
+                    <MarketPulse data={marketPulse} cityName={city.name} newspapers={displayNewspapers} />
                 </section>
 
                 <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
