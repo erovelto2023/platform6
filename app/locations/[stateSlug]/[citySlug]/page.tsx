@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocation } from "@/lib/actions/location.actions";
 import { CensusService } from "@/lib/services/census.service";
+import { MarketService } from "@/lib/services/market.service";
 import { CityCensusStats } from "@/components/locations/city-census-stats";
+import { MarketPulse } from "@/components/locations/market-pulse";
 import { ArrowLeft } from "lucide-react";
 import { Metadata } from "next";
 
@@ -38,8 +40,25 @@ export default async function CityPage({
         notFound();
     }
 
-    // Fetch live market data from US Census
+// Fetch live market data from US Census
     const censusData = await CensusService.getCityDemographics(city.name, state.name);
+
+    // Fetch Market Pulse (Free/Open Data)
+    // Map state name to code for Ticketmaster/OSM
+    const STATE_CODES: Record<string, string> = {
+        "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
+        "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
+        "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+        "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+        "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO",
+        "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ",
+        "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH",
+        "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+        "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT",
+        "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY"
+    };
+    const stateCode = STATE_CODES[state.name] || "";
+    const marketPulse = await MarketService.getMarketPulse(city.name, state.name, stateCode);
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-20">
@@ -74,6 +93,7 @@ export default async function CityPage({
                         </h2>
                     </div>
                     <CityCensusStats data={censusData} cityName={city.name} />
+                    <MarketPulse data={marketPulse} cityName={city.name} />
                 </section>
 
                 <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
