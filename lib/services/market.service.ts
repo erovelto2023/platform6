@@ -121,39 +121,34 @@ export class MarketService {
      */
     static async getBusinessDensity(city: string, stateSuffix: string): Promise<Record<string, number>> {
         const categories = {
-            "Gyms": "leisure=fitness_centre",
-            "Cafes": "amenity=cafe",
-            "Restaurants": "amenity=restaurant",
-            "Retail": "shop=boutique"
+            "Gyms": "fitness_centre",
+            "Cafes": "cafe",
+            "Restaurants": "restaurant",
+            "Retail": "boutique"
         };
         
         const results: Record<string, number> = {};
         
         try {
+            const coords = await this.resolveCityCoords(city, stateSuffix);
+            const latLonFilter = coords ? `(around:16000,${coords.lat},${coords.lon})` : `area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"];->.a; (around.a:10000)`;
+
             for (const [label, tag] of Object.entries(categories)) {
-                // Try a very broad area search based on name alone if specific fails
+                const tagFilter = label === "Retail" ? `shop=${tag}` : `amenity=${tag}`;
                 const query = `[out:json][timeout:15];
-                    (
-                      area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"];
-                      area["name"="${city} city"]["ISO3166-2"="US-${stateSuffix}"];
-                      area["name"="${city} village"]["ISO3166-2"="US-${stateSuffix}"];
-                    )->.a;
-                    (node[${tag}](area.a);way[${tag}](area.a););
+                    (nwr[${tagFilter}]${latLonFilter};);
                     out count;`;
-                const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+                const url = `https://lz4.overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
                 
                 const res = await fetch(url).catch(() => null);
-                if (!res || !res.ok) {
-                    results[label] = 0;
-                    continue;
+                if (res && res.ok) {
+                    const data = await res.json().catch(() => null);
+                    if (data?.elements?.[0]?.tags?.total) {
+                        results[label] = parseInt(data.elements[0].tags.total);
+                        continue;
+                    }
                 }
-                
-                const data = await res.json().catch(() => null);
-                if (data && data.elements && data.elements[0]) {
-                    results[label] = parseInt(data.elements[0].tags.total) || 0;
-                } else {
-                    results[label] = 0;
-                }
+                results[label] = 0;
             }
             return results;
         } catch (error) {
@@ -172,47 +167,24 @@ export class MarketService {
         const results = { parenting: [] as string[], seniors: [] as string[], home: [] as string[] };
         
         try {
-            const cityQuery = `[out:json][timeout:10];
-                (
-                  node["name"="${city}"]["addr:state"="${stateSuffix}"];
-                  node["name"="${city}"]["is_in:state_code"="${stateSuffix}"];
-                  node["name"="${city}"][place~"city|town|village|hamlet"];
-                );
-                out body 1;`;
-            // Use a more stable mirror
-            const OVERPASS_MIRROR = "https://lz4.overpass-api.de/api/interpreter";
-            const cityUrl = `${OVERPASS_MIRROR}?data=${encodeURIComponent(cityQuery)}`;
-            const cityRes = await fetch(cityUrl).catch(() => null);
-            let latLonFilter = `area["name"="${city}"]["ISO3166-2"="US-${stateSuffix}"];->.a;`; // Fallback
+            const coords = await this.resolveCityCoords(city, stateSuffix);
+            if (!coords) return results;
 
-            if (cityRes && cityRes.ok) {
-                const text = await cityRes.text();
-                if (text.includes("<?xml") || text.includes("<html")) {
-                    console.warn("[MarketService] Overpass mirror returned non-JSON. Skipping coords.");
-                } else {
-                    const cityData = JSON.parse(text);
-                    if (cityData?.elements?.[0]) {
-                        const { lat, lon } = cityData.elements[0];
-                        latLonFilter = `(around:16000,${lat},${lon});`; // 16km (~10 miles) around city center
-                    }
-                }
-            }
+            const latLonFilter = `(around:16000,${coords.lat},${coords.lon})`;
+            const OVERPASS_MIRROR = "https://lz4.overpass-api.de/api/interpreter";
 
             for (const [key, tag] of Object.entries(queries)) {
                 const query = `[out:json][timeout:15];
-                    nwr${tag}${latLonFilter}
+                    nwr${tag}${latLonFilter};
                     out body 10;`;
                 const url = `${OVERPASS_MIRROR}?data=${encodeURIComponent(query)}`;
                 const res = await fetch(url).catch(() => null);
                 if (res && res.ok) {
-                    const text = await res.text();
-                    if (!text.includes("<?xml") && !text.includes("<html")) {
-                        const data = JSON.parse(text);
-                        if (data && data.elements) {
-                            results[key as keyof typeof results] = data.elements
-                                .map((e: any) => e.tags.name)
-                                .filter((name: string) => !!name);
-                        }
+                    const data = await res.json().catch(() => null);
+                    if (data?.elements) {
+                        results[key as keyof typeof results] = data.elements
+                            .map((e: any) => e.tags.name)
+                            .filter((name: string) => !!name);
                     }
                 }
             }
@@ -222,36 +194,51 @@ export class MarketService {
             return results;
         }
     }
+
+    private static async resolveCityCoords(city: string, stateSuffix: string): Promise<{lat: number, lon: number} | null> {
+        try {
+            const query = `[out:json][timeout:15];
+                area["ISO3166-2"="US-${stateSuffix}"]->.s;
+                (
+                  node["name"="${city}"][place](area.s);
+                  relation["name"="${city}"][boundary=administrative](area.s);
+                  node["name"="${city} city"][place](area.s);
+                  relation["name"="${city} city"][boundary=administrative](area.s);
+                );
+                out center 1;`;
+            
+            const res = await fetch(`https://lz4.overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+            if (!res.ok) return null;
+            const data = await res.json();
+            const el = data.elements?.[0];
+            if (el) {
+                return {
+                    lat: el.lat || el.center?.lat,
+                    lon: el.lon || el.center?.lon
+                };
+            }
+            return null;
+        } catch { return null; }
+    }
     
     static async getMarketDominance(city: string, stateSuffix: string): Promise<MarketPulseData['dominance']> {
         try {
-            // Step 1: Find city coordinates (flexible search)
-            const cityQuery = `[out:json][timeout:15];
-                (
-                  node["name"="${city}"]["addr:state"="${stateSuffix}"];
-                  node["name"="${city}"]["is_in:state_code"="${stateSuffix}"];
-                  node["name"="${city}"][place~"city|town|village|hamlet"];
-                );
-                out body 1;`;
+            const coords = await this.resolveCityCoords(city, stateSuffix);
             const OVERPASS_MIRROR = "https://lz4.overpass-api.de/api/interpreter";
-            const cityUrl = `${OVERPASS_MIRROR}?data=${encodeURIComponent(cityQuery)}`;
-            const cityRes = await fetch(cityUrl).catch(() => null);
             
-            let lat: number = 0, lon: number = 0;
-            if (cityRes && cityRes.ok) {
-                const text = await cityRes.text();
-                if (!text.includes("<?xml") && !text.includes("<html")) {
-                    const cityData = JSON.parse(text);
-                    if (cityData?.elements?.[0]) {
-                        lat = cityData.elements[0].lat;
-                        lon = cityData.elements[0].lon;
-                    }
-                }
+            if (!coords) {
+                // Last ditch: try area-based count if coordinates fail
+                return this.getBusinessDensity(city, stateSuffix)
+                    .then(res => {
+                        const dominance: any = {};
+                        Object.entries(res).forEach(([label, count]) => {
+                            dominance[label] = { count, sector: "General Retail" };
+                        });
+                        return dominance;
+                    });
             }
 
-            if (!lat || !lon) return {};
-
-            const latLonFilter = `(around:16000,${lat},${lon})`;
+            const latLonFilter = `(around:16000,${coords.lat},${coords.lon})`;
 
             // Step 2: Bulk fetch all 50 categories using proximity
             // Combine tags for efficiency
