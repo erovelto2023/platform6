@@ -4,6 +4,14 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 import connectToDatabase from "../lib/db/connect";
 import Location from "../lib/db/models/Location";
 
+const ALL_STATES = [
+    "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "florida", "georgia",
+    "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland",
+    "massachusetts", "michigan", "minnesota", "mississippi", "missouri", "montana", "nebraska", "nevada", "new-hampshire", "new-jersey",
+    "new-mexico", "new-york", "north-carolina", "north-dakota", "ohio", "oklahoma", "oregon", "pennsylvania", "rhode-island", "south-carolina",
+    "south-dakota", "tennessee", "texas", "utah", "vermont", "virginia", "washington", "west-virginia", "wisconsin", "wyoming"
+];
+
 const STATES = [
     "alabama", "alaska", "arizona", "arkansas", "california", "colorado", "connecticut", "delaware", "florida", "georgia",
     "hawaii", "idaho", "illinois", "indiana", "iowa", "kansas", "kentucky", "louisiana", "maine", "maryland",
@@ -17,41 +25,37 @@ async function fetchStateNewspapers(stateSlug: string) {
     try {
         const response = await fetch(url);
         const html = await response.text();
-
+        
         const newspapers: any[] = [];
         const blocks = html.split(/<h3/);
-
+        
         for (let i = 1; i < blocks.length; i++) {
             const block = blocks[i];
-
+            
             // Extract title from the rest of the h3 tag
             const nameMatch = block.match(/.*?>(.*?)<\/h3>/);
             const name = nameMatch ? nameMatch[1].replace(/<[^>]*>?/gm, '').trim() : "";
-
+            
             // Extract first link that isn't an internal/social link
             const linkMatch = block.match(/href="(http[^"]+)"/);
             const link = linkMatch ? linkMatch[1].trim() : "";
-
+            
             // Extract first paragraph as description
             const descMatch = block.match(/<p.*?>(.*?)<\/p>/);
             const description = descMatch ? descMatch[1].replace(/<[^>]*>?/gm, '').trim() : "";
-
+            
             if (name && link && !link.includes('allyoucanread') && !link.includes('facebook') && !link.includes('twitter')) {
                 const lowerName = name.toLowerCase().trim();
                 const blacklist = ["allyoucanread", "statewide media", "regional media", "national media", "copyright", "©", "2001 - 2026", "visit publication"];
                 const isBlacklisted = blacklist.some(b => lowerName.includes(b));
-                const isStateName = STATES.some(s => s.replace(/-/g, ' ') === lowerName);
-
-                if (lowerName === 'wyoming') {
-                    console.log(`DEBUG: Found Wyoming. isStateName: ${isStateName}, isBlacklisted: ${isBlacklisted}`);
-                }
+                const isStateName = ALL_STATES.some(s => s.replace(/-/g, ' ') === lowerName);
 
                 if (!isBlacklisted && !isStateName && name.length > 3) {
                     newspapers.push({ name, url: link, description });
                 }
             }
         }
-
+        
         return newspapers;
     } catch (e) {
         console.error(`Failed to fetch ${stateSlug}:`, e);
@@ -70,10 +74,10 @@ async function seed() {
             if (newspapers.length === 0) continue;
 
             const cities = await Location.find({ stateSlug, type: 'city' });
-
+            
             for (const city of cities) {
-                const cityNews = newspapers.filter(n =>
-                    n.name.toLowerCase().includes(city.name.toLowerCase()) ||
+                const cityNews = newspapers.filter(n => 
+                    n.name.toLowerCase().includes(city.name.toLowerCase()) || 
                     n.description?.toLowerCase().includes(city.name.toLowerCase())
                 );
 
@@ -90,7 +94,6 @@ async function seed() {
             });
 
             console.log(`  Done with ${stateSlug}. Found ${newspapers.length} newspapers.`);
-            // Pause to avoid rate limits
             await new Promise(r => setTimeout(r, 1000));
         }
 
@@ -102,6 +105,4 @@ async function seed() {
     }
 }
 
-// Since I am in an agentic environment, I will run this for a few states first to verify.
-// The user can run the full script later.
 seed();

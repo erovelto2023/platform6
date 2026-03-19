@@ -6,14 +6,10 @@ import Location from "../lib/db/models/Location";
 
 async function check() {
     await connectToDatabase();
-    
-    console.log("Checking Alabama State...");
-    const al = await Location.findOne({ slug: "alabama", type: "state" });
-    if (al) {
-        console.log(`Newspapers count: ${al.newspapers?.length || 0}`);
-        al.newspapers?.forEach((n: any) => console.log(`- ${n.name} (${n.type})`));
+    const ny = await Location.findOne({ slug: "new-york", type: "state" });
+    if (ny) {
+        console.log("NY NEWS:", ny.newspapers?.map(n => n.name));
     }
-
     process.exit(0);
 }
 
