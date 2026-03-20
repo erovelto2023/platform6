@@ -127,6 +127,7 @@
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.10.8",
     "cheerio": "^1.0.0",
+    "csv-parse": "^6.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",
     "papaparse": "^5.5.3",
