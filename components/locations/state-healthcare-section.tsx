@@ -64,31 +64,37 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
         <div className="space-y-10">
             {/* Stats Overview */}
             {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="flex flex-wrap gap-4">
                     <StatCard 
                         label="Hospitals" 
                         value={stats.count?.toLocaleString() || '0'} 
                         icon={<Building2 size={20} />} 
                         color="blue"
                     />
-                    <StatCard 
-                        label="Total Beds" 
-                        value={(stats.staffedBeds || 0).toLocaleString()} 
-                        icon={<Bed size={20} />} 
-                        color="emerald"
-                    />
-                    <StatCard 
-                        label="Patient Days" 
-                        value={(stats.patientDays || 0).toLocaleString()} 
-                        icon={<Activity size={20} />} 
-                        color="purple"
-                    />
-                    <StatCard 
-                        label="Revenue" 
-                        value={stats.grossRevenue || 'N/A'} 
-                        icon={<DollarSign size={20} />} 
-                        color="amber"
-                    />
+                    {stats.staffedBeds > 0 && (
+                        <StatCard 
+                            label="Total Beds" 
+                            value={(stats.staffedBeds || 0).toLocaleString()} 
+                            icon={<Bed size={20} />} 
+                            color="emerald"
+                        />
+                    )}
+                    {stats.patientDays > 0 && (
+                        <StatCard 
+                            label="Patient Days" 
+                            value={(stats.patientDays || 0).toLocaleString()} 
+                            icon={<Activity size={20} />} 
+                            color="purple"
+                        />
+                    )}
+                    {stats.grossRevenue && stats.grossRevenue !== "$0" && stats.grossRevenue !== "0" && stats.grossRevenue !== "N/A" && (
+                        <StatCard 
+                            label="Revenue" 
+                            value={stats.grossRevenue || 'N/A'} 
+                            icon={<DollarSign size={20} />} 
+                            color="amber"
+                        />
+                    )}
                 </div>
             )}
 
