@@ -490,6 +490,25 @@ const enrichedData = [
     fax: "(561) 798-4053", website: "https://templetonco.com", licenseStatus: "Active",
     notes: "Verified via Yelp and Florida Institute of CPAs directory. Top South Florida accounting firm.", isFirm: true,
   },
+  // ── IOWA ──
+  {
+    licenseNumber: "5177", name: "Ted McElderry, CPA", city: "Council Bluffs", state: "IA",
+    address: "PO Box 1832 / 111 Antioch Dr, Council Bluffs, IA 51502-51503", phone: "(712) 323-6940",
+    licenseStatus: "Unverified", notes: "Listed via PTIN Directory and tax preparer directories. Sole proprietorship. Verify via Iowa Board: https://dial.iowa.gov/contacts/accountancy.",
+    isFirm: false,
+  },
+  {
+    licenseNumber: "5722", name: "Perkins, Derdowski & Associates, PLLC", city: "Clive", state: "IA",
+    address: "2636 NW 160th St, Clive, IA 50325", website: "https://cpa-perkins.com",
+    licenseStatus: "Merged", notes: "Firm merged with Elite Accounting & Financial Services, Inc. effective December 2021 per LinkedIn. Founded 1980. Verify current Iowa license status.",
+    isFirm: true,
+  },
+  {
+    licenseNumber: "5315", name: "Henry Wood, CPA", city: "Moville", state: "IA",
+    address: "324 South St, PO Box 421, Moville, IA 51039", phone: "(712) 873-3191",
+    licenseStatus: "Unverified", notes: "Listed via CPAdirectory and Experience.com. Sole proprietorship. Verify via Iowa Board.",
+    isFirm: false,
+  },
 ];
 // ─────────────────────────────────────────────────────────────────────────────
 
