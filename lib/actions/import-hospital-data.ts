@@ -8,6 +8,9 @@ import { delawareHospitals } from '../data/delaware-hospitals';
 import { floridaHospitals } from '../data/florida-hospitals';
 import { georgiaHospitals } from '../data/georgia-hospitals';
 import { hawaiiHospitals } from '../data/hawaii-hospitals';
+import { alabamaHospitals } from '../data/alabama-hospitals';
+import { alaskaHospitals } from '../data/alaska-hospitals';
+import { arizonaHospitals } from '../data/arizona-hospitals';
 import { idahoHospitals } from '../data/idaho-hospitals';
 import { indianaHospitals } from '../data/indiana-hospitals';
 import { iowaHospitals } from '../data/iowa-hospitals';
@@ -4200,3 +4203,159 @@ export async function importWyomingHospitals() {
 
 
 
+
+/**
+ * Import Alabama hospital data from CSV directly to database
+ */
+export async function importAlabamaHospitals() {
+    try {
+        await connectToDatabase();
+        
+        const alState = await Location.findOne({ slug: 'alabama', type: 'state' });
+        if (!alState) throw new Error("Alabama state not found");
+
+        const { MongoClient } = require('mongodb');
+        const client = new MongoClient(process.env.MONGODB_URI!);
+        
+        try {
+            await client.connect();
+            const db = client.db();
+            const locations = db.collection('locations');
+            
+            const totalBeds = alabamaHospitals.reduce((sum: number, h: any) => sum + (h.beds || 0), 0);
+            
+            await locations.updateOne(
+                { slug: 'alabama', type: 'state' },
+                { 
+                    $set: { 
+                        hospitals: alabamaHospitals,
+                        hospitalStats: {
+                            count: alabamaHospitals.length,
+                            staffedBeds: totalBeds,
+                            totalDischarges: 0,
+                            patientDays: 0,
+                            grossRevenue: "$0"
+                        }
+                    }
+                }
+            );
+        } finally {
+            await client.close();
+        }
+
+        safeRevalidatePath('/locations/alabama');
+
+        return { 
+            success: true, 
+            message: `Successfully imported ${alabamaHospitals.length} Alabama hospitals`,
+            count: alabamaHospitals.length
+        };
+    } catch (error: any) {
+        console.error("Error importing Alabama hospitals:", error);
+        return { success: false, error: error?.message || "Unknown error" };
+    }
+}
+
+/**
+ * Import Alaska hospital data from CSV directly to database
+ */
+export async function importAlaskaHospitals() {
+    try {
+        await connectToDatabase();
+        
+        const akState = await Location.findOne({ slug: 'alaska', type: 'state' });
+        if (!akState) throw new Error("Alaska state not found");
+
+        const { MongoClient } = require('mongodb');
+        const client = new MongoClient(process.env.MONGODB_URI!);
+        
+        try {
+            await client.connect();
+            const db = client.db();
+            const locations = db.collection('locations');
+            
+            const totalBeds = alaskaHospitals.reduce((sum: number, h: any) => sum + (h.beds || 0), 0);
+            
+            await locations.updateOne(
+                { slug: 'alaska', type: 'state' },
+                { 
+                    $set: { 
+                        hospitals: alaskaHospitals,
+                        hospitalStats: {
+                            count: alaskaHospitals.length,
+                            staffedBeds: totalBeds,
+                            totalDischarges: 0,
+                            patientDays: 0,
+                            grossRevenue: "$0"
+                        }
+                    }
+                }
+            );
+        } finally {
+            await client.close();
+        }
+
+        safeRevalidatePath('/locations/alaska');
+
+        return { 
+            success: true, 
+            message: `Successfully imported ${alaskaHospitals.length} Alaska hospitals`,
+            count: alaskaHospitals.length
+        };
+    } catch (error: any) {
+        console.error("Error importing Alaska hospitals:", error);
+        return { success: false, error: error?.message || "Unknown error" };
+    }
+}
+
+/**
+ * Import Arizona hospital data from CSV directly to database
+ */
+export async function importArizonaHospitals() {
+    try {
+        await connectToDatabase();
+        
+        const azState = await Location.findOne({ slug: 'arizona', type: 'state' });
+        if (!azState) throw new Error("Arizona state not found");
+
+        const { MongoClient } = require('mongodb');
+        const client = new MongoClient(process.env.MONGODB_URI!);
+        
+        try {
+            await client.connect();
+            const db = client.db();
+            const locations = db.collection('locations');
+            
+            const totalBeds = arizonaHospitals.reduce((sum: number, h: any) => sum + (h.beds || 0), 0);
+            
+            await locations.updateOne(
+                { slug: 'arizona', type: 'state' },
+                { 
+                    $set: { 
+                        hospitals: arizonaHospitals,
+                        hospitalStats: {
+                            count: arizonaHospitals.length,
+                            staffedBeds: totalBeds,
+                            totalDischarges: 0,
+                            patientDays: 0,
+                            grossRevenue: "$0"
+                        }
+                    }
+                }
+            );
+        } finally {
+            await client.close();
+        }
+
+        safeRevalidatePath('/locations/arizona');
+
+        return { 
+            success: true, 
+            message: `Successfully imported ${arizonaHospitals.length} Arizona hospitals`,
+            count: arizonaHospitals.length
+        };
+    } catch (error: any) {
+        console.error("Error importing Arizona hospitals:", error);
+        return { success: false, error: error?.message || "Unknown error" };
+    }
+}

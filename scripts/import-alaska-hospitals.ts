@@ -1,4 +1,4 @@
-import { importAlabamaHospitals } from '../lib/actions/import-hospital-data';
+import { importAlaskaHospitals } from '../lib/actions/import-hospital-data';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -6,8 +6,8 @@ import path from 'path';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 async function run() {
-    console.log("Starting Alabama hospital import...");
-    const result = await importAlabamaHospitals();
+    console.log("Starting Alaska hospital import...");
+    const result = await importAlaskaHospitals();
     console.log("Import result:", result);
     process.exit(result.success ? 0 : 1);
 }

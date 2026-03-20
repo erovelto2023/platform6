@@ -3,6 +3,9 @@ dotenv.config({ path: ".env.local" });
 
 import { 
     importArkansasHospitals,
+    importAlabamaHospitals,
+    importAlaskaHospitals,
+    importArizonaHospitals,
     importCaliforniaHospitals,
     importColoradoHospitals,
     importConnecticutHospitals,
@@ -52,11 +55,14 @@ import {
 } from '../lib/actions/import-hospital-data';
 
 async function runAllImports() {
-    console.log('--- Starting Master Hospital Import (47 States) ---');
+    console.log('--- Starting Master Hospital Import (50 States) ---');
     console.log('Target DB:', process.env.MONGODB_URI?.split('@').pop());
     
     const importers = [
         { name: 'Arkansas', fn: importArkansasHospitals },
+        { name: 'Alabama', fn: importAlabamaHospitals },
+        { name: 'Alaska', fn: importAlaskaHospitals },
+        { name: 'Arizona', fn: importArizonaHospitals },
         { name: 'California', fn: importCaliforniaHospitals },
         { name: 'Colorado', fn: importColoradoHospitals },
         { name: 'Connecticut', fn: importConnecticutHospitals },
