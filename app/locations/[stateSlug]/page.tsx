@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getLocation, getCitiesByState } from "@/lib/actions/location.actions";
+import { getLocation, getCitiesByState, syncHospitalData } from "@/lib/actions/location.actions";
 import { MapPin, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -452,13 +452,32 @@ export default async function StatePage({
     const { stateSlug } = await params;
     const { query } = await searchParams;
     
-    const state = await getLocation(stateSlug);
+    let state = await getLocation(stateSlug);
 
     if (!state) {
         notFound();
     }
     
     console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
+
+    // Auto-sync Hospital Data if missing or empty
+    if (!state.hospitals || state.hospitals.length === 0) {
+        try {
+            const result = await syncHospitalData(stateSlug, false);
+            if (!result.success) {
+                console.error(`[Sync Error] Hospital sync failed for ${stateSlug}:`, result.error);
+            } else {
+                console.log(`[Sync] Hospital sync successful for ${stateSlug}`);
+                // Reload state data to get updated hospitals
+                const updatedState = await getLocation(stateSlug);
+                if (updatedState) {
+                    state = updatedState;
+                }
+            }
+        } catch (error) {
+            console.error(`[Sync Error] Exception during hospital sync for ${stateSlug}:`, error);
+        }
+    }
 
     const cities = await getCitiesByState(stateSlug, query);
 

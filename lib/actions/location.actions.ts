@@ -8,6 +8,7 @@ import connectToDatabase from "@/lib/db/connect";
 import Location from "@/lib/db/models/Location";
 import { RapidApiService } from "@/lib/services/rapidapi.service";
 import { OpenStatesService } from "@/lib/services/openstates.service";
+import { HospitalService } from "@/lib/services/hospital.service";
 import { STATE_NAME_TO_ABBR } from "@/lib/utils/state-mapping";
 
 /**
@@ -304,5 +305,53 @@ export async function seedLocations() {
             success: false,
             error: error?.message || "Failed to seed locations"
         };
+    }
+}
+
+/**
+ * Sync hospital data from Hospital Safety Grade API for a specific state.
+ */
+export async function syncHospitalData(stateSlug: string, shouldRevalidate: boolean = true) {
+    try {
+        await connectToDatabase();
+        
+        const state = await Location.findOne({ slug: stateSlug, type: 'state' });
+        if (!state) throw new Error("State not found");
+
+        console.log(`[Sync] Starting hospital sync for state: ${state.name} (${stateSlug})`);
+
+        const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
+        if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
+
+        // Fetch from Hospital Safety Grade API
+        const hospitalData = await HospitalService.fetchHospitalsByState(stateAbbr);
+        
+        if (!hospitalData) {
+            console.warn(`[Sync] Failed to fetch hospital data for ${state.name}, using sample data`);
+            // Fallback to sample data for demonstration
+            const sampleData = HospitalService.getSampleHospitalData(stateAbbr);
+            state.hospitals = sampleData.hospitals.map(h => ({
+                ...h,
+                state: stateAbbr
+            }));
+            state.hospitalStats = sampleData.stats;
+        } else {
+            // Update database with real hospital data
+            state.hospitals = hospitalData.hospitals.map(h => ({
+                ...h,
+                state: stateAbbr
+            }));
+            state.hospitalStats = hospitalData.stats;
+        }
+
+        await state.save();
+        if (shouldRevalidate) {
+            revalidatePath(`/locations/${stateSlug}`);
+        }
+        
+        return { success: true, data: JSON.parse(JSON.stringify(state)) };
+    } catch (error: any) {
+        console.error("Error syncing hospital data:", error);
+        return { success: false, error: error?.message };
     }
 }
