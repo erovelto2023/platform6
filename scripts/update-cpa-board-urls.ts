@@ -4,72 +4,73 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
+// User-provided clean mappings
 const stateBoardUrls: Record<string, string> = {
-  "Alabama": "https://www.asbpa.alabama.gov/",
-  "Alaska": "https://nasba.org/exams/cpaexam/alaska/",
-  "Arizona": "https://www.azaccountancy.gov/Exam/FAQs.aspx#Q2",
-  "Arkansas": "https://www.asbpa.arkansas.gov/cpa-exam/",
-  "California": "https://dca.ca.gov/cba/applicants/cpa_exam_quick_tips.pdf",
-  "Colorado": "https://dpo.colorado.gov/Accountancy/Applications",
-  "Connecticut": "https://portal.ct.gov/DCP/Occupational-and-Professional-Division/Occupational--Profess/Certified-Public-Accountants#edexam",
-  "Delaware": "https://dpr.delaware.gov/boards/accountancy/",
-  "District of Columbia": "https://dcra.dc.gov/node/1423866",
-  "Florida": "http://www.myfloridalicense.com/DBPR/certified-public-accounting/education-requirements/",
-  "Georgia": "https://gsba.georgia.gov/",
-  "Hawaii": "https://cca.hawaii.gov/pvl/boards/accountancy/",
-  "Idaho": "https://isba.idaho.gov/ISBAPortal/BoardAdditional.aspx?Board=ISBA&BoardLinkID=700",
-  "Illinois": "https://www.ilboe.org/education-requirements/",
-  "Indiana": "https://www.in.gov/pla/professions/indiana-board-of-accountancy/",
-  "Iowa": "https://plb.iowa.gov/board/accountants/faqs",
-  "Kansas": "https://ksboa.kansas.gov/cpa-exam-info/cpa-exam-qa/",
-  "Kentucky": "https://cpa.ky.gov/examcandidates/Pages/Exam-Requirements.aspx",
-  "Louisiana": "http://cpaboard.state.la.us/what-is-the-%e2%80%9c150-hour-requirement%e2%80%9d-that-is-what-are-the-educational-requirements-to-qualify-to-sit-for-the-cpa-exam/",
-  "Maine": "https://www.maine.gov/pfr/professionallicensing/professions/accountancy/licensing/public-accountant-and-certified-public-accountant",
-  "Maryland": "https://www.dllr.state.md.us/license/cpa/cpaexam/cpaexameducreq.shtml",
-  "Michigan": "https://www.michigan.gov/lara/bureau-list/bpl/occ/prof/accountancy",
-  "Minnesota": "https://boa.state.mn.us/",
-  "Mississippi": "https://www.msbpa.ms.gov/",
-  "Missouri": "https://nasba.org/exams/cpaexam/missouri/",
-  "Montana": "https://boards.bsd.dli.mt.gov/public-accountants/license-information/",
-  "Nebraska": "https://nbpa.nebraska.gov/",
-  "Nevada": "https://www.nvaccountancy.com/exam_education.fx",
-  "New Hampshire": "https://nasba.org/licensure/nasbalicensing/new-hampshire/",
-  "New Jersey": "https://www.njconsumeraffairs.gov/acc/Pages/applications.aspx",
-  "New Mexico": "https://www.rld.nm.gov/boards-and-commissions/individual-boards-and-commissions/accountancy/instructors-training-requirements-and-continuing-education/",
-  "New York": "https://www.op.nysed.gov/certified-public-accountants",
-  "North Carolina": "https://nccpaboard.gov/applicants/exam-applicants/#heading-3",
-  "North Dakota": "https://www.ndsba.nd.gov/requirements-become-cpa",
-  "Ohio": "https://acc.ohio.gov/becoming-licensed",
-  "Oklahoma": "https://oklahoma.gov/oab/departments/examination/new-applicant-information.html",
-  "Oregon": "https://www.oregon.gov/BOA/Pages/License-Application-Requirements.aspx",
-  "Pennsylvania": "https://www.dos.pa.gov/ProfessionalLicensing/BoardsCommissions/Accountancy/Pages/CPA-licensure-requirements-snapshot.aspx",
-  "Puerto Rico": "https://nasba.org/exams/cpaexam/puertorico/",
-  "Rhode Island": "https://dbr.ri.gov/documents/divisions/accountancy/BOA-Frequently-Asked-Questions.pdf",
-  "South Carolina": "https://llr.sc.gov/acct/Info/CPAExamSittingReqs.aspx",
-  "South Dakota": "https://dlr.sd.gov/accountancy/cpa_exam.aspx#eligibility",
-  "Tennessee": "https://www.tn.gov/commerce/regboards/accountancy/license-applicant-resources/licensing-requirements-exams.html",
-  "Texas": "https://www.tsbpa.texas.gov/exam-qualification/examination-requirements.html",
-  "Utah": "https://nasba.org/exams/cpaexam/utah/?openform&038%3Bstateabbrev=UT",
-  "Vermont": "https://sos.vermont.gov/accountancy/forms-instructions/",
-  "Virgin Islands": "https://dlca.vi.gov/boardcertifications/steps/cparequirements/",
-  "Virginia": "https://boa.virginia.gov/",
-  "Washington": "https://acb.wa.gov/",
-  "West Virginia": "https://www.boa.wv.gov/exam/ExamFAQ.asp",
-  "Wisconsin": "https://dsps.wi.gov/Pages/Professions/Accountant/Default.aspx",
-  "Wyoming": "https://sites.google.com/a/wyo.gov/wyoming-cpa/exam-info"
+  "Alabama": "https://www.asbpa.alabama.gov",
+  "Alaska": "https://commerce.alaska.gov/web/cbpl/ProfessionalLicenses/BoardofPublicAccountancy",
+  "Arizona": "https://azaccountancy.gov",
+  "Arkansas": "https://www.ark.org/asbpa",
+  "California": "https://www.cba.ca.gov",
+  "Colorado": "https://dpo.colorado.gov/Accountancy",
+  "Connecticut": "https://portal.ct.gov/DCP/Professional-Licensing/Accountancy",
+  "Delaware": "https://dpr.delaware.gov/boards/accountancy",
+  "District of Columbia": "https://dcra.dc.gov/service/accountancy-board",
+  "Florida": "https://floridasboardofaccountancy.gov",
+  "Georgia": "https://gsba.georgia.gov",
+  "Hawaii": "https://cca.hawaii.gov/pvl/boards/accountancy",
+  "Idaho": "https://isba.idaho.gov",
+  "Illinois": "https://idfpr.illinois.gov", // User provided two for IL. Using the primary regulatory site.
+  "Indiana": "https://www.in.gov/pla/accountancy",
+  "Iowa": "https://accountancy.iowa.gov",
+  "Kansas": "https://ksboa.org",
+  "Kentucky": "https://cpa.ky.gov",
+  "Louisiana": "https://cpaboard.state.la.us",
+  "Maine": "https://www.maine.gov/pfr/professionallicensing/board_opa",
+  "Maryland": "https://www.mbon.org",
+  "Michigan": "https://www.michigan.gov/lara/bpl/accountancy",
+  "Minnesota": "https://mn.gov/accountancy",
+  "Mississippi": "https://www.msbpa.ms.gov",
+  "Missouri": "https://pr.mo.gov/boards/accountancy",
+  "Montana": "https://boards.bsd.dli.mt.gov/accountancy",
+  "Nebraska": "https://nebaccountancy.gov",
+  "Nevada": "https://nvaccountancy.com",
+  "New Hampshire": "https://www.oplc.nh.gov/accountancy",
+  "New Jersey": "https://www.njconsumeraffairs.gov/obo",
+  "New Mexico": "https://www.rld.nm.gov/accountancy",
+  "New York": "https://www.op.nysed.gov/professions/certified-public-accountants",
+  "North Carolina": "https://nccpaboard.gov",
+  "North Dakota": "https://www.nd.gov/ndaccountancy",
+  "Ohio": "https://accountancy.ohio.gov",
+  "Oklahoma": "https://oklahoma.gov/oab",
+  "Oregon": "https://www.oregon.gov/boa",
+  "Pennsylvania": "https://www.dos.pa.gov/ProfessionalLicensing/BoardsCommissions/Accountancy",
+  "Puerto Rico": "https://ddec.pr.gov/contabilidad",
+  "Rhode Island": "https://www.dbr.ri.gov/divisions/board-accountancy",
+  "South Carolina": "https://llr.sc.gov/accountancy",
+  "South Dakota": "https://sdboraccountancy.gov",
+  "Tennessee": "https://www.tn.gov/commerce/regboards/accountancy",
+  "Texas": "https://www.tsbpa.texas.gov",
+  "Utah": "https://dopl.utah.gov/licensing/types/accountancy",
+  "Vermont": "https://sos.vermont.gov/opr/boards/accountancy",
+  "Virgin Islands": "https://dlca.vi.gov/boards-commissions/accountancy-board",
+  "Virginia": "https://www.dpor.virginia.gov/Boards/Accountancy",
+  "Washington": "https://acb.wa.gov",
+  "West Virginia": "https://wvboa.wv.gov",
+  "Wisconsin": "https://dsps.wisconsin.gov/Boards/Accountancy",
+  "Wyoming": "https://cpa.wyo.gov"
 };
 
 const CPAListingSchema = new mongoose.Schema({
   name: { type: String, required: true },
   jurisdiction: { type: String },
   state: { type: String, required: true },
-  boardUrl: { type: String }, // NEW FIELD
+  boardUrl: { type: String },
 }, { timestamps: true, strict: false });
 
 const CPAListing = mongoose.models.CPAListing || mongoose.model("CPAListing", CPAListingSchema);
 
 async function updateStateUrls() {
-  console.log("🚀 Starting CPA Board URL updates...");
+  console.log("🚀 Starting CPA Board URL updates using user-provided list...");
   
   try {
     const mongoUri = process.env.MONGODB_URI;
@@ -81,14 +82,13 @@ async function updateStateUrls() {
     let updatedCount = 0;
     
     for (const [stateName, url] of Object.entries(stateBoardUrls)) {
-      console.log(`Updating all records for State/Jurisdiction: ${stateName} with URL: ${url}`);
+      console.log(`Updating all records for State: ${stateName} with clean URL: ${url}`);
       
       const result = await CPAListing.updateMany(
         { 
           $or: [
             { jurisdiction: new RegExp(`^${stateName}$`, 'i') }, 
             { state: new RegExp(`^${stateName}$`, 'i') },
-            // match state abbrev for WA etc if used
             { state: stateName === 'Washington' ? 'WA' : undefined }
           ] 
         },
