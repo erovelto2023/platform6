@@ -368,6 +368,13 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
 
         console.log(`[Sync] Starting hospital sync for state: ${state.name} (${stateSlug})`);
 
+        // Clear any existing corrupted hospital data
+        state.hospitals = undefined;
+        state.hospitalStats = undefined;
+        await state.save(); // Save the cleared state first
+        
+        console.log(`[DEBUG] Cleared existing hospital data`);
+
         const stateAbbr = STATE_NAME_TO_ABBR[state.name.toLowerCase()];
         if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
 
