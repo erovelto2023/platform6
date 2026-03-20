@@ -74,10 +74,10 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
     };
 
     return (
-        <Card className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden border-t-4 border-t-purple-500 shadow-2xl">
+        <Card className="bg-white border-slate-200 rounded-2xl overflow-hidden border-t-4 border-t-purple-500 shadow-2xl">
             <CardHeader className="pb-2 bg-purple-500/5">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                    <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-[#0e0021]">
                         <BrainCircuit className="h-4 w-4 text-purple-400" />
                         AI Business Advisor
                     </CardTitle>
@@ -86,23 +86,23 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800/50">
+                    <div className="p-4 bg-[#f8f9fa]/60 rounded-xl border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-3 w-3 text-emerald-400" />
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing Ceiling</p>
+                            <Target className="h-3 w-3 text-emerald-700" />
+                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Pricing Ceiling</p>
                         </div>
-                        <p className="text-sm font-black text-white italic uppercase tracking-tight">{pricingCeiling}</p>
+                        <p className="text-sm font-black text-[#0e0021] italic uppercase tracking-tight">{pricingCeiling}</p>
                         <p className="mt-2 text-[9px] font-bold text-slate-500 leading-relaxed uppercase italic">
                             {povertyRate > 20 ? "High price sensitivity detected. Focus on accessibility, payment plans, and high-perceived-value bundles." : "Strong middle-class base. Standard value-based pricing is recommended."}
                         </p>
                     </div>
 
-                    <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800/50">
+                    <div className="p-4 bg-[#f8f9fa]/60 rounded-xl border border-slate-200">
                         <div className="flex items-center gap-2 mb-2">
                             <ShoppingBag className="h-3 w-3 text-blue-400" />
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Shopping Habits</p>
+                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Shopping Habits</p>
                         </div>
-                        <p className="text-sm font-black text-white italic uppercase tracking-tight">
+                        <p className="text-sm font-black text-[#0e0021] italic uppercase tracking-tight">
                             {zeroVehiclePct > 5 ? "Transit/Delivery Dependent" : "Local Transit/Curbside Focus"}
                         </p>
                         <p className="mt-2 text-[9px] font-bold text-slate-500 leading-relaxed uppercase italic">
@@ -114,23 +114,23 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                 {/* Product Opportunities Section */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <ShoppingBag className="h-4 w-4 text-emerald-400" />
-                        <h4 className="text-[10px] font-black uppercase text-white tracking-widest">Productization Opportunities</h4>
+                        <ShoppingBag className="h-4 w-4 text-emerald-700" />
+                        <h4 className="text-[10px] font-black uppercase text-[#0e0021] tracking-widest">Productization Opportunities</h4>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {recommendations.map((rec) => (
-                            <div key={rec.type} className="p-3 bg-slate-950/40 border border-slate-800/80 rounded-2xl group hover:border-purple-500/50 transition-all">
+                            <div key={rec.type} className="p-3 bg-[#f8f9fa]/40 border border-slate-200/80 rounded-2xl group hover:border-purple-500/50 transition-all">
                                 <div className="flex items-center gap-2 mb-2">
                                     {rec.type === 'digital' && <Laptop className="h-3 w-3 text-blue-400" />}
-                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-400" />}
+                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-700" />}
                                     {rec.type === 'physical' && <Package className="h-3 w-3 text-amber-400" />}
                                     {rec.type === 'saas' && <Zap className="h-3 w-3 text-purple-400" />}
                                     <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider font-mono">{rec.type}</span>
                                 </div>
-                                <h5 className="text-[10px] font-black text-white uppercase italic leading-tight mb-1">{rec.title}</h5>
-                                <p className="text-[9px] text-slate-400 leading-tight mb-2 h-8 overflow-hidden line-clamp-2">{rec.description}</p>
-                                <div className="pt-2 border-t border-slate-800/50">
+                                <h5 className="text-[10px] font-black text-[#0e0021] uppercase italic leading-tight mb-1">{rec.title}</h5>
+                                <p className="text-[9px] text-slate-600 leading-tight mb-2 h-8 overflow-hidden line-clamp-2">{rec.description}</p>
+                                <div className="pt-2 border-t border-slate-200">
                                     <p className="text-[7.5px] font-bold text-slate-600 uppercase italic leading-tight group-hover:text-purple-400 transition-colors">
                                         Why: {rec.reason}
                                     </p>
@@ -144,12 +144,12 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4 text-amber-400" />
-                            <h4 className="text-[10px] font-black uppercase text-white tracking-widest">Generate Master Prompt</h4>
+                            <h4 className="text-[10px] font-black uppercase text-[#0e0021] tracking-widest">Generate Master Prompt</h4>
                         </div>
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className={`h-7 text-[9px] font-black uppercase tracking-tighter transition-all ${copied ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-slate-900 border-slate-800 text-slate-400 hover:text-purple-400"}`}
+                            className={`h-7 text-[9px] font-black uppercase tracking-tighter transition-all ${copied ? "bg-emerald-50 text-emerald-700 border-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:text-purple-400"}`}
                             onClick={copyToClipboard}
                         >
                             {copied ? <><ShieldCheck className="h-3 w-3 mr-1" /> Copied!</> : <><Copy className="h-3 w-3 mr-1" /> Copy Prompt</>}
@@ -158,7 +158,7 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                     
                     <div className="relative group">
                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative p-4 bg-slate-950 border border-slate-800 rounded-xl font-mono text-[9px] text-slate-400 whitespace-pre-wrap leading-relaxed select-all max-h-[250px] overflow-y-auto">
+                        <div className="relative p-4 bg-[#f8f9fa] border border-slate-200 rounded-xl font-mono text-[9px] text-slate-600 whitespace-pre-wrap leading-relaxed select-all max-h-[250px] overflow-y-auto">
                             {promptText}
                         </div>
                     </div>

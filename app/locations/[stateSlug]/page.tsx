@@ -12,6 +12,7 @@ import { StateEducationSection } from "@/components/locations/state-education-se
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByState } from "@/lib/actions/cpa.actions";
+import { MainNav } from "@/components/shared/MainNav";
 
 export const dynamic = 'force-dynamic';
 
@@ -520,29 +521,13 @@ const uniqueLabels = Array.from(new Set([
     const stateCPAs = await getCPAsByState(state.name);
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950">
-            {/* Header */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
-                            K
-                        </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
-                    </Link>
-                </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6">
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/locations">
-                        Directory
-                    </Link>
-                </nav>
-            </header>
+        <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
+            {/* Top Navigation Bar */}
+            <MainNav />
 
-            <main className="flex-1">
+            <main className="flex-1 mt-16">
                 {/* Hero Section */}
-                <section className="w-full py-12 md:py-20 bg-slate-950 relative overflow-hidden">
+                <section className="w-full py-12 md:py-20 bg-[#f8f9fa] relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_10%,rgba(124,58,237,0.1),transparent_50%)]" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <Link 
@@ -552,15 +537,15 @@ const uniqueLabels = Array.from(new Set([
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> All States
                         </Link>
                         <div className="text-left max-w-4xl">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-white uppercase italic leading-tight" suppressHydrationWarning>
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-[#0e0021] uppercase italic leading-tight" suppressHydrationWarning>
                                 {state.name} <span className="text-purple-500">Business Hub</span>
                             </h1>
-                            <p className="text-slate-400 text-lg md:text-xl mb-10 font-medium max-w-2xl" suppressHydrationWarning>
+                            <p className="text-slate-600 text-lg md:text-xl mb-10 font-medium max-w-2xl" suppressHydrationWarning>
                                 Discover all city-level business insights and local resources across the state of {state.name}.
                             </p>
                             
                             <div className="max-w-xl" suppressHydrationWarning>
-                                <Suspense fallback={<div className="h-12 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />}>
+                                <Suspense fallback={<div className="h-12 bg-white border border-slate-200 rounded-xl animate-pulse" />}>
                                     <Search placeholder={`Search cities in ${state.name}...`} />
                                 </Suspense>
                             </div>
@@ -569,13 +554,13 @@ const uniqueLabels = Array.from(new Set([
                 </section>
 
                 {/* Market & State Details Section */}
-                <section className="w-full py-12 bg-slate-900 min-h-[600px]">
+                <section className="w-full py-12 bg-white min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
                         {/* Recommended Resources / Rotating Banner */}
                         {products && products.length > 0 && (
                             <div className="mb-12 max-w-2xl mx-auto">
                                 <div className="flex items-center gap-3 mb-6 border-l-4 border-emerald-500 pl-4">
-                                    <h2 className="text-xl font-black uppercase italic tracking-tight text-white">
+                                    <h2 className="text-xl font-black uppercase italic tracking-tight text-[#0e0021]">
                                         Partner Recommendations
                                     </h2>
                                 </div>
@@ -584,24 +569,24 @@ const uniqueLabels = Array.from(new Set([
                         )}
 
                         <Tabs defaultValue="details" className="w-full">
-                            <TabsList className="bg-slate-950/50 border border-slate-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start flex-wrap h-auto">
-                                <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                            <TabsList className="bg-[#f8f9fa]/50 border border-slate-200 p-1 rounded-xl mb-10 w-full md:w-fit justify-start flex-wrap h-auto">
+                                <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                     State Details
                                 </TabsTrigger>
-                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                     Market Cities
                                 </TabsTrigger>
                                 {(state as any).educationalInstitutions?.length > 0 && (
-                                    <TabsTrigger value="education" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    <TabsTrigger value="education" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                         Education
                                     </TabsTrigger>
                                 )}
                                 {(hospitals.length > 0 || (state as any).hospitalStats) && (
-                                    <TabsTrigger value="healthcare" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    <TabsTrigger value="healthcare" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                         Healthcare
                                     </TabsTrigger>
                                 )}
-                                <TabsTrigger value="taxhub" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                <TabsTrigger value="taxhub" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                     Tax & Accounting
                                 </TabsTrigger>
                             </TabsList>
@@ -610,7 +595,7 @@ const uniqueLabels = Array.from(new Set([
                             <TabsContent value="details" className="space-y-8 w-full max-w-full" suppressHydrationWarning>
                                 <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-4 mb-4">
                                     <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">State Information Details</h2>
+                                        <h2 className="text-2xl font-black text-[#0e0021] uppercase italic tracking-tight">State Information Details</h2>
                                         <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Comprehensive Directory of State Heritage</p>
                                     </div>
                                 </div>
@@ -621,9 +606,9 @@ const uniqueLabels = Array.from(new Set([
                                         if (val === "Not Specified") return null;
                                         
                                         return (
-                                            <div key={label + idx} className="bg-slate-950/60 border border-slate-800/60 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/30 transition-colors">
+                                            <div key={label + idx} className="bg-[#f8f9fa]/60 border border-slate-200/60 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/30 transition-colors">
                                                 <div className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest mb-2">{label}</div>
-                                                <div className="text-sm font-bold text-slate-200" suppressHydrationWarning>
+                                                <div className="text-sm font-bold text-slate-800" suppressHydrationWarning>
                                                     {val}
                                                 </div>
                                             </div>
@@ -635,10 +620,10 @@ const uniqueLabels = Array.from(new Set([
                             {/* Cities Tab Content */}
                             <TabsContent value="cities" className="space-y-8">
                                 <div className="flex items-center justify-between mb-6 border-l-4 border-purple-500 pl-4">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
+                                    <h2 className="text-2xl font-black text-[#0e0021] uppercase italic tracking-tight">
                                         {query ? `Results for "${query}"` : 'Explore Market Locations'}
                                     </h2>
-                                    <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-800 px-3 py-1 rounded-full">
+                                    <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
                                         {cities.length} Cities Found
                                     </span>
                                 </div>
@@ -648,14 +633,14 @@ const uniqueLabels = Array.from(new Set([
                                         <Link 
                                             key={city.slug}
                                             href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-slate-800/40 hover:bg-slate-800 p-6 rounded-2xl border border-slate-700/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10 active:scale-95"
+                                            className="group relative overflow-hidden bg-white border-slate-200/50 hover:bg-slate-100 p-6 rounded-2xl border border-slate-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10 active:scale-95"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-all duration-300">
+                                                    <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-[#8422dc] transition-all duration-300">
                                                         <MapPin size={20} />
                                                     </div>
-                                                    <span className="font-bold text-slate-200 group-hover:text-white transition-colors">
+                                                    <span className="font-bold text-slate-800 group-hover:text-[#8422dc] transition-colors">
                                                         {city.name}
                                                     </span>
                                                 </div>
@@ -667,7 +652,7 @@ const uniqueLabels = Array.from(new Set([
                                 </div>
                                 
                                 {cities.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-700 bg-slate-800/20 rounded-[2rem] text-center">
+                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-300 bg-slate-50 rounded-[2rem] text-center">
                                         <SearchIcon className="h-12 w-12 text-slate-700 mb-4" />
                                         <h2 className="text-xl font-bold text-slate-500 uppercase italic">No Cities Found</h2>
                                         <p className="text-slate-600 mt-2 max-w-sm text-sm">
@@ -699,7 +684,7 @@ const uniqueLabels = Array.from(new Set([
                             <TabsContent value="taxhub" className="space-y-8">
                                 <div className="flex items-center justify-between mb-6 border-l-4 border-emerald-500 pl-4">
                                     <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Verified CPAs in {state.name}</h2>
+                                        <h2 className="text-2xl font-black text-[#0e0021] uppercase italic tracking-tight">Verified CPAs in {state.name}</h2>
                                         <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">State-Wide Professional Directory</p>
                                     </div>
                                 </div>
@@ -715,7 +700,7 @@ const uniqueLabels = Array.from(new Set([
             </main>
 
             {/* Footer */}
-            <footer className="py-12 border-t border-slate-800 bg-slate-950">
+            <footer className="py-12 border-t border-slate-200 bg-[#f8f9fa]">
                 <div className="container px-4 md:px-6 mx-auto text-center">
                     <p className="text-xs text-slate-500 font-bold tracking-widest uppercase" suppressHydrationWarning>
                         © 2025 K Business Academy. All rights reserved.

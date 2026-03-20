@@ -164,7 +164,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
             <div className="space-y-6">
                 {/* Header */}
                 <div className="border-l-4 border-rose-500 pl-4">
-                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
+                    <h2 className="text-2xl font-black text-[#0e0021] uppercase italic tracking-tight">
                         Medical Facilities
                     </h2>
                     <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
@@ -180,7 +180,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         placeholder="Search hospitals or cities..."
-                        className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-rose-500 transition-colors"
+                        className="w-full bg-[#f8f9fa]/60 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-600 focus:outline-none focus:border-rose-500 transition-colors"
                     />
                 </div>
 
@@ -190,14 +190,14 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                         {filtered.map((hosp, idx) => (
                             <div
                                 key={idx}
-                                className="group flex flex-col justify-between bg-slate-950/60 border border-slate-800/60 hover:border-rose-500/40 rounded-xl p-4 transition-all duration-200 hover:bg-slate-900"
+                                className="group flex flex-col justify-between bg-[#f8f9fa]/60 border border-slate-200/60 hover:border-rose-500/40 rounded-xl p-4 transition-all duration-200 hover:bg-white"
                             >
                                 <div className="space-y-3">
-                                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:bg-rose-500 group-hover:text-white transition-all">
+                                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 group-hover:bg-rose-500 group-hover:text-[#8422dc] transition-all">
                                         <Activity size={15} />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors leading-tight line-clamp-2">
+                                        <p className="text-sm font-semibold text-slate-800 group-hover:text-[#8422dc] transition-colors leading-tight line-clamp-2">
                                             {hosp.name}
                                         </p>
                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide mt-1">
@@ -210,28 +210,28 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                     {hosp.address && (
                                         <div className="flex items-start gap-1.5">
                                             <MapPin className="h-3 w-3 text-slate-500 mt-0.5 flex-shrink-0" />
-                                            <span className="text-[10px] text-slate-400 leading-tight">{hosp.address}</span>
+                                            <span className="text-[10px] text-slate-600 leading-tight">{hosp.address}</span>
                                         </div>
                                     )}
                                     {hosp.phone && (
                                         <div className="flex items-center gap-1.5">
                                             <Phone className="h-3 w-3 text-slate-500 flex-shrink-0" />
-                                            <span className="text-[10px] text-slate-400">{hosp.phone}</span>
+                                            <span className="text-[10px] text-slate-600">{hosp.phone}</span>
                                         </div>
                                     )}
                                 </div>
                                 
-                                <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                                <div className="mt-4 pt-4 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-500 font-medium">
                                     <span className="truncate max-w-[120px]">{hosp.type || 'General'}</span>
                                     <div className="flex items-center gap-2">
                                         {hosp.beds && hosp.beds > 0 && (
-                                            <span className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">
+                                            <span className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">
                                                 {hosp.beds} Beds
                                             </span>
                                         )}
                                         {hosp.safetyGrade && (
                                             <span className={`px-1.5 py-0.5 rounded font-bold ${
-                                                hosp.safetyGrade === 'A' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                hosp.safetyGrade === 'A' ? 'bg-emerald-500/20 text-emerald-700' :
                                                 hosp.safetyGrade === 'B' ? 'bg-blue-500/20 text-blue-400' :
                                                 hosp.safetyGrade === 'C' ? 'bg-yellow-500/20 text-yellow-400' :
                                                 hosp.safetyGrade === 'D' ? 'bg-orange-500/20 text-orange-400' :
@@ -245,7 +245,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                                 href={hosp.website} 
                                                 target="_blank" 
                                                 rel="noopener noreferrer" 
-                                                className="text-slate-400 hover:text-white transition-colors"
+                                                className="text-slate-600 hover:text-[#8422dc] transition-colors"
                                                 title="Visit hospital website"
                                             >
                                                 <ExternalLink size={12} />
@@ -268,7 +268,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center p-16 border border-dashed border-slate-700 bg-slate-800/20 rounded-2xl text-center">
+                    <div className="flex flex-col items-center justify-center p-16 border border-dashed border-slate-300 bg-slate-50 rounded-2xl text-center">
                         <Activity className="h-10 w-10 text-slate-700 mb-3" />
                         <p className="text-slate-500 font-bold uppercase italic text-sm">
                             No facilities match your search
@@ -283,20 +283,20 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
 function StatCard({ label, value, icon, color, sub }: { label: string, value: string, icon: React.ReactNode, color: 'blue' | 'emerald' | 'purple' | 'amber', sub?: string }) {
     const colorClasses = {
         blue: 'text-blue-400 bg-blue-500/10',
-        emerald: 'text-emerald-400 bg-emerald-500/10',
+        emerald: 'text-emerald-700 bg-emerald-50',
         purple: 'text-purple-400 bg-purple-500/10',
         amber: 'text-amber-400 bg-amber-500/10',
     };
 
     return (
-        <div className="bg-slate-950/60 border border-slate-800 p-5 rounded-2xl relative overflow-hidden group">
+        <div className="bg-[#f8f9fa]/60 border border-slate-200 p-5 rounded-2xl relative overflow-hidden group">
             <div className={`w-10 h-10 rounded-xl ${colorClasses[color]} flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}>
                 {icon}
             </div>
             <div>
                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">{label}</p>
                 <div className="flex items-baseline gap-2 mt-1">
-                    <h3 className="text-xl font-black text-white italic">{value}</h3>
+                    <h3 className="text-xl font-black text-[#0e0021] italic">{value}</h3>
                     {sub && <span className="text-[9px] text-slate-600 font-bold uppercase">{sub}</span>}
                 </div>
             </div>

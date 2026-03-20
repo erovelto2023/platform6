@@ -26,7 +26,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
     return (
         <div className="space-y-12 mt-12">
             <div className="flex items-center gap-3 mb-8 border-l-4 border-blue-500 pl-4">
-                <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                     Market Pulse (Live)
                 </h2>
                 <Badge variant="outline" className="bg-blue-500/10 text-blue-400 border-blue-500/20 text-[8px] uppercase font-black">Real-Time Data</Badge>
@@ -35,22 +35,22 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Search Intent & Momentum */}
                 <div className="lg:col-span-3 space-y-8">
-                    <Card className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden border-t-4 border-t-blue-500">
+                    <Card className="bg-white border-slate-200 rounded-2xl overflow-hidden border-t-4 border-t-blue-500">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
+                            <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-[#0e0021]">
                                 <Search className="h-4 w-4 text-blue-400" />
                                 What People are Searching For in {cityName}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 text-white">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 text-[#0e0021]">
                                 {searchIntent.length > 0 ? (
                                     searchIntent.slice(0, 8).map((intent, i) => (
-                                        <div key={i} className="flex items-center gap-3 p-3 bg-slate-950/40 border border-slate-800 rounded-xl group hover:border-blue-500/30 transition-all">
+                                        <div key={i} className="flex items-center gap-3 p-3 bg-[#f8f9fa]/40 border border-slate-200 rounded-xl group hover:border-blue-500/30 transition-all">
                                             <div className="h-6 w-6 rounded-full bg-blue-500/10 flex items-center justify-center text-[10px] font-black text-blue-400 group-hover:bg-blue-500/20">
                                                 {i + 1}
                                             </div>
-                                            <span className="text-[10px] font-bold text-slate-300 uppercase italic tracking-tight leading-none truncate">
+                                            <span className="text-[10px] font-bold text-slate-700 uppercase italic tracking-tight leading-none truncate">
                                                 {intent}
                                             </span>
                                         </div>
@@ -70,14 +70,14 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
-                                            <p className="text-[11px] font-black text-white uppercase italic mb-1">Navigation & Intent</p>
+                                            <p className="text-[11px] font-black text-[#0e0021] uppercase italic mb-1">Navigation & Intent</p>
                                             <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">
                                                 High volume for 'map', 'directions', or 'weather' suggests a transit-heavy or tourist-prone audience. 
                                                 <span className="text-blue-400/80 block mt-1 underline">Action: Focus on location-based mobile SEO & local business listings.</span>
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-[11px] font-black text-white uppercase italic mb-1">Community Awareness</p>
+                                            <p className="text-[11px] font-black text-[#0e0021] uppercase italic mb-1">Community Awareness</p>
                                             <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">
                                                 Queries for 'news' or 'population' point to an active, civic-minded audience.
                                                 <span className="text-blue-400/80 block mt-1 underline">Action: Best for local affiliate news sites & community-driven products.</span>
@@ -90,17 +90,17 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                     </Card>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-emerald-500">
+                         <Card className="bg-white border-slate-200 rounded-2xl border-l-4 border-l-emerald-500">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-[10px] font-black uppercase text-slate-500">City Momentum (30 Days)</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="text-3xl font-black text-white italic tracking-tighter">
+                                <div className="text-3xl font-black text-[#0e0021] italic tracking-tighter">
                                     {monthlyMomentum > 0 ? monthlyMomentum.toLocaleString() : "---"}
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
-                                    <TrendingUp className="h-3 w-3 text-emerald-400" />
-                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-400">Monthly Wiki Traffic</span>
+                                    <TrendingUp className="h-3 w-3 text-emerald-700" />
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-emerald-700">Monthly Wiki Traffic</span>
                                 </div>
                                 <p className="mt-4 text-[9px] font-bold text-slate-600 uppercase italic leading-tight">
                                     Measures "Curiosity Index". High traffic suggests outsiders or potential movers researching {cityName}.
@@ -108,7 +108,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                             </CardContent>
                         </Card>
 
-                        <Card className="bg-slate-900/40 border-slate-800 rounded-2xl border-l-4 border-l-blue-500">
+                        <Card className="bg-white border-slate-200 rounded-2xl border-l-4 border-l-blue-500">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-[10px] font-black uppercase text-slate-500">Opportunity Score</CardTitle>
                             </CardHeader>
@@ -129,10 +129,10 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
             {/* Market Dominance Section - New Dashboard */}
             <div className="mt-12">
                 <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
-                    <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                    <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                         Market Dominance & Gap Analysis
                     </h2>
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] uppercase font-black tracking-widest">50-Category Scan</Badge>
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-500/20 text-[8px] uppercase font-black tracking-widest">50-Category Scan</Badge>
                 </div>
                 <MarketDominance dominance={data?.dominance} cityName={cityName} />
             </div>
@@ -141,7 +141,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
             {data?.competitors && (
                 <section className="mb-12">
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-amber-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                             Competitive Landscape
                         </h2>
                         <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-[8px] uppercase font-black tracking-widest">Market Density</Badge>
@@ -155,17 +155,17 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                         ].map((niche) => {
                             const list = (data.competitors as any)[niche.key] || [];
                             const saturation = list.length === 0 ? "Untapped" : list.length < 3 ? "Low" : "Saturated";
-                            const satColor = saturation === "Untapped" ? "text-emerald-400" : saturation === "Low" ? "text-blue-400" : "text-amber-400";
+                            const satColor = saturation === "Untapped" ? "text-emerald-700" : saturation === "Low" ? "text-blue-400" : "text-amber-400";
 
                             return (
-                                <Card key={niche.key} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden border-t-2 border-t-slate-800 hover:border-amber-500/20 transition-all">
+                                <Card key={niche.key} className="bg-white border-slate-200 rounded-2xl overflow-hidden border-t-2 border-t-slate-800 hover:border-amber-500/20 transition-all">
                                     <CardHeader className="pb-2">
                                         <div className="flex items-center justify-between">
                                             <CardTitle className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-2">
                                                 <Target className="h-3 w-3" />
                                                 {niche.label}
                                             </CardTitle>
-                                            <Badge className={`bg-slate-950 text-[8px] font-black uppercase border-slate-800 ${satColor}`}>
+                                            <Badge className={`bg-[#f8f9fa] text-[8px] font-black uppercase border-slate-200 ${satColor}`}>
                                                 {saturation}
                                             </Badge>
                                         </div>
@@ -174,7 +174,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                         {list.length > 0 ? (
                                             <ul className="space-y-1.5 min-h-[100px]">
                                                 {list.slice(0, 5).map((name: string, j: number) => (
-                                                    <li key={j} className="text-[11px] font-bold text-white flex items-center gap-2">
+                                                    <li key={j} className="text-[11px] font-bold text-[#0e0021] flex items-center gap-2">
                                                         <div className={`h-1.5 w-1.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] ${
                                                             niche.key === 'parenting' ? 'bg-purple-500' :
                                                             niche.key === 'seniors' ? 'bg-blue-500' : 'bg-emerald-500'
@@ -189,8 +189,8 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                                 )}
                                             </ul>
                                         ) : (
-                                            <div className="py-8 text-center border-2 border-dashed border-slate-800/40 rounded-xl">
-                                                <p className="text-[10px] font-black text-emerald-400/60 uppercase tracking-widest italic leading-tight">
+                                            <div className="py-8 text-center border-2 border-dashed border-slate-200/40 rounded-xl">
+                                                <p className="text-[10px] font-black text-emerald-700/60 uppercase tracking-widest italic leading-tight">
                                                     No direct competitors<br/>found in OSM data
                                                 </p>
                                             </div>
@@ -212,16 +212,16 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
             {newspapers.length > 0 && (
                 <section>
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-rose-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                             Local Media & Press
                         </h2>
                         <Badge variant="outline" className="bg-rose-500/10 text-rose-400 border-rose-500/20 text-[8px] uppercase font-black">Ad Targeting</Badge>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {newspapers.map((paper, i) => (
-                            <Card key={i} className="bg-slate-900/40 border-slate-800 rounded-2xl hover:border-rose-500/30 transition-all group">
+                            <Card key={i} className="bg-white border-slate-200 rounded-2xl hover:border-rose-500/30 transition-all group">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-black uppercase text-white group-hover:text-rose-400 transition-colors">
+                                    <CardTitle className="text-sm font-black uppercase text-[#0e0021] group-hover:text-rose-400 transition-colors">
                                         <a href={paper.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
                                             {paper.name}
                                             <Search className="h-3 w-3 opacity-0 group-hover:opacity-100" />
@@ -230,7 +230,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                     <div className="text-[8px] font-black uppercase tracking-widest text-slate-600">{paper.type || 'Local'} Media</div>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed line-clamp-3 italic">
+                                    <p className="text-[10px] text-slate-600 font-medium leading-relaxed line-clamp-3 italic">
                                         {paper.description || "Top source for local news and community happenings."}
                                     </p>
                                     <a 
@@ -248,7 +248,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                 </section>
             )}
 
-            <div className="p-6 bg-slate-900/20 border border-slate-800 rounded-2xl flex items-start gap-3">
+            <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-500 mt-1" />
                 <p className="text-[10px] font-medium text-slate-500 leading-relaxed uppercase">
                     Market Pulse uses 100% free and open data from **Google Autocomplete**, **Wikimedia**, and **OpenStreetMap**. Unlike Census data which is historical, these indicators reflect real-time momentum.

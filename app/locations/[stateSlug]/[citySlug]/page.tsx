@@ -11,6 +11,7 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
+import { MainNav } from "@/components/shared/MainNav";
 
 export const dynamic = 'force-dynamic';
 
@@ -86,7 +87,9 @@ export default async function CityPage({
     const displayNewspapers = Array.from(uniqueNewspapersMap.values());
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950 text-white p-6 md:p-12 lg:p-20">
+        <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-[#0e0021]">
+            <MainNav />
+            <div className="pt-24 px-6 md:px-12 lg:px-20">
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
@@ -113,7 +116,7 @@ export default async function CityPage({
                 {/* Census Data Insight Dashboard */}
                 <section>
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                             Market Indicators
                         </h2>
                     </div>
@@ -131,13 +134,13 @@ export default async function CityPage({
                 <section id="tax-directory">
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
                         <div className="flex flex-col">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white leading-tight">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021] leading-tight">
                                 Tax & Accounting Hub
                             </h2>
                             <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Verified Local Experts</p>
                         </div>
-                        <div className="ml-auto p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                            <Calculator className="w-5 h-5 text-emerald-400" />
+                        <div className="ml-auto p-2 bg-emerald-50 rounded-xl border border-emerald-500/20">
+                            <Calculator className="w-5 h-5 text-emerald-700" />
                         </div>
                     </div>
                     
@@ -152,7 +155,7 @@ export default async function CityPage({
                 {products && products.length > 0 && (
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-400 pl-4">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
                                 Recommended Resources
                             </h2>
                         </div>
@@ -163,18 +166,19 @@ export default async function CityPage({
                 )}
 
                 <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
-                    <h4 className="text-xl font-black uppercase text-emerald-400 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
-                    <p className="text-slate-400 font-medium italic max-w-2xl mx-auto text-sm">
+                    <h4 className="text-xl font-black uppercase text-emerald-700 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
+                    <p className="text-slate-600 font-medium italic max-w-2xl mx-auto text-sm">
                         Use the data above to determine your product market fit. Whether it&apos;s a $50 guide for toddlers or a $10,000 premium course for high-earning seniors, {city.name} has clear signals for your next big move.
                     </p>
                 </section>
             </main>
 
-            <footer className="mt-20 pt-8 border-t border-slate-900">
+            <footer className="mt-20 pt-8 border-t border-slate-200">
                 <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">
                     © 2025 K Business Academy. Powered by US Census Bureau Data.
                 </p>
             </footer>
+            </div>
         </div>
     );
 }

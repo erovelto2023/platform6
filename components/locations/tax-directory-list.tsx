@@ -49,7 +49,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
 
   if (!listings || listings.length === 0) {
     return (
-      <div className="p-12 border border-dashed border-slate-800 rounded-[2.5rem] bg-slate-900/10 text-center">
+      <div className="p-12 border border-dashed border-slate-200 rounded-[2.5rem] bg-slate-50 text-center">
         <Calculator className="w-12 h-12 text-slate-700 mx-auto mb-4 opacity-20" />
         <h3 className="text-xl font-black uppercase italic text-slate-500">Tax Directory Initializing</h3>
         <p className="text-slate-600 text-xs font-bold uppercase tracking-widest mt-2 max-w-sm mx-auto leading-relaxed">
@@ -62,13 +62,13 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
   return (
     <div className="space-y-8">
       {/* Directory Search & Stats Bar */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-4 bg-slate-900/40 border border-slate-800 rounded-2xl">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-4 bg-white border border-slate-200 rounded-2xl">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-            <Scale className="w-5 h-5 text-emerald-400" />
+          <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-500/20">
+            <Scale className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-white uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
+            <h4 className="text-sm font-black text-[#0e0021] uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Found in {cityName}, {stateName}</p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
           <input 
             type="text" 
             placeholder="Search by name..." 
-            className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
+            className="w-full bg-[#f8f9fa] border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-[#0e0021] placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -88,36 +88,36 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
       {/* Grid of CPA Listings */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredListings.slice(0, 51).map((cpa) => (
-          <Card key={cpa._id} className="bg-slate-900/40 border-slate-800 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all border-b-2 border-b-emerald-500/20 flex flex-col group">
+          <Card key={cpa._id} className="bg-white border-slate-200 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition-all border-b-2 border-b-emerald-500/20 flex flex-col group">
             <CardHeader className="p-5 pb-0 flex flex-row items-start justify-between gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] uppercase font-black px-1.5 py-0">
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-500/20 text-[8px] uppercase font-black px-1.5 py-0">
                     {cpa.isFirm ? "CPA FIRM" : "INDIVIDUAL CPA"}
                   </Badge>
                   {cpa.licenseNumber && (
                     <span className="text-[8px] font-black text-slate-600 uppercase">#{cpa.licenseNumber}</span>
                   )}
                 </div>
-                <CardTitle className="text-base font-black text-white leading-tight uppercase italic group-hover:text-emerald-400 transition-colors line-clamp-2 min-h-[3rem]">
+                <CardTitle className="text-base font-black text-[#0e0021] leading-tight uppercase italic group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[3rem]">
                   {cpa.name}
                 </CardTitle>
               </div>
-              <div className="p-2 bg-slate-950/60 rounded-xl border border-slate-800 shrink-0">
+              <div className="p-2 bg-[#f8f9fa]/60 rounded-xl border border-slate-200 shrink-0">
                 <Building2 className="w-4 h-4 text-slate-500" />
               </div>
             </CardHeader>
             
             <CardContent className="p-5 pt-4 flex-1 flex flex-col gap-4">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase">
+                <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
                   <MapPin className="w-3 h-3 text-emerald-500/50" />
                   {cpa.city}, {cpa.state}
                 </div>
                 {cpa.services && cpa.services.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {cpa.services.map((s: string) => (
-                      <Badge key={s} variant="secondary" className="bg-slate-800 text-slate-400 text-[8px] font-black px-2 py-0">
+                      <Badge key={s} variant="secondary" className="bg-slate-100 text-slate-600 text-[8px] font-black px-2 py-0">
                         {s}
                       </Badge>
                     ))}
@@ -125,12 +125,12 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                 )}
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-800/50 grid grid-cols-2 gap-2">
+              <div className="mt-auto pt-4 border-t border-slate-200 grid grid-cols-2 gap-2">
                 {cpa.boardUrl && (
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="col-span-2 h-8 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-white transition-all group/btn"
+                    className="col-span-2 h-8 bg-emerald-50 border-emerald-500/30 text-emerald-700 text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-[#8422dc] transition-all group/btn"
                     onClick={() => window.open(cpa.boardUrl, '_blank')}
                   >
                     <ShieldCheck className="w-3 h-3 mr-2 group-hover/btn:scale-110 transition-transform" />
@@ -141,7 +141,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className={`h-8 bg-slate-950 border-slate-800 text-slate-400 text-[10px] font-black uppercase hover:text-emerald-400 hover:border-emerald-500/30 transition-all group/btn ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
+                  className={`h-8 bg-[#f8f9fa] border-slate-200 text-slate-600 text-[10px] font-black uppercase hover:text-emerald-700 hover:border-emerald-500/30 transition-all group/btn ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
                   onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(cpa.name + ' CPA ' + cpa.city)}`, '_blank')}
                 >
                   <Search className="w-3 h-3 mr-1.5 group-hover/btn:scale-110" />
@@ -162,7 +162,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                     disabled 
                     variant="ghost" 
                     size="sm" 
-                    className={`h-8 text-slate-700 text-[10px] font-black uppercase bg-slate-900/40 cursor-not-allowed ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
+                    className={`h-8 text-slate-700 text-[10px] font-black uppercase bg-white cursor-not-allowed ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
                   >
                     <Phone className="w-3 h-3 mr-1.5" />
                     Pending
@@ -175,9 +175,9 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
       </div>
 
       {filteredListings.length > 51 && (
-        <div className="p-8 border border-slate-800 rounded-2xl bg-slate-900/20 text-center">
+        <div className="p-8 border border-slate-200 rounded-2xl bg-slate-50 text-center">
             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest italic mb-4">Displaying top results for {cityName}. Showing 51 of {filteredListings.length} total firms.</p>
-            <Button variant="outline" className="border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 uppercase font-black text-xs tracking-widest transition-all">
+            <Button variant="outline" className="border-emerald-500/20 text-emerald-700 hover:bg-emerald-50 uppercase font-black text-xs tracking-widest transition-all">
                 Load All Local Experts <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
         </div>
