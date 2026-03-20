@@ -145,7 +145,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                     </div>
                                     <div className="flex items-center justify-between p-2 bg-slate-900/60 rounded-xl border border-slate-800">
                                         <span className="text-[9px] font-black text-slate-500 uppercase">Area Codes</span>
-                                        <div className="flex gap-1">
+                                        <div className="flex flex-wrap gap-1 justify-end max-w-[120px]">
                                             {areaCodes.length > 0 ? areaCodes.map(ac => (
                                                 <Badge key={ac} variant="outline" className="text-[9px] h-4 bg-purple-500/10 border-purple-500/20 text-purple-400">{ac}</Badge>
                                             )) : <span className="text-[9px] font-bold text-slate-600 italic">No data</span>}

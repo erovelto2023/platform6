@@ -5,10 +5,12 @@ import { CensusService } from "@/lib/services/census.service";
 import { MarketService } from "@/lib/services/market.service";
 import { CityCensusStats } from "@/components/locations/city-census-stats";
 import { MarketPulse } from "@/components/locations/market-pulse";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calculator } from "lucide-react";
 import { Metadata } from "next";
 import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
+import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
+import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,9 +44,10 @@ export default async function CityPage({
         notFound();
     }
 
-// Fetch live market data from US Census
+    // Fetch live market data from US Census
     const censusData = await CensusService.getCityDemographics(city.name, state.name);
     const { products } = await getDirectoryProducts();
+    const cpas = await getCPAsByLocation(city.name, state.name);
 
     // Fetch Market Pulse (Free/Open Data)
     // Map state name to code for Ticketmaster/OSM
@@ -106,7 +109,7 @@ export default async function CityPage({
                 </div>
             </header>
 
-            <main className="flex-1 space-y-12">
+            <main className="flex-1 space-y-20">
                 {/* Census Data Insight Dashboard */}
                 <section>
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-500 pl-4">
@@ -124,10 +127,31 @@ export default async function CityPage({
                     <MarketPulse data={marketPulse} cityName={city.name} newspapers={displayNewspapers} />
                 </section>
 
+                {/* Tax & Accounting Hub */}
+                <section id="tax-directory">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                        <div className="flex flex-col">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white leading-tight">
+                                Tax & Accounting Hub
+                            </h2>
+                            <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Verified Local Experts</p>
+                        </div>
+                        <div className="ml-auto p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                            <Calculator className="w-5 h-5 text-emerald-400" />
+                        </div>
+                    </div>
+                    
+                    <TaxDirectoryList 
+                        listings={cpas} 
+                        cityName={city.name} 
+                        stateName={state.name} 
+                    />
+                </section>
+
                 {/* Recommended Resources / Rotating Banner */}
                 {products && products.length > 0 && (
                     <section className="mb-12">
-                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                        <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-400 pl-4">
                             <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
                                 Recommended Resources
                             </h2>

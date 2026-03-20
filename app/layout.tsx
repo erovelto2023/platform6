@@ -2,7 +2,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
@@ -25,6 +25,11 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "K Business Academy",
   description: "All-in-one educational and business-building platform.",
@@ -42,7 +47,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning className="scroll-smooth">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} antialiased`}
           suppressHydrationWarning
         >
           <NextSSRPlugin

@@ -10,6 +10,8 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { StateEducationSection } from "@/components/locations/state-education-section";
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
+import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
+import { getCPAsByState } from "@/lib/actions/cpa.actions";
 
 export const dynamic = 'force-dynamic';
 
@@ -515,6 +517,7 @@ const uniqueLabels = Array.from(new Set([
 
     const stateDoc = await getLocation(stateSlug, "");
     const { products } = await getDirectoryProducts();
+    const stateCPAs = await getCPAsByState(state.name);
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950">
@@ -598,6 +601,9 @@ const uniqueLabels = Array.from(new Set([
                                         Healthcare
                                     </TabsTrigger>
                                 )}
+                                <TabsTrigger value="taxhub" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                    Tax & Accounting
+                                </TabsTrigger>
                             </TabsList>
 
                             {/* State Details Tab Content */}
@@ -689,6 +695,20 @@ const uniqueLabels = Array.from(new Set([
                                     />
                                 </TabsContent>
                             )}
+                            {/* Tax Hub Tab */}
+                            <TabsContent value="taxhub" className="space-y-8">
+                                <div className="flex items-center justify-between mb-6 border-l-4 border-emerald-500 pl-4">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Verified CPAs in {state.name}</h2>
+                                        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">State-Wide Professional Directory</p>
+                                    </div>
+                                </div>
+                                <TaxDirectoryList 
+                                    listings={stateCPAs} 
+                                    cityName={state.name} 
+                                    stateName={state.name} 
+                                />
+                            </TabsContent>
                         </Tabs>
                     </div>
                 </section>
