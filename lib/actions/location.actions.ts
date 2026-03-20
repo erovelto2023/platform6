@@ -8,7 +8,7 @@ import connectToDatabase from "@/lib/db/connect";
 import Location from "@/lib/db/models/Location";
 import { RapidApiService } from "@/lib/services/rapidapi.service";
 import { OpenStatesService } from "@/lib/services/openstates.service";
-import { HospitalService } from "@/lib/services/hospital.service";
+import { HospitalService } from "../services/hospital.service";
 import { STATE_NAME_TO_ABBR } from "@/lib/utils/state-mapping";
 
 /**
@@ -330,14 +330,14 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
             console.warn(`[Sync] Failed to fetch hospital data for ${state.name}, using sample data`);
             // Fallback to sample data for demonstration
             const sampleData = HospitalService.getSampleHospitalData(stateAbbr);
-            state.hospitals = sampleData.hospitals.map(h => ({
+            state.hospitals = sampleData.hospitals.map((h: any) => ({
                 ...h,
                 state: stateAbbr
             }));
             state.hospitalStats = sampleData.stats;
         } else {
             // Update database with real hospital data
-            state.hospitals = hospitalData.hospitals.map(h => ({
+            state.hospitals = hospitalData.hospitals.map((h: any) => ({
                 ...h,
                 state: stateAbbr
             }));
