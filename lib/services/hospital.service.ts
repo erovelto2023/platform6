@@ -36,7 +36,17 @@ export class HospitalService {
             // Always use the sample data since the API is not working reliably
             // This ensures we always have complete hospital information with addresses and websites
             console.log(`[HospitalService] Using sample data for ${stateAbbr} (API fallback disabled)`);
-            return this.getSampleHospitalData(stateAbbr);
+            const sampleData = this.getSampleHospitalData(stateAbbr);
+            console.log(`[HospitalService] Sample data debug:`, {
+                hospitalsCount: sampleData.hospitals.length,
+                firstHospital: sampleData.hospitals[0] ? {
+                    name: sampleData.hospitals[0].name,
+                    address: sampleData.hospitals[0].address,
+                    website: sampleData.hospitals[0].website,
+                    phone: sampleData.hospitals[0].phone
+                } : null
+            });
+            return sampleData;
             
         } catch (error) {
             console.error("[HospitalService] Error fetching hospital data:", error);
