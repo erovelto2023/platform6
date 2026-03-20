@@ -40,6 +40,7 @@ const CPAListingSchema = new Schema<ICPAListing>(
     email: { type: String },
     services: { type: [String], default: [] },
     notes: { type: String },
+    licenseStatus: { type: String },
     isFirm: { type: Boolean, default: false },
     slug: { type: String, required: true, unique: true },
     boardUrl: { type: String },
