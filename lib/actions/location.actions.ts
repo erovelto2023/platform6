@@ -424,6 +424,19 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
         });
 
         await state.save();
+        
+        console.log(`[DEBUG] After save - checking what was actually saved:`);
+        console.log(`[DEBUG] Hospitals count in saved state:`, state.hospitals?.length || 0);
+        if (state.hospitals && state.hospitals.length > 0) {
+            console.log(`[DEBUG] First hospital in saved state:`, {
+                name: state.hospitals[0].name,
+                address: state.hospitals[0].address,
+                website: state.hospitals[0].website,
+                phone: state.hospitals[0].phone,
+                safetyGrade: state.hospitals[0].safetyGrade
+            });
+        }
+        
         if (shouldRevalidate) {
             revalidatePath(`/locations/${stateSlug}`);
         }
