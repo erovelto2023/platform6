@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getLocation, getCitiesByState, syncHospitalData } from "@/lib/actions/location.actions";
+import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
 import { MapPin, ArrowLeft, Search as SearchIcon } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -459,6 +459,25 @@ export default async function StatePage({
     }
     
     console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
+
+    // Auto-sync Educational Institutions - ensure education tab shows up
+    try {
+        console.log(`[Sync] Starting educational institutions sync for ${stateSlug}`);
+        const eduResult = await syncEducationalInstitutions(stateSlug, false);
+        if (!eduResult.success) {
+            console.error(`[Sync Error] Educational institutions sync failed for ${stateSlug}:`, eduResult.error);
+        } else {
+            console.log(`[Sync] Educational institutions sync successful for ${stateSlug}`);
+            // Reload state data to get updated institutions
+            const updatedState = await getLocation(stateSlug);
+            if (updatedState) {
+                state = updatedState;
+                console.log(`[DEBUG] Updated state loaded. Educational institutions count: ${(state as any).educationalInstitutions?.length || 0}`);
+            }
+        }
+    } catch (error) {
+        console.error(`[Sync Error] Exception during educational institutions sync for ${stateSlug}:`, error);
+    }
 
     // Auto-sync Hospital Data - always refresh to get latest data
     try {

@@ -309,6 +309,54 @@ export async function seedLocations() {
 }
 
 /**
+ * Sync educational institutions data for a specific state.
+ */
+export async function syncEducationalInstitutions(stateSlug: string, shouldRevalidate: boolean = true) {
+    try {
+        await connectToDatabase();
+        
+        const state = await Location.findOne({ slug: stateSlug, type: 'state' });
+        if (!state) throw new Error("State not found");
+
+        console.log(`[Sync] Starting educational institutions sync for state: ${state.name} (${stateSlug})`);
+
+        // Sample educational institutions data - you can expand this with real data
+        const sampleInstitutions: Array<{ name: string; url?: string }> = [
+            {
+                name: `${state.name} Department of Education`,
+                url: `https://www.${state.name.toLowerCase().replace(/\s+/g, '')}.gov/education`
+            },
+            {
+                name: `${state.name} State University System`,
+                url: `https://www.${state.name.toLowerCase().replace(/\s+/g, '')}.edu`
+            },
+            {
+                name: `${state.name} Community College System`,
+                url: `https://www.${state.name.toLowerCase().replace(/\s+/g, '')}.edu/community`
+            },
+            {
+                name: `${state.name} Public Schools`,
+                url: `https://www.${state.name.toLowerCase().replace(/\s+/g, '')}.k12.gov`
+            }
+        ];
+
+        (state as any).educationalInstitutions = sampleInstitutions;
+
+        await state.save();
+        if (shouldRevalidate) {
+            revalidatePath(`/locations/${stateSlug}`);
+        }
+        
+        console.log(`[Sync] Educational institutions sync successful for ${stateSlug}. Added ${sampleInstitutions.length} institutions.`);
+        
+        return { success: true, data: JSON.parse(JSON.stringify(state)) };
+    } catch (error: any) {
+        console.error("Error syncing educational institutions data:", error);
+        return { success: false, error: error?.message };
+    }
+}
+
+/**
  * Sync hospital data from Hospital Safety Grade API for a specific state.
  */
 export async function syncHospitalData(stateSlug: string, shouldRevalidate: boolean = true) {

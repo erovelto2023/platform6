@@ -47,6 +47,14 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
         } : null
     });
     
+    // Log the first hospital data in detail
+    if (hospitals.length > 0) {
+        console.log(`[DEBUG] First hospital details:`, hospitals[0]);
+        console.log(`[DEBUG] Address:`, hospitals[0].address);
+        console.log(`[DEBUG] Website:`, hospitals[0].website);
+        console.log(`[DEBUG] Phone:`, hospitals[0].phone);
+    }
+    
     const filtered = hospitals.filter(h =>
         h.name.toLowerCase().includes(query.toLowerCase()) ||
         (h.city && h.city.toLowerCase().includes(query.toLowerCase()))
@@ -111,18 +119,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                 {/* Grid */}
                 {filtered.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                        {filtered.map((hosp, idx) => {
-                            // Debug: Log each hospital's data
-                            console.log(`[DEBUG] Hospital ${idx}:`, {
-                                name: hosp.name,
-                                address: hosp.address,
-                                website: hosp.website,
-                                phone: hosp.phone,
-                                safetyGrade: hosp.safetyGrade,
-                                beds: hosp.beds
-                            });
-                            
-                            return (
+                        {filtered.map((hosp, idx) => (
                             <div
                                 key={idx}
                                 className="group flex flex-col justify-between bg-slate-950/60 border border-slate-800/60 hover:border-rose-500/40 rounded-xl p-4 transition-all duration-200 hover:bg-slate-900"
@@ -200,8 +197,7 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                     </div>
                                 </div>
                             </div>
-                            );
-                        })}
+                        ))}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-16 border border-dashed border-slate-700 bg-slate-800/20 rounded-2xl text-center">
