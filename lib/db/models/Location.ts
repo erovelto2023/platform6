@@ -130,6 +130,20 @@ export interface ILocation extends Document {
         name: string;
         url?: string;
     }>;
+    hospitals?: Array<{
+        name: string;
+        city?: string;
+        type?: string;
+        beds?: number;
+        url?: string;
+    }>;
+    hospitalStats?: {
+        count: number;
+        staffedBeds: number;
+        totalDischarges: number;
+        patientDays: number;
+        grossRevenue: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -284,6 +298,20 @@ const LocationSchema = new Schema<ILocation>(
             name: String,
             url: String,
         }],
+        hospitals: [{
+            name: String,
+            city: String,
+            type: String,
+            beds: Number,
+            url: String,
+        }],
+        hospitalStats: {
+            count: Number,
+            staffedBeds: Number,
+            totalDischarges: Number,
+            patientDays: Number,
+            grossRevenue: String,
+        },
     },
     {
         timestamps: true,

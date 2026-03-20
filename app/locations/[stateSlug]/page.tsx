@@ -9,6 +9,7 @@ import { Metadata } from "next";
 import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { StateEducationSection } from "@/components/locations/state-education-section";
+import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
 
 export const dynamic = 'force-dynamic';
 
@@ -566,6 +567,11 @@ export default async function StatePage({
                                         Education
                                     </TabsTrigger>
                                 )}
+                                {((state as any).hospitals?.length > 0 || (state as any).hospitalStats) && (
+                                    <TabsTrigger value="healthcare" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                        Healthcare
+                                    </TabsTrigger>
+                                )}
                             </TabsList>
 
                             {/* State Details Tab Content */}
@@ -643,6 +649,16 @@ export default async function StatePage({
                                 <TabsContent value="education" className="space-y-8">
                                     <StateEducationSection
                                         institutions={(state as any).educationalInstitutions}
+                                        stateName={state.name}
+                                    />
+                                </TabsContent>
+                            )}
+                            {/* Healthcare Tab */}
+                            {((state as any).hospitals?.length > 0 || (state as any).hospitalStats) && (
+                                <TabsContent value="healthcare" className="space-y-8">
+                                    <StateHealthcareSection
+                                        hospitals={(state as any).hospitals || []}
+                                        stats={(state as any).hospitalStats}
                                         stateName={state.name}
                                     />
                                 </TabsContent>
