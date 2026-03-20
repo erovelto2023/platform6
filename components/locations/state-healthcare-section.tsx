@@ -63,40 +63,95 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
     return (
         <div className="space-y-10">
             {/* Stats Overview */}
-            {stats && (
-                <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4">
+                <StatCard 
+                    label="Hospitals" 
+                    value={hospitals.length?.toLocaleString() || '0'} 
+                    icon={<Building2 size={20} />} 
+                    color="blue"
+                />
+                
+                {/* Dynamic Stats Derived from Hospitals Array */}
+                {(() => {
+                    const gradeACount = hospitals.filter(h => h.safetyGrade === 'A').length;
+                    if (gradeACount > 0) {
+                        return (
+                            <StatCard 
+                                label="Safety Leaders" 
+                                value={gradeACount.toLocaleString()} 
+                                icon={<Shield size={20} />} 
+                                color="emerald"
+                                sub="Grade A Rated"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
+
+                {(() => {
+                    const cityCounts: Record<string, number> = {};
+                    hospitals.forEach(h => {
+                        if (h.city) cityCounts[h.city] = (cityCounts[h.city] || 0) + 1;
+                    });
+                    const topCity = Object.entries(cityCounts).sort((a, b) => b[1] - a[1])[0];
+                    if (topCity && topCity[1] > 1) {
+                        return (
+                            <StatCard 
+                                label="Healthcare Hub" 
+                                value={topCity[0]} 
+                                icon={<MapPin size={20} />} 
+                                color="purple"
+                                sub={`${topCity[1]} Facilities`}
+                            />
+                        );
+                    }
+                    return null;
+                })()}
+
+                {(() => {
+                    const specialized = hospitals.filter(h => 
+                        h.type && h.type !== 'General Acute Care' && h.type !== 'Critical Access' && h.type !== 'General'
+                    ).length;
+                    if (specialized > 0) {
+                        return (
+                            <StatCard 
+                                label="Specialized Care" 
+                                value={specialized.toLocaleString()} 
+                                icon={<Activity size={20} />} 
+                                color="amber"
+                                sub="Specialty Centers"
+                            />
+                        );
+                    }
+                    return null;
+                })()}
+
+                {/* DB Stats (Fallback) */}
+                {stats && stats.staffedBeds > 0 && (
                     <StatCard 
-                        label="Hospitals" 
-                        value={stats.count?.toLocaleString() || '0'} 
-                        icon={<Building2 size={20} />} 
-                        color="blue"
+                        label="Total Beds" 
+                        value={stats.staffedBeds.toLocaleString()} 
+                        icon={<Bed size={20} />} 
+                        color="emerald"
                     />
-                    {stats.staffedBeds > 0 && (
-                        <StatCard 
-                            label="Total Beds" 
-                            value={(stats.staffedBeds || 0).toLocaleString()} 
-                            icon={<Bed size={20} />} 
-                            color="emerald"
-                        />
-                    )}
-                    {stats.patientDays > 0 && (
-                        <StatCard 
-                            label="Patient Days" 
-                            value={(stats.patientDays || 0).toLocaleString()} 
-                            icon={<Activity size={20} />} 
-                            color="purple"
-                        />
-                    )}
-                    {stats.grossRevenue && stats.grossRevenue !== "$0" && stats.grossRevenue !== "0" && stats.grossRevenue !== "N/A" && (
-                        <StatCard 
-                            label="Revenue" 
-                            value={stats.grossRevenue || 'N/A'} 
-                            icon={<DollarSign size={20} />} 
-                            color="amber"
-                        />
-                    )}
-                </div>
-            )}
+                )}
+                {stats && stats.patientDays > 0 && (
+                    <StatCard 
+                        label="Patient Days" 
+                        value={stats.patientDays.toLocaleString()} 
+                        icon={<TrendingUp size={20} />} 
+                        color="purple"
+                    />
+                )}
+                {stats && stats.grossRevenue && stats.grossRevenue !== "$0" && stats.grossRevenue !== "0" && (
+                    <StatCard 
+                        label="Revenue" 
+                        value={stats.grossRevenue} 
+                        icon={<DollarSign size={20} />} 
+                        color="amber"
+                    />
+                )}
+            </div>
 
             <div className="space-y-6">
                 {/* Header */}
