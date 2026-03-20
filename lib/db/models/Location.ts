@@ -126,6 +126,10 @@ export interface ILocation extends Document {
         description?: string;
         type?: 'Local' | 'Regional' | 'Statewide';
     }>;
+    educationalInstitutions?: Array<{
+        name: string;
+        url?: string;
+    }>;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -275,6 +279,10 @@ const LocationSchema = new Schema<ILocation>(
                 enum: ['Local', 'Regional', 'Statewide'],
                 default: 'Local',
             },
+        }],
+        educationalInstitutions: [{
+            name: String,
+            url: String,
         }],
     },
     {

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
 import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
+import { StateEducationSection } from "@/components/locations/state-education-section";
 
 export const dynamic = 'force-dynamic';
 
@@ -560,6 +561,11 @@ export default async function StatePage({
                                 <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
                                     Market Cities
                                 </TabsTrigger>
+                                {(state as any).educationalInstitutions?.length > 0 && (
+                                    <TabsTrigger value="education" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
+                                        Education
+                                    </TabsTrigger>
+                                )}
                             </TabsList>
 
                             {/* State Details Tab Content */}
@@ -632,6 +638,15 @@ export default async function StatePage({
                                     </div>
                                 )}
                             </TabsContent>
+                            {/* Education Tab */}
+                            {(state as any).educationalInstitutions?.length > 0 && (
+                                <TabsContent value="education" className="space-y-8">
+                                    <StateEducationSection
+                                        institutions={(state as any).educationalInstitutions}
+                                        stateName={state.name}
+                                    />
+                                </TabsContent>
+                            )}
                         </Tabs>
                     </div>
                 </section>
