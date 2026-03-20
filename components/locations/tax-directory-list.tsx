@@ -126,17 +126,6 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
               </div>
 
               <div className="mt-auto pt-4 border-t border-slate-200 grid grid-cols-2 gap-2">
-                {cpa.boardUrl && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="col-span-2 h-8 bg-emerald-50 border-emerald-500/30 text-emerald-700 text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-[#8422dc] transition-all group/btn"
-                    onClick={() => window.open(cpa.boardUrl, '_blank')}
-                  >
-                    <ShieldCheck className="w-3 h-3 mr-2 group-hover/btn:scale-110 transition-transform" />
-                    Verify License on State Board
-                  </Button>
-                )}
                 
                 <Button 
                   variant="outline" 
