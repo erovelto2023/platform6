@@ -32,7 +32,21 @@ interface StateHealthcareSectionProps {
 
 export function StateHealthcareSection({ hospitals, stats, stateName }: StateHealthcareSectionProps) {
     const [query, setQuery] = useState("");
-
+    
+    // Debug: Log the first hospital data
+    console.log(`[DEBUG] StateHealthcareSection received:`, {
+        hospitalsCount: hospitals.length,
+        stateName,
+        firstHospital: hospitals[0] ? {
+            name: hospitals[0].name,
+            address: hospitals[0].address,
+            website: hospitals[0].website,
+            phone: hospitals[0].phone,
+            safetyGrade: hospitals[0].safetyGrade,
+            beds: hospitals[0].beds
+        } : null
+    });
+    
     const filtered = hospitals.filter(h =>
         h.name.toLowerCase().includes(query.toLowerCase()) ||
         (h.city && h.city.toLowerCase().includes(query.toLowerCase()))
@@ -97,7 +111,18 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                 {/* Grid */}
                 {filtered.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                        {filtered.map((hosp, idx) => (
+                        {filtered.map((hosp, idx) => {
+                            // Debug: Log each hospital's data
+                            console.log(`[DEBUG] Hospital ${idx}:`, {
+                                name: hosp.name,
+                                address: hosp.address,
+                                website: hosp.website,
+                                phone: hosp.phone,
+                                safetyGrade: hosp.safetyGrade,
+                                beds: hosp.beds
+                            });
+                            
+                            return (
                             <div
                                 key={idx}
                                 className="group flex flex-col justify-between bg-slate-950/60 border border-slate-800/60 hover:border-rose-500/40 rounded-xl p-4 transition-all duration-200 hover:bg-slate-900"
@@ -175,7 +200,8 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-16 border border-dashed border-slate-700 bg-slate-800/20 rounded-2xl text-center">

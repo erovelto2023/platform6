@@ -326,10 +326,30 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
         // Fetch from Hospital Safety Grade API
         const hospitalData = await HospitalService.fetchHospitalsByState(stateAbbr);
         
+        console.log(`[DEBUG] Hospital data fetched for ${stateAbbr}:`, {
+            success: !!hospitalData,
+            hospitalsCount: hospitalData?.hospitals?.length || 0,
+            firstHospital: hospitalData?.hospitals?.[0] ? {
+                name: hospitalData.hospitals[0].name,
+                address: hospitalData.hospitals[0].address,
+                website: hospitalData.hospitals[0].website,
+                phone: hospitalData.hospitals[0].phone
+            } : null
+        });
+        
         if (!hospitalData) {
             console.warn(`[Sync] Failed to fetch hospital data for ${state.name}, using sample data`);
             // Fallback to sample data for demonstration
             const sampleData = HospitalService.getSampleHospitalData(stateAbbr);
+            console.log(`[DEBUG] Sample data for ${stateAbbr}:`, {
+                hospitalsCount: sampleData.hospitals.length,
+                firstHospital: sampleData.hospitals[0] ? {
+                    name: sampleData.hospitals[0].name,
+                    address: sampleData.hospitals[0].address,
+                    website: sampleData.hospitals[0].website,
+                    phone: sampleData.hospitals[0].phone
+                } : null
+            });
             state.hospitals = sampleData.hospitals.map((h: any) => ({
                 ...h,
                 state: stateAbbr
@@ -337,12 +357,23 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
             state.hospitalStats = sampleData.stats;
         } else {
             // Update database with real hospital data
+            console.log(`[DEBUG] Using real hospital data for ${stateAbbr}`);
             state.hospitals = hospitalData.hospitals.map((h: any) => ({
                 ...h,
                 state: stateAbbr
             }));
             state.hospitalStats = hospitalData.stats;
         }
+        
+        console.log(`[DEBUG] Final hospital data being saved:`, {
+            hospitalsCount: state.hospitals.length,
+            firstHospital: state.hospitals[0] ? {
+                name: state.hospitals[0].name,
+                address: state.hospitals[0].address,
+                website: state.hospitals[0].website,
+                phone: state.hospitals[0].phone
+            } : null
+        });
 
         await state.save();
         if (shouldRevalidate) {
