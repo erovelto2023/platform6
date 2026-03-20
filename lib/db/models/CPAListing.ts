@@ -11,9 +11,11 @@ export interface ICPAListing extends Document {
   state: string; // 2-letter code or full name
   zipCode?: string;
   phone?: string;
+  fax?: string;
   website?: string;
   email?: string;
   services?: string[]; // e.g., ["Tax Preparation", "Audit", "Small Business"]
+  notes?: string;
   isFirm: boolean;
   slug: string; // for URL: /locations/ca/los-angeles/tax-directory/firm-name
   boardUrl?: string;
@@ -33,9 +35,11 @@ const CPAListingSchema = new Schema<ICPAListing>(
     state: { type: String, required: true },
     zipCode: { type: String },
     phone: { type: String },
+    fax: { type: String },
     website: { type: String },
     email: { type: String },
     services: { type: [String], default: [] },
+    notes: { type: String },
     isFirm: { type: Boolean, default: false },
     slug: { type: String, required: true, unique: true },
     boardUrl: { type: String },
