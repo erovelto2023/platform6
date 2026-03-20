@@ -460,23 +460,23 @@ export default async function StatePage({
     
     console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
 
-    // Auto-sync Hospital Data if missing or empty
-    if (!state.hospitals || state.hospitals.length === 0) {
-        try {
-            const result = await syncHospitalData(stateSlug, false);
-            if (!result.success) {
-                console.error(`[Sync Error] Hospital sync failed for ${stateSlug}:`, result.error);
-            } else {
-                console.log(`[Sync] Hospital sync successful for ${stateSlug}`);
-                // Reload state data to get updated hospitals
-                const updatedState = await getLocation(stateSlug);
-                if (updatedState) {
-                    state = updatedState;
-                }
+    // Auto-sync Hospital Data - always refresh to get latest data
+    try {
+        console.log(`[Sync] Starting hospital sync for ${stateSlug}`);
+        const result = await syncHospitalData(stateSlug, false);
+        if (!result.success) {
+            console.error(`[Sync Error] Hospital sync failed for ${stateSlug}:`, result.error);
+        } else {
+            console.log(`[Sync] Hospital sync successful for ${stateSlug}`);
+            // Reload state data to get updated hospitals
+            const updatedState = await getLocation(stateSlug);
+            if (updatedState) {
+                state = updatedState;
+                console.log(`[DEBUG] Updated state loaded. Hospitals count: ${state.hospitals?.length || 0}`);
             }
-        } catch (error) {
-            console.error(`[Sync Error] Exception during hospital sync for ${stateSlug}:`, error);
         }
+    } catch (error) {
+        console.error(`[Sync Error] Exception during hospital sync for ${stateSlug}:`, error);
     }
 
     const cities = await getCitiesByState(stateSlug, query);
