@@ -10,6 +10,8 @@ export interface HospitalSafetyGradeData {
     url?: string;
     address?: string;
     phone?: string;
+    website?: string; // Hospital's own website
+    safetyGradeUrl?: string; // Direct link to their safety grade page
 }
 
 export interface HospitalStats {
@@ -55,24 +57,116 @@ export class HospitalService {
             const html = await response.text();
             
             // Parse HTML to extract hospital data
-            const hospitals = this.parseHospitalDataFromHTML(html);
+            let hospitals = this.parseHospitalDataFromHTML(html);
             
-            console.log(`[HospitalService] Found ${hospitals.length} hospitals for ${stateAbbr}`);
+            // If no hospitals found, try the all-hospitals page
+            if (hospitals.length === 0) {
+                console.log(`[HospitalService] No hospitals found in search, trying all-hospitals page...`);
+                const allHospitalsData = await this.fetchFromAllHospitalsPage(stateAbbr);
+                if (allHospitalsData && allHospitalsData.length > 0) {
+                    hospitals = allHospitalsData;
+                }
+            }
+            
+            // Fetch detailed information for each hospital (including website URLs)
+            const enrichedHospitals = await this.enrichHospitalData(hospitals);
+            
+            console.log(`[HospitalService] Found ${enrichedHospitals.length} hospitals for ${stateAbbr}`);
             
             // Calculate stats
             const stats: HospitalStats = {
-                count: hospitals.length,
-                staffedBeds: hospitals.reduce((sum, h) => sum + (h.beds || 0), 0),
+                count: enrichedHospitals.length,
+                staffedBeds: enrichedHospitals.reduce((sum, h) => sum + (h.beds || 0), 0),
                 totalDischarges: 0, // Not available from this API
                 patientDays: 0, // Not available from this API
                 grossRevenue: "Not Available" // Not available from this API
             };
 
-            return { hospitals, stats };
+            return { hospitals: enrichedHospitals, stats };
             
         } catch (error) {
             console.error("[HospitalService] Error fetching hospital data:", error);
             return null;
+        }
+    }
+
+    /**
+     * Fetch hospitals from the all-hospitals page
+     */
+    private static async fetchFromAllHospitalsPage(stateAbbr: string): Promise<HospitalSafetyGradeData[]> {
+        try {
+            const allHospitalsUrl = `${HOSPITAL_SAFETY_GRADE_BASE_URL}/all-hospitals`;
+            
+            const response = await fetch(allHospitalsUrl, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error(`[HospitalService] Failed to fetch all-hospitals page: ${response.status}`);
+                return [];
+            }
+
+            const html = await response.text();
+            return this.parseAllHospitalsPage(html, stateAbbr);
+            
+        } catch (error) {
+            console.error("[HospitalService] Error fetching from all-hospitals page:", error);
+            return [];
+        }
+    }
+
+    /**
+     * Enrich hospital data with detailed information including website URLs
+     */
+    private static async enrichHospitalData(hospitals: HospitalSafetyGradeData[]): Promise<HospitalSafetyGradeData[]> {
+        const enrichedHospitals = await Promise.all(
+            hospitals.map(async (hospital) => {
+                try {
+                    // If we have a safety grade URL, fetch detailed information
+                    if (hospital.safetyGradeUrl) {
+                        const details = await this.fetchHospitalDetails(hospital.safetyGradeUrl);
+                        return { ...hospital, ...details };
+                    }
+                    return hospital;
+                } catch (error) {
+                    console.warn(`[HospitalService] Failed to enrich data for ${hospital.name}:`, error);
+                    return hospital;
+                }
+            })
+        );
+        
+        return enrichedHospitals;
+    }
+
+    /**
+     * Fetch detailed information for a specific hospital
+     */
+    private static async fetchHospitalDetails(hospitalUrl: string): Promise<Partial<HospitalSafetyGradeData>> {
+        try {
+            const response = await fetch(`${HOSPITAL_SAFETY_GRADE_BASE_URL}${hospitalUrl}`, {
+                method: 'GET',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.warn(`[HospitalService] Failed to fetch hospital details: ${response.status}`);
+                return {};
+            }
+
+            const html = await response.text();
+            return this.parseHospitalDetails(html);
+            
+        } catch (error) {
+            console.error("[HospitalService] Error fetching hospital details:", error);
+            return {};
         }
     }
 
@@ -105,7 +199,7 @@ export class HospitalService {
                         type: typeMatch ? typeMatch[1].trim() : 'General',
                         beds: bedsMatch ? parseInt(bedsMatch[1]) : undefined,
                         safetyGrade: gradeMatch ? gradeMatch[1] : undefined,
-                        url: urlMatch ? urlMatch[1] : undefined
+                        safetyGradeUrl: urlMatch ? urlMatch[1] : undefined
                     });
                 }
             });
@@ -117,6 +211,81 @@ export class HospitalService {
         }
         
         return hospitals;
+    }
+
+    /**
+     * Parse hospitals from the all-hospitals page
+     */
+    private static parseAllHospitalsPage(html: string, stateAbbr: string): HospitalSafetyGradeData[] {
+        const hospitals: HospitalSafetyGradeData[] = [];
+        
+        // Look for hospital entries in the all-hospitals page
+        // This would need to be adapted based on the actual HTML structure
+        const hospitalEntryRegex = /<a[^>]*href=["\']([^"\']*hospital[^"\']*)["\'][^>]*>([\s\S]*?)<\/a>/gi;
+        const matches = html.match(hospitalEntryRegex);
+        
+        if (matches) {
+            matches.forEach(match => {
+                const urlMatch = match.match(/href=["\']([^"\']+)["\']/i);
+                const nameMatch = match.match(/>([^<]+)</i);
+                
+                if (urlMatch && nameMatch) {
+                    // Extract city from name or URL if possible
+                    const name = nameMatch[1].trim();
+                    const cityMatch = name.match(/,\s*([^,]+)$/);
+                    const city = cityMatch ? cityMatch[1] : 'Unknown';
+                    
+                    hospitals.push({
+                        name: name.replace(/,\s*[^,]+$/, '').trim(), // Remove city from name
+                        city: city,
+                        state: stateAbbr,
+                        type: 'General',
+                        safetyGradeUrl: urlMatch[1]
+                    });
+                }
+            });
+        }
+        
+        return hospitals;
+    }
+
+    /**
+     * Parse detailed hospital information from individual hospital page
+     */
+    private static parseHospitalDetails(html: string): Partial<HospitalSafetyGradeData> {
+        const details: Partial<HospitalSafetyGradeData> = {};
+        
+        // Extract website URL
+        const websiteMatch = html.match(/<a[^>]*href=["\']([^"\']*http[^"\']*)["\'][^>]*>[\s\S]*?website[\s\S]*?<\/a>/i);
+        if (websiteMatch) {
+            details.website = websiteMatch[1];
+        }
+        
+        // Extract address
+        const addressMatch = html.match(/<address[^>]*>([\s\S]*?)<\/address>/i);
+        if (addressMatch) {
+            details.address = addressMatch[1].replace(/<[^>]*>/g, '').trim();
+        }
+        
+        // Extract phone number
+        const phoneMatch = html.match(/(\d{3}[-.\s]?\d{3}[-.\s]?\d{4})/);
+        if (phoneMatch) {
+            details.phone = phoneMatch[1];
+        }
+        
+        // Extract bed count if not already available
+        const bedsMatch = html.match(/(\d+)\s*(?:beds|bed)/i);
+        if (bedsMatch && !details.beds) {
+            details.beds = parseInt(bedsMatch[1]);
+        }
+        
+        // Extract hospital type
+        const typeMatch = html.match(/<span[^>]*class="type[^>]*>([^<]+)<\/span>/i);
+        if (typeMatch) {
+            details.type = typeMatch[1].trim();
+        }
+        
+        return details;
     }
 
     /**
@@ -134,7 +303,8 @@ export class HospitalService {
                 type: 'General Medical & Surgical',
                 beds: 250,
                 safetyGrade: 'B',
-                url: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample`
+                website: `https://www.${stateAbbr.toLowerCase()}generalhospital.org`,
+                safetyGradeUrl: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample`
             },
             {
                 name: `${stateAbbr} Medical Center`,
@@ -143,7 +313,8 @@ export class HospitalService {
                 type: 'Regional Referral',
                 beds: 400,
                 safetyGrade: 'A',
-                url: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample2`
+                website: `https://www.${stateAbbr.toLowerCase()}medicalcenter.org`,
+                safetyGradeUrl: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample2`
             },
             {
                 name: `${stateAbbr} Community Hospital`,
@@ -152,7 +323,8 @@ export class HospitalService {
                 type: 'Community',
                 beds: 100,
                 safetyGrade: 'C',
-                url: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample3`
+                website: `https://www.${stateAbbr.toLowerCase()}communityhospital.org`,
+                safetyGradeUrl: `${HOSPITAL_SAFETY_GRADE_BASE_URL}/hospital/sample3`
             }
         ];
 

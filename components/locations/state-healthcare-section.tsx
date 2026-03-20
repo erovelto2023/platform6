@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Search, Building2, Bed, TrendingUp, DollarSign } from "lucide-react";
+import { Activity, Search, Building2, Bed, TrendingUp, DollarSign, ExternalLink } from "lucide-react";
 
 interface Hospital {
     name: string;
@@ -9,6 +9,8 @@ interface Hospital {
     type?: string;
     beds?: number;
     url?: string;
+    website?: string;
+    safetyGradeUrl?: string;
 }
 
 interface HospitalStats {
@@ -113,11 +115,35 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                 
                                 <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 font-medium">
                                     <span className="truncate max-w-[120px]">{hosp.type || 'General'}</span>
-                                    {hosp.beds && hosp.beds > 0 && (
-                                        <span className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">
-                                            {hosp.beds} Beds
-                                        </span>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {hosp.beds && hosp.beds > 0 && (
+                                            <span className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">
+                                                {hosp.beds} Beds
+                                            </span>
+                                        )}
+                                        {hosp.website && (
+                                            <a 
+                                                href={hosp.website} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="text-slate-400 hover:text-white transition-colors"
+                                                title="Visit hospital website"
+                                            >
+                                                <ExternalLink size={12} />
+                                            </a>
+                                        )}
+                                        {hosp.safetyGradeUrl && (
+                                            <a 
+                                                href={`https://www.hospitalsafetygrade.org${hosp.safetyGradeUrl}`} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer" 
+                                                className="text-rose-400 hover:text-rose-300 transition-colors"
+                                                title="View safety grade"
+                                            >
+                                                <Activity size={12} />
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         ))}

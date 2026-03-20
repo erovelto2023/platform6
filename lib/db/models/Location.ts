@@ -136,6 +136,8 @@ export interface ILocation extends Document {
         type?: string;
         beds?: number;
         url?: string;
+        website?: string;
+        safetyGradeUrl?: string;
     }>;
     hospitalStats?: {
         count: number;
@@ -304,6 +306,8 @@ const LocationSchema = new Schema<ILocation>(
             type: String,
             beds: Number,
             url: String,
+            website: String,
+            safetyGradeUrl: String,
         }],
         hospitalStats: {
             count: Number,
