@@ -509,6 +509,37 @@ const enrichedData = [
     licenseStatus: "Unverified", notes: "Listed via CPAdirectory and Experience.com. Sole proprietorship. Verify via Iowa Board.",
     isFirm: false,
   },
+  // ── GEORGIA ──
+  {
+    licenseNumber: "48102", name: "Aprio, LLP", city: "Atlanta", state: "GA",
+    address: "2002 Summit Boulevard, Suite 120, Atlanta, GA 30319", phone: "(404) 892-9651",
+    website: "https://www.aprio.com", licenseStatus: "Active",
+    notes: "Verified via firm website and MapQuest. Premier CPA-led business advisory firm founded 1952.", isFirm: true,
+  },
+  {
+    licenseNumber: "5222", name: "NDB Accountants & Consultants LLP", city: "Atlanta", state: "GA",
+    address: "2897 N Druid Hills Rd NE, Suite 355, Atlanta, GA 30329", phone: "(850) 999-3200",
+    website: "https://ndbcpa.com", licenseStatus: "Active",
+    notes: "Verified via firm contact page. Specializes in SOC, HITRUST, PCI DSS audits.", isFirm: true,
+  },
+  {
+    licenseNumber: "54248", name: "Melissa D Preston CPA P.C.", city: "Atlanta", state: "GA",
+    address: "50 Hurt Plaza SE, Suite 1438, Atlanta, GA 30303", phone: "(404) 217-1742",
+    email: "melissa@prestoncpa.com", website: "https://prestoncpa.com", licenseStatus: "Active",
+    notes: "Verified via federal contractor profile and firm website. Specializes in gaming/financial services.", isFirm: true,
+  },
+  {
+    licenseNumber: "47558", name: "T. Wayne Owens & Associates, PC", city: "Augusta", state: "GA",
+    address: "1005 Broad Street, Suite 302, Augusta, GA 30901", phone: "(800) 745-8233",
+    website: "http://www.twocpa.com", licenseStatus: "Acquired",
+    notes: "Firm acquired by Stambaugh Ness effective November 2020. Verify current status via Georgia Board.", isFirm: true,
+  },
+  {
+    licenseNumber: "46755", name: "TJS Deemer Dana LLP", city: "Savannah", state: "GA",
+    address: "118 Park of Commerce Drive, Suite 200, Savannah, GA 31405", phone: "(912) 238-1001",
+    fax: "(912) 238-1701", website: "https://www.symphona.us", licenseStatus: "Rebranded",
+    notes: "Now operates as Symphona following merger. Full-service CPA firm with multiple GA locations.", isFirm: true,
+  },
 ];
 // ─────────────────────────────────────────────────────────────────────────────
 
