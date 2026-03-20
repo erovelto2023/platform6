@@ -16,6 +16,7 @@ export interface ICPAListing extends Document {
   services?: string[]; // e.g., ["Tax Preparation", "Audit", "Small Business"]
   isFirm: boolean;
   slug: string; // for URL: /locations/ca/los-angeles/tax-directory/firm-name
+  boardUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +38,7 @@ const CPAListingSchema = new Schema<ICPAListing>(
     services: { type: [String], default: [] },
     isFirm: { type: Boolean, default: false },
     slug: { type: String, required: true, unique: true },
+    boardUrl: { type: String },
   },
   { timestamps: true }
 );

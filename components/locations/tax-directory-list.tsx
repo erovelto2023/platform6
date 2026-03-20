@@ -28,6 +28,7 @@ interface CPAListing {
   website?: string;
   services?: string[];
   slug: string;
+  boardUrl?: string;
 }
 
 interface TaxDirectoryListProps {
@@ -124,24 +125,36 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                 )}
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-800/50 flex items-center gap-2">
+              <div className="mt-auto pt-4 border-t border-slate-800/50 grid grid-cols-2 gap-2">
+                {cpa.boardUrl && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="col-span-2 h-8 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase hover:bg-emerald-500 hover:text-white transition-all group/btn"
+                    onClick={() => window.open(cpa.boardUrl, '_blank')}
+                  >
+                    <ShieldCheck className="w-3 h-3 mr-2 group-hover/btn:scale-110 transition-transform" />
+                    Verify License on State Board
+                  </Button>
+                )}
+                
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="flex-1 h-8 bg-slate-950 border-slate-800 text-slate-400 text-[10px] font-black uppercase hover:text-emerald-400 hover:border-emerald-500/30 transition-all group/btn"
+                  className={`h-8 bg-slate-950 border-slate-800 text-slate-400 text-[10px] font-black uppercase hover:text-emerald-400 hover:border-emerald-500/30 transition-all group/btn ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
                   onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(cpa.name + ' CPA ' + cpa.city)}`, '_blank')}
                 >
-                  <Search className="w-3 h-3 mr-2 group/btn-hover:scale-110" />
+                  <Search className="w-3 h-3 mr-1.5 group-hover/btn:scale-110" />
                   Details
                 </Button>
                 
                 {cpa.website ? (
                   <Button 
                     size="sm" 
-                    className="flex-1 h-8 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-500/10"
+                    className={`h-8 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-500/10 ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
                     onClick={() => window.open(cpa.website, '_blank')}
                   >
-                    <Globe className="w-3 h-3 mr-2" />
+                    <Globe className="w-3 h-3 mr-1.5" />
                     Visit Site
                   </Button>
                 ) : (
@@ -149,9 +162,9 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                     disabled 
                     variant="ghost" 
                     size="sm" 
-                    className="flex-1 h-8 text-slate-700 text-[10px] font-black uppercase bg-slate-900/40 cursor-not-allowed"
+                    className={`h-8 text-slate-700 text-[10px] font-black uppercase bg-slate-900/40 cursor-not-allowed ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
                   >
-                    <Phone className="w-3 h-3 mr-2" />
+                    <Phone className="w-3 h-3 mr-1.5" />
                     Pending
                   </Button>
                 )}
