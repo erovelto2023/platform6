@@ -35,21 +35,25 @@ export default function LandingPage() {
       {/* Top Navigation Bar */}
       <nav className="fixed top-0 w-full z-50 glass-nav">
         <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
-          <div className="text-xl font-headline font-black text-primary tracking-tight italic">
-            K BUSINESS ACADEMY
+          <Link href="/" className="text-xl font-headline font-black text-primary tracking-tight italic">
+            K Business Academy
+          </Link>
+          <div className="hidden lg:flex items-center space-x-6">
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/courses">Courses</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/library">Library</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/business-resources">Resources</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/affiliate-crm">Affiliate CRM</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/dashboard">Dashboard</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/blog">Blog</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/glossary">Glossary</Link>
+            <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/locations">Market Intelligence</Link>
           </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <Link className="text-accent border-b-2 border-accent font-semibold tracking-tight py-1" href="/courses">Courses</Link>
-            <Link className="text-secondary hover:text-accent transition-colors font-semibold tracking-tight py-1" href="/library">Library</Link>
-            <Link className="text-secondary hover:text-accent transition-colors font-semibold tracking-tight py-1" href="/dashboard">Dashboard</Link>
-            <Link className="text-secondary hover:text-accent transition-colors font-semibold tracking-tight py-1" href="/blog">Blog</Link>
-          </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <Link href="/sign-in">
-              <button className="px-5 py-2 rounded-xl text-accent font-bold text-sm hover:bg-muted/50 transition-all uppercase tracking-widest">Login</button>
+              <button className="px-4 py-2 rounded-xl text-primary font-bold text-sm hover:bg-muted/50 transition-all">Log In</button>
             </Link>
             <Link href="/sign-up">
-              <button className="px-5 py-2 rounded-xl bg-accent text-white font-bold text-sm shadow-lg shadow-accent/20 hover:opacity-90 transition-all uppercase tracking-widest">Get Started</button>
+              <button className="px-5 py-2 rounded-xl bg-accent text-white font-bold text-sm shadow-lg shadow-accent/20 hover:opacity-90 transition-all">Get Started</button>
             </Link>
           </div>
         </div>
