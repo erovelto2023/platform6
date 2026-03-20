@@ -49,6 +49,17 @@ import { wisconsinHospitals } from '../data/wisconsin-hospitals';
 import { wyomingHospitals } from '../data/wyoming-hospitals';
 
 /**
+ * Safe revalidatePath that doesn't crash in CLI/script environments
+ */
+const safeRevalidatePath = (path: string) => {
+    try {
+        revalidatePath(path);
+    } catch (e) {
+        // console.log(`[Revalidate] Skipped revalidation for ${path} (CLI environment)`);
+    }
+};
+
+/**
  * Import Arkansas hospital data from CSV directly to database
  */
 export async function importArkansasHospitals() {
@@ -203,7 +214,7 @@ export async function importArkansasHospitals() {
         console.log(`[Import] Successfully imported ${arkansasHospitals.length} Arkansas hospitals`);
 
         // Revalidate the Arkansas page
-        revalidatePath('/locations/arkansas');
+        safeRevalidatePath('/locations/arkansas');
 
         return { 
             success: true, 
@@ -284,7 +295,7 @@ export async function importCaliforniaHospitals() {
         console.log(`[Import] Successfully imported ${californiaHospitals.length} California hospitals`);
 
         // Revalidate the California page
-        revalidatePath('/locations/california');
+        safeRevalidatePath('/locations/california');
 
         return { 
             success: true, 
@@ -371,7 +382,7 @@ export async function importColoradoHospitals() {
         console.log(`[Import] Successfully imported ${coloradoHospitals.length} Colorado hospitals`);
 
         // Revalidate the Colorado page
-        revalidatePath('/locations/colorado');
+        safeRevalidatePath('/locations/colorado');
 
         return { 
             success: true, 
@@ -458,7 +469,7 @@ export async function importConnecticutHospitals() {
         console.log(`[Import] Successfully imported ${connecticutHospitals.length} Connecticut hospitals`);
 
         // Revalidate the Connecticut page
-        revalidatePath('/locations/connecticut');
+        safeRevalidatePath('/locations/connecticut');
 
         return { 
             success: true, 
@@ -545,7 +556,7 @@ export async function importDelawareHospitals() {
         console.log(`[Import] Successfully imported ${delawareHospitals.length} Delaware hospitals`);
 
         // Revalidate the Delaware page
-        revalidatePath('/locations/delaware');
+        safeRevalidatePath('/locations/delaware');
 
         return { 
             success: true, 
@@ -632,7 +643,7 @@ export async function importFloridaHospitals() {
         console.log(`[Import] Successfully imported ${floridaHospitals.length} Florida hospitals`);
 
         // Revalidate the Florida page
-        revalidatePath('/locations/florida');
+        safeRevalidatePath('/locations/florida');
 
         return { 
             success: true, 
@@ -719,7 +730,7 @@ export async function importGeorgiaHospitals() {
         console.log(`[Import] Successfully imported ${georgiaHospitals.length} Georgia hospitals`);
 
         // Revalidate the Georgia page
-        revalidatePath('/locations/georgia');
+        safeRevalidatePath('/locations/georgia');
 
         return { 
             success: true, 
@@ -806,7 +817,7 @@ export async function importHawaiiHospitals() {
         console.log(`[Import] Successfully imported ${hawaiiHospitals.length} Hawaii hospitals`);
 
         // Revalidate the Hawaii page
-        revalidatePath('/locations/hawaii');
+        safeRevalidatePath('/locations/hawaii');
 
         return { 
             success: true, 
@@ -893,7 +904,7 @@ export async function importIdahoHospitals() {
         console.log(`[Import] Successfully imported ${idahoHospitals.length} Idaho hospitals`);
 
         // Revalidate the Idaho page
-        revalidatePath('/locations/idaho');
+        safeRevalidatePath('/locations/idaho');
 
         return { 
             success: true, 
@@ -980,7 +991,7 @@ export async function importIllinoisHospitals() {
         console.log(`[Import] Successfully imported ${illinoisHospitals.length} Illinois hospitals`);
 
         // Revalidate the Illinois page
-        revalidatePath('/locations/illinois');
+        safeRevalidatePath('/locations/illinois');
 
         return { 
             success: true, 
@@ -1067,7 +1078,7 @@ export async function importIndianaHospitals() {
         console.log(`[Import] Successfully imported ${indianaHospitals.length} Indiana hospitals`);
 
         // Revalidate the Indiana page
-        revalidatePath('/locations/indiana');
+        safeRevalidatePath('/locations/indiana');
 
         return { 
             success: true, 
@@ -1154,7 +1165,7 @@ export async function importIowaHospitals() {
         console.log(`[Import] Successfully imported ${iowaHospitals.length} Iowa hospitals`);
 
         // Revalidate the Iowa page
-        revalidatePath('/locations/iowa');
+        safeRevalidatePath('/locations/iowa');
 
         return { 
             success: true, 
@@ -1241,7 +1252,7 @@ export async function importKentuckyHospitals() {
         console.log(`[Import] Successfully imported ${kentuckyHospitals.length} Kentucky hospitals`);
 
         // Revalidate the Kentucky page
-        revalidatePath('/locations/kentucky');
+        safeRevalidatePath('/locations/kentucky');
 
         return { 
             success: true, 
@@ -1328,7 +1339,7 @@ export async function importKansasHospitals() {
         console.log(`[Import] Successfully imported ${kansasHospitals.length} Kansas hospitals`);
 
         // Revalidate the Kansas page
-        revalidatePath('/locations/kansas');
+        safeRevalidatePath('/locations/kansas');
 
         return { 
             success: true, 
@@ -1415,7 +1426,7 @@ export async function importLouisianaHospitals() {
         console.log(`[Import] Successfully imported ${louisianaHospitals.length} Louisiana hospitals`);
 
         // Revalidate the Louisiana page
-        revalidatePath('/locations/louisiana');
+        safeRevalidatePath('/locations/louisiana');
 
         return { 
             success: true, 
@@ -1502,7 +1513,7 @@ export async function importMaineHospitals() {
         console.log(`[Import] Successfully imported ${maineHospitals.length} Maine hospitals`);
 
         // Revalidate the Maine page
-        revalidatePath('/locations/maine');
+        safeRevalidatePath('/locations/maine');
 
         return { 
             success: true, 
@@ -1589,7 +1600,7 @@ export async function importMarylandHospitals() {
         console.log(`[Import] Successfully imported ${marylandHospitals.length} Maryland hospitals`);
 
         // Revalidate the Maryland page
-        revalidatePath('/locations/maryland');
+        safeRevalidatePath('/locations/maryland');
 
         return { 
             success: true, 
@@ -1676,7 +1687,7 @@ export async function importMassachusettsHospitals() {
         console.log(`[Import] Successfully imported ${massachusettsHospitals.length} Massachusetts hospitals`);
 
         // Revalidate the Massachusetts page
-        revalidatePath('/locations/massachusetts');
+        safeRevalidatePath('/locations/massachusetts');
 
         return { 
             success: true, 
@@ -1763,7 +1774,7 @@ export async function importMichiganHospitals() {
         console.log(`[Import] Successfully imported ${michiganHospitals.length} Michigan hospitals`);
 
         // Revalidate the Michigan page
-        revalidatePath('/locations/michigan');
+        safeRevalidatePath('/locations/michigan');
 
         return { 
             success: true, 
@@ -1850,7 +1861,7 @@ export async function importMinnesotaHospitals() {
         console.log(`[Import] Successfully imported ${minnesotaHospitals.length} Minnesota hospitals`);
 
         // Revalidate the Minnesota page
-        revalidatePath('/locations/minnesota');
+        safeRevalidatePath('/locations/minnesota');
 
         return { 
             success: true, 
@@ -1937,7 +1948,7 @@ export async function importMississippiHospitals() {
         console.log(`[Import] Successfully imported ${mississippiHospitals.length} Mississippi hospitals`);
 
         // Revalidate the Mississippi page
-        revalidatePath('/locations/mississippi');
+        safeRevalidatePath('/locations/mississippi');
 
         return { 
             success: true, 
