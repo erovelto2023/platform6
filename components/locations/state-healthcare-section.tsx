@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Search, Building2, Bed, TrendingUp, DollarSign, ExternalLink } from "lucide-react";
+import { Activity, Search, Building2, Bed, TrendingUp, DollarSign, ExternalLink, MapPin, Phone } from "lucide-react";
 
 interface Hospital {
     name: string;
@@ -11,6 +11,9 @@ interface Hospital {
     url?: string;
     website?: string;
     safetyGradeUrl?: string;
+    address?: string;
+    phone?: string;
+    safetyGrade?: string;
 }
 
 interface HospitalStats {
@@ -113,12 +116,38 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                                     </div>
                                 </div>
                                 
+                                <div className="mt-3 space-y-1.5">
+                                    {hosp.address && (
+                                        <div className="flex items-start gap-1.5">
+                                            <MapPin className="h-3 w-3 text-slate-500 mt-0.5 flex-shrink-0" />
+                                            <span className="text-[10px] text-slate-400 leading-tight">{hosp.address}</span>
+                                        </div>
+                                    )}
+                                    {hosp.phone && (
+                                        <div className="flex items-center gap-1.5">
+                                            <Phone className="h-3 w-3 text-slate-500 flex-shrink-0" />
+                                            <span className="text-[10px] text-slate-400">{hosp.phone}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                
                                 <div className="mt-4 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 font-medium">
                                     <span className="truncate max-w-[120px]">{hosp.type || 'General'}</span>
                                     <div className="flex items-center gap-2">
                                         {hosp.beds && hosp.beds > 0 && (
                                             <span className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">
                                                 {hosp.beds} Beds
+                                            </span>
+                                        )}
+                                        {hosp.safetyGrade && (
+                                            <span className={`px-1.5 py-0.5 rounded font-bold ${
+                                                hosp.safetyGrade === 'A' ? 'bg-emerald-500/20 text-emerald-400' :
+                                                hosp.safetyGrade === 'B' ? 'bg-blue-500/20 text-blue-400' :
+                                                hosp.safetyGrade === 'C' ? 'bg-yellow-500/20 text-yellow-400' :
+                                                hosp.safetyGrade === 'D' ? 'bg-orange-500/20 text-orange-400' :
+                                                'bg-red-500/20 text-red-400'
+                                            }`}>
+                                                {hosp.safetyGrade}
                                             </span>
                                         )}
                                         {hosp.website && (

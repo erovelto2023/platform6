@@ -138,6 +138,9 @@ export interface ILocation extends Document {
         url?: string;
         website?: string;
         safetyGradeUrl?: string;
+        address?: string;
+        phone?: string;
+        safetyGrade?: string;
     }>;
     hospitalStats?: {
         count: number;
@@ -308,6 +311,9 @@ const LocationSchema = new Schema<ILocation>(
             url: String,
             website: String,
             safetyGradeUrl: String,
+            address: String,
+            phone: String,
+            safetyGrade: String,
         }],
         hospitalStats: {
             count: Number,
