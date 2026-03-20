@@ -109,9 +109,15 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                 })()}
 
                 {(() => {
-                    const specialized = hospitals.filter(h => 
-                        h.type && h.type !== 'General Acute Care' && h.type !== 'Critical Access' && h.type !== 'General'
-                    ).length;
+                    const specialized = hospitals.filter(h => {
+                        if (!h.type) return false;
+                        const t = h.type.toLowerCase();
+                        // Filter out common general types
+                        return !t.includes('general') && 
+                               !t.includes('acute care') && 
+                               !t.includes('critical access');
+                    }).length;
+                    
                     if (specialized > 0) {
                         return (
                             <StatCard 

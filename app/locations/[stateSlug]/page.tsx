@@ -464,8 +464,9 @@ export default async function StatePage({
     // The hospital sync is causing database validation errors that break the entire page
     console.log(`[DEBUG] Hospital sync temporarily disabled to fix other tabs`);
     
-    // Get hospital data using raw MongoDB to bypass Mongoose issues
+    // Get hospital data using raw MongoDB to bypass Mongoose issues (Next.js caching)
     let hospitals = [];
+    let mongoState = null;
     try {
         const { MongoClient } = require('mongodb');
         const client = new MongoClient(process.env.MONGODB_URI!);
@@ -474,10 +475,10 @@ export default async function StatePage({
         const db = client.db();
         const locations = db.collection('locations');
         
-        const rawState = await locations.findOne({ slug: stateSlug, type: 'state' });
-        if (rawState?.hospitals && Array.isArray(rawState.hospitals)) {
-            hospitals = rawState.hospitals;
-            console.log(`[DEBUG] Found ${hospitals.length} hospitals using raw MongoDB`);
+        mongoState = await locations.findOne({ slug: stateSlug, type: 'state' });
+        if (mongoState?.hospitals && Array.isArray(mongoState.hospitals)) {
+            hospitals = mongoState.hospitals;
+            console.log(`[DEBUG] Found ${hospitals.length} hospitals using raw MongoDB for ${stateSlug}`);
         }
         
         await client.close();
@@ -679,11 +680,11 @@ const uniqueLabels = Array.from(new Set([
                                 </TabsContent>
                             )}
                             {/* Healthcare Tab */}
-                            {(hospitals.length > 0 || (state as any).hospitalStats) && (
+                            {(hospitals.length > 0 || (mongoState as any)?.hospitalStats) && (
                                 <TabsContent value="healthcare" className="space-y-8">
                                     <StateHealthcareSection
                                         hospitals={hospitals}
-                                        stats={(state as any).hospitalStats}
+                                        stats={(mongoState as any)?.hospitalStats || (state as any).hospitalStats}
                                         stateName={state.name}
                                     />
                                 </TabsContent>
