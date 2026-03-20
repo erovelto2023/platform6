@@ -13,7 +13,7 @@ import {
   Search,
   Scale,
   Calculator,
-  Briefcase
+  Mail
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -22,13 +22,15 @@ interface CPAListing {
   name: string;
   city: string;
   state: string;
+  address?: string;
   licenseNumber?: string;
   isFirm: boolean;
   phone?: string;
+  fax?: string;
+  email?: string;
   website?: string;
   services?: string[];
   slug: string;
-  boardUrl?: string;
 }
 
 interface TaxDirectoryListProps {
@@ -108,53 +110,89 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
               </div>
             </CardHeader>
             
-            <CardContent className="p-5 pt-4 flex-1 flex flex-col gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
-                  <MapPin className="w-3 h-3 text-emerald-500/50" />
-                  {cpa.city}, {cpa.state}
-                </div>
-                {cpa.services && cpa.services.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-3">
-                    {cpa.services.map((s: string) => (
-                      <Badge key={s} variant="secondary" className="bg-slate-100 text-slate-600 text-[8px] font-black px-2 py-0">
-                        {s}
-                      </Badge>
-                    ))}
+            <CardContent className="p-5 pt-4 flex-1 flex flex-col gap-3">
+              <div className="space-y-1.5">
+                {/* Address */}
+                {cpa.address ? (
+                  <div className="flex items-start gap-2 text-[10px] font-semibold text-slate-700">
+                    <MapPin className="w-3 h-3 text-emerald-600 mt-0.5 shrink-0" />
+                    <span>{cpa.address}</span>
                   </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase">
+                    <MapPin className="w-3 h-3 text-emerald-500/40" />
+                    {cpa.city}, {cpa.state}
+                  </div>
+                )}
+
+                {/* Phone */}
+                {cpa.phone && (
+                  <a href={`tel:${cpa.phone}`} className="flex items-center gap-2 text-[10px] font-semibold text-slate-700 hover:text-emerald-700 transition-colors group/link">
+                    <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <span>{cpa.phone}</span>
+                  </a>
+                )}
+
+                {/* Email */}
+                {cpa.email && (
+                  <a href={`mailto:${cpa.email}`} className="flex items-center gap-2 text-[10px] font-semibold text-slate-700 hover:text-emerald-700 transition-colors group/link">
+                    <Mail className="w-3 h-3 text-emerald-600 shrink-0" />
+                    <span className="truncate">{cpa.email}</span>
+                  </a>
                 )}
               </div>
 
-              <div className="mt-auto pt-4 border-t border-slate-200 grid grid-cols-2 gap-2">
-                
+              {/* Services */}
+              {cpa.services && cpa.services.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {cpa.services.map((s: string) => (
+                    <Badge key={s} variant="secondary" className="bg-slate-100 text-slate-600 text-[8px] font-black px-2 py-0">
+                      {s}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="mt-auto pt-3 border-t border-slate-200 grid grid-cols-2 gap-2">
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className={`h-8 bg-[#f8f9fa] border-slate-200 text-slate-600 text-[10px] font-black uppercase hover:text-emerald-700 hover:border-emerald-500/30 transition-all group/btn ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
+                  className="h-8 bg-[#f8f9fa] border-slate-200 text-slate-600 text-[10px] font-black uppercase hover:text-emerald-700 hover:border-emerald-500/30 transition-all group/btn"
                   onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(cpa.name + ' CPA ' + cpa.city)}`, '_blank')}
                 >
                   <Search className="w-3 h-3 mr-1.5 group-hover/btn:scale-110" />
-                  Details
+                  Search
                 </Button>
                 
                 {cpa.website ? (
                   <Button 
                     size="sm" 
-                    className={`h-8 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-500/10 ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
+                    className="h-8 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-500/10"
                     onClick={() => window.open(cpa.website, '_blank')}
                   >
                     <Globe className="w-3 h-3 mr-1.5" />
-                    Visit Site
+                    Website
                   </Button>
+                ) : cpa.phone ? (
+                  <a href={`tel:${cpa.phone}`} className="contents">
+                    <Button 
+                      size="sm" 
+                      className="h-8 bg-emerald-500 hover:bg-emerald-400 text-white text-[10px] font-black uppercase shadow-lg shadow-emerald-500/10"
+                    >
+                      <Phone className="w-3 h-3 mr-1.5" />
+                      Call
+                    </Button>
+                  </a>
                 ) : (
                   <Button 
                     disabled 
                     variant="ghost" 
                     size="sm" 
-                    className={`h-8 text-slate-700 text-[10px] font-black uppercase bg-white cursor-not-allowed ${cpa.boardUrl ? 'col-span-1' : 'col-span-1'}`}
+                    className="h-8 text-slate-400 text-[10px] font-black uppercase bg-slate-50 cursor-not-allowed"
                   >
-                    <Phone className="w-3 h-3 mr-1.5" />
-                    Pending
+                    <Globe className="w-3 h-3 mr-1.5" />
+                    No Site
                   </Button>
                 )}
               </div>
