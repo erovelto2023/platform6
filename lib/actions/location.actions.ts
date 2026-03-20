@@ -398,17 +398,38 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
                     phone: sampleData.hospitals[0].phone
                 } : null
             });
+            
+            // Ensure we're saving proper objects, not strings
             state.hospitals = sampleData.hospitals.map((h: any) => ({
-                ...h,
-                state: stateAbbr
+                name: h.name,
+                city: h.city,
+                state: h.state,
+                type: h.type,
+                beds: h.beds,
+                safetyGrade: h.safetyGrade,
+                url: h.url,
+                address: h.address,
+                phone: h.phone,
+                website: h.website,
+                safetyGradeUrl: h.safetyGradeUrl
             }));
             state.hospitalStats = sampleData.stats;
         } else {
             // Update database with real hospital data
             console.log(`[DEBUG] Using real hospital data for ${stateAbbr}`);
+            // Ensure we're saving proper objects, not strings
             state.hospitals = hospitalData.hospitals.map((h: any) => ({
-                ...h,
-                state: stateAbbr
+                name: h.name,
+                city: h.city,
+                state: h.state,
+                type: h.type,
+                beds: h.beds,
+                safetyGrade: h.safetyGrade,
+                url: h.url,
+                address: h.address,
+                phone: h.phone,
+                website: h.website,
+                safetyGradeUrl: h.safetyGradeUrl
             }));
             state.hospitalStats = hospitalData.stats;
         }
