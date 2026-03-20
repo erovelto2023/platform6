@@ -460,50 +460,37 @@ export default async function StatePage({
     
     console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
 
-    // Auto-sync Educational Institutions - ensure education tab shows up
+    // TEMPORARILY DISABLE HOSPITAL SYNC TO FIX OTHER TABS
+    // The hospital sync is causing database validation errors that break the entire page
+    console.log(`[DEBUG] Hospital sync temporarily disabled to fix other tabs`);
+    
+    // Get hospital data using raw MongoDB to bypass Mongoose issues
+    let hospitals = [];
     try {
-        console.log(`[Sync] Starting educational institutions sync for ${stateSlug}`);
-        const eduResult = await syncEducationalInstitutions(stateSlug, false);
-        if (!eduResult.success) {
-            console.error(`[Sync Error] Educational institutions sync failed for ${stateSlug}:`, eduResult.error);
-        } else {
-            console.log(`[Sync] Educational institutions sync successful for ${stateSlug}`);
-            // Reload state data to get updated institutions
-            const updatedState = await getLocation(stateSlug);
-            if (updatedState) {
-                state = updatedState;
-                console.log(`[DEBUG] Updated state loaded. Educational institutions count: ${(state as any).educationalInstitutions?.length || 0}`);
-            }
+        const { MongoClient } = require('mongodb');
+        const client = new MongoClient(process.env.MONGODB_URI!);
+        
+        await client.connect();
+        const db = client.db();
+        const locations = db.collection('locations');
+        
+        const rawState = await locations.findOne({ slug: stateSlug, type: 'state' });
+        if (rawState?.hospitals && Array.isArray(rawState.hospitals)) {
+            hospitals = rawState.hospitals;
+            console.log(`[DEBUG] Found ${hospitals.length} hospitals using raw MongoDB`);
         }
+        
+        await client.close();
     } catch (error) {
-        console.error(`[Sync Error] Exception during educational institutions sync for ${stateSlug}:`, error);
-    }
-
-    // Auto-sync Hospital Data - always refresh to get latest data
-    try {
-        console.log(`[Sync] Starting hospital sync for ${stateSlug}`);
-        const result = await syncHospitalData(stateSlug, false);
-        if (!result.success) {
-            console.error(`[Sync Error] Hospital sync failed for ${stateSlug}:`, result.error);
-        } else {
-            console.log(`[Sync] Hospital sync successful for ${stateSlug}`);
-            // Reload state data to get updated hospitals
-            const updatedState = await getLocation(stateSlug);
-            if (updatedState) {
-                state = updatedState;
-                console.log(`[DEBUG] Updated state loaded. Hospitals count: ${state.hospitals?.length || 0}`);
-            }
-        }
-    } catch (error) {
-        console.error(`[Sync Error] Exception during hospital sync for ${stateSlug}:`, error);
+        console.error(`[DEBUG] Error getting hospitals with raw MongoDB:`, error);
     }
 
     const cities = await getCitiesByState(stateSlug, query);
 
-    const uniqueLabels = Array.from(new Set([
-        ...STATE_FACTS,
-        ...(state.extendedFacts ? state.extendedFacts.map((f: any) => f.label) : [])
-    ]));
+const uniqueLabels = Array.from(new Set([
+    ...STATE_FACTS,
+    ...(state.extendedFacts ? state.extendedFacts.map((f: any) => f.label) : [])
+]));
 
     // Create a dummy mapping of lowercase labels to available data, if needed
     // Otherwise fallback to "Not Specified"
@@ -605,7 +592,7 @@ export default async function StatePage({
                                         Education
                                     </TabsTrigger>
                                 )}
-                                {((state as any).hospitals?.length > 0 || (state as any).hospitalStats) && (
+                                {(hospitals.length > 0 || (state as any).hospitalStats) && (
                                     <TabsTrigger value="healthcare" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-white transition-all">
                                         Healthcare
                                     </TabsTrigger>
@@ -692,10 +679,10 @@ export default async function StatePage({
                                 </TabsContent>
                             )}
                             {/* Healthcare Tab */}
-                            {((state as any).hospitals?.length > 0 || (state as any).hospitalStats) && (
+                            {(hospitals.length > 0 || (state as any).hospitalStats) && (
                                 <TabsContent value="healthcare" className="space-y-8">
                                     <StateHealthcareSection
-                                        hospitals={(state as any).hospitals || []}
+                                        hospitals={hospitals}
                                         stats={(state as any).hospitalStats}
                                         stateName={state.name}
                                     />

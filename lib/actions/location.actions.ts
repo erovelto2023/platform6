@@ -315,10 +315,26 @@ export async function syncEducationalInstitutions(stateSlug: string, shouldReval
     try {
         await connectToDatabase();
         
+        // First, clear any corrupted hospital data to avoid casting errors
+        await Location.findOneAndUpdate(
+            { slug: stateSlug, type: 'state' },
+            { $unset: { hospitals: 1, hospitalStats: 1 } },
+            { new: true }
+        );
+        console.log(`[DEBUG] Cleared corrupted hospital data for ${stateSlug}`);
+        
         const state = await Location.findOne({ slug: stateSlug, type: 'state' });
         if (!state) throw new Error("State not found");
 
         console.log(`[Sync] Starting educational institutions sync for state: ${state.name} (${stateSlug})`);
+
+        // Clear any existing corrupted hospital data first
+        if (state.hospitals && typeof state.hospitals === 'string') {
+            console.log(`[DEBUG] Found corrupted hospital data as string, clearing it`);
+            state.hospitals = undefined;
+            state.hospitalStats = undefined;
+            await state.save();
+        }
 
         // Sample educational institutions data - you can expand this with real data
         const sampleInstitutions: Array<{ name: string; url?: string }> = [
@@ -379,7 +395,9 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
         if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
 
         // Fetch from Hospital Safety Grade API
+        console.log(`[DEBUG] About to call HospitalService.fetchHospitalsByState for ${stateAbbr}`);
         const hospitalData = await HospitalService.fetchHospitalsByState(stateAbbr);
+        console.log(`[DEBUG] HospitalService returned:`, !!hospitalData);
         
         console.log(`[DEBUG] Hospital data fetched for ${stateAbbr}:`, {
             success: !!hospitalData,
@@ -407,7 +425,7 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
             });
             
             // Ensure we're saving proper objects, not strings
-            state.hospitals = sampleData.hospitals.map((h: any) => ({
+            const hospitalArray = sampleData.hospitals.map((h: any) => ({
                 name: h.name,
                 city: h.city,
                 state: h.state,
@@ -420,12 +438,27 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
                 website: h.website,
                 safetyGradeUrl: h.safetyGradeUrl
             }));
-            state.hospitalStats = sampleData.stats;
+            
+            console.log(`[DEBUG] About to save ${hospitalArray.length} hospitals`);
+            console.log(`[DEBUG] First hospital being saved:`, hospitalArray[0]);
+            
+            // Use direct MongoDB update to bypass Mongoose casting issues
+            await Location.updateOne(
+                { _id: state._id },
+                { 
+                    $set: { 
+                        hospitals: hospitalArray,
+                        hospitalStats: sampleData.stats
+                    }
+                }
+            );
+            
+            console.log(`[DEBUG] Direct MongoDB update completed`);
         } else {
             // Update database with real hospital data
             console.log(`[DEBUG] Using real hospital data for ${stateAbbr}`);
             // Ensure we're saving proper objects, not strings
-            state.hospitals = hospitalData.hospitals.map((h: any) => ({
+            const hospitalArray = hospitalData.hospitals.map((h: any) => ({
                 name: h.name,
                 city: h.city,
                 state: h.state,
@@ -438,30 +471,36 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
                 website: h.website,
                 safetyGradeUrl: h.safetyGradeUrl
             }));
-            state.hospitalStats = hospitalData.stats;
+            
+            console.log(`[DEBUG] About to save ${hospitalArray.length} hospitals`);
+            console.log(`[DEBUG] First hospital being saved:`, hospitalArray[0]);
+            
+            // Use direct MongoDB update to bypass Mongoose casting issues
+            await Location.updateOne(
+                { _id: state._id },
+                { 
+                    $set: { 
+                        hospitals: hospitalArray,
+                        hospitalStats: hospitalData.stats
+                    }
+                }
+            );
+            
+            console.log(`[DEBUG] Direct MongoDB update completed`);
         }
         
-        console.log(`[DEBUG] Final hospital data being saved:`, {
-            hospitalsCount: state.hospitals.length,
-            firstHospital: state.hospitals[0] ? {
-                name: state.hospitals[0].name,
-                address: state.hospitals[0].address,
-                website: state.hospitals[0].website,
-                phone: state.hospitals[0].phone
-            } : null
-        });
-
-        await state.save();
+        // Reload the state to get the updated data
+        const updatedState = await Location.findOne({ slug: stateSlug, type: 'state' });
         
         console.log(`[DEBUG] After save - checking what was actually saved:`);
-        console.log(`[DEBUG] Hospitals count in saved state:`, state.hospitals?.length || 0);
-        if (state.hospitals && state.hospitals.length > 0) {
+        console.log(`[DEBUG] Hospitals count in saved state:`, updatedState?.hospitals?.length || 0);
+        if (updatedState?.hospitals && updatedState.hospitals.length > 0) {
             console.log(`[DEBUG] First hospital in saved state:`, {
-                name: state.hospitals[0].name,
-                address: state.hospitals[0].address,
-                website: state.hospitals[0].website,
-                phone: state.hospitals[0].phone,
-                safetyGrade: state.hospitals[0].safetyGrade
+                name: updatedState.hospitals[0].name,
+                address: updatedState.hospitals[0].address,
+                website: updatedState.hospitals[0].website,
+                phone: updatedState.hospitals[0].phone,
+                safetyGrade: updatedState.hospitals[0].safetyGrade
             });
         }
         

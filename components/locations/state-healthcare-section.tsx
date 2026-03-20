@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Search, Building2, Bed, TrendingUp, DollarSign, ExternalLink, MapPin, Phone } from "lucide-react";
+import { Activity, Search, Building2, Bed, TrendingUp, DollarSign, ExternalLink, MapPin, Phone, Shield } from "lucide-react";
 
 interface Hospital {
     name: string;
@@ -67,28 +67,27 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard 
                         label="Hospitals" 
-                        value={stats.count.toLocaleString()} 
+                        value={stats.count?.toLocaleString() || '0'} 
                         icon={<Building2 size={20} />} 
                         color="blue"
                     />
                     <StatCard 
                         label="Total Beds" 
-                        value={stats.staffedBeds.toLocaleString()} 
+                        value={(stats.staffedBeds || 0).toLocaleString()} 
                         icon={<Bed size={20} />} 
                         color="emerald"
                     />
                     <StatCard 
                         label="Patient Days" 
-                        value={stats.patientDays.toLocaleString()} 
+                        value={(stats.patientDays || 0).toLocaleString()} 
                         icon={<Activity size={20} />} 
                         color="purple"
                     />
                     <StatCard 
-                        label="Gross Revenue" 
-                        value={stats.grossRevenue} 
+                        label="Revenue" 
+                        value={stats.grossRevenue || 'N/A'} 
                         icon={<DollarSign size={20} />} 
                         color="amber"
-                        sub="Annually"
                     />
                 </div>
             )}

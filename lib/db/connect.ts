@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * Global is used here to maintain a cached connection across hot reloads
