@@ -55,10 +55,12 @@ export function StateHealthcareSection({ hospitals, stats, stateName }: StateHea
         console.log(`[DEBUG] Phone:`, hospitals[0].phone);
     }
     
-    const filtered = hospitals.filter(h =>
-        h.name.toLowerCase().includes(query.toLowerCase()) ||
-        (h.city && h.city.toLowerCase().includes(query.toLowerCase()))
-    );
+    const filtered = hospitals
+        .filter(h =>
+            h.name.toLowerCase().includes(query.toLowerCase()) ||
+            (h.city && h.city.toLowerCase().includes(query.toLowerCase()))
+        )
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     return (
         <div className="space-y-10">
