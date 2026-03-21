@@ -13,6 +13,7 @@ import { StateHealthcareSection } from "@/components/locations/state-healthcare-
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByState } from "@/lib/actions/cpa.actions";
 import { MainNav } from "@/components/shared/MainNav";
+import { StatePopulationStats } from "@/components/locations/state-population-stats";
 
 export const dynamic = 'force-dynamic';
 
@@ -589,6 +590,11 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="taxhub" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
                                     Tax & Accounting
                                 </TabsTrigger>
+                                {state.detailedPopulation && (
+                                    <TabsTrigger value="demographics" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-slate-500 hover:text-[#8422dc] transition-all">
+                                        Demographics
+                                    </TabsTrigger>
+                                )}
                             </TabsList>
 
                             {/* State Details Tab Content */}
@@ -694,6 +700,15 @@ const uniqueLabels = Array.from(new Set([
                                     stateName={state.name} 
                                 />
                             </TabsContent>
+                            {/* Demographics Tab Content */}
+                            {state.detailedPopulation && (
+                                <TabsContent value="demographics" className="space-y-8">
+                                    <StatePopulationStats 
+                                        data={state.detailedPopulation as any} 
+                                        stateName={state.name} 
+                                    />
+                                </TabsContent>
+                            )}
                         </Tabs>
                     </div>
                 </section>

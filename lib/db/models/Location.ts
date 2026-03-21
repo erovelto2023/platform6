@@ -146,8 +146,23 @@ export interface ILocation extends Document {
         count: number;
         staffedBeds: number;
         totalDischarges: number;
-        patientDays: number;
-        grossRevenue: string;
+        patientDays?: number;
+        grossRevenue?: string;
+    };
+    detailedPopulation?: {
+        total?: number;
+        male?: number;
+        female?: number;
+        age0to4?: number;
+        age5to17?: number;
+        age18to24?: number;
+        age25to44?: number;
+        age45to64?: number;
+        age65plus?: number;
+        ageUnder18?: number;
+        age18plus?: number;
+        age18to54?: number;
+        age55plus?: number;
     };
     createdAt: Date;
     updatedAt: Date;
@@ -321,6 +336,21 @@ const LocationSchema = new Schema<ILocation>(
             totalDischarges: Number,
             patientDays: Number,
             grossRevenue: String,
+        },
+        detailedPopulation: {
+            total: Number,
+            male: Number,
+            female: Number,
+            age0to4: Number,
+            age5to17: Number,
+            age18to24: Number,
+            age25to44: Number,
+            age45to64: Number,
+            age65plus: Number,
+            ageUnder18: Number,
+            age18plus: Number,
+            age18to54: Number,
+            age55plus: Number,
         },
     },
     {

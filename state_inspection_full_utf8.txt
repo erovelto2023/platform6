@@ -1,0 +1,680 @@
+﻿[dotenv@17.2.3] injecting env (20) from .env.local -- tip: ≡ƒöæ add access controls to secrets: https://dotenvx.com/ops
+State Sample: {
+  "legislativeData": {
+    "legislators": [],
+    "recentBills": []
+  },
+  "hospitalStats": {
+    "count": 118,
+    "staffedBeds": 18759,
+    "totalDischarges": 0,
+    "patientDays": 0,
+    "grossRevenue": "$0"
+  },
+  "_id": "69b9fd9e84ee745dacd594d0",
+  "name": "Alabama",
+  "slug": "alabama",
+  "type": "state",
+  "metaTitle": "Alabama Business Directory | K Business Academy",
+  "metaDescription": "Find business opportunities and local resources in Alabama.",
+  "__v": 633,
+  "createdAt": "2026-03-18T01:19:26.615Z",
+  "updatedAt": "2026-03-20T03:56:14.156Z",
+  "cities": [
+    {
+      "_id": "69beae0f469e27d3f25881c4",
+      "name": "Birmingham",
+      "population": "200733",
+      "description": "Largest city in Alabama, major healthcare and financial hub"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881c5",
+      "name": "Montgomery",
+      "population": "204528",
+      "description": "State capital and second-largest city"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881c6",
+      "name": "Mobile",
+      "population": "191011",
+      "description": "Port city on the Gulf Coast"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881c7",
+      "name": "Huntsville",
+      "population": "215006",
+      "description": "Technology and aerospace hub"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881c8",
+      "name": "Tuscaloosa",
+      "population": "101113",
+      "description": "Home to University of Alabama"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881c9",
+      "name": "Hoover",
+      "population": "92814",
+      "description": "Suburban city near Birmingham"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881ca",
+      "name": "Auburn",
+      "population": "76143",
+      "description": "Home to Auburn University"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881cb",
+      "name": "Decatur",
+      "population": "54944",
+      "description": "Industrial city on Tennessee River"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881cc",
+      "name": "Madison",
+      "population": "56933",
+      "description": "Technology corridor near Huntsville"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881cd",
+      "name": "Dothan",
+      "population": "71684",
+      "description": "Peanut capital of the world"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881ce",
+      "name": "Florence",
+      "population": "40049",
+      "description": "Northwest Alabama cultural center"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881cf",
+      "name": "Prattville",
+      "population": "37191",
+      "description": "Suburb of Montgomery"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881d0",
+      "name": "Gadsden",
+      "population": "33945",
+      "description": "Northeast Alabama industrial city"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881d1",
+      "name": "Phenix City",
+      "population": "32822",
+      "description": "Border city near Columbus, GA"
+    },
+    {
+      "_id": "69beae0f469e27d3f25881d2",
+      "name": "Alabaster",
+      "population": "33284",
+      "description": "Birmingham suburb"
+    }
+  ],
+  "extendedFacts": [
+    {
+      "label": "State Bible",
+      "value": "Established 1853",
+      "_id": "69bb064b03271a15ccd00f61"
+    },
+    {
+      "label": "State Great Seal",
+      "value": "Established 1876",
+      "_id": "69bb064b03271a15ccd00f62"
+    },
+    {
+      "label": "State Flag",
+      "value": "Established 1895",
+      "_id": "69bb064b03271a15ccd00f63"
+    },
+    {
+      "label": "State Coat of Arms",
+      "value": "Established 1939",
+      "_id": "69bb064b03271a15ccd00f64"
+    },
+    {
+      "label": "State Military Crest",
+      "value": "Present",
+      "_id": "69bb064b03271a15ccd00f65"
+    },
+    {
+      "label": "State Motto",
+      "value": "Audemus jura nostra defendere (\"We dare defend our rights\") (1939)",
+      "_id": "69bb064b03271a15ccd00f66"
+    },
+    {
+      "label": "State Creed",
+      "value": "Established 1939",
+      "_id": "69bb064b03271a15ccd00f67"
+    },
+    {
+      "label": "State Mascot",
+      "value": "Eastern Tiger Swallowtail (1989)",
+      "_id": "69bb064b03271a15ccd00f68"
+    },
+    {
+      "label": "State Bird",
+      "value": "Yellowhammer / Northern Flicker (1927)",
+      "_id": "69bb064b03271a15ccd00f69"
+    },
+    {
+      "label": "State Mammal",
+      "value": "American Black Bear (2006)",
+      "_id": "69bb064b03271a15ccd00f6a"
+    },
+    {
+      "label": "State Marine Mammal",
+      "value": "West Indian Manatee (2009)",
+      "_id": "69bb064b03271a15ccd00f6b"
+    },
+    {
+      "label": "State Game Bird",
+      "value": "Wild Turkey (1980)",
+      "_id": "69bb064b03271a15ccd00f6c"
+    },
+    {
+      "label": "State Horse",
+      "value": "Racking Horse (1975)",
+      "_id": "69bb064b03271a15ccd00f6d"
+    },
+    {
+      "label": "State Amphibian",
+      "value": "Red Hills Salamander (2000)",
+      "_id": "69bb064b03271a15ccd00f6e"
+    },
+    {
+      "label": "State Reptile",
+      "value": "Alabama Red-Bellied Turtle (1990)",
+      "_id": "69bb064b03271a15ccd00f6f"
+    },
+    {
+      "label": "State Insect",
+      "value": "Monarch Butterfly (1989)",
+      "_id": "69bb064b03271a15ccd00f70"
+    },
+    {
+      "label": "State Butterfly & Mascot",
+      "value": "Eastern Tiger Swallowtail (1989)",
+      "_id": "69bb064b03271a15ccd00f71"
+    },
+    {
+      "label": "State Agricultural Insect",
+      "value": "Queen Honey Bee (2015)",
+      "_id": "69bb064b03271a15ccd00f72"
+    },
+    {
+      "label": "State Crustacean",
+      "value": "Brown Shrimp (2015)",
+      "_id": "69bb064b03271a15ccd00f73"
+    },
+    {
+      "label": "State Freshwater Fish",
+      "value": "Largemouth Bass (1975)",
+      "_id": "69bb064b03271a15ccd00f74"
+    },
+    {
+      "label": "State Saltwater Fish",
+      "value": "Atlantic Tarpon (1955)",
+      "_id": "69bb064b03271a15ccd00f75"
+    },
+    {
+      "label": "State Flower",
+      "value": "Camellia (1959)",
+      "_id": "69bb064b03271a15ccd00f76"
+    },
+    {
+      "label": "State Tree",
+      "value": "Southern Longleaf Pine (1949)",
+      "_id": "69bb064b03271a15ccd00f77"
+    },
+    {
+      "label": "State Wildflower",
+      "value": "Oak-Leaf Hydrangea (1999)",
+      "_id": "69bb064b03271a15ccd00f78"
+    },
+    {
+      "label": "State Fruit",
+      "value": "Blackberry (2004)",
+      "_id": "69bb064b03271a15ccd00f79"
+    },
+    {
+      "label": "State Tree Fruit",
+      "value": "Peach (2006)",
+      "_id": "69bb064b03271a15ccd00f7a"
+    },
+    {
+      "label": "State Nut",
+      "value": "Pecan (1982)",
+      "_id": "69bb064b03271a15ccd00f7b"
+    },
+    {
+      "label": "State Vegetable",
+      "value": "Sweet Potato (2021)",
+      "_id": "69bb064b03271a15ccd00f7c"
+    },
+    {
+      "label": "State Legume",
+      "value": "Peanut (2022)",
+      "_id": "69bb064b03271a15ccd00f7d"
+    },
+    {
+      "label": "State Native Grass",
+      "value": "Little Bluestem (2024)",
+      "_id": "69bb064b03271a15ccd00f7e"
+    },
+    {
+      "label": "State Fossil",
+      "value": "Basilosaurus cetoides (1984)",
+      "_id": "69bb064b03271a15ccd00f7f"
+    },
+    {
+      "label": "State Gemstone",
+      "value": "Star Blue Quartz (1990)",
+      "_id": "69bb064b03271a15ccd00f80"
+    },
+    {
+      "label": "State Mineral",
+      "value": "Hematite / Red Iron Ore (1967)",
+      "_id": "69bb064b03271a15ccd00f81"
+    },
+    {
+      "label": "State Rock",
+      "value": "Marble (1969)",
+      "_id": "69bb064b03271a15ccd00f82"
+    },
+    {
+      "label": "State Shell",
+      "value": "Johnstone's Junonia (1990)",
+      "_id": "69bb064b03271a15ccd00f83"
+    },
+    {
+      "label": "State Soil",
+      "value": "Bama Soil Series (1997)",
+      "_id": "69bb064b03271a15ccd00f84"
+    },
+    {
+      "label": "State Capital",
+      "value": "Montgomery",
+      "_id": "69bb064b03271a15ccd00f85"
+    },
+    {
+      "label": "State Song",
+      "value": "\"Alabama\" (1931)",
+      "_id": "69bb064b03271a15ccd00f86"
+    },
+    {
+      "label": "State Dance",
+      "value": "Square Dance (1981)",
+      "_id": "69bb064b03271a15ccd00f87"
+    },
+    {
+      "label": "State Dessert",
+      "value": "Lane Cake (2016)",
+      "_id": "69bb064b03271a15ccd00f88"
+    },
+    {
+      "label": "State Cookie",
+      "value": "Yellowhammer Cookie (2023)",
+      "_id": "69bb064b03271a15ccd00f89"
+    },
+    {
+      "label": "State Spirit",
+      "value": "Conecuh Ridge Alabama Fine Whiskey (2004)",
+      "_id": "69bb064b03271a15ccd00f8a"
+    },
+    {
+      "label": "State Quilt",
+      "value": "Pine Burr Quilt (1997)",
+      "_id": "69bb064b03271a15ccd00f8b"
+    },
+    {
+      "label": "State Historic Theatre",
+      "value": "Alabama Theatre for the Performing Arts (1993)",
+      "_id": "69bb064b03271a15ccd00f8c"
+    },
+    {
+      "label": "State Outdoor Drama",
+      "value": "The Miracle Worker (1991)",
+      "_id": "69bb064b03271a15ccd00f8d"
+    },
+    {
+      "label": "State Outdoor Musical Drama",
+      "value": "The Incident at Looney's Tavern (1993)",
+      "_id": "69bb064b03271a15ccd00f8e"
+    },
+    {
+      "label": "State Renaissance Faire",
+      "value": "Florence Renaissance Faire (1988)",
+      "_id": "69bb064b03271a15ccd00f8f"
+    },
+    {
+      "label": "State Poet Laureate",
+      "value": "Andrew Glaze",
+      "_id": "69bb064b03271a15ccd00f90"
+    },
+    {
+      "label": "State Literary Capital",
+      "value": "Monroeville and Monroe County (1997)",
+      "_id": "69bb064b03271a15ccd00f91"
+    },
+    {
+      "label": "State Agricultural Museum",
+      "value": "Dothan Landmark Park (1992)",
+      "_id": "69bb064b03271a15ccd00f92"
+    },
+    {
+      "label": "State Aquarium",
+      "value": "Dauphin Island Sea Lab's Alabama Aquarium (2021)",
+      "_id": "69bb064b03271a15ccd00f93"
+    },
+    {
+      "label": "State Barbecue Championship",
+      "value": "Christmas on the River Barbeque Cookoff (1991)",
+      "_id": "69bb064b03271a15ccd00f94"
+    },
+    {
+      "label": "State Horse Show",
+      "value": "Alabama Championship Horse Show (1988)",
+      "_id": "69bb064b03271a15ccd00f95"
+    },
+    {
+      "label": "State Horseshoe Tournament",
+      "value": "Stockton Fall Horseshoe Tournament (1992)",
+      "_id": "69bb064b03271a15ccd00f96"
+    },
+    {
+      "label": "State Wild & Scenic River",
+      "value": "Little River",
+      "_id": "69bb064b03271a15ccd00f97"
+    },
+    {
+      "label": "State Quarter Design",
+      "value": "Alabama State Quarter",
+      "_id": "69bb064b03271a15ccd00f98"
+    }
+  ],
+  "koppen_climate": [],
+  "other_nicknames": [],
+  "subdivisions": [],
+  "time_zones": [],
+  "newspapers": [
+    {
+      "name": "Alabama Media Group",
+      "url": "https://www.al.com",
+      "description": "The Montgomery Advertiser, a long-standing newspaper in Alabama, offers extensive coverage of local and state news. Its online platform provides up-to-date reporting on politics, education, crime, and community news. Known for its investigative journalism, the Advertiser plays a crucial role in highlighting important issues and events in Montgomery and surrounding areas.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf092"
+    },
+    {
+      "name": "Montgomery Advertiser",
+      "url": "https://www.montgomeryadvertiser.com",
+      "description": "The Montgomery Advertiser, a long-standing newspaper in Alabama, offers extensive coverage of local and state news. Its online platform provides up-to-date reporting on politics, education, crime, and community news. Known for its investigative journalism, the Advertiser plays a crucial role in highlighting important issues and events in Montgomery and surrounding areas.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf093"
+    },
+    {
+      "name": "WSFA 12 News",
+      "url": "https://www.wsfa.com",
+      "description": "WSFA 12 News, based in Montgomery, is a major news source in central Alabama. It offers comprehensive local news, weather updates, and sports coverage. The station is known for its community engagement and in-depth reports on local governance, education, and health issues, playing a pivotal role in keeping residents informed about matters affecting their daily lives.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf094"
+    },
+    {
+      "name": "WHNT News 19",
+      "url": "https://www.whnt.com",
+      "description": "WHNT News 19, serving North Alabama and Southern Tennessee, is recognized for its quality news coverage, especially in areas like Huntsville and Decatur. It provides up-to-date local news, weather forecasts, and sports. The station&#39;s commitment to investigative journalism and community programming makes it a respected voice in the region.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf095"
+    },
+    {
+      "name": "WKRG News 5",
+      "url": "https://www.wkrg.com",
+      "description": "WKRG News 5, based in Mobile, covers the Gulf Coast region, offering local news, weather, and sports coverage. Known for its timely reporting and commitment to the community, WKRG provides insightful coverage of local issues, events, and stories that matter to residents of the Gulf Coast.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf096"
+    },
+    {
+      "name": "Tuscaloosa News",
+      "url": "https://www.tuscaloosanews.com",
+      "description": "The Tuscaloosa News provides in-depth coverage of local news, sports, and community events in Tuscaloosa and West Alabama. The newspaper is renowned for its detailed reporting on local government, education, and cultural events, making it an important source of information for residents.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf097"
+    },
+    {
+      "name": "WBRC FOX6 News Birmingham",
+      "url": "https://www.wbrc.com",
+      "description": "WBRC FOX6 News is a leading TV news outlet in Birmingham, offering extensive local and regional news coverage. Known for its breaking news, weather forecasts, and sports coverage, WBRC has a strong commitment to investigative reporting and community issues. Its website and mobile apps provide real-time news updates, making it a go-to source for many Alabamians seeking timely and reliable information.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf098"
+    },
+    {
+      "name": "ABC 33/40",
+      "url": "http://www.abc3340.com/",
+      "description": "ABC 33/40, based in Birmingham, Alabama, offers comprehensive local news, weather updates, and sports coverage. It&#39;s known for its in-depth reporting on regional stories and active engagement with the community.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf099"
+    },
+    {
+      "name": "WAFF 48 News",
+      "url": "https://www.waff.com",
+      "description": "Based in Huntsville, WAFF 48 News offers comprehensive coverage of North Alabama. It provides the latest news, weather, and sports information, with a strong focus on local stories and community issues. The station is known for its accurate and timely reporting, making it a trusted source for news in the region.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09a"
+    },
+    {
+      "name": "WIAT CBS 42",
+      "url": "https://www.cbs42.com",
+      "description": "WIAT CBS 42 is a Birmingham-based TV station offering a wide range of news coverage, including local and state news, weather updates, and sports. The station is known for its investigative reports and community-focused stories, playing a significant role in local journalism.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09b"
+    },
+    {
+      "name": "FOX10 News",
+      "url": "http://www.fox10tv.com/",
+      "description": "FOX10 News, serving Mobile and Baldwin counties in Alabama, provides up-to-the-minute news coverage, weather forecasts, and sports updates. The channel is recognized for its extensive local reporting and community involvement.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09c"
+    },
+    {
+      "name": "WVTM 13",
+      "url": "https://www.wvtm13.com",
+      "description": "WVTM 13, based in Birmingham, is known for its extensive coverage of local news, weather, and sports. The station&#39;s in-depth coverage of major events, along with its focus on community stories, makes it a key player in Alabama&#39;s news scene. Its dedication to delivering accurate and timely news has earned it a loyal viewership.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09d"
+    },
+    {
+      "name": "Dothan Eagle",
+      "url": "http://www.dothaneagle.com/",
+      "description": "Dothan Eagle offers detailed news coverage of the Dothan area, focusing on local news, sports, and community events. It&#39;s a primary news source in the Wiregrass Region, valued for its in-depth local reporting and commitment to the community.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09e"
+    },
+    {
+      "name": "WAAY-TV",
+      "url": "https://www.waaytv.com",
+      "description": "WAAY-TV, located in Huntsville, is a key source for news in North Alabama. It offers comprehensive local news coverage, weather forecasts, and sports updates. The station&#39;s dedication to covering local stories and issues, including education, health, and community events, makes it an integral part of the local media landscape.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf09f"
+    },
+    {
+      "name": "The Anniston Star",
+      "url": "https://www.annistonstar.com",
+      "description": "The Anniston Star, serving East Alabama, is known for its comprehensive coverage of local news, sports, and community events. The newspaper has a strong focus on investigative journalism and editorial content, offering insightful perspectives on issues affecting the region.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a0"
+    },
+    {
+      "name": "TimesDaily",
+      "url": "http://www.timesdaily.com/",
+      "description": "TimesDaily serves the Northwest Alabama region with news, sports, and local features. Known for its comprehensive coverage of the Shoals area, it provides insightful reporting on community and regional issues.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a1"
+    },
+    {
+      "name": "Opelika-Auburn News",
+      "url": "https://www.oanow.com",
+      "description": "Opelika-Auburn News serves the communities of Opelika and Auburn, providing local news, sports, and community coverage. The newspaper focuses on local issues and events, offering insights into the life and happenings in this part of Alabama.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a2"
+    },
+    {
+      "name": "The Decatur Daily",
+      "url": "http://decaturdaily.com/",
+      "description": "The Decatur Daily focuses on the Decatur region in Alabama, offering local news, sports updates, and in-depth analysis of community issues. It&#39;s a trusted source for residents, providing reliable reporting and a spotlight on local events.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a3"
+    },
+    {
+      "name": "WTVY",
+      "url": "http://www.wtvy.com/",
+      "description": "WTVY is a leading news source in Dothan, Alabama, providing news, weather, and sports information. Known for its extensive coverage of the Wiregrass Region, it&#39;s committed to bringing breaking news and detailed local reports.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a4"
+    },
+    {
+      "name": "Alabama Political Reporter",
+      "url": "https://www.alreporter.com",
+      "description": "Alabama Political Reporter specializes in political news and analysis, offering in-depth coverage of state government, elections, and legislative issues. Its focus on political reporting and commentary makes it a valuable resource for those interested in Alabama&#39;s political landscape.",
+      "type": "Statewide",
+      "_id": "69bb6cc27a936dbaeefaf0a5"
+    }
+  ],
+  "areaCodes": [
+    "205",
+    "251",
+    "256",
+    "334",
+    "938"
+  ],
+  "zipCodes": [],
+  "educationalInstitutions": [
+    {
+      "_id": "69beae0f469e27d3f258821f",
+      "name": "University of Alabama",
+      "url": "https://www.ua.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588220",
+      "name": "Auburn University",
+      "url": "https://www.auburn.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588221",
+      "name": "University of Alabama at Birmingham",
+      "url": "https://www.uab.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588222",
+      "name": "University of South Alabama",
+      "url": "https://www.southalabama.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588223",
+      "name": "University of North Alabama",
+      "url": "https://www.una.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588224",
+      "name": "University of Alabama in Huntsville",
+      "url": "https://www.uah.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588225",
+      "name": "Troy University",
+      "url": "https://www.troy.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588226",
+      "name": "Jacksonville State University",
+      "url": "https://www.jsu.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588227",
+      "name": "University of Montevallo",
+      "url": "https://www.montevallo.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588228",
+      "name": "Alabama State University",
+      "url": "https://www.alasu.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588229",
+      "name": "Alabama A&M University",
+      "url": "https://www.aamu.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822a",
+      "name": "University of West Alabama",
+      "url": "https://www.uwa.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822b",
+      "name": "Samford University",
+      "url": "https://www.samford.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822c",
+      "name": "Birmingham-Southern College",
+      "url": "https://www.bsc.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822d",
+      "name": "Spring Hill College",
+      "url": "https://www.shc.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822e",
+      "name": "Huntingdon College",
+      "url": "https://www.huntingdon.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f258822f",
+      "name": "Miles College",
+      "url": "https://www.miles.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588230",
+      "name": "Oakwood University",
+      "url": "https://www.oakwood.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588231",
+      "name": "Faulkner University",
+      "url": "https://www.faulkner.edu"
+    },
+    {
+      "_id": "69beae0f469e27d3f2588232",
+      "name": "University of Mobile",
+      "url": "https://www.umobile.edu"
+    }
+  ],
+  "cityStats": {
+    "count": 15,
+    "totalPopulation": 1442200
+  },
+  "educationStats": {
+    "count": 20
+  }
+}
+All State Postals: []
+All State Names: [
+  'Alabama',        'Alaska',        'Arizona',
+  'Arkansas',       'California',    'Colorado',
+  'Connecticut',    'Delaware',      'Florida',
+  'Georgia',        'Hawaii',        'Idaho',
+  'Illinois',       'Indiana',       'Iowa',
+  'Kansas',         'Kentucky',      'Louisiana',
+  'Maine',          'Maryland',      'Massachusetts',
+  'Michigan',       'Minnesota',     'Mississippi',
+  'Missouri',       'Montana',       'Nebraska',
+  'Nevada',         'New Hampshire', 'New Jersey',
+  'New Mexico',     'New York',      'North Carolina',
+  'North Dakota',   'Ohio',          'Oklahoma',
+  'Oregon',         'Pennsylvania',  'Rhode Island',
+  'South Carolina', 'South Dakota',  'Tennessee',
+  'Texas',          'Utah',          'Vermont',
+  'Virginia',       'Washington',    'West Virginia',
+  'Wisconsin',      'Wyoming'
+]
