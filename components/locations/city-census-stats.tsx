@@ -152,9 +152,9 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                         </div>
                                     </div>
                                     {timezone && (
-                                        <div className="flex items-center justify-between p-2 bg-white/60 rounded-xl border border-slate-200">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase">Timezone</span>
-                                            <span className="text-[10px] font-black text-[#0e0021]">{timezone}</span>
+                                        <div className="flex items-center justify-between p-2 bg-zinc-800 rounded-xl border border-zinc-700">
+                                            <span className="text-[9px] font-black text-zinc-500 uppercase">Timezone</span>
+                                            <span className="text-[10px] font-black text-white">{timezone}</span>
                                         </div>
                                     )}
                                 </div>
@@ -171,7 +171,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <div className="flex justify-between text-[8px] font-black uppercase text-slate-500 mb-1">
+                                        <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500 mb-1">
                                             <span>Married</span>
                                             <span>{data.audience.maritalStatus.marriedPct}%</span>
                                         </div>
@@ -275,16 +275,16 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                         </Card>
 
                         <div className="space-y-6">
-                            <Card className="bg-slate-50 border-slate-200 rounded-2xl">
+                        <Card className="bg-zinc-900 border-zinc-800 rounded-2xl">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-xs font-black uppercase text-[#0e0021] flex items-center gap-2">
-                                        <Home className="h-4 w-4 text-emerald-700" />
+                                    <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
+                                        <Home className="h-4 w-4 text-emerald-400" />
                                         Housing Reality
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
                                     <div className="flex justify-between items-center py-2 border-b border-zinc-800">
-                                        <span className="text-[10px] font-bold text-zinc-500 uppercase">Median Rent</span>
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">Median Rent</span>
                                         <span className="text-sm font-black text-white">
                                             {data.affordability.medianRent > 0 
                                                 ? `$${data.affordability.medianRent.toLocaleString()}` 
@@ -292,7 +292,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center py-2 border-b border-zinc-800">
-                                        <span className="text-[10px] font-bold text-zinc-500 uppercase">Median Mortgage</span>
+                                        <span className="text-[10px] font-bold text-zinc-400 uppercase">Median Mortgage</span>
                                         <span className="text-sm font-black text-white">
                                             {data.affordability.medianMortgage > 0 
                                                 ? `$${data.affordability.medianMortgage.toLocaleString()}` 
@@ -309,12 +309,12 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-white/60 border-slate-200 rounded-2xl border-l-4 border-l-emerald-500">
+                            <Card className="bg-zinc-900 border-zinc-800 rounded-2xl border-l-4 border-l-emerald-500">
                                 <CardContent className="pt-6">
                                     <div className="text-2xl font-black text-white italic tracking-tighter">
                                         {data.affordability.perCapitaIncome > 0 ? `$${data.affordability.perCapitaIncome.toLocaleString()}` : "N/A"}
                                     </div>
-                                    <p className="text-[10px] font-bold text-zinc-500 uppercase">Per Capita Income</p>
+                                    <p className="text-[10px] font-bold text-zinc-400 uppercase">Per Capita Income</p>
                                     <div className="mt-4 flex items-center gap-2">
                                         <TrendingUp className="h-3 w-3 text-emerald-500" />
                                         <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
@@ -682,8 +682,8 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
             {/* Quality & Footer */}
             <div className="pt-12 border-t border-zinc-800 flex flex-col md:flex-row justify-between gap-6 opacity-60 transition-opacity hover:opacity-100">
                 <div className="flex items-start gap-3 max-w-lg">
-                    <Info className="h-4 w-4 text-zinc-500 mt-1" />
-                    <p className="text-[10px] font-medium text-zinc-500 leading-relaxed uppercase tracking-tighter">
+                    <Info className="h-4 w-4 text-zinc-400 mt-1" />
+                    <p className="text-[10px] font-medium text-zinc-400 leading-relaxed uppercase tracking-tighter">
                         Data sourced from ACS 2018-2022 5-Year Estimates. 
                         {isSmallTown && (
                           <span className="block text-orange-400 font-bold mt-1">

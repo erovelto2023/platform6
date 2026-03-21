@@ -52,6 +52,22 @@ async function main() {
     const citiesInMetro = cityPart.split('-').map(c => c.trim());
     const statesInMetro = statePart.split('-').map(s => s.trim());
 
+    // Mapping of State Abbreviations to Slugs
+    const STATE_SLUG_MAP: Record<string, string> = {
+        "AL": "alabama", "AK": "alaska", "AZ": "arizona", "AR": "arkansas", "CA": "california",
+        "CO": "colorado", "CT": "connecticut", "DE": "delaware", "FL": "florida", "GA": "georgia",
+        "HI": "hawaii", "ID": "idaho", "IL": "illinois", "IN": "indiana", "IA": "iowa",
+        "KS": "kansas", "KY": "kentucky", "LA": "louisiana", "ME": "maine", "MD": "maryland",
+        "MA": "massachusetts", "MI": "michigan", "MN": "minnesota", "MS": "mississippi", "MO": "missouri",
+        "MT": "montana", "NE": "nebraska", "NV": "nevada", "NH": "new-hampshire", "NJ": "new-jersey",
+        "NM": "new-mexico", "NY": "new-york", "NC": "north-carolina", "ND": "north-dakota", "OH": "ohio",
+        "OK": "oklahoma", "OR": "oregon", "PA": "pennsylvania", "RI": "rhode-island", "SC": "south-carolina",
+        "SD": "south-dakota", "TN": "tennessee", "TX": "texas", "UT": "utah", "VT": "vermont",
+        "VA": "virginia", "WA": "washington", "WV": "west-virginia", "WI": "wisconsin", "WY": "wyoming"
+    };
+
+    const targetStateSlugs = statesInMetro.map(s => STATE_SLUG_MAP[s]).filter(Boolean);
+
     // Update each city found in the database
     for (const cityName of citiesInMetro) {
       // Find city in any of the associated states
@@ -59,8 +75,7 @@ async function main() {
         { 
           type: 'city', 
           name: new RegExp(`^${cityName}$`, 'i'),
-          // We don't strictly enforce state matching yet as some states use acronyms (VA vs Virginia)
-          // but we can try to match by stateSlug if we have a mapping
+          stateSlug: { $in: targetStateSlugs }
         },
         { 
           $set: { 
