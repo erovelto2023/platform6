@@ -12,6 +12,8 @@ import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBann
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
 import { MainNav } from "@/components/shared/MainNav";
+import { MetroRankings } from "@/components/locations/metro-rankings";
+import { SearchIcon } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
 
@@ -113,6 +115,16 @@ export default async function CityPage({
             </header>
 
             <main className="flex-1 space-y-20">
+                {/* Metro Area Rankings */}
+                {city.metroStats && (
+                    <section>
+                        <MetroRankings 
+                            metroName={city.metroName || ""} 
+                            stats={city.metroStats} 
+                        />
+                    </section>
+                )}
+
                 {/* Census Data Insight Dashboard */}
                 <section>
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-500 pl-4">

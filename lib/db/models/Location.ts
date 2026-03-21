@@ -174,6 +174,16 @@ export interface ILocation extends Document {
         hispanic?: number;
         notHispanic?: number;
     };
+    metroName?: string;
+    metroStats?: {
+        smallBusinessCount?: { value: number; rank: number };
+        smallManufacturerCount?: { value: number; rank: number };
+        employmentShare?: { value: number; rank: number };
+        payrollShare?: { value: number; rank: number };
+        minorityShare?: { value: number; rank: number };
+        womenShare?: { value: number; rank: number };
+        veteranShare?: { value: number; rank: number };
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -371,6 +381,16 @@ const LocationSchema = new Schema<ILocation>(
             twoOrMore: Number,
             hispanic: Number,
             notHispanic: Number,
+        },
+        metroName: String,
+        metroStats: {
+            smallBusinessCount: { value: Number, rank: Number },
+            smallManufacturerCount: { value: Number, rank: Number },
+            employmentShare: { value: Number, rank: Number },
+            payrollShare: { value: Number, rank: Number },
+            minorityShare: { value: Number, rank: Number },
+            womenShare: { value: Number, rank: Number },
+            veteranShare: { value: Number, rank: Number },
         },
     },
     {
