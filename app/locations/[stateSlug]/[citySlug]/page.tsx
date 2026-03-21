@@ -89,27 +89,27 @@ export default async function CityPage({
     const displayNewspapers = Array.from(uniqueNewspapersMap.values());
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#f8f9fa] text-[#0e0021]">
+        <div className="flex flex-col min-h-screen bg-background text-foreground">
             <MainNav />
             <div className="pt-24 px-6 md:px-12 lg:px-20">
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
-                    className="inline-flex items-center gap-2 text-slate-500 hover:text-purple-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
+                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-purple-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
                 >
                     <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
                 </Link>
                 
                 <div className="max-w-5xl">
-                    <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase italic leading-none mb-6">
+                    <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase italic leading-none mb-6 text-white">
                         {city.name}
                     </h1>
                     <div className="flex items-center gap-3">
                         <span className="px-4 py-1.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-black uppercase tracking-widest border border-purple-500/20">
                             {state.name}
                         </span>
-                        <span className="text-slate-700">•</span>
-                        <span className="text-slate-500 text-xs font-bold uppercase tracking-widest">Market Intelligence</span>
+                        <span className="text-zinc-700">•</span>
+                        <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Market Intelligence</span>
                     </div>
                 </div>
             </header>
@@ -128,7 +128,7 @@ export default async function CityPage({
                 {/* Census Data Insight Dashboard */}
                 <section>
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
                             Market Indicators
                         </h2>
                     </div>
@@ -146,7 +146,7 @@ export default async function CityPage({
                 <section id="tax-directory">
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
                         <div className="flex flex-col">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021] leading-tight">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white leading-tight">
                                 Tax & Accounting Hub
                             </h2>
                             <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Verified Local Experts</p>
@@ -167,7 +167,7 @@ export default async function CityPage({
                 {products && products.length > 0 && (
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-400 pl-4">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-[#0e0021]">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
                                 Recommended Resources
                             </h2>
                         </div>
@@ -177,16 +177,16 @@ export default async function CityPage({
                     </section>
                 )}
 
-                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
-                    <h4 className="text-xl font-black uppercase text-emerald-700 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
-                    <p className="text-slate-600 font-medium italic max-w-2xl mx-auto text-sm">
+                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/10 text-center">
+                    <h4 className="text-xl font-black uppercase text-emerald-400 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
+                    <p className="text-zinc-400 font-medium italic max-w-2xl mx-auto text-sm">
                         Use the data above to determine your product market fit. Whether it&apos;s a $50 guide for toddlers or a $10,000 premium course for high-earning seniors, {city.name} has clear signals for your next big move.
                     </p>
                 </section>
             </main>
 
-            <footer className="mt-20 pt-8 border-t border-slate-200">
-                <p className="text-xs text-slate-600 font-bold uppercase tracking-widest">
+            <footer className="mt-20 pt-8 border-t border-zinc-900">
+                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
                     © 2025 K Business Academy. Powered by US Census Bureau Data.
                 </p>
             </footer>
