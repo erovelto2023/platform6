@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import ReviewForm from "@/components/directory/ReviewForm";
 
 export async function generateMetadata({
     params,
@@ -54,6 +55,8 @@ export default async function ProductDetailPage({
         event: "Event / Conference",
         other: "Other"
     };
+
+    const approvedReviews = product.userReviews?.filter((r: any) => r.isApproved !== false) || [];
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0e0021] text-white">
@@ -201,16 +204,6 @@ export default async function ProductDetailPage({
                     <aside className="space-y-8">
                         {/* Status Card */}
                         <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-[2rem] space-y-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                                    <span className="text-xl font-black italic text-white">{product.rating || "4.8"}/5</span>
-                                </div>
-                                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[8px] uppercase font-black">Verified Tool</Badge>
-                            </div>
-                            
-                            <Separator className="bg-zinc-800" />
-                            
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-zinc-500">
@@ -289,13 +282,11 @@ export default async function ProductDetailPage({
                             <h2 className="text-3xl md:text-5xl font-black uppercase italic tracking-tighter text-white mb-2">User Intelligence</h2>
                             <p className="text-zinc-500 font-bold uppercase text-xs tracking-widest">What the market is saying about {product.name}</p>
                         </div>
-                        <Button variant="outline" className="border-zinc-800 text-zinc-400 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-900 rounded-xl px-8 h-12 flex items-center gap-2">
-                            <MessageSquare size={14} /> Submit Your Review
-                        </Button>
+                        <ReviewForm productId={product.id} />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {product.userReviews && product.userReviews.length > 0 ? product.userReviews.map((review: any, i: number) => (
+                        {approvedReviews.length > 0 ? approvedReviews.map((review: any, i: number) => (
                             <div key={i} className="p-8 bg-zinc-900 border border-zinc-800 rounded-3xl space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex gap-1">

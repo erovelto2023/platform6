@@ -103,3 +103,45 @@ export async function trackDirectoryProductClick(productId: number) {
         console.error("Tracking click failed", e);
     }
 }
+
+export async function addDirectoryProductReview(productId: number, review: { user: string, rating: number, comment: string }) {
+    try {
+        await connectToDatabase();
+        
+        const newReview = {
+            ...review,
+            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            isApproved: false, // Require admin approval by default
+            isVerified: false
+        };
+
+        const product = await DirectoryProduct.findOneAndUpdate(
+            { id: productId }, 
+            { 
+                $push: { userReviews: newReview },
+                $inc: { reviewsCount: 1 }
+            },
+            { new: true }
+        );
+
+        if (product && product.userReviews.length > 0) {
+            // Recalculate average rating
+            const approvedReviews = product.userReviews.filter((r: any) => r.isApproved !== false);
+            if (approvedReviews.length > 0) {
+                const totalRating = approvedReviews.reduce((sum: number, r: any) => sum + r.rating, 0);
+                const avgRating = totalRating / approvedReviews.length;
+                await DirectoryProduct.findOneAndUpdate(
+                    { id: productId },
+                    { rating: Number(avgRating.toFixed(1)) }
+                );
+            }
+        }
+
+        revalidatePath(`/tools/[slug]`, 'page');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Failed to add review", error);
+        return { error: error.message || "Failed to submit review" };
+    }
+}
+
