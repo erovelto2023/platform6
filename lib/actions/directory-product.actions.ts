@@ -15,6 +15,18 @@ export async function getDirectoryProducts() {
     }
 }
 
+export async function getDirectoryProductBySlug(slug: string) {
+    try {
+        await connectToDatabase();
+        const product = await DirectoryProduct.findOne({ slug }).lean();
+        if (!product) return { product: null };
+        return { product: JSON.parse(JSON.stringify(product)) };
+    } catch (e) {
+        console.error("Failed to fetch product by slug", e);
+        return { product: null };
+    }
+}
+
 export async function createDirectoryProduct(data: any) {
     try {
         await connectToDatabase();

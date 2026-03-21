@@ -105,11 +105,20 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
+                                            <a
+                                                href={`/tools/${product.slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-slate-400 hover:text-emerald-600 mr-4 transition-colors inline-block"
+                                                title="View Live"
+                                            >
+                                                <ExternalLink size={18} />
+                                            </a>
                                             <button
                                                 onClick={() => {
                                                     const url = `${window.location.origin}/tools/${product.slug}`;
                                                     navigator.clipboard.writeText(url);
-                                                    alert('Link Copied!');
+                                                    alert('Link Copied: ' + url);
                                                 }}
                                                 className="text-slate-400 hover:text-black mr-4 transition-colors"
                                                 title="Copy Live Link"
