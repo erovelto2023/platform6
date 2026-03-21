@@ -33,12 +33,23 @@ interface PopulationStatsProps {
     age18to54?: number;
     age55plus?: number;
   };
+  raceData?: {
+    white?: number;
+    black?: number;
+    native?: number;
+    asian?: number;
+    pacificIslander?: number;
+    twoOrMore?: number;
+    hispanic?: number;
+    notHispanic?: number;
+  };
   stateName: string;
 }
 
 const COLORS = ['#3b82f6', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
+const RACE_COLORS = ['#334155', '#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#64748b'];
 
-export function StatePopulationStats({ data, stateName }: PopulationStatsProps) {
+export function StatePopulationStats({ data, raceData, stateName }: PopulationStatsProps) {
   if (!data || !data.total) return null;
 
   const ageData = [
@@ -54,6 +65,16 @@ export function StatePopulationStats({ data, stateName }: PopulationStatsProps) 
     { name: 'Male', value: data.male },
     { name: 'Female', value: data.female },
   ].filter(item => item.value !== undefined);
+
+  const racialProfile = raceData ? [
+    { name: 'White', value: raceData.white },
+    { name: 'Black', value: raceData.black },
+    { name: 'Hispanic', value: raceData.hispanic },
+    { name: 'Asian', value: raceData.asian },
+    { name: 'Native', value: raceData.native },
+    { name: 'Pacific Islander', value: raceData.pacificIslander },
+    { name: 'Mixed/Other', value: raceData.twoOrMore },
+  ].filter(item => item.value !== undefined && item.value > 0) : [];
 
   const formatNumber = (num: number) => new Intl.NumberFormat('en-US').format(num);
 
@@ -189,6 +210,48 @@ export function StatePopulationStats({ data, stateName }: PopulationStatsProps) 
             </div>
           </CardContent>
         </Card>
+
+        {/* Racial Profile Chart */}
+        {racialProfile.length > 0 && (
+          <Card className="shadow-lg border-slate-100 overflow-hidden lg:col-span-2">
+            <CardHeader className="border-b border-slate-50 bg-slate-50/50">
+              <CardTitle>Racial Demographic Profile</CardTitle>
+              <CardDescription>Estimated ethnic and racial composition for the state</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-8">
+              <div className="h-[400px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                    layout="vertical" 
+                    data={racialProfile} 
+                    margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                    <XAxis type="number" hide />
+                    <YAxis 
+                      dataKey="name" 
+                      type="category" 
+                      axisLine={false} 
+                      tickLine={false}
+                      width={90}
+                      tick={{ fill: '#334155', fontSize: 13, fontWeight: 600 }}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: '#f8fafc' }}
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      formatter={(value: any) => [`${formatNumber(Number(value))} (${((Number(value) / data.total!) * 100).toFixed(1)}%)`, 'Population']}
+                    />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32}>
+                      {racialProfile.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={RACE_COLORS[index % RACE_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

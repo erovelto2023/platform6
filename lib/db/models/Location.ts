@@ -164,6 +164,16 @@ export interface ILocation extends Document {
         age18to54?: number;
         age55plus?: number;
     };
+    racePopulation?: {
+        white?: number;
+        black?: number;
+        native?: number;
+        asian?: number;
+        pacificIslander?: number;
+        twoOrMore?: number;
+        hispanic?: number;
+        notHispanic?: number;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -351,6 +361,16 @@ const LocationSchema = new Schema<ILocation>(
             age18plus: Number,
             age18to54: Number,
             age55plus: Number,
+        },
+        racePopulation: {
+            white: Number,
+            black: Number,
+            native: Number,
+            asian: Number,
+            pacificIslander: Number,
+            twoOrMore: Number,
+            hispanic: Number,
+            notHispanic: Number,
         },
     },
     {

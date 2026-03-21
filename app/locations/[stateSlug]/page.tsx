@@ -705,6 +705,7 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsContent value="demographics" className="space-y-8">
                                     <StatePopulationStats 
                                         data={state.detailedPopulation as any} 
+                                        raceData={state.racePopulation as any}
                                         stateName={state.name} 
                                     />
                                 </TabsContent>
