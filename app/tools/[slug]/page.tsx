@@ -62,13 +62,6 @@ export default async function ProductDetailPage({
             <div className="pt-32 pb-20 px-6 md:px-12 lg:px-20 max-w-7xl mx-auto w-full">
                 {/* Header / Breadcrumbs */}
                 <header className="mb-12">
-                    <Link 
-                        href="/business-resources"
-                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-purple-400 transition-all mb-8 font-bold uppercase tracking-widest text-[10px] group"
-                    >
-                        <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to Resources
-                    </Link>
-                    
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-4">
@@ -81,8 +74,8 @@ export default async function ProductDetailPage({
                             
                             <div className="flex items-center gap-6">
                                 {product.logoUrl ? (
-                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white/5 border border-white/10 p-4 flex items-center justify-center overflow-hidden">
-                                        <img src={product.logoUrl} alt={product.name} className="w-full h-full object-contain" />
+                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-white p-2 flex items-center justify-center shrink-0">
+                                        <img src={product.logoUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                     </div>
                                 ) : (
                                     <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center">
