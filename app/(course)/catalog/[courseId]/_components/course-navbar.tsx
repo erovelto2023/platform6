@@ -18,7 +18,7 @@ export const CourseNavbar = ({
     completedLessonIds
 }: CourseNavbarProps) => {
     return (
-        <div className="p-4 border-b h-full flex items-center bg-white shadow-sm">
+        <div className="p-4 border-b border-zinc-800 h-full flex items-center bg-zinc-950 shadow-sm text-white">
             <ClientWrapper>
                 <CourseMobileSidebar
                     course={course}
@@ -32,7 +32,7 @@ export const CourseNavbar = ({
                 </div>
                 <div className="flex gap-x-2 ml-auto">
                     <Link href="/catalog">
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800">
                             <LogOut className="h-4 w-4 mr-2" />
                             Exit
                         </Button>

@@ -24,13 +24,13 @@ export const CollapsibleModule = ({
         <div>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full px-6 py-4 font-medium text-sm bg-slate-50 border-b hover:bg-slate-100 transition flex items-center justify-between group"
+                className="w-full px-6 py-4 font-bold text-sm bg-zinc-900 border-b border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white transition flex items-center justify-between group"
             >
                 <span className="text-left">{module.title}</span>
                 {isOpen ? (
-                    <ChevronDown className="h-4 w-4 text-slate-500 group-hover:text-slate-700 transition" />
+                    <ChevronDown className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
                 ) : (
-                    <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-slate-700 transition" />
+                    <ChevronRight className="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition" />
                 )}
             </button>
             <div
