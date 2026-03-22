@@ -56,6 +56,37 @@
   --popover-foreground: #f8f9fa;
 }
 
+/* Light Theme Override for internal layout shells */
+.light-theme {
+  --background: #ffffff;
+  --foreground: #09090b;
+
+  --card: #ffffff;
+  --card-foreground: #09090b;
+
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+
+  --primary: #8322dc;
+  --primary-foreground: #ffffff;
+
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #8322dc;
+}
+
 /* Redesign Utility Classes */
 @layer utilities {
   .glass-nav {
@@ -71,6 +102,7 @@
   .text-gradient {
     background: linear-gradient(to right, #0e0021, #8422dc);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 }

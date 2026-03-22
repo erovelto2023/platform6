@@ -23,7 +23,7 @@ export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
                 <Sidebar userRole={userRole} />
             </div>
             <main className={cn(
-                "h-full transition-all duration-300 ease-in-out",
+                "h-full transition-all duration-300 ease-in-out light-theme bg-background text-foreground",
                 isCollapsed ? "md:pl-20" : "md:pl-72"
             )}>
                 <Navbar userRole={userRole} />
