@@ -395,19 +395,25 @@ export async function backfillAiPrompts() {
     }
 }
 
-export async function verifyYouTubeLinks() {
+export async function verifyYouTubeLinksBatch(termsToVerify: { id: string; term: string; videoUrl: string }[]) {
     try {
         await connectToDatabase();
-        const terms = await GlossaryTerm.find({ videoUrl: { $exists: true, $ne: "" } }, { id: 1, term: 1, videoUrl: 1 }).lean();
         
         const brokenTerms: { id: string; term: string; videoUrl: string; reason: string }[] = [];
         
-        // Process in small batches to avoid rate limiting
-        for (const term of terms) {
-            if (!term.videoUrl) continue;
+        await Promise.all(termsToVerify.map(async (term) => {
+            if (!term.videoUrl) return;
             
             try {
-                const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(term.videoUrl)}&format=json`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                
+                const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(term.videoUrl)}&format=json`, {
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
                 if (res.status === 404 || res.status === 400) {
                     brokenTerms.push({
                         id: term.id,
@@ -415,23 +421,24 @@ export async function verifyYouTubeLinks() {
                         videoUrl: term.videoUrl,
                         reason: "Video not found or unavailable"
                     });
-                } else if (!res.ok) {
-                   // Some other error, maybe rate limit or temporary issue, but 404/400 are definitive
                 }
-            } catch (err) {
-                // Network error or fetch failed
-                brokenTerms.push({
-                    id: term.id,
-                    term: term.term,
-                    videoUrl: term.videoUrl,
-                    reason: "Verification failed (network error)"
-                });
+            } catch (err: any) {
+                if (err.name === 'AbortError') {
+                    console.warn(`Timeout verifying video: ${term.videoUrl}`);
+                } else {
+                    brokenTerms.push({
+                        id: term.id,
+                        term: term.term,
+                        videoUrl: term.videoUrl,
+                        reason: "Verification failed (network error)"
+                    });
+                }
             }
-        }
+        }));
         
-        return { success: true, count: terms.length, brokenCount: brokenTerms.length, brokenTerms };
+        return { success: true, count: termsToVerify.length, brokenCount: brokenTerms.length, brokenTerms };
     } catch (error: any) {
-        console.error("Error verifying YouTube links:", error);
+        console.error("Error verifying batch of YouTube links:", error);
         return { error: error.message || "Failed to verify links" };
     }
 }

@@ -8,7 +8,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinks, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -25,6 +25,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [brokenVideos, setBrokenVideos] = useState<{ id: string; term: string; videoUrl: string; reason: string }[]>([]);
     const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
+    const [auditProgress, setAuditProgress] = useState<string>("");
     const searchParams = useSearchParams();
 
     // Auto-edit from query param
@@ -195,23 +196,44 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
-    const handleVideoAudit = () => {
-        startTransition(async () => {
-            setAuditStatus("running");
-            const res = await verifyYouTubeLinks();
-            setAuditStatus("done");
-            if (res.success) {
-                if (res.brokenCount === 0) {
-                    alert('✅ All YouTube videos are live and available!');
-                    setBrokenVideos([]);
-                } else {
-                    setBrokenVideos(res.brokenTerms || []);
-                    alert(`⚠️ Found ${res.brokenCount} broken or unavailable YouTube links. See the report below.`);
-                }
-            } else {
-                alert('Error verifying videos: ' + (res as any).error);
+    const handleVideoAudit = async () => {
+        setAuditStatus("running");
+        setAuditProgress("0%");
+        
+        const videoTerms = initialTerms.filter(t => t.videoUrl);
+        if (videoTerms.length === 0) {
+            alert('✅ No videos found to audit!');
+            setAuditStatus("idle");
+            setAuditProgress("");
+            return;
+        }
+
+        const brokenUrls: any[] = [];
+        const batchSize = 10;
+        let processedCount = 0;
+        
+        for (let i = 0; i < videoTerms.length; i += batchSize) {
+            const batch = videoTerms.slice(i, i + batchSize).map(t => ({ id: t.id, term: t.term, videoUrl: t.videoUrl! }));
+            const res = await verifyYouTubeLinksBatch(batch);
+            
+            if (res.success && res.brokenTerms) {
+                brokenUrls.push(...res.brokenTerms);
             }
-        });
+            
+            processedCount += batch.length;
+            setAuditProgress(`${Math.round((processedCount / videoTerms.length) * 100)}%`);
+        }
+
+        setAuditStatus("done");
+        setAuditProgress("");
+        
+        if (brokenUrls.length === 0) {
+            alert('✅ All YouTube videos are live and available!');
+            setBrokenVideos([]);
+        } else {
+            setBrokenVideos(brokenUrls);
+            alert(`⚠️ Found ${brokenUrls.length} broken or unavailable YouTube links. See the report below.`);
+        }
     };
 
     return (
@@ -233,7 +255,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 disabled={isPending || initialTerms.length === 0 || auditStatus === "running"}
                                 className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-rose-700 transition-all disabled:opacity-50 text-sm"
                             >
-                                {auditStatus === "running" ? "Auditing..." : "Video Audit"}
+                                {auditStatus === "running" ? `Auditing... ${auditProgress}` : "Video Audit"}
                             </button>
                             <button
                                 onClick={handleScrubUrls}
