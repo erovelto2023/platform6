@@ -115,3 +115,51 @@ export async function importFAQs(faqs: any[]) {
         return { error: error.message || "Failed to import FAQs" };
     }
 }
+export async function importCSVFAQs(faqs: any[]) {
+    try {
+        await connectToDatabase();
+        const { slugify, makeUniqueSlug } = await import('@/lib/utils/slugify');
+        
+        const existingFAQs = await FAQ.find({}, { slug: 1 }).lean();
+        const existingSlugs = existingFAQs.map((f: any) => f.slug).filter(Boolean);
+
+        const preparedFAQs = faqs.map((faq) => {
+            const baseSlug = slugify(faq.question);
+            const slug = makeUniqueSlug(baseSlug, existingSlugs);
+            existingSlugs.push(slug);
+            
+            // Map the CSV-like data to the FAQ model
+            return {
+                question: faq.question,
+                slug,
+                parentQuestion: faq.parentQuestion || '',
+                linkTitle: faq.linkTitle || '',
+                linkUrl: faq.linkUrl || '',
+                sourceText: faq.sourceText || '',
+                h1Title: faq.h1Title || faq.question,
+                answerSnippet: faq.answerSnippet || (faq.sourceText && faq.sourceText !== 'not-given' ? faq.sourceText.substring(0, 300) : faq.question),
+                deepDive: {
+                    problem: '',
+                    methodology: '',
+                    application: faq.sourceText && faq.sourceText !== 'not-given' ? faq.sourceText : ''
+                },
+                isPublished: faq.isPublished !== undefined ? faq.isPublished : true
+            };
+        });
+
+        // Use insertMany for efficiency
+        const batchSize = 100;
+        let importedCount = 0;
+        for (let i = 0; i < preparedFAQs.length; i += batchSize) {
+            const batch = preparedFAQs.slice(i, i + batchSize);
+            await FAQ.insertMany(batch);
+            importedCount += batch.length;
+        }
+
+        revalidatePath('/admin/faqs');
+        return { success: true, count: importedCount };
+    } catch (error: any) {
+        console.error("Error importing CSV FAQs:", error);
+        return { error: error.message || "Failed to import CSV FAQs" };
+    }
+}

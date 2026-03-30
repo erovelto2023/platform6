@@ -3,7 +3,9 @@ import { useState, useTransition } from 'react';
 import { IFAQ } from '@/lib/db/models/FAQ';
 import { Plus, Edit, Trash2, Search, ArrowLeft, Download, RefreshCw, Eye } from 'lucide-react';
 import Link from 'next/link';
-import { createFAQ, updateFAQ, deleteFAQ, importFAQs } from '@/lib/actions/faq.actions';
+import { createFAQ, updateFAQ, deleteFAQ, importFAQs, importCSVFAQs } from '@/lib/actions/faq.actions';
+import Papa from 'papaparse';
+import { FileUp } from 'lucide-react';
 
 interface FAQManagerProps {
     faqs: IFAQ[];
@@ -11,7 +13,7 @@ interface FAQManagerProps {
 }
 
 export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) {
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'import-csv'>('list');
     const [editingFAQ, setEditingFAQ] = useState<IFAQ | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
     const [importText, setImportText] = useState('');
@@ -71,6 +73,12 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                                 className="bg-black text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-slate-800 transition-all"
                             >
                                 <Plus size={16} /> Add New
+                            </button>
+                            <button
+                                onClick={() => setView('import-csv')}
+                                className="bg-emerald-50 text-emerald-700 px-6 py-2 rounded-lg font-bold flex items-center gap-2 border border-emerald-100 hover:bg-emerald-100 transition-all"
+                            >
+                                <FileUp size={16} /> Import CSV
                             </button>
                             <button
                                 onClick={() => setView('import')}
@@ -205,6 +213,103 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                     </div>
                 </div>
             )}
+
+            {view === 'import-csv' && (
+                <CSVImportView 
+                    onCancel={() => setView('list')} 
+                    isPending={isPending}
+                    startTransition={startTransition}
+                />
+            )}
+        </div>
+    );
+}
+
+function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () => void, isPending: boolean, startTransition: any }) {
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setFile(e.target.files[0]);
+        }
+    };
+
+    const handleImport = () => {
+        if (!file) return;
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async (results) => {
+                const data = results.data.map((row: any) => ({
+                    question: row['Question'] || row['question'],
+                    parentQuestion: row['Parent Question'] || row['parentQuestion'],
+                    linkTitle: row['Link Title'] || row['linkTitle'],
+                    linkUrl: row['Link'] || row['linkUrl'] || row['link'],
+                    sourceText: row['Text'] || row['sourceText'] || row['text']
+                }));
+
+                startTransition(async () => {
+                    const res = await importCSVFAQs(data);
+                    if (res.success) {
+                        alert(`Imported ${res.count} FAQs from CSV`);
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + res.error);
+                    }
+                });
+            },
+            error: (err) => {
+                alert('Parsing error: ' + err.message);
+            }
+        });
+    };
+
+    return (
+        <div>
+            <div className="flex items-center gap-2 mb-6">
+                <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <ArrowLeft size={20} />
+                </button>
+                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Import CSV</h2>
+            </div>
+            
+            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center">
+                <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100">
+                    <FileUp className="text-slate-400" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-800 mb-2">Upload your FAQ CSV</h3>
+                <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">
+                    Make sure your CSV has headers: <strong>Question, Parent Question, Link Title, Link, Text</strong>
+                </p>
+                
+                <input 
+                    type="file" 
+                    accept=".csv" 
+                    onChange={handleFileChange}
+                    className="hidden" 
+                    id="csv-upload"
+                />
+                <label 
+                    htmlFor="csv-upload"
+                    className="bg-white border border-slate-200 px-6 py-2 rounded-lg font-bold cursor-pointer hover:bg-slate-50 transition-all shadow-sm inline-block mb-4"
+                >
+                    {file ? file.name : 'Select CSV File'}
+                </label>
+
+                {file && (
+                    <div className="mt-4">
+                        <button
+                            onClick={handleImport}
+                            disabled={isPending}
+                            className="bg-black text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl mx-auto"
+                        >
+                            {isPending ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />}
+                            Process & Import Data
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
