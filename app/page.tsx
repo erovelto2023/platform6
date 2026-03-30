@@ -64,7 +64,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-xl md:text-2xl text-secondary leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 font-medium"
+                className="text-xl md:text-2xl text-slate-600 leading-relaxed mb-10 max-w-2xl mx-auto lg:mx-0 font-medium"
               >
                 Skip the 200-hour niche deep dive. We hand you validated models ready to execute.
               </motion.p>
@@ -94,7 +94,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="mb-16 text-center md:text-left">
               <h2 className="text-4xl font-headline font-black text-primary mb-4 italic uppercase">Who This Is For</h2>
-              <p className="text-xl text-secondary max-w-xl font-medium">If you want structure, direction, and execution, you're in the right place.</p>
+              <p className="text-xl text-slate-600 max-w-xl font-medium">If you want structure, direction, and execution, you're in the right place.</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -113,7 +113,7 @@ export default function LandingPage() {
                     <item.icon className="w-8 h-8" />
                   </div>
                   <h3 className="text-2xl font-headline font-black text-primary mb-3 italic">{item.title}</h3>
-                  <p className="text-secondary leading-relaxed font-medium">{item.text}</p>
+                  <p className="text-slate-600 leading-relaxed font-medium">{item.text}</p>
                 </motion.div>
               ))}
             </div>
@@ -125,7 +125,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-5xl font-headline font-black text-primary mb-4 italic uppercase">What You Get Inside</h2>
-              <p className="text-secondary font-medium uppercase tracking-widest text-sm">Elite Assets & Execution Protocols</p>
+              <p className="text-slate-600 font-medium uppercase tracking-widest text-sm">Elite Assets & Execution Protocols</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
@@ -135,11 +135,11 @@ export default function LandingPage() {
                   <span className="text-accent font-black text-xs uppercase tracking-widest mb-4 block">Curated Knowledge</span>
                   <h3 className="text-3xl font-headline font-black mb-4 italic">Premium Online Training</h3>
                   <ul className="space-y-3">
-                    <li className="flex items-center gap-3 text-secondary font-medium">
+                    <li className="flex items-center gap-3 text-slate-600 font-medium">
                       <CheckCircle2 className="w-5 h-5 text-accent" />
                       HD Video modules covering end-to-end execution.
                     </li>
-                    <li className="flex items-center gap-3 text-secondary font-medium">
+                    <li className="flex items-center gap-3 text-slate-600 font-medium">
                       <CheckCircle2 className="w-5 h-5 text-accent" />
                       Downloadable blueprints & step-by-step checklists.
                     </li>
@@ -180,7 +180,7 @@ export default function LandingPage() {
                     <Wrench className="w-6 h-6" />
                   </div>
                   <h3 className="text-2xl font-headline font-black mb-3 italic">Built-In Business Tools</h3>
-                  <p className="text-secondary text-sm font-medium">Financial modeling sheets, CRM templates, and automated marketing flows ready to deploy.</p>
+                  <p className="text-slate-600 text-sm font-medium">Financial modeling sheets, CRM templates, and automated marketing flows ready to deploy.</p>
                 </div>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-2 text-xs font-black text-primary/40 group-hover:text-accent transition-colors">
@@ -232,7 +232,7 @@ export default function LandingPage() {
                       <div className="text-accent font-headline font-black text-5xl opacity-20 group-hover:opacity-100 transition-opacity italic">{truth.id}</div>
                       <div>
                         <h4 className="text-2xl font-black text-primary mb-2 italic">{truth.title}</h4>
-                        <p className="text-secondary font-medium text-lg leading-relaxed">{truth.desc}</p>
+                        <p className="text-slate-600 font-medium text-lg leading-relaxed">{truth.desc}</p>
                       </div>
                     </div>
                   ))}
@@ -264,7 +264,7 @@ export default function LandingPage() {
                 <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="bg-muted">
-                      <th className="p-8 text-xs font-black uppercase tracking-widest text-secondary">Operational Feature</th>
+                      <th className="p-8 text-xs font-black uppercase tracking-widest text-slate-600">Operational Feature</th>
                       <th className="p-8 text-xs font-black uppercase tracking-widest text-red-500">The "Guru" Way</th>
                       <th className="p-8 text-xs font-black uppercase tracking-widest text-accent">The K Academy Way</th>
                     </tr>
@@ -278,7 +278,7 @@ export default function LandingPage() {
                     ].map((row, i) => (
                       <tr key={i} className="hover:bg-muted/30 transition-colors">
                         <td className="p-8 font-black text-primary italic">{row.f}</td>
-                        <td className="p-8 text-secondary font-medium">{row.guru}</td>
+                        <td className="p-8 text-slate-600 font-medium">{row.guru}</td>
                         <td className="p-8 text-primary font-black uppercase tracking-tighter text-lg underline decoration-accent/10">{row.kba}</td>
                       </tr>
                     ))}
@@ -324,7 +324,7 @@ export default function LandingPage() {
               ].map((faq, i) => (
                 <AccordionItem key={i} value={`item-${i}`} className="bg-muted/10 rounded-2xl px-6 border-none">
                   <AccordionTrigger className="text-xl font-black text-primary hover:text-accent italic py-8">{faq.q}</AccordionTrigger>
-                  <AccordionContent className="text-secondary text-lg font-medium pb-8 leading-relaxed">
+                  <AccordionContent className="text-slate-600 text-lg font-medium pb-8 leading-relaxed">
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>
@@ -354,11 +354,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16">
           <div className="md:col-span-1">
             <div className="text-3xl font-headline font-black text-primary mb-6 italic tracking-tighter">K ACADEMY</div>
-            <p className="text-secondary font-medium leading-relaxed">Elevating professional growth through radical transparency and validated business models.</p>
+            <p className="text-slate-600 font-medium leading-relaxed">Elevating professional growth through radical transparency and validated business models.</p>
           </div>
           <div className="space-y-6">
             <h4 className="font-black text-primary uppercase tracking-widest text-sm">Resources</h4>
-            <ul className="text-base space-y-4 text-secondary font-medium">
+            <ul className="text-base space-y-4 text-slate-600 font-medium">
               <li><Link className="hover:text-accent transition-colors" href="/courses">Courses</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="/library">Library</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="/glossary">Knowledgebase</Link></li>
@@ -367,7 +367,7 @@ export default function LandingPage() {
           </div>
           <div className="space-y-6">
             <h4 className="font-black text-primary uppercase tracking-widest text-sm">Company</h4>
-            <ul className="text-base space-y-4 text-secondary font-medium">
+            <ul className="text-base space-y-4 text-slate-600 font-medium">
               <li><Link className="hover:text-accent transition-colors" href="/about">About</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="/mission">Mission</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="/p/pay-your-price">Donations</Link></li>
@@ -376,7 +376,7 @@ export default function LandingPage() {
           </div>
           <div className="space-y-6">
             <h4 className="font-black text-primary uppercase tracking-widest text-sm">Legal</h4>
-            <ul className="text-base space-y-4 text-secondary font-medium">
+            <ul className="text-base space-y-4 text-slate-600 font-medium">
               <li><Link className="hover:text-accent transition-colors" href="#">Terms</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="#">Privacy</Link></li>
               <li><Link className="hover:text-accent transition-colors" href="#">Cookie Policy</Link></li>
@@ -384,7 +384,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-muted flex flex-col md:flex-row justify-between items-center gap-8">
-          <p className="text-secondary font-black text-xs uppercase tracking-widest opacity-50">© 2025 K Business Academy. Elevating professional growth.</p>
+          <p className="text-slate-600 font-black text-xs uppercase tracking-widest opacity-50">© 2025 K Business Academy. Elevating professional growth.</p>
           <div className="flex gap-8">
             <Link className="text-primary hover:text-accent transition-colors" href="#"><Globe className="w-6 h-6" /></Link>
             <Link className="text-primary hover:text-accent transition-colors" href="#"><Share2 className="w-6 h-6" /></Link>
