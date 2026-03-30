@@ -6,29 +6,47 @@ import Link from 'next/link';
 import { createFAQ, updateFAQ, deleteFAQ, importFAQs, importCSVFAQs } from '@/lib/actions/faq.actions';
 import Papa from 'papaparse';
 import { FileUp } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface FAQManagerProps {
     faqs: IFAQ[];
     offers?: any[];
+    initialPage?: number;
+    totalPages?: number;
+    totalCount?: number;
+    initialSearch?: string;
 }
 
-export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) {
+export default function FAQManager({ 
+    faqs = [], 
+    offers = [], 
+    initialPage = 1, 
+    totalPages = 1, 
+    totalCount = 0,
+    initialSearch = ""
+}: FAQManagerProps) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'import-csv'>('list');
     const [editingFAQ, setEditingFAQ] = useState<IFAQ | undefined>(undefined);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
     const [importText, setImportText] = useState('');
     const [isPending, startTransition] = useTransition();
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 20;
 
-    // Filter FAQs
-    const filteredFAQs = faqs.filter(f =>
-        f.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        f.parentQuestion?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const updateSearch = (term: string) => {
+        setSearchTerm(term);
+        const params = new URLSearchParams(searchParams?.toString() || "");
+        if (term) params.set('search', term);
+        else params.delete('search');
+        params.set('page', '1');
+        router.push(`?${params.toString()}`);
+    };
 
-    const totalPages = Math.ceil(filteredFAQs.length / itemsPerPage);
-    const paginatedFAQs = filteredFAQs.slice((page - 1) * itemsPerPage, page * itemsPerPage);
+    const handlePageChange = (newPage: number) => {
+        const params = new URLSearchParams(searchParams?.toString() || "");
+        params.set('page', newPage.toString());
+        router.push(`?${params.toString()}`);
+    };
 
     const handleDelete = (id: string) => {
         if (!confirm('Are you sure you want to delete this FAQ?')) return;
@@ -97,7 +115,7 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                                 placeholder="Search questions..."
                                 className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => updateSearch(e.target.value)}
                             />
                         </div>
                     </div>
@@ -106,17 +124,17 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                         <table className="min-w-full divide-y divide-slate-200">
                             <thead className="bg-slate-50">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Question</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Question ({totalCount})</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Parent</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Slug</th>
                                     <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-slate-100">
-                                {paginatedFAQs.map(faq => (
+                                {faqs.map(faq => (
                                     <tr key={(faq._id as unknown) as string}>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-slate-900">{faq.question}</div>
+                                            <div className="text-sm font-bold text-slate-900 line-clamp-1">{faq.question}</div>
                                             <div className="text-xs text-slate-500 truncate max-w-xs">{faq.answerSnippet}</div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">{faq.parentQuestion || '-'}</td>
@@ -144,7 +162,7 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                                         </td>
                                     </tr>
                                 ))}
-                                {paginatedFAQs.length === 0 && (
+                                {faqs.length === 0 && (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold uppercase text-xs tracking-widest">No FAQs found.</td>
                                     </tr>
@@ -156,19 +174,19 @@ export default function FAQManager({ faqs = [], offers = [] }: FAQManagerProps) 
                     {totalPages > 1 && (
                         <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
                             <div className="text-xs font-black text-slate-400 uppercase tracking-widest">
-                                Page <span className="text-black">{page}</span> of {totalPages}
+                                Page <span className="text-black">{initialPage}</span> of {totalPages}
                             </div>
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                                    disabled={page === 1}
+                                    onClick={() => handlePageChange(initialPage - 1)}
+                                    disabled={initialPage === 1}
                                     className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all"
                                 >
                                     Prev
                                 </button>
                                 <button
-                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={page >= totalPages}
+                                    onClick={() => handlePageChange(initialPage + 1)}
+                                    disabled={initialPage >= totalPages}
                                     className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all"
                                 >
                                     Next

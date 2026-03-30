@@ -15,6 +15,77 @@ export async function getFAQs() {
     }
 }
 
+export async function getPaginatedFAQs({ 
+    page = 1, 
+    limit = 20, 
+    search = "", 
+    category = "" 
+}: { 
+    page?: number; 
+    limit?: number; 
+    search?: string; 
+    category?: string; 
+}) {
+    try {
+        await connectToDatabase();
+        const query: any = { isPublished: true };
+
+        if (search) {
+            query.$or = [
+                { question: { $regex: search, $options: "i" } },
+                { answerSnippet: { $regex: search, $options: "i" } },
+                { h1Title: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        if (category) {
+            query.parentQuestion = category;
+        }
+
+        const skip = (page - 1) * limit;
+        const [faqs, total] = await Promise.all([
+            FAQ.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            FAQ.countDocuments(query)
+        ]);
+
+        return {
+            faqs: JSON.parse(JSON.stringify(faqs)),
+            total,
+            page,
+            totalPages: Math.ceil(total / limit)
+        };
+    } catch (error) {
+        console.error("Error fetching paginated FAQs:", error);
+        return { faqs: [], total: 0, page: 1, totalPages: 0 };
+    }
+}
+
+export async function getFAQBySlug(slug: string) {
+    try {
+        await connectToDatabase();
+        const faq = await FAQ.findOne({ slug }).lean();
+        return faq ? JSON.parse(JSON.stringify(faq)) : null;
+    } catch (error) {
+        console.error("Error fetching FAQ by slug:", error);
+        return null;
+    }
+}
+
+export async function getFAQCategories() {
+    try {
+        await connectToDatabase();
+        const categories = await FAQ.distinct('parentQuestion', { isPublished: true });
+        return categories.filter(Boolean).sort();
+    } catch (error) {
+        console.error("Error fetching FAQ categories:", error);
+        return [];
+    }
+}
+
 export async function createFAQ(data: any) {
     try {
         await connectToDatabase();
