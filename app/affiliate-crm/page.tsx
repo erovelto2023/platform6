@@ -14,10 +14,10 @@ import { SiteHeader } from "@/components/shared/SiteHeader";
 export default function AffiliateCRMPage() {
     const heroSlides = [
         {
-            title: 'Partnership Ecosystem Management',
-            subtitle: 'Scale your leverage through professional relationships. A high-performance CRM built for elite partnership growth.',
+            title: 'The Best Affiliate Programs.',
+            subtitle: "Stop wasting time on programs that don't pay. We've found the most reliable products for you to promote. Focus on what makes you money.",
             backgroundImage: '/heroimages/affiliate_premium.png',
-            ctaText: 'Access CRM',
+            ctaText: 'See the List',
             ctaLink: '/sign-up',
         }
     ];
@@ -54,12 +54,12 @@ export default function AffiliateCRMPage() {
                                 viewport={{ once: true }}
                                 variants={fadeInUp}
                             >
-                                <span className="text-[#bc6c25] font-black tracking-widest text-xs mb-4 block uppercase underline decoration-2 underline-offset-4">Relational Capital</span>
+                                <span className="text-[#bc6c25] font-black tracking-widest text-xs mb-4 block uppercase underline decoration-2 underline-offset-4">High-Paying Programs</span>
                                 <h2 className="text-4xl md:text-6xl font-black text-[#283618] mb-8 leading-tight">
-                                    Strategic Growth Through Networks.
+                                    The Best Products <br/>to Promote.
                                 </h2>
                                 <p className="text-xl text-[#283618]/60 leading-relaxed max-w-3xl mx-auto">
-                                    Traditional marketing is expensive. Relational marketing is profound. K Business Academy provides the infrastructure to track, manage, and scale your partnership network with professional-grade precision.
+                                    Stop chasing pennies. K Business Academy gives you a list of the best products to promote so you can make more money for $497/yr.
                                 </p>
                             </motion.div>
                         </div>
@@ -119,7 +119,7 @@ export default function AffiliateCRMPage() {
                                 <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                                     <Link href="/sign-up">
                                         <Button className="bg-[#bc6c25] hover:bg-[#606c38] text-[#fefae0] h-16 px-10 rounded-2xl font-black text-lg transition-all group">
-                                            Apply for Partnership <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                                            Unlock the Program List <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                                         </Button>
                                     </Link>
                                 </motion.div>

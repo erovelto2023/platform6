@@ -6,7 +6,7 @@ import {
   CheckCircle2, Box, Wrench, 
   Rocket, ChevronDown, Share2, Globe, MessagesSquare,
   School, Palette, HardHat, ArrowRight, ShieldCheck, Zap,
-  PlayCircle, Users, BookOpen, Star
+  PlayCircle, Users, BookOpen, Star, Book, MessageCircle, Layout
 } from "lucide-react";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 
@@ -42,20 +42,22 @@ export default function LandingPage() {
             >
               <motion.h1 
                 variants={fadeInUp}
-                className="text-5xl md:text-7xl font-black leading-[1.1] tracking-tighter mb-8 uppercase italic"
+                className="text-[clamp(2.5rem,8vw,5.5rem)] font-black text-[#283618] leading-[0.9] tracking-tighter mb-8"
               >
-                The Ultimate <br/>Launchpad For <br/>Online Careers.
+                From Newbie <br/>To Expert.
               </motion.h1>
               <motion.p 
                 variants={fadeInUp}
-                className="text-xl md:text-2xl text-[#fefae0]/70 leading-relaxed mb-10 max-w-xl mx-auto lg:mx-0 font-bold italic"
+                className="text-xl md:text-2xl text-[#283618]/60 font-bold mb-10 max-w-2xl leading-relaxed"
               >
-                Stop guessing. We provide the validated blueprints, market data, and systematic roadmaps you need to build a professional business from zero.
+                The #1 Online School for Digital Marketers. <br/>
+                Tired of the Hype? Empty Promises? <br/>
+                K Business Academy is built for beginners like you.
               </motion.p>
               <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Link href="/courses">
-                  <button className="px-10 py-5 bg-[#fefae0] text-[#283618] rounded-2xl font-black text-lg hover:shadow-2xl transition-all uppercase tracking-widest flex items-center gap-2">
-                    Start Learning Now <ArrowRight size={20} />
+                  <button className="px-10 py-5 bg-[#283618] text-[#fefae0] rounded-2xl font-black text-lg hover:shadow-2xl transition-all uppercase tracking-widest flex items-center gap-2">
+                    Join the New Standard <ArrowRight size={20} />
                   </button>
                 </Link>
               </motion.div>
@@ -71,21 +73,14 @@ export default function LandingPage() {
               <img 
                 src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" 
                 alt="Academy Excellence" 
-                className="rounded-[4rem] shadow-2xl relative z-10 border-4 border-[#fefae0]/10 grayscale hover:grayscale-0 transition-all duration-700"
+                className="rounded-[4rem] shadow-2xl relative z-10 border-4 border-[#283618]/10 grayscale hover:grayscale-0 transition-all duration-700"
               />
             </motion.div>
-          </div>
-          
-          {/* Wave/Curve decor */}
-          <div className="absolute bottom-0 left-0 w-full overflow-hidden leading-none rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="relative block w-full h-20 fill-[#fefae0]">
-              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V46.12C46.85,60.59,112.58,74.72,172,75.14,241.4,75.61,274.65,66.42,321.39,56.44Z"></path>
-            </svg>
           </div>
         </section>
 
         {/* TRIPLE FEATURE CARDS */}
-        <section className="relative -mt-16 z-20 px-6">
+        <section className="relative z-20 px-6 pb-20">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: BookOpen, title: "3,000+ Tactical Lessons", desc: "Every module is built for immediate execution.", color: "bg-[#606c38]" },
@@ -109,40 +104,88 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* OUR FEATURED COURSES */}
-        <section className="py-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-              <span className="text-[#bc6c25] font-black tracking-[0.3em] text-xs uppercase mb-4 block">Core Curriculum</span>
-              <h2 className="text-5xl font-black text-[#283618] italic uppercase tracking-tighter">Our Featured Courses</h2>
+        {/* THE ANTI-GURU MANIFESTO */}
+        <section className="py-32 px-6 bg-white relative overflow-hidden">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl md:text-7xl font-black text-[#283618] mb-10 tracking-tight">The Anti-Guru Manifesto.</h2>
+            <p className="text-2xl md:text-4xl font-bold text-[#606c38] leading-tight mb-12 italic">
+                "Stop Buying Hype. Start Building Your Business."
+            </p>
+            <div className="text-lg md:text-2xl text-[#283618]/70 space-y-8 leading-relaxed font-medium">
+                <p>
+                    Most online courses sell you a dream, but they don't give you the tools to finish the job. We're different. We focus on steps that actually work.
+                </p>
+                <p>
+                    No more "Shiny Object" traps. No more empty promises. Just the facts you need to succeed as a digital marketer.
+                </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {[
-                { title: "Business Foundation 101", cat: "Infrastructure", price: "Free", rating: 4.9, img: "https://images.unsplash.com/photo-1454165833767-151671e54021?q=80&w=800&auto=format&fit=crop" },
-                { title: "The Scaling Protocol", cat: "Operations", price: "Free", rating: 4.8, img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop" },
-                { title: "Advanced Market Design", cat: "Strategy", price: "Free", rating: 5.0, img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop" }
-              ].map((course, i) => (
-                <div key={i} className="bg-white rounded-[3.5rem] overflow-hidden border border-[#283618]/5 shadow-sm hover:shadow-2xl transition-all group">
-                  <div className="aspect-video relative overflow-hidden">
-                    <img src={course.img} alt={course.title} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110" />
-                    <div className="absolute top-6 left-6 bg-[#606c38] text-[#fefae0] px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">{course.cat}</div>
-                  </div>
-                  <div className="p-10">
-                    <div className="flex items-center gap-1 mb-4">
-                      {[...Array(5)].map((_, i) => <Star key={i} size={14} className={i < 4 ? "fill-[#dda15e] text-[#dda15e]" : "text-[#283618]/10"} />)}
-                      <span className="text-[10px] font-black text-[#283618]/30 ml-2">{course.rating}</span>
-                    </div>
-                    <h3 className="text-2xl font-black mb-6 italic leading-tight group-hover:text-[#606c38] transition-colors">{course.title}</h3>
-                    <div className="flex items-center justify-between pt-6 border-t border-[#283618]/5">
-                      <span className="text-xl font-black text-[#606c38] uppercase tracking-tighter">{course.price}</span>
-                      <Link href="/courses">
-                        <button className="text-[#283618] font-black text-xs uppercase tracking-widest hover:translate-x-2 transition-transform flex items-center gap-2">Details <ArrowRight size={16}/></button>
-                      </Link>
-                    </div>
-                  </div>
+          </div>
+        </section>
+
+        {/* YOUR UNFAIR ADVANTAGE: THE INFRASTRUCTURE */}
+        <section className="py-24 px-6 bg-[#fefae0]/50">
+          <div className="max-w-7xl mx-auto text-center mb-20">
+            <h2 className="text-5xl font-black text-[#283618] italic uppercase tracking-tighter mb-4">Your Unfair Advantage</h2>
+            <p className="text-[#283618]/40 font-black uppercase tracking-[0.3em] text-xs">The Tools You've Been Missing</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[
+              { title: "The Execution Engine", desc: "Easy step-by-step video courses that show you exactly what to do.", icon: <Zap />, href: "/courses" },
+              { title: "Answers Library", desc: "Quick fixes and worksheets for when you need an answer right now.", icon: <Book />, href: "/library" },
+              { title: "Research Database", desc: "Stop guessing. See real data for every state so you know what people are buying.", icon: <Globe />, href: "/locations" },
+              { title: "Mind-Reader DB", desc: "Learn exactly what your customers are searching for online.", icon: <MessageCircle />, href: "/questions" },
+              { title: "Curated Affiliate CRM", desc: "The best products to promote. We only show you what actually pays well.", icon: <Users />, href: "/affiliate-crm" },
+              { title: "Operational Infrastructure", desc: "Don't start from zero. Use our templates and tools to go faster.", icon: <Layout />, href: "/business-resources" }
+            ].map((feature, i) => (
+              <Link key={i} href={feature.href} className="bg-white p-10 rounded-[3rem] shadow-sm border border-[#283618]/5 hover:shadow-2xl transition-all group">
+                <div className="w-12 h-12 bg-[#606c38] rounded-xl mb-8 group-hover:scale-110 transition-transform flex items-center justify-center text-white">
+                  {feature.icon}
                 </div>
-              ))}
+                <h3 className="text-2xl font-black mb-4 italic leading-tight group-hover:text-[#606c38] transition-colors">{feature.title}</h3>
+                <p className="text-[#283618]/50 font-bold italic leading-relaxed text-sm">{feature.desc}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* WHY WE ARE DIFFERENT */}
+        <section className="py-32 bg-white px-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="relative">
+              <img 
+                src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop" 
+                alt="Architecture" 
+                className="rounded-[4rem] shadow-2xl border-4 border-[#283618]/5 grayscale aspect-square object-cover"
+              />
+              <div className="absolute -bottom-10 -right-10 bg-[#dda15e] p-10 rounded-[3rem] text-[#283618] shadow-2xl max-w-xs">
+                <p className="font-black italic text-xl">"Education should be available to everyone no matter their budget."</p>
+              </div>
+            </div>
+            <div>
+              <h2 className="text-5xl font-black text-[#283618] mb-10 italic uppercase leading-[1.1] tracking-tighter">We’ve Evolved <br/>Beyond the Kindle.</h2>
+              <div className="text-xl text-[#283618]/70 font-bold italic leading-relaxed space-y-6">
+                <p>While we started as the premier destination for Amazon and KDP, the market moved—and so did we. We realized that to truly win today, you need a holistic approach to Digital Marketing.</p>
+                <p>We’ve rebuilt the Academy from the ground up to be a student-first ecosystem. Whether you are a "Newbie" looking for your first dollar or a "Builder" architecting a complex brand, we provide the raw data and validated protocols you need to execute.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* PRICING REALITY CHECK */}
+        <section className="py-32 bg-[#fefae0] px-6">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-[#606c38] rounded-[3rem] p-12 md:p-24 text-[#fefae0] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#bc6c25]/20 rounded-full blur-[100px] -mr-48 -mt-48" />
+              <div className="relative z-10 max-w-3xl">
+                <h2 className="text-4xl md:text-7xl font-black mb-10 leading-[0.9]">Why $497 a year?</h2>
+                <p className="text-xl md:text-2xl font-bold opacity-80 mb-12 leading-relaxed">
+                    Because real tools and research aren't free. This price pays for our weekly live classes and deep-dive research so you can win. No gated secrets. No hidden fees. Just everything you need to build your empire.
+                </p>
+                <Link href="/sign-up">
+                  <button className="px-14 py-6 bg-[#dda15e] text-[#283618] rounded-2xl font-black text-2xl hover:bg-[#fefae0] transition-all uppercase tracking-widest shadow-2xl shadow-black/40">Join the Academy</button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

@@ -13,10 +13,10 @@ import { SiteHeader } from "@/components/shared/SiteHeader";
 export default function LibraryPage() {
     const heroSlides = [
         {
-            title: 'Foundational Business Intelligence',
-            subtitle: 'Access the curated research, foundational texts, and strategic archives that power high-level business decisions.',
+            title: 'The "Just-the-Answers" Library.',
+            subtitle: "Don't have time for a long course? Our library has quick fixes, worksheets, and short videos to solve your problems in minutes.",
             backgroundImage: '/heroimages/library_premium.png',
-            ctaText: 'Access Archive',
+            ctaText: 'Open the Library',
             ctaLink: '/sign-up',
         }
     ];
@@ -53,12 +53,12 @@ export default function LibraryPage() {
                                 viewport={{ once: true }}
                                 variants={fadeInUp}
                             >
-                                <span className="text-[#bc6c25] font-black uppercase tracking-widest text-xs mb-4 block">Central Knowledge Base</span>
+                                <span className="text-[#bc6c25] font-black uppercase tracking-widest text-xs mb-4 block">QUICK SOLUTIONS</span>
                                 <h2 className="text-4xl md:text-5xl font-black text-[#283618] mb-8 leading-tight">
-                                    A Repository of High-Leverage Information.
+                                    Simple Answers for Busy People.
                                 </h2>
                                 <p className="text-xl text-[#283618]/60 leading-relaxed">
-                                    The Academy Library is more than a collection of PDFs. It is a curated, systematic archive of the research and foundational models required to build a resilient business in any climate.
+                                    The "Just-the-Answers" Library is built for people who need to move fast. We cut out the fluff and give you exactly what you need to fix a problem right now.
                                 </p>
                             </motion.div>
                         </div>
@@ -74,9 +74,9 @@ export default function LibraryPage() {
                                 <div className="w-16 h-16 bg-[#606c38] rounded-2xl flex items-center justify-center text-[#fefae0] mb-8 shadow-xl transition-transform group-hover:rotate-6">
                                     <Archive size={32} />
                                 </div>
-                                <h3 className="text-2xl font-black text-[#283618] mb-4">Strategic Archives</h3>
+                                <h3 className="text-2xl font-black text-[#283618] mb-4">Easy Guides</h3>
                                 <p className="text-[#283618]/70 leading-relaxed mb-6">
-                                    Comprehensive case studies and longitudinal research on successful business models, market cycles, and historical winners.
+                                    Short books and summaries that give you the answers you need to keep moving forward.
                                 </p>
                                 <ul className="space-y-3">
                                     <li className="flex items-center gap-2 text-sm font-bold text-[#606c38]"><CheckCircle2 size={16} /> Historical Market Analysis</li>
@@ -120,13 +120,13 @@ export default function LibraryPage() {
                     <div className="container px-4 md:px-6 mx-auto">
                         <div className="flex flex-col md:flex-row items-center gap-16">
                             <div className="md:w-1/2">
-                                <h2 className="text-4xl font-black mb-8 leading-tight">Information Without Execution is Noise.</h2>
+                                <h2 className="text-4xl font-black mb-8 leading-tight">Simple Solutions for $497/yr.</h2>
                                 <p className="text-xl opacity-80 mb-10 leading-relaxed">
-                                    The Academy Library is designed for the operator. We filter through 99% of the noise to give you the 1% of information that actually shifts the needle.
+                                    Get the entire Just-the-Answers Library and our full collection of tools and worksheets today.
                                 </p>
                                 <Link href="/sign-up">
                                     <Button className="bg-[#fefae0] text-[#606c38] hover:bg-[#dda15e] hover:text-[#283618] px-10 h-16 rounded-2xl font-black text-lg transition-all shadow-2xl">
-                                        Unlock the Vault
+                                        Open the Vault
                                     </Button>
                                 </Link>
                             </div>

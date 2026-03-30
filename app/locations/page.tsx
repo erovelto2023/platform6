@@ -19,10 +19,10 @@ export default async function LocationsPage({
 
     const heroSlides = [
         {
-            title: 'Market Intelligence',
-            subtitle: 'Strategic geographical data assets for professional business operations. Map your growth with precision.',
+            title: 'Marketers Research Database.',
+            subtitle: "Stop guessing what people want. This database helps you find exactly what people are buying in every state. Access local news, population data, and more.",
             backgroundImage: '/heroimages/locations_premium.png',
-            ctaText: 'Explore Data',
+            ctaText: 'See the Data',
             ctaLink: '#explorer',
         }
     ];
@@ -40,13 +40,13 @@ export default async function LocationsPage({
                         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-10">
                             <div className="max-w-2xl">
                                 <span className="flex items-center gap-2 text-[#bc6c25] font-black tracking-[0.3em] text-xs mb-4 uppercase">
-                                    <Globe size={16} /> Global Infrastructure
+                                    <Globe size={16} /> Market Research
                                 </span>
                                 <h2 className="text-4xl md:text-6xl font-black text-[#283618] leading-[1.1]">
-                                    Intelligence Explorer.
+                                    See the Facts in Every State.
                                 </h2>
                                 <p className="mt-6 text-xl text-[#283618]/60 font-medium">
-                                    Access tactical data across the United States. Find markets, resources, and operational nodes.
+                                    Stop guessing what people want. Use our database to find real facts about your customers for $497/yr.
                                 </p>
                             </div>
                             <div className="w-full md:w-96">
@@ -56,10 +56,10 @@ export default async function LocationsPage({
 
                         <div className="flex items-center gap-4 mb-10 border-l-4 border-[#606c38] pl-6 py-2 bg-[#606c38]/5 rounded-r-2xl">
                             <h3 className="text-xl font-black text-[#283618] uppercase tracking-tight italic">
-                                {query ? `Matched Analysis: "${query}"` : 'Tactical Regions'}
+                                {query ? `Matches for: "${query}"` : 'States and Regions'}
                             </h3>
                             <div className="ml-auto bg-[#606c38] text-[#fefae0] px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#606c38]/20">
-                                {states.length} Active Nodes
+                                {states.length} Regions Found
                             </div>
                         </div>
 
@@ -68,9 +68,9 @@ export default async function LocationsPage({
                                 <div className="w-20 h-20 bg-[#fefae0] rounded-full flex items-center justify-center text-[#bc6c25] mb-8">
                                     <SearchIcon size={40} />
                                 </div>
-                                <h2 className="text-3xl font-black text-[#283618] mb-4">No Nodes Detected.</h2>
+                                <h2 className="text-3xl font-black text-[#283618] mb-4">No States Found.</h2>
                                 <p className="text-[#283618]/50 max-w-sm mb-10 font-medium italic">
-                                    We couldn't find any regions matching your specific query. Try broadening your parameters.
+                                    We couldn't find any states matching your search. Try searching for something else.
                                 </p>
                                 <Link href="/locations">
                                     <Button className="bg-[#283618] hover:bg-[#606c38] text-[#fefae0] px-10 h-14 rounded-2xl font-black transition-all">
@@ -99,7 +99,7 @@ export default async function LocationsPage({
                                         </div>
                                         <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#283618]/5">
                                             <span className="text-[10px] font-black text-[#bc6c25] uppercase tracking-widest group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
-                                                Analyze Node <ArrowRight size={14} />
+                                                See Details <ArrowRight size={14} />
                                             </span>
                                         </div>
                                     </Link>
@@ -118,9 +118,9 @@ export default async function LocationsPage({
                                 <span className="flex items-center gap-2 text-[#283618] font-black tracking-[0.3em] text-xs mb-8 uppercase">
                                     <ShieldCheck size={16} /> Exclusive Intelligence
                                 </span>
-                                <h2 className="text-4xl md:text-6xl font-black text-[#fefae0] mb-8 leading-tight italic">Expand Your Reach.</h2>
+                                <h2 className="text-4xl md:text-6xl font-black text-[#fefae0] mb-8 leading-tight italic">Know Your Niche.</h2>
                                 <p className="text-xl text-[#283618] font-medium opacity-80 leading-relaxed">
-                                    K Business Academy members get priority access to deep-market data, localized resource maps, and strategic networking opportunities in every node.
+                                    Our state data is the secret weapon for smart marketers. Stop selling to everyone and start selling to the right people based on real facts.
                                 </p>
                             </div>
                             <div className="md:w-1/3 w-full relative z-10">
@@ -135,16 +135,16 @@ export default async function LocationsPage({
                 </section>
             </main>
 
-            <footer className="py-12 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5">
+             <footer className="py-12 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5">
                 <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="flex items-center gap-2 grayscale brightness-200 opacity-40">
-                        <div className="w-8 h-8 bg-[#606c38] rounded flex items-center justify-center font-black text-[#fefae0]">K</div>
-                        <span className="font-bold tracking-tighter">K BUSINESS INTELLIGENCE</span>
+                    <div className="flex items-center gap-3 grayscale brightness-200 opacity-40">
+                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center font-black text-[#fefae0] text-xl">K</div>
+                        <span className="font-bold tracking-tighter text-xl uppercase">K RESEARCH DATABASE</span>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest italic">© 2026 Global Intelligence Network</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest italic">© 2026 K Business Academy</p>
                     <nav className="flex gap-10">
-                        <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Methodology</Link>
-                        <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Archives</Link>
+                        <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-sm">How it Works</Link>
+                        <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Library</Link>
                         <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Legal</Link>
                     </nav>
                 </div>

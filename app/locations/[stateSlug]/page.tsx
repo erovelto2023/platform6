@@ -28,10 +28,10 @@ export async function generateMetadata({
     if (!state) return { title: 'State Not Found' };
 
     return {
-        title: `${state.name} Business Hub | K Business Academy`,
-        description: `Explore local business opportunities, underserved niches, and entrepreneurial resources in the state of ${state.name}.`,
+        title: `${state.name} Business Map | K Business Academy`,
+        description: `Everything you need to start a business in ${state.name}. We've collected the best data on cities, schools, hospitals, and taxes for you.`,
         openGraph: {
-            title: `${state.name} Business Directory`,
+            title: `${state.name} Business Map`,
             description: `Unlock business insights for ${state.name}.`,
         }
     };
@@ -526,23 +526,23 @@ const uniqueLabels = Array.from(new Set([
             {/* Top Navigation Bar */}
             <MainNav />
 
-            <main className="flex-1 mt-16">
+            <main className="flex-1 mt-16 pb-20">
                 {/* Hero Section */}
-                <section className="w-full py-12 md:py-20 bg-background relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_10%,rgba(132,34,220,0.15),transparent_50%)]" />
+                <section className="w-full py-12 md:py-20 bg-[#fefae0] relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[#606c38]/5" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <Link 
                             href="/locations"
-                            className="inline-flex items-center gap-2 text-zinc-500 hover:text-sky-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
+                            className="inline-flex items-center gap-2 text-[#283618]/50 hover:text-[#283618] transition-all mb-8 font-black uppercase tracking-[0.3em] text-[10px] group"
                         >
-                            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> All States
+                            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to States
                         </Link>
                         <div className="text-left max-w-4xl">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-white uppercase italic leading-tight" suppressHydrationWarning>
-                                {state.name} <span className="text-sky-500">Business Hub</span>
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-[#283618] uppercase leading-tight" suppressHydrationWarning>
+                                {state.name} <span className="text-[#606c38]/60 underline decoration-[#dda15e] decoration-8 underline-offset-8">Business Map</span>
                             </h1>
-                            <p className="text-zinc-400 text-lg md:text-xl mb-10 font-medium max-w-2xl" suppressHydrationWarning>
-                                Discover all city-level business insights and local resources across the state of {state.name}.
+                            <p className="text-[#283618]/60 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
+                                Find everything you need to start a business in {state.name}. We've collected the best data on cities, schools, hospitals, and taxes for you.
                             </p>
                             
                             <div className="max-w-xl" suppressHydrationWarning>
@@ -555,54 +555,42 @@ const uniqueLabels = Array.from(new Set([
                 </section>
 
                 {/* Market & State Details Section */}
-                <section className="w-full py-12 bg-background min-h-[600px]">
+                <section className="w-full py-12 bg-[#fefae0] min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        {/* Recommended Resources / Rotating Banner */}
-                        {products && products.length > 0 && (
-                            <div className="mb-12 max-w-2xl mx-auto">
-                                <div className="flex items-center gap-3 mb-6 border-l-4 border-emerald-500 pl-4">
-                                    <h2 className="text-xl font-black uppercase italic tracking-tight text-white">
-                                        Partner Recommendations
-                                    </h2>
-                                </div>
-                                <RotatingAffiliateBanner products={products} />
-                            </div>
-                        )}
-
                         <Tabs defaultValue="details" className="w-full">
-                            <TabsList className="bg-zinc-900/50 border border-zinc-800 p-1 rounded-xl mb-10 w-full md:w-fit justify-start flex-wrap h-auto">
-                                <TabsTrigger value="details" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                            <TabsList className="bg-[#283618]/5 border-2 border-[#283618]/10 p-1.5 rounded-2xl mb-12 w-full md:w-fit justify-start flex-wrap h-auto">
+                                <TabsTrigger value="details" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                     State Details
                                 </TabsTrigger>
-                                <TabsTrigger value="cities" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                                <TabsTrigger value="cities" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                     Market Cities
                                 </TabsTrigger>
                                 {(state as any).educationalInstitutions?.length > 0 && (
-                                    <TabsTrigger value="education" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                                    <TabsTrigger value="education" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                         Education
                                     </TabsTrigger>
                                 )}
                                 {(hospitals.length > 0 || (state as any).hospitalStats) && (
-                                    <TabsTrigger value="healthcare" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-rose-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                                    <TabsTrigger value="healthcare" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                         Healthcare
                                     </TabsTrigger>
                                 )}
-                                <TabsTrigger value="taxhub" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                                <TabsTrigger value="taxhub" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                     Tax & Accounting
                                 </TabsTrigger>
                                 {state.detailedPopulation && (
-                                    <TabsTrigger value="demographics" className="px-8 py-2.5 rounded-lg data-[state=active]:bg-indigo-600 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-[#0284c7] transition-all">
+                                    <TabsTrigger value="demographics" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
                                         Demographics
                                     </TabsTrigger>
                                 )}
                             </TabsList>
 
-                            {/* State Details Tab Content */}
+                             {/* State Details Tab Content */}
                             <TabsContent value="details" className="space-y-8 w-full max-w-full" suppressHydrationWarning>
-                                <div className="flex items-center justify-between border-l-4 border-emerald-500 pl-4 mb-4">
+                                <div className="flex items-center justify-between border-l-8 border-[#606c38] pl-6 mb-10">
                                     <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">State Information Details</h2>
-                                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Comprehensive Directory of State Heritage</p>
+                                        <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight">Important State Facts</h2>
+                                        <p className="text-[#283618]/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 space-x-2"><span>• Symbols</span> <span>• Heritage</span> <span>• Key Info</span></p>
                                     </div>
                                 </div>
 
@@ -612,9 +600,9 @@ const uniqueLabels = Array.from(new Set([
                                         if (val === "Not Specified") return null;
                                         
                                         return (
-                                            <div key={label + idx} className="bg-zinc-900/60 border border-zinc-800/60 p-4 rounded-xl flex flex-col justify-between hover:border-emerald-500/30 transition-colors">
-                                                <div className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest mb-2">{label}</div>
-                                                <div className="text-sm font-bold text-zinc-200" suppressHydrationWarning>
+                                            <div key={label + idx} className="bg-white border-2 border-[#283618]/5 p-6 rounded-2xl flex flex-col justify-between hover:border-[#606c38]/20 transition-all hover:shadow-lg hover:shadow-[#283618]/5">
+                                                <div className="text-[10px] font-black uppercase text-[#606c38] tracking-widest mb-3">{label}</div>
+                                                <div className="text-base font-bold text-[#283618]" suppressHydrationWarning>
                                                     {val}
                                                 </div>
                                             </div>
@@ -623,34 +611,33 @@ const uniqueLabels = Array.from(new Set([
                                 </div>
                             </TabsContent>
 
-                            {/* Cities Tab Content */}
-                            <TabsContent value="cities" className="space-y-8">
-                                <div className="flex items-center justify-between mb-6 border-l-4 border-sky-500 pl-4">
-                                    <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
-                                        {query ? `Results for "${query}"` : 'Explore Market Locations'}
+                             <TabsContent value="cities" className="space-y-8">
+                                <div className="flex items-center justify-between mb-8 border-l-8 border-[#283618] pl-6">
+                                    <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight">
+                                        {query ? `Results for "${query}"` : 'The Best Cities to Visit'}
                                     </h2>
-                                    <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest bg-zinc-800 px-3 py-1 rounded-full">
-                                        {cities.length} Cities Found
+                                    <span className="text-[#283618] text-[10px] font-black uppercase tracking-widest bg-[#283618]/5 px-4 py-2 rounded-xl">
+                                        {cities.length} Cities in the System
                                     </span>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                     {cities.map((city: any) => (
                                         <Link 
                                             key={city.slug}
                                             href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-zinc-900 border-zinc-800/50 hover:bg-zinc-800 p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/10 active:scale-95"
+                                            className="group relative overflow-hidden bg-white border-2 border-[#283618]/5 hover:bg-[#283618]/5 p-8 rounded-[2rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-[#283618]/5"
                                         >
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300">
-                                                        <MapPin size={20} />
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-2xl bg-[#606c38]/10 flex items-center justify-center text-[#606c38] group-hover:bg-[#606c38] group-hover:text-white transition-all duration-300">
+                                                        <MapPin size={24} />
                                                     </div>
-                                                    <span className="font-bold text-zinc-200 group-hover:text-sky-400 transition-colors">
+                                                    <span className="font-black text-[#283618] text-lg group-hover:text-[#606c38] transition-colors leading-tight">
                                                         {city.name}
                                                     </span>
                                                 </div>
-                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-sky-400 -translate-x-2 group-hover:translate-x-0" size={16} />
+                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-[#606c38] -translate-x-2 group-hover:translate-x-0" size={18} />
                                             </div>
                                             <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </Link>
@@ -686,12 +673,12 @@ const uniqueLabels = Array.from(new Set([
                                     />
                                 </TabsContent>
                             )}
-                            {/* Tax Hub Tab */}
+                            {/* Tax Hub Tab Content */}
                             <TabsContent value="taxhub" className="space-y-8">
-                                <div className="flex items-center justify-between mb-6 border-l-4 border-emerald-500 pl-4">
+                                <div className="flex items-center justify-between mb-8 border-l-8 border-[#606c38] pl-6">
                                     <div>
-                                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">Verified CPAs in {state.name}</h2>
-                                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">State-Wide Professional Directory</p>
+                                        <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight italic">Verified CPAs in {state.name}</h2>
+                                        <p className="text-[#283618]/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 italic">Professional Help in Your Area</p>
                                     </div>
                                 </div>
                                 <TaxDirectoryList 
@@ -716,10 +703,10 @@ const uniqueLabels = Array.from(new Set([
             </main>
 
             {/* Footer */}
-            <footer className="py-12 border-t border-zinc-900 bg-background">
+            <footer className="py-12 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5">
                 <div className="container px-4 md:px-6 mx-auto text-center">
-                    <p className="text-xs text-zinc-500 font-bold tracking-widest uppercase" suppressHydrationWarning>
-                        © 2025 K Business Academy. All rights reserved.
+                    <p className="text-[10px] font-black uppercase tracking-widest italic" suppressHydrationWarning>
+                        © 2026 K Business Academy. All rights reserved.
                     </p>
                 </div>
             </footer>

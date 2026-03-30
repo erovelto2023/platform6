@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const NAV_LINKS = [
-    { label: "Courses",           href: "/courses" },
-    { label: "Library",           href: "/library" },
-    { label: "Resources",         href: "/business-resources" },
-    { label: "Affiliate CRM",     href: "/affiliate-crm" },
+    { label: "Execution Engine",  href: "/courses" },
+    { label: "Answers Library",   href: "/library" },
+    { label: "Infrastructure",    href: "/business-resources" },
+    { label: "Curated CRM",       href: "/affiliate-crm" },
     { label: "Blog",              href: "/blog" },
-    { label: "Intelligence",      href: "/locations" },
-    { label: "FAQ",               href: "/questions" },
+    { label: "Research Database", href: "/locations" },
+    { label: "Mind-Reader DB",    href: "/questions" },
 ];
 
 export function SiteHeader() {

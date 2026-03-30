@@ -13,10 +13,10 @@ import { SiteHeader } from "@/components/shared/SiteHeader";
 export default function BusinessResourcesPage() {
     const heroSlides = [
         {
-            title: 'Operational Speed & Systems',
-            subtitle: 'The literal templates, spreadsheets, and SOPs used to operate at the 1% level. Built for immediate deployment.',
+            title: 'The Skeleton of Your Business.',
+            subtitle: "Every business needs a strong foundation. We’ve built a library of tools and templates so you don't have to start from zero. Use our 'Skeleton' to build yours.",
             backgroundImage: '/heroimages/resources_premium.png',
-            ctaText: 'Deploy Systems',
+            ctaText: 'Get the Tools',
             ctaLink: '/sign-up',
         }
     ];
@@ -54,12 +54,12 @@ export default function BusinessResourcesPage() {
                                 variants={fadeInUp}
                                 className="md:w-1/2"
                             >
-                                <span className="inline-block py-1 px-4 rounded-full bg-[#dda15e]/10 text-[#bc6c25] text-xs font-black tracking-widest mb-6">OPERATIONAL ASSETS</span>
+                                <span className="inline-block py-1 px-4 rounded-full bg-[#dda15e]/10 text-[#bc6c25] text-xs font-black tracking-widest mb-6">BUSINESS SKELETON</span>
                                 <h2 className="text-4xl md:text-5xl font-black text-[#283618] mb-8 leading-[1.1]">
-                                    Move Faster with Proven Infrastructure.
+                                    Build Faster with Our <br/>Tested Templates.
                                 </h2>
                                 <p className="text-xl text-[#283618]/70 leading-relaxed mb-8">
-                                    Why build from scratch when you can deploy what already works? Our resource hub provides the tactical infrastructure required to scale without the structural debt.
+                                    Why start from zero when you can use what already works? Use our tools to build your business faster for $497/yr.
                                 </p>
                                 
                                 <div className="space-y-6">
@@ -118,11 +118,11 @@ export default function BusinessResourcesPage() {
                             <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#bc6c25]/30 rounded-full blur-[100px]" />
                             <div className="relative z-10 max-w-2xl">
                                 <span className="flex items-center gap-2 text-[#dda15e] font-black tracking-[0.3em] text-xs mb-8 uppercase">
-                                    <ShieldCheck size={16} /> Elite Support
+                                    <ShieldCheck size={16} /> Foundation Access
                                 </span>
-                                <h2 className="text-4xl md:text-6xl font-black mb-10 leading-tight">Stop Wasting Time on Repetitive Work.</h2>
+                                <h2 className="text-4xl md:text-6xl font-black mb-10 leading-tight">Stop Wasting Time on <br/>Busy Work.</h2>
                                 <p className="text-xl opacity-70 mb-12 leading-relaxed">
-                                    We provide the "skeleton" of the business. You provide the vision. Join K Business Academy to gain instant access to our entire internal toolset.
+                                    We provide the "skeleton" of the business. You provide the vision. Join K Business Academy to get our full library of tools.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-6">
                                     <Link href="/sign-up">

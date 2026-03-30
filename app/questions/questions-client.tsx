@@ -83,13 +83,13 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
             <div className="pt-24 pb-12 px-6 text-center border-b border-[#bc6c25]/10">
                 <div className="max-w-4xl mx-auto">
                     <span className="flex items-center justify-center gap-2 text-[#bc6c25] font-black tracking-[0.3em] text-xs mb-6 uppercase">
-                        <HelpCircle size={16} /> Knowledge Base
+                        <MessageCircle size={16} /> READ THEIR MINDS
                     </span>
                     <h1 className="text-4xl md:text-7xl font-black text-[#283618] mb-6 tracking-tight leading-[1.1]">
-                        The Academy <span className="italic text-[#606c38]">Intelligence Hub.</span>
+                        The FAQ <span className="italic text-[#606c38]">&ldquo;Mind-Reader&rdquo; Database.</span>
                     </h1>
                     <p className="text-xl text-[#283618]/60 font-bold mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Access {initialFAQs.length.toLocaleString()}+ tactical answers processed through our methodology.
+                        Know what your customers are asking before you even build your business. We show you the top questions people are searching for online right now for $497/yr.
                     </p>
 
                     {/* Search */}
@@ -201,11 +201,11 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                         <div className="bg-white p-12 rounded-[3.5rem] border border-[#283618]/5 shadow-2xl shadow-[#283618]/5 relative overflow-hidden flex flex-col justify-center group">
                             <div className="absolute -top-10 -right-10 p-8 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-700 text-[#606c38]"><HelpCircle size={200} /></div>
                             <div className="relative z-10">
-                                <span className="inline-block px-4 py-1.5 bg-[#bc6c25] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8 shadow-lg shadow-[#bc6c25]/20">Daily Intelligence Spotlight</span>
+                                <span className="inline-block px-4 py-1.5 bg-[#bc6c25] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8 shadow-lg shadow-[#bc6c25]/20">Daily Mind-Reader Tip</span>
                                 {spotlightFAQ ? (
                                     <>
                                         <h2 className="text-3xl font-black text-[#283618] mb-6 leading-tight group-hover:text-[#606c38] transition-colors">{spotlightFAQ.question}</h2>
-                                        <p className="text-[#283618]/60 mb-10 line-clamp-3 leading-relaxed font-bold italic">{spotlightFAQ.answerSnippet}</p>
+                                        <p className="text-[#283618]/60 mb-10 line-clamp-3 leading-relaxed font-bold italic">Real questions from real people, so you know exactly what to talk about in your marketing.</p>
                                         <Link href={`/questions/${spotlightFAQ.slug}`} className="text-[#606c38] font-black text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-2 transition-all">
                                             Read Methodology <ArrowRight size={18} />
                                         </Link>
@@ -231,11 +231,11 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                     <div>
                         <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 pb-6 border-b border-[#283618]/5 px-4 gap-6">
                             <h3 className="text-3xl font-black text-[#283618] flex items-center gap-4 italic uppercase tracking-tighter">
-                                {selectedCategory !== 'all' ? selectedCategory : 'Intelligence Registry'}
+                                {selectedCategory !== 'all' ? selectedCategory : 'Question Registry'}
                                 {activeLetter && <span className="text-[#bc6c25]">— {activeLetter}</span>}
                             </h3>
                             <div className="bg-[#606c38] text-[#fefae0] px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#606c38]/20 whitespace-nowrap self-start">
-                                {filteredFAQs.length.toLocaleString()} Operational Nodes
+                                {filteredFAQs.length.toLocaleString()} Common Questions
                             </div>
                         </div>
 
@@ -356,7 +356,7 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                 <div className="container px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex items-center gap-3 grayscale brightness-200 opacity-40">
                         <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center font-black text-[#fefae0] text-xl">K</div>
-                        <span className="font-bold tracking-tighter text-xl">K BUSINESS INTELLIGENCE</span>
+                        <span className="font-bold tracking-tighter text-xl uppercase">K MIND-READER DATABASE</span>
                     </div>
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">© 2026 Global Knowledge Architecture</p>
                     <nav className="flex gap-12">

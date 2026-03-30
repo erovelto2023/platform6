@@ -15,10 +15,10 @@ export default function CoursesPage() {
     // Hero slides for courses page
     const heroSlides = [
         {
-            title: 'Tactical Methodology.',
-            subtitle: 'The systems, mental models, and operational frameworks used by the top 1% to build and scale assets.',
+            title: 'The Execution Engine.',
+            subtitle: "Easy step-by-step videos you can watch at your own pace. All with clear workbooks and plans.",
             backgroundImage: '/heroimages/courses_premium.png',
-            ctaText: 'Access Methodology',
+            ctaText: 'Start Learning',
             ctaLink: '/sign-up',
         }
     ];
@@ -58,12 +58,12 @@ export default function CoursesPage() {
                                 variants={fadeInUp}
                                 className="md:w-1/2"
                             >
-                                <Badge className="bg-[#dda15e]/10 text-[#bc6c25] border-[#bc6c25]/20 mb-6 px-4 py-1">THE METHODOLOGY</Badge>
+                                <Badge className="bg-[#dda15e]/10 text-[#bc6c25] border-[#bc6c25]/20 mb-6 px-4 py-1 uppercase tracking-widest font-black">STEP-BY-STEP COURSES</Badge>
                                 <h2 className="text-4xl md:text-5xl font-black text-[#283618] leading-[1.1] mb-8">
-                                    Structured Education for the Modern Entrepreneur.
+                                    Simple Lessons for Digital Marketers.
                                 </h2>
                                 <p className="text-xl text-[#283618]/70 leading-relaxed mb-8">
-                                    Most online courses offer tricks. We offer systems. K Business Academy is built on the belief that long-term success is a byproduct of sound operations and repeatable frameworks.
+                                    Most courses are confusing. Ours are built for beginners. Whether you want to make your first dollar or build a big brand, we give you the simple steps to get it done.
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     {[
@@ -88,12 +88,12 @@ export default function CoursesPage() {
                                 className="md:w-1/2 p-8 bg-[#e2e7d1] rounded-[2.5rem] border-2 border-[#606c38]/10 relative"
                             >
                                 <div className="absolute -top-6 -right-6 w-24 h-24 bg-[#dda15e] rounded-full flex items-center justify-center text-[#fefae0] font-black text-2xl shadow-xl">100%</div>
-                                <h3 className="text-2xl font-black text-[#283618] mb-6 underline decoration-[#dda15e] decoration-4 underline-offset-8">Academy Standards</h3>
+                                <h3 className="text-2xl font-black text-[#283618] mb-6 underline decoration-[#dda15e] decoration-4 underline-offset-8">Our Promise to You</h3>
                                 <ul className="space-y-6">
                                     {[
-                                        { title: "Academic Rigor", desc: "Lessons are designed with pedagogical depth, ensuring you don't just consume—you master." },
-                                        { title: "Zero Filler Policies", desc: "Every minute of video and every line of text is vetted for absolute utility. No fluff." },
-                                        { title: "Action-Locked Progress", desc: "Our curriculum is gated by practical application milestones to ensure real-world result." }
+                                        { title: "Updated Lessons", desc: "Our lessons are always new. If we don't have a video on a topic you need? Tell us, and we’ll build it for you." },
+                                        { title: "No Fluff", desc: "Every video is short and packed with real steps. We don't waste your time with useless talk." },
+                                        { title: "Easy Plans", desc: "Blueprints and worksheets that help you start building your business right away." }
                                     ].map((item, i) => (
                                         <li key={i} className="flex gap-4">
                                             <div className="mt-1.5"><CheckCircle2 size={18} className="text-[#606c38]" /></div>
@@ -142,9 +142,9 @@ export default function CoursesPage() {
                         <div className="bg-[#606c38] rounded-[3rem] p-12 md:p-20 flex flex-col md:flex-row items-center justify-between gap-12 text-[#fefae0] relative overflow-hidden">
                             <div className="absolute top-0 right-1/4 w-[300px] h-[300px] bg-[#bc6c25]/20 rounded-full blur-[80px]" />
                             <div className="md:w-2/3 relative z-10">
-                                <h2 className="text-4xl md:text-6xl font-black leading-tight mb-8">Join the Top 1% of Business Operators.</h2>
+                                <h2 className="text-4xl md:text-6xl font-black leading-tight mb-8">Ready to Build for $497/yr?</h2>
                                 <p className="text-xl opacity-80 mb-10 leading-relaxed">
-                                    Access the full curriculum, download the tactical spreadsheets, and join a fleet of professionals building the future of business.
+                                    Get every video lesson, join our weekly live classes, and get all the unannounced bonuses we release.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <Link href="/sign-up">

@@ -3,8 +3,8 @@ import QuestionsClient from "./questions-client";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Business Questions & Answers Library | K Business Academy",
-    description: "Browse 2,600+ answered business questions covering baby showers, events, entrepreneurship, and more. Find expert answers instantly.",
+    title: "Business Questions & Answers | K Business Academy",
+    description: "Get the answers you need to start your business. Browse over 2,600 questions about marketing, research, and more.",
 };
 
 export default async function QuestionsPage() {
