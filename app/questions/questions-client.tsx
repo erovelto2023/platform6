@@ -5,10 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
     Book, Clock, ChevronRight, TrendingUp, Search,
-    Zap, LayoutList, HelpCircle, MessageCircle
+    Zap, LayoutList, HelpCircle, MessageCircle, ArrowRight
 } from 'lucide-react';
-import { PaymentSupport } from '@/components/PaymentSupport';
 import RotatingAffiliateBanner from '@/components/glossary/RotatingAffiliateBanner';
+import { SiteHeader } from '@/components/shared/SiteHeader';
 
 interface QuestionsClientProps {
     initialFAQs: any[];
@@ -76,49 +76,54 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
     }, [categoryActiveLetter, categories]);
 
     return (
-        <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
+        <div className="bg-[#fefae0] min-h-screen pb-20 font-medium">
+            <SiteHeader />
+
             {/* Hero / Header */}
-            <div className="pt-24 pb-12 px-6 text-center border-b border-slate-100 dark:border-slate-800">
+            <div className="pt-24 pb-12 px-6 text-center border-b border-[#bc6c25]/10">
                 <div className="max-w-4xl mx-auto">
-                    <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">
-                        The Business <span className="text-sky-500">Questions Library</span>
+                    <span className="flex items-center justify-center gap-2 text-[#bc6c25] font-black tracking-[0.3em] text-xs mb-6 uppercase">
+                        <HelpCircle size={16} /> Knowledge Base
+                    </span>
+                    <h1 className="text-4xl md:text-7xl font-black text-[#283618] mb-6 tracking-tight leading-[1.1]">
+                        The Academy <span className="italic text-[#606c38]">Intelligence Hub.</span>
                     </h1>
-                    <p className="text-xl text-slate-500 dark:text-slate-400 font-medium mb-12 italic">
-                        {initialFAQs.length.toLocaleString()}+ questions answered. Find yours.
+                    <p className="text-xl text-[#283618]/60 font-bold mb-12 max-w-2xl mx-auto leading-relaxed">
+                        Access {initialFAQs.length.toLocaleString()}+ tactical answers processed through our methodology.
                     </p>
 
                     {/* Search */}
-                    <div className="relative max-w-2xl mx-auto mb-8">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={24} />
+                    <div className="relative max-w-2xl mx-auto mb-10">
+                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#606c38]" size={24} />
                         <input
                             type="text"
-                            placeholder="Search questions..."
-                            className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 focus:border-sky-500 focus:bg-white dark:focus:bg-slate-800 rounded-2xl outline-none text-lg font-bold transition-all shadow-sm"
+                            placeholder="Query the database..."
+                            className="w-full h-20 pl-16 pr-6 bg-white border-2 border-[#283618]/5 focus:border-[#606c38] rounded-3xl outline-none text-lg font-black transition-all shadow-xl shadow-[#283618]/5 placeholder-[#283618]/20 text-[#283618]"
                             value={searchQuery}
                             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                         />
                     </div>
 
                     {/* Inline Nav Row */}
-                    <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-black uppercase tracking-widest text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-8 mt-4">
+                    <div className="flex flex-wrap items-center justify-center gap-8 text-[10px] font-black uppercase tracking-widest text-[#283618]/40 border-t border-[#bc6c25]/5 pt-10 mt-6 md:mt-10">
                         <button
                             onClick={() => { setShowLetters(!showLetters); setShowCategories(false); }}
-                            className={`hover:text-sky-600 transition-colors flex items-center gap-2 ${showLetters ? 'text-sky-500' : ''}`}
+                            className={`hover:text-[#606c38] transition-colors flex items-center gap-2 ${showLetters ? 'text-[#606c38]' : ''}`}
                         >
-                            <Book size={14} /> Browse A-Z
+                            <Book size={14} /> Index Registry
                         </button>
-                        <span className="text-slate-200">|</span>
+                        <span className="opacity-20">|</span>
                         <button
                             onClick={() => { setShowCategories(!showCategories); setShowLetters(false); setCategoryActiveLetter(null); }}
-                            className={`hover:text-sky-600 transition-colors flex items-center gap-2 ${showCategories ? 'text-sky-500' : ''}`}
+                            className={`hover:text-[#606c38] transition-colors flex items-center gap-2 ${showCategories ? 'text-[#606c38]' : ''}`}
                         >
-                            <LayoutList size={14} /> Explore Categories
+                            <LayoutList size={14} /> Operational Clusters
                         </button>
                         {(searchQuery || activeLetter || selectedCategory !== 'all') && (
                             <>
-                                <span className="text-slate-200">|</span>
-                                <button onClick={resetFilters} className="text-red-400 hover:text-red-600 transition-colors">
-                                    Clear Filters
+                                <span className="opacity-20">|</span>
+                                <button onClick={resetFilters} className="text-[#bc6c25] hover:text-[#bc6c25]/80 transition-colors">
+                                    Format Reset
                                 </button>
                             </>
                         )}
@@ -126,15 +131,15 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
 
                     {/* A-Z Letter browser */}
                     {showLetters && (
-                        <div className="mt-8 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="mt-10 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300 max-w-4xl mx-auto">
                             {characters.map(char => (
                                 <button
                                     key={char}
                                     onClick={() => { setActiveLetter(activeLetter === char ? null : char); setCurrentPage(1); }}
-                                    className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all border ${
+                                    className={`w-12 h-12 rounded-xl text-[10px] font-black transition-all border ${
                                         activeLetter === char
-                                            ? 'bg-sky-600 text-white border-sky-600 shadow-lg'
-                                            : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-sky-500'
+                                            ? 'bg-[#606c38] text-[#fefae0] border-[#606c38] shadow-lg shadow-[#606c38]/30'
+                                            : 'bg-white text-[#283618]/40 border-[#283618]/5 hover:border-[#606c38]'
                                     }`}
                                 >
                                     {char}
@@ -145,40 +150,40 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
 
                     {/* Category browser */}
                     {showCategories && (
-                        <div className="mt-8 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                            <div className="flex flex-wrap justify-center gap-1.5 max-w-2xl mx-auto">
+                        <div className="mt-10 space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
                                 <button
                                     onClick={() => { setSelectedCategory('all'); setCurrentPage(1); setCategoryActiveLetter(null); }}
-                                    className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
-                                        selectedCategory === 'all' && !categoryActiveLetter ? 'bg-sky-600 text-white border-sky-600' : 'bg-slate-50 dark:bg-slate-100/5 text-slate-400'
+                                    className={`px-6 py-3 rounded-xl text-[10px] font-black transition-all border uppercase tracking-widest ${
+                                        selectedCategory === 'all' && !categoryActiveLetter ? 'bg-[#606c38] text-[#fefae0] border-[#606c38]' : 'bg-white text-[#283618]/40 border-[#283618]/5'
                                     }`}
-                                >ALL</button>
+                                >Root Directory</button>
                                 {alphabet.map(letter => (
                                     <button
                                         key={letter}
                                         onClick={() => setCategoryActiveLetter(categoryActiveLetter === letter ? null : letter)}
-                                        className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border ${
+                                        className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all border ${
                                             categoryActiveLetter === letter
-                                                ? 'bg-sky-600 text-white border-sky-600 shadow-lg'
-                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-sky-500'
+                                                ? 'bg-[#dda15e] text-[#283618] border-[#dda15e] shadow-lg shadow-[#dda15e]/20'
+                                                : 'bg-white text-[#283618]/40 border-[#283618]/5 hover:border-[#bc6c25]'
                                         }`}
                                     >{letter}</button>
                                 ))}
                             </div>
                             {categoryActiveLetter && (
-                                <div className="flex flex-wrap justify-center gap-2 animate-in fade-in duration-300">
+                                <div className="flex flex-wrap justify-center gap-3 animate-in fade-in duration-300 max-w-5xl mx-auto">
                                     {filteredCategoryList.length > 0 ? filteredCategoryList.map(cat => (
                                         <button
                                             key={cat}
                                             onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
-                                            className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase transition-all border ${
+                                            className={`px-6 py-3 rounded-2xl text-[11px] font-black uppercase transition-all border tracking-widest ${
                                                 selectedCategory === cat
-                                                    ? 'bg-sky-600 text-white border-sky-600 shadow-xl'
-                                                    : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-sky-500 hover:text-sky-600'
+                                                    ? 'bg-[#606c38] text-[#fefae0] border-[#606c38] shadow-xl'
+                                                    : 'bg-white text-[#283618]/50 border-[#283618]/5 hover:border-[#606c38] hover:text-[#606c38]'
                                             }`}
                                         >{cat}</button>
                                     )) : (
-                                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No categories starting with &ldquo;{categoryActiveLetter}&rdquo;</p>
+                                        <p className="text-[10px] font-black text-[#283618]/20 uppercase tracking-widest italic">No operational clusters found for &ldquo;{categoryActiveLetter}&rdquo;</p>
                                     )}
                                 </div>
                             )}
@@ -187,35 +192,36 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-12">
-                <div className="flex flex-col gap-16">
+            <div className="max-w-7xl mx-auto px-6 py-20">
+                <div className="flex flex-col gap-20">
 
                     {/* Spotlight Row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Question of the Day */}
-                        <div className="bg-sky-50 dark:bg-sky-900/10 p-10 rounded-[2.5rem] border border-sky-100 dark:border-sky-900/30 relative overflow-hidden flex flex-col justify-center">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><HelpCircle size={100} className="text-sky-600" /></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Daily Intelligence */}
+                        <div className="bg-white p-12 rounded-[3.5rem] border border-[#283618]/5 shadow-2xl shadow-[#283618]/5 relative overflow-hidden flex flex-col justify-center group">
+                            <div className="absolute -top-10 -right-10 p-8 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-700 text-[#606c38]"><HelpCircle size={200} /></div>
                             <div className="relative z-10">
-                                <span className="inline-block px-3 py-1 bg-sky-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-6">Question of the Day</span>
+                                <span className="inline-block px-4 py-1.5 bg-[#bc6c25] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8 shadow-lg shadow-[#bc6c25]/20">Daily Intelligence Spotlight</span>
                                 {spotlightFAQ ? (
                                     <>
-                                        <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-4 leading-tight">{spotlightFAQ.question}</h2>
-                                        <p className="text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed font-medium">{spotlightFAQ.answerSnippet}</p>
-                                        <Link href={`/questions/${spotlightFAQ.slug}`} className="text-sky-600 font-black text-sm uppercase tracking-wider flex items-center gap-2 hover:translate-x-1 transition-all">
-                                            Read Full Answer <ChevronRight size={16} />
+                                        <h2 className="text-3xl font-black text-[#283618] mb-6 leading-tight group-hover:text-[#606c38] transition-colors">{spotlightFAQ.question}</h2>
+                                        <p className="text-[#283618]/60 mb-10 line-clamp-3 leading-relaxed font-bold italic">{spotlightFAQ.answerSnippet}</p>
+                                        <Link href={`/questions/${spotlightFAQ.slug}`} className="text-[#606c38] font-black text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-2 transition-all">
+                                            Read Methodology <ArrowRight size={18} />
                                         </Link>
                                     </>
                                 ) : (
-                                    <div className="h-40 animate-pulse bg-sky-200/20 rounded-2xl" />
+                                    <div className="h-48 animate-pulse bg-[#606c38]/5 rounded-[2rem]" />
                                 )}
                             </div>
                         </div>
 
-                        {/* Rotating Affiliate Tools */}
-                        <div className="bg-slate-900 p-10 rounded-[2.5rem] border border-slate-800 flex flex-col justify-center relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Zap size={100} className="text-white fill-current" /></div>
+                        {/* Partner Ecosystem */}
+                        <div className="bg-[#283618] p-12 rounded-[3.5rem] border border-[#283618] flex flex-col justify-center relative overflow-hidden shadow-2xl shadow-[#283618]/20">
+                            <div className="absolute -top-10 -right-10 p-8 opacity-5 rotate-[15deg] text-white"><Zap size={200} /></div>
                             <div className="relative z-10">
-                                <h3 className="text-white font-black text-xl mb-8">Boost Your Workflow</h3>
+                                <span className="inline-block px-4 py-1.5 bg-[#606c38] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8">Ecosystem Leverage</span>
+                                <h3 className="text-[#fefae0] font-black text-2xl mb-10 italic">Operational Toolkit Support.</h3>
                                 <RotatingAffiliateBanner products={products} />
                             </div>
                         </div>
@@ -223,66 +229,70 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
 
                     {/* Card Grid */}
                     <div>
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 dark:border-slate-800 px-2">
-                            <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                                {selectedCategory !== 'all' ? selectedCategory : 'All Questions'}
-                                {activeLetter && <span className="text-sky-500">— {activeLetter}</span>}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 pb-6 border-b border-[#283618]/5 px-4 gap-6">
+                            <h3 className="text-3xl font-black text-[#283618] flex items-center gap-4 italic uppercase tracking-tighter">
+                                {selectedCategory !== 'all' ? selectedCategory : 'Intelligence Registry'}
+                                {activeLetter && <span className="text-[#bc6c25]">— {activeLetter}</span>}
                             </h3>
-                            <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800">
-                                {filteredFAQs.length.toLocaleString()} results
-                            </span>
+                            <div className="bg-[#606c38] text-[#fefae0] px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#606c38]/20 whitespace-nowrap self-start">
+                                {filteredFAQs.length.toLocaleString()} Operational Nodes
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                             {currentItems.map((faq: any) => (
                                 <Link
                                     key={faq.slug}
                                     href={`/questions/${faq.slug}`}
-                                    className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 hover:border-sky-500/50 hover:shadow-2xl transition-all group animate-in fade-in slide-in-from-bottom-4 flex flex-col h-full"
+                                    className="bg-white p-10 rounded-[2.5rem] border border-[#283618]/5 hover:border-[#606c38]/30 hover:shadow-[0_20px_50px_rgba(40,54,24,0.1)] transition-all duration-500 group animate-in fade-in slide-in-from-bottom-6 flex flex-col h-full relative overflow-hidden"
                                 >
+                                    <div className="absolute top-0 right-0 w-2 h-0 bg-[#606c38] group-hover:h-full transition-all duration-500" />
+                                    
                                     {faq.parentQuestion && (
-                                        <div className="text-[9px] font-black uppercase tracking-widest text-sky-500 mb-4 bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 rounded-md inline-block self-start line-clamp-1">
+                                        <div className="text-[9px] font-black uppercase tracking-widest text-[#bc6c25] mb-6 bg-[#dda15e]/10 px-3 py-1 rounded-lg self-start line-clamp-1 border border-[#bc6c25]/5">
                                             {faq.parentQuestion}
                                         </div>
                                     )}
-                                    <h3 className="text-base font-black text-slate-900 dark:text-white mb-4 group-hover:text-sky-500 transition-colors leading-tight line-clamp-3 flex-grow">
+                                    <h3 className="text-lg font-black text-[#283618] mb-6 group-hover:text-[#606c38] transition-colors leading-tight line-clamp-3 flex-grow underline decoration-[#606c38]/0 group-hover:decoration-[#606c38]/30 decoration-2 underline-offset-4">
                                         {faq.question}
                                     </h3>
                                     {faq.answerSnippet && (
-                                        <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed line-clamp-2 mb-6 font-medium">
+                                        <p className="text-[#283618]/50 text-sm leading-relaxed line-clamp-2 mb-8 font-bold italic">
                                             {faq.answerSnippet}
                                         </p>
                                     )}
-                                    <div className="pt-4 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between text-[10px] font-black uppercase text-slate-300">
-                                        <div className="flex items-center gap-1.5">
-                                            <Clock size={11} /> {Math.max(1, Math.round((faq.answerSnippet?.length || 80) / 200))}m read
+                                    <div className="pt-6 border-t border-[#283618]/5 flex items-center justify-between text-[10px] font-black uppercase text-[#283618]/30">
+                                        <div className="flex items-center gap-2">
+                                            <Clock size={14} className="text-[#bc6c25]" /> {Math.max(1, Math.round((faq.answerSnippet?.length || 80) / 200))}m analysis
                                         </div>
-                                        <ChevronRight size={14} className="group-hover:translate-x-1 transition-all text-sky-500" />
+                                        <div className="bg-[#606c38]/5 p-2 rounded-lg group-hover:bg-[#606c38] group-hover:text-[#fefae0] transition-all">
+                                            <ArrowRight size={16} />
+                                        </div>
                                     </div>
                                 </Link>
                             ))}
                         </div>
 
                         {currentItems.length === 0 && (
-                            <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                <Search size={40} className="mx-auto text-slate-200 mb-4" />
-                                <h3 className="text-xl font-bold mb-2">No questions found</h3>
-                                <p className="text-slate-500">Try a different search term or clear your filters.</p>
-                                <button onClick={resetFilters} className="mt-6 text-sky-600 font-black text-sm underline">Clear all filters</button>
+                            <div className="text-center py-32 bg-white rounded-[4rem] border-2 border-dashed border-[#283618]/10 shadow-xl shadow-[#283618]/5">
+                                <Search size={60} className="mx-auto text-[#283618]/10 mb-8" />
+                                <h3 className="text-3xl font-black text-[#283618] mb-4">No Nodes Detected.</h3>
+                                <p className="text-[#283618]/40 max-w-sm mx-auto font-bold mb-10 italic">Adjust your parameters or expand your cluster search.</p>
+                                <button onClick={resetFilters} className="bg-[#bc6c25] text-[#fefae0] px-10 h-14 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-[#bc6c25]/20 hover:scale-105 transition-all">Clear Search Filters</button>
                             </div>
                         )}
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="mt-20 flex flex-col items-center gap-6">
-                                <div className="flex items-center gap-1">
+                            <div className="mt-24 flex flex-col items-center gap-10">
+                                <div className="flex items-center gap-2">
                                     <button
                                         disabled={currentPage === 1}
                                         onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                        className="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-sky-600 disabled:opacity-30 transition-all font-black"
-                                    ><ChevronRight size={20} className="rotate-180" /></button>
+                                        className="w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-[#283618]/5 bg-white text-[#283618]/30 hover:text-[#606c38] hover:border-[#606c38] disabled:opacity-30 transition-all"
+                                    ><ArrowRight size={24} className="rotate-180" /></button>
 
-                                    <div className="flex items-center gap-1 px-4">
+                                    <div className="flex items-center gap-2 px-4">
                                         {Array.from({ length: Math.min(10, totalPages) }, (_, i) => {
                                             const p = currentPage > 6 ? currentPage - 5 + i : i + 1;
                                             if (p > totalPages) return null;
@@ -290,10 +300,10 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                                                 <button
                                                     key={p}
                                                     onClick={() => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                                    className={`w-12 h-12 rounded-2xl text-sm font-black transition-all ${
+                                                    className={`w-14 h-14 rounded-2xl text-[11px] font-black transition-all ${
                                                         currentPage === p
-                                                            ? 'bg-sky-600 text-white shadow-xl shadow-sky-500/20 scale-110'
-                                                            : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-400 hover:border-sky-500 hover:text-sky-600'
+                                                            ? 'bg-[#606c38] text-[#fefae0] shadow-2xl shadow-[#606c38]/30 scale-110'
+                                                            : 'bg-white border-2 border-[#283618]/5 text-[#283618]/30 hover:border-[#bc6c25] hover:text-[#bc6c25]'
                                                     }`}
                                                 >{p}</button>
                                             );
@@ -303,31 +313,31 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                                     <button
                                         disabled={currentPage === totalPages}
                                         onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                        className="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-sky-600 disabled:opacity-30 transition-all font-black"
-                                    ><ChevronRight size={20} /></button>
+                                        className="w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-[#283618]/5 bg-white text-[#283618]/30 hover:text-[#606c38] hover:border-[#606c38] disabled:opacity-30 transition-all"
+                                    ><ArrowRight size={24} /></button>
                                 </div>
-                                <p className="text-xs text-slate-400 font-black uppercase tracking-widest">
-                                    Page {currentPage} of {totalPages} · {filteredFAQs.length.toLocaleString()} results
+                                <p className="text-[10px] text-[#283618]/30 font-black uppercase tracking-[0.3em] bg-white px-6 py-2 rounded-full border border-[#283618]/5">
+                                    Page {currentPage} of {totalPages} · {filteredFAQs.length.toLocaleString()} Intelligence Nodes
                                 </p>
                             </div>
                         )}
                     </div>
 
                     {/* Footer Discovery - Popular Categories */}
-                    <div className="mt-24 pt-24 border-t border-slate-100 dark:border-slate-800">
-                        <div className="max-w-4xl mx-auto space-y-16">
+                    <div className="mt-20 pt-24 border-t border-[#bc6c25]/10">
+                        <div className="max-w-5xl mx-auto space-y-20">
                             <div className="text-center">
-                                <h4 className="text-xs font-black uppercase tracking-widest text-sky-600 mb-8">Popular Question Topics</h4>
-                                <div className="bg-slate-50 dark:bg-slate-900 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800">
-                                    <div className="flex flex-wrap justify-center gap-2">
-                                        {categories.slice(0, 30).map(cat => (
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#bc6c25] mb-10 block">Operational Cluster Directory</span>
+                                <div className="bg-white p-16 rounded-[4rem] border border-[#283618]/5 shadow-2xl shadow-[#283618]/5">
+                                    <div className="flex flex-wrap justify-center gap-3">
+                                        {categories.slice(0, 40).map(cat => (
                                             <button
                                                 key={cat}
                                                 onClick={() => { setSelectedCategory(cat); setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                                className={`px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${
                                                     selectedCategory === cat
-                                                        ? 'bg-sky-600 text-white shadow-lg'
-                                                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-sky-300 hover:text-sky-600'
+                                                        ? 'bg-[#606c38] text-[#fefae0] shadow-lg'
+                                                        : 'bg-[#fefae0]/50 text-[#283618]/60 border border-[#283618]/5 hover:bg-[#606c38]/10 hover:text-[#606c38] hover:border-[#606c38]'
                                                 }`}
                                             >
                                                 {cat}
@@ -336,19 +346,34 @@ function QuestionsClientInner({ initialFAQs, categories, products = [] }: Questi
                                     </div>
                                 </div>
                             </div>
-
-                            <PaymentSupport className="border-none bg-slate-50 dark:bg-slate-900 shadow-none" />
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Global Footer - Dark Theme */}
+            <footer className="py-20 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5 mt-20">
+                <div className="container px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+                    <div className="flex items-center gap-3 grayscale brightness-200 opacity-40">
+                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center font-black text-[#fefae0] text-xl">K</div>
+                        <span className="font-bold tracking-tighter text-xl">K BUSINESS INTELLIGENCE</span>
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">© 2026 Global Knowledge Architecture</p>
+                    <nav className="flex gap-12">
+                        <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-xs uppercase tracking-widest">Strategy</Link>
+                        <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-xs uppercase tracking-widest">Library</Link>
+                        <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-xs uppercase tracking-widest">Registry</Link>
+                        <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-xs uppercase tracking-widest">Access</Link>
+                    </nav>
+                </div>
+            </footer>
         </div>
     );
 }
 
 export default function QuestionsClient(props: QuestionsClientProps) {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600" /></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-[#fefae0] flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-2 border-[#606c38]" /></div>}>
             <QuestionsClientInner {...props} />
         </Suspense>
     );

@@ -3,10 +3,10 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart } from 'lucide-react';
-import { PaymentSupport } from '@/components/PaymentSupport';
+import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart, ArrowRight, HelpCircle } from 'lucide-react';
 import TagCloud from '../../components/glossary/TagCloud';
 import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
+import { SiteHeader } from '@/components/shared/SiteHeader';
 
 interface GlossaryClientProps {
   initialTerms: any[];
@@ -29,7 +29,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [keywordOfTheDay, setKeywordOfTheDay] = useState<any>(null);
@@ -85,63 +85,68 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const filteredCategories = useMemo(() => {
     if (!categoryActiveLetter) return [];
     return categories.filter(cat => cat.toUpperCase().startsWith(categoryActiveLetter));
-  }, [categoryActiveLetter]);
+  }, [categoryActiveLetter, categories]);
 
   return (
-    <div className="bg-white dark:bg-slate-950 min-h-screen pb-20">
+    <div className="bg-[#fefae0] min-h-screen pb-20 font-medium text-[#283618]">
+      <SiteHeader />
+
       {/* Hero / Header Section */}
-      <div className="pt-24 pb-12 px-6 text-center border-b border-slate-100 dark:border-slate-800">
+      <div className="pt-24 pb-12 px-6 text-center border-b border-[#bc6c25]/10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">
-            The Internet Marketer <span className="text-emerald-500">Keyword Glossary</span>
+          <span className="flex items-center justify-center gap-2 text-[#bc6c25] font-black tracking-[0.3em] text-xs mb-6 uppercase">
+            <TrendingUp size={16} /> Technical Registry
+          </span>
+          <h1 className="text-4xl md:text-7xl font-black text-[#283618] mb-6 tracking-tight leading-[1.1]">
+            The Academy <span className="italic text-[#606c38]">Knowledgebase.</span>
           </h1>
-          <p className="text-xl text-slate-500 dark:text-slate-400 font-medium mb-12 italic">
-            Master Keywords and Niche Marketing one word at a time.
+          <p className="text-xl text-[#283618]/60 font-bold mb-12 max-w-2xl mx-auto leading-relaxed italic">
+            Master the operational language of high-performance business, one concept at a time.
           </p>
 
-          <div className="relative max-w-2xl mx-auto mb-8">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400" size={24} />
+          <div className="relative max-w-2xl mx-auto mb-10">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-[#606c38]" size={24} />
             <input
               type="text"
-              placeholder="Search specific keywords or niches..."
-              className="w-full pl-16 pr-6 py-5 bg-slate-50 dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-800 rounded-2xl outline-none text-lg font-bold transition-all shadow-sm"
+              placeholder="Query the glossary..."
+              className="w-full h-20 pl-16 pr-6 bg-white border-2 border-[#283618]/5 focus:border-[#606c38] rounded-3xl outline-none text-lg font-black transition-all shadow-xl shadow-[#283618]/5 text-[#283618] placeholder-[#283618]/20"
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             />
           </div>
 
           {/* Inline Navigation Row */}
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs font-black uppercase tracking-widest text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-8 mt-4">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-[#283618]/40 border-t border-[#bc6c25]/5 pt-10 mt-6 md:mt-10">
              <button 
                 onClick={() => { setShowLetters(!showLetters); setShowCategories(false); }} 
-                className={`hover:text-emerald-600 transition-colors flex items-center gap-2 ${showLetters ? 'text-emerald-500' : ''}`}
+                className={`hover:text-[#606c38] transition-colors flex items-center gap-2 ${showLetters ? 'text-[#606c38]' : ''}`}
              >
-                <Book size={14} /> Browse A-Z
+                <Book size={14} /> Index Table
              </button>
-             <span className="text-slate-200">|</span>
+             <span className="opacity-20">|</span>
              <button 
                 onClick={() => { setShowCategories(!showCategories); setShowLetters(false); setCategoryActiveLetter(null); }} 
-                className={`hover:text-emerald-600 transition-colors flex items-center gap-2 ${showCategories ? 'text-emerald-500' : ''}`}
+                className={`hover:text-[#606c38] transition-colors flex items-center gap-2 ${showCategories ? 'text-[#606c38]' : ''}`}
              >
-                <LayoutList size={14} /> Search Categories
+                <LayoutList size={14} /> Taxonomy Search
              </button>
-             <span className="text-slate-200">|</span>
-             <Link href="/glossary/study" className="hover:text-emerald-600 transition-colors flex items-center gap-2">
-                <Zap size={14} className="fill-current" /> Enter Study Mode
+             <span className="opacity-20">|</span>
+             <Link href="/glossary/study" className="hover:text-[#dda15e] transition-colors flex items-center gap-2">
+                <Zap size={14} className="fill-current" /> Mastery Mode
              </Link>
           </div>
 
           {/* Sub-Nav: Letters */}
           {showLetters && (
-            <div className="mt-8 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="mt-10 flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300 max-w-4xl mx-auto">
                 {characters.map(char => (
                     <button 
                         key={char}
                         onClick={() => { setActiveLetter(activeLetter === char ? null : char); setCurrentPage(1); }}
-                        className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all border ${
+                        className={`w-12 h-12 rounded-xl text-[10px] font-black transition-all border ${
                             activeLetter === char 
-                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
-                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
+                                ? 'bg-[#606c38] text-[#fefae0] border-[#606c38] shadow-lg shadow-[#606c38]/30' 
+                                : 'bg-white text-[#283618]/40 border-[#283618]/5 hover:border-[#606c38]'
                         }`}
                     >
                         {char}
@@ -152,13 +157,12 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
           {/* Sub-Nav: Categories (Hierarchical) */}
           {showCategories && (
-            <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
-                {/* Step 1: Letter selection for categories */}
-                <div className="flex flex-wrap justify-center gap-1.5 max-w-2xl mx-auto">
+            <div className="mt-10 space-y-8 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
                     <button 
                          onClick={() => { setSelectedCategory('all'); setCurrentPage(1); setCategoryActiveLetter(null); }}
-                         className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
-                             selectedCategory === 'all' && !categoryActiveLetter ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 dark:bg-slate-100/5 text-slate-400'
+                         className={`px-6 py-3 rounded-xl text-[10px] font-black transition-all border uppercase tracking-widest ${
+                             selectedCategory === 'all' && !categoryActiveLetter ? 'bg-[#606c38] text-[#fefae0] border-[#606c38]' : 'bg-white text-[#283618]/40 border-[#283618]/5'
                          }`}
                     >
                         ALL
@@ -167,10 +171,10 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                         <button 
                             key={letter}
                             onClick={() => setCategoryActiveLetter(categoryActiveLetter === letter ? null : letter)}
-                            className={`w-8 h-8 rounded-lg text-[10px] font-black transition-all border ${
+                            className={`w-10 h-10 rounded-xl text-[10px] font-black transition-all border ${
                                 categoryActiveLetter === letter 
-                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
-                                    : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border-slate-100 dark:border-slate-800 hover:border-emerald-500'
+                                    ? 'bg-[#dda15e] text-[#283618] border-[#dda15e] shadow-lg shadow-[#dda15e]/20' 
+                                    : 'bg-white text-[#283618]/40 border-[#283618]/5 hover:border-[#bc6c25]'
                             }`}
                         >
                             {letter}
@@ -178,25 +182,24 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                     ))}
                 </div>
 
-                {/* Step 2: Display filtered categories */}
                 {categoryActiveLetter && (
-                    <div className="flex flex-wrap justify-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                    <div className="flex flex-wrap justify-center gap-3 animate-in fade-in duration-300 max-w-5xl mx-auto">
                         {filteredCategories.length > 0 ? (
                             filteredCategories.map(cat => (
                                 <button 
                                     key={cat}
                                     onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
-                                    className={`px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase transition-all border ${
+                                    className={`px-6 py-3 rounded-2xl text-[11px] font-black uppercase transition-all border tracking-widest ${
                                         selectedCategory === cat 
-                                            ? 'bg-emerald-600 text-white border-emerald-600 shadow-xl' 
-                                            : 'bg-white dark:bg-slate-900 text-slate-500 border-slate-100 dark:border-slate-800 hover:border-emerald-500 hover:text-emerald-600'
+                                            ? 'bg-[#606c38] text-[#fefae0] border-[#606c38] shadow-xl' 
+                                            : 'bg-white text-[#283618]/50 border-[#283618]/5 hover:border-[#606c38] hover:text-[#606c38]'
                                     }`}
                                 >
                                     {cat}
                                 </button>
                             ))
                         ) : (
-                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No categories starting with "{categoryActiveLetter}"</p>
+                            <p className="text-[10px] font-black text-[#283618]/20 uppercase tracking-widest italic">No operational clusters found for &ldquo;{categoryActiveLetter}&rdquo;</p>
                         )}
                     </div>
                 )}
@@ -205,98 +208,104 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex flex-col gap-16">
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="flex flex-col gap-20">
           
           {/* Daily Spotlight Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {/* Keyword of the Day */}
-            <div className="bg-emerald-50 dark:bg-emerald-900/10 p-10 rounded-[2.5rem] border border-emerald-100 dark:border-emerald-900/30 relative overflow-hidden flex flex-col justify-center">
-                <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><TrendingUp size={100} className="text-emerald-600" /></div>
+            <div className="bg-white p-12 rounded-[3.5rem] border border-[#283618]/5 shadow-2xl shadow-[#283618]/5 relative overflow-hidden flex flex-col justify-center group">
+                <div className="absolute -top-10 -right-10 p-8 opacity-5 rotate-12 group-hover:rotate-0 transition-transform duration-700 text-[#606c38]"><TrendingUp size={200} /></div>
                 <div className="relative z-10">
-                    <span className="inline-block px-3 py-1 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-6">Keyword of the Day</span>
+                    <span className="inline-block px-4 py-1.5 bg-[#bc6c25] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8 shadow-lg shadow-[#bc6c25]/20">Registry Spotlight</span>
                     {keywordOfTheDay ? (
                         <>
-                            <h2 className="text-3xl font-black text-slate-900 dark:text-white mb-4">{keywordOfTheDay.term}</h2>
-                            <p className="text-slate-600 dark:text-slate-400 mb-8 line-clamp-3 leading-relaxed font-medium">{keywordOfTheDay.shortDefinition}</p>
-                            <Link href={`/glossary/${keywordOfTheDay.slug}`} className="text-emerald-600 font-black text-sm uppercase tracking-wider flex items-center gap-2 hover:translate-x-1 transition-all">
-                                Learn More <ChevronRight size={16} />
+                            <h2 className="text-3xl font-black text-[#283618] mb-6 leading-tight group-hover:text-[#606c38] transition-colors uppercase tracking-tighter">{keywordOfTheDay.term}</h2>
+                            <p className="text-[#283618]/60 mb-10 line-clamp-3 leading-relaxed font-bold italic">{keywordOfTheDay.shortDefinition}</p>
+                            <Link href={`/glossary/${keywordOfTheDay.slug}`} className="text-[#606c38] font-black text-xs uppercase tracking-[0.2em] flex items-center gap-2 hover:translate-x-2 transition-all">
+                                Analyze Term <ArrowRight size={18} />
                             </Link>
                         </>
                     ) : (
-                        <div className="h-40 animate-pulse bg-emerald-200/20 rounded-2xl" />
+                        <div className="h-48 animate-pulse bg-[#606c38]/5 rounded-2xl" />
                     )}
                 </div>
             </div>
 
-            {/* Rotating Affiliate Tools */}
-            <div className="bg-slate-900 p-10 rounded-[2.5rem] border border-slate-800 flex flex-col justify-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Zap size={100} className="text-white fill-current" /></div>
+            {/* Partner Ecosystem */}
+            <div className="bg-[#283618] p-12 rounded-[3.5rem] border border-[#283618] flex flex-col justify-center relative overflow-hidden shadow-2xl shadow-[#283618]/20">
+                <div className="absolute -top-10 -right-10 p-8 opacity-5 rotate-[15deg] text-white"><Zap size={200} /></div>
                 <div className="relative z-10">
-                    <h3 className="text-white font-black text-xl mb-8">Boost Your Workflow</h3>
+                    <span className="inline-block px-4 py-1.5 bg-[#606c38] text-[#fefae0] text-[10px] font-black uppercase tracking-widest rounded-xl mb-8">Ecosystem Leverage</span>
+                    <h3 className="text-[#fefae0] font-black text-2xl mb-10 italic">Strategic Partnerships.</h3>
                     <RotatingAffiliateBanner products={products} />
                 </div>
             </div>
           </div>
 
-          {/* Randomized Grid Section */}
+          {/* Card Grid Section */}
           <div>
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 dark:border-slate-800 px-2">
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
-                   Essential Keywords
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 pb-6 border-b border-[#283618]/5 px-4 gap-6">
+                <h3 className="text-3xl font-black text-[#283618] flex items-center gap-4 italic uppercase tracking-tighter">
+                   Essential Vocabulary
                 </h3>
-                <span className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 dark:bg-slate-900 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-800">
-                    Randomizing {currentItems.length} Terms
-                </span>
+                <div className="bg-[#606c38] text-[#fefae0] px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-[#606c38]/20 whitespace-nowrap self-start">
+                    Analyzing {filteredTerms.length.toLocaleString()} Concepts
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {currentItems.map((term: any) => (
                     <Link 
                         key={term.slug}
                         href={`/glossary/${term.slug}`}
-                        className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 hover:border-emerald-500/50 hover:shadow-2xl transition-all group animate-in fade-in slide-in-from-bottom-4 flex flex-col h-full relative"
+                        className="bg-white p-10 rounded-[2.5rem] border border-[#283618]/5 hover:border-[#606c38]/30 hover:shadow-[0_20px_50px_rgba(40,54,24,0.1)] transition-all duration-500 group animate-in fade-in slide-in-from-bottom-6 flex flex-col h-full relative overflow-hidden"
                     >
-                        <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500 mb-4 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md inline-block self-start">{term.category}</div>
-                        <h3 className="text-xl font-black text-slate-900 dark:text-white mb-4 group-hover:text-emerald-500 transition-colors leading-tight">{term.term}</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed line-clamp-3 mb-8 flex-grow font-medium">{term.shortDefinition}</p>
-                        <div className="pt-6 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-between text-[10px] font-black uppercase text-slate-300">
-                             <div className="flex items-center gap-1.5 focus:text-emerald-500 transition-colors"><Clock size={12} /> {Math.round((term.shortDefinition?.length || 100) / 100) + 1}m read</div>
-                             <ChevronRight size={14} className="group-hover:translate-x-1 transition-all text-emerald-500" />
+                        <div className="absolute top-0 right-0 w-2 h-0 bg-[#606c38] group-hover:h-full transition-all duration-500" />
+                        
+                        <div className="text-[9px] font-black uppercase tracking-widest text-[#bc6c25] mb-6 bg-[#dda15e]/10 px-3 py-1 rounded-lg self-start border border-[#bc6c25]/5">{term.category}</div>
+                        <h3 className="text-xl font-black text-[#283618] mb-6 group-hover:text-[#606c38] transition-colors leading-tight underline decoration-[#606c38]/0 group-hover:decoration-[#606c38]/30 decoration-2 underline-offset-4">{term.term}</h3>
+                        <p className="text-[#283618]/50 text-sm leading-relaxed line-clamp-3 mb-8 flex-grow font-bold italic">{term.shortDefinition}</p>
+                        <div className="pt-6 border-t border-[#283618]/5 flex items-center justify-between text-[10px] font-black uppercase text-[#283618]/30">
+                             <div className="flex items-center gap-2 transition-colors"><Clock size={14} className="text-[#bc6c25]" /> {Math.round((term.shortDefinition?.length || 100) / 100) + 1}m study</div>
+                             <div className="bg-[#606c38]/5 p-2 rounded-lg group-hover:bg-[#606c38] group-hover:text-[#fefae0] transition-all">
+                                <ArrowRight size={16} />
+                             </div>
                         </div>
                     </Link>
                 ))}
             </div>
 
             {filteredTerms.length === 0 && (
-                <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-                    <Search size={40} className="mx-auto text-slate-200 mb-4" />
-                    <h3 className="text-xl font-bold mb-2">No keywords found</h3>
-                    <p className="text-slate-500">Try a different term or clear your filters.</p>
+                <div className="text-center py-32 bg-white rounded-[4rem] border-2 border-dashed border-[#283618]/10 shadow-xl shadow-[#283618]/5">
+                    <Search size={60} className="mx-auto text-[#283618]/10 mb-8" />
+                    <h3 className="text-3xl font-black text-[#283618] mb-4">No Concepts Detected.</h3>
+                    <p className="text-[#283618]/40 max-w-sm mx-auto font-bold mb-10 italic">Adjust your parameters or expand your cluster search.</p>
+                    <button onClick={resetFilters} className="bg-[#bc6c25] text-[#fefae0] px-10 h-14 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-[#bc6c25]/20 hover:scale-105 transition-all">Clear Search Filters</button>
                 </div>
             )}
 
-            {/* Pagination 1-10 Style */}
+            {/* Pagination */}
             {totalPages > 1 && (
-                <div className="mt-20 flex flex-col items-center gap-6">
-                    <div className="flex items-center gap-1">
+                <div className="mt-24 flex flex-col items-center gap-10">
+                    <div className="flex items-center gap-2">
                         <button 
                             disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            className="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-all font-black"
+                            onClick={() => { setCurrentPage(prev => Math.max(1, prev - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-[#283618]/5 bg-white text-[#283618]/30 hover:text-[#606c38] hover:border-[#606c38] disabled:opacity-30 transition-all"
                         >
-                            <ChevronRight size={20} className="rotate-180" />
+                            <ArrowRight size={24} className="rotate-180" />
                         </button>
                         
-                        <div className="flex items-center gap-1 px-4">
+                        <div className="flex items-center gap-2 px-4">
                             {Array.from({ length: Math.min(10, totalPages) }, (_, i) => i + 1).map(p => (
                                 <button 
                                     key={p} 
-                                    onClick={() => setCurrentPage(p)} 
-                                    className={`w-12 h-12 rounded-2xl text-sm font-black transition-all ${
+                                    onClick={() => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                    className={`w-14 h-14 rounded-2xl text-[11px] font-black transition-all ${
                                         currentPage === p 
-                                            ? 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 scale-110' 
-                                            : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-400 hover:border-emerald-500 hover:text-emerald-600'
+                                            ? 'bg-[#606c38] text-[#fefae0] shadow-2xl shadow-[#606c38]/30 scale-110' 
+                                            : 'bg-white border-2 border-[#283618]/5 text-[#283618]/30 hover:border-[#bc6c25] hover:text-[#bc6c25]'
                                     }`}
                                 >
                                     {p}
@@ -306,39 +315,57 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
                         <button 
                             disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            className="w-12 h-12 rounded-2xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-emerald-600 disabled:opacity-30 transition-all font-black"
+                            onClick={() => { setCurrentPage(prev => Math.min(totalPages, prev + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center border-2 border-[#283618]/5 bg-white text-[#283618]/30 hover:text-[#606c38] hover:border-[#606c38] disabled:opacity-30 transition-all"
                         >
-                            <ChevronRight size={20} />
+                            <ArrowRight size={24} />
                         </button>
                     </div>
+                    <p className="text-[10px] text-[#283618]/30 font-black uppercase tracking-[0.3em] bg-white px-6 py-2 rounded-full border border-[#283618]/5">
+                        Page {currentPage} of {totalPages} · {filteredTerms.length.toLocaleString()} Registry Concepts
+                    </p>
                 </div>
             )}
           </div>
 
           {/* Footer Discovery - Popular Tags */}
-          <div className="mt-24 pt-24 border-t border-slate-100 dark:border-slate-800">
-             <div className="max-w-4xl mx-auto space-y-16">
+          <div className="mt-20 pt-24 border-t border-[#bc6c25]/10">
+             <div className="max-w-5xl mx-auto space-y-20">
                 <div className="text-center">
-                    <h4 className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-8">Popular Keyword Topics</h4>
-                    <div className="bg-slate-50 dark:bg-slate-900 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#bc6c25] mb-10 block">Concept Taxonomy Directory</span>
+                    <div className="bg-white p-16 rounded-[4rem] border border-[#283618]/5 shadow-2xl shadow-[#283618]/5">
                         <TagCloud terms={terms} onSelectTag={(tag) => { setSelectedTag(tag); setSelectedCategory('all'); setCurrentPage(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }} activeTag={selectedTag} />
                     </div>
                 </div>
-
-                <PaymentSupport className="border-none bg-slate-50 dark:bg-slate-900 shadow-none" />
              </div>
           </div>
 
         </div>
       </div>
+
+      {/* Global Footer - Dark Theme */}
+      <footer className="py-20 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5 mt-20">
+          <div className="container px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+              <div className="flex items-center gap-3 grayscale brightness-200 opacity-40">
+                  <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center font-black text-[#fefae0] text-xl">K</div>
+                  <span className="font-bold tracking-tighter text-xl uppercase">K Business Glossary</span>
+              </div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">© 2026 Registry Protocols. Systematic Results.</p>
+              <nav className="flex gap-12">
+                  <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Strategy</Link>
+                  <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Library</Link>
+                  <Link href="/questions" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Registry</Link>
+                  <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Access</Link>
+              </nav>
+          </div>
+      </footer>
     </div>
   );
 }
 
 export default function GlossaryClient(props: GlossaryClientProps) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-slate-950 flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#fefae0] flex items-center justify-center"><div className="animate-spin rounded-full h-16 w-16 border-t-2 border-[#606c38]"></div></div>}>
       <GlossaryClientInner {...props} />
     </Suspense>
   );

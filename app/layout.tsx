@@ -59,7 +59,6 @@ export default function RootLayout({
             routerConfig={extractRouterConfig(ourFileRouter)}
           />
           <SocketProvider>
-            <PaymentSupport variant="minimal" className="sticky top-0 z-[100]" />
             {children}
             <ConfettiProvider />
             <Toaster />

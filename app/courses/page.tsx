@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SimpleHeroSlideshow } from "@/components/animations";
 import { motion } from "framer-motion";
+import { SiteHeader } from "@/components/shared/SiteHeader";
 import {
     BookOpen, Clock, Layers, Video, FileText, FolderOpen, RefreshCw,
     Zap, TrendingUp, ShieldCheck, CheckCircle2, Target, Rocket, Award,
@@ -14,10 +15,10 @@ export default function CoursesPage() {
     // Hero slides for courses page
     const heroSlides = [
         {
-            title: 'Master the Methodology of Modern Business',
-            subtitle: 'Structured, systems-based education designed to transform entrepreneurs into operators. Build foundational leverage that lasts.',
+            title: 'Tactical Methodology.',
+            subtitle: 'The systems, mental models, and operational frameworks used by the top 1% to build and scale assets.',
             backgroundImage: '/heroimages/courses_premium.png',
-            ctaText: 'Explore Curriculum',
+            ctaText: 'Access Methodology',
             ctaLink: '/sign-up',
         }
     ];
@@ -40,51 +41,7 @@ export default function CoursesPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-[#fefae0]">
-            {/* Navbar - Professional Educational Theme */}
-            <header className="px-6 lg:px-10 h-20 flex items-center border-b border-[#bc6c25]/20 bg-[#fefae0]/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-[#283618]">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center text-[#fefae0] shadow-lg shadow-[#606c38]/20 transition-transform hover:scale-105">
-                            K
-                        </div>
-                        <div className="flex flex-col leading-none">
-                            <span className="text-lg font-black tracking-tight">K BUSINESS</span>
-                            <span className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-70">Academy</span>
-                        </div>
-                    </Link>
-                </div>
-                <nav className="ml-auto flex items-center gap-8 hidden md:flex">
-                    <Link className="text-sm font-bold text-[#606c38] border-b-2 border-[#606c38]" href="/courses">
-                        Courses
-                    </Link>
-                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/library">
-                        Library
-                    </Link>
-                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/business-resources">
-                        Resources
-                    </Link>
-                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/affiliate-crm">
-                        Affiliate CRM
-                    </Link>
-                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/blog">
-                        Blog
-                    </Link>
-                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/locations">
-                        Intelligence
-                    </Link>
-                    <div className="h-6 w-px bg-[#283618]/10 mx-2" />
-                    <Link href="/sign-in">
-                        <Button variant="ghost" className="text-[#283618] font-bold hover:bg-[#606c38]/5">
-                            Log In
-                        </Button>
-                    </Link>
-                    <Link href="/sign-up">
-                        <Button className="bg-[#606c38] hover:bg-[#283618] text-[#fefae0] px-6 h-11 rounded-xl shadow-xl shadow-[#606c38]/20 transition-all font-bold">
-                            Enroll Now
-                        </Button>
-                    </Link>
-                </nav>
-            </header>
+            <SiteHeader />
 
             <main className="flex-1">
                 {/* Hero section */}
