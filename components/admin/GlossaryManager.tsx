@@ -8,7 +8,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -236,6 +236,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         }
     };
 
+    const handleAutoReplace = () => {
+        if (!confirm('This will automatically search YouTube and replace broken videos with relevant new ones. Continue?')) return;
+        startTransition(async () => {
+            const res = await autoReplaceBrokenVideos(brokenVideos.map(v => ({ id: v.id, term: v.term })));
+            if (res.success) {
+                if (res.fixedCount > 0) {
+                    alert(`✅ Successfully auto-replaced ${res.fixedCount} videos!`);
+                } else {
+                    alert(`Unable to find relevant replacements for the remaining videos.`);
+                }
+                setBrokenVideos(res.remainingBroken || []);
+            } else {
+                alert('Error auto-replacing videos: ' + (res as any).error);
+            }
+        });
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -321,10 +338,20 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     {/* Broken Videos Report */}
                     {brokenVideos.length > 0 && (
                         <div className="mb-6 p-6 bg-rose-50 border border-rose-200 rounded-2xl">
-                            <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <AlertCircle size={16} />
-                                Broken YouTube Links Found ({brokenVideos.length})
-                            </h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest flex items-center gap-2">
+                                    <AlertCircle size={16} />
+                                    Broken YouTube Links Found ({brokenVideos.length})
+                                </h3>
+                                <button
+                                    onClick={handleAutoReplace}
+                                    disabled={isPending}
+                                    className="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    <Sparkles size={14} />
+                                    Auto-Fix All
+                                </button>
+                            </div>
                             <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                                 {brokenVideos.map((item) => (
                                     <div key={item.id} className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">

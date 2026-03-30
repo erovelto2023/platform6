@@ -443,6 +443,54 @@ export async function verifyYouTubeLinksBatch(termsToVerify: { id: string; term:
     }
 }
 
+export async function autoReplaceBrokenVideos(brokenTerms: { id: string; term: string }[]) {
+    try {
+        await connectToDatabase();
+        
+        let fixedCount = 0;
+        const remainingBroken: { id: string; term: string; videoUrl: string; reason: string }[] = [];
+        
+        // Dynamically import yt-search
+        const ytSearch = (await import('yt-search')).default;
+
+        await Promise.all(brokenTerms.map(async (t) => {
+            try {
+                // Perform a YouTube search for the exact term plus relevant context
+                const query = t.term;
+                const searchResults = await ytSearch(query);
+                
+                const bestVideo = searchResults.videos.length > 0 ? searchResults.videos[0].url : null;
+                
+                if (bestVideo) {
+                    await GlossaryTerm.findOneAndUpdate({ id: t.id }, { videoUrl: bestVideo });
+                    fixedCount++;
+                } else {
+                    remainingBroken.push({
+                        ...t,
+                        videoUrl: "",
+                        reason: "Could not find a replacement video automatically"
+                    });
+                }
+            } catch (err) {
+                console.error(`Failed to auto-replace for term ${t.term}:`, err);
+                remainingBroken.push({
+                    ...t,
+                    videoUrl: "",
+                    reason: "Search error during auto-replace"
+                });
+            }
+        }));
+
+        revalidatePath('/admin/glossary');
+        revalidatePath('/glossary');
+        
+        return { success: true, fixedCount, remainingBroken };
+    } catch (error: any) {
+        console.error("Error auto-replacing videos:", error);
+        return { error: error.message || "Failed to auto-replace videos" };
+    }
+}
+
 export async function normalizeGlossaryData() {
     try {
         await connectToDatabase();
