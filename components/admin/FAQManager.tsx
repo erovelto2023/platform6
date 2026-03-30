@@ -245,10 +245,13 @@ export default function FAQManager({
 
 function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () => void, isPending: boolean, startTransition: any }) {
     const [file, setFile] = useState<File | null>(null);
+    const [progress, setProgress] = useState<{ current: number; total: number; done: boolean } | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0]);
+            setProgress(null);
         }
     };
 
@@ -259,23 +262,47 @@ function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () 
             header: true,
             skipEmptyLines: true,
             complete: async (results) => {
-                const data = results.data.map((row: any) => ({
-                    question: row['Question'] || row['question'],
-                    parentQuestion: row['Parent Question'] || row['parentQuestion'],
-                    linkTitle: row['Link Title'] || row['linkTitle'],
-                    linkUrl: row['Link'] || row['linkUrl'] || row['link'],
-                    sourceText: row['Text'] || row['sourceText'] || row['text']
-                }));
+                const data = (results.data as any[])
+                    .map((row: any) => ({
+                        question: row['Question'] || row['question'],
+                        parentQuestion: row['Parent Question'] || row['parentQuestion'],
+                        linkTitle: row['Link Title'] || row['linkTitle'],
+                        linkUrl: row['Link'] || row['linkUrl'] || row['link'],
+                        sourceText: row['Text'] || row['sourceText'] || row['text']
+                    }))
+                    .filter((row: any) => row.question); // skip rows without a question
 
-                startTransition(async () => {
-                    const res = await importCSVFAQs(data);
-                    if (res.success) {
-                        alert(`Imported ${res.count} FAQs from CSV`);
-                        window.location.reload();
-                    } else {
-                        alert('Error: ' + res.error);
+                const BATCH_SIZE = 50; // keep each server action payload small
+                const batches: any[][] = [];
+                for (let i = 0; i < data.length; i += BATCH_SIZE) {
+                    batches.push(data.slice(i, i + BATCH_SIZE));
+                }
+
+                setIsProcessing(true);
+                setProgress({ current: 0, total: batches.length, done: false });
+
+                let totalImported = 0;
+                for (let bIdx = 0; bIdx < batches.length; bIdx++) {
+                    try {
+                        const res = await importCSVFAQs(batches[bIdx]);
+                        if (res.success) {
+                            totalImported += res.count ?? batches[bIdx].length;
+                        } else {
+                            alert(`Batch ${bIdx + 1} failed: ${res.error}`);
+                            setIsProcessing(false);
+                            return;
+                        }
+                    } catch (err: any) {
+                        alert(`Batch ${bIdx + 1} threw an error: ${err.message}`);
+                        setIsProcessing(false);
+                        return;
                     }
-                });
+                    setProgress({ current: bIdx + 1, total: batches.length, done: bIdx === batches.length - 1 });
+                }
+
+                setIsProcessing(false);
+                alert(`✅ Import complete! ${totalImported} FAQs imported.`);
+                window.location.reload();
             },
             error: (err) => {
                 alert('Parsing error: ' + err.message);
@@ -307,6 +334,7 @@ function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () 
                     onChange={handleFileChange}
                     className="hidden" 
                     id="csv-upload"
+                    disabled={isProcessing}
                 />
                 <label 
                     htmlFor="csv-upload"
@@ -315,16 +343,33 @@ function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () 
                     {file ? file.name : 'Select CSV File'}
                 </label>
 
-                {file && (
+                {file && !isProcessing && (
                     <div className="mt-4">
                         <button
                             onClick={handleImport}
-                            disabled={isPending}
-                            className="bg-black text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl mx-auto"
+                            className="bg-black text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-800 flex items-center gap-2 transition-all shadow-xl mx-auto"
                         >
-                            {isPending ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />}
-                            Process & Import Data
+                            <Download size={16} />
+                            Process &amp; Import Data
                         </button>
+                    </div>
+                )}
+
+                {isProcessing && progress && (
+                    <div className="mt-6 max-w-sm mx-auto">
+                        <div className="flex justify-between text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
+                            <span className="flex items-center gap-2"><RefreshCw className="animate-spin" size={12} /> Importing...</span>
+                            <span>{progress.current} / {progress.total} batches</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                            <div
+                                className="bg-emerald-500 h-3 rounded-full transition-all duration-300"
+                                style={{ width: `${Math.round((progress.current / progress.total) * 100)}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-slate-400 mt-3 italic">
+                            Please keep this tab open until the import completes.
+                        </p>
                     </div>
                 )}
             </div>
