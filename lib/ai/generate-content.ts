@@ -23,7 +23,7 @@ const SECTION_PROMPTS: Record<string, string> = {
   hero: `Create a modern, high-converting hero section matching this design style:
   - Background: White or very light gray
   - Typography: Inter font, large bold headings (text-5xl to text-7xl)
-  - Styling: Use a gradient text effect for key phrases (bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent)
+  - Styling: Use a gradient text effect for key phrases (bg-gradient-to-r from-indigo-600 to-sky-600 bg-clip-text text-transparent)
   - Layout: Centered alignment, max-w-4xl mx-auto
   - Elements:
     - A small pill badge at the top (bg-indigo-50 text-indigo-700 rounded-full)

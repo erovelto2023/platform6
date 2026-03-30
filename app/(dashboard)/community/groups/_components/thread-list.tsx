@@ -112,7 +112,7 @@ export function ThreadList({ threads, groupSlug }: ThreadListProps) {
                                                 <MessageSquare className="h-3.5 w-3.5" />
                                                 <span>{thread.replyCount}</span>
                                             </div>
-                                            <div className="flex items-center gap-1 hover:text-pink-600 transition-colors">
+                                            <div className="flex items-center gap-1 hover:text-indigo-600 transition-colors">
                                                 <ThumbsUp className="h-3.5 w-3.5" />
                                                 <span>{thread.likes?.length || 0}</span>
                                             </div>

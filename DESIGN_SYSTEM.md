@@ -4,38 +4,39 @@
 
 ### Primary Brand Colors
 ```css
-Purple: #9333ea (purple-600)
-Pink:   #ec4899 (pink-600)
+Ocean Blue: #0284c7 (sky-600)
+Deep Indigo: #4f46e5 (indigo-600)
 ```
 
 ### Background Colors
 ```css
-Darkest:  #020617 (slate-950) - Main background
-Dark:     #0f172a (slate-900) - Section backgrounds
-Medium:   #1e293b (slate-800) - Card backgrounds
+Lightest: #ffffff (white) - Main background
+Light:    #f8fafc (slate-50) - Section backgrounds
+Medium:   #e2e8f0 (slate-200) - Borders / Modals
+Dark Mode: #0f172a (slate-900) - Soft navy background
 ```
 
 ### Text Colors
 ```css
-Primary:   #ffffff (white)       - Headings
-Secondary: #cbd5e1 (slate-300)   - Body text
-Tertiary:  #94a3b8 (slate-400)   - Muted text
-Muted:     #64748b (slate-500)   - Footer, captions
+Primary:   #0f172a (slate-900)   - Headings (Dark in Light Mode)
+Secondary: #334155 (slate-700)   - Body text
+Tertiary:  #64748b (slate-500)   - Muted text
+Muted:     #94a3b8 (slate-400)   - Footer, captions
 ```
 
 ### Border Colors
 ```css
-Default: #334155 (slate-700)
+Default: #e2e8f0 (slate-200)
 Hover:   Various with /50 opacity
 ```
 
 ### Feature Colors
 ```css
-Courses:    #3b82f6 (blue-600)
-Niche:      #a855f7 (purple-600)
-Tools:      #f97316 (orange-600)
-Knowledge:  #14b8a6 (teal-600)
-Resources:  #ec4899 (pink-600)
+Courses:    #0284c7 (sky-600)
+Niche:      #4f46e5 (indigo-600)
+Tools:      #ea580c (orange-600)
+Knowledge:  #0d9488 (teal-600)
+Resources:  #6366f1 (indigo-500)
 Success:    #10b981 (emerald-500)
 ```
 
@@ -45,27 +46,24 @@ Success:    #10b981 (emerald-500)
 
 ### Background Gradients
 ```tsx
-// Purple to Pink (Primary)
-className="bg-gradient-to-br from-purple-600 to-pink-600"
+// Sky to Indigo (Primary)
+className="bg-gradient-to-br from-sky-600 to-indigo-600"
 
-// Purple to Pink (Dark)
-className="bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900"
-
-// Slate to Slate (Subtle)
-className="bg-gradient-to-br from-slate-800 to-slate-900"
+// Light Subtle Gradient
+className="bg-gradient-to-br from-slate-50 to-white"
 
 // Multi-stop (Complex)
-className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"
+className="bg-gradient-to-br from-white via-sky-50 to-white"
 ```
 
 ### Text Gradients
 ```tsx
-className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+className="bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-transparent"
 ```
 
 ### Button Gradients
 ```tsx
-className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700"
 ```
 
 ---
@@ -74,22 +72,20 @@ className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 ho
 
 ### Standard Shadows
 ```tsx
-className="shadow-lg"           // Large shadow
-className="shadow-xl"           // Extra large
-className="shadow-2xl"          // 2X large
+className="shadow-sm"           // Subtle card shadow
+className="shadow-md"           // Elevated element
+className="shadow-lg"           // Dropdowns / Modals
 ```
 
 ### Colored Glows
 ```tsx
-className="shadow-lg shadow-purple-500/50"   // Purple glow
-className="shadow-lg shadow-pink-500/50"     // Pink glow
-className="shadow-lg shadow-blue-500/50"     // Blue glow
-className="shadow-2xl shadow-purple-500/20"  // Subtle purple glow
+className="shadow-lg shadow-sky-500/20"      // Sky glow
+className="shadow-lg shadow-indigo-500/20"   // Indigo glow
 ```
 
 ### Hover Glows
 ```tsx
-className="hover:shadow-2xl hover:shadow-purple-500/20"
+className="hover:shadow-xl hover:shadow-sky-500/10 transition-shadow"
 ```
 
 ---
@@ -98,17 +94,17 @@ className="hover:shadow-2xl hover:shadow-purple-500/20"
 
 ### Basic Glass
 ```tsx
-className="bg-slate-800/50 backdrop-blur-sm"
+className="bg-white/80 backdrop-blur-sm"
 ```
 
 ### Glass with Border
 ```tsx
-className="bg-slate-800/50 backdrop-blur-sm border border-slate-700"
+className="bg-white/80 backdrop-blur-md border border-slate-200"
 ```
 
 ### Navbar Glass
 ```tsx
-className="bg-slate-900/95 backdrop-blur-sm"
+className="bg-white/95 backdrop-blur-sm border-b border-slate-200"
 ```
 
 ---
@@ -134,7 +130,7 @@ const fadeInUp = {
 ### Scale In
 ```tsx
 const scaleIn = {
-  hidden: { opacity: 0, scale: 0.8 },
+  hidden: { opacity: 0, scale: 0.95 },
   visible: { opacity: 1, scale: 1 }
 };
 
@@ -163,7 +159,7 @@ const staggerContainer = {
 
 ### Hover Scale
 ```tsx
-className="hover:scale-110 transition-transform"
+className="hover:-translate-y-1 transition-transform"
 ```
 
 ---
@@ -172,35 +168,35 @@ className="hover:scale-110 transition-transform"
 
 ### Card Pattern
 ```tsx
-<div className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700 hover:border-purple-500/50 transition-all hover:shadow-2xl hover:shadow-purple-500/20 group">
+<div className="bg-white p-8 rounded-2xl border border-slate-200 hover:border-sky-300 transition-all hover:shadow-xl group">
   {/* Content */}
 </div>
 ```
 
 ### Icon Container
 ```tsx
-<div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/50 group-hover:scale-110 transition-transform">
-  <Icon className="h-7 w-7 text-white" />
+<div className="w-14 h-14 bg-sky-50 rounded-xl flex items-center justify-center text-sky-600 group-hover:bg-sky-100 transition-colors">
+  <Icon className="h-7 w-7" />
 </div>
 ```
 
 ### Button Primary
 ```tsx
-<Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
+<Button className="bg-sky-600 hover:bg-sky-700 text-white shadow-sm">
   Click Me
 </Button>
 ```
 
 ### Button Secondary
 ```tsx
-<Button variant="outline" className="border-slate-700 hover:bg-slate-800 hover:text-white text-white">
+<Button variant="outline" className="border-slate-200 hover:bg-slate-50 text-slate-700">
   Click Me
 </Button>
 ```
 
 ### Heading with Gradient
 ```tsx
-<h2 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+<h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-slate-900">
   Heading
 </h2>
 ```
@@ -211,23 +207,12 @@ className="hover:scale-110 transition-transform"
 
 ### Gradient Orb
 ```tsx
-<div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+<div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
 ```
 
 ### Grid Pattern
 ```tsx
-<div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-```
-
-### Layered Background
-```tsx
-<section className="relative overflow-hidden">
-  <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 opacity-50" />
-  <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-  <div className="container relative z-10">
-    {/* Content */}
-  </div>
-</section>
+<div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5 pointer-events-none" />
 ```
 
 ---
@@ -250,112 +235,27 @@ className="container px-4 md:px-6 mx-auto"
 ```tsx
 className="max-w-4xl mx-auto"   // Standard content
 className="max-w-5xl mx-auto"   // Wide content
-className="max-w-2xl mx-auto"   // Narrow content
 ```
 
 ---
 
 ## 🎨 Typography Scale
 
-### Headings
+### Headings (Inter / Headline font)
 ```tsx
-className="text-4xl md:text-5xl font-bold"  // H1
-className="text-3xl md:text-4xl font-bold"  // H2
-className="text-2xl font-bold"              // H3
-className="text-xl font-semibold"           // H4
+className="text-4xl md:text-5xl font-extrabold text-slate-900"  // H1
+className="text-3xl md:text-4xl font-bold text-slate-900"       // H2
+className="text-2xl font-bold text-slate-800"                   // H3
+className="text-xl font-semibold text-slate-800"                // H4
 ```
 
-### Body Text
+### Body Text (Inter)
 ```tsx
-className="text-lg"      // Large body
-className="text-base"    // Normal body
-className="text-sm"      // Small text
-className="text-xs"      // Tiny text
-```
-
----
-
-## 🔧 Utility Combos
-
-### Responsive Grid
-```tsx
-className="grid gap-8 lg:grid-cols-2"
-className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
-```
-
-### Flex Center
-```tsx
-className="flex items-center justify-center"
-className="flex flex-col items-center gap-4"
-```
-
-### Transition All
-```tsx
-className="transition-all duration-300"
-className="transition-colors duration-200"
-className="transition-transform duration-300"
+className="text-lg text-slate-700"      // Large body
+className="text-base text-slate-600"    // Normal body
+className="text-sm text-slate-500"      // Small text
 ```
 
 ---
 
-## 🎯 Quick Copy-Paste
-
-### Feature Card
-```tsx
-<div className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700 hover:border-purple-500/50 transition-all hover:shadow-2xl hover:shadow-purple-500/20 group">
-  <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/50 group-hover:scale-110 transition-transform">
-    <Icon className="h-7 w-7 text-white" />
-  </div>
-  <h3 className="text-2xl font-bold mb-4 text-white">Title</h3>
-  <p className="text-slate-400">Description</p>
-</div>
-```
-
-### Animated Section
-```tsx
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
->
-  {/* Content */}
-</motion.div>
-```
-
-### CTA Button
-```tsx
-<Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl shadow-purple-500/50 group">
-  Get Started
-  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-</Button>
-```
-
----
-
-## 📱 Responsive Breakpoints
-
-```tsx
-sm:   640px   // Small devices
-md:   768px   // Medium devices
-lg:   1024px  // Large devices
-xl:   1280px  // Extra large devices
-2xl:  1536px  // 2X large devices
-```
-
----
-
-## 🎉 Pro Tips
-
-1. **Always use gradients** for primary elements
-2. **Add hover effects** to interactive elements
-3. **Use colored shadows** for depth
-4. **Animate on scroll** for engagement
-5. **Layer backgrounds** for richness
-6. **Group hover** for coordinated effects
-7. **Viewport once** to prevent re-animation
-8. **Stagger children** for list animations
-
----
-
-This design system creates a **cohesive, premium, modern** look! 🚀
+This design system establishes a **clean, robust, and calming educational** aesthetic! 🚀

@@ -64,16 +64,16 @@ export default function CoursesPage() {
             <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
                 <div className="flex items-center gap-2 font-bold text-xl text-white">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
+                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
                             K Business Academy
                         </span>
                     </Link>
                 </div>
                 <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/courses">
+                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/courses">
                         Courses
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
@@ -103,7 +103,7 @@ export default function CoursesPage() {
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
+                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
                             Get Started
                         </Button>
                     </Link>
@@ -121,7 +121,7 @@ export default function CoursesPage() {
 
                 {/* Self-Paced Learning - Dark Theme */}
                 <section className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
                             <motion.div
@@ -144,8 +144,8 @@ export default function CoursesPage() {
                                         { icon: ShieldCheck, text: "No deadlines, no pressure" }
                                     ].map((item, i) => (
                                         <li key={i} className="flex items-center gap-3">
-                                            <div className="p-2 bg-purple-500/20 rounded-lg">
-                                                <item.icon className="h-5 w-5 text-purple-400" />
+                                            <div className="p-2 bg-sky-500/20 rounded-lg">
+                                                <item.icon className="h-5 w-5 text-sky-400" />
                                             </div>
                                             <span className="text-slate-300">{item.text}</span>
                                         </li>
@@ -171,14 +171,14 @@ export default function CoursesPage() {
                                         { num: 3, title: "Advanced", desc: "Refine systems, execution, and scalability", icon: Award }
                                     ].map((item, i) => (
                                         <div key={i} className="flex gap-3 p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shrink-0 font-bold text-white shadow-lg shadow-purple-500/30">
+                                            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-full flex items-center justify-center shrink-0 font-bold text-white shadow-lg shadow-sky-500/30">
                                                 {item.num}
                                             </div>
                                             <div className="flex-1">
                                                 <h4 className="font-semibold text-white mb-1">{item.title}</h4>
                                                 <p className="text-sm text-slate-400">{item.desc}</p>
                                             </div>
-                                            <item.icon className="h-5 w-5 text-purple-400 shrink-0" />
+                                            <item.icon className="h-5 w-5 text-sky-400 shrink-0" />
                                         </div>
                                     ))}
                                 </div>
@@ -195,7 +195,7 @@ export default function CoursesPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.6 }}
-                            className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+                            className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent"
                         >
                             Multiple Learning Formats for Real Understanding
                         </motion.h2>
@@ -215,7 +215,7 @@ export default function CoursesPage() {
                                 <motion.div
                                     key={i}
                                     variants={fadeInUp}
-                                    className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all hover:shadow-2xl hover:shadow-purple-500/20 group"
+                                    className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 hover:border-sky-500/50 transition-all hover:shadow-2xl hover:shadow-sky-500/20 group"
                                 >
                                     <div className={`w-12 h-12 bg-gradient-to-br from-${item.color}-500 to-${item.color}-600 rounded-lg flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
                                         <item.icon className="h-6 w-6 text-white" />
@@ -261,7 +261,7 @@ export default function CoursesPage() {
                 </section>
 
                 {/* Learning System - Gradient Section */}
-                <section className="w-full py-20 bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900 relative overflow-hidden">
+                <section className="w-full py-20 bg-gradient-to-br from-sky-900 via-slate-900 to-indigo-900 relative overflow-hidden">
                     <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -272,7 +272,7 @@ export default function CoursesPage() {
                                 transition={{ duration: 0.6 }}
                             >
                                 <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">A Learning System That Grows With You</h2>
-                                <p className="text-purple-200 mb-6 text-lg">
+                                <p className="text-sky-200 mb-6 text-lg">
                                     As online business evolves, so does K Business Academy. Your membership becomes more valuable over time—not outdated.
                                 </p>
                                 <div className="grid grid-cols-2 gap-4">
@@ -283,7 +283,7 @@ export default function CoursesPage() {
                                         "Learning paths that evolve"
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-center gap-2 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                                            <TrendingUp className="h-4 w-4 text-purple-400" />
+                                            <TrendingUp className="h-4 w-4 text-sky-400" />
                                             <span className="text-sm text-white">{item}</span>
                                         </div>
                                     ))}
@@ -298,17 +298,17 @@ export default function CoursesPage() {
                             >
                                 <h3 className="text-2xl font-bold mb-4 text-white">Learn Without Overwhelm</h3>
                                 <ul className="space-y-4 mb-6">
-                                    <li className="flex items-center gap-3 text-purple-100">
+                                    <li className="flex items-center gap-3 text-sky-100">
                                         <ShieldCheck className="h-5 w-5 text-emerald-400" /> No complicated jargon
                                     </li>
-                                    <li className="flex items-center gap-3 text-purple-100">
+                                    <li className="flex items-center gap-3 text-sky-100">
                                         <ShieldCheck className="h-5 w-5 text-emerald-400" /> No information overload
                                     </li>
-                                    <li className="flex items-center gap-3 text-purple-100">
+                                    <li className="flex items-center gap-3 text-sky-100">
                                         <ShieldCheck className="h-5 w-5 text-emerald-400" /> No unrealistic expectations
                                     </li>
                                 </ul>
-                                <p className="text-purple-200 italic">
+                                <p className="text-sky-200 italic">
                                     "Just organized, structured learning that makes sense—especially if you've ever felt lost trying to figure things out on your own."
                                 </p>
                             </motion.div>
@@ -326,7 +326,7 @@ export default function CoursesPage() {
                         className="container px-4 md:px-6 mx-auto text-center max-w-4xl"
                     >
                         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">This Is More Than Courses</h2>
-                        <h3 className="text-xl bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent font-semibold mb-6">
+                        <h3 className="text-xl bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent font-semibold mb-6">
                             It's a Foundation for Long-Term Success
                         </h3>
                         <p className="text-lg text-slate-400 mb-8">
@@ -336,9 +336,9 @@ export default function CoursesPage() {
                 </section>
 
                 {/* CTA - Gradient */}
-                <section className="w-full py-24 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden border-t border-slate-800">
+                <section className="w-full py-24 bg-gradient-to-br from-slate-900 via-sky-900 to-slate-900 relative overflow-hidden border-t border-slate-800">
                     <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-500/20 rounded-full blur-3xl" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/20 rounded-full blur-3xl" />
 
                     <div className="container px-4 md:px-6 mx-auto text-center relative z-10">
                         <motion.div
@@ -353,7 +353,7 @@ export default function CoursesPage() {
                             </p>
                             <div className="flex flex-col items-center gap-6">
                                 <Link href="/sign-up">
-                                    <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xl px-12 h-16 shadow-2xl shadow-purple-500/50">
+                                    <Button size="lg" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-xl px-12 h-16 shadow-2xl shadow-sky-500/50">
                                         Join K Business Academy
                                     </Button>
                                 </Link>

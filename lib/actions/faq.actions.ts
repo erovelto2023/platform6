@@ -19,16 +19,18 @@ export async function getPaginatedFAQs({
     page = 1, 
     limit = 20, 
     search = "", 
-    category = "" 
+    category = "",
+    isPublished = true
 }: { 
     page?: number; 
     limit?: number; 
     search?: string; 
-    category?: string; 
+    category?: string;
+    isPublished?: boolean;
 }) {
     try {
         await connectToDatabase();
-        const query: any = { isPublished: true };
+        const query: any = { isPublished };
 
         if (search) {
             query.$or = [
@@ -232,5 +234,69 @@ export async function importCSVFAQs(faqs: any[]) {
     } catch (error: any) {
         console.error("Error importing CSV FAQs:", error);
         return { error: error.message || "Failed to import CSV FAQs" };
+    }
+}
+
+export async function bulkUnpublishEmptyFAQs() {
+    try {
+        await connectToDatabase();
+
+        // An FAQ is considered "empty" if it has no meaningful sourceText/answerSnippet
+        const emptyConditions = {
+            $or: [
+                { sourceText: { $in: ['', 'not-given', null] } },
+                { answerSnippet: { $in: ['', 'not-given', null] } },
+                { sourceText: { $exists: false } },
+                { answerSnippet: { $exists: false } },
+            ]
+        };
+
+        const { modifiedCount } = await FAQ.updateMany(
+            { ...emptyConditions, isPublished: true },
+            { $set: { isPublished: false } }
+        );
+
+        revalidatePath('/admin/faqs');
+        return { success: true, count: modifiedCount };
+    } catch (error: any) {
+        console.error('Error bulk unpublishing empty FAQs:', error);
+        return { error: error.message || 'Failed to unpublish empty FAQs' };
+    }
+}
+
+export async function countEmptyFAQs() {
+    try {
+        await connectToDatabase();
+        const count = await FAQ.countDocuments({
+            isPublished: true,
+            $or: [
+                { sourceText: { $in: ['', 'not-given', null] } },
+                { answerSnippet: { $in: ['', 'not-given', null] } },
+                { sourceText: { $exists: false } },
+                { answerSnippet: { $exists: false } },
+            ]
+        });
+        return { count };
+    } catch (error: any) {
+        return { count: 0 };
+    }
+}
+
+export async function publishFAQWithAnswer(id: string, answerText: string) {
+    try {
+        await connectToDatabase();
+        await FAQ.findByIdAndUpdate(id, {
+            $set: {
+                answerSnippet: answerText.substring(0, 400),
+                sourceText: answerText,
+                "deepDive.application": answerText,
+                isPublished: true
+            }
+        });
+        revalidatePath('/admin/faqs');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error publishing FAQ with answer:', error);
+        return { error: error.message || 'Failed to publish FAQ' };
     }
 }

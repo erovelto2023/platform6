@@ -49,7 +49,7 @@ export default function SimplePageListClient({ initialPages }: SimplePageListCli
                     />
                 </div>
                 <Link href="/admin/page-builder-simple/create">
-                    <Button className="rounded-2xl bg-purple-600 hover:bg-purple-700 gap-2 h-11 px-6 shadow-lg shadow-purple-500/20">
+                    <Button className="rounded-2xl bg-sky-600 hover:bg-sky-700 gap-2 h-11 px-6 shadow-lg shadow-sky-500/20">
                         <Plus size={18} /> New Simple Page
                     </Button>
                 </Link>
@@ -71,7 +71,7 @@ export default function SimplePageListClient({ initialPages }: SimplePageListCli
                         <div key={page._id} className="group bg-white rounded-[2rem] border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-500">
                             <div className="p-8 space-y-6">
                                 <div className="flex justify-between items-start">
-                                    <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center font-black">
+                                    <div className="w-12 h-12 bg-sky-50 text-sky-600 rounded-2xl flex items-center justify-center font-black">
                                         <Layout size={24} />
                                     </div>
                                     <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${page.isPublished ? "bg-green-50 text-green-600" : "bg-slate-50 text-slate-400"}`}>
@@ -81,7 +81,7 @@ export default function SimplePageListClient({ initialPages }: SimplePageListCli
 
                                 <div>
                                     <h3 className="text-xl font-black text-slate-900 truncate">{page.name}</h3>
-                                    <Link href={`/p/${page.slug}`} target="_blank" className="text-xs text-slate-400 font-bold flex items-center gap-1 hover:text-purple-600 transition-colors mt-1">
+                                    <Link href={`/p/${page.slug}`} target="_blank" className="text-xs text-slate-400 font-bold flex items-center gap-1 hover:text-sky-600 transition-colors mt-1">
                                         /p/{page.slug} <ArrowUpRight size={12} />
                                     </Link>
                                 </div>

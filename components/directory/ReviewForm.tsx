@@ -82,7 +82,7 @@ export default function ReviewForm({ productId }: { productId: number }) {
                         name="user" 
                         required 
                         maxLength={50}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 transition-colors"
                         placeholder="e.g. Alex D."
                     />
                 </div>
@@ -94,13 +94,13 @@ export default function ReviewForm({ productId }: { productId: number }) {
                         required 
                         rows={4}
                         maxLength={500}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 transition-colors resize-none"
                         placeholder="What do you think of this tool?"
                     />
                 </div>
 
                 {message && (
-                    <div className={`p-3 rounded-xl text-xs font-bold leading-relaxed ${message.startsWith('Success') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-pink-500/10 text-pink-400 border border-pink-500/20'}`}>
+                    <div className={`p-3 rounded-xl text-xs font-bold leading-relaxed ${message.startsWith('Success') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'}`}>
                         {message}
                     </div>
                 )}

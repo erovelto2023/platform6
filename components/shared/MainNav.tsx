@@ -7,10 +7,10 @@ export function MainNav() {
     <nav className="fixed top-0 w-full z-50 glass-nav">
       <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto w-full">
         <Link href="/" className="text-xl font-headline font-black text-primary tracking-tight italic flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-[#8422dc] to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/20 not-italic">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#0284c7] to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/20 not-italic">
             K
           </div>
-          <span className="bg-gradient-to-r from-[#0e0021] to-[#8422dc] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#f8fafc] to-[#0284c7] bg-clip-text text-transparent">
             K Business Academy
           </span>
         </Link>
@@ -23,6 +23,7 @@ export function MainNav() {
           <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/blog">Blog</Link>
           <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/glossary">Glossary</Link>
           <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/locations">Market Intelligence</Link>
+          <Link className="text-sm font-semibold text-secondary hover:text-accent transition-colors" href="/questions">FAQs</Link>
         </div>
         <div className="flex items-center space-x-3">
           <Link href="/sign-in">

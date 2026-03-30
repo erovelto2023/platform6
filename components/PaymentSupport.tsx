@@ -10,14 +10,14 @@ export const PaymentSupport: React.FC<PaymentSupportProps> = ({ variant = 'full'
   const paymentMethods = [
     { name: 'Cash App', value: '$EricRovelto', icon: DollarSign, color: 'text-emerald-500' },
     { name: 'PayPal', value: 'erovelto1@gmail.com', icon: CreditCard, color: 'text-blue-500' },
-    { name: 'Venmo', value: 'LearnEric', url: 'https://www.venmo.com/u/LearnEric', icon: Heart, color: 'text-purple-500' },
+    { name: 'Venmo', value: 'LearnEric', url: 'https://www.venmo.com/u/LearnEric', icon: Heart, color: 'text-sky-500' },
   ];
 
   if (variant === 'minimal') {
     return (
       <div className={`bg-slate-900/50 backdrop-blur-sm border-b border-white/5 py-2 px-6 flex flex-wrap justify-center items-center gap-x-8 gap-y-2 text-[10px] uppercase font-black tracking-widest text-slate-400 ${className}`}>
         <span className="flex items-center gap-2">
-          <Heart size={12} className="text-pink-500 fill-current" />
+          <Heart size={12} className="text-indigo-500 fill-current" />
           Support the Academy:
         </span>
         <div className="flex flex-wrap gap-x-6 gap-y-2">
@@ -46,7 +46,7 @@ export const PaymentSupport: React.FC<PaymentSupportProps> = ({ variant = 'full'
       
       <div className="relative z-10">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-[10px] font-black uppercase tracking-widest mb-6 border border-white/10">
-          <Heart size={12} className="fill-current text-pink-500" /> Pay What You Want
+          <Heart size={12} className="fill-current text-indigo-500" /> Pay What You Want
         </div>
         
         <h2 className="text-3xl font-black text-white mb-4 tracking-tight">Support Our Mission</h2>

@@ -98,7 +98,7 @@ export default function RelatedTerms({ currentTerm, allTerms }: Props) {
 
   const getReasonIcon = (reason: string) => {
     if (reason === 'Same category') return <Tag size={14} className="text-blue-500" />;
-    if (reason.startsWith('Shared tag')) return <Users size={14} className="text-purple-500" />;
+    if (reason.startsWith('Shared tag')) return <Users size={14} className="text-sky-500" />;
     return <ArrowRight size={14} className="text-emerald-500" />;
   };
 

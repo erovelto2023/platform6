@@ -46,8 +46,8 @@ interface PopulationStatsProps {
   stateName: string;
 }
 
-const COLORS = ['#3b82f6', '#ec4899', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
-const RACE_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#71717a'];
+const COLORS = ['#3b82f6', '#4f46e5', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
+const RACE_COLORS = ['#3b82f6', '#8b5cf6', '#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#71717a'];
 
 export function StatePopulationStats({ data, raceData, stateName }: PopulationStatsProps) {
   if (!data || !data.total) return null;
@@ -194,7 +194,7 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
                     dataKey="value"
                   >
                     <Cell fill="#3b82f6" />
-                    <Cell fill="#ec4899" />
+                    <Cell fill="#4f46e5" />
                   </Pie>
                   <Tooltip 
                     contentStyle={{ 
@@ -220,7 +220,7 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
                 <div className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter italic">Male</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-black text-pink-400 italic">{data.total ? (data.female! / data.total * 100).toFixed(1) : 0}%</div>
+                <div className="text-2xl font-black text-indigo-400 italic">{data.total ? (data.female! / data.total * 100).toFixed(1) : 0}%</div>
                 <div className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter italic">Female</div>
               </div>
             </div>

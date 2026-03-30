@@ -15,7 +15,7 @@ export default async function DashboardPage() {
     return (
         <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none">
+                <Card className="bg-gradient-to-br from-indigo-500 to-sky-600 text-white border-none">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-medium">Active Courses</CardTitle>
                         <BookOpen className="h-5 w-5 opacity-75" />
@@ -26,7 +26,7 @@ export default async function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-orange-500 to-pink-600 text-white border-none">
+                <Card className="bg-gradient-to-br from-orange-500 to-indigo-600 text-white border-none">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <CardTitle className="text-lg font-medium">Completed</CardTitle>
                         <Trophy className="h-5 w-5 opacity-75" />

@@ -15,8 +15,8 @@ export default function UpgradePage() {
         <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 p-4">
             <Card className="max-w-md w-full bg-slate-900 border-slate-800 shadow-2xl">
                 <CardHeader className="text-center pb-2">
-                    <div className="mx-auto w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
-                        <Lock className="w-8 h-8 text-purple-400" />
+                    <div className="mx-auto w-16 h-16 bg-sky-500/20 rounded-full flex items-center justify-center mb-4">
+                        <Lock className="w-8 h-8 text-sky-400" />
                     </div>
                     <CardTitle className="text-2xl font-bold text-white">Unlock Premium Access</CardTitle>
                     <CardDescription className="text-slate-400">
@@ -32,7 +32,7 @@ export default function UpgradePage() {
                             "Direct support"
                         ].map((feature, i) => (
                             <div key={i} className="flex items-center gap-3 text-slate-300">
-                                <CheckCircle2 className="w-5 h-5 text-purple-500 shrink-0" />
+                                <CheckCircle2 className="w-5 h-5 text-sky-500 shrink-0" />
                                 <span>{feature}</span>
                             </div>
                         ))}
@@ -41,7 +41,7 @@ export default function UpgradePage() {
                 <CardFooter className="flex flex-col gap-3 pt-6">
                     <Button
                         size="lg"
-                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+                        className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-semibold"
                         onClick={() => openUserProfile()}
                     >
                         Upgrade Now

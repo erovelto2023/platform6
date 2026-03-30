@@ -42,7 +42,7 @@ export const PRESET_TEMPLATES = [
     {
         name: "Vibrant Deal Badge",
         type: "widget",
-        content: `<div class="relative p-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl text-white shadow-lg max-w-xs">
+        content: `<div class="relative p-4 bg-gradient-to-br from-indigo-500 to-sky-600 rounded-2xl text-white shadow-lg max-w-xs">
   <div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide">
     Best Deal
   </div>

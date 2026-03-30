@@ -177,7 +177,7 @@ export function FindMembers({ currentUser }: FindMembersProps) {
                                         <Link href={`/community/profile/${member._id}`}>
                                             <Avatar className="h-12 w-12 cursor-pointer hover:opacity-80 transition">
                                                 <AvatarImage src={member.avatar || member.imageUrl} />
-                                                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                                                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-sky-600 text-white">
                                                     {member.firstName?.[0]}
                                                 </AvatarFallback>
                                             </Avatar>

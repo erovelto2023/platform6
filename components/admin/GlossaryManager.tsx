@@ -263,7 +263,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                             <button
                                 onClick={handleBackfillPrompts}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-purple-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-sky-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-sky-700 transition-all disabled:opacity-50 text-sm"
                             >
                                 <Sparkles size={15} /> Backfill Prompts
                             </button>
@@ -436,7 +436,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 <Globe size={14} className="text-blue-500" /> Website
                             </div>
                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <Mic size={14} className="text-purple-500" /> Podcast
+                                <Mic size={14} className="text-sky-500" /> Podcast
                             </div>
                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
                                 <FileText size={14} className="text-emerald-500" /> Case Study
@@ -478,7 +478,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                                     {term.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-500" /></span>}
                                                     {term.amazonProducts && term.amazonProducts.length > 0 && <span title="Has Products"><ShoppingCart size={12} className="text-amber-500" /></span>}
                                                     {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={12} className="text-blue-500" /></span>}
-                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-purple-500" /></span>}
+                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-sky-500" /></span>}
                                                     {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={12} className="text-emerald-500" /></span>}
                                                     {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0)) && (
                                                         <span title="Has Social Prompts"><Lightbulb size={12} className="text-indigo-500" /></span>

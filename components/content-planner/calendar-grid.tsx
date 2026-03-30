@@ -55,7 +55,7 @@ const PLATFORM_ICONS: Record<string, any> = {
 
 const PLATFORM_COLORS: Record<string, string> = {
     facebook: "text-blue-600 bg-blue-50 border-blue-100",
-    instagram: "text-pink-600 bg-pink-50 border-pink-100",
+    instagram: "text-indigo-600 bg-indigo-50 border-indigo-100",
     twitter: "text-slate-900 bg-slate-50 border-slate-200",
     linkedin: "text-blue-700 bg-blue-50 border-blue-100",
     youtube: "text-red-600 bg-red-50 border-red-100",

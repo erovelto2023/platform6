@@ -40,10 +40,10 @@ export default function ResourcesPage() {
             <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
                 <div className="flex items-center gap-2 font-bold text-xl text-white">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
+                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
                             K Business Academy
                         </span>
                     </Link>
@@ -55,7 +55,7 @@ export default function ResourcesPage() {
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
                         Library
                     </Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/business-resources">
+                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/business-resources">
                         Resources
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
@@ -79,7 +79,7 @@ export default function ResourcesPage() {
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
+                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
                             Get Started
                         </Button>
                     </Link>

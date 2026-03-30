@@ -15,7 +15,7 @@ export default async function AdminSimplePagesPage() {
         <div className="p-8 max-w-7xl mx-auto space-y-12">
             <div className="space-y-2">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-600 rounded-xl text-white shadow-lg shadow-purple-500/20">
+                    <div className="p-2 bg-sky-600 rounded-xl text-white shadow-lg shadow-sky-500/20">
                         <FileStack size={24} />
                     </div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight">Simple Page Builder</h1>

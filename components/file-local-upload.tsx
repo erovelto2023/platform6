@@ -94,7 +94,7 @@ export const FileLocalUpload = ({
             {...getRootProps()}
             className={cn(
                 "border-2 border-dashed rounded-lg p-6 transition-all cursor-pointer flex flex-col items-center justify-center gap-2",
-                isDragActive ? "border-purple-600 bg-purple-50" : "border-slate-200 hover:border-slate-300",
+                isDragActive ? "border-sky-600 bg-sky-50" : "border-slate-200 hover:border-slate-300",
                 isUploading && "pointer-events-none opacity-60"
             )}
         >
@@ -102,7 +102,7 @@ export const FileLocalUpload = ({
 
             {isUploading ? (
                 <div className="w-full space-y-4 flex flex-col items-center">
-                    <Loader2 className="h-8 w-8 text-purple-600 animate-spin" />
+                    <Loader2 className="h-8 w-8 text-sky-600 animate-spin" />
                     <div className="w-full max-w-[200px] space-y-1 text-center">
                         <Progress value={progress} className="h-2" />
                         <p className="text-xs text-slate-500">{progress}% uploaded</p>

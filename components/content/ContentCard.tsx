@@ -16,7 +16,7 @@ export interface ContentCardProps {
 const PlatformIcon = ({ platform }: { platform: string }) => {
     switch (platform.toLowerCase()) {
         case 'facebook': return <Facebook className="w-3 h-3 text-blue-600" />;
-        case 'instagram': return <Instagram className="w-3 h-3 text-pink-600" />;
+        case 'instagram': return <Instagram className="w-3 h-3 text-indigo-600" />;
         case 'linkedin': return <Linkedin className="w-3 h-3 text-blue-700" />;
         case 'twitter': return <Twitter className="w-3 h-3 text-sky-500" />;
         case 'youtube': return <Youtube className="w-3 h-3 text-red-600" />;
@@ -24,7 +24,7 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
         case 'pinterest': return <Layout className="w-3 h-3 text-red-700" />;
         case 'email': return <Mail className="w-3 h-3 text-amber-600" />;
         case 'blog': return <FileText className="w-3 h-3 text-slate-600" />;
-        case 'podcast': return <Mic className="w-3 h-3 text-purple-600" />;
+        case 'podcast': return <Mic className="w-3 h-3 text-sky-600" />;
         case 'threads': return <Hash className="w-3 h-3 text-black" />;
         default: return <FileText className="w-3 h-3 text-slate-400" />;
     }
@@ -37,7 +37,7 @@ export function ContentCard({ item, onClick, className }: ContentCardProps) {
             case 'scheduled': return 'bg-blue-100 text-blue-700 border-blue-200';
             case 'editing': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
             case 'draft': return 'bg-slate-100 text-slate-700 border-slate-200';
-            case 'idea': return 'bg-purple-100 text-purple-700 border-purple-200';
+            case 'idea': return 'bg-sky-100 text-sky-700 border-sky-200';
             default: return 'bg-slate-100 text-slate-700';
         }
     };

@@ -28,7 +28,7 @@ const reactionTypes = [
     { type: "like", icon: ThumbsUp, label: "Like", color: "text-blue-500" },
     { type: "love", icon: Heart, label: "Love", color: "text-red-500" },
     { type: "laugh", icon: Laugh, label: "Haha", color: "text-yellow-500" },
-    { type: "wow", icon: Sparkles, label: "Wow", color: "text-purple-500" },
+    { type: "wow", icon: Sparkles, label: "Wow", color: "text-sky-500" },
     { type: "fire", icon: Flame, label: "Fire", color: "text-orange-500" },
     { type: "star", icon: Star, label: "Star", color: "text-amber-500" },
 ];

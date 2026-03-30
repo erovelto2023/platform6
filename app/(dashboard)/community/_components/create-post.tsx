@@ -142,7 +142,7 @@ export function CreatePost({ user }: CreatePostProps) {
                                     }}
                                 />
 
-                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-pink-600" onClick={() => setShowVideoInput(!showVideoInput)}>
+                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-600" onClick={() => setShowVideoInput(!showVideoInput)}>
                                     <Video className="h-5 w-5 mr-2" />
                                     Video
                                 </Button>

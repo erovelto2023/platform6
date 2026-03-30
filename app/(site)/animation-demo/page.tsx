@@ -47,7 +47,7 @@ export default function AnimationDemoPage() {
                 <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
                     {/* AnimatedHero Card */}
                     <div className="bg-white rounded-lg shadow-lg p-8">
-                        <h3 className="text-2xl font-bold mb-4 text-purple-600">AnimatedHero</h3>
+                        <h3 className="text-2xl font-bold mb-4 text-sky-600">AnimatedHero</h3>
                         <p className="text-gray-600 mb-4">
                             Professional video-quality animations powered by Remotion
                         </p>
@@ -110,7 +110,7 @@ export default function AnimationDemoPage() {
             </div>
 
             {/* Quick Start Section */}
-            <div id="start" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16">
+            <div id="start" className="bg-gradient-to-r from-sky-600 to-blue-600 text-white py-16">
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-4xl font-bold mb-6">Quick Start</h2>
                     <p className="text-xl mb-8 max-w-2xl mx-auto">
@@ -119,13 +119,13 @@ export default function AnimationDemoPage() {
                     <div className="flex flex-wrap justify-center gap-4">
                         <a
                             href="/components/animations/QUICKSTART.md"
-                            className="px-8 py-4 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                            className="px-8 py-4 bg-white text-sky-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                         >
                             📖 Quick Start Guide
                         </a>
                         <a
                             href="/components/animations/README.md"
-                            className="px-8 py-4 bg-purple-800 text-white rounded-lg font-semibold hover:bg-purple-900 transition-colors"
+                            className="px-8 py-4 bg-sky-800 text-white rounded-lg font-semibold hover:bg-sky-900 transition-colors"
                         >
                             📚 Full Documentation
                         </a>

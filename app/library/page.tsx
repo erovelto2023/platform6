@@ -41,10 +41,10 @@ export default function LibraryPage() {
             <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
                 <div className="flex items-center gap-2 font-bold text-xl text-white">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
+                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
                             K Business Academy
                         </span>
                     </Link>
@@ -53,7 +53,7 @@ export default function LibraryPage() {
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
                         Courses
                     </Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/library">
+                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/library">
                         Library
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
@@ -80,7 +80,7 @@ export default function LibraryPage() {
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
+                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
                             Get Started
                         </Button>
                     </Link>
@@ -125,8 +125,8 @@ export default function LibraryPage() {
                                 viewport={{ once: true }}
                                 className="grid md:grid-cols-3 gap-8 text-left"
                             >
-                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all">
-                                    <BookOpen className="h-10 w-10 text-purple-400 mb-4" />
+                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-sky-500/50 transition-all">
+                                    <BookOpen className="h-10 w-10 text-sky-400 mb-4" />
                                     <h3 className="text-xl font-bold text-white mb-2">Recommended Books</h3>
                                     <p className="text-slate-400 text-sm">Curated reading lists that have shaped successful entrepreneurs.</p>
                                 </div>
@@ -135,8 +135,8 @@ export default function LibraryPage() {
                                     <h3 className="text-xl font-bold text-white mb-2">In-Depth Guides</h3>
                                     <p className="text-slate-400 text-sm">Step-by-step manuals on specific business models and strategies.</p>
                                 </div>
-                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-pink-500/50 transition-all">
-                                    <GraduationCap className="h-10 w-10 text-pink-400 mb-4" />
+                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-indigo-500/50 transition-all">
+                                    <GraduationCap className="h-10 w-10 text-indigo-400 mb-4" />
                                     <h3 className="text-xl font-bold text-white mb-2">Educational Resources</h3>
                                     <p className="text-slate-400 text-sm">Worksheets, checklists, and references to aid your learning.</p>
                                 </div>

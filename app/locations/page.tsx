@@ -27,8 +27,8 @@ export default async function LocationsPage({
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.1),transparent_50%)]" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <div className="text-center max-w-3xl mx-auto">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-[#0e0021] uppercase italic">
-                                US Business <span className="text-purple-500">Directory</span>
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-[#f8fafc] uppercase italic">
+                                US Business <span className="text-sky-500">Directory</span>
                             </h1>
                             <p className="text-slate-600 text-lg md:text-xl mb-10 font-medium max-w-2xl mx-auto">
                                 Explore every state and city in the United States to discover unique local opportunities and business resources.
@@ -44,8 +44,8 @@ export default async function LocationsPage({
                 {/* States Grid */}
                 <section className="w-full py-12 bg-white min-h-[400px]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <div className="flex items-center justify-between mb-8 border-l-4 border-purple-500 pl-4">
-                            <h2 className="text-2xl font-black text-[#0e0021] uppercase italic tracking-tight">
+                        <div className="flex items-center justify-between mb-8 border-l-4 border-sky-500 pl-4">
+                            <h2 className="text-2xl font-black text-[#f8fafc] uppercase italic tracking-tight">
                                 {query ? `Results for "${query}"` : 'Browse by State'}
                             </h2>
                             <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
@@ -62,7 +62,7 @@ export default async function LocationsPage({
                                 </p>
                                 <Button 
                                     variant="link" 
-                                    className="mt-4 text-purple-500 hover:text-purple-400 font-bold uppercase text-xs"
+                                    className="mt-4 text-sky-500 hover:text-sky-400 font-bold uppercase text-xs"
                                     onClick={() => window.location.href = '/locations'}
                                 >
                                     Clear Search
@@ -74,17 +74,17 @@ export default async function LocationsPage({
                                     <Link 
                                         key={state.slug}
                                         href={`/locations/${state.slug}`}
-                                        className="group relative overflow-hidden bg-white border-slate-200/50 hover:bg-slate-100 p-6 rounded-2xl border border-slate-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/10 active:scale-95"
+                                        className="group relative overflow-hidden bg-white border-slate-200/50 hover:bg-slate-100 p-6 rounded-2xl border border-slate-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/10 active:scale-95"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-[#8422dc] transition-all duration-300">
+                                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 group-hover:bg-sky-500 group-hover:text-[#0284c7] transition-all duration-300">
                                                 <MapPin size={20} />
                                             </div>
-                                            <span className="font-bold text-slate-800 group-hover:text-[#8422dc] transition-colors">
+                                            <span className="font-bold text-slate-800 group-hover:text-[#0284c7] transition-colors">
                                                 {state.name}
                                             </span>
                                         </div>
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </Link>
                                 ))}
                             </div>

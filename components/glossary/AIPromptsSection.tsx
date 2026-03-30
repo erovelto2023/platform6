@@ -34,9 +34,9 @@ export default function AIPromptsSection({ term, imagePrompt, productPrompt, soc
             title: "AI Content Strategy Prompt",
             description: "Use this to generate a viral social media strategy and content plan around this keyword.",
             content: socialPrompt || `Create a comprehensive 7-day social media content plan for "${term}". Include hooks for TikTok/Reels, educational captions for Instagram, and a thought-leadership thread for X (Twitter). Focus on how this topic helps small business owners.`,
-            icon: <Share2 size={18} className="text-purple-500" />,
-            bgColor: "bg-purple-50 dark:bg-purple-900/10",
-            borderColor: "border-purple-100 dark:border-purple-900/30"
+            icon: <Share2 size={18} className="text-sky-500" />,
+            bgColor: "bg-sky-50 dark:bg-sky-900/10",
+            borderColor: "border-sky-100 dark:border-sky-900/30"
         }
     ];
 
@@ -49,7 +49,7 @@ export default function AIPromptsSection({ term, imagePrompt, productPrompt, soc
     return (
         <div className="mt-16 pt-12 border-t-2 border-dashed border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-emerald-500 rounded-lg text-white">
+                <div className="p-2 bg-gradient-to-br from-sky-500 to-emerald-500 rounded-lg text-white">
                     <Sparkles size={20} />
                 </div>
                 <div>

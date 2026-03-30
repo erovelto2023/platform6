@@ -77,7 +77,7 @@ export function GroupsTab({ currentUser }: GroupsTabProps) {
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex gap-4 flex-1">
                                         <div className="flex-shrink-0">
-                                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-500 to-sky-600 flex items-center justify-center">
                                                 <Users className="h-8 w-8 text-white" />
                                             </div>
                                         </div>

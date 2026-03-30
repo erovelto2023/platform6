@@ -629,7 +629,7 @@ export default function KeywordExplorerPage() {
                                                     </TableCell>
                                                     <TableCell>
                                                         <Badge variant="outline" className={
-                                                            (typeof item.intent === 'string' ? item.intent : (item.intent as any)?.intent) === 'Transactional' ? 'bg-purple-100 text-purple-700 border-purple-200' :
+                                                            (typeof item.intent === 'string' ? item.intent : (item.intent as any)?.intent) === 'Transactional' ? 'bg-sky-100 text-sky-700 border-sky-200' :
                                                                 (typeof item.intent === 'string' ? item.intent : (item.intent as any)?.intent) === 'Commercial' ? 'bg-blue-100 text-blue-700 border-blue-200' :
                                                                     'bg-slate-100 text-slate-700 border-slate-200'
                                                         }>
@@ -664,7 +664,7 @@ export default function KeywordExplorerPage() {
                                                                 <Bot className="h-4 w-4 text-indigo-500 hover:text-indigo-700" />
                                                             </Button>
                                                             <Button variant="ghost" size="icon" onClick={() => handleCreateContent(item.keyword)} title="Create Content">
-                                                                <Sparkles className="h-4 w-4 text-pink-500 hover:text-pink-700" />
+                                                                <Sparkles className="h-4 w-4 text-indigo-500 hover:text-indigo-700" />
                                                             </Button>
                                                             <Button variant="ghost" size="icon" onClick={() => handleAnalyzeSerp(item.keyword)} title="Analyze SERP">
                                                                 <Eye className="h-4 w-4 text-slate-400 hover:text-blue-600" />
@@ -736,7 +736,7 @@ export default function KeywordExplorerPage() {
                                 </div>
                             </div>
                             <div className="flex justify-center">
-                                <Button className="h-12 px-8 bg-purple-600 hover:bg-purple-700" onClick={handleCompetitorAnalysis} disabled={isAnalyzingComp || !compDomain}>
+                                <Button className="h-12 px-8 bg-sky-600 hover:bg-sky-700" onClick={handleCompetitorAnalysis} disabled={isAnalyzingComp || !compDomain}>
                                     {isAnalyzingComp ? (
                                         <>
                                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -879,10 +879,10 @@ export default function KeywordExplorerPage() {
 
                             {/* Keyword Gap Analysis */}
                             {gapResults && (
-                                <Card className="border-purple-200 bg-purple-50/30">
+                                <Card className="border-sky-200 bg-sky-50/30">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
-                                            <Zap className="h-5 w-5 text-purple-600" />
+                                            <Zap className="h-5 w-5 text-sky-600" />
                                             Keyword Gap Analysis
                                         </CardTitle>
                                         <CardDescription>
@@ -966,12 +966,12 @@ export default function KeywordExplorerPage() {
                                         <p className="text-sm text-indigo-800">{aiAnalysisResult.searchIntent}</p>
                                     </CardContent>
                                 </Card>
-                                <Card className="bg-pink-50 border-pink-100">
+                                <Card className="bg-indigo-50 border-indigo-100">
                                     <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-medium text-pink-900">Target Audience</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-indigo-900">Target Audience</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-sm text-pink-800">{aiAnalysisResult.targetAudience}</p>
+                                        <p className="text-sm text-indigo-800">{aiAnalysisResult.targetAudience}</p>
                                     </CardContent>
                                 </Card>
                             </div>

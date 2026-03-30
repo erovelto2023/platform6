@@ -20,7 +20,7 @@ interface KanbanBoardProps {
 const COLUMNS = [
     { id: "idea", title: "Ideas", color: "bg-slate-100 border-slate-200" },
     { id: "draft", title: "In Progress", color: "bg-blue-50 border-blue-100" },
-    { id: "review", title: "Review", color: "bg-purple-50 border-purple-100" },
+    { id: "review", title: "Review", color: "bg-sky-50 border-sky-100" },
     { id: "scheduled", title: "Scheduled", color: "bg-amber-50 border-amber-100" },
     { id: "published", title: "Published", color: "bg-green-50 border-green-100" }
 ];

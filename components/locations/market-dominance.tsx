@@ -56,12 +56,12 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
         <div className="space-y-12">
             {/* Top Insight Header */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-purple-600/10 border-purple-500/20 rounded-3xl overflow-hidden relative group">
+                <Card className="bg-sky-600/10 border-sky-500/20 rounded-3xl overflow-hidden relative group">
                     <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                        <TrendingUp size={120} className="text-purple-500" />
+                        <TrendingUp size={120} className="text-sky-500" />
                     </div>
                     <CardHeader>
-                        <CardTitle className="text-xs font-black uppercase text-purple-400 tracking-widest flex items-center gap-2">
+                        <CardTitle className="text-xs font-black uppercase text-sky-400 tracking-widest flex items-center gap-2">
                             <BarChart3 size={14} />
                             Dominant Sector
                         </CardTitle>

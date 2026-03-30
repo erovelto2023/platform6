@@ -248,7 +248,7 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                             <span className="block text-2xl font-black text-blue-600">{cvr}%</span>
                         </div>
                     </div>
-                    <div className={`${formData.abEnabled ? 'bg-purple-600' : 'bg-blue-600'} p-6 rounded-3xl shadow-lg flex items-center gap-4 text-white transition-colors`}>
+                    <div className={`${formData.abEnabled ? 'bg-sky-600' : 'bg-blue-600'} p-6 rounded-3xl shadow-lg flex items-center gap-4 text-white transition-colors`}>
                         <div className="p-3 bg-white/10 rounded-2xl"><Layers size={20} /></div>
                         <div>
                             <span className="block text-[10px] font-black text-white/70 uppercase tracking-widest">A/B Status</span>
@@ -314,7 +314,7 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                     <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-10">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl"><Code size={24} /></div>
+                                <div className="p-3 bg-sky-50 text-sky-600 rounded-2xl"><Code size={24} /></div>
                                 <div>
                                     <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Engineering Lab</h3>
                                     <p className="text-sm text-slate-500 font-medium font-bold">Build your high-converting HTML environment.</p>
@@ -386,13 +386,13 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                             {formData.abEnabled && (
                                 <div className="group space-y-4 animate-in slide-in-from-top-4 duration-500">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-black text-purple-600 uppercase tracking-[0.3em]">Version B (Challenger)</span>
+                                        <span className="text-[10px] font-black text-sky-600 uppercase tracking-[0.3em]">Version B (Challenger)</span>
                                         <div className="flex gap-4 text-[10px] font-bold text-slate-400 uppercase">
                                             <span>{viewsB} Views</span>
-                                            <span className="text-purple-600">{cvrB}% CV</span>
+                                            <span className="text-sky-600">{cvrB}% CV</span>
                                         </div>
                                     </div>
-                                    <textarea name="bodyCodeB" value={formData.bodyCodeB} onChange={handleChange} rows={15} className="w-full p-8 rounded-[2rem] border-2 border-purple-200 focus:border-purple-500 outline-none font-mono text-sm bg-white shadow-lg" placeholder="Enter Version B HTML here..." />
+                                    <textarea name="bodyCodeB" value={formData.bodyCodeB} onChange={handleChange} rows={15} className="w-full p-8 rounded-[2rem] border-2 border-sky-200 focus:border-sky-500 outline-none font-mono text-sm bg-white shadow-lg" placeholder="Enter Version B HTML here..." />
                                 </div>
                             )}
                         </div>

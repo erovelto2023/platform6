@@ -95,7 +95,7 @@ export default async function CityPage({
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
-                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-purple-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
+                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-sky-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
                 >
                     <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
                 </Link>
@@ -105,7 +105,7 @@ export default async function CityPage({
                         {city.name}
                     </h1>
                     <div className="flex items-center gap-3">
-                        <span className="px-4 py-1.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-black uppercase tracking-widest border border-purple-500/20">
+                        <span className="px-4 py-1.5 rounded-full bg-sky-500/10 text-sky-400 text-xs font-black uppercase tracking-widest border border-sky-500/20">
                             {state.name}
                         </span>
                         <span className="text-zinc-700">•</span>
@@ -127,7 +127,7 @@ export default async function CityPage({
 
                 {/* Census Data Insight Dashboard */}
                 <section>
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-500 pl-4">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-sky-500 pl-4">
                         <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
                             Market Indicators
                         </h2>
@@ -166,7 +166,7 @@ export default async function CityPage({
                 {/* Recommended Resources / Rotating Banner */}
                 {products && products.length > 0 && (
                     <section className="mb-12">
-                        <div className="flex items-center gap-3 mb-8 border-l-4 border-purple-400 pl-4">
+                        <div className="flex items-center gap-3 mb-8 border-l-4 border-sky-400 pl-4">
                             <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
                                 Recommended Resources
                             </h2>

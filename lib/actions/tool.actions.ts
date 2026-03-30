@@ -145,7 +145,7 @@ export async function seedTools() {
                 slug: "workbook-designer",
                 description: "Design professional workbooks, journals, and printables.",
                 icon: "LayoutTemplate",
-                gradient: "from-indigo-500 to-purple-600",
+                gradient: "from-indigo-500 to-sky-600",
                 path: "/tools/workbook-designer",
                 isEnabled: true,
                 order: 4
@@ -195,7 +195,7 @@ export async function seedTools() {
                 slug: "design-editor",
                 description: "A free, easy-to-use graphic design editor.",
                 icon: "LayoutTemplate",
-                gradient: "from-pink-500 to-rose-500",
+                gradient: "from-indigo-500 to-rose-500",
                 path: "/tools/design-editor",
                 isEnabled: true,
                 order: 9

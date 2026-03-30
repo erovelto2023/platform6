@@ -85,7 +85,7 @@ export default function HeadlineVaultClient({ initialHeadlines }: HeadlineVaultC
         <div className="space-y-6">
             {/* Header / Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white border-none">
+                <Card className="bg-gradient-to-br from-indigo-500 to-sky-600 text-white border-none">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                             <div>

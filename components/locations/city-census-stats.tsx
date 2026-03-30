@@ -56,7 +56,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-black text-white italic tracking-tighter">{data.population.toLocaleString()}</div>
-                        <Badge variant="outline" className={`mt-2 text-[8px] border-none font-black uppercase ${data.isStateLevel ? 'bg-orange-500/10 text-orange-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                        <Badge variant="outline" className={`mt-2 text-[8px] border-none font-black uppercase ${data.isStateLevel ? 'bg-orange-500/10 text-orange-400' : 'bg-sky-500/10 text-sky-400'}`}>
                             {data.isStateLevel ? "Regional Profile" : (isSmallTown ? "Small Market" : "Active Market")}
                         </Badge>
                     </CardContent>
@@ -100,22 +100,22 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
             {/* Layered Intelligence Tabs */}
             <Tabs defaultValue="audience" className="w-full">
                 <TabsList className="bg-zinc-900 border border-zinc-800 p-1 rounded-xl mb-8 w-full justify-start overflow-x-auto h-auto no-scrollbar">
-                    <TabsTrigger value="audience" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors">
+                    <TabsTrigger value="audience" className="px-6 py-2 rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors">
                         Audience Validation
                     </TabsTrigger>
-                    <TabsTrigger value="affordability" className="px-6 py-2 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors">
+                    <TabsTrigger value="affordability" className="px-6 py-2 rounded-lg data-[state=active]:bg-emerald-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors">
                         Affordability & Pricing
                     </TabsTrigger>
-                    <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors">
+                    <TabsTrigger value="targeting" className="px-6 py-2 rounded-lg data-[state=active]:bg-blue-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors">
                         Targeting Intelligence
                     </TabsTrigger>
-                    <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors">
+                    <TabsTrigger value="logistics" className="px-6 py-2 rounded-lg data-[state=active]:bg-cyan-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors">
                         Channel & Logistics
                     </TabsTrigger>
-                    <TabsTrigger value="economy" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors">
+                    <TabsTrigger value="economy" className="px-6 py-2 rounded-lg data-[state=active]:bg-orange-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors">
                         Economy & Skills
                     </TabsTrigger>
-                    <TabsTrigger value="advisor" className="px-6 py-2 rounded-lg data-[state=active]:bg-purple-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-purple-400 transition-colors flex items-center gap-2">
+                    <TabsTrigger value="advisor" className="px-6 py-2 rounded-lg data-[state=active]:bg-sky-500 data-[state=active]:text-white uppercase font-black text-[10px] tracking-widest text-zinc-500 hover:text-sky-400 transition-colors flex items-center gap-2">
                         <Sparkles className="h-3 w-3" />
                         Business Advisor
                     </TabsTrigger>
@@ -125,10 +125,10 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                 <TabsContent value="audience" className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Local Identity Card */}
-                        <Card className="bg-zinc-900 border-purple-500/20 rounded-2xl border-l-4 border-l-purple-500">
+                        <Card className="bg-zinc-900 border-sky-500/20 rounded-2xl border-l-4 border-l-sky-500">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
-                                    <MapPin className="h-4 w-4 text-purple-400" />
+                                    <MapPin className="h-4 w-4 text-sky-400" />
                                     Local Identity
                                 </CardTitle>
                             </CardHeader>
@@ -147,7 +147,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                         <span className="text-[9px] font-black text-zinc-500 uppercase">Area Codes</span>
                                         <div className="flex flex-wrap gap-1 justify-end max-w-[120px]">
                                             {areaCodes.length > 0 ? areaCodes.map(ac => (
-                                                <Badge key={ac} variant="outline" className="text-[9px] h-4 bg-purple-500/10 border-purple-500/20 text-purple-400">{ac}</Badge>
+                                                <Badge key={ac} variant="outline" className="text-[9px] h-4 bg-sky-500/10 border-sky-500/20 text-sky-400">{ac}</Badge>
                                             )) : <span className="text-[9px] font-bold text-zinc-600 italic">No data</span>}
                                         </div>
                                     </div>
@@ -164,7 +164,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                         <Card className="bg-zinc-900 border-zinc-800 rounded-2xl">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-white">
-                                    <Baby className="h-4 w-4 text-purple-400" />
+                                    <Baby className="h-4 w-4 text-sky-400" />
                                     Family Density
                                 </CardTitle>
                             </CardHeader>
@@ -175,7 +175,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                             <span>Married</span>
                                             <span>{data.audience.maritalStatus.marriedPct}%</span>
                                         </div>
-                                        <Progress value={data.audience.maritalStatus.marriedPct} className="h-1 bg-zinc-800" indicatorClassName="bg-purple-500" />
+                                        <Progress value={data.audience.maritalStatus.marriedPct} className="h-1 bg-zinc-800" indicatorClassName="bg-sky-500" />
                                     </div>
                                     <div>
                                         <div className="flex justify-between text-[8px] font-black uppercase text-zinc-500 mb-1">
@@ -195,9 +195,9 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                         <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Kids 18-24</p>
                                     </div>
                                 </div>
-                                <div className="pt-2 flex justify-between items-center bg-purple-500/5 p-2 rounded-lg border border-purple-500/10">
+                                <div className="pt-2 flex justify-between items-center bg-sky-500/5 p-2 rounded-lg border border-sky-500/10">
                                     <span className="text-[9px] font-black text-zinc-400 uppercase">Avg HH Size</span>
-                                    <span className="text-sm font-black text-purple-400">{data.audience.avgHouseholdSize}</span>
+                                    <span className="text-sm font-black text-sky-400">{data.audience.avgHouseholdSize}</span>
                                 </div>
                             </CardContent>
                         </Card>
@@ -343,11 +343,11 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                 </div>
                                 <div className="w-full h-3 bg-zinc-800 rounded-full overflow-hidden flex">
                                     <div className="h-full bg-blue-500" style={{ width: `${(data.gender.male / totalPop) * 100}%` }} />
-                                    <div className="h-full bg-pink-500" style={{ width: `${(data.gender.female / totalPop) * 100}%` }} />
+                                    <div className="h-full bg-indigo-500" style={{ width: `${(data.gender.female / totalPop) * 100}%` }} />
                                 </div>
                                 <div className="mt-4 grid grid-cols-2 text-[10px] font-bold uppercase text-zinc-500">
                                     <div className="flex items-center gap-2"><div className="w-2 h-2 bg-blue-500 rounded-full" /> {data.gender.male.toLocaleString()} Male</div>
-                                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-pink-500 rounded-full" /> {data.gender.female.toLocaleString()} Female</div>
+                                    <div className="flex items-center gap-2"><div className="w-2 h-2 bg-indigo-500 rounded-full" /> {data.gender.female.toLocaleString()} Female</div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -364,7 +364,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                     { label: "White", val: data.ethnicity.white, color: "bg-blue-500" },
                                     { label: "Black", val: data.ethnicity.black, color: "bg-emerald-500" },
                                     { label: "Hispanic", val: data.ethnicity.hispanic, color: "bg-orange-500" },
-                                    { label: "Asian", val: data.ethnicity.asian, color: "bg-purple-500" },
+                                    { label: "Asian", val: data.ethnicity.asian, color: "bg-sky-500" },
                                 ].sort((a, b) => b.val - a.val).map(e => (
                                     <div key={e.label} className="space-y-1">
                                         <div className="flex justify-between text-[10px] font-bold uppercase text-zinc-500">
@@ -439,14 +439,14 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                     </div>
                                     <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Heart className="h-3 w-3 text-pink-400" />
+                                            <Heart className="h-3 w-3 text-indigo-400" />
                                             <span className="text-[8px] font-black text-zinc-500 uppercase">Walk/Bike</span>
                                         </div>
                                         <div className="text-lg font-black text-white italic">{data.mobility.walkPct + data.mobility.bikePct}%</div>
                                     </div>
                                     <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <Home className="h-3 w-3 text-purple-400" />
+                                            <Home className="h-3 w-3 text-sky-400" />
                                             <span className="text-[8px] font-black text-zinc-500 uppercase">WFH</span>
                                         </div>
                                         <div className="text-lg font-black text-white italic">{data.digital.workFromHomePct}%</div>
@@ -511,9 +511,9 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                 {data.economy.topIndustries.map((ind) => {
                                     const colors: Record<string, string> = {
                                         "Education/Health": "bg-blue-500",
-                                        "Arts/Food": "bg-pink-500",
+                                        "Arts/Food": "bg-indigo-500",
                                         "Retail": "bg-emerald-500",
-                                        "Prof/Admin": "bg-purple-500",
+                                        "Prof/Admin": "bg-sky-500",
                                         "Manufacturing": "bg-cyan-500",
                                         "Public Admin": "bg-zinc-400",
                                         "Finance/Real Estate": "bg-amber-500",
@@ -550,8 +550,8 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                             <CardContent className="space-y-4">
                                 {data.economy.topOccupations.map((occ) => {
                                     const colors: Record<string, string> = {
-                                        "Management/Arts": "bg-purple-500",
-                                        "Service": "bg-pink-500",
+                                        "Management/Arts": "bg-sky-500",
+                                        "Service": "bg-indigo-500",
                                         "Sales/Office": "bg-blue-500",
                                         "Natural Resources/Construction": "bg-orange-500",
                                         "Production/Transport": "bg-cyan-400"
@@ -576,13 +576,13 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                         <Card className="bg-zinc-900 border-zinc-800 rounded-2xl">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-xs font-black uppercase text-white flex items-center gap-2">
-                                    <Heart className="h-4 w-4 text-pink-500" />
+                                    <Heart className="h-4 w-4 text-indigo-500" />
                                     Health & Wellness
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="p-4 bg-pink-500/5 border border-pink-500/10 rounded-xl">
-                                    <div className="text-2xl font-black text-pink-400 italic">{data.health.insurancePct}%</div>
+                                <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+                                    <div className="text-2xl font-black text-indigo-400 italic">{data.health.insurancePct}%</div>
                                     <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">Health Insurance Coverage</p>
                                 </div>
                                 <p className="text-[9px] font-bold text-zinc-400 uppercase italic leading-relaxed">
@@ -642,14 +642,14 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
             {data.nicheInsights && (
                 <div className="mt-12 space-y-6">
                     <div className="flex items-center gap-2">
-                        <Target className="h-5 w-5 text-purple-400" />
+                        <Target className="h-5 w-5 text-sky-400" />
                         <h3 className="text-sm font-black uppercase tracking-widest text-white">Niche Opportunity Spotlight</h3>
-                        <Badge variant="outline" className="ml-auto bg-purple-500/10 text-purple-400 border-purple-500/20 text-[8px] uppercase font-black">AI Scored</Badge>
+                        <Badge variant="outline" className="ml-auto bg-sky-500/10 text-sky-400 border-sky-500/20 text-[8px] uppercase font-black">AI Scored</Badge>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {data.nicheInsights.candidates.map((niche) => (
-                            <Card key={niche.id} className="bg-zinc-900 border-zinc-800 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all border-b-2 border-b-purple-500/20 flex flex-col">
+                            <Card key={niche.id} className="bg-zinc-900 border-zinc-800 rounded-2xl overflow-hidden hover:border-sky-500/30 transition-all border-b-2 border-b-sky-500/20 flex flex-col">
                                 <CardHeader className="p-4 pb-0 flex flex-row items-center justify-between">
                                     <CardTitle className="text-[10px] font-black uppercase text-zinc-400">{niche.label}</CardTitle>
                                     <span className={`text-sm font-black italic ${niche.score >= 8 ? "text-emerald-500" : niche.score >= 5 ? "text-blue-400" : "text-amber-400"}`}>{niche.score}/10</span>
@@ -664,7 +664,7 @@ export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [],
                                             <ul className="space-y-1">
                                                 {niche.signals.map((signal, idx) => (
                                                     <li key={idx} className="flex items-center gap-2 text-[9px] font-bold text-zinc-400 uppercase">
-                                                        <div className="w-1 h-1 rounded-full bg-purple-500" />
+                                                        <div className="w-1 h-1 rounded-full bg-sky-500" />
                                                         {signal}
                                                     </li>
                                                 ))}

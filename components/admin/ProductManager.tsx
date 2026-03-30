@@ -57,7 +57,7 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
                             <input
                                 type="text"
                                 placeholder="Search products or niches..."
-                                className="w-full pl-10 pr-4 py-3 border border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all bg-zinc-900 text-white placeholder:text-zinc-500"
+                                className="w-full pl-10 pr-4 py-3 border border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all bg-zinc-900 text-white placeholder:text-zinc-500"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -133,7 +133,7 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
-                                                className="text-zinc-500 hover:text-pink-500 transition-colors"
+                                                className="text-zinc-500 hover:text-indigo-500 transition-colors"
                                             >
                                                 <Trash2 size={18} />
                                             </button>

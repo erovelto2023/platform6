@@ -110,7 +110,7 @@ const routes = [
         label: "Niche Research Hub",
         icon: Compass,
         href: "/niche-boxes",
-        color: "text-pink-700",
+        color: "text-indigo-700",
     },
     {
         label: "Resources",
@@ -134,7 +134,7 @@ const routes = [
         label: "Whiteboard",
         icon: PenTool,
         href: "/whiteboard",
-        color: "text-pink-500",
+        color: "text-indigo-500",
     },
 ];
 
@@ -161,7 +161,7 @@ const adminRoutes = [
         label: "Niches in a Box",
         icon: Compass,
         href: "/admin/niche-boxes",
-        color: "text-pink-700",
+        color: "text-indigo-700",
     },
     {
         label: "Tools & Apps",
@@ -185,7 +185,7 @@ const adminRoutes = [
         label: "Subscribers",
         icon: Users,
         href: "/admin/subscribers",
-        color: "text-pink-500",
+        color: "text-indigo-500",
     },
     {
         label: "Simple Page Builder",
@@ -233,7 +233,7 @@ const adminRoutes = [
         label: "Events",
         icon: Calendar,
         href: "/admin/events",
-        color: "text-pink-600",
+        color: "text-indigo-600",
     },
     {
         label: "Groups",

@@ -37,7 +37,7 @@ export function ResourceDisplay({ resource }: ResourceDisplayProps) {
         switch (type) {
             case "Link": return <LinkIcon className="h-8 w-8 text-blue-500" />;
             case "Video": return <Video className="h-8 w-8 text-red-500" />;
-            case "Audio": return <Mic className="h-8 w-8 text-purple-500" />;
+            case "Audio": return <Mic className="h-8 w-8 text-sky-500" />;
             case "File": return <File className="h-8 w-8 text-orange-500" />;
             case "Document": return <FileText className="h-8 w-8 text-slate-500" />;
             case "Template": return <LayoutTemplate className="h-8 w-8 text-indigo-500" />;

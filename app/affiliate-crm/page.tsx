@@ -40,10 +40,10 @@ export default function AffiliatePage() {
             <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
                 <div className="flex items-center gap-2 font-bold text-xl text-white">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
+                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
                             K Business Academy
                         </span>
                     </Link>
@@ -58,7 +58,7 @@ export default function AffiliatePage() {
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
                         Resources
                     </Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/affiliate-crm">
+                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/affiliate-crm">
                         Affiliate CRM
                     </Link>
                     <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
@@ -79,7 +79,7 @@ export default function AffiliatePage() {
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
+                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
                             Get Started
                         </Button>
                     </Link>
@@ -95,7 +95,7 @@ export default function AffiliatePage() {
                 <SimpleHeroSlideshow slides={heroSlides} autoplay={true} interval={6000} />
 
                 <section className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[100px]" />
+                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-sky-600/5 rounded-full blur-[100px]" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <div className="max-w-4xl mx-auto text-center">
                             <motion.h2

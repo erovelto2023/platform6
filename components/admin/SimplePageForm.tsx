@@ -104,7 +104,7 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                             <Globe size={14} className="mr-2" /> Preview
                         </Button>
                     </div>
-                    <Button onClick={handleSubmit} disabled={loading} className="rounded-xl bg-purple-600 hover:bg-purple-700 gap-2">
+                    <Button onClick={handleSubmit} disabled={loading} className="rounded-xl bg-sky-600 hover:bg-sky-700 gap-2">
                         <Save size={18} /> Save Page
                     </Button>
                 </div>
@@ -120,7 +120,7 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                                     name="html"
                                     value={formData.html}
                                     onChange={handleChange}
-                                    className="w-full h-[600px] p-8 rounded-3xl border-2 border-slate-100 focus:border-purple-500 outline-none font-mono text-sm bg-slate-50/50"
+                                    className="w-full h-[600px] p-8 rounded-3xl border-2 border-slate-100 focus:border-sky-500 outline-none font-mono text-sm bg-slate-50/50"
                                     placeholder="Paste your pure HTML code here..."
                                 />
                             </div>
@@ -136,7 +136,7 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-xs font-bold text-slate-500">URL Slug</Label>
-                                    <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="landing-page" className="rounded-xl font-mono text-purple-600" />
+                                    <Input name="slug" value={formData.slug} onChange={handleChange} placeholder="landing-page" className="rounded-xl font-mono text-sky-600" />
                                 </div>
                                 <div className="flex items-center gap-3 pt-2">
                                     <input 
@@ -144,16 +144,16 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                                         id="published"
                                         checked={formData.isPublished}
                                         onChange={(e) => setFormData(prev => ({ ...prev, isPublished: e.target.checked }))}
-                                        className="w-5 h-5 rounded border-slate-300 text-purple-600"
+                                        className="w-5 h-5 rounded border-slate-300 text-sky-600"
                                     />
                                     <Label htmlFor="published" className="font-bold cursor-pointer">Published</Label>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-purple-50 p-8 rounded-[2.5rem] border border-purple-100 space-y-4">
-                            <h4 className="font-black text-purple-900 uppercase tracking-tight text-sm">Pro Tip</h4>
-                            <p className="text-xs text-purple-700 font-medium leading-relaxed">
+                        <div className="bg-sky-50 p-8 rounded-[2.5rem] border border-sky-100 space-y-4">
+                            <h4 className="font-black text-sky-900 uppercase tracking-tight text-sm">Pro Tip</h4>
+                            <p className="text-xs text-sky-700 font-medium leading-relaxed">
                                 You can paste full HTML documents including <code>&lt;style&gt;</code> tags. Our system will automatically isolate the styles to prevent them from affecting the admin interface.
                             </p>
                         </div>

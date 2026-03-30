@@ -59,7 +59,7 @@ export default async function ProductDetailPage({
     const approvedReviews = product.userReviews?.filter((r: any) => r.isApproved !== false) || [];
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#0e0021] text-white">
+        <div className="flex flex-col min-h-screen bg-[#f8fafc] text-white">
             <MainNav />
             
             <div className="pt-32 pb-20 px-6 md:px-12 lg:px-20 max-w-7xl mx-auto w-full">
@@ -68,7 +68,7 @@ export default async function ProductDetailPage({
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-4">
-                                <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[10px] uppercase font-black tracking-widest px-3 py-1">
+                                <Badge variant="outline" className="bg-sky-500/10 text-sky-400 border-sky-500/20 text-[10px] uppercase font-black tracking-widest px-3 py-1">
                                     {typeLabels[product.type || "tool"]}
                                 </Badge>
                                 <span className="text-zinc-700">•</span>
@@ -81,8 +81,8 @@ export default async function ProductDetailPage({
                                         <img src={product.logoUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply" />
                                     </div>
                                 ) : (
-                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/20 flex items-center justify-center">
-                                        <Layers className="w-10 h-10 text-purple-400" />
+                                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-sky-500/20 to-indigo-500/20 border border-sky-500/20 flex items-center justify-center">
+                                        <Layers className="w-10 h-10 text-sky-400" />
                                     </div>
                                 )}
                                 <div>
@@ -91,7 +91,7 @@ export default async function ProductDetailPage({
                                     </h1>
                                     {product.alternativeTo && (
                                         <p className="text-zinc-400 text-sm font-medium uppercase tracking-tight italic">
-                                            A Powerhouse Alternative to <span className="text-purple-400">{product.alternativeTo}</span>
+                                            A Powerhouse Alternative to <span className="text-sky-400">{product.alternativeTo}</span>
                                         </p>
                                     )}
                                 </div>
@@ -111,7 +111,7 @@ export default async function ProductDetailPage({
                                     <p className="text-xs font-bold text-white uppercase">{product.priceModel}</p>
                                 </div>
                             </div>
-                            <Button asChild size="lg" className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black uppercase tracking-widest rounded-xl h-14 shadow-lg shadow-purple-500/20">
+                            <Button asChild size="lg" className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-black uppercase tracking-widest rounded-xl h-14 shadow-lg shadow-sky-500/20">
                                 <a href={product.affiliateLink} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                                     {product.ctaButtonText || "Visit Website"}
                                     <ExternalLink size={18} />
@@ -127,9 +127,9 @@ export default async function ProductDetailPage({
                         {/* Summary Card */}
                         <div className="p-8 rounded-[2.5rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-8 opacity-10">
-                                <Zap size={80} className="text-purple-500" />
+                                <Zap size={80} className="text-sky-500" />
                             </div>
-                            <h2 className="text-xs font-black text-purple-400 uppercase tracking-[0.3em] mb-4">Strategic Overview</h2>
+                            <h2 className="text-xs font-black text-sky-400 uppercase tracking-[0.3em] mb-4">Strategic Overview</h2>
                             <p className="text-xl md:text-2xl font-bold text-white leading-relaxed italic tracking-tight">
                                 {product.shortDescription}
                             </p>
@@ -137,7 +137,7 @@ export default async function ProductDetailPage({
 
                         {/* Detailed Description */}
                         <section className="prose prose-invert prose-zinc max-w-none">
-                            <h3 className="text-2xl font-black uppercase italic tracking-tight text-white border-l-4 border-purple-500 pl-4 mb-8">
+                            <h3 className="text-2xl font-black uppercase italic tracking-tight text-white border-l-4 border-sky-500 pl-4 mb-8">
                                 Market Intelligence & Deep Review
                             </h3>
                             <div className="text-zinc-300 leading-loose text-lg font-medium space-y-6">
@@ -166,17 +166,17 @@ export default async function ProductDetailPage({
                                 </ul>
                             </div>
 
-                            <div className="p-8 rounded-3xl bg-pink-500/5 border border-pink-500/10">
+                            <div className="p-8 rounded-3xl bg-indigo-500/5 border border-indigo-500/10">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-pink-500/20 rounded-xl">
-                                        <XCircle className="w-5 h-5 text-pink-400" />
+                                    <div className="p-2 bg-indigo-500/20 rounded-xl">
+                                        <XCircle className="w-5 h-5 text-indigo-400" />
                                     </div>
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-pink-400">Critical Gaps</h3>
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400">Critical Gaps</h3>
                                 </div>
                                 <ul className="space-y-4">
                                     {product.cons.map((con: string, i: number) => (
                                         <li key={i} className="flex font-bold items-start gap-3 text-sm text-zinc-300">
-                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-pink-500 shrink-0" />
+                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
                                             {con}
                                         </li>
                                     ))}
@@ -190,8 +190,8 @@ export default async function ProductDetailPage({
                                 <h3 className="text-2xl font-black uppercase italic tracking-tight text-white mb-8">Core Weaponry</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {product.features.map((feature: string, i: number) => (
-                                        <div key={i} className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4 group hover:border-purple-500/30 transition-all">
-                                            <div className="w-2 h-2 rounded-full bg-purple-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                        <div key={i} className="p-4 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4 group hover:border-sky-500/30 transition-all">
+                                            <div className="w-2 h-2 rounded-full bg-sky-500 opacity-20 group-hover:opacity-100 transition-opacity" />
                                             <span className="text-sm font-bold text-zinc-300 uppercase tracking-tight">{feature}</span>
                                         </div>
                                     ))}
@@ -249,7 +249,7 @@ export default async function ProductDetailPage({
                                 <h3 className="text-xs font-black text-zinc-500 uppercase tracking-[0.2em] mb-6">Taxonomy</h3>
                                 <div className="flex flex-wrap gap-2">
                                     {product.tags.map((tag: string, i: number) => (
-                                        <span key={i} className="text-[10px] font-bold text-zinc-600 hover:text-purple-400 cursor-default transition-colors uppercase">
+                                        <span key={i} className="text-[10px] font-bold text-zinc-600 hover:text-sky-400 cursor-default transition-colors uppercase">
                                             #{tag.replace(/\s+/g, '')}
                                         </span>
                                     ))}
@@ -259,17 +259,17 @@ export default async function ProductDetailPage({
 
                         {/* Deal Alert */}
                         {product.deal && (
-                            <div className="p-8 bg-purple-500/10 border border-purple-500/20 rounded-[2rem] relative overflow-hidden group">
+                            <div className="p-8 bg-sky-500/10 border border-sky-500/20 rounded-[2rem] relative overflow-hidden group">
                                 <div className="relative z-10">
-                                    <h3 className="text-xs font-black text-purple-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                                        <Heart className="w-3 h-3 fill-purple-400" /> Special Offer
+                                    <h3 className="text-xs font-black text-sky-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                        <Heart className="w-3 h-3 fill-sky-400" /> Special Offer
                                     </h3>
                                     <p className="text-lg font-black text-white italic leading-tight uppercase tracking-tighter">
                                         {product.deal}
                                     </p>
                                     <p className="text-[10px] font-bold text-zinc-400 uppercase mt-2">Active via link above</p>
                                 </div>
-                                <div className="absolute -bottom-4 -right-4 bg-purple-500/10 w-20 h-20 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
+                                <div className="absolute -bottom-4 -right-4 bg-sky-500/10 w-20 h-20 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
                             </div>
                         )}
                     </aside>
@@ -298,7 +298,7 @@ export default async function ProductDetailPage({
                                 </div>
                                 <p className="text-sm font-medium text-zinc-300 leading-relaxed italic">&quot;{review.comment}&quot;</p>
                                 <div className="pt-4 border-t border-zinc-800 flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-black text-purple-400 uppercase">
+                                    <div className="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-[10px] font-black text-sky-400 uppercase">
                                         {review.user?.[0] || "A"}
                                     </div>
                                     <div className="flex flex-col">

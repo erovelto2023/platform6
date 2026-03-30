@@ -222,8 +222,8 @@ export default function ProductForm({ initialData, onComplete }: { initialData?:
                             <textarea name="pros" defaultValue={initialData?.pros?.join(", ")} rows={4} className="input-field border-emerald-900/30 focus:ring-emerald-500" />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-pink-400 mb-1">Cons (comma separated)</label>
-                            <textarea name="cons" defaultValue={initialData?.cons?.join(", ")} rows={4} className="input-field border-pink-900/30 focus:ring-pink-500" />
+                            <label className="block text-sm font-bold text-indigo-400 mb-1">Cons (comma separated)</label>
+                            <textarea name="cons" defaultValue={initialData?.cons?.join(", ")} rows={4} className="input-field border-indigo-900/30 focus:ring-indigo-500" />
                         </div>
                         <div>
                             <label className="block text-sm font-bold text-blue-400 mb-1">Key Features</label>
@@ -262,7 +262,7 @@ export default function ProductForm({ initialData, onComplete }: { initialData?:
                 }
             `}</style>
 
-            {message && <p className={`mt-6 p-4 rounded-xl font-bold text-center ${message.startsWith('Error') ? 'bg-pink-950/50 text-pink-400 border border-pink-900' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-900'}`}>{message}</p>}
+            {message && <p className={`mt-6 p-4 rounded-xl font-bold text-center ${message.startsWith('Error') ? 'bg-indigo-950/50 text-indigo-400 border border-indigo-900' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-900'}`}>{message}</p>}
         </form>
     );
 }

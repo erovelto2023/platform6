@@ -20,7 +20,7 @@ const FUNNEL_COLORS = {
     retention: '#f43f5e', // Rose
 };
 
-const PILLAR_COLORS = ['#3b82f6', '#f59e0b', '#ec4899', '#84cc16', '#06b6d4', '#8b5cf6'];
+const PILLAR_COLORS = ['#3b82f6', '#f59e0b', '#4f46e5', '#84cc16', '#06b6d4', '#8b5cf6'];
 
 export function StrategyDashboard({ posts, offers }: StrategyDashboardProps) {
     // 1. Funnel Analysis

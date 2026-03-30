@@ -100,8 +100,8 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 { title: "Beginners", icon: School, text: "Starting from scratch with zero noise and a clear path to your first dollar.", color: "bg-blue-500/10 text-blue-600" },
-                { title: "Entrepreneurs", icon: Rocket, text: "Scaling existing ventures with advanced frameworks and systems thinking.", color: "bg-purple-500/10 text-purple-600" },
-                { title: "Creators", icon: Palette, text: "Turning personal brands into institutional assets with sustainable revenue models.", color: "bg-pink-500/10 text-pink-600" },
+                { title: "Entrepreneurs", icon: Rocket, text: "Scaling existing ventures with advanced frameworks and systems thinking.", color: "bg-sky-500/10 text-sky-600" },
+                { title: "Creators", icon: Palette, text: "Turning personal brands into institutional assets with sustainable revenue models.", color: "bg-indigo-500/10 text-indigo-600" },
                 { title: "Builders", icon: HardHat, text: "Architecting complex businesses using validated data and strategic execution.", color: "bg-orange-500/10 text-orange-600" }
               ].map((item, i) => (
                 <motion.div 

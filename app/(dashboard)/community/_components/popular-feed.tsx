@@ -47,7 +47,7 @@ export function PopularFeed({ currentUser }: PopularFeedProps) {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-sky-600 bg-clip-text text-transparent">
                     Trending Now
                 </h2>
                 <span className="text-xs font-semibold px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full">

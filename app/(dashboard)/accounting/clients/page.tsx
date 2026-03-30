@@ -46,7 +46,7 @@ export default async function ClientsPage() {
 
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Button className="bg-sky-600 hover:bg-sky-700">
                             <Plus className="mr-2 h-4 w-4" /> Add Client
                         </Button>
                     </DialogTrigger>

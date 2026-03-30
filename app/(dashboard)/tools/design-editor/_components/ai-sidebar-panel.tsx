@@ -189,7 +189,7 @@ export default function AISidebarPanel({ onAddImage, onAddText }: AISidebarPanel
                         </div>
 
                         <Button
-                            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white"
+                            className="w-full bg-gradient-to-r from-indigo-500 to-sky-600 hover:from-indigo-600 hover:to-sky-700 text-white"
                             onClick={handleGenerateImage}
                             disabled={isGenerating || !prompt}
                         >

@@ -56,7 +56,7 @@ export function Search({ placeholder = "Search..." }: { placeholder?: string }) 
         <div className="relative flex-1 flex-shrink-0">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <Input
-                className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 rounded-xl h-12 focus:ring-purple-500/20"
+                className="pl-10 bg-slate-900 border-slate-800 text-white placeholder:text-slate-500 rounded-xl h-12 focus:ring-sky-500/20"
                 placeholder={placeholder}
                 onChange={(e) => onInputChange(e.target.value)}
                 defaultValue={searchParams?.get('query')?.toString()}

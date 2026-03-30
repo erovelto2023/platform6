@@ -33,7 +33,7 @@ export function ContentCalendarClient({ items }: ContentCalendarClientProps) {
         switch (type) {
             case 'video': return "bg-red-50 text-red-700 border-red-100 hover:bg-red-100";
             case 'blog': return "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100";
-            case 'social': return "bg-pink-50 text-pink-700 border-pink-100 hover:bg-pink-100";
+            case 'social': return "bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100";
             case 'email': return "bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100";
             default: return "bg-slate-50 text-slate-700 border-slate-100 hover:bg-slate-100";
         }
@@ -126,7 +126,7 @@ export function ContentCalendarClient({ items }: ContentCalendarClientProps) {
             <div className="flex gap-4 mt-4 text-xs text-slate-500">
                 <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div> Blog Post</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-100 border border-red-200"></div> Video</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-pink-100 border border-pink-200"></div> Social</div>
+                <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-indigo-100 border border-indigo-200"></div> Social</div>
                 <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-amber-100 border border-amber-200"></div> Email</div>
             </div>
         </div>

@@ -7,6 +7,7 @@ import { SimpleHeroSlideshow } from "@/components/animations";
 import { Lock, Calendar, Clock, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { calculateReadingTime } from "@/lib/utils";
+import { SiteHeader } from "@/components/shared/SiteHeader";
 
 export default async function BlogPage() {
     let posts: any[] = [];
@@ -52,60 +53,7 @@ export default async function BlogPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950">
-            {/* Header - Dark Theme */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
-                            K
-                        </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
-                    </Link>
-                </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
-                        Courses
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
-                        Library
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
-                        Resources
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
-                        Affiliate CRM
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
-                        Dashboard
-                    </Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/blog">
-                        Blog
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/glossary">
-                        Glossary
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/locations">
-                        Market Intelligence
-                    </Link>
-                    <Link href="/sign-in">
-                        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
-                            Log In
-                        </Button>
-                    </Link>
-                    <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg shadow-purple-500/30">
-                            Get Started
-                        </Button>
-                    </Link>
-                </nav>
-                <div className="ml-auto md:hidden">
-                    <Link href="/sign-up">
-                        <Button size="sm">Get Started</Button>
-                    </Link>
-                </div>
-            </header>
+            <SiteHeader />
 
             <main className="flex-1">
                 {/* Animated Hero Section */}
@@ -113,11 +61,11 @@ export default async function BlogPage() {
 
                 {/* Blog Posts Section */}
                 <section id="posts" className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
 
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <div className="text-center mb-12 max-w-2xl mx-auto sticky top-[34px] z-20 bg-slate-900/80 backdrop-blur-md border border-slate-800 p-8 rounded-3xl shadow-xl">
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
                                 The Blog
                             </h2>
                             <p className="text-lg text-slate-400">
@@ -135,7 +83,7 @@ export default async function BlogPage() {
                                     <Link
                                         key={post._id}
                                         href={`/blog/${post.slug}`}
-                                        className="group flex flex-col h-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl overflow-hidden hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/50"
+                                        className="group flex flex-col h-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl overflow-hidden hover:shadow-2xl hover:shadow-sky-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-sky-500/50"
                                     >
                                         <div className="relative aspect-video w-full bg-slate-800">
                                             {post.imageUrl ? (
@@ -149,13 +97,13 @@ export default async function BlogPage() {
                                                 <div className="flex items-center justify-center h-full text-slate-600">No Image</div>
                                             )}
                                             {post.accessLevel !== "public" && (
-                                                <div className="absolute top-3 right-3 bg-purple-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                                                <div className="absolute top-3 right-3 bg-sky-600/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-bold flex items-center gap-1.5 shadow-lg">
                                                     <Lock className="h-3 w-3" />
                                                     MEMBER
                                                 </div>
                                             )}
                                             {post.featured && (
-                                                <div className="absolute top-3 left-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2.5 py-1 rounded-md text-xs font-bold shadow-lg">
+                                                <div className="absolute top-3 left-3 bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-2.5 py-1 rounded-md text-xs font-bold shadow-lg">
                                                     FEATURED
                                                 </div>
                                             )}
@@ -163,7 +111,7 @@ export default async function BlogPage() {
                                         <div className="p-6 flex flex-col flex-1">
                                             <div className="flex items-center gap-2 mb-3">
                                                 {post.categories?.[0] && (
-                                                    <Badge variant="secondary" className="text-xs font-normal text-purple-300 bg-purple-900/50 hover:bg-purple-900 border-purple-700">
+                                                    <Badge variant="secondary" className="text-xs font-normal text-sky-300 bg-sky-900/50 hover:bg-sky-900 border-sky-700">
                                                         {post.categories[0]}
                                                     </Badge>
                                                 )}
@@ -175,7 +123,7 @@ export default async function BlogPage() {
                                                     <span>{calculateReadingTime(post.content)} min</span>
                                                 </div>
                                             </div>
-                                            <h2 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-purple-400 group-hover:to-pink-400 group-hover:bg-clip-text transition-all line-clamp-2">
+                                            <h2 className="text-xl font-bold mb-3 text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-sky-400 group-hover:to-indigo-400 group-hover:bg-clip-text transition-all line-clamp-2">
                                                 {post.title}
                                             </h2>
                                             <p className="text-slate-400 line-clamp-3 mb-4 flex-1 text-sm leading-relaxed">

@@ -199,7 +199,7 @@ export default async function AccountingDashboard() {
                                 <span className="text-sm font-medium">Expenses</span>
                             </Link>
                             <Link href="/accounting/clients" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">
-                                <Users className="h-6 w-6 text-purple-600 mb-2" />
+                                <Users className="h-6 w-6 text-sky-600 mb-2" />
                                 <span className="text-sm font-medium">Clients</span>
                             </Link>
                             <Link href="/accounting/reports" className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-slate-100 rounded-lg transition border border-slate-200">

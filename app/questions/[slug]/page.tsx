@@ -1,174 +1,268 @@
-import Link from "next/link";
 import { getFAQBySlug, getPaginatedFAQs } from "@/lib/actions/faq.actions";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen, Clock, Tag, ExternalLink, HelpCircle, ChevronRight, MessageSquare } from "lucide-react";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import Link from "next/link";
+import {
+    ArrowLeft, ExternalLink, HelpCircle, ChevronRight,
+    Clock, BookOpen, Zap, CheckCircle2, Quote, Tag, AlertTriangle
+} from "lucide-react";
 
-export default async function FAQDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+interface Props {
+    params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { slug } = await params;
     const faq = await getFAQBySlug(slug);
-    
-    if (!faq) {
-        notFound();
-    }
+    if (!faq) return { title: "Question Not Found" };
+    return {
+        title: `${faq.question} | K Business Academy`,
+        description: faq.answerSnippet || `Get a clear, expert answer to: ${faq.question}`,
+        keywords: [faq.parentQuestion, "FAQ", "business questions", "K Business Academy"].filter(Boolean) as string[],
+    };
+}
 
-    // Fetch some related questions or simply more from same category
-    const { faqs: relatedFAQs } = await getPaginatedFAQs({ 
+export default async function FAQDetailPage({ params }: Props) {
+    const { slug } = await params;
+    const faq = await getFAQBySlug(slug);
+
+    if (!faq || !faq.isPublished) notFound();
+
+    // Fetch related questions from the same parent category
+    const { faqs: relatedFAQs } = await getPaginatedFAQs({
+        page: 1,
+        limit: 12,
         category: faq.parentQuestion || "",
-        limit: 5,
-        page: 1
+        isPublished: true,
     });
+    const related = relatedFAQs.filter((f: any) => f.slug !== slug).slice(0, 8);
+
+    const hasDeepDive = faq.deepDive?.problem || faq.deepDive?.methodology || faq.deepDive?.application;
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950 font-sans text-slate-300">
-            {/* Header */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-purple-500/50">
-                            K
-                        </div>
-                        <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
+        <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white transition-colors duration-300 pb-24">
+            <div className="max-w-6xl mx-auto px-6 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                {/* Breadcrumb */}
+                <div className="flex items-center gap-2 text-sm text-slate-400 mb-8 flex-wrap">
+                    <Link href="/questions" className="hover:text-sky-600 transition-colors font-bold flex items-center gap-1">
+                        <ArrowLeft size={16} className="inline" /> Questions
                     </Link>
+                    {faq.parentQuestion && (
+                        <>
+                            <ChevronRight size={14} />
+                            <Link
+                                href={`/questions?category=${encodeURIComponent(faq.parentQuestion)}`}
+                                className="hover:text-sky-600 transition-colors font-medium"
+                            >
+                                {faq.parentQuestion}
+                            </Link>
+                        </>
+                    )}
                 </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">Courses</Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">Blog</Link>
-                    <Link className="text-sm font-medium text-purple-400 hover:text-white transition-colors" href="/questions">FAQs</Link>
-                    <Link href="/sign-in">
-                        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">Log In</Button>
-                    </Link>
-                </nav>
-            </header>
 
-            <main className="flex-1 py-12 md:py-20 bg-slate-950">
-                <div className="container px-4 mx-auto max-w-6xl">
-                    {/* Breadcrumbs */}
-                    <nav className="flex items-center gap-2 text-xs font-black text-slate-500 uppercase tracking-widest mb-12">
-                        <Link href="/questions" className="hover:text-purple-400 transition-colors">Questions</Link>
-                        <ChevronRight size={12} />
-                        <span className="text-slate-600 truncate max-w-[200px]">{faq.parentQuestion || "General"}</span>
-                        <ChevronRight size={12} />
-                        <span className="text-purple-400 truncate max-w-[200px]">{faq.question}</span>
-                    </nav>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                    {/* ── Main Content ── */}
+                    <div className="lg:col-span-2">
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-                        {/* Main Content */}
-                        <div className="lg:col-span-2">
-                            <article className="prose prose-invert prose-purple max-w-none">
-                                <header className="mb-12">
-                                    <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter leading-tight mb-8">
-                                        {faq.h1Title || faq.question}
-                                    </h1>
-                                    
-                                    {/* Fast Answer Snippet */}
-                                    <div className="p-8 bg-gradient-to-br from-purple-900/30 to-slate-900 border border-purple-500/20 rounded-3xl mb-12 shadow-2xl relative overflow-hidden group">
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
-                                        <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                            <HelpCircle size={16} /> Fast Answer
-                                        </h3>
-                                        <p className="text-xl text-slate-200 font-medium leading-relaxed italic">
-                                            {faq.answerSnippet}
-                                        </p>
+                        {/* Category badge + meta */}
+                        <div className="flex items-center flex-wrap gap-3 mb-5">
+                            {faq.parentQuestion && (
+                                <Link
+                                    href={`/questions?category=${encodeURIComponent(faq.parentQuestion)}`}
+                                    className="text-xs font-bold px-3 py-1 rounded-full text-white bg-sky-500 hover:bg-sky-600 transition-colors uppercase tracking-widest cursor-pointer"
+                                >
+                                    {faq.parentQuestion}
+                                </Link>
+                            )}
+                            <div className="flex items-center gap-1 text-slate-400 text-sm">
+                                <Clock size={13} />
+                                <span>{Math.max(1, Math.round(((faq.answerSnippet?.length || 0) + (faq.sourceText?.length || 0)) / 200))} min read</span>
+                            </div>
+                        </div>
+
+                        {/* H1 */}
+                        <h1 className="text-3xl md:text-5xl font-black mb-8 leading-tight tracking-tight text-slate-900 dark:text-white">
+                            {faq.h1Title || faq.question}
+                        </h1>
+
+                        {/* Answer Snippet — featured snippet box */}
+                        {faq.answerSnippet && faq.answerSnippet !== 'not-given' && (
+                            <div className="p-8 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700 mb-10 shadow-xl shadow-sky-500/5 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-sky-500" />
+                                <p className="text-xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed relative z-10">
+                                    <span className="text-sky-600 dark:text-sky-400 font-black mr-2">Answer:</span>
+                                    {faq.answerSnippet}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Source text (full answer) */}
+                        {faq.sourceText && faq.sourceText !== 'not-given' && faq.sourceText !== faq.answerSnippet && (
+                            <>
+                                <h2 className="text-2xl font-black mt-10 mb-5 text-slate-900 dark:text-white flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <BookOpen size={18} />
                                     </div>
-                                </header>
-
-                                {/* Deep Dive Sections */}
-                                <div className="space-y-16">
-                                    {faq.deepDive?.problem && (
-                                        <section className="scroll-mt-24">
-                                            <h2 className="text-2xl font-black text-red-400 uppercase tracking-widest mb-6 italic border-b border-red-900/30 pb-2">The Problem / Pain Point</h2>
-                                            <p className="text-lg leading-relaxed text-slate-300 bg-red-400/5 p-6 rounded-2xl border border-red-400/10 whitespace-pre-wrap font-medium">
-                                                {faq.deepDive.problem}
-                                            </p>
-                                        </section>
-                                    )}
-
-                                    {faq.deepDive?.methodology && (
-                                        <section className="scroll-mt-24">
-                                            <h2 className="text-2xl font-black text-blue-400 uppercase tracking-widest mb-6 italic border-b border-blue-900/30 pb-2">The Methodology / Science</h2>
-                                            <p className="text-lg leading-relaxed text-slate-300 bg-blue-400/5 p-8 rounded-2xl border border-blue-400/10 whitespace-pre-wrap font-medium shadow-inner shadow-blue-400/5">
-                                                {faq.deepDive.methodology}
-                                            </p>
-                                        </section>
-                                    )}
-
-                                    {faq.deepDive?.application && (
-                                        <section className="scroll-mt-24">
-                                            <h2 className="text-2xl font-black text-emerald-400 uppercase tracking-widest mb-6 italic border-b border-emerald-900/30 pb-2">Practical Application</h2>
-                                            <p className="text-lg leading-relaxed text-slate-300 bg-emerald-400/5 p-8 rounded-2xl border border-emerald-400/10 whitespace-pre-wrap font-medium">
-                                                {faq.deepDive.application}
-                                            </p>
-                                        </section>
-                                    )}
+                                    Full Explanation
+                                </h2>
+                                <div className="prose prose-lg dark:prose-invert max-w-none prose-purple">
+                                    <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
+                                        {faq.sourceText}
+                                    </p>
                                 </div>
+                            </>
+                        )}
 
-                                {/* Source/Reference */}
-                                {faq.linkUrl && (
-                                    <div className="mt-16 p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-                                        <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Verified Source</h4>
-                                        <a href={faq.linkUrl} target="_blank" className="flex items-center gap-2 text-purple-400 hover:text-white transition-colors group">
-                                            <span className="font-bold underline decoration-purple-400/30">{faq.linkTitle || "Click here to view reference"}</span>
-                                            <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                        </a>
+                        {/* Deep Dive Sections */}
+                        {hasDeepDive && (
+                            <div className="mt-12 space-y-8">
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                    <div className="w-9 h-9 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <Zap size={18} />
+                                    </div>
+                                    Deep Dive
+                                </h2>
+
+                                {faq.deepDive?.problem && (
+                                    <div className="p-6 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                                        <h3 className="font-bold text-rose-700 dark:text-rose-400 mb-3 flex items-center gap-2 text-sm uppercase tracking-widest">
+                                            <AlertTriangle size={15} /> The Challenge
+                                        </h3>
+                                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{faq.deepDive.problem}</p>
                                     </div>
                                 )}
-                            </article>
-                        </div>
+                                {faq.deepDive?.methodology && (
+                                    <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
+                                        <h3 className="font-bold text-blue-700 dark:text-blue-400 mb-3 flex items-center gap-2 text-sm uppercase tracking-widest">
+                                            <BookOpen size={15} /> The Approach
+                                        </h3>
+                                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{faq.deepDive.methodology}</p>
+                                    </div>
+                                )}
+                                {faq.deepDive?.application && (
+                                    <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+                                        <h3 className="font-bold text-emerald-700 dark:text-emerald-400 mb-3 flex items-center gap-2 text-sm uppercase tracking-widest">
+                                            <CheckCircle2 size={15} /> Put It Into Practice
+                                        </h3>
+                                        <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{faq.deepDive.application}</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                        {/* Sidebar */}
-                        <aside className="lg:col-span-1 space-y-12">
-                            {/* CTA Card */}
-                            <div className="p-8 bg-primary rounded-[2.5rem] text-white border border-primary relative overflow-hidden group">
-                                <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl font-headline font-black mb-4 italic leading-tight">Ready to build your business?</h3>
-                                    <p className="text-white/70 text-sm mb-8 font-medium italic">Get access to our full library of blueprints, execution guides, and business tools—absolutely free.</p>
-                                    <Link href="/sign-up">
-                                        <Button className="w-full bg-white text-primary hover:bg-purple-500 hover:text-white font-black uppercase tracking-widest py-6 rounded-2xl shadow-xl shadow-black/20">
-                                            Start Your Journey
-                                        </Button>
+                        {/* Source Link */}
+                        {faq.linkUrl && faq.linkUrl !== '#' && (
+                            <div className="mt-12 p-6 bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Source Reference</p>
+                                    <p className="font-bold text-slate-800 dark:text-slate-100">{faq.linkTitle || "View Source"}</p>
+                                </div>
+                                <a
+                                    href={faq.linkUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="shrink-0 flex items-center gap-2 text-sky-600 dark:text-sky-400 font-black text-sm hover:text-sky-700 transition-colors"
+                                >
+                                    Read Source <ExternalLink size={14} />
+                                </a>
+                            </div>
+                        )}
+
+                        {/* Quote block */}
+                        <div className="mt-16 pt-12 border-t border-dashed border-slate-200 dark:border-slate-700">
+                            <div className="p-8 bg-sky-50 dark:bg-sky-900/10 rounded-3xl border border-sky-100 dark:border-sky-900/30 relative">
+                                <Quote className="text-sky-200 absolute top-6 right-6" size={40} />
+                                <p className="text-lg font-medium italic text-slate-700 dark:text-slate-300 leading-relaxed max-w-xl">
+                                    &ldquo;{faq.answerSnippet || faq.question}&rdquo;
+                                </p>
+                                <p className="mt-4 text-xs font-black uppercase tracking-widest text-sky-500">K Business Academy</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Sidebar ── */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-24 space-y-8">
+
+                            {/* Quick Info Card */}
+                            <div className="p-6 bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                                <h4 className="font-bold mb-5 flex items-center gap-2 text-slate-800 dark:text-white text-sm">
+                                    <HelpCircle size={16} className="text-sky-500" /> About This Question
+                                </h4>
+
+                                {faq.parentQuestion && (
+                                    <div className="mb-4">
+                                        <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1">
+                                            <Tag size={10} /> Category
+                                        </span>
+                                        <Link
+                                            href={`/questions?category=${encodeURIComponent(faq.parentQuestion)}`}
+                                            className="text-sky-600 dark:text-sky-400 font-bold text-sm hover:underline"
+                                        >
+                                            {faq.parentQuestion}
+                                        </Link>
+                                    </div>
+                                )}
+
+                                <div className="mb-4">
+                                    <span className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Reading Time</span>
+                                    <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+                                        {Math.max(1, Math.round(((faq.answerSnippet?.length || 0) + (faq.sourceText?.length || 0)) / 200))} min
+                                    </span>
+                                </div>
+
+                                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-col gap-3">
+                                    <Link
+                                        href="/questions"
+                                        className="w-full text-center px-4 py-3 bg-sky-600 text-white font-black rounded-xl text-xs uppercase tracking-widest hover:bg-sky-700 transition-all shadow-lg shadow-sky-500/20"
+                                    >
+                                        Browse All Questions
+                                    </Link>
+                                    <Link
+                                        href="/glossary"
+                                        className="w-full text-center px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-black rounded-xl text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                    >
+                                        Business Glossary
                                     </Link>
                                 </div>
                             </div>
 
                             {/* Related Questions */}
-                            <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-8 sticky top-24">
-                                <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                    <MessageSquare size={16} /> Related Questions
-                                </h3>
-                                <nav className="flex flex-col gap-4">
-                                    {relatedFAQs.filter((f: any) => f._id !== faq._id).slice(0, 5).map((rf: any) => (
-                                        <Link 
-                                            key={rf._id} 
-                                            href={`/questions/${rf.slug}`}
-                                            className="text-sm font-bold text-slate-400 hover:text-purple-400 transition-all block pb-4 border-b border-slate-800/50 last:border-0"
+                            {related.length > 0 && (
+                                <div className="p-6 bg-white dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-none">
+                                    <h4 className="font-bold mb-5 flex items-center gap-2 text-slate-800 dark:text-white text-sm">
+                                        <ChevronRight size={16} className="text-sky-500" /> Related Questions
+                                    </h4>
+                                    <ul className="space-y-3">
+                                        {related.map((r: any) => (
+                                            <li key={r.slug}>
+                                                <Link
+                                                    href={`/questions/${r.slug}`}
+                                                    className="flex items-start gap-3 group text-sm text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
+                                                >
+                                                    <div className="mt-2 w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
+                                                    <span className="font-medium leading-snug line-clamp-2 group-hover:text-sky-600 dark:group-hover:text-sky-400">
+                                                        {r.question}
+                                                    </span>
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {faq.parentQuestion && (
+                                        <Link
+                                            href={`/questions?category=${encodeURIComponent(faq.parentQuestion)}`}
+                                            className="mt-6 flex items-center gap-1 text-xs font-black uppercase tracking-widest text-sky-600 dark:text-sky-400 hover:text-sky-800 transition-colors"
                                         >
-                                            {rf.question}
+                                            See all in {faq.parentQuestion} <ChevronRight size={12} />
                                         </Link>
-                                    ))}
-                                </nav>
-                                <Link href="/questions" className="block text-center mt-6 text-xs font-black text-purple-400 uppercase tracking-widest hover:text-white transition-colors italic underline underline-offset-4">
-                                    Browse All Questions
-                                </Link>
-                            </div>
-                        </aside>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </main>
-
-            {/* Footer */}
-            <footer className="py-12 border-t border-slate-800 bg-slate-900 mt-20">
-                <div className="container px-4 mx-auto text-center md:flex md:justify-between items-center">
-                    <p className="text-slate-500 text-xs italic mb-4 md:mb-0 pr-8">© 2025 K Business Academy. Elevating professional growth through structured execution.</p>
-                    <div className="flex justify-center gap-6">
-                        <Link href="/terms" className="text-xs text-slate-600 hover:text-white transition-colors font-bold uppercase tracking-widest">Terms</Link>
-                        <Link href="/privacy" className="text-xs text-slate-600 hover:text-white transition-colors font-bold uppercase tracking-widest">Privacy</Link>
-                    </div>
-                </div>
-            </footer>
+            </div>
         </div>
     );
 }

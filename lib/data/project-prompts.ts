@@ -60,7 +60,7 @@ If sufficient information is provided, proceed directly to crafting engaging con
     title: "SEO Blog Posts",
     description: "SEO-optimized blog content that ranks and engages",
     icon: Search,
-    color: "bg-purple-500",
+    color: "bg-sky-500",
     prompt: `You are tasked with creating engaging, SEO-optimized blog content designed to rank well in search engines while delivering genuine value and engagement for readers.
 
 Key Objectives:
@@ -173,7 +173,7 @@ Integrations: CRM/Email, booking system, analytics, accessibility, privacy polic
     title: "Social Media Posts",
     description: "Facebook, LinkedIn, X/Twitter posts",
     icon: Share2,
-    color: "bg-pink-500",
+    color: "bg-indigo-500",
     prompt: `You are tasked with writing highly engaging, direct-response style social media posts optimized for attention, relevance, and conversions. Supports Facebook, LinkedIn, and Twitter/X.
 
 Platform-Specific:

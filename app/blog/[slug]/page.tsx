@@ -10,6 +10,7 @@ import { Lock } from "lucide-react";
 import { calculateReadingTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { BlogTracker } from "@/components/analytics/blog-tracker";
+import { SiteHeader } from "@/components/shared/SiteHeader";
 import "../blog-content.css";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -46,32 +47,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 articleSlug={post.slug}
             />
 
-            {/* Header */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b bg-white sticky top-0 z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-indigo-900">
-                    <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-lg flex items-center justify-center text-white">K</div>
-                        K Business Academy
-                    </Link>
-                </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/courses">Courses</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/library">Library</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/business-resources">Resources</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/affiliate-crm">Affiliate CRM</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/dashboard">Dashboard</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4 text-indigo-600" href="/blog">Blog</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/glossary">Glossary</Link>
-                    <Link className="text-sm font-medium hover:underline underline-offset-4" href="/locations">Market Intelligence</Link>
-                    <Link href="/sign-in"><Button variant="ghost" size="sm">Log In</Button></Link>
-                    <Link href="/sign-up"><Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Get Started</Button></Link>
-                </nav>
-                <div className="ml-auto md:hidden">
-                    <Link href="/sign-up">
-                        <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">Get Started</Button>
-                    </Link>
-                </div>
-            </header>
+            <SiteHeader />
 
             <main className="flex-1 container px-4 md:px-6 mx-auto py-12 max-w-4xl">
                 <div className="mb-8 text-center">

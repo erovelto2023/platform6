@@ -86,9 +86,9 @@ export default async function AdminDashboardPage() {
             description: "Paste pure HTML pages",
             href: "/admin/page-builder-simple",
             icon: FileStack,
-            color: "text-purple-600",
-            bg: "bg-purple-100",
-            hover: "group-hover:bg-purple-600"
+            color: "text-sky-600",
+            bg: "bg-sky-100",
+            hover: "group-hover:bg-sky-600"
         },
         {
             title: "Courses",
@@ -104,9 +104,9 @@ export default async function AdminDashboardPage() {
             description: "Manage calendar",
             href: "/admin/events",
             icon: Calendar,
-            color: "text-pink-600",
-            bg: "bg-pink-100",
-            hover: "group-hover:bg-pink-600"
+            color: "text-indigo-600",
+            bg: "bg-indigo-100",
+            hover: "group-hover:bg-indigo-600"
         },
         {
             title: "Groups",
@@ -122,9 +122,9 @@ export default async function AdminDashboardPage() {
             description: "Business blueprints",
             href: "/admin/niche-boxes",
             icon: Compass,
-            color: "text-purple-600",
-            bg: "bg-purple-100",
-            hover: "group-hover:bg-purple-600"
+            color: "text-sky-600",
+            bg: "bg-sky-100",
+            hover: "group-hover:bg-sky-600"
         },
         {
             title: "Resources",
@@ -288,7 +288,7 @@ export default async function AdminDashboardPage() {
                         { label: "Affiliate Partners", count: stats.breakdown.affiliatePartners, color: "text-blue-600" },
 
                         { label: "Courses", count: stats.breakdown.courses, color: "text-indigo-600" },
-                        { label: "Events", count: stats.breakdown.events, color: "text-pink-600" },
+                        { label: "Events", count: stats.breakdown.events, color: "text-indigo-600" },
                         { label: "Groups", count: stats.breakdown.groups, color: "text-emerald-600" },
                         { label: "Surveys", count: stats.breakdown.surveys, color: "text-orange-600" },
                         { label: "Wholesale Partners", count: stats.breakdown.wholesaleSuppliers, color: "text-cyan-600" },

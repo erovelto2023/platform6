@@ -132,7 +132,7 @@ export default function OfferListClient({ initialOffers }: OfferListClientProps)
                                 <div>
                                     <div className="flex items-center gap-2 mb-1">
                                         <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">{offer.pageType || 'Sales Page'}</span>
-                                        {offer.abEnabled && <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1"><Zap size={10} fill="currentColor" /> Split Test</span>}
+                                        {offer.abEnabled && <span className="text-[10px] font-black text-sky-600 uppercase tracking-widest flex items-center gap-1"><Zap size={10} fill="currentColor" /> Split Test</span>}
                                     </div>
                                     <h3 className="text-xl font-black text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">{offer.name}</h3>
                                     <Link href={`/offers/${offer.slug}`} target="_blank" className="text-xs text-slate-400 font-bold flex items-center gap-1 hover:text-blue-500 transition-colors mt-1">

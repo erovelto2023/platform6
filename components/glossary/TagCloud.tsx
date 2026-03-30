@@ -54,9 +54,9 @@ export default function TagCloud({ terms, onSelectTag, activeTag }: Props) {
     const colors = [
       'text-emerald-600 hover:text-emerald-700',
       'text-blue-600 hover:text-blue-700',
-      'text-purple-600 hover:text-purple-700',
+      'text-sky-600 hover:text-sky-700',
       'text-orange-600 hover:text-orange-700',
-      'text-pink-600 hover:text-pink-700',
+      'text-indigo-600 hover:text-indigo-700',
       'text-teal-600 hover:text-teal-700',
       'text-indigo-600 hover:text-indigo-700',
       'text-rose-600 hover:text-rose-700',

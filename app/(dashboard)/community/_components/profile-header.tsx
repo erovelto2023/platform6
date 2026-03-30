@@ -54,7 +54,7 @@ export function ProfileHeader({ user, isOwnProfile, currentUserId }: ProfileHead
     return (
         <Card className="overflow-hidden border-none shadow-sm mb-6">
             {/* Cover Image */}
-            <div className="h-48 md:h-64 bg-gradient-to-r from-violet-600 to-pink-500 relative group">
+            <div className="h-48 md:h-64 bg-gradient-to-r from-violet-600 to-indigo-500 relative group">
                 {coverImage && (
                     <img src={coverImage} alt="Cover" className="w-full h-full object-cover absolute inset-0" />
                 )}

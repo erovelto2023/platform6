@@ -73,7 +73,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       title: "Employment Share",
       value: `${stats.employmentShare?.value}%`,
       rank: stats.employmentShare?.rank,
-      icon: <Users className="w-5 h-5 text-purple-400" />,
+      icon: <Users className="w-5 h-5 text-sky-400" />,
       suffix: "of total workforce"
     },
     {
@@ -110,7 +110,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col border-l-4 border-purple-500 pl-4 mb-8">
+      <div className="flex flex-col border-l-4 border-sky-500 pl-4 mb-8">
         <h2 className="text-3xl font-black text-white uppercase italic tracking-tight">
           Market Authority Rankings
         </h2>
@@ -129,7 +129,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">National Rank</span>
-                  <span className="text-2xl font-black text-purple-400 italic leading-none">#{card.rank}</span>
+                  <span className="text-2xl font-black text-sky-400 italic leading-none">#{card.rank}</span>
                 </div>
               </div>
             </CardHeader>
@@ -147,7 +147,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       </div>
       
       <div className="mt-8 p-6 bg-zinc-900 border border-zinc-800 rounded-[2rem] flex items-start gap-4">
-        <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400 group">
+        <div className="p-3 bg-sky-500/10 rounded-2xl text-sky-400 group">
            <Trophy size={24} className="group-hover:scale-110 transition-transform" />
         </div>
         <div>

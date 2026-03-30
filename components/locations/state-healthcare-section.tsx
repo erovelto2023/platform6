@@ -248,7 +248,7 @@ function StatCard({ label, value, icon, color, sub }: { label: string, value: st
     const colorClasses = {
         blue: 'text-blue-400 bg-blue-500/10',
         emerald: 'text-emerald-400 bg-emerald-500/10',
-        purple: 'text-purple-400 bg-purple-500/10',
+        purple: 'text-sky-400 bg-sky-500/10',
         amber: 'text-amber-400 bg-amber-500/10',
     };
 

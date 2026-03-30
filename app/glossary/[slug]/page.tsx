@@ -181,7 +181,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {serializedTerm.expandedExplanation && (
                                 <>
                                     <h2 className="text-3xl font-black mt-10 mb-6 text-slate-900 dark:text-white flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-xl flex items-center justify-center shrink-0">
+                                        <div className="w-10 h-10 bg-sky-100 dark:bg-sky-900/30 text-sky-600 rounded-xl flex items-center justify-center shrink-0">
                                             <Sparkles size={20} />
                                         </div>
                                         Deeper Dive
@@ -246,11 +246,11 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                             {/* Best For */}
                             {serializedTerm.bestFor && (
-                                <div className="p-6 bg-purple-50 dark:bg-purple-900/20 rounded-2xl border border-purple-100 dark:border-purple-900/50 mt-12 mb-10 not-prose">
-                                    <h4 className="font-bold text-purple-800 dark:text-purple-300 mb-2 flex items-center gap-2 text-lg">
-                                        <Users size={20} className="text-purple-600 dark:text-purple-400" /> Ideal Target Audience
+                                <div className="p-6 bg-sky-50 dark:bg-sky-900/20 rounded-2xl border border-sky-100 dark:border-sky-900/50 mt-12 mb-10 not-prose">
+                                    <h4 className="font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center gap-2 text-lg">
+                                        <Users size={20} className="text-sky-600 dark:text-sky-400" /> Ideal Target Audience
                                     </h4>
-                                    <p className="text-purple-900 dark:text-purple-200/80 leading-relaxed text-lg">{serializedTerm.bestFor}</p>
+                                    <p className="text-sky-900 dark:text-sky-200/80 leading-relaxed text-lg">{serializedTerm.bestFor}</p>
                                 </div>
                             )}
 
@@ -429,10 +429,10 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     {renderList(serializedTerm.headlines, <LayoutList className="text-slate-400" size={20} />, "Blog Headlines")}
                                     {renderList(serializedTerm.youtubeTitles, <Youtube className="text-red-500" size={20} />, "YouTube Titles")}
                                     {renderList(serializedTerm.pinterestIdeas, <span className="text-[#E60023] font-bold text-lg leading-none">P</span>, "Pinterest Pins")}
-                                    {renderList(serializedTerm.instagramIdeas, <Instagram className="text-pink-500" size={20} />, "Instagram Posts")}
+                                    {renderList(serializedTerm.instagramIdeas, <Instagram className="text-indigo-500" size={20} />, "Instagram Posts")}
                                     {renderList(serializedTerm.amazonProducts, <ShoppingBag className="text-orange-500" size={20} />, "Related Products", true)}
                                     {renderList(serializedTerm.websitesRanking, <Globe className="text-blue-500" size={20} />, "Websites", true)}
-                                    {renderList(serializedTerm.podcastsRanking, <Podcast className="text-purple-500" size={20} />, "Ranked Podcasts", true)}
+                                    {renderList(serializedTerm.podcastsRanking, <Podcast className="text-sky-500" size={20} />, "Ranked Podcasts", true)}
                                 </div>
 
                                 <AIPromptsSection 

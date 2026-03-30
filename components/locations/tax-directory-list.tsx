@@ -70,7 +70,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
             <Scale className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-[#0e0021] uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
+            <h4 className="text-sm font-black text-[#f8fafc] uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Found in {cityName}, {stateName}</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
           <input 
             type="text" 
             placeholder="Search by name..." 
-            className="w-full bg-[#f8f9fa] border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-[#0e0021] placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
+            className="w-full bg-[#f8f9fa] border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-[#f8fafc] placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -101,7 +101,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                     <span className="text-[8px] font-black text-slate-600 uppercase">#{cpa.licenseNumber}</span>
                   )}
                 </div>
-                <CardTitle className="text-base font-black text-[#0e0021] leading-tight uppercase italic group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[3rem]">
+                <CardTitle className="text-base font-black text-[#f8fafc] leading-tight uppercase italic group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[3rem]">
                   {cpa.name}
                 </CardTitle>
               </div>

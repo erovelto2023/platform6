@@ -43,7 +43,7 @@ export default async function CommunityGroupsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {groups.map((group: any) => (
                         <Card key={group._id} className="flex flex-col hover:shadow-lg transition-shadow duration-200 border-slate-200 overflow-hidden">
-                            <div className="h-32 bg-gradient-to-r from-indigo-500 to-purple-600 relative">
+                            <div className="h-32 bg-gradient-to-r from-indigo-500 to-sky-600 relative">
                                 {group.bannerUrl && (
                                     <img src={group.bannerUrl} alt={group.name} className="w-full h-full object-cover" />
                                 )}

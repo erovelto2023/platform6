@@ -176,7 +176,7 @@ export function MarketPulse({ data, cityName, newspapers = [] }: MarketPulseProp
                                                 {list.slice(0, 5).map((name: string, j: number) => (
                                                     <li key={j} className="text-[11px] font-bold text-white flex items-center gap-2">
                                                         <div className={`h-1.5 w-1.5 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] ${
-                                                            niche.key === 'parenting' ? 'bg-purple-500' :
+                                                            niche.key === 'parenting' ? 'bg-sky-500' :
                                                             niche.key === 'seniors' ? 'bg-blue-500' : 'bg-emerald-500'
                                                         }`} />
                                                         <span className="truncate">{name}</span>
