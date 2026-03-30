@@ -6,40 +6,20 @@ import { SimpleHeroSlideshow } from "@/components/animations";
 import { motion } from "framer-motion";
 import {
     BookOpen, Clock, Layers, Video, FileText, FolderOpen, RefreshCw,
-    Zap, TrendingUp, ShieldCheck, CheckCircle2, Target, Rocket, Award
+    Zap, TrendingUp, ShieldCheck, CheckCircle2, Target, Rocket, Award,
+    ChevronRight, Binary, GraduationCap
 } from "lucide-react";
 
 export default function CoursesPage() {
     // Hero slides for courses page
     const heroSlides = [
         {
-            title: 'Blueprint. Build. Bank.',
-            subtitle: 'Your first $100 online shouldn\'t take six months. It should take a weekend.',
-            backgroundImage: '/heroimages/3eeba56d-f561-4cde-bf77-80373ff8a65d.png',
-            ctaText: 'Start Learning',
+            title: 'Master the Methodology of Modern Business',
+            subtitle: 'Structured, systems-based education designed to transform entrepreneurs into operators. Build foundational leverage that lasts.',
+            backgroundImage: '/heroimages/courses_premium.png',
+            ctaText: 'Explore Curriculum',
             ctaLink: '/sign-up',
-        },
-        {
-            title: 'Process. Progress. Profitability.',
-            subtitle: 'Entrepreneurship isn\'t magic—it\'s methodical. We teach the method.',
-            backgroundImage: '/heroimages/48f75e7d-3cf0-41e1-a88d-9e0d0d0464dc.png',
-            ctaText: 'View Courses',
-            ctaLink: '/sign-up',
-        },
-        {
-            title: 'Direction. Discipline. Dividends.',
-            subtitle: 'Your time is valuable. Stop wasting it piecing together free YouTube tutorials.',
-            backgroundImage: '/heroimages/5aadcd74-4927-46f2-b6b7-df3606468ca4.png',
-            ctaText: 'Get Started',
-            ctaLink: '/sign-up',
-        },
-        {
-            title: 'From "what should I do?" to "what\'s next?"',
-            subtitle: 'In 90 days—not 9 months.',
-            backgroundImage: '/heroimages/5e214005-ec9c-46ba-aed1-06f6513e19d3.png',
-            ctaText: 'Join Now',
-            ctaLink: '/sign-up',
-        },
+        }
     ];
 
     // Animation variants
@@ -59,322 +39,212 @@ export default function CoursesPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950">
-            {/* Navbar - Dark Theme */}
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
+        <div className="flex flex-col min-h-screen bg-[#fefae0]">
+            {/* Navbar - Professional Educational Theme */}
+            <header className="px-6 lg:px-10 h-20 flex items-center border-b border-[#bc6c25]/20 bg-[#fefae0]/80 backdrop-blur-md sticky top-0 z-50">
+                <div className="flex items-center gap-2 font-bold text-xl text-[#283618]">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
+                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center text-[#fefae0] shadow-lg shadow-[#606c38]/20 transition-transform hover:scale-105">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
+                        <div className="flex flex-col leading-none">
+                            <span className="text-lg font-black tracking-tight">K BUSINESS</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-70">Academy</span>
+                        </div>
                     </Link>
                 </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/courses">
+                <nav className="ml-auto flex items-center gap-8 hidden md:flex">
+                    <Link className="text-sm font-bold text-[#606c38] border-b-2 border-[#606c38]" href="/courses">
                         Courses
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/library">
                         Library
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/business-resources">
                         Resources
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/affiliate-crm">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/affiliate-crm">
                         Affiliate CRM
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
-                        Dashboard
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/blog">
                         Blog
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/glossary">
-                        Glossary
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/locations">
+                        Intelligence
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/locations">
-                        Market Intelligence
-                    </Link>
+                    <div className="h-6 w-px bg-[#283618]/10 mx-2" />
                     <Link href="/sign-in">
-                        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+                        <Button variant="ghost" className="text-[#283618] font-bold hover:bg-[#606c38]/5">
                             Log In
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
-                            Get Started
+                        <Button className="bg-[#606c38] hover:bg-[#283618] text-[#fefae0] px-6 h-11 rounded-xl shadow-xl shadow-[#606c38]/20 transition-all font-bold">
+                            Enroll Now
                         </Button>
                     </Link>
                 </nav>
-                <div className="ml-auto md:hidden">
-                    <Link href="/sign-up">
-                        <Button size="sm">Get Started</Button>
-                    </Link>
-                </div>
             </header>
 
             <main className="flex-1">
-                {/* Animated Hero Section */}
-                <SimpleHeroSlideshow slides={heroSlides} autoplay={true} interval={6000} />
+                {/* Hero section */}
+                <SimpleHeroSlideshow slides={heroSlides} autoplay={false} />
 
-                {/* Self-Paced Learning - Dark Theme */}
-                <section className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl" />
-                    <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-                            <motion.div
+                {/* The K Academy Philosophy */}
+                <section className="w-full py-24 bg-[#fefae0]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="flex flex-col md:flex-row gap-16 items-center">
+                            <motion.div 
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true }}
                                 variants={fadeInUp}
-                                transition={{ duration: 0.6 }}
+                                className="md:w-1/2"
                             >
-                                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Self-Paced Learning That Fits Your Life</h2>
-                                <p className="text-slate-400 mb-6 text-lg">
-                                    Our courses are 100% self-paced, so you stay in control of your learning experience.
-                                    Whether you have 20 minutes or two hours, you can make meaningful progress every time you log in.
+                                <Badge className="bg-[#dda15e]/10 text-[#bc6c25] border-[#bc6c25]/20 mb-6 px-4 py-1">THE METHODOLOGY</Badge>
+                                <h2 className="text-4xl md:text-5xl font-black text-[#283618] leading-[1.1] mb-8">
+                                    Structured Education for the Modern Entrepreneur.
+                                </h2>
+                                <p className="text-xl text-[#283618]/70 leading-relaxed mb-8">
+                                    Most online courses offer tricks. We offer systems. K Business Academy is built on the belief that long-term success is a byproduct of sound operations and repeatable frameworks.
                                 </p>
-                                <ul className="space-y-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     {[
-                                        { icon: Clock, text: "Learn when it works for you" },
-                                        { icon: RefreshCw, text: "Revisit lessons anytime" },
-                                        { icon: Zap, text: "Move fast or slow—your choice" },
-                                        { icon: ShieldCheck, text: "No deadlines, no pressure" }
+                                        { title: "Foundational Mechanics", icon: Binary },
+                                        { title: "Systemic Scaling", icon: TrendingUp },
+                                        { title: "Operational Excellence", icon: ShieldCheck },
+                                        { title: "Strategic Leverage", icon: Target }
                                     ].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-3">
-                                            <div className="p-2 bg-sky-500/20 rounded-lg">
-                                                <item.icon className="h-5 w-5 text-sky-400" />
+                                        <div key={i} className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-[#606c38]/10 rounded-lg flex items-center justify-center text-[#606c38]">
+                                                <item.icon size={20} />
                                             </div>
-                                            <span className="text-slate-300">{item.text}</span>
+                                            <span className="font-bold text-[#283618]">{item.title}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                className="md:w-1/2 p-8 bg-[#e2e7d1] rounded-[2.5rem] border-2 border-[#606c38]/10 relative"
+                            >
+                                <div className="absolute -top-6 -right-6 w-24 h-24 bg-[#dda15e] rounded-full flex items-center justify-center text-[#fefae0] font-black text-2xl shadow-xl">100%</div>
+                                <h3 className="text-2xl font-black text-[#283618] mb-6 underline decoration-[#dda15e] decoration-4 underline-offset-8">Academy Standards</h3>
+                                <ul className="space-y-6">
+                                    {[
+                                        { title: "Academic Rigor", desc: "Lessons are designed with pedagogical depth, ensuring you don't just consume—you master." },
+                                        { title: "Zero Filler Policies", desc: "Every minute of video and every line of text is vetted for absolute utility. No fluff." },
+                                        { title: "Action-Locked Progress", desc: "Our curriculum is gated by practical application milestones to ensure real-world result." }
+                                    ].map((item, i) => (
+                                        <li key={i} className="flex gap-4">
+                                            <div className="mt-1.5"><CheckCircle2 size={18} className="text-[#606c38]" /></div>
+                                            <div>
+                                                <h4 className="font-bold text-[#283618]">{item.title}</h4>
+                                                <p className="text-sm text-[#283618]/60">{item.desc}</p>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
                             </motion.div>
-                            <motion.div
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeInUp}
-                                transition={{ duration: 0.6, delay: 0.2 }}
-                                className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl border border-slate-700"
-                            >
-                                <h3 className="text-2xl font-bold mb-4 text-white">Built for Beginners — Powerful Enough for Experts</h3>
-                                <p className="text-slate-400 mb-6">
-                                    Our course structure is designed to meet you where you are and guide you forward step by step.
-                                </p>
-                                <div className="space-y-4">
-                                    {[
-                                        { num: 1, title: "Newbies", desc: "Get clear foundations and guidance", icon: Rocket },
-                                        { num: 2, title: "Intermediate", desc: "Gain deeper understanding and strategy", icon: Target },
-                                        { num: 3, title: "Advanced", desc: "Refine systems, execution, and scalability", icon: Award }
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex gap-3 p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-full flex items-center justify-center shrink-0 font-bold text-white shadow-lg shadow-sky-500/30">
-                                                {item.num}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-white mb-1">{item.title}</h4>
-                                                <p className="text-sm text-slate-400">{item.desc}</p>
-                                            </div>
-                                            <item.icon className="h-5 w-5 text-sky-400 shrink-0" />
-                                        </div>
-                                    ))}
-                                </div>
-                            </motion.div>
                         </div>
                     </div>
                 </section>
 
-                {/* Multiple Formats - Dark Theme */}
-                <section className="w-full py-20 bg-slate-950">
+                {/* Multimodal Section */}
+                <section className="w-full py-24 bg-[#283618] text-[#fefae0] rounded-t-[3rem]">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <motion.h2
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="text-3xl md:text-4xl font-bold text-center mb-12 bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent"
-                        >
-                            Multiple Learning Formats for Real Understanding
-                        </motion.h2>
-                        <motion.div
-                            variants={staggerContainer}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-                        >
+                        <div className="text-center max-w-3xl mx-auto mb-16">
+                            <h2 className="text-3xl md:text-5xl font-black mb-6">A Multi-Dimensional Learning Ecosystem</h2>
+                            <p className="text-lg opacity-70">We recognize that true mastery requires seeing concepts from multiple angles. Our curriculum is delivered across four mission-critical formats.</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                             {[
-                                { icon: Video, title: "Video Lessons", desc: "Walkthroughs and explanations that break concepts down clearly and visually.", color: "blue" },
-                                { icon: FileText, title: "Text-Based Lessons", desc: "Structured written lessons for clarity, reference, and deeper understanding.", color: "purple" },
-                                { icon: FolderOpen, title: "Resources & Materials", desc: "Guides, checklists, frameworks, and supporting materials.", color: "pink" },
-                                { icon: RefreshCw, title: "Repeatable Learning", desc: "Return to lessons anytime as your business grows and your needs change.", color: "teal" }
+                                { icon: Video, title: "Deep-Dive Video", desc: "Visual walkthroughs of complex systems and strategic execution." },
+                                { icon: FileText, title: "Technical Manuals", desc: "High-level written curriculum for reference and implementation." },
+                                { icon: FolderOpen, title: "Operational Assets", desc: "Downloadable blueprints, templates, and calculators." },
+                                { icon: RefreshCw, title: "Iterative Updates", desc: "Live curriculum that adapts to the current market climate." }
                             ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={fadeInUp}
-                                    className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-xl border border-slate-700 hover:border-sky-500/50 transition-all hover:shadow-2xl hover:shadow-sky-500/20 group"
-                                >
-                                    <div className={`w-12 h-12 bg-gradient-to-br from-${item.color}-500 to-${item.color}-600 rounded-lg flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                                        <item.icon className="h-6 w-6 text-white" />
+                                <div key={i} className="bg-[#606c38]/20 p-8 rounded-[2rem] border border-[#fefae0]/10 hover:border-[#dda15e] transition-all group">
+                                    <div className="w-14 h-14 bg-[#dda15e] rounded-2xl flex items-center justify-center text-[#283618] mb-6 shadow-lg group-hover:scale-110 transition-transform">
+                                        <item.icon size={28} />
                                     </div>
-                                    <h3 className="font-bold text-lg mb-2 text-white">{item.title}</h3>
-                                    <p className="text-sm text-slate-400">{item.desc}</p>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </section>
-
-                {/* Practical Education - Dark Theme */}
-                <section className="w-full py-20 bg-slate-900">
-                    <div className="container px-4 md:px-6 mx-auto">
-                        <motion.div
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            variants={fadeInUp}
-                            transition={{ duration: 0.6 }}
-                            className="max-w-3xl mx-auto text-center"
-                        >
-                            <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Practical, Action-Driven Education</h2>
-                            <p className="text-lg text-slate-400 mb-8">
-                                These courses aren't just about learning—they're about doing. <br />
-                                You'll learn how concepts fit together, how strategies are applied in real-world scenarios, and how to turn knowledge into actual progress.
-                            </p>
-                            <div className="grid sm:grid-cols-3 gap-6 text-left">
-                                {[
-                                    "Understand the 'why' behind what you're doing",
-                                    "Build confidence through clarity",
-                                    "Take action without guesswork"
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
-                                        <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-                                        <span className="font-medium text-slate-300">{item}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.div>
-                    </div>
-                </section>
-
-                {/* Learning System - Gradient Section */}
-                <section className="w-full py-20 bg-gradient-to-br from-sky-900 via-slate-900 to-indigo-900 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
-                    <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="grid md:grid-cols-2 gap-12 items-center">
-                            <motion.div
-                                initial={{ opacity: 0, x: -30 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6 }}
-                            >
-                                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">A Learning System That Grows With You</h2>
-                                <p className="text-sky-200 mb-6 text-lg">
-                                    As online business evolves, so does K Business Academy. Your membership becomes more valuable over time—not outdated.
-                                </p>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {[
-                                        "New lessons added regularly",
-                                        "Courses expanded and refined",
-                                        "Content updated to stay relevant",
-                                        "Learning paths that evolve"
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-center gap-2 p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                                            <TrendingUp className="h-4 w-4 text-sky-400" />
-                                            <span className="text-sm text-white">{item}</span>
-                                        </div>
-                                    ))}
+                                    <h3 className="text-xl font-black mb-3">{item.title}</h3>
+                                    <p className="text-sm opacity-60 leading-relaxed">{item.desc}</p>
                                 </div>
-                            </motion.div>
-                            <motion.div
-                                initial={{ opacity: 0, x: 30 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6 }}
-                                className="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/20"
-                            >
-                                <h3 className="text-2xl font-bold mb-4 text-white">Learn Without Overwhelm</h3>
-                                <ul className="space-y-4 mb-6">
-                                    <li className="flex items-center gap-3 text-sky-100">
-                                        <ShieldCheck className="h-5 w-5 text-emerald-400" /> No complicated jargon
-                                    </li>
-                                    <li className="flex items-center gap-3 text-sky-100">
-                                        <ShieldCheck className="h-5 w-5 text-emerald-400" /> No information overload
-                                    </li>
-                                    <li className="flex items-center gap-3 text-sky-100">
-                                        <ShieldCheck className="h-5 w-5 text-emerald-400" /> No unrealistic expectations
-                                    </li>
-                                </ul>
-                                <p className="text-sky-200 italic">
-                                    "Just organized, structured learning that makes sense—especially if you've ever felt lost trying to figure things out on your own."
-                                </p>
-                            </motion.div>
+                            ))}
                         </div>
                     </div>
                 </section>
 
-                {/* Foundation - Dark Theme */}
-                <section className="w-full py-20 bg-slate-950">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="container px-4 md:px-6 mx-auto text-center max-w-4xl"
-                    >
-                        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">This Is More Than Courses</h2>
-                        <h3 className="text-xl bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent font-semibold mb-6">
-                            It's a Foundation for Long-Term Success
-                        </h3>
-                        <p className="text-lg text-slate-400 mb-8">
-                            When you learn through K Business Academy, you're not just consuming content—you're building a knowledge base you can rely on for years to come.
-                        </p>
-                    </motion.div>
-                </section>
-
-                {/* CTA - Gradient */}
-                <section className="w-full py-24 bg-gradient-to-br from-slate-900 via-sky-900 to-slate-900 relative overflow-hidden border-t border-slate-800">
-                    <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/20 rounded-full blur-3xl" />
-
-                    <div className="container px-4 md:px-6 mx-auto text-center relative z-10">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ready to Start Learning?</h2>
-                            <p className="max-w-2xl mx-auto text-xl text-slate-300 mb-10 leading-relaxed">
-                                If you're ready to learn at your own pace, build real skills, and grow with confidence—K Business Academy is ready when you are.
-                            </p>
-                            <div className="flex flex-col items-center gap-6">
-                                <Link href="/sign-up">
-                                    <Button size="lg" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-xl px-12 h-16 shadow-2xl shadow-sky-500/50">
-                                        Join K Business Academy
-                                    </Button>
-                                </Link>
+                {/* Certification/Trust Section */}
+                <section className="w-full py-24 bg-[#fefbe7]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="bg-[#606c38] rounded-[3rem] p-12 md:p-20 flex flex-col md:flex-row items-center justify-between gap-12 text-[#fefae0] relative overflow-hidden">
+                            <div className="absolute top-0 right-1/4 w-[300px] h-[300px] bg-[#bc6c25]/20 rounded-full blur-[80px]" />
+                            <div className="md:w-2/3 relative z-10">
+                                <h2 className="text-4xl md:text-6xl font-black leading-tight mb-8">Join the Top 1% of Business Operators.</h2>
+                                <p className="text-xl opacity-80 mb-10 leading-relaxed">
+                                    Access the full curriculum, download the tactical spreadsheets, and join a fleet of professionals building the future of business.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    <Link href="/sign-up">
+                                        <Button className="bg-[#bc6c25] hover:bg-[#dda15e] text-[#fefae0] px-10 h-16 rounded-2xl font-black text-lg transition-all shadow-2xl">
+                                            Enroll in the Academy
+                                        </Button>
+                                    </Link>
+                                    <Link href="/library">
+                                        <Button variant="outline" className="border-[#fefae0]/30 text-[#fefae0] hover:bg-[#fefae0]/10 px-10 h-16 rounded-2xl font-black text-lg backdrop-blur-sm">
+                                            View Library
+                                        </Button>
+                                    </Link>
+                                </div>
                             </div>
-                        </motion.div>
+                            <div className="md:w-1/3 flex flex-col gap-6 relative z-10">
+                                <div className="bg-[#fefae0]/10 p-6 rounded-2xl backdrop-blur-md border border-[#fefae0]/10">
+                                    <GraduationCap className="text-[#dda15e] mb-4" size={40} />
+                                    <p className="italic opacity-80 font-medium">"The most comprehensive approach to business operations I've found online. No games, just growth."</p>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm font-bold ml-4">
+                                    <div className="flex -space-x-4">
+                                        {[1, 2, 3].map(i => <div key={i} className="w-10 h-10 rounded-full border-2 border-[#606c38] bg-[#dda15e]" />)}
+                                    </div>
+                                    <span>Joined by 12,000+ Students</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </main>
 
-            {/* Footer - Dark Theme */}
-            <footer className="flex flex-col gap-2 sm:flex-row py-8 w-full shrink-0 items-center px-4 md:px-6 border-t border-slate-800 bg-slate-950">
-                <p className="text-xs text-slate-500">© 2025 K Business Academy. All rights reserved.</p>
-                <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-                    <Link className="text-xs text-slate-500 hover:text-slate-300 transition-colors" href="#">
-                        Terms of Service
-                    </Link>
-                    <Link className="text-xs text-slate-500 hover:text-slate-300 transition-colors" href="#">
-                        Privacy
-                    </Link>
-                </nav>
+            {/* Footer - Professional Theme */}
+            <footer className="py-12 bg-[#283618] text-[#fefae0]/50 border-t border-[#fefae0]/5">
+                <div className="container px-4 md:px-6 mx-auto">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="flex items-center gap-2 grayscale brightness-200 opacity-50">
+                            <div className="w-8 h-8 bg-[#606c38] rounded flex items-center justify-center font-black text-[#fefae0]">K</div>
+                            <span className="font-bold tracking-tighter">K BUSINESS ACADEMY</span>
+                        </div>
+                        <nav className="flex gap-10">
+                            <Link href="#" className="text-sm font-bold hover:text-[#dda15e] transition-colors">Curriculum</Link>
+                            <Link href="#" className="text-sm font-bold hover:text-[#dda15e] transition-colors">Ethics</Link>
+                            <Link href="#" className="text-sm font-bold hover:text-[#dda15e] transition-colors">Privacy</Link>
+                            <Link href="#" className="text-sm font-bold hover:text-[#dda15e] transition-colors">Support</Link>
+                        </nav>
+                        <p className="text-xs font-medium uppercase tracking-widest">© 2026 K Business Academy</p>
+                    </div>
+                </div>
             </footer>
         </div>
+    );
+}
+
+function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
+    return (
+        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${className}`}>
+            {children}
+        </span>
     );
 }

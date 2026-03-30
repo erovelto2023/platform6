@@ -1,10 +1,10 @@
 "use client";
 import { useState, useTransition } from 'react';
 import { IFAQ } from '@/lib/db/models/FAQ';
-import { Plus, Edit, Trash2, Search, ArrowLeft, Download, RefreshCw, Eye, FileUp, EyeOff, AlertTriangle, CheckCircle2, Pencil, Send } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, ArrowLeft, Download, RefreshCw, Eye, FileUp, EyeOff, AlertTriangle, CheckCircle2, Pencil, Send, Sparkles, ExternalLink, Copy, RotateCcw, AlertCircle, Video } from 'lucide-react';
 import Link from 'next/link';
 import Papa from 'papaparse';
-import { createFAQ, updateFAQ, deleteFAQ, importFAQs, importCSVFAQs, bulkUnpublishEmptyFAQs, publishFAQWithAnswer } from '@/lib/actions/faq.actions';
+import { createFAQ, updateFAQ, deleteFAQ, importFAQs, importCSVFAQs, bulkUnpublishEmptyFAQs, publishFAQWithAnswer, flushAllFAQs, removeDuplicateFAQs, scrubFaqUrls, normalizeFaqData, backfillFaqAffiliateLinks, backfillFaqAnswers, verifyFaqVideoLinksBatch, autoReplaceBrokenFaqVideos } from '@/lib/actions/faq.actions';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 interface FAQManagerProps {
@@ -45,6 +45,103 @@ export default function FAQManager({
     const [draftSearchTerm, setDraftSearchTerm] = useState(draftSearch);
     const [importText, setImportText] = useState('');
     const [isPending, startTransition] = useTransition();
+
+    const [brokenVideos, setBrokenVideos] = useState<{ id: string; term: string; videoUrl: string; reason: string }[]>([]);
+    const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
+    const [auditProgress, setAuditProgress] = useState<string>("");
+
+    const handleBackfillAnswers = () => {
+        if (!confirm('This will use AI to automatically generate answers for all draft FAQs. Continue?')) return;
+        startTransition(async () => {
+            const res = await backfillFaqAnswers();
+            if (res.success) { alert(`✅ Generated and published answers for ${res.updatedCount} questions!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleVideoAudit = async () => {
+        setAuditStatus("running");
+        setAuditProgress("0%");
+        
+        const videoFaqs = faqs.filter(f => f.videoUrl);
+        if (videoFaqs.length === 0) {
+            alert('✅ No videos found to audit!');
+            setAuditStatus("idle"); setAuditProgress(""); return;
+        }
+
+        const brokenUrls: any[] = [];
+        const batchSize = 10;
+        let processedCount = 0;
+        
+        for (let i = 0; i < videoFaqs.length; i += batchSize) {
+            const batch = videoFaqs.slice(i, i + batchSize).map(f => ({ id: (f._id as unknown as string), question: f.question, videoUrl: f.videoUrl! }));
+            const res = await verifyFaqVideoLinksBatch(batch);
+            if (res.success && res.brokenTerms) brokenUrls.push(...res.brokenTerms);
+            processedCount += batch.length;
+            setAuditProgress(`${Math.round((processedCount / videoFaqs.length) * 100)}%`);
+        }
+
+        setAuditStatus("done"); setAuditProgress("");
+        if (brokenUrls.length === 0) { alert('✅ All YouTube videos are live!'); setBrokenVideos([]); } 
+        else { setBrokenVideos(brokenUrls); alert(`⚠️ Found ${brokenUrls.length} broken YouTube links.`); }
+    };
+
+    const handleAutoReplace = () => {
+        if (!confirm('Auto-search YouTube and replace broken videos? Continue?')) return;
+        startTransition(async () => {
+            const res = await autoReplaceBrokenFaqVideos(brokenVideos.map(v => ({ id: v.id, term: v.term })));
+            if (res.success) {
+                if (res.fixedCount > 0) alert(`✅ Auto-replaced ${res.fixedCount} videos!`);
+                else alert(`Unable to find relevant replacements.`);
+                setBrokenVideos(res.remainingBroken || []);
+            } else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleScrubUrls = () => {
+        if (!confirm('Scan and remove placeholder URLs? Continue?')) return;
+        startTransition(async () => {
+            const res = await scrubFaqUrls();
+            if (res.success) { alert(`✅ Scrubbed URLs! Pages updating.`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleAffiliateAudit = () => {
+        if (!confirm('Scan Amazon links and attach affiliate ID? Continue?')) return;
+        startTransition(async () => {
+            const res = await backfillFaqAffiliateLinks();
+            if (res.success) { alert(`✅ Updated ${res.updatedCount} FAQs!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleRemoveDuplicates = () => {
+        if (!confirm('Scan and remove duplicate questions? Continue?')) return;
+        startTransition(async () => {
+            const res = await removeDuplicateFAQs();
+            if (res.success) { alert(`✅ Removed ${res.removed} duplicates!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleFlushFAQs = () => {
+        if (!confirm('⚠️ WARNING: Delete ALL FAQs? Cannot be undone. Continue?')) return;
+        startTransition(async () => {
+            const res = await flushAllFAQs();
+            if (res.success) { alert(`✅ Successfully deleted all FAQs.`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleNormalizeData = () => {
+        if (!confirm('Fix structural data issues? Continue?')) return;
+        startTransition(async () => {
+            const res = await normalizeFaqData();
+            if (res.success) { alert(`✅ Successfully normalized data.`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
 
     const updateSearch = (term: string) => {
         setSearchTerm(term);
@@ -138,6 +235,30 @@ export default function FAQManager({
                     <p className="text-xs text-slate-400 mt-1">{totalCount} published · <span className="text-amber-600 font-bold">{draftTotal} need answers</span></p>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end">
+                    <Link href="/admin/glossary" className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all text-sm">
+                        Glossary Management
+                    </Link>
+                    <button onClick={handleBackfillAnswers} disabled={isPending || draftTotal === 0} className="bg-sky-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-sky-700 transition-all disabled:opacity-50 text-sm">
+                        <Sparkles size={15} /> Backfill Answers
+                    </button>
+                    <button onClick={handleVideoAudit} disabled={isPending || faqs.length === 0 || auditStatus === "running"} className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-rose-700 transition-all disabled:opacity-50 text-sm">
+                        {auditStatus === "running" ? `Auditing... ${auditProgress}` : "Video Audit"}
+                    </button>
+                    <button onClick={handleScrubUrls} disabled={isPending || faqs.length === 0} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 text-sm">
+                        <ExternalLink size={15} /> Scrub URLs
+                    </button>
+                    <button onClick={handleAffiliateAudit} disabled={isPending || faqs.length === 0} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm">
+                        <ExternalLink size={15} /> Affiliate Audit
+                    </button>
+                    <button onClick={handleRemoveDuplicates} disabled={isPending || faqs.length === 0} className="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-amber-600 transition-all disabled:opacity-50 text-sm">
+                        <Copy size={15} /> Remove Duplicates
+                    </button>
+                    <button onClick={handleNormalizeData} disabled={isPending || faqs.length === 0} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50 text-sm">
+                        <RotateCcw size={15} /> Normalize Data
+                    </button>
+                    <button onClick={handleFlushFAQs} disabled={isPending || faqs.length === 0} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50 text-sm">
+                        <RotateCcw size={15} /> Flush All
+                    </button>
                     {emptyCount > 0 && (
                         <button onClick={handleBulkUnpublish} disabled={isPending} className="bg-amber-50 text-amber-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-amber-200 hover:bg-amber-100 transition-all text-sm disabled:opacity-50">
                             <EyeOff size={15} />
@@ -156,6 +277,37 @@ export default function FAQManager({
                     </button>
                 </div>
             </div>
+
+            {/* Broken Videos Report */}
+            {view === 'list' && brokenVideos.length > 0 && (
+                <div className="m-6 p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest flex items-center gap-2">
+                            <AlertCircle size={16} />
+                            Broken YouTube Links Found ({brokenVideos.length})
+                        </h3>
+                        <button onClick={handleAutoReplace} disabled={isPending} className="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all disabled:opacity-50 flex items-center gap-2">
+                            <Sparkles size={14} /> Auto-Fix All
+                        </button>
+                    </div>
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                        {brokenVideos.map((item) => (
+                            <div key={item.id} className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">
+                                <div>
+                                    <p className="text-sm font-black text-slate-900">{item.term}</p>
+                                    <p className="text-xs text-rose-500 font-mono truncate max-w-lg">{item.videoUrl}</p>
+                                </div>
+                                <button
+                                    onClick={() => { const faqToEdit = faqs.find(f => (f._id as unknown as string) === item.id); if (faqToEdit) { setEditingFAQ(faqToEdit); setView('edit'); } }}
+                                    className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-slate-800 transition-all"
+                                >
+                                    Fix Now
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Tabs */}
             <div className="flex border-b border-slate-100">
@@ -197,7 +349,10 @@ export default function FAQManager({
                                 {faqs.map(faq => (
                                     <tr key={(faq._id as unknown) as string} className="hover:bg-slate-50 transition-colors">
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-bold text-slate-900 line-clamp-1">{faq.question}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="text-sm font-bold text-slate-900 line-clamp-1">{faq.question}</div>
+                                                {faq.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-500" /></span>}
+                                            </div>
                                             <div className="text-xs text-slate-500 truncate max-w-xs">{faq.answerSnippet}</div>
                                         </td>
                                         <td className="px-6 py-4 text-sm text-slate-500">{faq.parentQuestion || '-'}</td>
@@ -520,6 +675,7 @@ function FAQForm({ initialData, onCancel, offers = [] }: { initialData?: IFAQ, o
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Link Title</label><input name="linkTitle" defaultValue={initialData?.linkTitle} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" /></div>
                             <div><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Link URL</label><input name="linkUrl" defaultValue={initialData?.linkUrl} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" /></div>
+                            <div className="col-span-2"><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Video URL</label><input name="videoUrl" defaultValue={initialData?.videoUrl} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-rose-400" placeholder="https://youtube.com/watch?v=..." /></div>
                             <div className="col-span-2"><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Source Text</label><textarea name="sourceText" defaultValue={initialData?.sourceText} rows={2} className="w-full border rounded-xl p-3 text-sm bg-slate-50 font-mono text-[10px] focus:outline-none focus:border-black" /></div>
                         </div>
                     </div>

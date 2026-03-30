@@ -8,6 +8,7 @@ export interface IFAQ extends Document {
     // Source/Reference Data
     linkTitle?: string;
     linkUrl?: string;
+    videoUrl?: string;
     sourceText?: string;
 
     // SEO & Content
@@ -37,6 +38,7 @@ const FAQSchema = new Schema<IFAQ>({
 
     linkTitle: { type: String },
     linkUrl: { type: String },
+    videoUrl: { type: String },
     sourceText: { type: String },
 
     h1Title: { type: String, required: true },

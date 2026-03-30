@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getStates } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search as SearchIcon } from "lucide-react";
+import { MapPin, Search as SearchIcon, Globe, ArrowRight, ShieldCheck } from "lucide-react";
 import { Search } from "@/components/ui/Search";
-import { MainNav } from "@/components/shared/MainNav";
+import { SimpleHeroSlideshow } from "@/components/animations";
 
 export const dynamic = 'force-dynamic';
 
@@ -16,89 +16,180 @@ export default async function LocationsPage({
     const result = await getStates(query);
     const states = Array.isArray(result) ? result : (result?.states || []);
 
-    return (
-        <div className="flex flex-col min-h-screen bg-[#f8f9fa]">
-            {/* Top Navigation Bar */}
-            <MainNav />
+    const heroSlides = [
+        {
+            title: 'Market Intelligence',
+            subtitle: 'Strategic geographical data assets for professional business operations. Map your growth with precision.',
+            backgroundImage: '/heroimages/locations_premium.png',
+            ctaText: 'Explore Data',
+            ctaLink: '#explorer',
+        }
+    ];
 
-            <main className="flex-1 mt-16">
-                {/* Hero Section */}
-                <section className="w-full py-12 md:py-20 bg-[#f8f9fa] relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(124,58,237,0.1),transparent_50%)]" />
-                    <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="text-center max-w-3xl mx-auto">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tighter mb-6 text-[#f8fafc] uppercase italic">
-                                US Business <span className="text-sky-500">Directory</span>
-                            </h1>
-                            <p className="text-slate-600 text-lg md:text-xl mb-10 font-medium max-w-2xl mx-auto">
-                                Explore every state and city in the United States to discover unique local opportunities and business resources.
-                            </p>
-                            
-                            <div className="max-w-xl mx-auto">
-                                <Search placeholder="Search by state name..." />
+    return (
+        <div className="flex flex-col min-h-screen bg-[#fefae0]">
+            {/* Navbar - Professional Educational Theme */}
+            <header className="px-6 lg:px-10 h-20 flex items-center border-b border-[#bc6c25]/20 bg-[#fefae0]/80 backdrop-blur-md sticky top-0 z-50">
+                <div className="flex items-center gap-2 font-bold text-xl text-[#283618]">
+                    <Link href="/" className="flex items-center gap-2">
+                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center text-[#fefae0] shadow-lg shadow-[#606c38]/20 transition-transform hover:scale-105">
+                            K
+                        </div>
+                        <div className="flex flex-col leading-none">
+                            <span className="text-lg font-black tracking-tight">K BUSINESS</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-70">Academy</span>
+                        </div>
+                    </Link>
+                </div>
+                <nav className="ml-auto flex items-center gap-8 hidden md:flex">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/courses">
+                        Courses
+                    </Link>
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/library">
+                        Library
+                    </Link>
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/business-resources">
+                        Resources
+                    </Link>
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/affiliate-crm">
+                        Affiliate CRM
+                    </Link>
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/blog">
+                        Blog
+                    </Link>
+                    <Link className="text-sm font-bold text-[#606c38] border-b-2 border-[#606c38]" href="/locations">
+                        Intelligence
+                    </Link>
+                    <div className="h-6 w-px bg-[#283618]/10 mx-2" />
+                    <Link href="/sign-in">
+                        <Button variant="ghost" className="text-[#283618] font-bold hover:bg-[#606c38]/5">
+                            Log In
+                        </Button>
+                    </Link>
+                    <Link href="/sign-up">
+                        <Button className="bg-[#606c38] hover:bg-[#283618] text-[#fefae0] px-6 h-11 rounded-xl shadow-xl shadow-[#606c38]/20 transition-all font-bold">
+                            Get Access
+                        </Button>
+                    </Link>
+                </nav>
+            </header>
+
+            <main className="flex-1">
+                <SimpleHeroSlideshow slides={heroSlides} autoplay={false} />
+
+                {/* Explorer Section */}
+                <section id="explorer" className="w-full py-24 bg-[#fefae0]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-10">
+                            <div className="max-w-2xl">
+                                <span className="flex items-center gap-2 text-[#bc6c25] font-black tracking-[0.3em] text-xs mb-4 uppercase">
+                                    <Globe size={16} /> Global Infrastructure
+                                </span>
+                                <h2 className="text-4xl md:text-6xl font-black text-[#283618] leading-[1.1]">
+                                    Intelligence Explorer.
+                                </h2>
+                                <p className="mt-6 text-xl text-[#283618]/60 font-medium">
+                                    Access tactical data across the United States. Find markets, resources, and operational nodes.
+                                </p>
+                            </div>
+                            <div className="w-full md:w-96">
+                                <Search placeholder="Search by region..." />
                             </div>
                         </div>
-                    </div>
-                </section>
 
-                {/* States Grid */}
-                <section className="w-full py-12 bg-white min-h-[400px]">
-                    <div className="container px-4 md:px-6 mx-auto">
-                        <div className="flex items-center justify-between mb-8 border-l-4 border-sky-500 pl-4">
-                            <h2 className="text-2xl font-black text-[#f8fafc] uppercase italic tracking-tight">
-                                {query ? `Results for "${query}"` : 'Browse by State'}
-                            </h2>
-                            <span className="text-slate-500 text-xs font-bold uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">
-                                {states.length} States Found
-                            </span>
+                        <div className="flex items-center gap-4 mb-10 border-l-4 border-[#606c38] pl-6 py-2 bg-[#606c38]/5 rounded-r-2xl">
+                            <h3 className="text-xl font-black text-[#283618] uppercase tracking-tight italic">
+                                {query ? `Matched Analysis: "${query}"` : 'Tactical Regions'}
+                            </h3>
+                            <div className="ml-auto bg-[#606c38] text-[#fefae0] px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[#606c38]/20">
+                                {states.length} Active Nodes
+                            </div>
                         </div>
 
                         {(!states || states.length === 0) ? (
-                            <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-300 bg-slate-50 rounded-[2rem] text-center">
-                                <SearchIcon className="h-12 w-12 text-slate-700 mb-4" />
-                                <h2 className="text-xl font-bold text-slate-500 uppercase italic">No Matches Found</h2>
-                                <p className="text-slate-600 mt-2 max-w-sm text-sm">
-                                    We couldn't find any states matching your search. Try a different term or browse the full list.
+                            <div className="flex flex-col items-center justify-center p-32 bg-white rounded-[4rem] border border-[#283618]/5 text-center shadow-xl shadow-[#283618]/5">
+                                <div className="w-20 h-20 bg-[#fefae0] rounded-full flex items-center justify-center text-[#bc6c25] mb-8">
+                                    <SearchIcon size={40} />
+                                </div>
+                                <h2 className="text-3xl font-black text-[#283618] mb-4">No Nodes Detected.</h2>
+                                <p className="text-[#283618]/50 max-w-sm mb-10 font-medium italic">
+                                    We couldn't find any regions matching your specific query. Try broadening your parameters.
                                 </p>
-                                <Button 
-                                    variant="link" 
-                                    className="mt-4 text-sky-500 hover:text-sky-400 font-bold uppercase text-xs"
-                                    onClick={() => window.location.href = '/locations'}
-                                >
-                                    Clear Search
-                                </Button>
+                                <Link href="/locations">
+                                    <Button className="bg-[#283618] hover:bg-[#606c38] text-[#fefae0] px-10 h-14 rounded-2xl font-black transition-all">
+                                        Reset Explorer
+                                    </Button>
+                                </Link>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                 {states.map((state: any) => (
                                     <Link 
                                         key={state.slug}
                                         href={`/locations/${state.slug}`}
-                                        className="group relative overflow-hidden bg-white border-slate-200/50 hover:bg-slate-100 p-6 rounded-2xl border border-slate-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-sky-500/10 active:scale-95"
+                                        className="group relative overflow-hidden bg-white p-8 rounded-[2rem] border border-[#283618]/5 transition-all duration-500 hover:shadow-2xl hover:shadow-[#606c38]/10 hover:-translate-y-2"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400 group-hover:bg-sky-500 group-hover:text-[#0284c7] transition-all duration-300">
-                                                <MapPin size={20} />
+                                        <div className="flex items-center gap-4 mb-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-[#dda15e]/10 flex items-center justify-center text-[#bc6c25] group-hover:bg-[#606c38] group-hover:text-[#fefae0] transition-all duration-500 shadow-sm">
+                                                <MapPin size={24} />
                                             </div>
-                                            <span className="font-bold text-slate-800 group-hover:text-[#0284c7] transition-colors">
-                                                {state.name}
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-[#283618] text-lg group-hover:text-[#606c38] transition-colors leading-tight">
+                                                    {state.name}
+                                                </span>
+                                                <span className="text-[10px] uppercase font-black tracking-widest text-[#283618]/30">Active Market</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#283618]/5">
+                                            <span className="text-[10px] font-black text-[#bc6c25] uppercase tracking-widest group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
+                                                Analyze Node <ArrowRight size={14} />
                                             </span>
                                         </div>
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </Link>
                                 ))}
                             </div>
                         )}
                     </div>
                 </section>
+
+                {/* Bottom CTA */}
+                <section className="w-full py-24 bg-[#283618]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="bg-[#dda15e] rounded-[4rem] p-12 md:p-24 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden">
+                            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#283618]/10 rounded-full blur-[100px]" />
+                            <div className="md:w-2/3 relative z-10">
+                                <span className="flex items-center gap-2 text-[#283618] font-black tracking-[0.3em] text-xs mb-8 uppercase">
+                                    <ShieldCheck size={16} /> Exclusive Intelligence
+                                </span>
+                                <h2 className="text-4xl md:text-6xl font-black text-[#fefae0] mb-8 leading-tight italic">Expand Your Reach.</h2>
+                                <p className="text-xl text-[#283618] font-medium opacity-80 leading-relaxed">
+                                    K Business Academy members get priority access to deep-market data, localized resource maps, and strategic networking opportunities in every node.
+                                </p>
+                            </div>
+                            <div className="md:w-1/3 w-full relative z-10">
+                                <Link href="/sign-up">
+                                    <Button className="w-full bg-[#283618] hover:bg-[#606c38] text-[#fefae0] h-20 rounded-3xl font-black text-2xl shadow-2xl transition-all">
+                                        Join for Data
+                                    </Button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </main>
 
-            {/* Footer */}
-            <footer className="py-12 border-t border-slate-200 bg-[#f8f9fa]">
-                <div className="container px-4 md:px-6 mx-auto text-center">
-                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">
-                        © 2025 K Business Academy. All rights reserved.
-                    </p>
+            <footer className="py-12 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5">
+                <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="flex items-center gap-2 grayscale brightness-200 opacity-40">
+                        <div className="w-8 h-8 bg-[#606c38] rounded flex items-center justify-center font-black text-[#fefae0]">K</div>
+                        <span className="font-bold tracking-tighter">K BUSINESS INTELLIGENCE</span>
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-widest italic">© 2026 Global Intelligence Network</p>
+                    <nav className="flex gap-10">
+                        <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Methodology</Link>
+                        <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Archives</Link>
+                        <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Legal</Link>
+                    </nav>
                 </div>
             </footer>
         </div>

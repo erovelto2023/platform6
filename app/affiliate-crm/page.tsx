@@ -5,17 +5,18 @@ import { Button } from "@/components/ui/button";
 import { SimpleHeroSlideshow } from "@/components/animations";
 import { motion } from "framer-motion";
 import {
-    Link as LinkIcon, DollarSign, BarChart3, ArrowRight,
-    Facebook, Youtube, Handshake
+    Users, BarChart3, Globe, ShieldCheck, Share2, Target,
+    Workflow, Network, Handshake, TrendingUp, CheckCircle2, ArrowRight,
+    Facebook, Youtube
 } from "lucide-react";
 
-export default function AffiliatePage() {
+export default function AffiliateCRMPage() {
     const heroSlides = [
         {
-            title: 'Partner with the Best.',
-            subtitle: 'Affiliate products and services you can join to resell.',
-            backgroundImage: '/heroimages/a400fc81-bf6f-4c22-be56-c83b91b26693.png',
-            ctaText: 'Start Earning',
+            title: 'Partnership Ecosystem Management',
+            subtitle: 'Scale your leverage through professional relationships. A high-performance CRM built for elite partnership growth.',
+            backgroundImage: '/heroimages/affiliate_premium.png',
+            ctaText: 'Access CRM',
             ctaLink: '/sign-up',
         }
     ];
@@ -36,154 +37,183 @@ export default function AffiliatePage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-950">
-            <header className="px-6 lg:px-10 h-16 flex items-center border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-[34px] z-50">
-                <div className="flex items-center gap-2 font-bold text-xl text-white">
+        <div className="flex flex-col min-h-screen bg-[#fefae0]">
+            {/* Navbar - Professional Educational Theme */}
+            <header className="px-6 lg:px-10 h-20 flex items-center border-b border-[#bc6c25]/20 bg-[#fefae0]/80 backdrop-blur-md sticky top-0 z-50">
+                <div className="flex items-center gap-2 font-bold text-xl text-[#283618]">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-indigo-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-sky-500/50">
+                        <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center text-[#fefae0] shadow-lg shadow-[#606c38]/20 transition-transform hover:scale-105">
                             K
                         </div>
-                        <span className="bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">
-                            K Business Academy
-                        </span>
+                        <div className="flex flex-col leading-none">
+                            <span className="text-lg font-black tracking-tight">K BUSINESS</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-70">Academy</span>
+                        </div>
                     </Link>
                 </div>
-                <nav className="ml-auto flex items-center gap-4 sm:gap-6 hidden md:flex">
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/courses">
+                <nav className="ml-auto flex items-center gap-8 hidden md:flex">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/courses">
                         Courses
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/library">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/library">
                         Library
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/business-resources">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/business-resources">
                         Resources
                     </Link>
-                    <Link className="text-sm font-medium text-sky-400 hover:text-white transition-colors" href="/affiliate-crm">
+                    <Link className="text-sm font-bold text-[#606c38] border-b-2 border-[#606c38]" href="/affiliate-crm">
                         Affiliate CRM
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/dashboard">
-                        Dashboard
-                    </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/blog">
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/blog">
                         Blog
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/glossary">
-                        Glossary
+                    <Link className="text-sm font-semibold text-[#283618]/70 hover:text-[#606c38] transition-colors" href="/locations">
+                        Intelligence
                     </Link>
-                    <Link className="text-sm font-medium text-slate-300 hover:text-white transition-colors" href="/locations">
-                        Market Intelligence
-                    </Link>
+                    <div className="h-6 w-px bg-[#283618]/10 mx-2" />
                     <Link href="/sign-in">
-                        <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-slate-800">
+                        <Button variant="ghost" className="text-[#283618] font-bold hover:bg-[#606c38]/5">
                             Log In
                         </Button>
                     </Link>
                     <Link href="/sign-up">
-                        <Button size="sm" className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 shadow-lg shadow-sky-500/30">
-                            Get Started
+                        <Button className="bg-[#606c38] hover:bg-[#283618] text-[#fefae0] px-6 h-11 rounded-xl shadow-xl shadow-[#606c38]/20 transition-all font-bold">
+                            Join Hub
                         </Button>
                     </Link>
                 </nav>
-                <div className="ml-auto md:hidden">
-                    <Link href="/sign-up">
-                        <Button size="sm">Get Started</Button>
-                    </Link>
-                </div>
             </header>
 
             <main className="flex-1">
-                <SimpleHeroSlideshow slides={heroSlides} autoplay={true} interval={6000} />
+                <SimpleHeroSlideshow slides={heroSlides} autoplay={false} />
 
-                <section className="w-full py-20 bg-slate-900 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-sky-600/5 rounded-full blur-[100px]" />
-                    <div className="container px-4 md:px-6 mx-auto relative z-10">
-                        <div className="max-w-4xl mx-auto text-center">
-                            <motion.h2
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeInUp}
-                                className="text-3xl md:text-5xl font-bold mb-6 text-white"
-                            >
-                                Monetize with Confidence
-                            </motion.h2>
-                            <motion.p
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={fadeInUp}
-                                className="text-xl text-slate-400 mb-12"
-                            >
-                                Discover high-converting affiliate products and services you can join to resell. Build a revenue stream by recommending tools you trust.
-                            </motion.p>
-
+                {/* CRM Philosophy */}
+                <section className="w-full py-24 bg-[#fefae0]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="max-w-4xl mx-auto text-center mb-24">
                             <motion.div
-                                variants={staggerContainer}
                                 initial="hidden"
                                 whileInView="visible"
                                 viewport={{ once: true }}
-                                className="grid md:grid-cols-3 gap-8 text-left"
+                                variants={fadeInUp}
                             >
-                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-green-500/50 transition-all">
-                                    <Handshake className="h-10 w-10 text-green-400 mb-4" />
-                                    <h3 className="text-xl font-bold text-white mb-2">Vetted Partnerships</h3>
-                                    <p className="text-slate-400 text-sm">We only list affiliate programs that are reliable and profitable.</p>
-                                </div>
-                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-yellow-500/50 transition-all">
-                                    <DollarSign className="h-10 w-10 text-yellow-400 mb-4" />
-                                    <h3 className="text-xl font-bold text-white mb-2">High Commissions</h3>
-                                    <p className="text-slate-400 text-sm">Find offers with generous payouts to maximize your earnings.</p>
-                                </div>
-                                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700 hover:border-cyan-500/50 transition-all">
-                                    <BarChart3 className="h-10 w-10 text-cyan-400 mb-4" />
-                                    <h3 className="text-xl font-bold text-white mb-2">Tracking & Tools</h3>
-                                    <p className="text-slate-400 text-sm">Manage your links and performance all in one place inside our CRM.</p>
+                                <span className="text-[#bc6c25] font-black tracking-widest text-xs mb-4 block uppercase underline decoration-2 underline-offset-4">Relational Capital</span>
+                                <h2 className="text-4xl md:text-6xl font-black text-[#283618] mb-8 leading-tight">
+                                    Strategic Growth Through Networks.
+                                </h2>
+                                <p className="text-xl text-[#283618]/60 leading-relaxed max-w-3xl mx-auto">
+                                    Traditional marketing is expensive. Relational marketing is profound. K Business Academy provides the infrastructure to track, manage, and scale your partnership network with professional-grade precision.
+                                </p>
+                            </motion.div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-16 items-center">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                whileInView={{ opacity: 1, scale: 1 }}
+                                viewport={{ once: true }}
+                                className="bg-[#283618] p-12 rounded-[3.5rem] text-[#fefae0] relative"
+                            >
+                                <div className="absolute -top-12 -left-12 w-32 h-32 bg-[#dda15e] rounded-full blur-[60px] opacity-30" />
+                                <h3 className="text-3xl font-black mb-8">Ecosystem Metrics</h3>
+                                <div className="space-y-8">
+                                    {[
+                                        { title: "Real-Time Attribution", icon: BarChart3, color: "#606c38" },
+                                        { title: "Network Visualization", icon: Network, color: "#bc6c25" },
+                                        { title: "Relational CRM", icon: Users, color: "#dda15e" }
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex gap-6 items-center">
+                                            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ backgroundColor: item.color }}>
+                                                <item.icon size={28} />
+                                            </div>
+                                            <div>
+                                                <h4 className="text-xl font-bold">{item.title}</h4>
+                                                <p className="text-sm opacity-60">High-fidelity data tracking for every connection.</p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </motion.div>
+
+                            <div className="space-y-12">
+                                <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+                                    <h3 className="text-3xl font-black text-[#283618] mb-6 underline decoration-[#dda15e] decoration-4 underline-offset-8">Professional Integration</h3>
+                                    <p className="text-[#283618]/70 leading-relaxed">
+                                        Our CRM isn't just about links. It's about data-driven partnership management. Integration is seamless, and attribution is absolute.
+                                    </p>
+                                </motion.div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    {[
+                                        "Automated Payouts",
+                                        "Tiered Commission",
+                                        "Marketing Toolkit",
+                                        "Priority Support",
+                                        "Direct Messaging",
+                                        "White-Label Options"
+                                    ].map((item, i) => (
+                                        <div key={i} className="flex items-center gap-3">
+                                            <CheckCircle2 size={20} className="text-[#606c38]" />
+                                            <span className="font-bold text-[#283618]">{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <motion.div variants={fadeInUp} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+                                    <Link href="/sign-up">
+                                        <Button className="bg-[#bc6c25] hover:bg-[#606c38] text-[#fefae0] h-16 px-10 rounded-2xl font-black text-lg transition-all group">
+                                            Apply for Partnership <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
+                                </motion.div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <section className="w-full py-24 bg-slate-950 border-t border-slate-800">
-                    <div className="container px-4 md:px-6 mx-auto text-center">
-                        <h2 className="text-3xl font-bold text-white mb-8">Ready to Start Earning?</h2>
-                        <Link href="/sign-up">
-                            <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-8 text-lg font-semibold">
-                                Access Affiliate CRM <ArrowRight className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
+                {/* Trust/Global Presence */}
+                <section className="w-full py-24 bg-[#e2e7d1] rounded-t-[4rem]">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="text-center max-w-2xl mx-auto mb-16">
+                            <h2 className="text-4xl font-black text-[#283618] mb-6">A Global Network of Operators</h2>
+                            <p className="text-lg text-[#283618]/60">Our affiliate partners aren't "influencers." They are business operators, strategists, and leaders who recognize the value of system-based education.</p>
+                        </div>
+                        
+                        <div className="flex flex-wrap justify-center gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+                             {/* Icons represent prestigious global presence */}
+                             <Globe size={48} className="text-[#283618]" />
+                             <Target size={48} className="text-[#283618]" />
+                             <Share2 size={48} className="text-[#283618]" />
+                             <TrendingUp size={48} className="text-[#283618]" />
+                             <Handshake size={48} className="text-[#283618]" />
+                        </div>
                     </div>
                 </section>
             </main>
 
-            <footer className="flex flex-col gap-4 sm:flex-row py-10 w-full shrink-0 items-center px-4 md:px-6 border-t border-slate-800 bg-slate-950">
-                <p className="text-sm text-slate-500">© 2025 K Business Academy. All rights reserved.</p>
-                <nav className="sm:ml-auto flex gap-6 items-center">
-                    <Link
-                        href="https://www.facebook.com/erovelto"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-500 hover:text-blue-500 transition-colors flex items-center gap-2"
-                    >
-                        <Facebook className="h-5 w-5" />
-                        <span className="hidden sm:inline text-xs font-medium">Facebook</span>
-                    </Link>
-                    <Link
-                        href="https://www.youtube.com/@KBusinessAcademy"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-slate-500 hover:text-red-500 transition-colors flex items-center gap-2"
-                    >
-                        <Youtube className="h-5 w-5" />
-                        <span className="hidden sm:inline text-xs font-medium">YouTube</span>
-                    </Link>
-                    <Link className="text-sm text-slate-500 hover:text-white transition-colors" href="#">
-                        Terms of Service
-                    </Link>
-                    <Link className="text-sm text-slate-500 hover:text-white transition-colors" href="#">
-                        Privacy
-                    </Link>
-                </nav>
+            {/* Footer - Professional Theme */}
+            <footer className="py-12 bg-[#283618] text-[#fefae0]/50 border-t border-[#fefae0]/5">
+                <div className="container px-4 md:px-6 mx-auto">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-center md:text-left">
+                        <div>
+                            <div className="flex items-center gap-2 mb-4 justify-center md:justify-start">
+                                <div className="w-8 h-8 bg-[#606c38] rounded flex items-center justify-center font-black text-[#fefae0]">K</div>
+                                <span className="font-bold tracking-tighter text-[#fefae0]">K BUSINESS ACADEMY</span>
+                            </div>
+                            <p className="max-w-xs text-xs opacity-60">Leveraging relational infrastructure for systemic global growth.</p>
+                        </div>
+                        <nav className="flex gap-10">
+                            <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Agreement</Link>
+                            <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Ethics Code</Link>
+                            <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Dashboard</Link>
+                            <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-sm">Support</Link>
+                        </nav>
+                        <div className="flex gap-4 justify-center md:justify-start">
+                            <Link href="https://facebook.com/erovelto" target="_blank" className="bg-[#fefae0]/5 p-3 rounded-full hover:bg-[#606c38] transition-colors"><Facebook size={20} className="text-[#fefae0]" /></Link>
+                            <Link href="https://youtube.com/@KBusinessAcademy" target="_blank" className="bg-[#fefae0]/5 p-3 rounded-full hover:bg-[#606c38] transition-colors"><Youtube size={20} className="text-[#fefae0]" /></Link>
+                        </div>
+                    </div>
+                </div>
             </footer>
         </div>
     );
