@@ -1,7 +1,7 @@
 import { getFullContentPosts } from "@/lib/actions/content.actions";
 import { AdvancedContentCalendar } from "@/components/content/AdvancedContentCalendar";
 import { StrategyDashboard } from "@/components/content/StrategyDashboard";
-import { KanbanBoard } from "@/components/content-planner/kanban-board";
+import { KanbanBoard } from "@/components/calendar/content-planner/KanbanBoard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Campaign from "@/lib/db/models/Campaign";
 import Offer from "@/lib/db/models/Offer";
