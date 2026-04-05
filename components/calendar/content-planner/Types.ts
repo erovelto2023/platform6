@@ -1,18 +1,18 @@
 export interface PostData {
   id: string;
   title: string;
-  description?: string;
+  content: string; // Unified field name
+  description?: string; // Kept for legacy support
   platforms: string[];
-  status: 'Draft' | 'Scheduled' | 'Published' | 'Failed' | 'idea' | 'scheduled' | 'draft';
+  status: 'idea' | 'draft' | 'review' | 'scheduled' | 'published' | 'failed';
   scheduledAt: Date | null;
   image: string;
   contentType: string;
   workflowStage: string;
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  priority: 'low' | 'medium' | 'high' | 'critical'; // Normalized to lowercase
   calendarColor: string;
   time?: string;
   timeAgo?: string;
-  // Specific to platform6
   businessId?: string;
   userId?: string;
 }

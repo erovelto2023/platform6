@@ -55,17 +55,18 @@ export default clerkMiddleware(async (auth, req) => {
     if (isProtected(req)) {
         await auth.protect();
 
-        // Check for Student tier on specific routes
-        /* 
-        if (isStudentRoute(req)) {
-            const plan = (sessionClaims?.publicMetadata as any)?.plan || 'free';
-            const isAdmin = (sessionClaims?.publicMetadata as any)?.role === 'admin';
+        const plan = (sessionClaims?.publicMetadata as any)?.plan || 'free';
+        const role = (sessionClaims?.publicMetadata as any)?.role || 'user';
+        const isAdmin = role === 'admin';
 
+        // FEATURE BYPASS: Set to true during development to unlock all features
+        const BYPASS_ACCESS_CONTROL = true; 
+
+        if (!BYPASS_ACCESS_CONTROL && isStudentRoute(req)) {
             if (plan !== 'student' && !isAdmin) {
                 return NextResponse.redirect(new URL('/upgrade', req.url));
             }
         }
-        */
     }
 });
 

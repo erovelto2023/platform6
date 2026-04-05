@@ -1,71 +1,71 @@
+
 'use server';
 
 import connectDB from "@/lib/db/connect";
 import ContentPost from "@/lib/db/models/ContentPost";
 import { revalidatePath } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
+import { getActionContext } from "../auth-utils";
+import { ActionResponse } from "@/types";
 
-// Helper to get business (workspace)
-async function getActiveBusiness() {
-    // In platform6, we might want to get the business related to the user
-    // For now, let's assume we find the first business for the user
-    const { userId } = await auth();
-    if (!userId) return null;
-    
-    const Business = (await import("@/lib/db/models/Business")).default;
-    await connectDB();
-    const business = await Business.findOne({ userId });
-    return business;
-}
-
-export async function createPost(data: any) {
-  try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-    const business = await getActiveBusiness();
-    
-    await connectDB();
-    
-    // Normalize for model
-    const normalizedData = {
+/**
+ * Normalizes input data for consistent schema persistence
+ * Handles mapping between legacy 'description' and new 'content' fields
+ */
+function normalizePostData(data: any, ctx: { userId: string, businessId: string }) {
+    return {
         ...data,
         content: data.content || data.description || 'No content provided',
-        contentType: (data.contentType || 'social').toLowerCase().split(' ')[0],
         status: (data.status || 'draft').toLowerCase(),
-        platforms: (data.platforms || []).map((p: string) => ({
-            name: p.toLowerCase(),
-            status: 'pending'
-        }))
+        contentType: (data.contentType || 'social').toLowerCase().split(' ')[0],
+        userId: ctx.userId,
+        businessId: ctx.businessId,
+        platforms: (data.platforms || ["social"]).map((p: string | any) => {
+            const name = typeof p === 'string' ? p.toLowerCase() : p.name.toLowerCase();
+            return {
+                name,
+                status: 'pending'
+            };
+        })
     };
+}
 
-    const newPost = await ContentPost.create({
-      ...normalizedData,
-      businessId: business ? business._id.toString() : 'unassigned',
-      userId: userId,
-    });
+/**
+ * Create a new content piece
+ */
+export async function createPost(data: any): Promise<ActionResponse> {
+  try {
+    const context = await getActionContext();
+    if (!context.success || !context.data) return { success: false, error: context.error };
+    const { userId, business } = context.data;
+
+    await connectDB();
+    const normalized = normalizePostData(data, { userId, businessId: business._id });
+
+    const newPost = await ContentPost.create(normalized);
     
     revalidatePath('/calendar');
-    return { success: true, post: JSON.parse(JSON.stringify(newPost)) };
+    return { success: true, data: JSON.parse(JSON.stringify(newPost)) };
   } catch (error: any) {
-    console.error("Create Post Error:", error);
+    console.error("[CREATE_POST_ERROR]", error);
     return { success: false, error: error.message };
   }
 }
 
-export async function updatePost(id: string, updates: any) {
+/**
+ * Update an existing post (content, title, metadata)
+ */
+export async function updatePost(id: string, updates: any): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-    
+    const context = await getActionContext();
+    if (!context.success || !context.data) return { success: false, error: context.error };
+
     await connectDB();
     
-    // Normalize updates
-    const normalizedUpdates = {
-        ...updates,
-        content: updates.content || updates.description,
-        contentType: updates.contentType ? updates.contentType.toLowerCase().split(' ')[0] : undefined,
-        status: updates.status ? updates.status.toLowerCase() : undefined,
-    };
+    // Partial normalization for updates
+    const normalizedUpdates: any = { ...updates };
+    if (updates.description) normalizedUpdates.content = updates.description;
+    if (updates.contentType) normalizedUpdates.contentType = updates.contentType.toLowerCase().split(' ')[0];
+    if (updates.status) normalizedUpdates.status = updates.status.toLowerCase();
 
     const updated = await ContentPost.findByIdAndUpdate(
       id,
@@ -74,15 +74,21 @@ export async function updatePost(id: string, updates: any) {
     );
     
     revalidatePath('/calendar');
-    return { success: true, post: JSON.parse(JSON.stringify(updated)) };
+    return { success: true, data: JSON.parse(JSON.stringify(updated)) };
   } catch (error: any) {
-    console.error("Update Post Error:", error);
+    console.error("[UPDATE_POST_ERROR]", error);
     return { success: false, error: error.message };
   }
 }
 
-export async function updatePostSchedule(id: string, scheduledFor: string) {
+/**
+ * Update specifically the schedule / drag-and-drop state
+ */
+export async function updatePostSchedule(id: string, scheduledFor: string): Promise<ActionResponse> {
   try {
+    const context = await getActionContext();
+    if (!context.success || !context.data) return { success: false, error: context.error };
+
     await connectDB();
     const updated = await ContentPost.findByIdAndUpdate(
       id, 
@@ -91,46 +97,47 @@ export async function updatePostSchedule(id: string, scheduledFor: string) {
     );
     
     revalidatePath('/calendar');
-    return { success: true, post: JSON.parse(JSON.stringify(updated)) };
+    return { success: true, data: JSON.parse(JSON.stringify(updated)) };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
 }
 
-export async function deletePost(id: string) {
+/**
+ * Delete a post
+ */
+export async function deletePost(id: string): Promise<ActionResponse> {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
-    
+    const context = await getActionContext();
+    if (!context.success || !context.data) return { success: false, error: context.error };
+
     await connectDB();
     await ContentPost.findByIdAndDelete(id);
     
     revalidatePath('/calendar');
     return { success: true };
   } catch (error: any) {
-    console.error("Delete Post Error:", error);
+    console.error("[DELETE_POST_ERROR]", error);
     return { success: false, error: error.message };
   }
 }
 
-export async function getPosts() {
+/**
+ * Fetch all posts for the current ecosystem
+ */
+export async function getPosts(): Promise<any[]> {
   try {
-    const { userId } = await auth();
-    if (!userId) return [];
-    
-    const business = await getActiveBusiness();
-    
-    await connectDB();
-    const query: any = { userId };
-    if (business) {
-        query.businessId = business._id;
-    }
+    const context = await getActionContext();
+    if (!context.success || !context.data) return [];
+    const { userId, business } = context.data;
 
-    const posts = await ContentPost.find(query).sort({ createdAt: -1 }).lean();
+    await connectDB();
+    const query = { userId, businessId: business._id };
     
+    const posts = await ContentPost.find(query).sort({ createdAt: -1 }).lean();
     return JSON.parse(JSON.stringify(posts));
   } catch (error) {
-    console.error("Failed to fetch posts:", error);
+    console.error("[FETCH_POSTS_ERROR]", error);
     return [];
   }
 }

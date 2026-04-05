@@ -13,19 +13,21 @@ import { UserButton, useUser } from "@clerk/nextjs";
 export function ContentPlannerClient({ initialPosts, business }: { initialPosts: any[], business?: any }) {
   const { user, isLoaded } = useUser();
   
-  const mapPosts = (posts: any[]): PostData[] => posts.map(p => ({
+  // Standardizer to convert DB model to Frontend UI state
+  const mapPosts = (items: any[]): PostData[] => items.map(p => ({
      ...p,
      id: p.id || p._id?.toString(),
+     content: p.content || p.description || '',
      scheduledAt: p.scheduledFor ? new Date(p.scheduledFor) : null,
-     platforms: p.platforms?.length ? p.platforms.map((plat: any) => plat.name || plat) : ["Social"],
+     platforms: p.platforms?.map((plat: any) => typeof plat === 'string' ? plat : (plat.name || 'Social')) || ["Social"],
      image: p.media?.[0]?.url || "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=200&auto=format&fit=crop",
      contentType: p.contentType || "social",
      workflowStage: p.status || "idea",
-     priority: p.priority || "medium",
+     priority: p.priority?.toLowerCase() || "medium",
      calendarColor: p.calendarColor || "#606c38",
      timeAgo: "Just now",
      time: p.scheduledFor ? new Date(p.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "12:00 PM",
-     status: p.status === 'scheduled' ? 'Scheduled' : 'Draft'
+     status: p.status === 'published' ? 'published' : (p.scheduledFor ? 'scheduled' : 'draft')
   }));
 
   const [posts, setPosts] = useState<PostData[]>(mapPosts(initialPosts));
@@ -67,7 +69,7 @@ export function ContentPlannerClient({ initialPosts, business }: { initialPosts:
     // Optimistic cache update
     setPosts(prev => prev.map(post => {
       if (post.id === active.id) {
-        return { ...post, status: 'Scheduled', scheduledAt: targetDate };
+        return { ...post, status: 'scheduled', scheduledAt: targetDate };
       }
       return post;
     }));
@@ -78,8 +80,8 @@ export function ContentPlannerClient({ initialPosts, business }: { initialPosts:
     });
   };
 
-  const drafts = posts.filter(p => p.status === 'Draft' || p.status === 'idea' || p.status === 'draft');
-  const scheduled = posts.filter(p => p.status === 'Scheduled' || p.status === 'scheduled');
+  const drafts = posts.filter(p => p.status === 'draft' || p.status === 'idea');
+  const scheduled = posts.filter(p => p.status === 'scheduled');
   const activePost = activeId ? posts.find(p => p.id === activeId) : null;
 
   return (
