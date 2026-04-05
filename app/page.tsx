@@ -1,400 +1,676 @@
 "use client";
 
-import Link from "next/link";
-import { motion } from "framer-motion";
+import React, { useState } from 'react';
+import Link from 'next/link';
 import { 
-  CheckCircle2, Box, Wrench, 
-  Rocket, ChevronDown, Share2, Globe, MessagesSquare,
-  School, Palette, HardHat, ArrowRight, ShieldCheck, Zap,
-  PlayCircle, Users, BookOpen, Star, Book, MessageCircle, Layout
-} from "lucide-react";
-import { SiteHeader } from "@/components/shared/SiteHeader";
+  ChevronRight, 
+  Play, 
+  CheckCircle2, 
+  Star, 
+  Menu, 
+  X,
+  Zap,
+  Search,
+  PieChart,
+  Calculator,
+  Share2,
+  Calendar,
+  MessageSquare,
+  Package,
+  LifeBuoy,
+  Wrench,
+  Library,
+  GraduationCap,
+  ArrowRight,
+  Globe,
+  Award,
+  Users,
+  BarChart3
+} from 'lucide-react';
+import { SignedIn, SignedOut } from '@clerk/nextjs';
+import { motion } from 'framer-motion';
 
-export default function LandingPage() {
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  };
+const LandingPage = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+  const features = [
+    {
+      title: "Exclusive Library",
+      desc: "Books and documents written by professionals to guide your online business journey.",
+      icon: <Library className="text-blue-400" />,
+      color: "from-blue-500/20 to-cyan-500/20"
+    },
+    {
+      title: "Marketing & Demographics",
+      desc: "Search the entire country by state. Get detailed information on who is looking for your products.",
+      icon: <PieChart className="text-purple-400" />,
+      color: "from-purple-500/20 to-pink-500/20"
+    },
+    {
+      title: "Accounting Platform",
+      desc: "A complete QuickBooks Clone. Manage all of your customers, clients, and products in one place.",
+      icon: <Calculator className="text-emerald-400" />,
+      color: "from-emerald-500/20 to-teal-500/20"
+    },
+    {
+      title: "Affiliate CRM",
+      desc: "Access thousands of pre-vetted products to sell. No more searching for hours for the right niche.",
+      icon: <Share2 className="text-orange-400" />,
+      color: "from-orange-500/20 to-red-500/20"
+    },
+    {
+      title: "Online Courses",
+      desc: "Thousands of self-paced courses. Learn everything from AI to advanced Internet Marketing.",
+      icon: <GraduationCap className="text-indigo-400" />,
+      color: "from-indigo-500/20 to-blue-500/20"
+    },
+    {
+      title: "Booking & Content Calendar",
+      desc: "Manage client sessions and plan your social media content with our integrated scheduling system.",
+      icon: <Calendar className="text-rose-400" />,
+      color: "from-rose-500/20 to-orange-500/20"
+    },
+    {
+      title: "Online Community",
+      desc: "A private social network to communicate with members and build lasting industry relationships.",
+      icon: <Users className="text-sky-400" />,
+      color: "from-sky-500/20 to-indigo-500/20"
+    },
+    {
+      title: "Messaging & Slack Clone",
+      desc: "Live class interactions and instant messaging to get real-time answers during your journey.",
+      icon: <MessageSquare className="text-violet-400" />,
+      color: "from-violet-500/20 to-purple-500/20"
+    },
+    {
+      title: "Business in a Box",
+      desc: "Done-for-you starter kits and niche skeletons. Take these and start your product journey instantly.",
+      icon: <Package className="text-amber-400" />,
+      color: "from-amber-500/20 to-yellow-500/20"
+    },
+    {
+      title: "Support Ticket System",
+      desc: "Dedicated help desk to ensure you never get stuck. We are with you every step of the way.",
+      icon: <LifeBuoy className="text-red-400" />,
+      color: "from-red-500/20 to-rose-500/20"
+    },
+    {
+      title: "Custom Tools & Apps",
+      desc: "Proprietary versions of popular apps so you don't have to spend thousands on external subscriptions.",
+      icon: <Wrench className="text-gray-400" />,
+      color: "from-gray-500/20 to-slate-500/20"
+    },
+    {
+      title: "And Much More...",
+      desc: "K Business Academy is a living tool. You get instant access to everything we develop in the future.",
+      icon: <Zap className="text-yellow-400" />,
+      color: "from-yellow-500/20 to-orange-500/20"
     }
-  };
+  ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fefae0] font-medium text-[#283618]">
-      <SiteHeader />
-
-      <main className="flex-1">
-        {/* HERO SECTION */}
-        <section className="relative pt-24 pb-20 md:pt-32 md:pb-32 overflow-hidden bg-gradient-to-br from-[#606c38] to-[#283618] text-[#fefae0]">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-              className="text-center lg:text-left"
-            >
-              <motion.h1 
-                variants={fadeInUp}
-                className="text-[clamp(2.5rem,8vw,5.5rem)] font-black text-[#283618] leading-[0.9] tracking-tighter mb-8"
-              >
-                From Newbie <br/>To Expert.
-              </motion.h1>
-              <motion.p 
-                variants={fadeInUp}
-                className="text-xl md:text-2xl text-[#283618]/60 font-bold mb-10 max-w-2xl leading-relaxed"
-              >
-                The #1 Online School for Digital Marketers. <br/>
-                Tired of the Hype? Empty Promises? <br/>
-                K Business Academy is built for beginners like you.
-              </motion.p>
-              <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 justify-center lg:justify-start">
-                <Link href="/courses">
-                  <button className="px-10 py-5 bg-[#283618] text-[#fefae0] rounded-2xl font-black text-lg hover:shadow-2xl transition-all uppercase tracking-widest flex items-center gap-2">
-                    Join the New Standard <ArrowRight size={20} />
-                  </button>
-                </Link>
-              </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="relative hidden lg:block"
-            >
-              <div className="absolute inset-0 bg-[#dda15e]/20 blur-[100px] rounded-full" />
-              <img 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" 
-                alt="Academy Excellence" 
-                className="rounded-[4rem] shadow-2xl relative z-10 border-4 border-[#283618]/10 grayscale hover:grayscale-0 transition-all duration-700"
-              />
-            </motion.div>
-          </div>
-        </section>
-
-        {/* TRIPLE FEATURE CARDS */}
-        <section className="relative z-20 px-6 pb-20">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { icon: BookOpen, title: "3,000+ Tactical Lessons", desc: "Every module is built for immediate execution.", color: "bg-[#606c38]" },
-              { icon: Users, title: "Expert Instruction", desc: "Learn from builders who have actually scaled businesses.", color: "bg-[#283618]" },
-              { icon: ShieldCheck, title: "Lifetime Registry Access", desc: "One-time enrollment, permanent data updates.", color: "bg-[#dda15e]" }
-            ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + (i * 0.1) }}
-                className="bg-white p-10 rounded-[3rem] shadow-xl border border-[#283618]/5 flex flex-col items-center text-center group hover:scale-105 transition-all"
-              >
-                <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center text-[#fefae0] mb-6 shadow-lg rotate-3 group-hover:rotate-0 transition-transform`}>
-                  <item.icon size={32} />
-                </div>
-                <h3 className="text-2xl font-black mb-3 italic">{item.title}</h3>
-                <p className="text-[#283618]/60 font-bold italic">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* THE ANTI-GURU MANIFESTO */}
-        <section className="py-32 px-6 bg-white relative overflow-hidden">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl md:text-7xl font-black text-[#283618] mb-10 tracking-tight">The Anti-Guru Manifesto.</h2>
-            <p className="text-2xl md:text-4xl font-bold text-[#606c38] leading-tight mb-12 italic">
-                "Stop Buying Hype. Start Building Your Business."
-            </p>
-            <div className="text-lg md:text-2xl text-[#283618]/70 space-y-8 leading-relaxed font-medium">
-                <p>
-                    Most online courses sell you a dream, but they don't give you the tools to finish the job. We're different. We focus on steps that actually work.
-                </p>
-                <p>
-                    No more "Shiny Object" traps. No more empty promises. Just the facts you need to succeed as a digital marketer.
-                </p>
-            </div>
-          </div>
-        </section>
-
-        {/* YOUR UNFAIR ADVANTAGE: THE INFRASTRUCTURE */}
-        <section className="py-24 px-6 bg-[#fefae0]/50">
-          <div className="max-w-7xl mx-auto text-center mb-20">
-            <h2 className="text-5xl font-black text-[#283618] italic uppercase tracking-tighter mb-4">Your Unfair Advantage</h2>
-            <p className="text-[#283618]/40 font-black uppercase tracking-[0.3em] text-xs">The Tools You've Been Missing</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[
-              { title: "The Execution Engine", desc: "Easy step-by-step video courses that show you exactly what to do.", icon: <Zap />, href: "/courses" },
-              { title: "Answers Library", desc: "Quick fixes and worksheets for when you need an answer right now.", icon: <Book />, href: "/library" },
-              { title: "Research Database", desc: "Stop guessing. See real data for every state so you know what people are buying.", icon: <Globe />, href: "/locations" },
-              { title: "Mind-Reader DB", desc: "Learn exactly what your customers are searching for online.", icon: <MessageCircle />, href: "/questions" },
-              { title: "Curated Affiliate CRM", desc: "The best products to promote. We only show you what actually pays well.", icon: <Users />, href: "/affiliate-crm" },
-              { title: "Operational Infrastructure", desc: "Don't start from zero. Use our templates and tools to go faster.", icon: <Layout />, href: "/business-resources" }
-            ].map((feature, i) => (
-              <Link key={i} href={feature.href} className="bg-white p-10 rounded-[3rem] shadow-sm border border-[#283618]/5 hover:shadow-2xl transition-all group">
-                <div className="w-12 h-12 bg-[#606c38] rounded-xl mb-8 group-hover:scale-110 transition-transform flex items-center justify-center text-white">
-                  {feature.icon}
-                </div>
-                <h3 className="text-2xl font-black mb-4 italic leading-tight group-hover:text-[#606c38] transition-colors">{feature.title}</h3>
-                <p className="text-[#283618]/50 font-bold italic leading-relaxed text-sm">{feature.desc}</p>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* WHY WE ARE DIFFERENT */}
-        <section className="py-32 bg-white px-6">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="relative">
-              <img 
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop" 
-                alt="Architecture" 
-                className="rounded-[4rem] shadow-2xl border-4 border-[#283618]/5 grayscale aspect-square object-cover"
-              />
-              <div className="absolute -bottom-10 -right-10 bg-[#dda15e] p-10 rounded-[3rem] text-[#283618] shadow-2xl max-w-xs">
-                <p className="font-black italic text-xl">"Education should be available to everyone no matter their budget."</p>
+    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-blue-500/30">
+      {/* --- HEADER --- */}
+      <nav className="fixed w-full z-[100] bg-[#0B0E23]/80 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <span className="text-white font-bold text-lg">K</span>
               </div>
-            </div>
-            <div>
-              <h2 className="text-5xl font-black text-[#283618] mb-10 italic uppercase leading-[1.1] tracking-tighter">We’ve Evolved <br/>Beyond the Kindle.</h2>
-              <div className="text-xl text-[#283618]/70 font-bold italic leading-relaxed space-y-6">
-                <p>While we started as the premier destination for Amazon and KDP, the market moved—and so did we. We realized that to truly win today, you need a holistic approach to Digital Marketing.</p>
-                <p>We’ve rebuilt the Academy from the ground up to be a student-first ecosystem. Whether you are a "Newbie" looking for your first dollar or a "Builder" architecting a complex brand, we provide the raw data and validated protocols you need to execute.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* PRICING REALITY CHECK */}
-        <section className="py-32 bg-[#fefae0] px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-[#606c38] rounded-[3rem] p-12 md:p-24 text-[#fefae0] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-[#bc6c25]/20 rounded-full blur-[100px] -mr-48 -mt-48" />
-              <div className="relative z-10 max-w-3xl">
-                <h2 className="text-4xl md:text-7xl font-black mb-10 leading-[0.9]">Why $497 a year?</h2>
-                <p className="text-xl md:text-2xl font-bold opacity-80 mb-12 leading-relaxed">
-                    Because real tools and research aren't free. This price pays for our weekly live classes and deep-dive research so you can win. No gated secrets. No hidden fees. Just everything you need to build your empire.
-                </p>
-                <Link href="/sign-up">
-                  <button className="px-14 py-6 bg-[#dda15e] text-[#283618] rounded-2xl font-black text-2xl hover:bg-[#fefae0] transition-all uppercase tracking-widest shadow-2xl shadow-black/40">Join the Academy</button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* LEARN NEW SKILLS CHECKLIST */}
-        <section className="py-32 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="relative">
-              <div className="absolute -top-10 -left-10 w-24 h-24 bg-[#606c38] rounded-full flex items-center justify-center text-[#fefae0] shadow-2xl rotate-12 z-20">
-                <Zap size={32} />
-              </div>
-              <img 
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" 
-                alt="Skills" 
-                className="rounded-[5rem] shadow-2xl border-8 border-[#fefae0] grayscale hover:grayscale-0 transition-all duration-1000"
-              />
-              <div className="absolute -bottom-10 -right-10 hidden sm:block">
-                <div className="w-40 h-40 bg-[#dda15e] rounded-[3rem] p-8 flex items-center justify-center text-[#283618] shadow-2xl animate-bounce">
-                  <PlayCircle size={64} className="fill-current"/>
-                </div>
-              </div>
+              <span className="text-white font-bold text-xl tracking-tight">Business Academy</span>
             </div>
             
-            <div>
-              <span className="text-[#bc6c25] font-black tracking-[0.3em] text-xs uppercase mb-6 block underline decoration-4 underline-offset-8 decoration-[#dda15e]/30">Practical Wisdom</span>
-              <h2 className="text-5xl font-black text-[#283618] mb-8 italic uppercase leading-[1.1] tracking-tighter">Learn Skills That <br/>Actually Move The Needle.</h2>
-              <p className="text-xl text-[#283618]/50 font-bold mb-12 italic leading-relaxed">
-                We've stripped away the fluff and academic filler. Everything you learn inside K Business Academy is designed for one thing: real-world execution.
-              </p>
-              <ul className="space-y-6">
-                {[
-                  "No generic 'guru' advice. Path-tested frameworks only.",
-                  "Daily registry updates to keep track of market shifts.",
-                  "A supportive ecosystem of builders and operators.",
-                  "Zero hidden costs. Open education for everyone."
-                ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-4 text-lg font-bold italic text-[#283618]/70">
-                    <div className="mt-1 bg-[#606c38] text-[#fefae0] rounded-full p-1 shadow-lg">
-                      <CheckCircle2 size={18} />
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/sign-up" className="mt-12 inline-block">
-                <button className="px-10 py-5 bg-[#283618] text-[#fefae0] rounded-2xl font-black text-sm uppercase tracking-[0.2em] hover:bg-[#606c38] transition-all shadow-xl shadow-black/10">Start Your Journey</button>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* EXPLORE TOP SUBJECTS GRID */}
-        <section className="py-32 px-6 bg-[#fefae0]">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-20">
-              <h2 className="text-5xl font-black text-[#283618] italic uppercase tracking-tighter">Explore Specialist Subjects</h2>
-              <p className="text-[#283618]/40 font-black uppercase tracking-[0.3em] text-xs mt-4">Focused Intelligence Clusters</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { title: "Infrastructure", img: "https://images.unsplash.com/photo-1497366216548-37526070297c" },
-                { title: "Operations", img: "https://images.unsplash.com/photo-1542744094-3a31f272c490" },
-                { title: "Marketing", img: "https://images.unsplash.com/photo-1551288049-bbbda536339a" },
-                { title: "Sales", img: "https://images.unsplash.com/photo-1557804506-669a67965ba0" },
-                { title: "Systems", img: "https://images.unsplash.com/photo-1518770660439-4636190af475" },
-                { title: "Content", img: "https://images.unsplash.com/photo-1512486130939-2c4f79935e4f" },
-                { title: "Analytics", img: "https://images.unsplash.com/photo-1551288049-bbbda536339a" },
-                { title: "Automation", img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e" }
-              ].map((sub, i) => (
-                <Link key={i} href="/library" className="group h-48 relative rounded-[2.5rem] overflow-hidden border border-[#283618]/5 shadow-sm block">
-                  <img src={sub.img} alt={sub.title} className="w-full h-full object-cover transition-all duration-700 grayscale group-hover:grayscale-0 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-[#283618]/60 group-hover:bg-[#283618]/20 transition-all duration-500" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <h3 className="text-xl font-black text-[#fefae0] uppercase tracking-widest">{sub.title}</h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div className="text-center mt-16">
-              <Link href="/library" className="text-[#283618] font-black text-sm uppercase tracking-widest border-b-2 border-[#bc6c25] pb-2 hover:text-[#bc6c25] transition-all">View Full Curriculum Registry</Link>
-            </div>
-          </div>
-        </section>
-
-        {/* LEARNER OUTCOMES (BLOB SECTION) */}
-        <section className="py-32 bg-white relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            <div className="lg:order-last">
-              <h2 className="text-5xl font-black text-[#283618] mb-8 italic uppercase leading-none tracking-tighter">Tangible Outcomes <br/>For Real Operators.</h2>
-              <p className="text-xl text-[#283618]/50 font-bold mb-10 italic">We don't just teach. We build the architecture for your success.</p>
-              <div className="space-y-8">
-                {[
-                  { title: "Direct Operational Clarity", desc: "Know exactly what to do when you log in every Monday morning." },
-                  { title: "Institutional Infrastructure", desc: "Build systems that work for you, not the other way around." },
-                  { title: "Vetted Partnership Access", desc: "Connect with resources verified by our internal audit team." }
-                ].map((outcome, i) => (
-                  <div key={i} className="flex gap-6 group">
-                    <div className="bg-[#fefae0] w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg border border-[#283618]/5 group-hover:bg-[#606c38] group-hover:text-[#fefae0] transition-all">
-                      <ShieldCheck size={24} />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-black text-[#283618] mb-2 italic">{outcome.title}</h4>
-                      <p className="text-[#283618]/50 font-bold italic leading-relaxed">{outcome.desc}</p>
-                    </div>
-                  </div>
-                ))}
+            <div className="hidden md:flex items-center space-x-8">
+              <div className="flex space-x-8 text-slate-300 text-sm font-medium">
+                <a href="#features" className="hover:text-white transition-colors">Features</a>
+                <a href="#database" className="hover:text-white transition-colors">Keywords</a>
+                <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+              </div>
+              <div className="flex items-center gap-4">
+                <SignedOut>
+                  <Link href="/sign-in">
+                    <button className="text-slate-300 hover:text-white text-sm font-medium transition-colors">
+                      Login
+                    </button>
+                  </Link>
+                  <Link href="/sign-up">
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+                      Get Started
+                    </button>
+                  </Link>
+                </SignedOut>
+                <SignedIn>
+                  <Link href="/dashboard">
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+                      Go to Dashboard
+                    </button>
+                  </Link>
+                </SignedIn>
               </div>
             </div>
-            
-            <div className="relative flex justify-center">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#606c38]/5 rounded-full blur-[80px]" />
-              <div className="relative z-10 w-full max-w-lg aspect-[4/5] rounded-[8rem] overflow-hidden border-8 border-[#fefae0] shadow-2xl rotate-2">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000&auto=format&fit=crop" alt="Outcomes" className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" />
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* COMMUNITY EXPERTS */}
-        <section className="py-32 px-6 bg-[#fefae0]/50">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-24">
-              <h2 className="text-5xl font-black text-[#283618] italic uppercase tracking-tighter">The Strategy Council</h2>
-              <p className="text-[#283618]/40 font-black uppercase tracking-[0.3em] text-xs mt-4">Vetted Operators & Industry Leaders</p>
+            <div className="md:hidden">
+              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white p-2">
+                {isMenuOpen ? <X /> : <Menu />}
+              </button>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-              {[
-                { name: "Julian K.", role: "Lead Architect", img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop" },
-                { name: "Sarah M.", role: "Market Intelligence", img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=400&auto=format&fit=crop" },
-                { name: "Daniel V.", role: "Operations Specialist", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400&auto=format&fit=crop" },
-                { name: "Elena R.", role: "Systems Engineer", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" }
-              ].map((expert, i) => (
-                <div key={i} className="text-center group">
-                  <div className="w-48 h-48 mx-auto rounded-full overflow-hidden border-4 border-white shadow-2xl mb-8 group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0">
-                    <img src={expert.img} alt={expert.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h3 className="text-2xl font-black text-[#283618] mb-2 italic underline decoration-transparent group-hover:decoration-[#bc6c25] transition-all decoration-4 underline-offset-4">{expert.name}</h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#283618]/40 italic">{expert.role}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* TAKE THE NEXT STEP (FINAL CTA) */}
-        <section className="py-32 px-6">
-          <div className="max-w-7xl mx-auto bg-[#283618] rounded-[5rem] overflow-hidden grid grid-cols-1 lg:grid-cols-2 shadow-2xl relative">
-            <div className="p-12 lg:p-24 relative z-10">
-              <h2 className="text-4xl md:text-6xl font-black text-[#fefae0] italic uppercase leading-none tracking-tighter mb-10">Get Started. <br/>Scale Higher.</h2>
-              <p className="text-xl text-[#fefae0]/60 font-bold mb-14 italic leading-relaxed">
-                Take the next step towards your professional goals. Join the K Business Academy infrastructure today and gain unrestricted access to our entire registry.
-              </p>
-              <Link href="/sign-up">
-                <button className="px-14 py-6 bg-[#dda15e] text-[#283618] rounded-2xl font-black text-xl hover:bg-[#fefae0] transition-all uppercase tracking-widest shadow-2xl shadow-black/40">Join the Academy</button>
-              </Link>
-            </div>
-            <div className="hidden lg:block relative">
-              <div className="absolute inset-0 bg-gradient-to-l from-[#283618]/0 to-[#283618]" />
-              <img src="https://images.unsplash.com/photo-1491975474562-1f4e30bc9468?q=80&w=1000&auto=format&fit=crop" alt="Success" className="w-full h-full object-cover grayscale opacity-50" />
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="bg-[#283618] text-[#fefae0]/40 py-24 px-6 border-t border-[#fefae0]/5">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-20">
-          <div className="md:col-span-1">
-            <div className="text-3xl font-black text-[#fefae0] mb-8 italic tracking-tighter uppercase">K Academy</div>
-            <p className="text-sm font-bold leading-relaxed italic mb-8">Professional excellence through radical transparency and systematic roadmaps.</p>
-            <div className="flex gap-6">
-              {[Globe, Share2, MessagesSquare].map((Icon, i) => (
-                <Link key={i} href="#" className="hover:text-[#dda15e] transition-colors"><Icon size={24}/></Link>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-8">
-            <h4 className="font-black text-[#fefae0] uppercase tracking-[0.2em] text-xs">Resources</h4>
-            <ul className="text-[10px] space-y-4 font-black uppercase tracking-widest">
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/courses">Execution Tracks</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/library">Academy Library</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/questions">Intelligence Hub</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/business-resources">Operational Tools</Link></li>
-            </ul>
-          </div>
-          <div className="space-y-8">
-            <h4 className="font-black text-[#fefae0] uppercase tracking-[0.2em] text-xs">Support</h4>
-            <ul className="text-[10px] space-y-4 font-black uppercase tracking-widest">
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/contact">Help Center</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/about">Methodology</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/p/pay-your-price">Donations</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="#">System Status</Link></li>
-            </ul>
-          </div>
-          <div className="space-y-8">
-            <h4 className="font-black text-[#fefae0] uppercase tracking-[0.2em] text-xs">Company</h4>
-            <ul className="text-[10px] space-y-4 font-black uppercase tracking-widest">
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="/about">About Us</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="#">Ethics Code</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="#">Privacy Protocol</Link></li>
-              <li><Link className="hover:text-[#dda15e] transition-colors" href="#">Careers</Link></li>
-            </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-24 pt-12 border-t border-[#fefae0]/10 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] italic">© 2026 K Business Academy Governance. Systemic Results.</p>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-[#0B0E23] border-b border-white/10 p-4 space-y-4">
+            <a href="#features" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Features</a>
+            <a href="#database" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Keywords</a>
+            <a href="#pricing" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Pricing</a>
+            <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+              <SignedOut>
+                <Link href="/sign-in" className="w-full">
+                  <button className="w-full text-center py-3 text-slate-300 font-medium">Login</button>
+                </Link>
+                <Link href="/sign-up" className="w-full">
+                  <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Get Started</button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard" className="w-full">
+                  <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Go to Dashboard</button>
+                </Link>
+              </SignedIn>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 bg-[#0B0E23] overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full"></div>
+        <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 text-center">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            Everything you need in one place
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight"
+          >
+            The Ultimate Business <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400">
+              Operating System
+            </span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl mb-10 leading-relaxed"
+          >
+            Ditch the thousands in monthly subscriptions. Access 12+ proprietary tools, 
+            9M+ keywords, and an elite community of online entrepreneurs.
+          </motion.p>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+          >
+            <SignedOut>
+              <Link href="/sign-up">
+                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-600/20">
+                  Explore All Features <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard">
+                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-600/20">
+                  Go to Dashboard <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+            </SignedIn>
+            <button className="w-full sm:w-auto bg-white/5 hover:bg-white/10 text-white px-8 py-4 rounded-full font-bold border border-white/10 transition-all flex items-center justify-center gap-2">
+              <Play size={18} fill="currentColor" /> See Platform Tour
+            </button>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="relative max-w-5xl mx-auto"
+          >
+            <div className="rounded-2xl border border-white/10 bg-[#161B33]/50 p-2 md:p-4 backdrop-blur-sm shadow-2xl overflow-hidden">
+              <div className="rounded-xl overflow-hidden bg-white/5 grid grid-cols-12 h-[300px] md:h-[500px]">
+                <div className="hidden md:block col-span-2 border-r border-white/5 p-4 text-left">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <div className="h-2 w-full bg-blue-500/20 rounded"></div>
+                      <div className="h-2 w-2/3 bg-slate-700 rounded"></div>
+                      <div className="h-2 w-3/4 bg-slate-700 rounded"></div>
+                    </div>
+                    <div className="space-y-4 pt-4">
+                      <div className="flex items-center gap-2 opacity-50"><Library size={12}/> <div className="h-1.5 w-12 bg-slate-700 rounded"></div></div>
+                      <div className="flex items-center gap-2 text-blue-400"><Calculator size={12}/> <div className="h-1.5 w-16 bg-blue-500/50 rounded"></div></div>
+                      <div className="flex items-center gap-2 opacity-50"><Calendar size={12}/> <div className="h-1.5 w-14 bg-slate-700 rounded"></div></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-10 p-6 text-left">
+                  <div className="flex justify-between items-center mb-8">
+                    <div className="h-6 w-32 bg-white/10 rounded"></div>
+                    <div className="flex gap-2">
+                      <div className="h-8 w-8 rounded-full bg-white/10"></div>
+                      <div className="h-8 w-8 rounded-full bg-blue-500"></div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 mb-8">
+                    <div className="h-24 rounded-xl bg-white/5 border border-white/5 p-4">
+                      <p className="text-[10px] text-slate-500 font-bold mb-2 uppercase">Keyword Database</p>
+                      <div className="text-xl font-bold text-white">9.2M+</div>
+                      <div className="h-1 w-full bg-slate-700 rounded mt-2 overflow-hidden">
+                        <div className="h-full w-3/4 bg-blue-500"></div>
+                      </div>
+                    </div>
+                    <div className="h-24 rounded-xl bg-white/5 border border-white/5 p-4">
+                      <p className="text-[10px] text-slate-500 font-bold mb-2 uppercase">Revenue Ledger</p>
+                      <div className="text-xl font-bold text-emerald-400">$12,450</div>
+                      <div className="h-1 w-full bg-slate-700 rounded mt-2"></div>
+                    </div>
+                    <div className="h-24 rounded-xl bg-white/5 border border-white/5 p-4">
+                      <p className="text-[10px] text-slate-500 font-bold mb-2 uppercase">CRM Leads</p>
+                      <div className="text-xl font-bold text-purple-400">1,204</div>
+                      <div className="h-1 w-full bg-slate-700 rounded mt-2"></div>
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 h-48 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 grid grid-cols-8 grid-rows-4 gap-2 p-4 opacity-20">
+                      {Array.from({length: 32}).map((_, i) => <div key={i} className="bg-white/20 rounded"></div>)}
+                    </div>
+                    <div className="relative text-center">
+                      <Search className="text-blue-400 w-10 h-10 mx-auto mb-2" />
+                      <div className="text-sm font-bold text-blue-200 tracking-widest uppercase">Platform Ready</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* --- NICHE KEYWORD DATABASE SECTION --- */}
+      <section id="database" className="py-24 bg-slate-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="flex-1 space-y-8">
+              <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200">
+                <Search size={32} />
+              </div>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
+                9 Million+ Niche <br />
+                Keyword Database
+              </h2>
+              <p className="text-slate-500 text-lg leading-relaxed">
+                The ultimate keyword research resource. Explore hundreds of niches with granular data you won't find anywhere else.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  "Definitions & Target Audiences",
+                  "Monetization Strategies",
+                  "Video Explanations & Case Studies",
+                  "Getting Started Checklists",
+                  "Content & Blog Ideas",
+                  "Pinterest & YouTube Roadmap"
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <CheckCircle2 size={18} className="text-blue-600 shrink-0" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <button className="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10">
+                Search the Database <ChevronRight size={18} />
+              </button>
+            </div>
+            <div className="flex-1 relative">
+              <div className="absolute -inset-4 bg-blue-100/50 rounded-[3rem] blur-3xl"></div>
+              <div className="relative bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex gap-2">
+                    <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] font-black uppercase tracking-tight">Trending Niche</div>
+                    <div className="px-3 py-1 bg-slate-50 text-slate-400 rounded-md text-[10px] font-black uppercase tracking-tight">SEO Score: 98</div>
+                  </div>
+                  <BarChart3 size={20} className="text-slate-300" />
+                </div>
+                <div className="space-y-4">
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <h4 className="text-xs font-bold text-slate-400 mb-2 uppercase">Keyword Analysis</h4>
+                    <p className="font-bold text-slate-800">"AI-Driven Sustainable Fashion"</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-blue-600 rounded-xl text-white">
+                      <p className="text-[10px] font-bold opacity-70 uppercase mb-1">Monthly Search</p>
+                      <p className="text-xl font-black">450,000</p>
+                    </div>
+                    <div className="p-4 bg-indigo-600 rounded-xl text-white">
+                      <p className="text-[10px] font-bold opacity-70 uppercase mb-1">Competition</p>
+                      <p className="text-xl font-black">Low</p>
+                    </div>
+                  </div>
+                  <div className="p-4 border border-dashed border-slate-200 rounded-xl">
+                    <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wide">Target Audience</p>
+                    <p className="text-sm text-slate-600 italic">"Eco-conscious Gen-Z founders looking for scalable tech solutions..."</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- ALL FEATURES GRID --- */}
+      <section id="features" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">The All-In-One Ecosystem</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Stop stitching together dozens of tools. We've built everything you need to run, track, and scale your online business from a single login.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((f, i) => (
+              <div key={i} className="group relative p-8 bg-white rounded-[2rem] border border-slate-100 hover:border-blue-200 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 overflow-hidden">
+                <div className={`absolute inset-0 bg-gradient-to-br ${f.color} opacity-0 group-hover:opacity-100 rounded-[2rem] transition-opacity duration-500`}></div>
+                <div className="relative z-10">
+                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 group-hover:bg-white transition-all duration-500">
+                    {React.cloneElement(f.icon as React.ReactElement<any>, { size: 28 })}
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">{f.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6">{f.desc}</p>
+                  <div className="flex items-center text-xs font-black text-blue-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
+                    Explore Tool <ChevronRight size={14} className="ml-1" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- DASHBOARD DETAIL SECTION (ACCOUNTING/CRM) --- */}
+      <section className="py-24 bg-[#0B0E23]">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-16">
+          <div className="flex-1 order-2 md:order-1 relative">
+            <div className="absolute -inset-10 bg-purple-600/10 blur-[100px] rounded-full"></div>
+            <div className="relative bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
+              <div className="flex justify-between items-center mb-10">
+                <h4 className="text-white font-bold tracking-tight">K-Accounting Suite</h4>
+                <div className="h-6 w-24 bg-white/10 rounded-full"></div>
+              </div>
+              <div className="space-y-6">
+                {[
+                  { label: "Active Customers", val: "2,405", p: "+12%" },
+                  { label: "Quarterly Revenue", val: "$142,000", p: "+8%" },
+                  { label: "Affiliate Payouts", val: "$34,200", p: "-2%" }
+                ].map((stat, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
+                    <span className="text-slate-400 text-sm font-medium">{stat.label}</span>
+                    <div className="text-right">
+                      <div className="text-white font-bold">{stat.val}</div>
+                      <div className={`text-[10px] font-bold ${stat.p.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}`}>{stat.p}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 pt-8 border-t border-white/5 flex gap-2">
+                <SignedOut>
+                  <Link href="/sign-up" className="flex-1">
+                    <button className="w-full bg-blue-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors">Start Scaling Today</button>
+                  </Link>
+                </SignedOut>
+                <SignedIn>
+                  <Link href="/dashboard" className="flex-1">
+                    <button className="w-full bg-blue-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors">Go to Dashboard</button>
+                  </Link>
+                </SignedIn>
+                <button className="px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-all"><Share2 size={18}/></button>
+              </div>
+            </div>
+          </div>
+          <div className="flex-1 order-1 md:order-2 space-y-6">
+            <div className="inline-block px-4 py-1 bg-blue-500/10 text-blue-400 rounded-full text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 mb-2">
+              Financial Control
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
+              Accounting & CRM <br /> Built Into the Core
+            </h2>
+            <p className="text-slate-400 text-lg leading-relaxed">
+              Don't waste time switching between QuickBooks, HubSpot, and Excel. Manage your entire customer lifecycle, billing, and affiliate network from one unified dashboard.
+            </p>
+            <div className="space-y-4 pt-4">
+              <div className="flex items-start gap-4">
+                <div className="mt-1 w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                  <Calculator size={20} className="text-blue-400" />
+                </div>
+                <div>
+                  <h5 className="text-white font-bold">QuickBooks Clone</h5>
+                  <p className="text-slate-500 text-sm">Full double-entry bookkeeping without the high monthly cost.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="mt-1 w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
+                  <Share2 size={20} className="text-purple-400" />
+                </div>
+                <div>
+                  <h5 className="text-white font-bold">Affiliate Engine</h5>
+                  <p className="text-slate-500 text-sm">Access thousands of pre-negotiated products to start selling today.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- PRICING SECTION --- */}
+      <section id="pricing" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">One Price. All Features.</h2>
+            <p className="text-slate-500">No hidden costs. No upsells. Just everything you need to win.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-8 hover:shadow-xl transition-all h-full flex flex-col">
+              <h3 className="text-xl font-bold mb-2 text-slate-900">Foundations</h3>
+              <p className="text-slate-500 text-sm mb-8">Access to library and core courses.</p>
+              <div className="mb-8">
+                <span className="text-4xl font-bold text-slate-900">$0</span>
+                <span className="text-slate-500">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-10 text-sm font-medium flex-1">
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-blue-600" /> Online Courses</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-blue-600" /> Glossary</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-blue-600" /> Marketing & Demographics</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-blue-600" /> Messaging & Slack Clone</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-blue-600" /> Support Ticket System</li>
+              </ul>
+              <SignedOut>
+                <Link href="/sign-up">
+                  <button className="w-full py-4 rounded-xl border border-slate-200 font-bold hover:bg-slate-900 hover:text-white transition-all">Get Started</button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard">
+                  <button className="w-full py-4 rounded-xl border border-slate-200 font-bold hover:bg-slate-900 hover:text-white transition-all">Go to Dashboard</button>
+                </Link>
+              </SignedIn>
+            </div>
+
+            <div className="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 shadow-2xl z-10 text-white h-full flex flex-col hover:scale-[1.02] transition-transform duration-300">
+              <div className="absolute -top-4 right-8 bg-yellow-400 text-slate-900 text-xs font-black px-4 py-1 rounded-full uppercase tracking-wider">Full Access</div>
+              <h3 className="text-xl font-bold mb-2 text-white">Mastery Elite</h3>
+              <p className="text-blue-100/70 text-sm mb-8">The entire business ecosystem.</p>
+              <div className="mb-8 text-white">
+                <span className="text-4xl font-bold">$97</span>
+                <span className="opacity-70">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-10 text-sm font-medium flex-1">
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Online Courses</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> 9M+ Keyword Database</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Marketing & Demographics</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Messaging & Slack Clone</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Support Ticket System</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Accounting & Affiliate CRM</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Booking & Content Calendar</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Community & Messaging</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Custom Tools and Apps</li>
+                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Businesses in a Box</li>
+              </ul>
+              <SignedOut>
+                <Link href="/sign-up">
+                  <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-lg active:scale-95">Get Started Now</button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard">
+                  <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-lg active:scale-95">Go to Dashboard</button>
+                </Link>
+              </SignedIn>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- TESTIMONIALS --- */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-16">Raving Academy Members</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+            {[
+              { name: "James Wilson", role: "Niche Creator", quote: "The Keyword Database saved me hundreds of hours. I found my next 6 months of content in one afternoon." },
+              { name: "Sarah Patel", role: "Agency Owner", quote: "Replacing Slack and QuickBooks with K Business Academy tools paid for the membership 10x over." },
+              { name: "Tom Baker", role: "Solo-Founder", quote: "The Business in a Box starter kits are incredible. I had my store skeleton ready in 2 hours." },
+              { name: "Linda Wu", role: "Affiliate Marketer", quote: "Finally, a CRM that actually gives me products to sell instead of just tracking leads." },
+            ].map((t, idx) => (
+              <div key={idx} className="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-between h-full hover:-translate-y-1 transition-transform duration-300">
+                <div>
+                  <div className="flex gap-1 mb-4 text-yellow-400">
+                    {[1, 2, 3, 4, 5].map(s => <Star key={s} size={14} fill="currentColor" />)}
+                  </div>
+                  <p className="text-slate-600 text-sm leading-relaxed mb-6 italic font-medium leading-relaxed">"{t.quote}"</p>
+                </div>
+                <div className="flex items-center gap-3 pt-4 border-t border-slate-50">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600 text-xs">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-sm text-slate-800">{t.name}</h5>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- CTA SECTION --- */}
+      <section className="py-24">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <div className="relative rounded-[3rem] overflow-hidden bg-[#0B0E23] p-12 md:p-24 text-white shadow-2xl">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full -mr-32 -mt-32"></div>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6">Build Your Brilliance Now</h2>
+              <p className="text-slate-400 text-lg mb-10 max-w-xl mx-auto font-medium">
+                Join the living, breathing community at K Business Academy. Your membership includes every tool we build in the future.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                />
+                <button className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                  Send
+                </button>
+              </div>
+              <p className="mt-6 text-xs text-slate-500 font-black uppercase tracking-[0.25em]">Join the Elite Membership today</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-slate-50 text-slate-500 pt-20 pb-10 border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-20">
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">K</span>
+                </div>
+                <span className="text-slate-900 font-bold text-xl tracking-tight">Business Academy</span>
+              </div>
+              <p className="max-w-xs mb-8 text-sm leading-relaxed font-medium">
+                The most complete infrastructure for digital entrepreneurs. From education to operations, we have you covered.
+              </p>
+              <div className="flex gap-4">
+                {[Globe, Users, Award].map((Icon, i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all cursor-pointer">
+                    <Icon size={18} />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Features</h6>
+              <ul className="space-y-4 text-sm font-bold secondary-text">
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">9M+ Keywords</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Accounting Clone</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Affiliate CRM</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Messaging Center</li>
+              </ul>
+            </div>
+            <div>
+              <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Resources</h6>
+              <ul className="space-y-4 text-sm font-bold secondary-text">
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Book Library</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Online Courses</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Business in a Box</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Market Reports</li>
+              </ul>
+            </div>
+            <div>
+              <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Company</h6>
+              <ul className="space-y-4 text-sm font-bold secondary-text">
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Success Stories</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Support Center</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Privacy</li>
+                <li className="hover:text-blue-600 cursor-pointer transition-colors">Terms</li>
+              </ul>
+            </div>
+          </div>
+          <div className="text-center pt-10 border-t border-slate-200 text-[10px] font-black text-slate-400 tracking-[0.4em] uppercase">
+            Copyright © 2026 K Business Academy. All Rights Reserved.
+          </div>
         </div>
       </footer>
     </div>
   );
-}
+};
+
+export default LandingPage;
