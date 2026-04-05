@@ -22,10 +22,11 @@ import User from '../lib/db/models/User';
 
 async function giveAccess() {
     const clerkId = process.argv[2];
+    const isAdminMode = process.argv[3] === '--admin';
 
     if (!clerkId) {
         console.error('❌ Error: Please provide a Clerk User ID');
-        console.log('Usage: npx tsx scripts/give-access.ts <clerk_user_id>');
+        console.log('Usage: npx tsx scripts/give-access.ts <clerk_user_id> [--admin]');
         process.exit(1);
     }
 
@@ -49,7 +50,7 @@ async function giveAccess() {
         await connectDB();
 
         // 1. Update Clerk's publicMetadata using dynamic import to ensure ENV is ready
-        console.log(`\n⏳ Updating Clerk data for user: ${clerkId}...`);
+        console.log(`\n⏳ Updating Clerk data for user: ${clerkId}${isAdminMode ? ' (as ADMIN)' : ''}...`);
         
         try {
             const { clerkClient } = await import('@clerk/nextjs/server');
@@ -57,10 +58,11 @@ async function giveAccess() {
             
             await client.users.updateUser(clerkId, {
                 publicMetadata: {
-                    plan: 'student'
+                    plan: 'student',
+                    role: isAdminMode ? 'admin' : 'student'
                 }
             });
-            console.log('✅ Clerk publicMetadata.plan updated to: "student"');
+            console.log(`✅ Clerk publicMetadata updated: plan="student", role="${isAdminMode ? 'admin' : 'student'}"`);
         } catch (clerkError: any) {
             console.error('❌ Clerk API Error:');
             console.error('   ' + (clerkError.message || clerkError));
@@ -71,9 +73,9 @@ async function giveAccess() {
         const user = await User.findOne({ clerkId });
 
         if (user) {
-            user.role = 'student';
+            user.role = isAdminMode ? 'admin' : 'student';
             await user.save();
-            console.log(`✅ Success! Database role updated for ${user.email} -> student`);
+            console.log(`✅ Success! Database role updated for ${user.email} -> ${user.role}`);
         } else {
             console.log(`⚠️  Warning: User not found in local database, but Clerk was updated.`);
         }
