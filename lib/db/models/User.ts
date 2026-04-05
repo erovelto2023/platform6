@@ -18,8 +18,8 @@ const UserSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['admin', 'student'],
-        default: 'student',
+        enum: ['admin', 'student', 'free'],
+        default: 'free',
     },
     purchasedCourses: [{
         type: Schema.Types.ObjectId,

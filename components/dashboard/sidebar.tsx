@@ -275,8 +275,52 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const pathname = usePathname();
     const isAdmin = pathname?.startsWith("/admin");
 
-    // Filter routes based on user role - remove Admin link if user is not an admin
-    const filteredRoutes = userRole === 'admin' ? routes : routes.filter(route => route.href !== '/admin');
+    // Define which routes are for which roles
+    const freeRoutes = [
+        "/dashboard",
+        "/locations",
+        "/catalog",
+        "/docs",
+        "/glossary",
+        "/messages",
+        "/tickets",
+        "/whiteboard"
+    ];
+
+    const studentRoutes = [
+        "/accounting",
+        "/affiliates",
+        "/calendar",
+        "/niche-boxes",
+        "/resources",
+        "/tools",
+        "/community"
+    ];
+
+    // Filter routes based on user role
+    const filteredRoutes = routes.filter(route => {
+        // Admins can see everything
+        if (userRole === 'admin') return true;
+
+        // If user is a student, they can see free routes AND student routes
+        if (userRole === 'student') {
+            return freeRoutes.includes(route.href) || studentRoutes.includes(route.href);
+        }
+
+        // If user is free, they can ONLY see free routes
+        return freeRoutes.includes(route.href);
+    });
+
+    // Add Upgrade link for non-students
+    if (userRole === 'free') {
+        filteredRoutes.push({
+            label: "Upgrade to Student",
+            icon: Sparkles,
+            href: "/upgrade",
+            color: "text-amber-400",
+        });
+    }
+
     const currentRoutes = isAdmin ? adminRoutes : filteredRoutes;
     const { isCollapsed, toggle } = useSidebarStore();
 

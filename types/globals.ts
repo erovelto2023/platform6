@@ -1,1 +1,1 @@
-export type Roles = 'admin' | 'student';
+export type Roles = 'admin' | 'student' | 'free';

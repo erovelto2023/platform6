@@ -62,7 +62,7 @@ export async function POST(req: Request) {
                 email: email_addresses[0].email_address,
                 firstName: first_name || '',
                 lastName: last_name || '',
-                role: 'student',
+                role: 'free',
             });
 
             console.log('User created in database:', id);
