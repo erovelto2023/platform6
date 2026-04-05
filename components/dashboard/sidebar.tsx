@@ -299,6 +299,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
     // Filter routes based on user role
     const filteredRoutes = routes.filter(route => {
+        /*
         // Admins can see everything
         if (userRole === 'admin') return true;
 
@@ -309,9 +310,14 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
         // If user is free, they can ONLY see free routes
         return freeRoutes.includes(route.href);
+        */
+        
+        // Show everything temporarily
+        return true;
     });
 
     // Add Upgrade link for non-students
+    /*
     if (userRole === 'free') {
         filteredRoutes.push({
             label: "Upgrade to Student",
@@ -320,6 +326,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
             color: "text-amber-400",
         });
     }
+    */
 
     const currentRoutes = isAdmin ? adminRoutes : filteredRoutes;
     const { isCollapsed, toggle } = useSidebarStore();

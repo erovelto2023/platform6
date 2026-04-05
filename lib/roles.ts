@@ -27,12 +27,15 @@ export const checkRole = async (role: Roles) => {
         if (role === 'admin') return isAdmin;
         if (isAdmin) return true; // Admins have all roles
 
-        const userPlan = (user.publicMetadata?.plan as string) || 'free';
+        // const userPlan = (user.publicMetadata?.plan as string) || 'free';
         
-        if (role === 'student') return userPlan === 'student';
-        if (role === 'free') return true; // Everyone logged in is at least 'free'
+        // if (role === 'student') return userPlan === 'student';
+        // if (role === 'free') return true; // Everyone logged in is at least 'free'
 
-        return false;
+        // return false;
+
+        // Temporary Unlock All
+        return true;
     } catch (error) {
         console.error('[checkRole] Error fetching user:', error);
         return false;
@@ -56,8 +59,11 @@ export const getUserRole = async (): Promise<Roles> => {
 
         if (isAdmin) return 'admin';
 
-        const userPlan = (user.publicMetadata?.plan as string) || 'free';
-        return userPlan === 'student' ? 'student' : 'free';
+        // const userPlan = (user.publicMetadata?.plan as string) || 'free';
+        // return userPlan === 'student' ? 'student' : 'free';
+
+        // Temporary Unlock
+        return 'student';
     } catch (error) {
         console.error('[getUserRole] Error fetching user:', error);
         return 'free';

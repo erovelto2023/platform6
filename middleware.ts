@@ -56,6 +56,7 @@ export default clerkMiddleware(async (auth, req) => {
         await auth.protect();
 
         // Check for Student tier on specific routes
+        /* 
         if (isStudentRoute(req)) {
             const plan = (sessionClaims?.publicMetadata as any)?.plan || 'free';
             const isAdmin = (sessionClaims?.publicMetadata as any)?.role === 'admin';
@@ -64,6 +65,7 @@ export default clerkMiddleware(async (auth, req) => {
                 return NextResponse.redirect(new URL('/upgrade', req.url));
             }
         }
+        */
     }
 });
 
