@@ -151,54 +151,11 @@ export async function updateBusiness(data: any) {
     }
 }
 
-export async function updateCalendarSettings(settings: any) {
-    try {
-        const businessResult = await getOrCreateBusiness();
-        if (!businessResult.success || !businessResult.data) {
-            return { success: false, error: 'Business not found' };
-        }
-        const businessId = businessResult.data._id;
-
-        await connectToDatabase();
-
-        // If slug is being updated, check uniqueness
-        if (settings.slug) {
-            const existing = await Business.findOne({
-                'calendarSettings.slug': settings.slug,
-                _id: { $ne: businessId }
-            });
-            if (existing) {
-                return { success: false, error: 'Booking URL slug is already taken' };
-            }
-        }
-
-        const updateData: any = {
-            'calendarSettings.slug': settings.slug,
-            'calendarSettings.timezone': settings.timezone,
-            'calendarSettings.bufferTime': settings.bufferTime,
-            'calendarSettings.slotInterval': settings.slotInterval,
-            'calendarSettings.requiresConfirmation': settings.requiresConfirmation,
-        };
-
-        const business = await Business.findByIdAndUpdate(
-            businessId,
-            { $set: updateData },
-            { new: true }
-        );
-
-        revalidatePath('/calendar/settings');
-        return { success: true, data: JSON.parse(JSON.stringify(business)) };
-    } catch (error) {
-        console.error('[UPDATE_CALENDAR_SETTINGS]', error);
-        return { success: false, error: 'Failed to update calendar settings' };
-    }
-}
-
 export async function updateEmailSettings(settings: { apiKey?: string; fromEmail: string }) {
     try {
         const businessResult = await getOrCreateBusiness();
         if (!businessResult.success || !businessResult.data) return { success: false, error: 'Business not found' };
-        const businessId = businessResult.data._id;
+        const businessId = businessResult.data?._id;
 
         await connectToDatabase();
 
@@ -217,7 +174,7 @@ export async function updateEmailSettings(settings: { apiKey?: string; fromEmail
             { new: true }
         );
 
-        revalidatePath('/calendar/settings');
+        revalidatePath('/accounting/settings');
         return { success: true };
     } catch (error) {
         console.error('[UPDATE_EMAIL_SETTINGS]', error);

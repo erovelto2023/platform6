@@ -14,7 +14,6 @@ import {
   PieChart,
   Calculator,
   Share2,
-  Calendar,
   MessageSquare,
   Package,
   LifeBuoy,
@@ -63,12 +62,6 @@ const LandingPage = () => {
       desc: "Thousands of self-paced courses. Learn everything from AI to advanced Internet Marketing.",
       icon: <GraduationCap className="text-indigo-400" />,
       color: "from-indigo-500/20 to-blue-500/20"
-    },
-    {
-      title: "Booking & Content Calendar",
-      desc: "Manage client sessions and plan your social media content with our integrated scheduling system.",
-      icon: <Calendar className="text-rose-400" />,
-      color: "from-rose-500/20 to-orange-500/20"
     },
     {
       title: "Online Community",
@@ -266,7 +259,7 @@ const LandingPage = () => {
                     <div className="space-y-4 pt-4">
                       <div className="flex items-center gap-2 opacity-50"><Library size={12}/> <div className="h-1.5 w-12 bg-slate-700 rounded"></div></div>
                       <div className="flex items-center gap-2 text-blue-400"><Calculator size={12}/> <div className="h-1.5 w-16 bg-blue-500/50 rounded"></div></div>
-                      <div className="flex items-center gap-2 opacity-50"><Calendar size={12}/> <div className="h-1.5 w-14 bg-slate-700 rounded"></div></div>
+                      <div className="flex items-center gap-2 opacity-50"><Users size={12}/> <div className="h-1.5 w-14 bg-slate-700 rounded"></div></div>
                     </div>
                   </div>
                 </div>
@@ -537,7 +530,6 @@ const LandingPage = () => {
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Messaging & Slack Clone</li>
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Support Ticket System</li>
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Accounting & Affiliate CRM</li>
-                <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Booking & Content Calendar</li>
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Community & Messaging</li>
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Custom Tools and Apps</li>
                 <li className="flex items-center gap-3"><CheckCircle2 size={16} className="text-white" /> Businesses in a Box</li>

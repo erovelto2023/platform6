@@ -20,7 +20,6 @@ const NotificationSchema = new Schema({
             'follow',
             'post_share',
             'group_invite',
-            'event_invite',
             'system'
         ],
         required: true,

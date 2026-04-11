@@ -3,11 +3,9 @@
 import connectDB from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
 import Course from "@/lib/db/models/Course";
-
 import Offer from "@/lib/db/models/Offer";
 import Resource from "@/lib/db/models/Resource";
 import Payment from "@/lib/db/models/Payment";
-import CommunityEvent from "@/lib/db/models/CommunityEvent";
 import AffiliateCompany from "@/lib/db/models/AffiliateCompany";
 import Group from "@/lib/db/models/Group";
 import Survey from "@/lib/db/models/Survey";
@@ -32,7 +30,6 @@ export async function getDashboardStats() {
             : totalUsers > 0 ? 100 : 0;
 
         // Active users (logged in within last 30 days)
-        // Note: User model may not have lastLoginAt field, so we'll use a fallback
         const activeUsers = await User.countDocuments({
             updatedAt: { $gte: thirtyDaysAgo }
         });
@@ -61,7 +58,6 @@ export async function getDashboardStats() {
         // Content from last month
         const contentLastMonth =
             await Course.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
-
             await Offer.countDocuments({ createdAt: { $lt: thirtyDaysAgo } }) +
             await Resource.countDocuments({ createdAt: { $lt: thirtyDaysAgo } });
 
@@ -87,7 +83,7 @@ export async function getDashboardStats() {
             : totalRevenue > 0 ? 100 : 0;
 
         // Page views - placeholder for now
-        const pageViews = 0; // TODO: Integrate with Google Analytics or similar
+        const pageViews = 0; 
         const viewsGrowth = 0;
 
         return {
@@ -105,7 +101,6 @@ export async function getDashboardStats() {
                 courses: totalCourses,
                 offers: totalOffers,
                 resources: totalResources,
-                events: await CommunityEvent.countDocuments({ startDate: { $gte: new Date() } }),
                 affiliatePartners: totalAffiliatePartners,
                 groups: totalGroups,
                 surveys: totalSurveys,
@@ -114,7 +109,6 @@ export async function getDashboardStats() {
         };
     } catch (error) {
         console.error("Error fetching dashboard stats:", error);
-        // Return default values on error
         return {
             totalUsers: 0,
             userGrowth: 0,
@@ -130,7 +124,6 @@ export async function getDashboardStats() {
                 courses: 0,
                 offers: 0,
                 resources: 0,
-                events: 0,
                 affiliatePartners: 0,
                 groups: 0,
                 surveys: 0,

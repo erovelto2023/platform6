@@ -15,7 +15,6 @@ import {
     Sparkles,
     BarChart3,
     Users,
-    Calendar,
     Search,
     Link as LinkIcon,
     FileQuestion,
@@ -69,12 +68,6 @@ const routes = [
         icon: BookOpen,
         href: "/catalog",
         color: "text-violet-500",
-    },
-    {
-        label: "Calendar",
-        icon: Calendar,
-        href: "/calendar",
-        color: "text-rose-500",
     },
     {
         label: "Community",
@@ -230,12 +223,6 @@ const adminRoutes = [
         color: "text-orange-500",
     },
     {
-        label: "Events",
-        icon: Calendar,
-        href: "/admin/events",
-        color: "text-indigo-600",
-    },
-    {
         label: "Groups",
         icon: Users,
         href: "/admin/groups",
@@ -290,7 +277,6 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const studentRoutes = [
         "/accounting",
         "/affiliates",
-        "/calendar",
         "/niche-boxes",
         "/resources",
         "/tools",

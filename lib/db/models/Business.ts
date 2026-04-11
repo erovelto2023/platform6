@@ -15,13 +15,6 @@ export interface IBusiness extends Document {
     taxId?: string;
     logo?: string;
     currency: string;
-    calendarSettings?: {
-        slug?: string;
-        timezone?: string;
-        bufferTime?: number;
-        slotInterval?: number;
-        requiresConfirmation?: boolean;
-    };
     emailSettings?: {
         provider: 'resend';
         apiKey: string;
@@ -59,13 +52,6 @@ const BusinessSchema = new Schema<IBusiness>(
         currency: {
             type: String,
             default: 'USD',
-        },
-        calendarSettings: {
-            slug: { type: String, unique: true, sparse: true },
-            timezone: { type: String, default: 'UTC' },
-            bufferTime: { type: Number, default: 0 },
-            slotInterval: { type: Number, default: 30 },
-            requiresConfirmation: { type: Boolean, default: false },
         },
         emailSettings: {
             provider: { type: String, default: 'resend' },

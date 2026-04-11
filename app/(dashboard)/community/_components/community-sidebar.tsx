@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from "@/components/ui/card";
-import { Users, Calendar, UserPlus, Bookmark, Home, TrendingUp } from "lucide-react";
+import { Users, UserPlus, Bookmark, Home, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getCommunityPhotos } from "@/lib/actions/community.actions";
 
@@ -43,7 +43,6 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
         { id: "popular", label: "Popular", icon: TrendingUp },
         { id: "friends", label: "Friends", icon: Users },
         { id: "members", label: "Find Members", icon: UserPlus },
-        { id: "events", label: "Events", icon: Calendar },
         { id: "groups", label: "Groups", icon: Users },
         { id: "saved", label: "Saved", icon: Bookmark },
     ];
@@ -56,9 +55,6 @@ export function CommunitySidebar({ user, onTabChange, activeTab }: CommunitySide
             switch (id) {
                 case 'members':
                     router.push('/community/members');
-                    break;
-                case 'events':
-                    router.push('/community/events');
                     break;
                 case 'groups':
                     router.push('/community/groups');

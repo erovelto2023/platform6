@@ -42,9 +42,6 @@ export function CommunityPageClient({ posts, currentUser }: CommunityPageClientP
                             <TabsTrigger value="members" className="px-4 py-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
                                 Members
                             </TabsTrigger>
-                            <TabsTrigger value="events" className="px-4 py-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
-                                Events
-                            </TabsTrigger>
                             <TabsTrigger value="groups" className="px-4 py-2 data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600">
                                 Groups
                             </TabsTrigger>

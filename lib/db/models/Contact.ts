@@ -8,8 +8,6 @@ export interface IContact extends Document {
     phone?: string;
     tags?: string[];
     notes?: string;
-    totalBookings: number;
-    lastBookingDate?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -32,11 +30,6 @@ const ContactSchema = new Schema<IContact>(
         phone: String,
         tags: [String],
         notes: String,
-        totalBookings: {
-            type: Number,
-            default: 0,
-        },
-        lastBookingDate: Date,
     },
     {
         timestamps: true,

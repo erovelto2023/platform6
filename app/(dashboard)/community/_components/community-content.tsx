@@ -7,7 +7,6 @@ import { FriendsActivity } from "./friends-activity";
 import { PopularPosts } from "./popular-posts";
 import { SavedContent } from "./saved-content";
 import { FindMembers } from "./find-members";
-import { EventsTab } from "./events-tab";
 import { GroupsTab } from "./groups-tab";
 
 interface CommunityContentProps {
@@ -51,9 +50,6 @@ export function CommunityContent({ posts, currentUser, activeTab }: CommunityCon
                 <FindMembers currentUser={currentUser} />
             )}
 
-            {activeTab === "events" && (
-                <EventsTab currentUser={currentUser} />
-            )}
 
             {activeTab === "groups" && (
                 <GroupsTab currentUser={currentUser} />

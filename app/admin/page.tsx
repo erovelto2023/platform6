@@ -100,15 +100,6 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-indigo-600"
         },
         {
-            title: "Events",
-            description: "Manage calendar",
-            href: "/admin/events",
-            icon: Calendar,
-            color: "text-indigo-600",
-            bg: "bg-indigo-100",
-            hover: "group-hover:bg-indigo-600"
-        },
-        {
             title: "Groups",
             description: "Community groups",
             href: "/admin/groups",
@@ -297,7 +288,6 @@ export default async function AdminDashboardPage() {
                         { label: "Affiliate Partners", count: stats.breakdown.affiliatePartners, color: "text-blue-600" },
 
                         { label: "Courses", count: stats.breakdown.courses, color: "text-indigo-600" },
-                        { label: "Events", count: stats.breakdown.events, color: "text-indigo-600" },
                         { label: "Groups", count: stats.breakdown.groups, color: "text-emerald-600" },
                         { label: "Surveys", count: stats.breakdown.surveys, color: "text-orange-600" },
                         { label: "Wholesale Partners", count: stats.breakdown.wholesaleSuppliers, color: "text-cyan-600" },

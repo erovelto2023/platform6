@@ -7,9 +7,7 @@ const isProtected = createRouteMatcher([
     '/niche-catalog(.*)',
     '/admin(.*)',
     '/docs-editor(.*)',
-    '/accounting(.*)',
     '/affiliates(.*)',
-    '/calendar(.*)',
     '/niche-boxes(.*)',
     '/resources(.*)',
     '/tools(.*)',
@@ -23,7 +21,6 @@ const isProtected = createRouteMatcher([
 const isStudentRoute = createRouteMatcher([
     '/accounting(.*)',
     '/affiliates(.*)',
-    '/calendar(.*)',
     '/niche-boxes(.*)',
     '/resources(.*)',
     '/tools(.*)',
