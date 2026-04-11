@@ -18,9 +18,9 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 interface ManageBookingProps {
-    params: {
+    params: Promise<{
         token: string;
-    };
+    }>;
 }
 
 export default async function ManageBookingPage(props: ManageBookingProps) {

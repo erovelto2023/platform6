@@ -26,15 +26,15 @@ import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
 
 interface ExpensesPageProps {
-    searchParams: {
+    searchParams: Promise<{
         page?: string;
         query?: string;
         category?: string;
-    };
+    }>;
 }
 
 export default async function ExpensesPage(props: ExpensesPageProps) {
-    const searchParams = props.searchParams;
+    const searchParams = await props.searchParams;
     const page = Number(searchParams?.page) || 1;
     const query = searchParams?.query || "";
     const category = searchParams?.category || "";

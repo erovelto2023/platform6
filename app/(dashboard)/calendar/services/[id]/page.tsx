@@ -4,8 +4,9 @@ import { BackButton } from "@/components/accounting/BackButton";
 import { getCalendarService } from "@/lib/actions/calendar-service.actions";
 import { notFound } from "next/navigation";
 
-export default async function EditServicePage({ params }: { params: { id: string } }) {
-    const res = await getCalendarService(params.id);
+export default async function EditServicePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const res = await getCalendarService(id);
 
     if (!res.success) {
         notFound();

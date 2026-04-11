@@ -4,9 +4,9 @@ import GlossaryTerm from '@/lib/db/models/GlossaryTerm';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
-  const { slug } = params;
+  const { slug } = await params;
   await connectToDatabase();
   const term = await GlossaryTerm.findOne({ slug }).lean();
   return NextResponse.json(term);

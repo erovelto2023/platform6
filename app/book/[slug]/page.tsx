@@ -7,13 +7,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface BookingPageProps {
-    params: {
+    params: Promise<{
         slug: string; // Business Slug
-    };
-    searchParams: {
+    }>;
+    searchParams: Promise<{
         date?: string;
         serviceId?: string;
-    };
+    }>;
 }
 
 export default async function PublicBookingPage(props: BookingPageProps) {

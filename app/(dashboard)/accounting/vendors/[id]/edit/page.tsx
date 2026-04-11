@@ -5,9 +5,9 @@ import { getVendor } from "@/lib/actions/vendor.actions";
 import { redirect } from "next/navigation";
 
 interface EditVendorPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function EditVendorPage(props: EditVendorPageProps) {

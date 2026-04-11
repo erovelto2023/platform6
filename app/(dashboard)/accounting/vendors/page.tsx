@@ -23,10 +23,10 @@ import { getVendors, deleteVendor } from "@/lib/actions/vendor.actions";
 import { Badge } from "@/components/ui/badge";
 
 interface VendorsPageProps {
-    searchParams: {
+    searchParams: Promise<{
         page?: string;
         query?: string;
-    };
+    }>;
 }
 
 export default async function VendorsPage(props: VendorsPageProps) {

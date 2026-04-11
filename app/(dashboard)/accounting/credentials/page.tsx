@@ -22,10 +22,10 @@ import { getCredentials } from "@/lib/actions/credential.actions";
 import { CredentialActions } from "@/components/accounting/CredentialActions";
 
 interface CredentialsPageProps {
-    searchParams: {
+    searchParams: Promise<{
         page?: string;
         query?: string;
-    };
+    }>;
 }
 
 export default async function CredentialsPage(props: CredentialsPageProps) {

@@ -7,9 +7,9 @@ import { redirect } from "next/navigation";
 import { getAllVendors } from "@/lib/actions/vendor.actions";
 
 interface EditCredentialPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function EditCredentialPage(props: EditCredentialPageProps) {

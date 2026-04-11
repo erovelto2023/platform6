@@ -4,12 +4,13 @@ import connectToDatabase from "@/lib/db/connect";
 import Headline from "@/lib/db/models/Headline";
 import HeadlineDetailClient from "./_components/headline-detail-client";
 
-export default async function HeadlineDetailPage({ params }: { params: { headlineId: string } }) {
+export default async function HeadlineDetailPage({ params }: { params: Promise<{ headlineId: string }> }) {
+    const { headlineId } = await params;
     const { userId } = await auth();
     if (!userId) return redirect("/");
 
     await connectToDatabase();
-    const headline = await Headline.findOne({ _id: params.headlineId, userId }).lean();
+    const headline = await Headline.findOne({ _id: headlineId, userId }).lean();
 
     if (!headline) {
         return redirect("/headlines");

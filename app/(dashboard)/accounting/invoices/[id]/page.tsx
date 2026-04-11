@@ -5,8 +5,9 @@ import { formatCurrency } from "@/lib/utils";
 import { DownloadInvoiceButton } from "@/components/accounting/DownloadInvoiceButton";
 import { Badge } from "@/components/ui/badge";
 
-export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
-    const { data: invoice, success } = await getInvoice(params.id);
+export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const { data: invoice, success } = await getInvoice(id);
 
     if (!success || !invoice) {
         notFound();
