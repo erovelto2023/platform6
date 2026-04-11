@@ -26,7 +26,7 @@ export function BookingsList({ searchTerm = "" }: BookingsListProps) {
         setLoading(true);
         const res = await getBookings();
         if (res.success) {
-            setBookings(res.data);
+            setBookings(res.data || []);
         }
         setLoading(false);
     };
