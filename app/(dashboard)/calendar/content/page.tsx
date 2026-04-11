@@ -1,60 +1,40 @@
-import { getFullContentPosts } from "@/lib/actions/content.actions";
-import { AdvancedContentCalendar } from "@/components/content/AdvancedContentCalendar";
-import { StrategyDashboard } from "@/components/content/StrategyDashboard";
-import { KanbanBoard } from "@/components/calendar/content-planner/KanbanBoard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Campaign from "@/lib/db/models/Campaign";
-import Offer from "@/lib/db/models/Offer";
-import connectToDatabase from "@/lib/db/connect";
-
-async function getData() {
-    await connectToDatabase();
-    const [postsRes, campaigns, offers] = await Promise.all([
-        getFullContentPosts(),
-        Campaign.find({}).sort({ createdAt: -1 }),
-        Offer.find({}).sort({ createdAt: -1 })
-    ]);
-
-    return {
-        posts: postsRes.success ? postsRes.data : [],
-        campaigns: JSON.parse(JSON.stringify(campaigns)),
-        offers: JSON.parse(JSON.stringify(offers))
-    };
-}
+import { getPosts } from "@/lib/actions/content-planner/post.actions";
+import { ContentPlannerClient } from "@/components/calendar/content-planner/ContentPlannerClient";
+import { Sparkles, Activity, Database } from "lucide-react";
 
 export default async function ContentCalendarPage() {
-    const { posts, campaigns, offers } = await getData();
+    const contentPosts = await getPosts();
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
-            <div className="flex flex-col gap-4">
-                <div>
-                    <h3 className="text-2xl font-bold tracking-tight text-slate-900">Advanced Content Calendar</h3>
-                    <p className="text-sm text-slate-500">
-                        Manage your content, strategy, and offers.
-                    </p>
+        <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden bg-[#07091B] font-sans">
+            {/* Context Header */}
+            <div className="px-8 py-6 flex justify-between items-center bg-[#07091B] border-b border-zinc-800/50 shrink-0">
+                <div className="flex flex-col">
+                   <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_10px_#6366f1]" />
+                      <span className="text-[10px] font-black uppercase tracking-[4px] text-zinc-600">Strategy Workspace</span>
+                   </div>
+                   <h2 className="text-2xl font-black text-white tracking-tighter leading-tight uppercase">Growth Roadmap</h2>
+                </div>
+                
+                <div className="flex items-center gap-6 bg-black/40 px-6 py-3 rounded-2xl border border-zinc-800/50 shadow-inner">
+                   <div className="flex items-center gap-2 group cursor-pointer">
+                      <Activity className="w-4 h-4 text-indigo-500" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">Analyzer Active</span>
+                   </div>
+                   <div className="w-px h-4 bg-zinc-800" />
+                   <div className="flex items-center gap-2 group cursor-pointer">
+                      <Database className="w-4 h-4 text-indigo-500" />
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest group-hover:text-indigo-400 transition-colors">Secure Uplink</span>
+                   </div>
                 </div>
             </div>
 
-            <Tabs defaultValue="calendar" className="flex-1 flex flex-col">
-                <TabsList>
-                    <TabsTrigger value="calendar">Calendar</TabsTrigger>
-                    <TabsTrigger value="kanban">Kanban Board</TabsTrigger>
-                    <TabsTrigger value="strategy">Strategy & Analytics</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="calendar" className="flex-1 mt-4">
-                    <AdvancedContentCalendar posts={posts} campaigns={campaigns} offers={offers} />
-                </TabsContent>
-
-                <TabsContent value="kanban" className="flex-1 mt-4 h-[calc(100vh-250px)]">
-                    <KanbanBoard posts={posts} campaigns={campaigns} offers={offers} />
-                </TabsContent>
-
-                <TabsContent value="strategy" className="mt-4">
-                    <StrategyDashboard posts={posts} offers={offers} />
-                </TabsContent>
-            </Tabs>
+            <div className="flex-1 overflow-hidden p-12">
+                <div className="max-w-[1600px] mx-auto h-full">
+                    <ContentPlannerClient initialPosts={contentPosts || []} />
+                </div>
+            </div>
         </div>
     );
 }

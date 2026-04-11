@@ -6,8 +6,9 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { 
     ArrowLeft, Calculator, Lightbulb, Bookmark, Share2, Info, ExternalLink, Heart, Rocket,
-    Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles, Clock, TrendingUp
+    Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles, Clock, TrendingUp, Wrench
 } from "lucide-react";
+import { getUserRole } from "@/lib/roles";
 import GlossaryActions from "@/components/glossary/GlossaryActions";
 import GlossaryProgressTracker from "@/components/glossary/GlossaryProgressTracker";
 import RelatedTerms from "@/components/glossary/RelatedTerms";
@@ -62,9 +63,9 @@ const renderList = (items: any[] | undefined, icon: React.ReactNode, title: stri
                     
                     return (
                         <li key={i} className="flex gap-3 text-slate-600 dark:text-slate-300 items-start">
-                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
                             {url ? (
-                                <a href={url} target="_blank" rel="noopener noreferrer" className="leading-relaxed hover:text-emerald-500 font-medium transition-colors flex items-center gap-1">
+                                <a href={url} target="_blank" rel="noopener noreferrer" className="leading-relaxed hover:text-indigo-500 font-medium transition-colors flex items-center gap-1">
                                     {label} <ExternalLink size={12} />
                                 </a>
                             ) : (
@@ -88,6 +89,8 @@ export default async function GlossaryTermPage({ params }: Props) {
 
     const { terms: allTerms } = await getGlossaryTerms({ limit: 1000 });
     const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
+    const userRole = await getUserRole();
+    const isAdmin = userRole === 'admin';
 
     // Increment view count asynchronously
     incrementGlossaryView(slug);
@@ -111,6 +114,13 @@ export default async function GlossaryTermPage({ params }: Props) {
     const updatedDate = serializedTerm.lastUpdated ? new Date(serializedTerm.lastUpdated).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "March 2026";
     const readingTime = getReadingTimeEstimate(serializedTerm);
 
+    // Breadcrumbs
+    const breadcrumbs = [
+        { label: "Glossary", href: "/glossary" },
+        { label: serializedTerm.category || "General", href: `/glossary?category=${serializedTerm.category}` },
+        { label: serializedTerm.term, href: `/glossary/${serializedTerm.slug}` }
+    ];
+
     // Extracting video ID if it's a youtube link
     let youtubeEmbedUrl = null;
     if (serializedTerm.videoUrl && serializedTerm.videoUrl.includes('youtube.com/watch?v=')) {
@@ -125,13 +135,40 @@ export default async function GlossaryTermPage({ params }: Props) {
         <>
         <GlossaryTermStructuredData term={serializedTerm} baseUrl="https://kbusinessacademy.com" />
         <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-900 dark:text-white pb-20">
-            <div className="max-w-5xl mx-auto px-6 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="max-w-[1400px] mx-auto px-6 py-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Breadcrumbs */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+                    <nav className="flex items-center gap-2 text-sm font-medium text-slate-500 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                        {breadcrumbs.map((crumb, idx) => (
+                            <div key={idx} className="flex items-center gap-2 shrink-0">
+                                {idx > 0 && <span className="text-slate-300">/</span>}
+                                <Link 
+                                    href={crumb.href}
+                                    className={`hover:text-indigo-600 transition-colors ${idx === breadcrumbs.length - 1 ? "text-indigo-600 font-bold" : ""}`}
+                                >
+                                    {crumb.label}
+                                </Link>
+                            </div>
+                        ))}
+                    </nav>
+
+                    {isAdmin && (
+                        <Link 
+                            href={`/admin/glossary?edit=${serializedTerm._id}`}
+                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-full font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 w-fit"
+                        >
+                            <Wrench size={16} />
+                            Edit Term
+                        </Link>
+                    )}
+                </div>
+
                 <Link 
                     href="/glossary"
-                    className="flex items-center gap-2 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors mb-8 group font-bold w-fit"
+                    className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors mb-8 group font-bold w-fit"
                 >
                     <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-                    Back to Glossary
+                    Back to All Terms
                 </Link>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
@@ -139,7 +176,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                     <div className="lg:col-span-2">
                         {/* 1. Header & Tags */}
                         <div className="flex items-center flex-wrap gap-3 mb-4">
-                            <Link href={`/glossary?category=${serializedTerm.category}`} className="text-xs font-bold px-3 py-1 rounded-full text-white bg-emerald-500 hover:bg-emerald-600 transition-colors uppercase tracking-widest cursor-pointer">
+                            <Link href={`/glossary?category=${serializedTerm.category}`} className="text-xs font-bold px-3 py-1 rounded-full text-white bg-indigo-500 hover:bg-indigo-600 transition-colors uppercase tracking-widest cursor-pointer">
                                 {serializedTerm.category || 'General'}
                             </Link>
                             <span className="text-slate-400 text-sm italic">Updated {updatedDate}</span>
@@ -156,19 +193,20 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                         {/* 2. Quick Definition (Featured Snippet Ready) */}
                         {serializedTerm.shortDefinition && (
-                            <div className="p-8 bg-white border border-slate-200 rounded-3xl dark:bg-slate-800/50 dark:border-slate-700 mb-10 shadow-xl shadow-emerald-500/5 relative overflow-hidden group">
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500" />
-                                <p className="text-2xl font-medium text-slate-800 dark:text-slate-100 leading-relaxed relative z-10">
-                                    <span className="text-emerald-600 dark:text-emerald-400 font-black mr-2">Definition:</span> 
+                            <div className="p-10 bg-white/70 backdrop-blur-xl border border-slate-200/50 rounded-[2.5rem] dark:bg-slate-800/40 dark:border-slate-700/50 mb-12 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-blue-600" />
+                                <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors duration-700" />
+                                <p className="text-2xl md:text-3xl font-semibold text-slate-800 dark:text-slate-100 leading-snug relative z-10">
+                                    <span className="text-indigo-600 dark:text-indigo-400 font-black mr-3">Definition:</span> 
                                     {autoLinkContent(serializedTerm.shortDefinition, termMap)}
                                 </p>
                             </div>
                         )}
 
-                        <div className="prose prose-lg dark:prose-invert max-w-none prose-emerald">
+                        <div className="prose prose-lg dark:prose-invert max-w-none prose-indigo">
                             {/* 3. Simple Explanation */}
                             <h2 className="text-3xl font-black mt-10 mb-6 text-slate-900 dark:text-white flex items-center gap-3">
-                                <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
+                                <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-xl flex items-center justify-center shrink-0 border border-indigo-200/50 dark:border-indigo-800/50">
                                     <BookOpen size={20} />
                                 </div>
                                 What is {serializedTerm.term}?
@@ -189,6 +227,18 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap space-y-4">
                                         {autoLinkContent(serializedTerm.expandedExplanation, termMap)}
                                     </div>
+
+                                    {/* Modern Usage snippet inside Deeper Dive */}
+                                    {serializedTerm.modernUsage && (
+                                        <div className="mt-6 p-6 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                                            <h4 className="text-sm font-black uppercase tracking-widest text-indigo-500 mb-3 flex items-center gap-2">
+                                                <TrendingUp size={14} /> Modern Day Use
+                                            </h4>
+                                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed italic">
+                                                "{serializedTerm.modernUsage}"
+                                            </p>
+                                        </div>
+                                    )}
                                 </>
                             )}
 
@@ -196,7 +246,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {(serializedTerm.origin || serializedTerm.traditionalMeaning) && (
                                 <div className="p-8 rounded-3xl mt-12 mb-10 bg-slate-100 dark:bg-slate-800/50 not-prose">
                                     <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                                        <History className="text-emerald-500" />
+                                        <History className="text-indigo-500" />
                                         History & Origins
                                     </h3>
                                     <div className="space-y-6">
@@ -235,7 +285,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {(serializedTerm.howItWorks || serializedTerm.howItMakesMoney) && (
                                 <div className="p-8 rounded-3xl mt-12 mb-10 border-2 border-dashed bg-white border-slate-200 shadow-sm dark:bg-slate-800/50 dark:border-slate-700 not-prose">
                                     <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100 font-bold mb-4 text-xl">
-                                        <Calculator className="text-emerald-500" />
+                                        <Calculator className="text-indigo-500" />
                                         How It Works & Makes Money
                                     </div>
                                     <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -244,13 +294,58 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 </div>
                             )}
 
-                            {/* Best For */}
-                            {serializedTerm.bestFor && (
-                                <div className="p-6 bg-sky-50 dark:bg-sky-900/20 rounded-2xl border border-sky-100 dark:border-sky-900/50 mt-12 mb-10 not-prose">
-                                    <h4 className="font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center gap-2 text-lg">
-                                        <Users size={20} className="text-sky-600 dark:text-sky-400" /> Ideal Target Audience
+                            {/* Essential Context - Beginner/Advanced */}
+                            {(serializedTerm.beginnerExplanation || serializedTerm.advancedPerspective) && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 mb-10 not-prose">
+                                    {serializedTerm.beginnerExplanation && (
+                                        <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+                                            <h4 className="font-bold text-emerald-800 dark:text-emerald-400 mb-2 flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center">
+                                                    <BookOpen size={14} className="text-emerald-600" />
+                                                </div>
+                                                For Beginners
+                                            </h4>
+                                            <p className="text-emerald-900/70 dark:text-emerald-300/80 text-sm leading-relaxed">{serializedTerm.beginnerExplanation}</p>
+                                        </div>
+                                    )}
+                                    {serializedTerm.advancedPerspective && (
+                                        <div className="p-6 bg-indigo-50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                                            <h4 className="font-bold text-indigo-800 dark:text-indigo-400 mb-2 flex items-center gap-2">
+                                                <div className="w-6 h-6 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+                                                    <Sparkles size={14} className="text-indigo-600" />
+                                                </div>
+                                                Advanced View
+                                            </h4>
+                                            <p className="text-indigo-900/70 dark:text-indigo-300/80 text-sm leading-relaxed">{serializedTerm.advancedPerspective}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Best For / Who Uses It */}
+                            {(serializedTerm.bestFor || serializedTerm.whoUsesIt) && (
+                                <div className="p-8 bg-sky-50 dark:bg-sky-900/20 rounded-3xl border border-sky-100 dark:border-sky-900/50 mt-12 mb-10 not-prose overflow-hidden relative group">
+                                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform">
+                                        <Users size={80} className="text-sky-600" />
+                                    </div>
+                                    <h4 className="font-bold text-sky-800 dark:text-sky-300 mb-4 flex items-center gap-2 text-xl relative z-10">
+                                        <Users size={24} className="text-sky-600 dark:text-sky-400" /> 
+                                        Ideal For & Audience
                                     </h4>
-                                    <p className="text-sky-900 dark:text-sky-200/80 leading-relaxed text-lg">{serializedTerm.bestFor}</p>
+                                    <div className="space-y-4 relative z-10">
+                                        {serializedTerm.bestFor && (
+                                            <div className="flex gap-3">
+                                                <span className="font-black text-[10px] uppercase text-sky-500 mt-1 shrink-0">Best For:</span>
+                                                <p className="text-sky-900 dark:text-sky-100 leading-relaxed text-lg">{serializedTerm.bestFor}</p>
+                                            </div>
+                                        )}
+                                        {serializedTerm.whoUsesIt && (
+                                            <div className="flex gap-3">
+                                                <span className="font-black text-[10px] uppercase text-sky-500 mt-1 shrink-0">Who Uses It:</span>
+                                                <p className="text-sky-900 dark:text-sky-100 leading-relaxed text-lg">{serializedTerm.whoUsesIt}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
@@ -258,7 +353,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {(serializedTerm.useCases || serializedTerm.commonPractices) && (
                                 <div className="mt-12 mb-10">
                                     <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <Briefcase className="text-emerald-500" /> Practical Applications
+                                        <Briefcase className="text-indigo-500" /> Practical Applications
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 not-prose">
                                         {serializedTerm.useCases && (
@@ -281,7 +376,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {serializedTerm.realExamples && (
                                 <div className="mt-12 mb-10">
                                     <h2 className="text-2xl font-bold mb-4 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <Target className="text-emerald-500" /> Real-World Examples
+                                        <Target className="text-indigo-500" /> Real-World Examples
                                     </h2>
                                     <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-900/50 not-prose">
                                         <p className="text-blue-800 dark:text-blue-200 leading-relaxed italic text-lg">
@@ -295,7 +390,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {youtubeEmbedUrl && (
                                 <div className="mt-12 mb-10 not-prose">
                                     <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <PlayCircle className="text-emerald-500" /> Video Explanation
+                                        <PlayCircle className="text-indigo-500" /> Video Explanation
                                     </h2>
                                     <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
                                         <iframe 
@@ -315,7 +410,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {serializedTerm.caseStudies && serializedTerm.caseStudies.length > 0 && (
                                 <div className="mt-12 mb-10 not-prose">
                                     <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                        <Star className="text-emerald-500" /> Case Studies
+                                        <Star className="text-indigo-500" /> Case Studies
                                     </h2>
                                     <div className="space-y-4">
                                         {serializedTerm.caseStudies.map((study: any, idx: number) => (
@@ -325,7 +420,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                                     {study.description}
                                                 </p>
                                                 {study.url && (
-                                                    <a href={study.url} target="_blank" rel="noopener noreferrer" className="text-emerald-600 dark:text-emerald-400 text-sm font-bold flex items-center gap-1 hover:underline">
+                                                    <a href={study.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 text-sm font-bold flex items-center gap-1 hover:underline">
                                                         Read Full Case Study <ExternalLink size={14} />
                                                     </a>
                                                 )}
@@ -348,12 +443,26 @@ export default async function GlossaryTermPage({ params }: Props) {
                             )}
 
                             {/* 9. Common Mistakes */}
-                            {serializedTerm.commonMistakes && (
-                                <div className="p-6 bg-rose-50 dark:bg-rose-900/20 rounded-2xl border border-rose-100 dark:border-rose-900/50 mt-12 mb-10 not-prose">
-                                    <h4 className="font-bold text-rose-800 dark:text-rose-400 mb-2 flex items-center gap-2 text-lg">
-                                        <AlertTriangle size={20} /> Common Mistakes & Pitfalls
-                                    </h4>
-                                    <p className="text-rose-700 dark:text-rose-300/80 leading-relaxed">{serializedTerm.commonMistakes}</p>
+                            {(serializedTerm.commonMistakes || serializedTerm.misconceptions) && (
+                                <div className="mt-12 mb-10 not-prose">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {serializedTerm.commonMistakes && (
+                                            <div className="p-8 bg-rose-50 dark:bg-rose-900/10 rounded-3xl border border-rose-100 dark:border-rose-900/30">
+                                                <h4 className="font-bold text-rose-800 dark:text-rose-400 mb-4 flex items-center gap-2 text-xl leading-none">
+                                                    <AlertTriangle size={24} /> Common Pitfalls
+                                                </h4>
+                                                <p className="text-rose-700 dark:text-rose-300/80 leading-relaxed">{serializedTerm.commonMistakes}</p>
+                                            </div>
+                                        )}
+                                        {serializedTerm.misconceptions && (
+                                            <div className="p-8 bg-slate-100 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700">
+                                                <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2 text-xl leading-none">
+                                                    <HelpCircle size={24} className="text-slate-400" /> Misconceptions
+                                                </h4>
+                                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{serializedTerm.misconceptions}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
@@ -361,13 +470,13 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {serializedTerm.takeaways && serializedTerm.takeaways.length > 0 && (
                                 <div className="mt-12 bg-slate-100 dark:bg-slate-800 p-8 rounded-3xl not-prose mb-10">
                                     <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                                        <CheckCircle2 className="text-emerald-500" />
+                                        <CheckCircle2 className="text-indigo-500" />
                                         Key Takeaways
                                     </h3>
                                     <ul className="space-y-4 list-none pl-0">
                                         {serializedTerm.takeaways.map((item: string, idx: number) => (
                                             <li key={idx} className="flex gap-4 items-start m-0">
-                                                <div className="mt-1.5 w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                                                <div className="mt-1.5 w-2 h-2 rounded-full bg-indigo-500 shrink-0" />
                                                 <span className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium text-lg">{item}</span>
                                             </li>
                                         ))}
@@ -377,16 +486,16 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                             {/* Getting Started Checklist */}
                             {serializedTerm.gettingStartedChecklist && serializedTerm.gettingStartedChecklist.length > 0 && (
-                                <div className="mt-12 bg-white dark:bg-slate-800 p-8 rounded-3xl border-2 border-emerald-500/20 shadow-lg shadow-emerald-500/5 not-prose mb-10">
+                                <div className="mt-12 bg-white dark:bg-slate-800 p-8 rounded-3xl border-2 border-indigo-500/20 shadow-lg shadow-indigo-500/5 not-prose mb-10">
                                     <h3 className="text-2xl font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                                        <CheckSquare className="text-emerald-500" />
+                                        <CheckSquare className="text-indigo-500" />
                                         Getting Started Checklist
                                     </h3>
                                     <div className="space-y-4">
-                                        {serializedTerm.gettingStartedChecklist.map((item: string, idx: number) => (
+                                         {serializedTerm.gettingStartedChecklist.map((item: string, idx: number) => (
                                             <label key={idx} className="flex gap-4 items-start p-4 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors group">
-                                                <div className="w-6 h-6 rounded border-2 border-slate-300 dark:border-slate-600 group-hover:border-emerald-500 mt-0.5 flex items-center justify-center shrink-0">
-                                                    <span className="w-3 h-3 bg-emerald-500 rounded-sm opacity-0" />
+                                                <div className="w-6 h-6 rounded border-2 border-slate-300 dark:border-slate-600 group-hover:border-indigo-500 mt-0.5 flex items-center justify-center shrink-0">
+                                                    <span className="w-3 h-3 bg-indigo-500 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 </div>
                                                 <span className="text-slate-700 dark:text-slate-300 leading-relaxed text-lg font-medium select-none">{item}</span>
                                             </label>
@@ -400,14 +509,14 @@ export default async function GlossaryTermPage({ params }: Props) {
                             {serializedTerm.faqs && serializedTerm.faqs.length > 0 && (
                                 <div className="mt-12 mb-10 not-prose">
                                     <h2 className="text-3xl font-black mb-8 text-slate-900 dark:text-white flex items-center gap-2">
-                                        <HelpCircle className="text-emerald-500" size={28} /> FAQs
+                                        <HelpCircle className="text-indigo-500" size={28} /> FAQs
                                     </h2>
                                     <div className="space-y-4">
                                         {serializedTerm.faqs.map((faq: any, idx: number) => (
                                             <details key={idx} className="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-sm">
                                                 <summary className="flex items-center justify-between p-6 cursor-pointer font-bold text-slate-800 dark:text-slate-100 select-none hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                                                     {faq.question}
-                                                    <span className="transition-transform duration-300 group-open:rotate-180 text-emerald-500">
+                                                    <span className="transition-transform duration-300 group-open:rotate-180 text-indigo-500">
                                                         <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
                                                     </span>
                                                 </summary>
@@ -416,6 +525,41 @@ export default async function GlossaryTermPage({ params }: Props) {
                                                 </div>
                                             </details>
                                         ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Sources & Trust Section */}
+                            {(serializedTerm.sources || serializedTerm.warningsOrNotes || serializedTerm.scientificPerspective || serializedTerm.culturalNotes) && (
+                                <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800 not-prose">
+                                    <div className="flex items-center gap-2 text-slate-400 font-bold mb-6 uppercase tracking-widest text-xs">
+                                        <Info size={14} /> Trust & Transparency
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        {serializedTerm.sources && (
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-black text-slate-500 uppercase">Verified Sources</h5>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{serializedTerm.sources}</p>
+                                            </div>
+                                        )}
+                                        {serializedTerm.warningsOrNotes && (
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-black text-rose-500 uppercase">Safety & Ethics</h5>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">{serializedTerm.warningsOrNotes}</p>
+                                            </div>
+                                        )}
+                                        {serializedTerm.scientificPerspective && (
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-black text-blue-500 uppercase">Scientific Context</h5>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{serializedTerm.scientificPerspective}</p>
+                                            </div>
+                                        )}
+                                        {serializedTerm.culturalNotes && (
+                                            <div className="space-y-2">
+                                                <h5 className="text-xs font-black text-amber-500 uppercase">Cultural Notes</h5>
+                                                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{serializedTerm.culturalNotes}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             )}
@@ -447,15 +591,18 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                     {/* Sidebar / Metadata */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-8">
+                        <div className="sticky top-24 space-y-6">
                             
+                            {/* Pro Recommended Tool (MOVED TO TOP) */}
+                            <RotatingAffiliateBanner products={products} />
+
                             {/* Progress Tracker */}
                             <GlossaryProgressTracker slug={serializedTerm.slug} term={serializedTerm.term} />
                             
                             {/* Actions Box */}
-                            <div className="p-8 rounded-3xl border bg-white border-slate-200 shadow-xl shadow-slate-200/50 dark:bg-slate-800/50 dark:border-slate-700 dark:shadow-none">
+                            <div className="p-6 rounded-[2rem] border bg-white border-slate-200 shadow-xl shadow-slate-200/50 dark:bg-slate-800/50 dark:border-slate-700 dark:shadow-none">
                                 <h4 className="font-bold mb-6 flex items-center gap-2 text-slate-800 dark:text-white">
-                                    <Info size={18} className="text-emerald-600 dark:text-emerald-400" />
+                                    <Info size={18} className="text-indigo-600 dark:text-indigo-400" />
                                     Details Overview
                                 </h4>
                                 
@@ -479,9 +626,9 @@ export default async function GlossaryTermPage({ params }: Props) {
                                         </div>
                                     )}
                                     {serializedTerm.platformPreference && (
-                                        <div className="col-span-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-900/50">
-                                            <span className="block text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400 mb-1">Platform / Software</span>
-                                            <span className="font-bold text-emerald-900 dark:text-emerald-100 text-sm">{serializedTerm.platformPreference}</span>
+                                        <div className="col-span-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
+                                            <span className="block text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 mb-1">Platform / Software</span>
+                                            <span className="font-bold text-indigo-900 dark:text-indigo-100 text-sm">{serializedTerm.platformPreference}</span>
                                         </div>
                                     )}
                                 </div>
@@ -501,9 +648,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 )}
                                 
                                 <GlossaryActions slug={serializedTerm.slug} term={serializedTerm.term} />
-                                <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
-                                    <RotatingAffiliateBanner products={products} />
-                                </div>
                             </div>
 
                             {/* Related Terms */}

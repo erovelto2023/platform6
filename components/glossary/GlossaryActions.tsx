@@ -71,8 +71,8 @@ export default function GlossaryActions({ slug, term }: Props) {
                 onClick={handleBookmark}
                 className={`w-full py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 text-sm transition-all ${
                     bookmarked
-                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                        ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700"
+                        : "bg-indigo-600 text-white hover:bg-indigo-700"
                 }`}
             >
                 {bookmarked ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
@@ -82,7 +82,7 @@ export default function GlossaryActions({ slug, term }: Props) {
                 onClick={handleShare}
                 className="w-full py-3 px-4 rounded-xl border font-bold flex items-center justify-center gap-2 transition-colors border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm"
             >
-                {shared ? <Check size={18} className="text-emerald-500" /> : <Share2 size={18} />}
+                {shared ? <Check size={18} className="text-indigo-500" /> : <Share2 size={18} />}
                 {shared ? "Link Copied!" : "Share Guide"}
             </button>
             <button

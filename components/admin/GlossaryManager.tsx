@@ -253,6 +253,51 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         });
     };
 
+    const handleExportCSV = () => {
+        if (initialTerms.length === 0) {
+            alert('No terms to export.');
+            return;
+        }
+
+        // CSV Header
+        const headers = ["Term", "Short Definition", "Category", "SubCategory", "Views", "Slug", "Startup Cost", "Time to Entry", "Skill Level"];
+        
+        // Helper to escape CSV values
+        const escapeCsv = (val: any) => {
+            if (val === undefined || val === null) return "";
+            const str = String(val);
+            if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+                return `"${str.replace(/"/g, '""')}"`;
+            }
+            return str;
+        };
+
+        const rows = initialTerms.map(t => [
+            escapeCsv(t.term),
+            escapeCsv(t.shortDefinition),
+            escapeCsv(t.category),
+            escapeCsv(t.subCategory),
+            escapeCsv((t as any).views || 0),
+            escapeCsv(`${window.location.origin}/glossary/${t.slug}`),
+            escapeCsv(t.startupCost),
+            escapeCsv(t.timeToFirstDollar),
+            escapeCsv(t.skillRequired)
+        ]);
+
+        const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        
+        const date = new Date().toISOString().split('T')[0];
+        link.setAttribute("href", url);
+        link.setAttribute("download", `glossary_export_${date}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             {view === 'list' && (
@@ -331,6 +376,12 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 className="bg-slate-100 text-slate-700 px-6 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all"
                             >
                                 <Download size={16} /> Bulk Import
+                            </button>
+                            <button
+                                onClick={handleExportCSV}
+                                className="bg-white text-indigo-600 px-6 py-2 rounded-lg font-bold flex items-center gap-2 border border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm"
+                            >
+                                <FileText size={16} /> Export CSV
                             </button>
                         </div>
                     </div>

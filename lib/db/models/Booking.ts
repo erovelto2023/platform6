@@ -6,10 +6,17 @@ export interface IBooking extends Document {
     serviceId: mongoose.Types.ObjectId;
     customerName: string;
     customerEmail: string;
+    customerPhone?: string;
     startTime: Date;
     endTime: Date;
-    status: 'confirmed' | 'cancelled' | 'completed';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'attended' | 'no-show';
+    paymentStatus: 'unpaid' | 'paid' | 'refunded';
+    capacityUsed: number;
+    meetingLink?: string;
     notes?: string;
+    internalNotes?: string;
+    location?: string; // Add this!
+    magicLinkToken?: string; // For self-service management
     createdAt: Date;
     updatedAt: Date;
 }
@@ -34,6 +41,9 @@ const BookingSchema = new Schema(
             type: String,
             required: true,
         },
+        customerPhone: {
+            type: String,
+        },
         startTime: {
             type: Date,
             required: true,
@@ -45,11 +55,34 @@ const BookingSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ['confirmed', 'cancelled', 'completed'],
+            enum: ['pending', 'confirmed', 'cancelled', 'attended', 'no-show'],
             default: 'confirmed',
+        },
+        paymentStatus: {
+            type: String,
+            enum: ['unpaid', 'paid', 'refunded'],
+            default: 'unpaid',
+        },
+        capacityUsed: {
+            type: Number,
+            default: 1,
+        },
+        meetingLink: {
+            type: String,
         },
         notes: {
             type: String,
+        },
+        internalNotes: {
+            type: String,
+        },
+        location: {
+            type: String, // Zoom, address, etc.
+        },
+        magicLinkToken: {
+            type: String,
+            unique: true,
+            sparse: true,
         },
     },
     {

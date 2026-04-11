@@ -162,6 +162,15 @@ export default async function AdminDashboardPage() {
             bg: "bg-indigo-100",
             hover: "group-hover:bg-indigo-600"
         },
+        {
+            title: "Glossary",
+            description: "Manage terminology & definitions",
+            href: "/admin/glossary",
+            icon: Library,
+            color: "text-violet-600",
+            bg: "bg-violet-100",
+            hover: "group-hover:bg-violet-600"
+        },
     ];
 
     return (

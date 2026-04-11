@@ -15,6 +15,7 @@ export async function sendBookingConfirmation(
         serviceName: string;
         startTime: Date;
         location?: string;
+        magicLink?: string; // Add this
     }
 ) {
     try {
@@ -42,7 +43,8 @@ export async function sendBookingConfirmation(
                 date: format(new Date(bookingData.startTime), 'MMMM do, yyyy'),
                 time: format(new Date(bookingData.startTime), 'h:mm a'),
                 location: bookingData.location,
-                businessName: business.name
+                businessName: business.name,
+                magicLink: bookingData.magicLink
             })
         });
 

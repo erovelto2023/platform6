@@ -19,6 +19,7 @@ interface BookingConfirmationEmailProps {
     time: string;
     location?: string;
     businessName: string;
+    magicLink?: string;
 }
 
 export const BookingConfirmationEmail = ({
@@ -28,6 +29,7 @@ export const BookingConfirmationEmail = ({
     time,
     location,
     businessName,
+    magicLink,
 }: BookingConfirmationEmailProps) => {
     return (
         <Html>
@@ -58,7 +60,9 @@ export const BookingConfirmationEmail = ({
                     <Hr style={hr} />
 
                     <Text style={footer}>
-                        Need to reschedule? Reply to this email.
+                        Need to reschedule or cancel? You can manage your booking here:
+                        <br />
+                        <a href={magicLink} style={link}>{magicLink}</a>
                     </Text>
                 </Container>
             </Body>
@@ -114,4 +118,9 @@ const hr = {
 const footer = {
     fontSize: '14px',
     color: '#8898aa',
+};
+
+const link = {
+    color: '#0070f3',
+    textDecoration: 'underline',
 };

@@ -20,22 +20,29 @@ export const Navbar = ({ userRole }: NavbarProps = {}) => {
     }, []);
 
     return (
-        <div className="flex items-center p-4 border-b">
-            <Sheet>
-                <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition">
-                    <Menu />
-                </SheetTrigger>
-                <SheetContent side="left" className="p-0 bg-[#111827] border-none text-white">
-                    <Sidebar userRole={userRole} />
-                </SheetContent>
-            </Sheet>
+        <div className="flex items-center p-4 border-b h-[65px]">
+            {mounted ? (
+                <>
+                    <Sheet>
+                        <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition" asChild>
+                            <button className="md:hidden pr-4 hover:opacity-75 transition">
+                                <Menu />
+                            </button>
+                        </SheetTrigger>
+                        <SheetContent side="left" className="p-0 bg-[#111827] border-none text-white">
+                            <Sidebar userRole={userRole} />
+                        </SheetContent>
+                    </Sheet>
 
-            {/* Business Switcher - Only show for accounting/admin context or generally? */}
-            {/* For now show it always, or maybe only if we are in /accounting route? */}
-            {/* userRole check? */}
-            <div className="hidden md:flex">
-                <BusinessSwitcher />
-            </div>
+                    <div className="hidden md:flex">
+                        <BusinessSwitcher />
+                    </div>
+                </>
+            ) : (
+                <div className="md:hidden pr-4">
+                    <Menu className="text-slate-200 opacity-50" />
+                </div>
+            )}
 
             <div className="flex w-full justify-end items-center gap-4">
                 <NotificationBellWrapper />

@@ -99,7 +99,7 @@ export default function RelatedTerms({ currentTerm, allTerms }: Props) {
   const getReasonIcon = (reason: string) => {
     if (reason === 'Same category') return <Tag size={14} className="text-blue-500" />;
     if (reason.startsWith('Shared tag')) return <Users size={14} className="text-sky-500" />;
-    return <ArrowRight size={14} className="text-emerald-500" />;
+    return <ArrowRight size={14} className="text-indigo-500" />;
   };
 
   return (
@@ -114,14 +114,14 @@ export default function RelatedTerms({ currentTerm, allTerms }: Props) {
           <Link
             key={relatedTerm.slug}
             href={`/glossary/${relatedTerm.slug}`}
-            className="block p-3 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group"
+            className="block p-3 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all group"
           >
             <div className="flex items-start gap-3">
               <div className="mt-1">
                 {getReasonIcon(relatedTerm.reason)}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 transition-colors truncate">
+                <h4 className="font-semibold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors truncate">
                   {relatedTerm.term}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
@@ -139,7 +139,7 @@ export default function RelatedTerms({ currentTerm, allTerms }: Props) {
       <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
         <Link
           href="/glossary"
-          className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline font-semibold"
+          className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline font-semibold"
         >
           Browse all terms →
         </Link>

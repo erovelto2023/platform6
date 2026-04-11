@@ -124,6 +124,7 @@ const LandingPage = () => {
             <div className="hidden md:flex items-center space-x-8">
               <div className="flex space-x-8 text-slate-300 text-sm font-medium">
                 <a href="#features" className="hover:text-white transition-colors">Features</a>
+                <Link href="/glossary" className="hover:text-white transition-colors">Glossary</Link>
                 <a href="#database" className="hover:text-white transition-colors">Keywords</a>
                 <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
               </div>
@@ -162,6 +163,7 @@ const LandingPage = () => {
         {isMenuOpen && (
           <div className="md:hidden bg-[#0B0E23] border-b border-white/10 p-4 space-y-4">
             <a href="#features" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Features</a>
+            <Link href="/glossary" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Glossary</Link>
             <a href="#database" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Keywords</a>
             <a href="#pricing" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Pricing</a>
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">

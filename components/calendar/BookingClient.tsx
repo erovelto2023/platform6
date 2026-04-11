@@ -2,13 +2,13 @@
 "use client";
 
 import { useState } from "react";
-import { format, parse, addMonths, subMonths } from "date-fns";
+import { format, addMonths, subMonths, isSameDay, parse } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { createBooking } from "@/lib/actions/booking.actions";
 import { toast } from "sonner";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle2, ArrowRight, ShieldCheck, Mail, User, Phone, FileText, Plus, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +28,7 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
     // Form State
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
     const [notes, setNotes] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,8 +36,7 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
         if (selected) {
             setDate(selected);
             setSelectedSlot(null);
-            // Update URL to fetch new slots (server component re-render)
-            router.push(`/book/${serviceId}?date=${format(selected, 'yyyy-MM-dd')}`);
+            router.push(`/book/${serviceId}?date=${format(selected, 'yyyy-MM-dd')}`, { scroll: false });
         }
     };
 
@@ -52,7 +52,6 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
         try {
             if (!date || !selectedSlot) return;
 
-            // Constuct full start time date object
             const [hours, minutes] = selectedSlot.split(':').map(Number);
             const startTime = new Date(date);
             startTime.setHours(hours, minutes, 0, 0);
@@ -61,18 +60,19 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
                 serviceId: serviceId,
                 customerName: name,
                 customerEmail: email,
+                customerPhone: phone,
                 startTime: startTime,
                 notes: notes,
             });
 
             if (res.success) {
                 setStep("confirmation");
-                toast.success("Booking confirmed!");
+                toast.success("Consultation Scheduled Successfully");
             } else {
-                toast.error(res.error || "Failed to book");
+                toast.error(res.error || "Execution failed");
             }
         } catch (error) {
-            toast.error("Something went wrong");
+            toast.error("Critical System Error");
         } finally {
             setIsSubmitting(false);
         }
@@ -80,22 +80,38 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
 
     if (step === "confirmation") {
         return (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-                <div className="h-16 w-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+            <div className="flex flex-col items-center justify-center min-h-[500px] text-center space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="relative">
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full" />
+                    <div className="relative h-24 w-24 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl flex items-center justify-center text-emerald-500 mb-2">
+                        <CheckCircle2 size={48} strokeWidth={1.5} />
+                    </div>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">Booking Confirmed!</h2>
-                <p className="text-slate-500 max-w-sm">
-                    You meet with KBAcademy on <br />
-                    <span className="font-semibold text-slate-900">{date ? format(date, 'PPPP') : ''} at {selectedSlot}</span>.
-                </p>
-                <p className="text-sm text-slate-400 mb-6">An invitation has been sent to {email}.</p>
-                <div className="flex gap-4">
-                    <Button variant="outline" onClick={() => window.location.reload()}>
-                        Book Another
+                
+                <div className="space-y-4">
+                    <h2 className="text-4xl font-black tracking-tight text-white uppercase italic">Protocol Initiated</h2>
+                    <p className="text-zinc-400 max-w-sm mx-auto leading-relaxed text-sm font-medium">
+                        Your strategic session has been successfully synchronized for <br />
+                        <span className="text-cyan-400 font-black uppercase tracking-widest">{date ? format(date, 'MMMM do') : ''} @ {selectedSlot}</span>
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-500 uppercase tracking-[3px] font-black">
+                        <ShieldCheck size={12} className="text-emerald-500" />
+                        Confirmation sequence sent
+                    </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm pt-8">
+                    <Button 
+                        className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 rounded-2xl h-14 font-black uppercase tracking-widest text-[10px]"
+                        onClick={() => window.location.reload()}
+                    >
+                        Schedule Another
                     </Button>
-                    <Button onClick={() => router.push('/')}>
-                        Back to Home
+                    <Button 
+                        className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl h-14 font-black uppercase tracking-widest text-[10px] shadow-xl shadow-cyan-900/20"
+                        onClick={() => router.push('/')}
+                    >
+                        Return to Hub
                     </Button>
                 </div>
             </div>
@@ -104,32 +120,102 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
 
     if (step === "form") {
         return (
-            <div className="max-w-md mx-auto h-full flex flex-col">
-                <Button variant="ghost" onClick={() => setStep("time")} className="self-start mb-4 -ml-4 text-slate-500">
-                    <ChevronLeft className="mr-1 h-4 w-4" /> Back to times
-                </Button>
-
-                <h2 className="text-xl font-bold text-slate-900 mb-1">Enter Details</h2>
-                <p className="text-slate-500 mb-6 text-sm">Please provide your information to confirm the appointment.</p>
-
-                <form onSubmit={handleSubmit} className="space-y-4 flex-1">
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} />
+            <div className="max-w-xl mx-auto h-full flex flex-col pt-4 animate-in slide-in-from-right duration-500">
+                <header className="mb-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <button 
+                            onClick={() => setStep("time")} 
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[2px] text-zinc-500 hover:text-cyan-400 transition-colors"
+                        >
+                            <ChevronLeft size={16} /> Re-sync Time
+                        </button>
+                        <div className="text-[10px] font-black text-cyan-400 uppercase tracking-[3px] py-1 px-3 bg-cyan-500/10 border border-cyan-500/20 rounded-full">
+                            Step 02/02
+                        </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="notes">Notes (Optional)</Label>
-                        <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+                    <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Identity Verification</h2>
+                    <p className="text-zinc-500 text-sm font-medium mt-1 uppercase tracking-widest">Provide your credentials to confirm access.</p>
+                </header>
+
+                <form onSubmit={handleSubmit} className="space-y-6 flex-1 pr-4 custom-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-[2px] text-zinc-500 ml-1">Full Name</Label>
+                            <div className="relative group">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" size={16} />
+                                <Input 
+                                    id="name" 
+                                    required 
+                                    placeholder="Enter your name"
+                                    className="bg-black/40 border-2 border-zinc-800/50 rounded-2xl py-6 pl-12 focus:border-cyan-500/50 transition-all font-bold text-sm"
+                                    value={name} 
+                                    onChange={(e) => setName(e.target.value)} 
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-[2px] text-zinc-500 ml-1">Contact Email</Label>
+                            <div className="relative group">
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" size={16} />
+                                <Input 
+                                    id="email" 
+                                    type="email" 
+                                    required 
+                                    placeholder="your@email.com"
+                                    className="bg-black/40 border-2 border-zinc-800/50 rounded-2xl py-6 pl-12 focus:border-cyan-500/50 transition-all font-bold text-sm"
+                                    value={email} 
+                                    onChange={(e) => setEmail(e.target.value)} 
+                                />
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="pt-4">
-                        <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Schedule Event
+                    <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-[10px] font-black uppercase tracking-[2px] text-zinc-500 ml-1">Phone (Optional)</Label>
+                        <div className="relative group">
+                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" size={16} />
+                            <Input 
+                                id="phone" 
+                                type="tel"
+                                placeholder="+1 (555) 000-0000"
+                                className="bg-black/40 border-2 border-zinc-800/50 rounded-2xl py-6 pl-12 focus:border-cyan-500/50 transition-all font-bold text-sm"
+                                value={phone} 
+                                onChange={(e) => setPhone(e.target.value)} 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="notes" className="text-[10px] font-black uppercase tracking-[2px] text-zinc-500 ml-1">Strategic Notes</Label>
+                        <div className="relative group">
+                            <FileText className="absolute left-4 top-14 text-zinc-600 group-focus-within:text-cyan-400 transition-colors" size={16} />
+                            <Textarea 
+                                id="notes" 
+                                placeholder="Anything we should know before the session?"
+                                className="bg-black/40 border-2 border-zinc-800/50 rounded-3xl py-12 pl-12 min-h-[120px] focus:border-cyan-500/50 transition-all font-bold text-sm resize-none"
+                                value={notes} 
+                                onChange={(e) => setNotes(e.target.value)} 
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-6">
+                        <Button 
+                            type="submit" 
+                            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded-3xl h-16 font-black uppercase tracking-[3px] text-xs transition-all shadow-2xl shadow-cyan-950/20 border-b-4 border-cyan-800 active:border-b-0 active:translate-y-1" 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                                    Synchronizing Engine...
+                                </>
+                            ) : (
+                                <>
+                                    Confirm Session Protocol
+                                    <ArrowRight size={18} className="ml-3" />
+                                </>
+                            )}
                         </Button>
                     </div>
                 </form>
@@ -138,51 +224,99 @@ export function BookingClient({ serviceId, initialDate, slots }: BookingClientPr
     }
 
     return (
-        <div className="h-full flex flex-col">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Select a Date & Time</h2>
-            <div className="flex flex-col md:flex-row gap-12 flex-1 pt-8">
-                {/* Calendar */}
-                <div className="flex justify-center md:justify-start">
-                    <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={handleDateSelect}
-                        className="rounded-md border shadow-sm p-4 w-full h-fit bg-white"
-                        classNames={{
-                            head_cell: "text-slate-500 rounded-md w-12 font-normal text-[0.8rem]",
-                            cell: "h-12 w-12 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-slate-100/50 [&:has([aria-selected])]:bg-slate-100 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-                            day: "h-12 w-12 p-0 font-normal aria-selected:opacity-100 ring-offset-white hover:bg-slate-100 focus:bg-slate-100 focus:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2 aria-selected:bg-blue-600 aria-selected:text-slate-50 aria-selected:hover:bg-blue-600/90 aria-selected:focus:bg-blue-600 aria-selected:focus:text-slate-50",
-                        }}
-                        disabled={(date: Date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                    />
+        <div className="h-full flex flex-col animate-in fade-in duration-700">
+            <header className="mb-8 flex items-center justify-between">
+                <div>
+                   <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Temporal Selection</h2>
+                   <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-[3px] mt-1">Select your preferred operational window.</p>
+                </div>
+                <div className="text-[10px] font-black text-cyan-400 uppercase tracking-[3px] py-1.5 px-4 bg-cyan-500/10 border border-cyan-500/20 rounded-full">
+                    Step 01/02
+                </div>
+            </header>
+
+            <div className="flex flex-col lg:flex-row gap-8 xl:gap-16 flex-1 overflow-hidden">
+                {/* Calendar Side */}
+                <div className="flex-shrink-0 animate-in slide-in-from-left duration-700">
+                    <div className="p-4 bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-[2.5rem] shadow-2xl">
+                        <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={handleDateSelect}
+                            className="p-4"
+                            classNames={{
+                                day: "h-14 w-14 p-0 font-black text-xs uppercase hover:bg-cyan-500/10 hover:text-cyan-400 rounded-2xl transition-all aria-selected:bg-cyan-500 aria-selected:text-black aria-selected:shadow-xl aria-selected:shadow-cyan-500/20",
+                                head_cell: "text-zinc-600 font-black text-[9px] uppercase tracking-widest w-14 pb-4",
+                                cell: "h-14 w-14 p-0.5",
+                                nav_button_previous: "h-9 w-9 bg-zinc-800/50 text-white rounded-xl border-zinc-700 hover:bg-cyan-500 hover:text-black transition-colors",
+                                nav_button_next: "h-9 w-9 bg-zinc-800/50 text-white rounded-xl border-zinc-700 hover:bg-cyan-500 hover:text-black transition-colors",
+                                caption_label: "text-xs font-black uppercase tracking-[3px] text-zinc-400 mb-6 flex items-center gap-2",
+                                day_today: "text-cyan-500",
+                                day_outside: "opacity-10",
+                            }}
+                            disabled={(date: Date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        />
+                    </div>
                 </div>
 
-                {/* Slots */}
-                <div className="flex-1 overflow-y-auto max-h-[400px] pr-2">
-                    <h3 className="text-sm font-medium text-slate-500 mb-3 uppercase tracking-wide">
-                        {date ? format(date, 'EEEE, MMMM do') : 'Select a date'}
-                    </h3>
+                {/* Slots Side */}
+                <div className="flex-1 flex flex-col pr-2 animate-in slide-in-from-bottom duration-700">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Clock size={16} className="text-zinc-600" />
+                        <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[4px]">
+                            {date ? format(date, 'EEEE | MMMM do') : 'Pending Date Selection'}
+                        </h3>
+                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pr-4 custom-scrollbar max-h-[450px]">
                         {slots.length > 0 ? (
                             slots.map((slot: string) => (
-                                <Button
+                                <button
                                     key={slot}
-                                    variant="outline"
-                                    className="w-full justify-center py-6 text-base font-medium hover:border-blue-600 hover:text-blue-600 transition-all"
+                                    className="group relative h-16 bg-zinc-900/40 border-2 border-zinc-800/50 rounded-2xl hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all outline-none"
                                     onClick={() => handleSlotSelect(slot)}
                                 >
-                                    {slot}
-                                </Button>
+                                    <div className="flex flex-col items-center justify-center h-full">
+                                        <span className="text-sm font-black text-zinc-300 group-hover:text-white tabular-nums tracking-tighter">
+                                            {format(parse(slot, 'HH:mm', new Date()), 'h:mm')}
+                                        </span>
+                                        <span className="text-[9px] font-black text-zinc-600 group-hover:text-cyan-400 uppercase tracking-widest mt-0.5">
+                                            {format(parse(slot, 'HH:mm', new Date()), 'a')}
+                                        </span>
+                                    </div>
+                                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Plus size={10} className="text-cyan-500" />
+                                    </div>
+                                </button>
                             ))
                         ) : (
-                            <div className="col-span-full text-center py-20 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50/50">
-                                <p className="text-slate-400">No slots available for this date.</p>
+                            <div className="col-span-full h-80 flex flex-col items-center justify-center border-2 border-dashed border-zinc-800/50 rounded-[2.5rem] bg-black/20 text-center p-8">
+                                <div className="h-16 w-16 bg-zinc-800/30 rounded-3xl flex items-center justify-center text-zinc-700 mb-4 opacity-50">
+                                    <ShieldAlert size={32} />
+                                </div>
+                                <h4 className="text-sm font-black uppercase text-zinc-600 tracking-widest mb-2">Protocol Conflict</h4>
+                                <p className="text-xs text-zinc-700 font-medium max-w-[200px]">No operational windows detected for the selected period.</p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
+            
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #27272a;
+                    border-radius: 10px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #3f3f46;
+                }
+            `}</style>
         </div>
     );
 }

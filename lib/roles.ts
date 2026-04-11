@@ -24,7 +24,7 @@ export const checkRole = async (role: Roles) => {
         const adminEmails = getAdminEmails();
         const isAdmin = userEmail ? adminEmails.includes(userEmail) : false;
         
-        if (role === 'admin') return isAdmin;
+        if (role === 'admin' && isAdmin) return true;
         if (isAdmin) return true; // Admins have all roles
 
         // const userPlan = (user.publicMetadata?.plan as string) || 'free';

@@ -29,7 +29,7 @@ export function autoLinkContent(text: string, termMap: Map<string, string>) {
                 <Link 
                     key={i} 
                     href={`/glossary/${slug}`}
-                    className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline decoration-2 underline-offset-4"
+                    className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline decoration-2 underline-offset-4"
                 >
                     {part}
                 </Link>
