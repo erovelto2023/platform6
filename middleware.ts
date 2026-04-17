@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isProtected = createRouteMatcher([
@@ -83,19 +83,32 @@ export default clerkMiddleware(async (auth, req) => {
 
         const plan = (sessionClaims?.publicMetadata as any)?.plan || 'free';
         const role = (sessionClaims?.publicMetadata as any)?.role || 'user';
-        const isAdmin = role === 'admin';
+        let isAdmin = role === 'admin';
 
         // FEATURE BYPASS: Set to false in production to enforce access control
         const BYPASS_ACCESS_CONTROL = false; 
 
         // 1. Admin Route Protection
-        const userEmail = (sessionClaims as any)?.email;
-        const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
-        const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
-        const isEmailAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !BYPASS_ACCESS_CONTROL) {
+            // High-reliability check: Fetch user's email directly if metadata role isn't 'admin'
+            if (userId) {
+                const client = await clerkClient();
+                const user = await client.users.getUser(userId);
+                const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+                
+                const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+                const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
+                const isEmailAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+                
+                if (isEmailAdmin) {
+                    isAdmin = true;
+                }
+            }
 
-        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !isEmailAdmin && !BYPASS_ACCESS_CONTROL) {
-            return NextResponse.redirect(new URL('/dashboard', req.url));
+            // If still not admin, redirect
+            if (!isAdmin) {
+                return NextResponse.redirect(new URL('/dashboard', req.url));
+            }
         }
 
         // 2. Student Route Protection (Plan-based)
