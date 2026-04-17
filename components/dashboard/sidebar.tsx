@@ -276,39 +276,8 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const isActuallyAdmin = userRole === 'admin';
 
 
-    // Define which routes are for which roles
-    const freeRoutes = [
-        "/dashboard",
-        "/locations",
-        "/catalog",
-        "/docs",
-        "/glossary",
-        "/messages",
-        "/tickets",
-        "/whiteboard",
-        "/partner"
-    ];
-
-    const studentRoutes = [
-        "/accounting",
-        "/affiliates",
-        "/niche-boxes",
-        "/resources",
-        "/tools",
-        "/community"
-    ];
-
-    // Filter routes based on user role
-    const filteredRoutes = routes.filter(route => {
-        // Admins can see everything
-        if (isActuallyAdmin) return true;
-
-        if (userRole === 'student') {
-            return freeRoutes.includes(route.href) || studentRoutes.includes(route.href);
-        }
-
-        return freeRoutes.includes(route.href);
-    });
+    // Show all standard routes for non-admins
+    const filteredRoutes = routes;
 
     // Determine which set of routes to show
     let currentRoutes = isCurrentlyInAdmin && isActuallyAdmin ? adminRoutes : filteredRoutes;
