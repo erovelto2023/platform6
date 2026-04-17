@@ -40,6 +40,23 @@ export async function getPartnerStats() {
 
         const partnerAccount = await ensurePartnerAccount(user);
 
+        // --- Active Linking Sync ---
+        // If the user hasn't been linked yet, check for the cookie right now
+        if (!user.referredBy) {
+            const { cookies } = await import("next/headers");
+            const cookieStore = await cookies();
+            const refCode = cookieStore.get('p6_partner_ref')?.value;
+
+            if (refCode) {
+                const partner = await PartnerAccount.findOne({ affiliateCode: refCode });
+                if (partner && partner.clerkId !== clerkUser.id) {
+                    await User.findByIdAndUpdate(user._id, { referredBy: partner.userId });
+                    user.referredBy = partner.userId;
+                    console.log(`[getPartnerStats] Late-linked user ${user.clerkId} to ${partner.clerkId}`);
+                }
+            }
+        }
+
         // Total Signups (Lifetime)
         const totalSignups = await User.countDocuments({ referredBy: user._id });
 

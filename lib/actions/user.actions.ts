@@ -67,9 +67,7 @@ export async function getOrCreateUser() {
                 // 3. Referred user is "newly" created (we don't want to attribute old users)
                 // Note: We check if referredBy is null, which covers most cases. 
                 // To be extra strict on "account creation" period:
-                const isRecentlyCreated = (new Date().getTime() - new Date(user.createdAt).getTime()) < (24 * 60 * 60 * 1000); // 24 hours
-
-                if (partner && partner.clerkId !== clerkUser.id && isRecentlyCreated) {
+                if (partner && partner.clerkId !== clerkUser.id) {
                     await User.findByIdAndUpdate(user._id, { referredBy: partner.userId });
                     user.referredBy = partner.userId; // Update local object for return
                     console.log(`User ${user.clerkId} linked to referrer ${partner.clerkId}`);
