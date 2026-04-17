@@ -58,12 +58,6 @@ const routes = [
         color: "text-amber-400",
     },
     {
-        label: "Admin",
-        icon: ShieldCheck,
-        href: "/admin",
-        color: "text-orange-700",
-    },
-    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/affiliates",
@@ -278,7 +272,8 @@ interface SidebarProps {
 
 export const Sidebar = ({ userRole }: SidebarProps) => {
     const pathname = usePathname();
-    const isAdmin = pathname?.startsWith("/admin");
+    const isCurrentlyInAdmin = pathname?.startsWith("/admin");
+    const isActuallyAdmin = userRole === 'admin';
 
     // Define which routes are for which roles
     const freeRoutes = [
@@ -289,7 +284,8 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
         "/glossary",
         "/messages",
         "/tickets",
-        "/whiteboard"
+        "/whiteboard",
+        "/partner"
     ];
 
     const studentRoutes = [
@@ -303,36 +299,36 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
 
     // Filter routes based on user role
     const filteredRoutes = routes.filter(route => {
-        /*
         // Admins can see everything
-        if (userRole === 'admin') return true;
+        if (isActuallyAdmin) return true;
 
-        // If user is a student, they can see free routes AND student routes
         if (userRole === 'student') {
             return freeRoutes.includes(route.href) || studentRoutes.includes(route.href);
         }
 
-        // If user is free, they can ONLY see free routes
         return freeRoutes.includes(route.href);
-        */
-        
-        // Show everything temporarily
-        return true;
     });
 
-    // Add Upgrade link for non-students
-    /*
-    if (userRole === 'free') {
-        filteredRoutes.push({
-            label: "Upgrade to Student",
-            icon: Sparkles,
-            href: "/upgrade",
-            color: "text-amber-400",
-        });
-    }
-    */
+    // Determine which set of routes to show
+    let currentRoutes = isCurrentlyInAdmin && isActuallyAdmin ? adminRoutes : filteredRoutes;
 
-    const currentRoutes = isAdmin ? adminRoutes : filteredRoutes;
+    // Inject Admin Panel link for admins if not already on an admin page
+    if (!isCurrentlyInAdmin && isActuallyAdmin) {
+        // Find existing Admin Panel link to avoid duplicates
+        const hasAdminLink = currentRoutes.some(r => r.href === '/admin');
+        if (!hasAdminLink) {
+            currentRoutes = [
+                ...currentRoutes.slice(0, 1), // Keep Dashboard first
+                {
+                    label: "Admin Panel",
+                    icon: ShieldCheck,
+                    href: "/admin",
+                    color: "text-orange-700",
+                },
+                ...currentRoutes.slice(1)
+            ];
+        }
+    }
     const { isCollapsed, toggle } = useSidebarStore();
 
     return (
