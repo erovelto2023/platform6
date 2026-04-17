@@ -113,6 +113,8 @@ export async function getPartnerNetwork() {
             .select('firstName lastName email createdAt')
             .sort({ createdAt: -1 });
 
+        console.log(`[getPartnerNetwork] Found ${signups.length} signups for user ${clerkUser.id}`);
+
         return JSON.parse(JSON.stringify(signups));
     } catch (error) {
         console.error("Failed to fetch partner network:", error);
