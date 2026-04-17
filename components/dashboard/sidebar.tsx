@@ -275,6 +275,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const isCurrentlyInAdmin = pathname?.startsWith("/admin");
     const isActuallyAdmin = userRole === 'admin';
 
+
     // Define which routes are for which roles
     const freeRoutes = [
         "/dashboard",
