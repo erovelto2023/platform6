@@ -85,9 +85,15 @@ export default clerkMiddleware(async (auth, req) => {
         const role = (sessionClaims?.publicMetadata as any)?.role || 'user';
         const isAdmin = role === 'admin';
 
-        // FEATURE BYPASS: Set to true during development to unlock all features
-        const BYPASS_ACCESS_CONTROL = true; 
+        // FEATURE BYPASS: Set to false in production to enforce access control
+        const BYPASS_ACCESS_CONTROL = false; 
 
+        // 1. Admin Route Protection
+        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !BYPASS_ACCESS_CONTROL) {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
+
+        // 2. Student Route Protection (Plan-based)
         if (!BYPASS_ACCESS_CONTROL && isStudentRoute(req)) {
             if (plan !== 'student' && !isAdmin) {
                 const upgradeUrl = new URL('/upgrade', req.url);

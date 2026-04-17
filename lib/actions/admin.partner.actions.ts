@@ -8,13 +8,10 @@ import PartnerCommission from "@/lib/db/models/PartnerCommission";
 import PartnerPayout from "@/lib/db/models/PartnerPayout";
 import { revalidatePath } from "next/cache";
 
+import { checkRole } from "@/lib/roles";
+
 async function checkAdmin() {
-    const clerkUser = await currentUser();
-    if (!clerkUser) return false;
-    
-    await connectDB();
-    const user = await User.findOne({ clerkId: clerkUser.id });
-    return user?.role === 'admin';
+    return await checkRole('admin');
 }
 
 export async function getAdminPartners() {
