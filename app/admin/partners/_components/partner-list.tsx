@@ -31,12 +31,17 @@ interface Partner {
         firstName: string;
         lastName: string;
         email: string;
+        referredBy?: {
+            firstName: string;
+            lastName: string;
+        };
     };
     affiliateCode: string;
     balance: number;
     pendingAmount: number;
     commissionType: 'percentage' | 'flat';
     commissionValue: number;
+    referralCount: number;
 }
 
 interface PartnerListProps {
@@ -112,10 +117,12 @@ export const PartnerList = ({ partners: initialPartners }: PartnerListProps) => 
                     <TableHeader className="bg-slate-50">
                         <TableRow>
                             <TableHead>Partner</TableHead>
+                            <TableHead>Recruited By</TableHead>
                             <TableHead>Code</TableHead>
                             <TableHead>Commission</TableHead>
                             <TableHead>Pending</TableHead>
                             <TableHead>Balance</TableHead>
+                            <TableHead>Referrals</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -127,6 +134,17 @@ export const PartnerList = ({ partners: initialPartners }: PartnerListProps) => 
                                         <span className="font-bold text-slate-900">{partner.userId.firstName} {partner.userId.lastName}</span>
                                         <span className="text-xs text-slate-500">{partner.userId.email}</span>
                                     </div>
+                                </TableCell>
+                                <TableCell>
+                                    {partner.userId.referredBy ? (
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-slate-700">
+                                                {partner.userId.referredBy.firstName} {partner.userId.referredBy.lastName}
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-xs text-slate-400 italic">Organic</span>
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono">
@@ -143,6 +161,13 @@ export const PartnerList = ({ partners: initialPartners }: PartnerListProps) => 
                                 </TableCell>
                                 <TableCell className="font-bold text-indigo-600">
                                     {formatPrice(partner.balance)}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex items-center">
+                                        <span className="bg-slate-100 px-2.5 py-1 rounded-full text-xs font-bold text-slate-700">
+                                            {partner.referralCount || 0}
+                                        </span>
+                                    </div>
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex justify-end gap-2">

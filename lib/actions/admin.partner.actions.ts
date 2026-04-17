@@ -25,13 +25,19 @@ export async function getAdminPartners() {
         const partners = await PartnerAccount.find({})
             .populate({
                 path: 'userId',
-                select: 'firstName lastName email'
+                select: 'firstName lastName email referredBy'
+            })
+            .populate({
+                path: 'userId.referredBy',
+                select: 'firstName lastName'
             })
             .lean();
 
-        // For each partner, get commission summaries
+        // For each partner, get commission summaries and network size
         const enhancedPartners = await Promise.all(partners.map(async (partner: any) => {
             const commissions = await PartnerCommission.find({ partnerId: partner._id });
+            const referralCount = await User.countDocuments({ referredBy: partner.userId._id });
+            
             const pendingAmount = commissions
                 .filter(c => c.status === 'pending')
                 .reduce((acc, curr) => acc + curr.amount, 0);
@@ -39,6 +45,7 @@ export async function getAdminPartners() {
             return {
                 ...partner,
                 pendingAmount,
+                referralCount
             };
         }));
 

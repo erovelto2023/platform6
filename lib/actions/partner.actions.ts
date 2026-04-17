@@ -32,7 +32,10 @@ export async function getPartnerStats() {
         if (!clerkUser) return null;
 
         await connectDB();
-        const user = await User.findOne({ clerkId: clerkUser.id });
+        const user = await User.findOne({ clerkId: clerkUser.id }).populate({
+            path: 'referredBy',
+            select: 'firstName lastName'
+        });
         if (!user) return null;
 
         const partnerAccount = await ensurePartnerAccount(user);
