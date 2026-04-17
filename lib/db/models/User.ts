@@ -82,6 +82,16 @@ const UserSchema = new Schema({
         directMessages: { type: Boolean, default: true },
         announcements: { type: Boolean, default: true },
         emailNotifications: { type: Boolean, default: false }
+    },
+    // Partner Program Fields
+    referredBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        index: true
+    },
+    isPartner: {
+        type: Boolean,
+        default: true // Every user is a partner by default as requested
     }
 }, { timestamps: true });
 

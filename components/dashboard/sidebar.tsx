@@ -52,6 +52,12 @@ const routes = [
         color: "text-green-600",
     },
     {
+        label: "Partner Program",
+        icon: Sparkles,
+        href: "/partner",
+        color: "text-amber-400",
+    },
+    {
         label: "Admin",
         icon: ShieldCheck,
         href: "/admin",
@@ -137,6 +143,12 @@ const adminRoutes = [
         icon: LayoutDashboard,
         href: "/admin",
         color: "text-sky-500",
+    },
+    {
+        label: "Partners",
+        icon: Users,
+        href: "/admin/partners",
+        color: "text-emerald-500",
     },
     {
         label: "Library",

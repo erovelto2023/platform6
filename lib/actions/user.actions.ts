@@ -1,8 +1,26 @@
 "use server";
 
 import { currentUser } from "@clerk/nextjs/server";
+import { cookies } from "next/headers";
 import connectDB from "@/lib/db/connect";
 import User from "@/lib/db/models/User";
+import PartnerAccount from "@/lib/db/models/PartnerAccount";
+
+// Helper function to generate a random unique affiliate code
+async function generateAffiliateCode(): Promise<string> {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // Check for collision
+    const existing = await PartnerAccount.findOne({ affiliateCode: code });
+    if (existing) {
+        return generateAffiliateCode(); // Recursive check
+    }
+    return code;
+}
 
 export async function getOrCreateUser() {
     try {
@@ -18,6 +36,18 @@ export async function getOrCreateUser() {
         let user = await User.findOne({ clerkId: clerkUser.id });
 
         if (!user) {
+            const cookieStore = await cookies();
+            const refCode = cookieStore.get('p6_partner_ref')?.value;
+            let referrerId = null;
+
+            if (refCode) {
+                // Find the referrer by their affiliate code
+                const partner = await PartnerAccount.findOne({ affiliateCode: refCode });
+                if (partner && partner.clerkId !== clerkUser.id) { // Self-referral check
+                    referrerId = partner.userId;
+                }
+            }
+
             // Create user if doesn't exist
             user = await User.create({
                 clerkId: clerkUser.id,
@@ -27,10 +57,27 @@ export async function getOrCreateUser() {
                 role: 'student',
                 username: clerkUser.username || clerkUser.emailAddresses[0].emailAddress.split('@')[0],
                 photo: clerkUser.imageUrl,
-                onboardingCompleted: true
+                onboardingCompleted: true,
+                referredBy: referrerId,
+                isPartner: true // Default to true as requested
             });
 
             console.log('User synced/created in database:', clerkUser.id);
+        }
+
+        // Automatic PartnerAccount creation if missing
+        let partnerAccount = await PartnerAccount.findOne({ userId: user._id });
+        if (!partnerAccount) {
+            const affiliateCode = await generateAffiliateCode();
+            partnerAccount = await PartnerAccount.create({
+                userId: user._id,
+                clerkId: user.clerkId,
+                affiliateCode: affiliateCode,
+                status: 'active',
+                commissionType: 'percentage',
+                commissionValue: 45
+            });
+            console.log('Partner account generated for user:', user.clerkId, 'Code:', affiliateCode);
         }
 
         return JSON.parse(JSON.stringify(user));

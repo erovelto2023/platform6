@@ -4,6 +4,8 @@ import Stripe from 'stripe';
 import connectDB from '@/lib/db/connect';
 import Payment from '@/lib/db/models/Payment';
 import User from '@/lib/db/models/User';
+import PartnerAccount from '@/lib/db/models/PartnerAccount';
+import PartnerCommission from '@/lib/db/models/PartnerCommission';
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy'; // Fallback for build time
 
@@ -66,7 +68,7 @@ export async function POST(req: Request) {
                 }
 
                 // Create payment record
-                await Payment.create({
+                const payment = await Payment.create({
                     stripePaymentId: paymentIntent.id,
                     userId: user?._id,
                     clerkId: clerkId,
@@ -80,6 +82,38 @@ export async function POST(req: Request) {
                 });
 
                 console.log('Payment recorded:', paymentIntent.id);
+
+                // Handle Partner Commission
+                if (user && user.referredBy) {
+                    const referrerAccount = await PartnerAccount.findOne({ userId: user.referredBy });
+                    
+                    if (referrerAccount && referrerAccount.status === 'active') {
+                        let commissionAmount = 0;
+                        const saleAmount = paymentIntent.amount / 100;
+
+                        if (referrerAccount.commissionType === 'percentage') {
+                            commissionAmount = saleAmount * (referrerAccount.commissionValue / 100);
+                        } else {
+                            commissionAmount = referrerAccount.commissionValue;
+                        }
+
+                        // Create the commission record
+                        const eligibleDate = new Date();
+                        eligibleDate.setDate(eligibleDate.getDate() + 30); // 30-day refund period
+
+                        await PartnerCommission.create({
+                            partnerId: referrerAccount._id,
+                            referrerUserId: referrerAccount.userId,
+                            referredUserId: user._id,
+                            paymentId: payment._id,
+                            amount: commissionAmount,
+                            status: 'pending',
+                            eligibleDate: eligibleDate,
+                        });
+
+                        console.log(`Commission of ${commissionAmount} recorded for partner ${referrerAccount.affiliateCode}`);
+                    }
+                }
             } catch (error) {
                 console.error('Error recording payment:', error);
             }
@@ -111,10 +145,19 @@ export async function POST(req: Request) {
 
             try {
                 // Update payment status to refunded
-                await Payment.findOneAndUpdate(
+                const payment = await Payment.findOneAndUpdate(
                     { stripePaymentId: charge.payment_intent },
-                    { status: 'refunded' }
+                    { status: 'refunded' },
+                    { new: true }
                 );
+
+                if (payment) {
+                    // Also cancel any pending commission for this payment
+                    await PartnerCommission.findOneAndUpdate(
+                        { paymentId: payment._id, status: 'pending' },
+                        { status: 'cancelled', notes: 'Payment was refunded' }
+                    );
+                }
 
                 console.log('Refund recorded:', charge.id);
             } catch (error) {
