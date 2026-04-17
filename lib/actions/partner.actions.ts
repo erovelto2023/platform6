@@ -72,7 +72,7 @@ export async function getPartnerLinks() {
 
         const partnerAccount = await ensurePartnerAccount(user);
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://platform6.com';
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kbusinessacademy.com';
         const affiliateCode = partnerAccount.affiliateCode;
 
         const mainLink = {
