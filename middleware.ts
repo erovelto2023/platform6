@@ -89,7 +89,12 @@ export default clerkMiddleware(async (auth, req) => {
         const BYPASS_ACCESS_CONTROL = false; 
 
         // 1. Admin Route Protection
-        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !BYPASS_ACCESS_CONTROL) {
+        const userEmail = (sessionClaims as any)?.email;
+        const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
+        const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
+        const isEmailAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+
+        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !isEmailAdmin && !BYPASS_ACCESS_CONTROL) {
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
