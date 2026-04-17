@@ -7,6 +7,24 @@ import PartnerAccount from "@/lib/db/models/PartnerAccount";
 import PartnerCommission from "@/lib/db/models/PartnerCommission";
 import PartnerPayout from "@/lib/db/models/PartnerPayout";
 import Offer from "@/lib/db/models/Offer";
+import { generateAffiliateCode } from "./user.actions";
+
+async function ensurePartnerAccount(user: any) {
+    let partnerAccount = await PartnerAccount.findOne({ userId: user._id });
+    if (!partnerAccount) {
+        const affiliateCode = await generateAffiliateCode();
+        partnerAccount = await PartnerAccount.create({
+            userId: user._id,
+            clerkId: user.clerkId,
+            affiliateCode: affiliateCode,
+            status: 'active',
+            commissionType: 'percentage',
+            commissionValue: 45
+        });
+        console.log('Partner account generated for user:', user.clerkId);
+    }
+    return partnerAccount;
+}
 
 export async function getPartnerStats() {
     try {
@@ -17,8 +35,7 @@ export async function getPartnerStats() {
         const user = await User.findOne({ clerkId: clerkUser.id });
         if (!user) return null;
 
-        const partnerAccount = await PartnerAccount.findOne({ userId: user._id });
-        if (!partnerAccount) return null;
+        const partnerAccount = await ensurePartnerAccount(user);
 
         // Total Signups (Lifetime)
         const totalSignups = await User.countDocuments({ referredBy: user._id });
@@ -53,8 +70,7 @@ export async function getPartnerLinks() {
         const user = await User.findOne({ clerkId: clerkUser.id });
         if (!user) return [];
 
-        const partnerAccount = await PartnerAccount.findOne({ userId: user._id });
-        if (!partnerAccount) return [];
+        const partnerAccount = await ensurePartnerAccount(user);
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://platform6.com';
         const affiliateCode = partnerAccount.affiliateCode;
@@ -110,8 +126,7 @@ export async function getPartnerPayouts() {
         const user = await User.findOne({ clerkId: clerkUser.id });
         if (!user) return [];
 
-        const partnerAccount = await PartnerAccount.findOne({ userId: user._id });
-        if (!partnerAccount) return [];
+        const partnerAccount = await ensurePartnerAccount(user);
 
         const payouts = await PartnerPayout.find({ partnerId: partnerAccount._id })
             .sort({ createdAt: -1 });

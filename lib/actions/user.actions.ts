@@ -7,7 +7,7 @@ import User from "@/lib/db/models/User";
 import PartnerAccount from "@/lib/db/models/PartnerAccount";
 
 // Helper function to generate a random unique affiliate code
-async function generateAffiliateCode(): Promise<string> {
+export async function generateAffiliateCode(): Promise<string> {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
     for (let i = 0; i < 8; i++) {
