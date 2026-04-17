@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/format";
 import { toast } from "sonner";
-import { processPartnerPayout, updatePartnerCommissionSettings, finalizePartnerCommissions } from "@/lib/actions/admin.partner.actions";
+import { processPartnerPayout, updatePartnerCommissionSettings, finalizePartnerCommissions, deletePartnerAccount } from "@/lib/actions/admin.partner.actions";
 import { 
     Dialog, 
     DialogContent, 
@@ -23,7 +23,7 @@ import {
     DialogFooter
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { RefreshCcw, DollarSign, Settings, Search } from "lucide-react";
+import { RefreshCcw, DollarSign, Settings, Search, Trash } from "lucide-react";
 
 interface Partner {
     _id: string;
@@ -176,6 +176,7 @@ export const PartnerList = ({ partners: initialPartners }: PartnerListProps) => 
                                             onPayout={handlePayout} 
                                         />
                                         <SettingsDialog partner={partner} />
+                                        <DeleteDialog partner={partner} />
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -280,6 +281,63 @@ const SettingsDialog = ({ partner }: { partner: Partner }) => {
                 <DialogFooter>
                     <Button onClick={onUpdate} disabled={loading}>
                         Save Changes
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const DeleteDialog = ({ partner }: { partner: Partner }) => {
+    const [loading, setLoading] = useState(false);
+
+    const onDelete = async () => {
+        setLoading(true);
+        try {
+            const result = await deletePartnerAccount(partner._id);
+            if (result.success) {
+                toast.success("Partner removed successfully");
+                window.location.reload();
+            } else {
+                toast.error(result.error || "Deletion failed");
+            }
+        } catch (error) {
+            toast.error("An error occurred during deletion");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50">
+                    <Trash className="h-3.5 w-3.5" />
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="text-rose-600">Remove Partner Status</DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                    <p className="text-sm text-slate-600">
+                        Are you sure you want to remove <span className="font-bold">{partner.userId.firstName} {partner.userId.lastName}</span> as a partner?
+                    </p>
+                    <ul className="mt-4 space-y-2 text-xs text-slate-500 list-disc pl-4">
+                        <li>Their affiliate link and code will be deactivated.</li>
+                        <li>Their partner dashboard will be hidden.</li>
+                        <li>Their existing balance and commissions will be preserved but inaccessible.</li>
+                        <li>The base user account will <span className="font-bold">not</span> be deleted.</li>
+                    </ul>
+                </div>
+                <DialogFooter className="flex gap-2">
+                    <DialogTrigger asChild>
+                        <Button variant="outline" disabled={loading}>
+                            Cancel
+                        </Button>
+                    </DialogTrigger>
+                    <Button variant="destructive" onClick={onDelete} disabled={loading}>
+                        {loading ? "Removing..." : "Remove Partner Account"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

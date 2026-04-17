@@ -140,3 +140,31 @@ export async function updatePartnerCommissionSettings(partnerId: string, data: {
         return { success: false, error: "Update failed" };
     }
 }
+
+export async function deletePartnerAccount(partnerId: string) {
+    if (!await checkAdmin()) return { success: false, error: "Unauthorized" };
+
+    try {
+        await connectDB();
+        
+        // Find the partner account to get the userId
+        const partner = await PartnerAccount.findById(partnerId);
+        if (!partner) return { success: false, error: "Partner not found" };
+
+        const userId = partner.userId;
+
+        // 1. Delete the PartnerAccount
+        await PartnerAccount.findByIdAndDelete(partnerId);
+
+        // 2. Update the User model to remove partner status
+        await User.findByIdAndUpdate(userId, { isPartner: false });
+
+        revalidatePath('/admin/partners');
+        revalidatePath('/partner');
+        
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete partner account:", error);
+        return { success: false, error: "Deletion failed" };
+    }
+}
