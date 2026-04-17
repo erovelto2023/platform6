@@ -60,6 +60,11 @@ export default async function PartnerDashboardPage() {
 
                 {/* Right Column - Payout History & Earnings Detail */}
                 <div className="space-y-8">
+                    <PayoutSettings 
+                        initialEmail={stats.partnerAccount.payoutEmail}
+                        initialMethod={stats.partnerAccount.payoutMethod}
+                    />
+
                     <Card className="hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-lg">Payout History</CardTitle>
