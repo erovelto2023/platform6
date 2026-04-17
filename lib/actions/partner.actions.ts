@@ -7,6 +7,7 @@ import PartnerAccount from "@/lib/db/models/PartnerAccount";
 import PartnerCommission from "@/lib/db/models/PartnerCommission";
 import PartnerPayout from "@/lib/db/models/PartnerPayout";
 import Offer from "@/lib/db/models/Offer";
+import { revalidatePath } from "next/cache";
 import { generateAffiliateCode } from "./user.actions";
 
 async function ensurePartnerAccount(user: any) {
@@ -157,5 +158,33 @@ export async function getPartnerPayouts() {
     } catch (error) {
         console.error("Failed to fetch partner payouts:", error);
         return [];
+    }
+}
+
+export async function updatePartnerPayoutSettings(data: { email: string, method: string }) {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Unauthorized" };
+
+        await connectDB();
+        const user = await User.findOne({ clerkId: clerkUser.id });
+        if (!user) return { success: false, error: "User not found" };
+
+        const partnerAccount = await PartnerAccount.findOneAndUpdate(
+            { userId: user._id },
+            { 
+                payoutEmail: data.email,
+                payoutMethod: data.method 
+            },
+            { new: true }
+        );
+
+        if (!partnerAccount) return { success: false, error: "Partner account not found" };
+
+        revalidatePath('/partner');
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to update payout settings:", error);
+        return { success: false, error: "Update failed" };
     }
 }

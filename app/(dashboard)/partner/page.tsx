@@ -2,6 +2,7 @@ import { getPartnerStats, getPartnerLinks, getPartnerNetwork, getPartnerPayouts 
 import { PartnerStats } from "./_components/partner-stats";
 import { ReferralLinks } from "./_components/referral-links";
 import { PartnerNetwork } from "./_components/partner-network";
+import { PayoutSettings } from "./_components/payout-settings";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/format";
 import { format } from "date-fns";

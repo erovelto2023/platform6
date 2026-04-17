@@ -42,6 +42,7 @@ interface Partner {
     commissionType: 'percentage' | 'flat';
     commissionValue: number;
     referralCount: number;
+    payoutEmail?: string;
 }
 
 interface PartnerListProps {
@@ -133,6 +134,11 @@ export const PartnerList = ({ partners: initialPartners }: PartnerListProps) => 
                                     <div className="flex flex-col">
                                         <span className="font-bold text-slate-900">{partner.userId.firstName} {partner.userId.lastName}</span>
                                         <span className="text-xs text-slate-500">{partner.userId.email}</span>
+                                        {partner.payoutEmail && (
+                                            <div className="mt-1 flex items-center gap-1.5 text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100 w-fit">
+                                                PayPal: {partner.payoutEmail}
+                                            </div>
+                                        )}
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -207,6 +213,16 @@ const PayoutDialog = ({ partner, onPayout }: { partner: Partner, onPayout: any }
                     <div className="p-4 bg-indigo-50 rounded-lg">
                         <p className="text-sm text-indigo-700">Available Balance: <span className="font-bold">{formatPrice(partner.balance)}</span></p>
                     </div>
+                    {partner.payoutEmail ? (
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                            <p className="text-[10px] uppercase font-bold text-slate-400">PayPal Recipient</p>
+                            <p className="text-sm font-bold text-slate-900">{partner.payoutEmail}</p>
+                        </div>
+                    ) : (
+                        <div className="p-4 bg-rose-50 border border-rose-100 rounded-lg">
+                            <p className="text-xs text-rose-600 font-bold italic">No payout email provided by user.</p>
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label>Amount to pay out</Label>
                         <Input 
