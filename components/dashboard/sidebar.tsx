@@ -46,28 +46,28 @@ const routes = [
         color: "text-emerald-400",
     },
     {
-        label: "Accounting",
-        icon: BarChart3,
-        href: "/accounting",
-        color: "text-green-600",
-    },
-    {
         label: "Partner Program",
         icon: Sparkles,
         href: "/partner",
         color: "text-amber-400",
     },
     {
-        label: "Affiliate CRM",
-        icon: LinkIcon,
-        href: "/affiliates",
-        color: "text-blue-500",
-    },
-    {
         label: "Browse Courses",
         icon: BookOpen,
         href: "/catalog",
         color: "text-violet-500",
+    },
+    {
+        label: "Accounting",
+        icon: BarChart3,
+        href: "/accounting",
+        color: "text-green-600",
+    },
+    {
+        label: "Affiliate CRM",
+        icon: LinkIcon,
+        href: "/affiliates",
+        color: "text-blue-500",
     },
     {
         label: "Community",
@@ -118,7 +118,7 @@ const routes = [
         color: "text-emerald-500",
     },
     {
-        label: "Tools & Apps",
+        label: "Tools and Apps",
         icon: Wrench,
         href: "/tools",
         color: "text-orange-500",
@@ -313,23 +313,20 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     // Determine which set of routes to show
     let currentRoutes = isCurrentlyInAdmin && isActuallyAdmin ? adminRoutes : filteredRoutes;
 
-    // Inject Admin Panel link for admins if not already on an admin page
+    // Inject Admin link ONLY for erovelto1@gmail.com (admin role)
     if (!isCurrentlyInAdmin && isActuallyAdmin) {
-        // Find existing Admin Panel link to avoid duplicates
-        const hasAdminLink = currentRoutes.some(r => r.href === '/admin');
-        if (!hasAdminLink) {
-            currentRoutes = [
-                ...currentRoutes.slice(0, 1), // Keep Dashboard first
-                {
-                    label: "Admin Panel",
-                    icon: ShieldCheck,
-                    href: "/admin",
-                    color: "text-orange-700",
-                },
-                ...currentRoutes.slice(1)
-            ];
-        }
+        currentRoutes = [
+            ...currentRoutes.slice(0, 3), // Dashboard, Locations, Partner Program
+            {
+                label: "Admin",
+                icon: ShieldCheck,
+                href: "/admin",
+                color: "text-orange-700",
+            },
+            ...currentRoutes.slice(3)
+        ];
     }
+
     const { isCollapsed, toggle } = useSidebarStore();
 
     return (
