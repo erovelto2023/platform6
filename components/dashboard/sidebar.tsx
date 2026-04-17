@@ -145,10 +145,16 @@ const adminRoutes = [
         color: "text-sky-500",
     },
     {
-        label: "Partners",
+        label: "Partners (Admin)",
         icon: Users,
         href: "/admin/partners",
         color: "text-emerald-500",
+    },
+    {
+        label: "Partner Program (My Stats)",
+        icon: Sparkles,
+        href: "/partner",
+        color: "text-amber-400",
     },
     {
         label: "Library",

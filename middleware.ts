@@ -15,6 +15,7 @@ const isProtected = createRouteMatcher([
     '/messages(.*)',
     '/tickets(.*)',
     '/whiteboard(.*)',
+    '/partner(.*)',
     '/docs(.*)',
 ]);
 
