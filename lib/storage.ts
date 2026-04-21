@@ -2,13 +2,15 @@ import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
+const UPLOAD_DIR = path.resolve(process.cwd(), "public", "uploads");
 
 /**
  * Ensures the upload directory exists.
  */
 const ensureUploadDir = () => {
+    console.log(`[Storage] Checking UPLOAD_DIR: ${UPLOAD_DIR}`);
     if (!fs.existsSync(UPLOAD_DIR)) {
+        console.log(`[Storage] Creating UPLOAD_DIR...`);
         fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 };

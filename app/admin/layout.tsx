@@ -19,13 +19,13 @@ const AdminLayout = async ({
         redirect("/sign-in");
     }
 
-    // Check if user is admin using Clerk metadata
-    const isAdmin = await checkRole('admin');
+    // Combine role and role name fetching to reduce Clerk API calls
+    const userRole = await getUserRole();
+    const isAdmin = userRole === 'admin';
+
     if (!isAdmin) {
         redirect('/dashboard');
     }
-
-    const userRole = await getUserRole();
 
     return (
         <div className="h-full relative">

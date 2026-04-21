@@ -61,7 +61,7 @@ export async function getResources(query?: string) {
             filter.title = { $regex: query, $options: "i" };
         }
 
-        const resources = await Resource.find(filter).sort({ createdAt: -1 });
+        const resources = await Resource.find(filter).sort({ createdAt: -1 }).lean();
         return { success: true, data: JSON.parse(JSON.stringify(resources)) };
     } catch (error: any) {
         console.error("[getResources] Error:", error);
