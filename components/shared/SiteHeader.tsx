@@ -20,11 +20,11 @@ export function SiteHeader() {
     const pathname = usePathname();
 
     return (
-        <header className="px-6 lg:px-10 h-20 flex items-center border-b border-[#bc6c25]/20 bg-[#fefae0]/80 backdrop-blur-md sticky top-0 z-50">
+        <header className="px-6 lg:px-10 h-20 flex items-center border-b border-emerald-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
             {/* Logo */}
-            <div className="flex items-center gap-2 font-bold text-xl text-[#283618] shrink-0">
+            <div className="flex items-center gap-2 font-bold text-xl text-slate-900 shrink-0">
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-10 h-10 bg-[#606c38] rounded-xl flex items-center justify-center text-[#fefae0] shadow-lg shadow-[#606c38]/20 transition-transform group-hover:scale-110">
+                    <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-200 transition-transform group-hover:scale-110">
                         K
                     </div>
                     <div className="flex flex-col leading-none">
@@ -45,15 +45,15 @@ export function SiteHeader() {
                             className={cn(
                                 "text-sm font-bold transition-all relative py-2",
                                 isActive 
-                                    ? "text-[#606c38]" 
-                                    : "text-[#283618]/60 hover:text-[#606c38]"
+                                    ? "text-emerald-600" 
+                                    : "text-slate-600 hover:text-emerald-600"
                             )}
                         >
                             {link.label}
                             {isActive && (
                                 <motion.div 
                                     layoutId="nav-underline"
-                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#606c38] rounded-full"
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600 rounded-full"
                                 />
                             )}
                         </Link>
@@ -63,14 +63,14 @@ export function SiteHeader() {
 
             {/* Auth Actions */}
             <div className="ml-8 flex items-center gap-4 shrink-0">
-                <div className="h-6 w-px bg-[#283618]/10 hidden md:block" />
+                <div className="h-6 w-px bg-slate-200 hidden md:block" />
                 <Link href="/sign-in" className="hidden md:block">
-                    <Button variant="ghost" className="text-[#283618] font-bold hover:bg-[#606c38]/5">
+                    <Button variant="ghost" className="text-slate-900 font-bold hover:bg-emerald-50">
                         Log In
                     </Button>
                 </Link>
                 <Link href="/sign-up">
-                    <Button className="bg-[#606c38] hover:bg-[#283618] text-[#fefae0] px-6 h-11 rounded-xl shadow-xl shadow-[#606c38]/20 transition-all font-bold">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 h-11 rounded-xl shadow-xl shadow-emerald-200 transition-all font-bold">
                         Join Now
                     </Button>
                 </Link>
