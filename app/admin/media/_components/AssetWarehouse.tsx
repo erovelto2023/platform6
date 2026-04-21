@@ -68,9 +68,9 @@ export default function AssetWarehouse() {
     };
 
     const handleDownload = async (id: string, url: string) => {
-        await incrementDownload(id);
-        window.open(url, "_blank");
-        fetchAssets(); // Refresh download count
+        // Use the secure download API instead of direct URL
+        window.open(`/api/media/download/${id}`, "_blank");
+        setTimeout(() => fetchAssets(), 1000); // Refresh UI to show updated download count
     };
 
     const formatSize = (bytes: number) => {

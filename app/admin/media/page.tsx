@@ -49,7 +49,7 @@ export default function MediaCenterPage() {
                         className="bg-[#6366F1] hover:bg-[#5850EC] text-white rounded-2xl px-8 h-14 font-black uppercase tracking-widest shadow-2xl shadow-[#6366F1]/20 transition-all hover:scale-105 active:scale-95"
                     >
                         <Plus className="mr-2 h-5 w-5" />
-                        Inject Assets
+                        Upload Files
                     </Button>
                 </div>
             </div>
