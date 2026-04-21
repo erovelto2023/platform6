@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const NAV_LINKS = [
-    { label: "Execution Engine",  href: "/courses" },
+    { label: "Courses",  href: "/courses" },
     { label: "Answers Library",   href: "/library" },
     { label: "Infrastructure",    href: "/business-resources" },
     { label: "Curated CRM",       href: "/affiliate-crm" },
