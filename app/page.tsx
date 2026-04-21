@@ -34,12 +34,6 @@ const LandingPage = () => {
 
   const features = [
     {
-      title: "Exclusive Library",
-      desc: "Books and documents written by professionals to guide your online business journey.",
-      icon: <Library className="text-blue-400" />,
-      color: "from-blue-500/20 to-cyan-500/20"
-    },
-    {
       title: "Marketing & Demographics",
       desc: "Search the entire country by state. Get detailed information on who is looking for your products.",
       icon: <PieChart className="text-purple-400" />,
@@ -50,12 +44,6 @@ const LandingPage = () => {
       desc: "A complete QuickBooks Clone. Manage all of your customers, clients, and products in one place.",
       icon: <Calculator className="text-emerald-400" />,
       color: "from-emerald-500/20 to-teal-500/20"
-    },
-    {
-      title: "Affiliate CRM",
-      desc: "Access thousands of pre-vetted products to sell. No more searching for hours for the right niche.",
-      icon: <Share2 className="text-orange-400" />,
-      color: "from-orange-500/20 to-red-500/20"
     },
     {
       title: "Online Courses",
@@ -74,12 +62,6 @@ const LandingPage = () => {
       desc: "Live class interactions and instant messaging to get real-time answers during your journey.",
       icon: <MessageSquare className="text-violet-400" />,
       color: "from-violet-500/20 to-purple-500/20"
-    },
-    {
-      title: "Business in a Box",
-      desc: "Done-for-you starter kits and niche skeletons. Take these and start your product journey instantly.",
-      icon: <Package className="text-amber-400" />,
-      color: "from-amber-500/20 to-yellow-500/20"
     },
     {
       title: "Support Ticket System",
@@ -634,17 +616,13 @@ const LandingPage = () => {
               <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Features</h6>
               <ul className="space-y-4 text-sm font-bold secondary-text">
                 <li className="hover:text-blue-600 cursor-pointer transition-colors">9M+ Keywords</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Accounting Clone</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Affiliate CRM</li>
                 <li className="hover:text-blue-600 cursor-pointer transition-colors">Messaging Center</li>
               </ul>
             </div>
             <div>
               <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Resources</h6>
               <ul className="space-y-4 text-sm font-bold secondary-text">
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Book Library</li>
                 <li className="hover:text-blue-600 cursor-pointer transition-colors">Online Courses</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Business in a Box</li>
                 <li className="hover:text-blue-600 cursor-pointer transition-colors">Market Reports</li>
               </ul>
             </div>

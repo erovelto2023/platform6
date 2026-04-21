@@ -9,9 +9,6 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 const NAV_LINKS = [
     { label: "Courses",  href: "/courses" },
-    { label: "Answers Library",   href: "/library" },
-    { label: "Infrastructure",    href: "/business-resources" },
-    { label: "Curated CRM",       href: "/affiliate-crm" },
     { label: "Blog",              href: "/blog" },
     { label: "Research Database", href: "/locations" },
     { label: "Mind-Reader DB",    href: "/questions" },

@@ -353,7 +353,6 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
               <p className="text-[10px] font-black uppercase tracking-[0.3em] italic">© 2026 Registry Protocols. Systematic Results.</p>
               <nav className="flex gap-12">
                   <Link href="/courses" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Strategy</Link>
-                  <Link href="/library" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Library</Link>
                   <Link href="/questions" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Registry</Link>
                   <Link href="#" className="font-bold hover:text-[#dda15e] transition-colors text-[10px] uppercase tracking-widest">Access</Link>
               </nav>
