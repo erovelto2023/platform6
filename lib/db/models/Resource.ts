@@ -17,13 +17,45 @@ const ResourceSchema = new Schema({
         enum: ['file', 'link', 'video', 'image', 'pdf'],
         default: 'file',
     },
+    altText: {
+        type: String,
+    },
+    tags: {
+        type: [String],
+        default: [],
+    },
+    thumbnailUrl: {
+        type: String,
+    },
+    fileSizeBytes: {
+        type: Number,
+        default: 0,
+    },
+    mimeType: {
+        type: String,
+    },
+    storedFilename: {
+        type: String,
+    },
+    originalFilename: {
+        type: String,
+    },
+    downloadCount: {
+        type: Number,
+        default: 0,
+    },
+    status: {
+        type: String,
+        enum: ['draft', 'published'],
+        default: 'published',
+    },
     category: {
         type: String,
         default: 'General',
     },
     isPublished: {
         type: Boolean,
-        default: false,
+        default: true,
     },
 }, { timestamps: true });
 

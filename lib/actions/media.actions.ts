@@ -23,7 +23,7 @@ export async function uploadMedia(formData: FormData) {
         // Save to filesystem
         const url = await saveFile(file);
 
-        // Determine type
+        // Determine type and mimeType
         let type: "image" | "pdf" | "file" = "file";
         const mimeType = file.type;
         if (mimeType.startsWith("image/")) {
@@ -38,7 +38,14 @@ export async function uploadMedia(formData: FormData) {
             url,
             type,
             category,
+            mimeType,
+            fileSizeBytes: file.size,
+            originalFilename: file.name,
+            storedFilename: url.split('/').pop(),
             isPublished: true,
+            status: 'published',
+            altText: title,
+            thumbnailUrl: type === 'image' ? url : undefined,
         });
 
         revalidatePath("/admin/media");
@@ -50,15 +57,32 @@ export async function uploadMedia(formData: FormData) {
 }
 
 /**
- * Fetches all resources.
+ * Fetches all resources with filtering.
  */
-export async function getResources(query?: string) {
+export async function getResources(options: { 
+    query?: string; 
+    category?: string; 
+    type?: string; 
+    status?: string;
+} = {}) {
     try {
         await connectDB();
         
         let filter: any = {};
-        if (query) {
-            filter.title = { $regex: query, $options: "i" };
+        if (options.query) {
+            filter.$or = [
+                { title: { $regex: options.query, $options: "i" } },
+                { tags: { $regex: options.query, $options: "i" } }
+            ];
+        }
+        if (options.category && options.category !== 'all') {
+            filter.category = options.category;
+        }
+        if (options.type && options.type !== 'all') {
+            filter.type = options.type;
+        }
+        if (options.status && options.status !== 'all') {
+            filter.status = options.status;
         }
 
         const resources = await Resource.find(filter).sort({ createdAt: -1 }).lean();
@@ -78,6 +102,12 @@ export async function updateResource(id: string, data: any) {
         if (!isAdmin) throw new Error("Unauthorized");
 
         await connectDB();
+        
+        // Handle tags if they come as a string
+        if (data.tags && typeof data.tags === 'string') {
+            data.tags = data.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+        }
+
         const resource = await Resource.findByIdAndUpdate(id, data, { new: true });
 
         revalidatePath("/admin/media");
@@ -101,7 +131,11 @@ export async function removeResource(id: string) {
         if (!resource) throw new Error("Resource not found");
 
         // Delete from disk
-        await deleteFile(resource.url);
+        try {
+            await deleteFile(resource.url);
+        } catch (err) {
+            console.warn(`File already deleted from disk or not found: ${resource.url}`);
+        }
 
         // Delete from DB
         await Resource.findByIdAndDelete(id);
@@ -110,6 +144,19 @@ export async function removeResource(id: string) {
         return { success: true };
     } catch (error: any) {
         console.error("[removeResource] Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Increment download count
+ */
+export async function incrementDownload(id: string) {
+    try {
+        await connectDB();
+        await Resource.findByIdAndUpdate(id, { $inc: { downloadCount: 1 } });
+        return { success: true };
+    } catch (error: any) {
         return { success: false, error: error.message };
     }
 }
