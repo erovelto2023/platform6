@@ -163,6 +163,12 @@ const adminRoutes = [
         color: "text-violet-500",
     },
     {
+        label: "Media Center",
+        icon: Film,
+        href: "/admin/media",
+        color: "text-indigo-400",
+    },
+    {
         label: "Niches in a Box",
         icon: Compass,
         href: "/admin/niche-boxes",
