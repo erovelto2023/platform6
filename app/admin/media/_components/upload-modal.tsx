@@ -71,6 +71,7 @@ export const UploadModal = ({ isOpen, onClose, onSuccess }: UploadModalProps) =>
             formData.append("category", category);
 
             const xhr = new XMLHttpRequest();
+            console.log(`[Upload] Starting XHR for ${file.name} to /api/media/upload`);
             xhr.open("POST", "/api/media/upload", true);
 
             xhr.upload.onprogress = (event) => {
@@ -115,11 +116,14 @@ export const UploadModal = ({ isOpen, onClose, onSuccess }: UploadModalProps) =>
             setUploadProgress(0);
 
             try {
+                console.log(`[Upload] Sending file ${i + 1}/${files.length}: ${file.name}`);
                 const result = await uploadFileWithXHR(file, category);
+                console.log(`[Upload] Result for ${file.name}:`, result);
                 if (result.success) {
                     successCount++;
                 }
             } catch (error: any) {
+                console.error(`[Upload] Error for ${file.name}:`, error);
                 toast.error(`Failed to upload ${file.name}: ${error.message}`);
             }
         }

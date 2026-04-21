@@ -17,25 +17,37 @@ const UPLOAD_DIR = resolve(process.cwd(), "public", "uploads");
  */
 const ensureUploadDir = () => {
     if (!existsSync(UPLOAD_DIR)) {
+        console.log('[API Upload] Creating UPLOAD_DIR:', UPLOAD_DIR);
         mkdirSync(UPLOAD_DIR, { recursive: true });
     }
 };
 
 export async function POST(req: NextRequest) {
+    console.log('[API Upload] Received POST request');
     try {
         // 1. Check Auth
         const { sessionClaims } = await auth();
         const role = (sessionClaims?.publicMetadata as any)?.role;
+        console.log('[API Upload] User Role:', role);
+
         if (role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized - Admin access required' }, { status: 401 });
         }
 
         await connectDB();
         ensureUploadDir();
 
+        if (!req.body) {
+            console.error('[API Upload] Request body is missing');
+            return NextResponse.json({ error: 'Request body is missing' }, { status: 400 });
+        }
+
         // 2. Setup Streaming
         const nodeStream = Readable.fromWeb(req.body as any);
         const headers = Object.fromEntries(req.headers);
+        
+        console.log('[API Upload] Initializing Busboy with headers:', headers['content-type']);
+        
         const bb = busboy({ 
             headers,
             limits: { fileSize: 1024 * 1024 * 1000 } // 1GB Limit
@@ -52,6 +64,7 @@ export async function POST(req: NextRequest) {
             let finalResource: any = null;
 
             bb.on('field', (name, value) => {
+                console.log(`[API Upload] Field received: ${name} = ${value}`);
                 if (name === 'title') assetData.title = value;
                 if (name === 'category') assetData.category = value;
                 if (name === 'tags') {
@@ -61,6 +74,8 @@ export async function POST(req: NextRequest) {
 
             bb.on('file', (name, file, info) => {
                 const { filename, mimeType } = info;
+                console.log(`[API Upload] File detected: ${filename} (${mimeType})`);
+                
                 const fileExtension = extname(filename);
                 const storedFilename = `${uuidv4()}${fileExtension}`;
                 const savePath = join(UPLOAD_DIR, storedFilename);
@@ -74,6 +89,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 file.on('end', async () => {
+                    console.log(`[API Upload] File stream ended. Total bytes: ${bytesRead}`);
                     writeStream.end();
                     fileUploaded = true;
                     savedFileUrl = `/uploads/${storedFilename}`;
@@ -84,6 +100,7 @@ export async function POST(req: NextRequest) {
                     else if (mimeType === 'application/pdf') type = 'pdf';
 
                     try {
+                        console.log('[API Upload] Saving to MongoDB...');
                         finalResource = await Resource.create({
                             title: assetData.title || filename,
                             url: savedFileUrl,
@@ -99,6 +116,7 @@ export async function POST(req: NextRequest) {
                             thumbnailUrl: type === 'image' ? savedFileUrl : undefined,
                             tags: assetData.tags
                         });
+                        console.log('[API Upload] MongoDB Save Successful:', finalResource._id);
                     } catch (err) {
                         console.error('[API Upload] DB Error:', err);
                     }
@@ -106,7 +124,9 @@ export async function POST(req: NextRequest) {
             });
 
             bb.on('finish', () => {
+                console.log('[API Upload] Busboy finished');
                 if (!fileUploaded) {
+                    console.error('[API Upload] No file was found in the stream');
                     resolveReject(NextResponse.json({ error: 'No file detected' }, { status: 400 }));
                     return;
                 }
@@ -116,9 +136,9 @@ export async function POST(req: NextRequest) {
                 }));
             });
 
-            bb.on('error', (err) => {
+            bb.on('error', (err: any) => {
                 console.error('[Busboy Error]', err);
-                resolveReject(NextResponse.json({ error: 'Stream processing failed' }, { status: 500 }));
+                resolveReject(NextResponse.json({ error: 'Stream processing failed: ' + (err.message || 'Unknown Error') }, { status: 500 }));
             });
 
             nodeStream.pipe(bb);
