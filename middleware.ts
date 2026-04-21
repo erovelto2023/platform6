@@ -10,7 +10,6 @@ const isProtected = createRouteMatcher([
     '/affiliates(.*)',
     '/niche-boxes(.*)',
     '/resources(.*)',
-    '/tools(.*)',
     '/community(.*)',
     '/messages(.*)',
     '/tickets(.*)',
@@ -24,7 +23,6 @@ const isStudentRoute = createRouteMatcher([
     '/affiliates(.*)',
     '/niche-boxes(.*)',
     '/resources(.*)',
-    '/tools(.*)',
     '/community(.*)',
 ]);
 
@@ -34,6 +32,7 @@ const isPublic = createRouteMatcher([
     '/uploads(.*)',
     '/locations(.*)',
     '/glossary(.*)',
+    '/tools(.*)',
     '/',
 ]);
 
