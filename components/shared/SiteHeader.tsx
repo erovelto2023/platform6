@@ -11,7 +11,7 @@ const NAV_LINKS = [
     { label: "Courses",  href: "/courses" },
     { label: "Blog",              href: "/blog" },
     { label: "Research Database", href: "/locations" },
-    { label: "Mind-Reader DB",    href: "/questions" },
+    { label: "People Asked Questions",    href: "/questions" },
 ];
 
 export function SiteHeader() {

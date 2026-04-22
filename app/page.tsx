@@ -90,7 +90,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <span className="text-white font-bold text-lg">K</span>
               </div>
               <span className="text-white font-bold text-xl tracking-tight">Business Academy</span>
@@ -98,10 +98,10 @@ const LandingPage = () => {
             
             <div className="hidden md:flex items-center space-x-8">
               <div className="flex space-x-8 text-slate-300 text-sm font-medium">
-                <a href="#features" className="hover:text-white transition-colors">Features</a>
-                <Link href="/glossary" className="hover:text-white transition-colors">Glossary</Link>
-                <a href="#database" className="hover:text-white transition-colors">Keywords</a>
-                <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+                <Link href="/courses" className="hover:text-white transition-colors">Courses</Link>
+                <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+                <Link href="/locations" className="hover:text-white transition-colors">Research Database</Link>
+                <Link href="/questions" className="hover:text-white transition-colors">People Asked Questions</Link>
               </div>
               <div className="flex items-center gap-4">
                 <SignedOut>
@@ -137,10 +137,10 @@ const LandingPage = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-[#0B0E23] border-b border-white/10 p-4 space-y-4">
-            <a href="#features" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Features</a>
-            <Link href="/glossary" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Glossary</Link>
-            <a href="#database" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Keywords</a>
-            <a href="#pricing" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Pricing</a>
+            <Link href="/courses" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Courses</Link>
+            <Link href="/blog" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+            <Link href="/locations" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Research Database</Link>
+            <Link href="/questions" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>People Asked Questions</Link>
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               <SignedOut>
                 <Link href="/sign-in" className="w-full">
