@@ -14,6 +14,7 @@ import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { MetroRankings } from "@/components/locations/metro-rankings";
 import { SearchIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = 'force-dynamic';
 
@@ -95,7 +96,6 @@ export default async function CityPage({
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
-                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-sky-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
                     className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-600 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
                 >
                     <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}

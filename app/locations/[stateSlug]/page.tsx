@@ -528,20 +528,20 @@ const uniqueLabels = Array.from(new Set([
 
             <main className="flex-1 mt-16 pb-20">
                 {/* Hero Section */}
-                <section className="w-full py-12 md:py-20 bg-[#fefae0] relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-[#606c38]/5" />
+                <section className="w-full py-12 md:py-20 bg-slate-50 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-emerald-600/5" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <Link 
                             href="/locations"
-                            className="inline-flex items-center gap-2 text-[#283618]/50 hover:text-[#283618] transition-all mb-8 font-black uppercase tracking-[0.3em] text-[10px] group"
+                            className="inline-flex items-center gap-2 text-emerald-900/50 hover:text-emerald-900 transition-all mb-8 font-black uppercase tracking-[0.3em] text-[10px] group"
                         >
                             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to States
                         </Link>
                         <div className="text-left max-w-4xl">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-[#283618] uppercase leading-tight" suppressHydrationWarning>
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-emerald-950 uppercase leading-tight" suppressHydrationWarning>
                                 {state.name} <span className="text-emerald-700/60 underline decoration-emerald-500 decoration-8 underline-offset-8">Business Map</span>
                             </h1>
-                            <p className="text-[#283618]/60 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
+                            <p className="text-emerald-900/60 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
                                 Find everything you need to start a business in {state.name}. We've collected the best data on cities, schools, hospitals, and taxes for you.
                             </p>
                             
@@ -555,11 +555,11 @@ const uniqueLabels = Array.from(new Set([
                 </section>
 
                 {/* Market & State Details Section */}
-                <section className="w-full py-12 bg-[#fefae0] min-h-[600px]">
+                <section className="w-full py-12 bg-white min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
                         <Tabs defaultValue="details" className="w-full">
                             <TabsList className="bg-[#283618]/5 border-2 border-[#283618]/10 p-1.5 rounded-2xl mb-12 w-full md:w-fit justify-start flex-wrap h-auto">
-                                <TabsTrigger value="details" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
+                                <TabsTrigger value="details" className="px-8 py-3 rounded-xl data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50 uppercase font-black text-[10px] tracking-[0.2em] text-emerald-900/40 hover:text-emerald-900 transition-all">
                                     State Details
                                 </TabsTrigger>
                                 <TabsTrigger value="cities" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
@@ -575,7 +575,7 @@ const uniqueLabels = Array.from(new Set([
                                         Healthcare
                                     </TabsTrigger>
                                 )}
-                                <TabsTrigger value="taxhub" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
+                                <TabsTrigger value="taxhub" className="px-8 py-3 rounded-xl data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50 uppercase font-black text-[10px] tracking-[0.2em] text-emerald-900/40 hover:text-emerald-900 transition-all">
                                     Tax & Accounting
                                 </TabsTrigger>
                                 {state.detailedPopulation && (
@@ -589,8 +589,8 @@ const uniqueLabels = Array.from(new Set([
                             <TabsContent value="details" className="space-y-8 w-full max-w-full" suppressHydrationWarning>
                                 <div className="flex items-center justify-between border-l-8 border-[#606c38] pl-6 mb-10">
                                     <div>
-                                        <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight">Important State Facts</h2>
-                                        <p className="text-[#283618]/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 space-x-2"><span>• Symbols</span> <span>• Heritage</span> <span>• Key Info</span></p>
+                                        <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight">Important State Facts</h2>
+                                        <p className="text-emerald-900/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 space-x-2"><span>• Symbols</span> <span>• Heritage</span> <span>• Key Info</span></p>
                                     </div>
                                 </div>
 
@@ -600,9 +600,9 @@ const uniqueLabels = Array.from(new Set([
                                         if (val === "Not Specified") return null;
                                         
                                         return (
-                                            <div key={label + idx} className="bg-white border-2 border-[#283618]/5 p-6 rounded-2xl flex flex-col justify-between hover:border-[#606c38]/20 transition-all hover:shadow-lg hover:shadow-[#283618]/5">
-                                                <div className="text-[10px] font-black uppercase text-[#606c38] tracking-widest mb-3">{label}</div>
-                                                <div className="text-base font-bold text-[#283618]" suppressHydrationWarning>
+                                            <div key={label + idx} className="bg-white border-2 border-emerald-900/5 p-6 rounded-2xl flex flex-col justify-between hover:border-emerald-600/20 transition-all hover:shadow-lg hover:shadow-emerald-900/5">
+                                                <div className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-3">{label}</div>
+                                                <div className="text-base font-bold text-emerald-950" suppressHydrationWarning>
                                                     {val}
                                                 </div>
                                             </div>
@@ -613,10 +613,10 @@ const uniqueLabels = Array.from(new Set([
 
                              <TabsContent value="cities" className="space-y-8">
                                 <div className="flex items-center justify-between mb-8 border-l-8 border-[#283618] pl-6">
-                                    <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight">
+                                    <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight">
                                         {query ? `Results for "${query}"` : 'The Best Cities to Visit'}
                                     </h2>
-                                    <span className="text-[#283618] text-[10px] font-black uppercase tracking-widest bg-[#283618]/5 px-4 py-2 rounded-xl">
+                                    <span className="text-emerald-950 text-[10px] font-black uppercase tracking-widest bg-emerald-900/5 px-4 py-2 rounded-xl">
                                         {cities.length} Cities in the System
                                     </span>
                                 </div>
@@ -626,18 +626,18 @@ const uniqueLabels = Array.from(new Set([
                                         <Link 
                                             key={city.slug}
                                             href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-white border-2 border-[#283618]/5 hover:bg-[#283618]/5 p-8 rounded-[2rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-[#283618]/5"
+                                            className="group relative overflow-hidden bg-white border-2 border-emerald-900/5 hover:bg-emerald-900/5 p-8 rounded-[2rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-900/5"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-[#606c38]/10 flex items-center justify-center text-[#606c38] group-hover:bg-[#606c38] group-hover:text-white transition-all duration-300">
+                                                    <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
                                                         <MapPin size={24} />
                                                     </div>
-                                                    <span className="font-black text-[#283618] text-lg group-hover:text-[#606c38] transition-colors leading-tight">
+                                                    <span className="font-black text-emerald-950 text-lg group-hover:text-emerald-600 transition-colors leading-tight">
                                                         {city.name}
                                                     </span>
                                                 </div>
-                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-[#606c38] -translate-x-2 group-hover:translate-x-0" size={18} />
+                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-emerald-600 -translate-x-2 group-hover:translate-x-0" size={18} />
                                             </div>
                                             <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </Link>
@@ -677,8 +677,8 @@ const uniqueLabels = Array.from(new Set([
                             <TabsContent value="taxhub" className="space-y-8">
                                 <div className="flex items-center justify-between mb-8 border-l-8 border-[#606c38] pl-6">
                                     <div>
-                                        <h2 className="text-3xl font-black text-[#283618] uppercase tracking-tight italic">Verified CPAs in {state.name}</h2>
-                                        <p className="text-[#283618]/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 italic">Professional Help in Your Area</p>
+                                        <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight italic">Verified CPAs in {state.name}</h2>
+                                        <p className="text-emerald-950/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 italic">Professional Help in Your Area</p>
                                     </div>
                                 </div>
                                 <TaxDirectoryList 
@@ -703,7 +703,7 @@ const uniqueLabels = Array.from(new Set([
             </main>
 
             {/* Footer */}
-            <footer className="py-12 bg-[#283618] text-[#fefae0]/40 border-t border-[#fefae0]/5">
+            <footer className="py-12 bg-emerald-950 text-emerald-50/40 border-t border-emerald-50/5">
                 <div className="container px-4 md:px-6 mx-auto text-center">
                     <p className="text-[10px] font-black uppercase tracking-widest italic" suppressHydrationWarning>
                         © 2026 K Business Academy. All rights reserved.
