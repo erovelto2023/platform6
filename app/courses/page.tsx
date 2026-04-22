@@ -428,9 +428,10 @@ export default function CoursesPage() {
                             <span className="font-black tracking-tighter text-white text-xl">K BUSINESS ACADEMY</span>
                         </div>
                         <nav className="flex flex-wrap justify-center gap-10">
-                            {["Curriculum", "Ethics", "Privacy", "Support"].map((item) => (
-                                <Link key={item} href="#" className="text-sm font-bold text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-widest">{item}</Link>
-                            ))}
+                            <Link href="/blog" className="text-xs font-black text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">Blog</Link>
+                            <Link href="/locations" className="text-xs font-black text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">Research Database</Link>
+                            <Link href="/questions" className="text-xs font-black text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">People Asked Questions</Link>
+                            <Link href="/glossary" className="text-xs font-black text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-[0.2em]">Glossary</Link>
                         </nav>
                         <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">© 2026 K Business Academy</p>
                     </div>

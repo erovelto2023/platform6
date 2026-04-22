@@ -118,7 +118,7 @@ export const SimpleHeroSlideshow: React.FC<SimpleHeroSlideshowProps> = ({
                                 transition={{ delay: 0.8, duration: 0.6, type: 'spring', damping: 20 }}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="px-8 py-4 text-lg font-semibold text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
+                                className="px-8 py-4 text-lg font-black text-white bg-emerald-600 rounded-2xl shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all hover:scale-105 uppercase tracking-widest"
                             >
                                 {slide.ctaText}
                             </motion.a>

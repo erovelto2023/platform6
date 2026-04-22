@@ -84,7 +84,7 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden selection:bg-emerald-500/30">
       {/* --- HEADER --- */}
       <nav className="fixed w-full z-[100] bg-[#0B0E23]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -98,27 +98,27 @@ const LandingPage = () => {
             
             <div className="hidden md:flex items-center space-x-8">
               <div className="flex space-x-8 text-slate-300 text-sm font-medium">
-                <Link href="/courses" className="hover:text-white transition-colors">Courses</Link>
-                <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-                <Link href="/locations" className="hover:text-white transition-colors">Research Database</Link>
-                <Link href="/questions" className="hover:text-white transition-colors">People Asked Questions</Link>
+                <Link href="/courses" className="hover:text-emerald-400 transition-colors">Courses</Link>
+                <Link href="/blog" className="hover:text-emerald-400 transition-colors">Blog</Link>
+                <Link href="/locations" className="hover:text-emerald-400 transition-colors">Research Database</Link>
+                <Link href="/questions" className="hover:text-emerald-400 transition-colors">People Asked Questions</Link>
               </div>
               <div className="flex items-center gap-4">
                 <SignedOut>
                   <Link href="/sign-in">
-                    <button className="text-slate-300 hover:text-white text-sm font-medium transition-colors">
+                    <button className="text-slate-300 hover:text-emerald-400 text-sm font-medium transition-colors">
                       Login
                     </button>
                   </Link>
                   <Link href="/sign-up">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-emerald-600/20">
                       Get Started
                     </button>
                   </Link>
                 </SignedOut>
                 <SignedIn>
                   <Link href="/dashboard">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-blue-600/20">
+                    <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all shadow-lg shadow-emerald-600/20">
                       Go to Dashboard
                     </button>
                   </Link>
@@ -137,22 +137,22 @@ const LandingPage = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-[#0B0E23] border-b border-white/10 p-4 space-y-4">
-            <Link href="/courses" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Courses</Link>
-            <Link href="/blog" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
-            <Link href="/locations" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>Research Database</Link>
-            <Link href="/questions" className="block text-slate-300 hover:text-white py-2" onClick={() => setIsMenuOpen(false)}>People Asked Questions</Link>
+            <Link href="/courses" className="block text-slate-300 hover:text-emerald-400 py-2" onClick={() => setIsMenuOpen(false)}>Courses</Link>
+            <Link href="/blog" className="block text-slate-300 hover:text-emerald-400 py-2" onClick={() => setIsMenuOpen(false)}>Blog</Link>
+            <Link href="/locations" className="block text-slate-300 hover:text-emerald-400 py-2" onClick={() => setIsMenuOpen(false)}>Research Database</Link>
+            <Link href="/questions" className="block text-slate-300 hover:text-emerald-400 py-2" onClick={() => setIsMenuOpen(false)}>People Asked Questions</Link>
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               <SignedOut>
                 <Link href="/sign-in" className="w-full">
                   <button className="w-full text-center py-3 text-slate-300 font-medium">Login</button>
                 </Link>
                 <Link href="/sign-up" className="w-full">
-                  <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Get Started</button>
+                  <button className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">Get Started</button>
                 </Link>
               </SignedOut>
               <SignedIn>
                 <Link href="/dashboard" className="w-full">
-                  <button className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Go to Dashboard</button>
+                  <button className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">Go to Dashboard</button>
                 </Link>
               </SignedIn>
             </div>
@@ -162,18 +162,18 @@ const LandingPage = () => {
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 bg-[#0B0E23] overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full"></div>
-        <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-purple-600/5 blur-[100px] rounded-full"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-600/10 blur-[120px] rounded-full"></div>
+        <div className="absolute -top-20 -right-20 w-[400px] h-[400px] bg-emerald-600/5 blur-[100px] rounded-full"></div>
 
         <div className="relative max-w-7xl mx-auto px-4 text-center">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             Everything you need in one place
           </motion.div>
@@ -184,7 +184,7 @@ const LandingPage = () => {
             className="text-4xl md:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight"
           >
             The Ultimate Business <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500">
               Operating System
             </span>
           </motion.h1>
@@ -206,14 +206,14 @@ const LandingPage = () => {
           >
             <SignedOut>
               <Link href="/sign-up">
-                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-600/20">
+                <button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-emerald-600/20">
                   Explore All Features <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
             </SignedOut>
             <SignedIn>
               <Link href="/dashboard">
-                <button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-blue-600/20">
+                <button className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center gap-2 group shadow-xl shadow-emerald-600/20">
                   Go to Dashboard <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
@@ -268,19 +268,19 @@ const LandingPage = () => {
                     </div>
                     <div className="h-24 rounded-xl bg-white/5 border border-white/5 p-4">
                       <p className="text-[10px] text-slate-500 font-bold mb-2 uppercase">CRM Leads</p>
-                      <div className="text-xl font-bold text-purple-400">1,204</div>
+                      <div className="text-xl font-bold text-emerald-400">1,204</div>
                       <div className="h-1 w-full bg-slate-700 rounded mt-2"></div>
                     </div>
                   </div>
-                  <div className="rounded-xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 h-48 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 grid grid-cols-8 grid-rows-4 gap-2 p-4 opacity-20">
-                      {Array.from({length: 32}).map((_, i) => <div key={i} className="bg-white/20 rounded"></div>)}
+                    <div className="rounded-xl bg-gradient-to-br from-emerald-600/20 to-teal-600/20 border border-white/10 h-48 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 grid grid-cols-8 grid-rows-4 gap-2 p-4 opacity-20">
+                        {Array.from({length: 32}).map((_, i) => <div key={i} className="bg-white/20 rounded"></div>)}
+                      </div>
+                      <div className="relative text-center">
+                        <Search className="text-emerald-400 w-10 h-10 mx-auto mb-2" />
+                        <div className="text-sm font-bold text-emerald-200 tracking-widest uppercase">Platform Ready</div>
+                      </div>
                     </div>
-                    <div className="relative text-center">
-                      <Search className="text-blue-400 w-10 h-10 mx-auto mb-2" />
-                      <div className="text-sm font-bold text-blue-200 tracking-widest uppercase">Platform Ready</div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -293,7 +293,7 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="flex-1 space-y-8">
-              <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-blue-200">
+              <div className="w-16 h-16 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-200">
                 <Search size={32} />
               </div>
               <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 leading-tight">
@@ -313,7 +313,7 @@ const LandingPage = () => {
                   "Pinterest & YouTube Roadmap"
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <CheckCircle2 size={18} className="text-blue-600 shrink-0" />
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
                     {item}
                   </div>
                 ))}
@@ -338,11 +338,11 @@ const LandingPage = () => {
                     <p className="font-bold text-slate-800">"AI-Driven Sustainable Fashion"</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-blue-600 rounded-xl text-white">
+                    <div className="p-4 bg-emerald-600 rounded-xl text-white">
                       <p className="text-[10px] font-bold opacity-70 uppercase mb-1">Monthly Search</p>
                       <p className="text-xl font-black">450,000</p>
                     </div>
-                    <div className="p-4 bg-indigo-600 rounded-xl text-white">
+                    <div className="p-4 bg-teal-600 rounded-xl text-white">
                       <p className="text-[10px] font-bold opacity-70 uppercase mb-1">Competition</p>
                       <p className="text-xl font-black">Low</p>
                     </div>
@@ -378,7 +378,7 @@ const LandingPage = () => {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-3">{f.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed mb-6">{f.desc}</p>
-                  <div className="flex items-center text-xs font-black text-blue-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
+                  <div className="flex items-center text-xs font-black text-emerald-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
                     Explore Tool <ChevronRight size={14} className="ml-1" />
                   </div>
                 </div>
@@ -416,12 +416,12 @@ const LandingPage = () => {
               <div className="mt-8 pt-8 border-t border-white/5 flex gap-2">
                 <SignedOut>
                   <Link href="/sign-up" className="flex-1">
-                    <button className="w-full bg-blue-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors">Start Scaling Today</button>
+                    <button className="w-full bg-emerald-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-500 transition-colors">Start Scaling Today</button>
                   </Link>
                 </SignedOut>
                 <SignedIn>
                   <Link href="/dashboard" className="flex-1">
-                    <button className="w-full bg-blue-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-500 transition-colors">Go to Dashboard</button>
+                    <button className="w-full bg-emerald-600 py-3 rounded-xl text-white text-sm font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-500 transition-colors">Go to Dashboard</button>
                   </Link>
                 </SignedIn>
                 <button className="px-4 py-3 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-all"><Share2 size={18}/></button>
@@ -429,7 +429,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="flex-1 order-1 md:order-2 space-y-6">
-            <div className="inline-block px-4 py-1 bg-blue-500/10 text-blue-400 rounded-full text-[10px] font-bold uppercase tracking-widest border border-blue-500/20 mb-2">
+            <div className="inline-block px-4 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20 mb-2">
               Financial Control
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">
@@ -441,7 +441,7 @@ const LandingPage = () => {
             <div className="space-y-4 pt-4">
               <div className="flex items-start gap-4">
                 <div className="mt-1 w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
-                  <Calculator size={20} className="text-blue-400" />
+                  <Calculator size={20} className="text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-bold">QuickBooks Clone</h5>
@@ -450,7 +450,7 @@ const LandingPage = () => {
               </div>
               <div className="flex items-start gap-4">
                 <div className="mt-1 w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">
-                  <Share2 size={20} className="text-purple-400" />
+                  <Share2 size={20} className="text-emerald-400" />
                 </div>
                 <div>
                   <h5 className="text-white font-bold">Affiliate Engine</h5>
@@ -497,10 +497,10 @@ const LandingPage = () => {
               </SignedIn>
             </div>
 
-            <div className="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 shadow-2xl z-10 text-white h-full flex flex-col hover:scale-[1.02] transition-transform duration-300">
+            <div className="relative bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-8 shadow-2xl z-10 text-white h-full flex flex-col hover:scale-[1.02] transition-transform duration-300">
               <div className="absolute -top-4 right-8 bg-yellow-400 text-slate-900 text-xs font-black px-4 py-1 rounded-full uppercase tracking-wider">Full Access</div>
               <h3 className="text-xl font-bold mb-2 text-white">Mastery Elite</h3>
-              <p className="text-blue-100/70 text-sm mb-8">The entire business ecosystem.</p>
+              <p className="text-emerald-100/70 text-sm mb-8">The entire business ecosystem.</p>
               <div className="mb-8 text-white">
                 <span className="text-4xl font-bold">$97</span>
                 <span className="opacity-70">/mo</span>
@@ -518,12 +518,12 @@ const LandingPage = () => {
               </ul>
               <SignedOut>
                 <Link href="/sign-up">
-                  <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-lg active:scale-95">Get Started Now</button>
+                  <button className="w-full py-4 rounded-xl bg-white text-emerald-600 font-bold hover:bg-emerald-50 transition-all shadow-lg active:scale-95">Get Started Now</button>
                 </Link>
               </SignedOut>
               <SignedIn>
                 <Link href="/dashboard">
-                  <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold hover:bg-blue-50 transition-all shadow-lg active:scale-95">Go to Dashboard</button>
+                  <button className="w-full py-4 rounded-xl bg-white text-emerald-600 font-bold hover:bg-emerald-50 transition-all shadow-lg active:scale-95">Go to Dashboard</button>
                 </Link>
               </SignedIn>
             </div>
@@ -580,7 +580,7 @@ const LandingPage = () => {
                   placeholder="Enter your email address" 
                   className="flex-1 px-6 py-4 rounded-xl bg-white/5 border border-white/10 text-white outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                 />
-                <button className="bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+                <button className="bg-emerald-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
                   Send
                 </button>
               </div>
@@ -596,7 +596,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-20">
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
                   <span className="text-white font-bold text-lg">K</span>
                 </div>
                 <span className="text-slate-900 font-bold text-xl tracking-tight">Business Academy</span>
@@ -606,33 +606,33 @@ const LandingPage = () => {
               </p>
               <div className="flex gap-4">
                 {[Globe, Users, Award].map((Icon, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all cursor-pointer">
+                  <div key={i} className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center hover:bg-emerald-600 hover:text-white transition-all cursor-pointer">
                     <Icon size={18} />
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Features</h6>
+              <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Navigation</h6>
               <ul className="space-y-4 text-sm font-bold secondary-text">
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">9M+ Keywords</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Messaging Center</li>
+                <li><Link href="/courses" className="hover:text-emerald-600 transition-colors">Courses</Link></li>
+                <li><Link href="/blog" className="hover:text-emerald-600 transition-colors">Blog</Link></li>
+                <li><Link href="/locations" className="hover:text-emerald-600 transition-colors">Research Database</Link></li>
+                <li><Link href="/questions" className="hover:text-emerald-600 transition-colors">People Asked Questions</Link></li>
               </ul>
             </div>
             <div>
               <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Resources</h6>
               <ul className="space-y-4 text-sm font-bold secondary-text">
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Online Courses</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Market Reports</li>
+                <li className="hover:text-emerald-600 cursor-pointer transition-colors">Success Stories</li>
+                <li className="hover:text-emerald-600 cursor-pointer transition-colors">Support Center</li>
               </ul>
             </div>
             <div>
               <h6 className="text-slate-900 font-extrabold mb-6 uppercase text-xs tracking-widest">Company</h6>
               <ul className="space-y-4 text-sm font-bold secondary-text">
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Success Stories</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Support Center</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Privacy</li>
-                <li className="hover:text-blue-600 cursor-pointer transition-colors">Terms</li>
+                <li className="hover:text-emerald-600 cursor-pointer transition-colors">Privacy</li>
+                <li className="hover:text-emerald-600 cursor-pointer transition-colors">Terms</li>
               </ul>
             </div>
           </div>

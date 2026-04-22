@@ -22,19 +22,13 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Olive Professional Brand Palette */
-  --olive-leaf-500: #606c38;
-  --olive-leaf-600: #88994f;
-  --olive-leaf-700: #a9b876;
-  --olive-leaf-800: #c5d0a3;
-  --olive-leaf-900: #e2e7d1;
-  --black-forest-500: #283618;
-  --black-forest-600: #547133;
-  --cornsilk-500: #fefae0;
-  --cornsilk-600: #fefbe7;
-  --sunlit-clay-500: #dda15e;
-  --copperwood-500: #bc6c25;
-
+  /* Emerald Professional Brand Palette */
+  --emerald-brand-500: #10b981;
+  --emerald-brand-600: #059669;
+  --emerald-brand-700: #047857;
+  --navy-dark: #0B0E23;
+  --slate-deep: #0f172a;
+  
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -43,30 +37,30 @@
 
 :root {
   --radius: 0.75rem;
-  --background: #fefae0; /* Cornsilk - Warm Paper Background */
-  --foreground: #283618; /* Black Forest - Strong Educational Contrast */
+  --background: #ffffff;
+  --foreground: #0f172a;
 
-  --primary: #606c38; /* Olive Leaf - Primary Brand Action */
-  --primary-foreground: #fefae0;
+  --primary: #059669; /* Emerald 600 */
+  --primary-foreground: #ffffff;
 
-  --secondary: #dda15e; /* Sunlit Clay - Auxiliary Info & Highlights */
-  --secondary-foreground: #283618;
+  --secondary: #10b981; /* Emerald 500 */
+  --secondary-foreground: #ffffff;
 
-  --accent: #bc6c25; /* Copperwood - High Impact CTA */
+  --accent: #10b981;
   --accent-foreground: #ffffff;
 
-  --muted: #e2e7d1; /* Olive Tin for subtle backgrounds */
-  --muted-foreground: #4c562c;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
-  --border: #bc6c25; /* Earthy copper border accent */
-  --input: #e2e7d1;
-  --ring: #606c38;
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ring: #10b981;
 
-  --card: #fffdf3; /* Ultra light parchment */
-  --card-foreground: #283618;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
 
-  --popover: #fffdf3;
-  --popover-foreground: #283618;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
 }
 
 /* Dark Theme specific variables */
