@@ -14,13 +14,11 @@ interface MarketDominanceProps {
 export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
     if (!dominance || Object.keys(dominance).length === 0) {
         return (
-        return (
             <Card className="bg-slate-50 border-emerald-100 rounded-3xl p-8 text-center border-dashed border-2">
                 <p className="text-emerald-900/40 font-bold uppercase tracking-widest text-xs italic">
                     Market Dominance data currently being indexed for {cityName}...
                 </p>
             </Card>
-        );
         );
     }
 
@@ -124,8 +122,8 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
                             </div>
                         ))
                     ) : (
-                        <div className="col-span-full py-8 text-center bg-zinc-900 border-2 border-dashed border-zinc-800 rounded-3xl">
-                            <p className="text-zinc-500 font-bold uppercase text-xs italic">All 50 categories have existing competition. Look for service-level gaps.</p>
+                        <div className="col-span-full py-12 text-center bg-slate-50 border-2 border-dashed border-emerald-100 rounded-3xl">
+                            <p className="text-emerald-900/40 font-black uppercase text-[10px] tracking-[0.2em] italic">All 50 categories have existing competition. Look for service-level gaps.</p>
                         </div>
                     )}
                 </div>
