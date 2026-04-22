@@ -56,12 +56,12 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
         <div className="space-y-12">
             {/* Top Insight Header */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="bg-sky-600/10 border-sky-500/20 rounded-3xl overflow-hidden relative group">
+                <Card className="bg-emerald-600/10 border-emerald-500/20 rounded-3xl overflow-hidden relative group">
                     <div className="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                        <TrendingUp size={120} className="text-sky-500" />
+                        <TrendingUp size={120} className="text-emerald-500" />
                     </div>
                     <CardHeader>
-                        <CardTitle className="text-xs font-black uppercase text-sky-400 tracking-widest flex items-center gap-2">
+                        <CardTitle className="text-xs font-black uppercase text-emerald-400 tracking-widest flex items-center gap-2">
                             <BarChart3 size={14} />
                             Dominant Sector
                         </CardTitle>
@@ -158,7 +158,7 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
 
             {/* Sector Breakdown */}
             <section>
-                <div className="flex items-center gap-3 mb-6 border-l-4 border-blue-500 pl-4">
+                <div className="flex items-center gap-3 mb-6 border-l-4 border-emerald-500 pl-4">
                     <h2 className="text-xl font-black uppercase italic tracking-tight text-white">
                         Full Sector Breakdown
                     </h2>
@@ -166,11 +166,11 @@ export function MarketDominance({ dominance, cityName }: MarketDominanceProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {sortedSectors.map(([sector, stats]) => (
-                        <Card key={sector} className="bg-zinc-950 border-zinc-800 rounded-2xl hover:border-blue-500/30 transition-colors">
+                        <Card key={sector} className="bg-zinc-950 border-zinc-800 rounded-2xl hover:border-emerald-500/30 transition-colors">
                             <CardHeader className="p-4 pb-2">
                                 <CardTitle className="text-[10px] font-black uppercase text-zinc-500 flex justify-between">
                                     {sector}
-                                    <span className="text-blue-400 italic">{stats.total}</span>
+                                    <span className="text-emerald-400 italic">{stats.total}</span>
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 pt-0">

@@ -11,7 +11,7 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
-import { MainNav } from "@/components/shared/MainNav";
+import { SiteHeader } from "@/components/shared/SiteHeader";
 import { MetroRankings } from "@/components/locations/metro-rankings";
 import { SearchIcon } from "lucide-react";
 
@@ -90,22 +90,24 @@ export default async function CityPage({
 
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
-            <MainNav />
+            <SiteHeader />
             <div className="pt-24 px-6 md:px-12 lg:px-20">
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
                     className="inline-flex items-center gap-2 text-zinc-500 hover:text-sky-400 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
+                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-600 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
                 >
                     <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
                 </Link>
                 
                 <div className="max-w-5xl">
-                    <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase italic leading-none mb-6 text-white">
+                    <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase italic leading-none mb-6 text-emerald-950">
                         {city.name}
                     </h1>
                     <div className="flex items-center gap-3">
-                        <span className="px-4 py-1.5 rounded-full bg-sky-500/10 text-sky-400 text-xs font-black uppercase tracking-widest border border-sky-500/20">
+                        <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px] uppercase font-black tracking-widest">Census Snapshot</Badge>
+                        <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-black uppercase tracking-widest border border-emerald-500/20">
                             {state.name}
                         </span>
                         <span className="text-zinc-700">•</span>
@@ -127,8 +129,8 @@ export default async function CityPage({
 
                 {/* Census Data Insight Dashboard */}
                 <section>
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-sky-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900">
                             Market Indicators
                         </h2>
                     </div>
@@ -146,7 +148,7 @@ export default async function CityPage({
                 <section id="tax-directory">
                     <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
                         <div className="flex flex-col">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white leading-tight">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900 dark:text-white leading-tight">
                                 Tax & Accounting Hub
                             </h2>
                             <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Verified Local Experts</p>
@@ -166,8 +168,8 @@ export default async function CityPage({
                 {/* Recommended Resources / Rotating Banner */}
                 {products && products.length > 0 && (
                     <section className="mb-12">
-                        <div className="flex items-center gap-3 mb-8 border-l-4 border-sky-400 pl-4">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-white">
+                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900">
                                 Recommended Resources
                             </h2>
                         </div>
@@ -177,9 +179,9 @@ export default async function CityPage({
                     </section>
                 )}
 
-                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/10 text-center">
-                    <h4 className="text-xl font-black uppercase text-emerald-400 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
-                    <p className="text-zinc-400 font-medium italic max-w-2xl mx-auto text-sm">
+                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
+                    <h4 className="text-xl font-black uppercase text-emerald-900 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
+                    <p className="text-slate-600 font-medium italic max-w-2xl mx-auto text-sm">
                         Use the data above to determine your product market fit. Whether it&apos;s a $50 guide for toddlers or a $10,000 premium course for high-earning seniors, {city.name} has clear signals for your next big move.
                     </p>
                 </section>

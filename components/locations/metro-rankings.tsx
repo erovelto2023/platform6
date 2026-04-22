@@ -59,7 +59,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       title: "Small Business Count",
       value: stats.smallBusinessCount?.value.toLocaleString(),
       rank: stats.smallBusinessCount?.rank,
-      icon: <Briefcase className="w-5 h-5 text-blue-400" />,
+      icon: <Briefcase className="w-5 h-5 text-emerald-400" />,
       suffix: "businesses"
     },
     {
@@ -73,7 +73,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       title: "Employment Share",
       value: `${stats.employmentShare?.value}%`,
       rank: stats.employmentShare?.rank,
-      icon: <Users className="w-5 h-5 text-sky-400" />,
+      icon: <Users className="w-5 h-5 text-emerald-400" />,
       suffix: "of total workforce"
     },
     {
@@ -110,8 +110,8 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col border-l-4 border-sky-500 pl-4 mb-8">
-        <h2 className="text-3xl font-black text-white uppercase italic tracking-tight">
+      <div className="flex flex-col border-l-4 border-emerald-500 pl-4 mb-8">
+        <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight">
           Market Authority Rankings
         </h2>
         <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">
@@ -129,7 +129,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">National Rank</span>
-                  <span className="text-2xl font-black text-sky-400 italic leading-none">#{card.rank}</span>
+                  <span className="text-2xl font-black text-emerald-400 italic leading-none">#{card.rank}</span>
                 </div>
               </div>
             </CardHeader>
@@ -147,7 +147,7 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       </div>
       
       <div className="mt-8 p-6 bg-zinc-900 border border-zinc-800 rounded-[2rem] flex items-start gap-4">
-        <div className="p-3 bg-sky-500/10 rounded-2xl text-sky-400 group">
+        <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group">
            <Trophy size={24} className="group-hover:scale-110 transition-transform" />
         </div>
         <div>

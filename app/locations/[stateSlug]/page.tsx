@@ -12,7 +12,7 @@ import { StateEducationSection } from "@/components/locations/state-education-se
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
 import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
 import { getCPAsByState } from "@/lib/actions/cpa.actions";
-import { MainNav } from "@/components/shared/MainNav";
+import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 
 export const dynamic = 'force-dynamic';
@@ -524,7 +524,7 @@ const uniqueLabels = Array.from(new Set([
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
             {/* Top Navigation Bar */}
-            <MainNav />
+            <SiteHeader />
 
             <main className="flex-1 mt-16 pb-20">
                 {/* Hero Section */}
@@ -539,7 +539,7 @@ const uniqueLabels = Array.from(new Set([
                         </Link>
                         <div className="text-left max-w-4xl">
                             <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-[#283618] uppercase leading-tight" suppressHydrationWarning>
-                                {state.name} <span className="text-[#606c38]/60 underline decoration-[#dda15e] decoration-8 underline-offset-8">Business Map</span>
+                                {state.name} <span className="text-emerald-700/60 underline decoration-emerald-500 decoration-8 underline-offset-8">Business Map</span>
                             </h1>
                             <p className="text-[#283618]/60 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
                                 Find everything you need to start a business in {state.name}. We've collected the best data on cities, schools, hospitals, and taxes for you.
