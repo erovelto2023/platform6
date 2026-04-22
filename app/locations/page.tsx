@@ -42,10 +42,10 @@ export default async function LocationsPage({
                                 <span className="flex items-center gap-2 text-emerald-600 font-black tracking-[0.3em] text-xs mb-4 uppercase">
                                     <Globe size={16} /> Market Research
                                 </span>
-                                <h2 className="text-4xl md:text-6xl font-black text-slate-900 leading-[1.1]">
+                                <h2 className="text-4xl md:text-6xl font-black text-emerald-950 leading-[1.1] italic tracking-tighter">
                                     See the Facts in Every State.
                                 </h2>
-                                <p className="mt-6 text-xl text-slate-600 font-medium">
+                                <p className="mt-6 text-xl text-emerald-900/60 font-medium italic">
                                     Stop guessing what people want. Use our database to find real facts about your customers.
                                 </p>
                             </div>
@@ -54,8 +54,8 @@ export default async function LocationsPage({
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mb-10 border-l-4 border-emerald-600 pl-6 py-2 bg-emerald-50 rounded-r-2xl">
-                            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight italic">
+                        <div className="flex items-center gap-4 mb-10 border-l-4 border-emerald-600 pl-6 py-2 bg-white rounded-r-2xl border border-emerald-50 shadow-sm">
+                            <h3 className="text-xl font-black text-emerald-950 uppercase tracking-tight italic">
                                 {query ? `Matches for: "${query}"` : 'States and Regions'}
                             </h3>
                             <div className="ml-auto bg-emerald-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
@@ -64,12 +64,12 @@ export default async function LocationsPage({
                         </div>
 
                         {(!states || states.length === 0) ? (
-                            <div className="flex flex-col items-center justify-center p-32 bg-white rounded-[4rem] border border-slate-100 text-center shadow-xl shadow-slate-200/50">
+                            <div className="flex flex-col items-center justify-center p-32 bg-white rounded-[4rem] border border-emerald-50 text-center shadow-xl shadow-emerald-200/20">
                                 <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mb-8">
                                     <SearchIcon size={40} />
                                 </div>
-                                <h2 className="text-3xl font-black text-slate-900 mb-4">No States Found.</h2>
-                                <p className="text-slate-400 max-w-sm mb-10 font-medium italic">
+                                <h2 className="text-3xl font-black text-emerald-950 mb-4 uppercase italic">No States Found.</h2>
+                                <p className="text-emerald-900/40 max-w-sm mb-10 font-bold uppercase tracking-widest text-[10px]">
                                     We couldn't find any states matching your search. Try searching for something else.
                                 </p>
                                 <Link href="/locations">
@@ -84,20 +84,20 @@ export default async function LocationsPage({
                                     <Link 
                                         key={state.slug}
                                         href={`/locations/${state.slug}`}
-                                        className="group relative overflow-hidden bg-white p-8 rounded-[2rem] border border-slate-100 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100 hover:-translate-y-2"
+                                        className="group relative overflow-hidden bg-white p-8 rounded-[2rem] border border-emerald-50 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100 hover:-translate-y-2 shadow-sm"
                                     >
                                         <div className="flex items-center gap-4 mb-4">
                                             <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 shadow-sm">
                                                 <MapPin size={24} />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-black text-slate-900 text-lg group-hover:text-emerald-600 transition-colors leading-tight">
+                                                <span className="font-black text-emerald-950 text-lg group-hover:text-emerald-600 transition-colors leading-tight italic uppercase">
                                                     {state.name}
                                                 </span>
-                                                <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">Active Market</span>
+                                                <span className="text-[9px] uppercase font-black tracking-widest text-emerald-900/40">Active Market</span>
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-100">
+                                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-emerald-50">
                                             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
                                                 See Details <ArrowRight size={14} />
                                             </span>
@@ -135,17 +135,17 @@ export default async function LocationsPage({
                 </section>
             </main>
 
-             <footer className="py-12 bg-slate-900 text-slate-400 border-t border-white/5">
+             <footer className="py-12 bg-emerald-950 text-emerald-100/40 border-t border-emerald-900">
                 <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div className="flex items-center gap-3 grayscale brightness-200 opacity-40">
+                    <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-white text-xl">K</div>
-                        <span className="font-bold tracking-tighter text-xl uppercase">K RESEARCH DATABASE</span>
+                        <span className="font-black tracking-tighter text-xl uppercase italic text-white">K RESEARCH DATABASE</span>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest italic">© 2026 K Business Academy</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest italic text-emerald-100/20">© 2026 K Business Academy</p>
                     <nav className="flex gap-10">
-                        <Link href="/courses" className="font-bold hover:text-emerald-500 transition-colors text-sm uppercase tracking-widest">Courses</Link>
-                        <Link href="/blog" className="font-bold hover:text-emerald-500 transition-colors text-sm uppercase tracking-widest">Blog</Link>
-                        <Link href="/questions" className="font-bold hover:text-emerald-500 transition-colors text-sm uppercase tracking-widest">People Asked Questions</Link>
+                        <Link href="/courses" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">Courses</Link>
+                        <Link href="/blog" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">Blog</Link>
+                        <Link href="/questions" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">People Asked Questions</Link>
                     </nav>
                 </div>
             </footer>

@@ -23,24 +23,24 @@ export function StateEducationSection({ institutions, stateName }: StateEducatio
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="border-l-4 border-blue-500 pl-4">
-                <h2 className="text-2xl font-black text-white uppercase italic tracking-tight">
+            <div className="border-l-4 border-emerald-600 pl-4">
+                <h2 className="text-2xl font-black text-emerald-950 uppercase italic tracking-tight">
                     Higher Education
                 </h2>
-                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+                <p className="text-emerald-900/40 text-[10px] font-bold uppercase tracking-widest mt-1">
                     {institutions.length} Colleges &amp; Universities in {stateName}
                 </p>
             </div>
 
             {/* Search filter */}
             <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-900/40" size={16} />
                 <input
                     type="text"
                     value={query}
                     onChange={e => setQuery(e.target.value)}
                     placeholder="Search institutions..."
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full bg-white border border-emerald-100 rounded-xl pl-10 pr-4 py-2.5 text-sm text-emerald-950 placeholder:text-emerald-900/20 focus:outline-none focus:border-emerald-600 transition-colors shadow-sm"
                 />
             </div>
 
@@ -63,19 +63,19 @@ export function StateEducationSection({ institutions, stateName }: StateEducatio
                                 href={inst.url || "#"}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group flex items-start gap-3 bg-zinc-900 border border-zinc-800/60 hover:border-blue-500/40 rounded-xl p-4 transition-all duration-200 hover:bg-zinc-800"
+                                className="group flex items-start gap-3 bg-white border border-emerald-100 hover:border-emerald-600 rounded-xl p-4 transition-all duration-200 hover:bg-slate-50 shadow-sm"
                             >
-                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0 mt-0.5">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all shrink-0 mt-0.5 shadow-sm">
                                     <GraduationCap size={15} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-black text-white group-hover:text-blue-400 transition-colors leading-tight line-clamp-2 uppercase italic">
+                                    <p className="text-sm font-black text-emerald-950 group-hover:text-emerald-600 transition-colors leading-tight line-clamp-2 uppercase italic">
                                         {inst.name}
                                     </p>
                                     {inst.url && (
                                         <div className="flex items-center gap-1 mt-1">
-                                            <ExternalLink size={10} className="text-zinc-600 group-hover:text-blue-400 transition-colors" />
-                                            <span className="text-[10px] text-zinc-500 font-bold uppercase group-hover:text-blue-400 transition-colors truncate">
+                                            <ExternalLink size={10} className="text-emerald-900/20 group-hover:text-emerald-600 transition-colors" />
+                                            <span className="text-[10px] text-emerald-900/40 font-bold uppercase group-hover:text-emerald-600 transition-colors truncate">
                                                 {hostname}
                                             </span>
                                         </div>
@@ -86,9 +86,9 @@ export function StateEducationSection({ institutions, stateName }: StateEducatio
                     })}
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center p-16 border border-dashed border-zinc-800 bg-zinc-950 rounded-2xl text-center">
-                    <GraduationCap className="h-10 w-10 text-zinc-700 mb-3" />
-                    <p className="text-zinc-500 font-bold uppercase italic text-[10px]">
+                <div className="flex flex-col items-center justify-center p-16 border border-dashed border-emerald-100 bg-white rounded-2xl text-center shadow-sm">
+                    <GraduationCap className="h-10 w-10 text-emerald-900/20 mb-3" />
+                    <p className="text-emerald-900/40 font-bold uppercase italic text-[10px]">
                         No institutions match your search
                     </p>
                 </div>

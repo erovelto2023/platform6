@@ -96,9 +96,9 @@ export default async function CityPage({
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
-                    className="inline-flex items-center gap-2 text-zinc-500 hover:text-emerald-600 transition-all mb-8 font-bold uppercase tracking-widest text-xs group"
+                    className="inline-flex items-center gap-2 text-emerald-900/40 hover:text-emerald-600 transition-all mb-8 font-black uppercase tracking-widest text-[10px] group"
                 >
-                    <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
+                    <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
                 </Link>
                 
                 <div className="max-w-5xl">
@@ -106,12 +106,12 @@ export default async function CityPage({
                         {city.name}
                     </h1>
                     <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[10px] uppercase font-black tracking-widest">Census Snapshot</Badge>
-                        <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-black uppercase tracking-widest border border-emerald-500/20">
+                        <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[10px] uppercase font-black tracking-widest">Census Snapshot</Badge>
+                        <span className="px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm">
                             {state.name}
                         </span>
-                        <span className="text-zinc-700">•</span>
-                        <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Market Intelligence</span>
+                        <span className="text-emerald-900/10">•</span>
+                        <span className="text-emerald-900/40 text-[10px] font-black uppercase tracking-widest">Market Intelligence</span>
                     </div>
                 </div>
             </header>
@@ -129,8 +129,8 @@ export default async function CityPage({
 
                 {/* Census Data Insight Dashboard */}
                 <section>
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
-                        <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
+                        <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950">
                             Market Indicators
                         </h2>
                     </div>
@@ -146,15 +146,15 @@ export default async function CityPage({
 
                 {/* Tax & Accounting Hub */}
                 <section id="tax-directory">
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
+                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
                         <div className="flex flex-col">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900 dark:text-white leading-tight">
+                            <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950 leading-tight">
                                 Tax & Accounting Hub
                             </h2>
-                            <p className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em]">Verified Local Experts</p>
+                            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-[0.2em]">Verified Local Experts</p>
                         </div>
-                        <div className="ml-auto p-2 bg-emerald-50 rounded-xl border border-emerald-500/20">
-                            <Calculator className="w-5 h-5 text-emerald-700" />
+                        <div className="ml-auto p-2 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm">
+                            <Calculator className="w-5 h-5 text-emerald-600" />
                         </div>
                     </div>
                     
@@ -168,8 +168,8 @@ export default async function CityPage({
                 {/* Recommended Resources / Rotating Banner */}
                 {products && products.length > 0 && (
                     <section className="mb-12">
-                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-500 pl-4">
-                            <h2 className="text-2xl font-black uppercase italic tracking-tight text-slate-900">
+                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
+                            <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950">
                                 Recommended Resources
                             </h2>
                         </div>
@@ -187,9 +187,9 @@ export default async function CityPage({
                 </section>
             </main>
 
-            <footer className="mt-20 pt-8 border-t border-zinc-900">
-                <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">
-                    © 2025 K Business Academy. Powered by US Census Bureau Data.
+            <footer className="mt-20 py-12 border-t border-emerald-50">
+                <p className="text-[10px] text-emerald-900/40 font-black uppercase tracking-[0.3em] text-center">
+                    © 2025 K Business Academy • US Census Bureau Verified Data
                 </p>
             </footer>
             </div>

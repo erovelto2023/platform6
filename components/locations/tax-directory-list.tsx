@@ -55,8 +55,8 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 mb-4">
                     <Scale className="w-6 h-6 text-emerald-600 animate-pulse" />
                 </div>
-                <h3 className="text-xl font-black text-slate-900 uppercase italic mb-2 tracking-tighter">Tax Directory Initializing</h3>
-                <p className="text-sm text-slate-600 font-bold uppercase tracking-widest max-w-md mx-auto leading-relaxed">
+                <h3 className="text-xl font-black text-emerald-950 uppercase italic mb-2 tracking-tighter">Tax Directory Initializing</h3>
+                <p className="text-sm text-emerald-900/60 font-bold uppercase tracking-widest max-w-md mx-auto leading-relaxed">
                     We are currently verifying and importing localized tax professional data for {cityName}. Check back soon for the full verified list.
                 </p>
             </div>
@@ -72,8 +72,8 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
             <Scale className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-slate-900 uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Found in {cityName}, {stateName}</p>
+            <h4 className="text-sm font-black text-emerald-950 uppercase italic leading-none">{listings.length} VERIFIED FIRMS</h4>
+            <p className="text-[10px] font-bold text-emerald-900/40 uppercase tracking-widest mt-1">Found in {cityName}, {stateName}</p>
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
           <input 
             type="text" 
             placeholder="Search by name..." 
-            className="w-full bg-[#f8f9fa] border border-slate-200 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-slate-900 placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all uppercase tracking-tight"
+            className="w-full bg-slate-50 border border-emerald-50 rounded-xl py-2 pl-10 pr-4 text-xs font-bold text-emerald-950 placeholder:text-emerald-900/20 focus:outline-none focus:border-emerald-600/50 transition-all uppercase tracking-tight shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -100,10 +100,10 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                     {cpa.isFirm ? "CPA FIRM" : "INDIVIDUAL CPA"}
                   </Badge>
                   {cpa.licenseNumber && (
-                    <span className="text-[8px] font-black text-slate-600 uppercase">#{cpa.licenseNumber}</span>
+                    <span className="text-[8px] font-black text-emerald-900/40 uppercase">#{cpa.licenseNumber}</span>
                   )}
                 </div>
-                <CardTitle className="text-base font-black text-slate-900 leading-tight uppercase italic group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[3rem]">
+                <CardTitle className="text-base font-black text-emerald-950 leading-tight uppercase italic group-hover:text-emerald-600 transition-colors line-clamp-2 min-h-[3rem]">
                   {cpa.name}
                 </CardTitle>
               </div>
@@ -116,12 +116,12 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
               <div className="space-y-1.5">
                 {/* Address */}
                 {cpa.address ? (
-                  <div className="flex items-start gap-2 text-[10px] font-semibold text-slate-700">
+                  <div className="flex items-start gap-2 text-[10px] font-semibold text-emerald-900/60">
                     <MapPin className="w-3 h-3 text-emerald-600 mt-0.5 shrink-0" />
                     <span>{cpa.address}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase">
+                  <div className="flex items-center gap-2 text-[10px] font-black text-emerald-900/40 uppercase">
                     <MapPin className="w-3 h-3 text-emerald-500/40" />
                     {cpa.city}, {cpa.state}
                   </div>
@@ -129,7 +129,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
 
                 {/* Phone */}
                 {cpa.phone && (
-                  <a href={`tel:${cpa.phone}`} className="flex items-center gap-2 text-[10px] font-semibold text-slate-700 hover:text-emerald-700 transition-colors group/link">
+                  <a href={`tel:${cpa.phone}`} className="flex items-center gap-2 text-[10px] font-semibold text-emerald-900/60 hover:text-emerald-600 transition-colors group/link">
                     <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span>{cpa.phone}</span>
                   </a>
@@ -137,7 +137,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
 
                 {/* Email */}
                 {cpa.email && (
-                  <a href={`mailto:${cpa.email}`} className="flex items-center gap-2 text-[10px] font-semibold text-slate-700 hover:text-emerald-700 transition-colors group/link">
+                  <a href={`mailto:${cpa.email}`} className="flex items-center gap-2 text-[10px] font-semibold text-emerald-900/60 hover:text-emerald-600 transition-colors group/link">
                     <Mail className="w-3 h-3 text-emerald-600 shrink-0" />
                     <span className="truncate">{cpa.email}</span>
                   </a>
@@ -160,7 +160,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  className="h-8 bg-[#f8f9fa] border-slate-200 text-slate-600 text-[10px] font-black uppercase hover:text-emerald-700 hover:border-emerald-500/30 transition-all group/btn"
+                  className="h-8 bg-slate-50 border-emerald-50 text-emerald-900/60 text-[10px] font-black uppercase hover:text-emerald-600 hover:border-emerald-600 transition-all group/btn shadow-sm"
                   onClick={() => window.open(`https://www.google.com/search?q=${encodeURIComponent(cpa.name + ' CPA ' + cpa.city)}`, '_blank')}
                 >
                   <Search className="w-3 h-3 mr-1.5 group-hover/btn:scale-110" />
@@ -191,7 +191,7 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
                     disabled 
                     variant="ghost" 
                     size="sm" 
-                    className="h-8 text-slate-400 text-[10px] font-black uppercase bg-slate-50 cursor-not-allowed"
+                    className="h-8 text-emerald-900/20 text-[10px] font-black uppercase bg-slate-50 cursor-not-allowed shadow-sm"
                   >
                     <Globe className="w-3 h-3 mr-1.5" />
                     No Site
@@ -204,18 +204,18 @@ export function TaxDirectoryList({ listings, cityName, stateName }: TaxDirectory
       </div>
 
       {filteredListings.length > 51 && (
-        <div className="p-8 border border-slate-200 rounded-2xl bg-slate-50 text-center">
-            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest italic mb-4">Displaying top results for {cityName}. Showing 51 of {filteredListings.length} total firms.</p>
-            <Button variant="outline" className="border-emerald-500/20 text-emerald-700 hover:bg-emerald-50 uppercase font-black text-xs tracking-widest transition-all">
+        <div className="p-8 border border-emerald-50 rounded-2xl bg-slate-50 text-center shadow-sm">
+            <p className="text-emerald-900/40 text-[10px] font-black uppercase tracking-widest italic mb-4">Displaying top results for {cityName}. Showing 51 of {filteredListings.length} total firms.</p>
+            <Button variant="outline" className="border-emerald-100 text-emerald-600 hover:bg-emerald-50 uppercase font-black text-xs tracking-widest transition-all shadow-sm">
                 Load All Local Experts <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
         </div>
       )}
 
       {/* Trust Signifier */}
-      <div className="p-6 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl flex items-center gap-4">
-        <ShieldCheck className="w-8 h-8 text-emerald-500/40 shrink-0" />
-        <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase italic">
+      <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-4 shadow-sm">
+        <ShieldCheck className="w-8 h-8 text-emerald-600/40 shrink-0" />
+        <p className="text-[10px] font-bold text-emerald-900/40 leading-relaxed uppercase italic">
           K Business Academy verifies licensure through official State Board of Accountancy databases. 
           The directory is updated monthly to ensure you find the most reliable tax and accounting professionals in {stateName}.
         </p>

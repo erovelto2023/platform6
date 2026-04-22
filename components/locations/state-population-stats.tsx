@@ -46,8 +46,8 @@ interface PopulationStatsProps {
   stateName: string;
 }
 
-const COLORS = ['#3b82f6', '#4f46e5', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#84cc16'];
-const RACE_COLORS = ['#3b82f6', '#8b5cf6', '#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#06b6d4', '#71717a'];
+const COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#064e3b', '#065f46', '#047857'];
+const RACE_COLORS = ['#059669', '#10b981', '#065f46', '#047857', '#34d399', '#6ee7b7', '#064e3b', '#64748b'];
 
 export function StatePopulationStats({ data, raceData, stateName }: PopulationStatsProps) {
   if (!data || !data.total) return null;
@@ -80,49 +80,49 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex items-center gap-3 mb-2 border-l-4 border-blue-500 pl-4">
-        <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+      <div className="flex items-center gap-3 mb-2 border-l-4 border-emerald-600 pl-4">
+        <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-600">
           <TrendingUp className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-3xl font-black tracking-tight text-white uppercase italic">Demographics & Population</h2>
-          <p className="text-zinc-500 mt-1 uppercase text-[10px] font-bold">Detailed statistical breakdown for the state of {stateName}.</p>
+          <h2 className="text-3xl font-black tracking-tight text-emerald-950 uppercase italic">Demographics & Population</h2>
+          <p className="text-emerald-900/40 mt-1 uppercase text-[10px] font-bold">Detailed statistical breakdown for the state of {stateName}.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Key Metrics */}
-        <Card className="border-zinc-800 bg-zinc-900 overflow-hidden relative group">
+        <Card className="border-emerald-100 bg-white overflow-hidden relative group shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Total Population</CardTitle>
+            <CardTitle className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">Total Population</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black text-blue-400 italic">{formatNumber(data.total)}</div>
-            <p className="text-[10px] font-bold text-zinc-500 mt-2 flex items-center gap-1 uppercase italic">
+            <div className="text-4xl font-black text-emerald-600 italic">{formatNumber(data.total)}</div>
+            <p className="text-[10px] font-bold text-emerald-900/40 mt-2 flex items-center gap-1 uppercase italic">
               <Users className="w-3 h-3" /> Latest Census Data
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900 overflow-hidden relative group">
+        <Card className="border-emerald-100 bg-white overflow-hidden relative group shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Adult Population (18+)</CardTitle>
+            <CardTitle className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">Adult Population (18+)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black text-indigo-400 italic">{formatNumber(data.age18plus || 0)}</div>
-            <p className="text-[10px] font-bold text-zinc-500 mt-2 uppercase italic">
+            <div className="text-4xl font-black text-emerald-700 italic">{formatNumber(data.age18plus || 0)}</div>
+            <p className="text-[10px] font-bold text-emerald-900/40 mt-2 uppercase italic">
               {data.total ? ((data.age18plus || 0) / data.total * 100).toFixed(1) : 0}% of total population
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-zinc-800 bg-zinc-900 overflow-hidden relative group">
+        <Card className="border-emerald-100 bg-white overflow-hidden relative group shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Senior Citizens (65+)</CardTitle>
+            <CardTitle className="text-[10px] font-black text-emerald-900/40 uppercase tracking-widest">Senior Citizens (65+)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-black text-emerald-400 italic">{formatNumber(data.age65plus || 0)}</div>
-            <p className="text-[10px] font-bold text-zinc-500 mt-2 uppercase italic">
+            <div className="text-4xl font-black text-emerald-500 italic">{formatNumber(data.age65plus || 0)}</div>
+            <p className="text-[10px] font-bold text-emerald-900/40 mt-2 uppercase italic">
               {data.total ? ((data.age65plus || 0) / data.total * 100).toFixed(1) : 0}% of total population
             </p>
           </CardContent>
@@ -131,37 +131,37 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Age Distribution Chart */}
-        <Card className="bg-zinc-900 border-zinc-800 overflow-hidden">
-          <CardHeader className="border-b border-zinc-800 bg-zinc-950/50">
-            <CardTitle className="text-white text-sm font-black uppercase tracking-widest">Age Distribution</CardTitle>
-            <CardDescription className="text-zinc-500 text-[10px] font-bold uppercase italic">Population breakdown by age group</CardDescription>
+        <Card className="bg-white border-emerald-100 overflow-hidden shadow-sm">
+          <CardHeader className="border-b border-emerald-50 bg-slate-50/50">
+            <CardTitle className="text-emerald-950 text-sm font-black uppercase tracking-widest">Age Distribution</CardTitle>
+            <CardDescription className="text-emerald-900/40 text-[10px] font-bold uppercase italic">Population breakdown by age group</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={ageData} margin={{ top: 20, right: 30, left: 40, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#27272a" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis 
                     dataKey="name" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }}
+                    tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }}
                   />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }}
+                    tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }}
                     tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
                   />
                   <Tooltip 
-                    cursor={{ fill: '#18181b' }}
+                    cursor={{ fill: '#f8fafc' }}
                     contentStyle={{ 
-                      backgroundColor: '#09090b', 
+                      backgroundColor: '#fff', 
                       borderRadius: '12px', 
-                      border: '1px solid #27272a',
-                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.5)' 
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                     }}
-                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                    itemStyle={{ color: '#064e3b', fontSize: '12px', fontWeight: 'bold' }}
                   />
                   <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                     {ageData.map((entry, index) => (
@@ -175,10 +175,10 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
         </Card>
 
         {/* Sex Distribution Chart */}
-        <Card className="bg-zinc-900 border-zinc-800 overflow-hidden">
-          <CardHeader className="border-b border-zinc-800 bg-zinc-950/50">
-            <CardTitle className="text-white text-sm font-black uppercase tracking-widest">Gender Distribution</CardTitle>
-            <CardDescription className="text-zinc-500 text-[10px] font-bold uppercase italic">Breakdown of male vs. female population</CardDescription>
+        <Card className="bg-white border-emerald-100 overflow-hidden shadow-sm">
+          <CardHeader className="border-b border-emerald-50 bg-slate-50/50">
+            <CardTitle className="text-emerald-950 text-sm font-black uppercase tracking-widest">Gender Distribution</CardTitle>
+            <CardDescription className="text-emerald-900/40 text-[10px] font-bold uppercase italic">Breakdown of male vs. female population</CardDescription>
           </CardHeader>
           <CardContent className="pt-6 flex flex-col items-center">
             <div className="h-[300px] w-full">
@@ -193,22 +193,22 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    <Cell fill="#3b82f6" />
-                    <Cell fill="#4f46e5" />
+                    <Cell fill="#059669" />
+                    <Cell fill="#047857" />
                   </Pie>
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#09090b', 
+                      backgroundColor: '#fff', 
                       borderRadius: '12px', 
-                      border: '1px solid #27272a',
-                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.5)' 
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                     }}
-                    itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                    itemStyle={{ color: '#064e3b', fontSize: '12px', fontWeight: 'bold' }}
                   />
                   <Legend 
                     verticalAlign="bottom" 
                     height={36} 
-                    formatter={(value) => <span className="text-zinc-400 text-[10px] font-black uppercase italic">{value}</span>}
+                    formatter={(value) => <span className="text-emerald-900/60 text-[10px] font-black uppercase italic">{value}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -216,12 +216,12 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
             
             <div className="grid grid-cols-2 gap-8 w-full mt-4">
               <div className="text-center">
-                <div className="text-2xl font-black text-blue-400 italic">{data.total ? (data.male! / data.total * 100).toFixed(1) : 0}%</div>
-                <div className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter italic">Male</div>
+                <div className="text-2xl font-black text-emerald-600 italic">{data.total ? (data.male! / data.total * 100).toFixed(1) : 0}%</div>
+                <div className="text-[10px] font-black text-emerald-900/40 uppercase tracking-tighter italic">Male</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-black text-indigo-400 italic">{data.total ? (data.female! / data.total * 100).toFixed(1) : 0}%</div>
-                <div className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter italic">Female</div>
+                <div className="text-2xl font-black text-emerald-700 italic">{data.total ? (data.female! / data.total * 100).toFixed(1) : 0}%</div>
+                <div className="text-[10px] font-black text-emerald-900/40 uppercase tracking-tighter italic">Female</div>
               </div>
             </div>
           </CardContent>
@@ -229,10 +229,10 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
 
         {/* Racial Profile Chart */}
         {racialProfile.length > 0 && (
-          <Card className="bg-zinc-900 border-zinc-800 overflow-hidden lg:col-span-2">
-            <CardHeader className="border-b border-zinc-800 bg-zinc-950/50">
-              <CardTitle className="text-white text-sm font-black uppercase tracking-widest">Racial Demographic Profile</CardTitle>
-              <CardDescription className="text-zinc-500 text-[10px] font-bold uppercase italic">Estimated ethnic and racial composition for the state</CardDescription>
+          <Card className="bg-white border-emerald-100 overflow-hidden lg:col-span-2 shadow-sm">
+            <CardHeader className="border-b border-emerald-50 bg-slate-50/50">
+              <CardTitle className="text-emerald-950 text-sm font-black uppercase tracking-widest">Racial Demographic Profile</CardTitle>
+              <CardDescription className="text-emerald-900/40 text-[10px] font-bold uppercase italic">Estimated ethnic and racial composition for the state</CardDescription>
             </CardHeader>
             <CardContent className="pt-8">
               <div className="h-[400px] w-full">
@@ -242,7 +242,7 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
                     data={racialProfile} 
                     margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#27272a" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
                     <XAxis type="number" hide />
                     <YAxis 
                       dataKey="name" 
@@ -250,17 +250,17 @@ export function StatePopulationStats({ data, raceData, stateName }: PopulationSt
                       axisLine={false} 
                       tickLine={false}
                       width={90}
-                      tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 'black' }}
+                      tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'black' }}
                     />
                     <Tooltip 
-                      cursor={{ fill: '#18181b' }}
+                      cursor={{ fill: '#f8fafc' }}
                       contentStyle={{ 
-                        backgroundColor: '#09090b', 
+                        backgroundColor: '#fff', 
                         borderRadius: '12px', 
-                        border: '1px solid #27272a',
-                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.5)' 
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' 
                       }}
-                      itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                      itemStyle={{ color: '#064e3b', fontSize: '12px', fontWeight: 'bold' }}
                       formatter={(value: any) => [`${formatNumber(Number(value))} (${((Number(value) / data.total!) * 100).toFixed(1)}%)`, 'Population']}
                     />
                     <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={32}>

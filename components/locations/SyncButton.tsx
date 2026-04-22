@@ -78,7 +78,7 @@ export function SyncButton({
             </Button>
             
             {message && (
-                <div className={`text-[9px] font-black uppercase tracking-widest mt-1 ${status === "success" ? "text-emerald-500" : "text-red-500"}`}>
+                <div className={`text-[9px] font-black uppercase tracking-widest mt-1 ${status === "success" ? "text-emerald-600" : "text-rose-600"}`}>
                     {message}
                 </div>
             )}

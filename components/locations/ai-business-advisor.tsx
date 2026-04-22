@@ -74,38 +74,38 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
     };
 
     return (
-        <Card className="bg-white border-slate-200 rounded-2xl overflow-hidden border-t-4 border-t-sky-500 shadow-2xl">
-            <CardHeader className="pb-2 bg-sky-500/5">
+        <Card className="bg-white border-emerald-100 rounded-2xl overflow-hidden border-t-4 border-t-emerald-600 shadow-xl">
+            <CardHeader className="pb-2 bg-emerald-500/5">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-[#f8fafc]">
-                        <BrainCircuit className="h-4 w-4 text-sky-400" />
+                    <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-emerald-950 italic">
+                        <BrainCircuit className="h-4 w-4 text-emerald-600" />
                         AI Business Advisor
                     </CardTitle>
-                    <Badge className="bg-sky-500 text-white text-[8px] font-black uppercase">Alpha Feature</Badge>
+                    <Badge className="bg-emerald-600 text-white text-[8px] font-black uppercase">Alpha Feature</Badge>
                 </div>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-[#f8f9fa]/60 rounded-xl border border-slate-200">
+                    <div className="p-4 bg-slate-50 border border-emerald-50 rounded-xl shadow-sm">
                         <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-3 w-3 text-emerald-700" />
-                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Pricing Ceiling</p>
+                            <Target className="h-3 w-3 text-emerald-600" />
+                            <p className="text-[10px] font-black text-emerald-900/60 uppercase tracking-widest">Pricing Ceiling</p>
                         </div>
-                        <p className="text-sm font-black text-[#f8fafc] italic uppercase tracking-tight">{pricingCeiling}</p>
-                        <p className="mt-2 text-[9px] font-bold text-slate-500 leading-relaxed uppercase italic">
+                        <p className="text-sm font-black text-emerald-950 italic uppercase tracking-tight">{pricingCeiling}</p>
+                        <p className="mt-2 text-[9px] font-bold text-emerald-900/40 leading-relaxed uppercase italic">
                             {povertyRate > 20 ? "High price sensitivity detected. Focus on accessibility, payment plans, and high-perceived-value bundles." : "Strong middle-class base. Standard value-based pricing is recommended."}
                         </p>
                     </div>
 
-                    <div className="p-4 bg-[#f8f9fa]/60 rounded-xl border border-slate-200">
+                    <div className="p-4 bg-slate-50 border border-emerald-50 rounded-xl shadow-sm">
                         <div className="flex items-center gap-2 mb-2">
-                            <ShoppingBag className="h-3 w-3 text-blue-400" />
-                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Shopping Habits</p>
+                            <ShoppingBag className="h-3 w-3 text-emerald-600" />
+                            <p className="text-[10px] font-black text-emerald-900/60 uppercase tracking-widest">Shopping Habits</p>
                         </div>
-                        <p className="text-sm font-black text-[#f8fafc] italic uppercase tracking-tight">
+                        <p className="text-sm font-black text-emerald-950 italic uppercase tracking-tight">
                             {zeroVehiclePct > 5 ? "Transit/Delivery Dependent" : "Local Transit/Curbside Focus"}
                         </p>
-                        <p className="mt-2 text-[9px] font-bold text-slate-500 leading-relaxed uppercase italic">
+                        <p className="mt-2 text-[9px] font-bold text-emerald-900/40 leading-relaxed uppercase italic">
                             {zeroVehiclePct > 5 ? "High demand for mobile providers or local delivery hubs." : "Preference for central one-stop shopping and local pickup locations."}
                         </p>
                     </div>
@@ -114,24 +114,24 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                 {/* Product Opportunities Section */}
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                        <ShoppingBag className="h-4 w-4 text-emerald-700" />
-                        <h4 className="text-[10px] font-black uppercase text-[#f8fafc] tracking-widest">Productization Opportunities</h4>
+                        <ShoppingBag className="h-4 w-4 text-emerald-600" />
+                        <h4 className="text-[10px] font-black uppercase text-emerald-950 tracking-widest italic">Productization Opportunities</h4>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         {recommendations.map((rec) => (
-                            <div key={rec.type} className="p-3 bg-[#f8f9fa]/40 border border-slate-200/80 rounded-2xl group hover:border-sky-500/50 transition-all">
+                            <div key={rec.type} className="p-3 bg-white border border-emerald-100 rounded-2xl group hover:border-emerald-500/50 transition-all shadow-sm">
                                 <div className="flex items-center gap-2 mb-2">
-                                    {rec.type === 'digital' && <Laptop className="h-3 w-3 text-blue-400" />}
-                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-700" />}
-                                    {rec.type === 'physical' && <Package className="h-3 w-3 text-amber-400" />}
-                                    {rec.type === 'saas' && <Zap className="h-3 w-3 text-sky-400" />}
-                                    <span className="text-[8px] font-black uppercase text-slate-500 tracking-wider font-mono">{rec.type}</span>
+                                    {rec.type === 'digital' && <Laptop className="h-3 w-3 text-emerald-600" />}
+                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-600" />}
+                                    {rec.type === 'physical' && <Package className="h-3 w-3 text-emerald-600" />}
+                                    {rec.type === 'saas' && <Zap className="h-3 w-3 text-emerald-600" />}
+                                    <span className="text-[8px] font-black uppercase text-emerald-900/40 tracking-wider font-mono">{rec.type}</span>
                                 </div>
-                                <h5 className="text-[10px] font-black text-[#f8fafc] uppercase italic leading-tight mb-1">{rec.title}</h5>
-                                <p className="text-[9px] text-slate-600 leading-tight mb-2 h-8 overflow-hidden line-clamp-2">{rec.description}</p>
-                                <div className="pt-2 border-t border-slate-200">
-                                    <p className="text-[7.5px] font-bold text-slate-600 uppercase italic leading-tight group-hover:text-sky-400 transition-colors">
+                                <h5 className="text-[10px] font-black text-emerald-950 uppercase italic leading-tight mb-1">{rec.title}</h5>
+                                <p className="text-[9px] text-emerald-900/60 leading-tight mb-2 h-8 overflow-hidden line-clamp-2 uppercase">{rec.description}</p>
+                                <div className="pt-2 border-t border-emerald-100">
+                                    <p className="text-[7.5px] font-bold text-emerald-900/40 uppercase italic leading-tight group-hover:text-emerald-600 transition-colors">
                                         Why: {rec.reason}
                                     </p>
                                 </div>
@@ -144,12 +144,12 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="h-4 w-4 text-amber-400" />
-                            <h4 className="text-[10px] font-black uppercase text-[#f8fafc] tracking-widest">Generate Master Prompt</h4>
+                            <h4 className="text-[10px] font-black uppercase text-emerald-950 tracking-widest">Generate Master Prompt</h4>
                         </div>
                         <Button 
                             variant="outline" 
                             size="sm" 
-                            className={`h-7 text-[9px] font-black uppercase tracking-tighter transition-all ${copied ? "bg-emerald-50 text-emerald-700 border-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:text-sky-400"}`}
+                            className={`h-7 text-[9px] font-black uppercase tracking-tighter transition-all shadow-sm ${copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white border-emerald-100 text-emerald-900/40 hover:text-emerald-600"}`}
                             onClick={copyToClipboard}
                         >
                             {copied ? <><ShieldCheck className="h-3 w-3 mr-1" /> Copied!</> : <><Copy className="h-3 w-3 mr-1" /> Copy Prompt</>}
@@ -157,17 +157,17 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
                     </div>
                     
                     <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-sky-500/20 to-blue-500/20 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative p-4 bg-[#f8f9fa] border border-slate-200 rounded-xl font-mono text-[9px] text-slate-600 whitespace-pre-wrap leading-relaxed select-all max-h-[250px] overflow-y-auto">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                        <div className="relative p-4 bg-slate-50 border border-emerald-100 rounded-xl font-mono text-[9px] text-emerald-900/60 whitespace-pre-wrap leading-relaxed select-all max-h-[250px] overflow-y-auto uppercase">
                             {promptText}
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-4 bg-sky-500/5 border border-sky-500/10 rounded-xl">
-                        <BarChart4 className="h-4 w-4 text-sky-400 mt-1" />
+                    <div className="flex items-start gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+                        <BarChart4 className="h-4 w-4 text-emerald-600 mt-1" />
                         <div>
-                            <p className="text-[10px] font-black text-sky-400 uppercase tracking-widest mb-1">How to use this</p>
-                            <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed italic">
+                            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">How to use this</p>
+                            <p className="text-[9px] font-bold text-emerald-900/40 uppercase leading-relaxed italic">
                                 Paste this prompt into ChatGPT or Claude. It automatically adjusts for ${cityName}'s specific poverty level, housing market, and employment data to give you a custom-built business blueprint.
                             </p>
                         </div>

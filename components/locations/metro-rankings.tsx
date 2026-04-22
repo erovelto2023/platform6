@@ -80,28 +80,28 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
       title: "Payroll Share",
       value: `${stats.payrollShare?.value}%`,
       rank: stats.payrollShare?.rank,
-      icon: <Wallet className="w-5 h-5 text-amber-400" />,
+      icon: <Wallet className="w-5 h-5 text-emerald-500" />,
       suffix: "of total payroll"
     },
     {
       title: "Minority Owned",
       value: `${stats.minorityShare?.value}%`,
       rank: stats.minorityShare?.rank,
-      icon: <Star className="w-5 h-5 text-rose-400" />,
+      icon: <Star className="w-5 h-5 text-emerald-400" />,
       suffix: "of businesses"
     },
     {
       title: "Women Owned",
       value: `${stats.womenShare?.value}%`,
       rank: stats.womenShare?.rank,
-      icon: <ShieldCheck className="w-5 h-5 text-indigo-400" />,
+      icon: <ShieldCheck className="w-5 h-5 text-emerald-600" />,
       suffix: "of businesses"
     },
     {
       title: "Veteran Owned",
       value: `${stats.veteranShare?.value}%`,
       rank: stats.veteranShare?.rank,
-      icon: <Trophy className="w-5 h-5 text-orange-400" />,
+      icon: <Trophy className="w-5 h-5 text-emerald-500" />,
       suffix: "of businesses"
     }
   ].filter(card => card.rank !== undefined && card.rank > 0);
@@ -110,35 +110,35 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col border-l-4 border-emerald-500 pl-4 mb-8">
-        <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tight">
+      <div className="flex flex-col border-l-4 border-emerald-600 pl-4 mb-8">
+        <h2 className="text-3xl font-black text-emerald-950 uppercase italic tracking-tight">
           Market Authority Rankings
         </h2>
-        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+        <p className="text-emerald-900/40 text-[10px] font-bold uppercase tracking-widest mt-1">
           {metroName} Metropolitan Statistical Area • 2025 Economic Projections
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rankingCards.map((card, index) => (
-          <Card key={index} className="border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900 transition-all group relative overflow-hidden">
+          <Card key={index} className="border border-emerald-100 bg-white hover:bg-slate-50 transition-all group relative overflow-hidden shadow-sm">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-zinc-800 rounded-lg">
+                <div className="p-2 bg-emerald-50 rounded-lg">
                   {card.icon}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-tighter">National Rank</span>
-                  <span className="text-2xl font-black text-emerald-400 italic leading-none">#{card.rank}</span>
+                  <span className="text-[10px] font-black text-emerald-900/40 uppercase tracking-tighter">National Rank</span>
+                  <span className="text-2xl font-black text-emerald-600 italic leading-none">#{card.rank}</span>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-black text-zinc-100 mb-1">{card.value}</div>
-              <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-2">
+              <div className="text-3xl font-black text-emerald-950 mb-1">{card.value}</div>
+              <div className="text-[10px] font-bold text-emerald-900/60 uppercase tracking-widest border-b border-emerald-50 pb-2 mb-2">
                 {card.title}
               </div>
-              <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
+              <p className="text-[11px] text-emerald-900/40 leading-relaxed font-medium">
                 {METRIC_DETAILS[card.title]?.insight}
               </p>
             </CardContent>
@@ -146,13 +146,13 @@ export function MetroRankings({ metroName, stats }: MetroRankingsProps) {
         ))}
       </div>
       
-      <div className="mt-8 p-6 bg-zinc-900 border border-zinc-800 rounded-[2rem] flex items-start gap-4">
-        <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400 group">
+      <div className="mt-8 p-6 bg-emerald-50 border border-emerald-100 rounded-[2rem] flex items-start gap-4 shadow-sm">
+        <div className="p-3 bg-white rounded-2xl text-emerald-600 group shadow-sm border border-emerald-50">
            <Trophy size={24} className="group-hover:scale-110 transition-transform" />
         </div>
         <div>
-          <h4 className="text-lg font-black text-white uppercase tracking-tight italic mb-1">Economic Significance</h4>
-          <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
+          <h4 className="text-lg font-black text-emerald-950 uppercase tracking-tight italic mb-1">Economic Significance</h4>
+          <p className="text-sm text-emerald-900/60 leading-relaxed max-w-3xl">
             These rankings measure the competitive strength of the <strong>{metroName}</strong> market against 384 other U.S. metropolitan areas. 
             A top-tier ranking (low number) signifies a market with high entrepreneurial velocity and institutional stability, factors that directly impact your ROI for professional services and high-ticket consulting.
           </p>
