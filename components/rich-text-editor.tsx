@@ -16,7 +16,7 @@ import {
     Redo,
     ImageIcon,
     Link2,
-    Youtube as YoutubeIcon,
+    Video as YoutubeIcon,
     Code,
     Minus,
     Music,

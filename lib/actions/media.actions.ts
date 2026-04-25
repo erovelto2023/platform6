@@ -5,6 +5,8 @@ import connectDB from "@/lib/db/connect";
 import Resource from "@/lib/db/models/Resource";
 import { saveFile, deleteFile } from "@/lib/storage";
 import { checkRole } from "@/lib/roles";
+import { auth } from "@clerk/nextjs/server";
+import { escapeRegExp } from "@/lib/utils";
 
 /**
  * Uploads a file to local storage and creates a database record.
@@ -66,13 +68,17 @@ export async function getResources(options: {
     status?: string;
 } = {}) {
     try {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Unauthorized");
+
         await connectDB();
         
         let filter: any = {};
         if (options.query) {
+            const safeQuery = escapeRegExp(options.query);
             filter.$or = [
-                { title: { $regex: options.query, $options: "i" } },
-                { tags: { $regex: options.query, $options: "i" } }
+                { title: { $regex: safeQuery, $options: "i" } },
+                { tags: { $regex: safeQuery, $options: "i" } }
             ];
         }
         if (options.category && options.category !== 'all') {
@@ -153,6 +159,9 @@ export async function removeResource(id: string) {
  */
 export async function incrementDownload(id: string) {
     try {
+        const { userId } = await auth();
+        if (!userId) throw new Error("Unauthorized");
+
         await connectDB();
         await Resource.findByIdAndUpdate(id, { $inc: { downloadCount: 1 } });
         return { success: true };

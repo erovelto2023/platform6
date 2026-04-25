@@ -1,0 +1,149 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { 
+    CircleCheck, 
+    ArrowRight, 
+    Mail, 
+    Layout, 
+    Users, 
+    Rocket,
+    Star,
+    ShieldCheck
+} from "lucide-react";
+import { motion } from "framer-motion";
+
+export default function ThankYouPage() {
+    return (
+        <div className="min-h-screen bg-[#FDFDFE] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 overflow-x-hidden">
+            {/* Header / Logo */}
+            <nav className="py-8 px-6 sm:px-10 absolute top-0 left-0 right-0 z-50">
+                <div className="max-w-7xl mx-auto flex justify-center">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-xl shadow-emerald-500/20 group-hover:scale-110 transition-transform">K</div>
+                        <span className="text-2xl font-black tracking-tight text-slate-900">K Business <span className="text-emerald-600">Academy</span></span>
+                    </Link>
+                </div>
+            </nav>
+
+            <main className="relative pt-44 pb-32 overflow-hidden flex flex-col items-center">
+                {/* Visual Elements */}
+                <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-100/30 rounded-full blur-[150px] -z-10 -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-100/20 rounded-full blur-[120px] -z-10 translate-y-1/2 -translate-x-1/2" />
+                
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-10 shadow-xl shadow-emerald-500/10 border border-emerald-100"
+                    >
+                        <CircleCheck size={48} className="animate-pulse" />
+                    </motion.div>
+                    
+                    <motion.h1 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-5xl md:text-7xl font-black text-slate-950 mb-8 leading-[0.95] tracking-tighter"
+                    >
+                        Registration <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600">Successful!</span>
+                    </motion.h1>
+
+                    <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto mb-16 leading-relaxed font-medium tracking-tight"
+                    >
+                        Welcome to the K Business Academy. You've just taken a massive step toward building professional digital foundations.
+                    </motion.p>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="grid md:grid-cols-3 gap-8 mb-20"
+                    >
+                        {[
+                            {
+                                icon: <Mail className="text-emerald-600" size={24} />,
+                                title: "Check Your Email",
+                                desc: "We've sent your login details and receipt. Check your inbox (and spam just in case)."
+                            },
+                            {
+                                icon: <Layout className="text-blue-600" size={24} />,
+                                title: "Access the Portal",
+                                desc: "Your dashboard is ready. Log in to start exploring the tools and templates."
+                            },
+                            {
+                                icon: <Rocket className="text-purple-600" size={24} />,
+                                title: "May 4th Prep",
+                                desc: "The live training starts May 4th at 10 AM EST. Mark your calendar!"
+                            }
+                        ].map((step, i) => (
+                            <div key={i} className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50 text-left hover:-translate-y-2 transition-all duration-500 group">
+                                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    {step.icon}
+                                </div>
+                                <h3 className="text-xl font-black text-slate-950 mb-4 tracking-tight">{step.title}</h3>
+                                <p className="text-slate-500 text-sm font-medium leading-relaxed">{step.desc}</p>
+                            </div>
+                        ))}
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="flex flex-col sm:flex-row justify-center gap-6 items-center"
+                    >
+                        <Link href="/dashboard" className="w-full sm:w-auto px-12 py-6 bg-slate-950 text-white font-black rounded-[2rem] shadow-2xl shadow-slate-200 hover:bg-emerald-600 hover:-translate-y-1.5 transition-all text-xl group active:scale-95">
+                            Go to My Dashboard
+                            <ArrowRight className="inline-block ml-3 group-hover:translate-x-2 transition-transform" size={24} />
+                        </Link>
+                        <Link href="/courses" className="w-full sm:w-auto px-12 py-6 bg-white text-slate-900 font-black rounded-[2rem] border border-slate-200 hover:bg-slate-50 transition-all text-xl shadow-sm hover:-translate-y-1">
+                            Browse Resources
+                        </Link>
+                    </motion.div>
+
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-32 pt-16 border-t border-slate-100 flex flex-wrap items-center justify-center gap-10 text-slate-400"
+                    >
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                            <ShieldCheck size={18} className="text-emerald-500" />
+                            Official Enrollment
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                            <Star size={18} className="text-amber-500 fill-amber-500" />
+                            Elite Community Access
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                            <Users size={18} className="text-indigo-500" />
+                            24/7 Priority Support
+                        </div>
+                    </motion.div>
+                </div>
+            </main>
+
+            <footer className="py-20 bg-white border-t border-slate-100">
+                <div className="max-w-7xl mx-auto px-6 text-center">
+                    <p className="text-slate-400 text-sm font-medium">&copy; 2024-2026 K Business Academy. Strategic Growth Initiative.</p>
+                </div>
+            </footer>
+
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap');
+                
+                body {
+                    font-family: 'Plus Jakarta Sans', sans-serif;
+                    -webkit-font-smoothing: antialiased;
+                }
+            `}</style>
+        </div>
+    );
+}

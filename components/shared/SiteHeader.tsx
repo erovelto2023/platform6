@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 
 const NAV_LINKS = [
     { label: "Courses",  href: "/courses" },
@@ -33,7 +33,7 @@ export function SiteHeader() {
             </div>
 
             {/* Universal Navigation Menu - Only visible to Signed Out users */}
-            <SignedOut>
+            <Show when="signed-out">
                 <nav className="ml-auto hidden xl:flex items-center gap-8">
                     {NAV_LINKS.map((link) => {
                         const isActive = pathname === link.href || (pathname ?? "").startsWith(link.href + "/");
@@ -59,11 +59,11 @@ export function SiteHeader() {
                         );
                     })}
                 </nav>
-            </SignedOut>
+            </Show>
 
             {/* Auth Actions */}
             <div className="ml-auto flex items-center gap-4 shrink-0">
-                <SignedOut>
+                <Show when="signed-out">
                     <div className="h-6 w-px bg-slate-200 hidden md:block mr-4" />
                     <Link href="/sign-in" className="hidden md:block">
                         <Button variant="ghost" className="text-slate-900 font-bold hover:bg-emerald-50">
@@ -75,16 +75,16 @@ export function SiteHeader() {
                             Join Now
                         </Button>
                     </Link>
-                </SignedOut>
+                </Show>
 
-                <SignedIn>
+                <Show when="signed-in">
                     <Link href="/dashboard" className="mr-2">
                         <Button variant="ghost" className="text-emerald-600 font-bold hover:bg-emerald-50">
                             Dashboard
                         </Button>
                     </Link>
-                    <UserButton afterSignOutUrl="/" />
-                </SignedIn>
+                    <UserButton />
+                </Show>
             </div>
         </header>
     );

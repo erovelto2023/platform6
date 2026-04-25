@@ -4,6 +4,8 @@ import connectDB from "@/lib/db/connect";
 import BlogAnalytics from "@/lib/db/models/BlogAnalytics";
 // import Article from "@/lib/db/models/Article"; // TODO: Create Article model
 import { headers } from "next/headers";
+import { checkRole } from "@/lib/roles";
+import { auth } from "@clerk/nextjs/server";
 
 interface TrackVisitParams {
     articleId: string;
@@ -150,6 +152,9 @@ export async function updatePageMetrics(
     nextPage?: string
 ) {
     try {
+        // Basic session verification
+        if (!visitorId || !sessionId) throw new Error("Invalid session data");
+
         await connectDB();
 
         // Find the most recent visit for this session
@@ -253,6 +258,9 @@ export async function getBlogAnalyticsSummary(): Promise<Array<{
 
 export async function getArticleDetailedAnalytics(articleId: string) {
     try {
+        const isAdmin = await checkRole("admin");
+        if (!isAdmin) throw new Error("Unauthorized");
+
         await connectDB();
 
         const thirtyDaysAgo = new Date();

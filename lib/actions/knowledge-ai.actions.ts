@@ -76,7 +76,7 @@ The JSON structure must be:
     try {
         const response = await AIService.generate({
             prompt,
-            model: "deepseek-r1"
+            model: "openai/gpt-3.5-turbo"
         });
 
         const content = response.content;

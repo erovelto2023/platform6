@@ -2,8 +2,8 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
-    Facebook, Instagram, Linkedin, Twitter, Youtube, Mail, FileText,
-    Video, Mic, Layout, Hash
+    Facebook as FacebookIcon, Camera as Instagram, Linkedin as LinkedinIcon, MessageSquare as Twitter, Video as Youtube, Mail, FileText,
+    Video, Mic, Layout, Hash, Users as Facebook, Briefcase as Linkedin, MessageSquare as TwitterIcon
 } from "lucide-react";
 import { format } from "date-fns";
 

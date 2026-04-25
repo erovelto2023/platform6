@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { 
     ArrowLeft, Calculator, Lightbulb, Bookmark, Share2, Info, ExternalLink, Heart, Rocket,
-    Youtube, Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, AlertTriangle, Star, CheckCircle2, Zap, PlayCircle, BookOpen, Quote, HelpCircle, History, Users, CheckSquare, Briefcase, Sparkles, Clock, TrendingUp, Wrench
+    Video as Youtube, Camera as Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, TriangleAlert as AlertTriangle, Star, CircleCheck as CheckCircle2, Zap, CirclePlay as PlayCircle, BookOpen, Quote, CircleHelp as HelpCircle, History, Users, SquareCheck as CheckSquare, Briefcase, Sparkles, Clock, TrendingUp, Wrench
 } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import GlossaryActions from "@/components/glossary/GlossaryActions";

@@ -259,12 +259,6 @@ const adminRoutes = [
         color: "text-cyan-500",
     },
     {
-        label: "Settings",
-        icon: Settings,
-        href: "/settings/ai",
-        color: "text-gray-500",
-    },
-    {
         label: "Exit Admin",
         icon: LogOut,
         href: "/dashboard",
