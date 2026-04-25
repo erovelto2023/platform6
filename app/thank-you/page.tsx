@@ -47,17 +47,18 @@ export default function ThankYouPage() {
                         transition={{ delay: 0.1 }}
                         className="text-5xl md:text-7xl font-black text-slate-950 mb-8 leading-[0.95] tracking-tighter"
                     >
-                        Registration <br/>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600">Successful!</span>
+                        Thank you <br/>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-600 to-blue-600">for registering.</span>
                     </motion.h1>
 
                     <motion.p 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl md:text-2xl text-slate-500 max-w-2xl mx-auto mb-16 leading-relaxed font-medium tracking-tight"
+                        className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-16 leading-relaxed font-medium tracking-tight"
                     >
-                        Welcome to the K Business Academy. You've just taken a massive step toward building professional digital foundations.
+                        Check your email shortly we will be sending you information about the class. <br className="hidden md:block" />
+                        Make sure to look for <span className="text-emerald-600 font-bold underline decoration-emerald-200">erovelto@outlook.com</span> for details.
                     </motion.p>
 
                     <motion.div 
@@ -97,15 +98,42 @@ export default function ThankYouPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="flex flex-col sm:flex-row justify-center gap-6 items-center"
+                        className="space-y-12"
                     >
-                        <Link href="/dashboard" className="w-full sm:w-auto px-12 py-6 bg-slate-950 text-white font-black rounded-[2rem] shadow-2xl shadow-slate-200 hover:bg-emerald-600 hover:-translate-y-1.5 transition-all text-xl group active:scale-95">
-                            Go to My Dashboard
-                            <ArrowRight className="inline-block ml-3 group-hover:translate-x-2 transition-transform" size={24} />
-                        </Link>
-                        <Link href="/courses" className="w-full sm:w-auto px-12 py-6 bg-white text-slate-900 font-black rounded-[2rem] border border-slate-200 hover:bg-slate-50 transition-all text-xl shadow-sm hover:-translate-y-1">
-                            Browse Resources
-                        </Link>
+                        <div className="flex flex-col sm:flex-row justify-center gap-6 items-center">
+                            <Link href="/dashboard" className="w-full sm:w-auto px-12 py-6 bg-slate-950 text-white font-black rounded-[2rem] shadow-2xl shadow-slate-200 hover:bg-emerald-600 hover:-translate-y-1.5 transition-all text-xl group active:scale-95">
+                                Go to My Dashboard
+                                <ArrowRight className="inline-block ml-3 group-hover:translate-x-2 transition-transform" size={24} />
+                            </Link>
+                        </div>
+
+                        <div className="bg-slate-50 border border-slate-100 rounded-[3rem] p-8 md:p-12 max-w-2xl mx-auto">
+                            <p className="text-slate-500 font-bold mb-8 uppercase tracking-[0.2em] text-xs">Reach out if you have any issues</p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-6">
+                                <a 
+                                    href="https://www.facebook.com/erovelto" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-8 py-4 bg-white border border-slate-200 rounded-2xl hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
+                                >
+                                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                                    </div>
+                                    <span className="font-black tracking-tight">Facebook</span>
+                                </a>
+                                <a 
+                                    href="https://www.tiktok.com/@kbusinessacademy" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-3 px-8 py-4 bg-white border border-slate-200 rounded-2xl hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
+                                >
+                                    <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center group-hover:bg-emerald-600 transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                                    </div>
+                                    <span className="font-black tracking-tight">TikTok</span>
+                                </a>
+                            </div>
+                        </div>
                     </motion.div>
 
                     <motion.div 
