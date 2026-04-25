@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, IText, Rect, Circle, Triangle, FabricImage } from 'fabric';
 import CanvasArea from './canvas-area';
 import EditorSidebar from './sidebar';
 import EditorToolbar from './toolbar';
@@ -9,7 +9,7 @@ import EditorToolbar from './toolbar';
 import AISidebarPanel from './ai-sidebar-panel';
 
 export default function DesignEditorDetails() {
-    const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+    const [canvas, setCanvas] = useState<Canvas | null>(null);
     const [hasSelection, setHasSelection] = useState(false);
     const [selectedColor, setSelectedColor] = useState("#000000");
     const [isAIOpen, setIsAIOpen] = useState(false);
@@ -46,11 +46,13 @@ export default function DesignEditorDetails() {
 
     const handleAddText = () => {
         if (!canvas) return;
-        const text = new fabric.IText('Double click to edit', {
+        const text = new IText('Double click to edit', {
             left: 100,
             top: 100,
             fontSize: 24,
-            fill: '#333333'
+            fill: '#333333',
+            originX: 'left',
+            originY: 'top'
         });
         canvas.add(text);
         canvas.setActiveObject(text);
@@ -59,12 +61,14 @@ export default function DesignEditorDetails() {
 
     const handleAddRectangle = () => {
         if (!canvas) return;
-        const rect = new fabric.Rect({
+        const rect = new Rect({
             left: 100,
             top: 100,
             fill: '#cbd5e1',
             width: 100,
-            height: 100
+            height: 100,
+            originX: 'left',
+            originY: 'top'
         });
         canvas.add(rect);
         canvas.setActiveObject(rect);
@@ -73,11 +77,13 @@ export default function DesignEditorDetails() {
 
     const handleAddCircle = () => {
         if (!canvas) return;
-        const circle = new fabric.Circle({
+        const circle = new Circle({
             left: 150,
             top: 150,
             radius: 50,
-            fill: '#94a3b8'
+            fill: '#94a3b8',
+            originX: 'left',
+            originY: 'top'
         });
         canvas.add(circle);
         canvas.setActiveObject(circle);
@@ -86,31 +92,38 @@ export default function DesignEditorDetails() {
 
     const handleAddTriangle = () => {
         if (!canvas) return;
-        const triangle = new fabric.Triangle({
+        const triangle = new Triangle({
             left: 200,
             top: 200,
             width: 100,
             height: 100,
-            fill: '#64748b'
+            fill: '#64748b',
+            originX: 'left',
+            originY: 'top'
         });
         canvas.add(triangle);
         canvas.setActiveObject(triangle);
         canvas.renderAll();
     };
 
-    const handleAddImage = (url: string) => {
+    const handleAddImage = async (url: string) => {
         if (!canvas) return;
-        fabric.Image.fromURL(url, (img) => {
+        try {
+            const img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' });
             img.set({
                 left: 100,
                 top: 100,
                 scaleX: 0.5,
-                scaleY: 0.5
+                scaleY: 0.5,
+                originX: 'left',
+                originY: 'top'
             });
             canvas.add(img);
             canvas.setActiveObject(img);
             canvas.renderAll();
-        }, { crossOrigin: 'anonymous' });
+        } catch (error) {
+            console.error("Error loading image:", error);
+        }
     };
 
     const handleDelete = () => {
@@ -152,12 +165,14 @@ export default function DesignEditorDetails() {
 
     const handleAddAIText = (text: string) => {
         if (!canvas) return;
-        const textObj = new fabric.IText(text, {
+        const textObj = new IText(text, {
             left: 100,
             top: 100,
             fontSize: 24,
             fill: '#333333',
             width: 300,
+            originX: 'left',
+            originY: 'top'
         });
         canvas.add(textObj);
         canvas.setActiveObject(textObj);

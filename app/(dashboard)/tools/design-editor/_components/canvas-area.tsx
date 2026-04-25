@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { fabric } from 'fabric';
+import { Canvas } from 'fabric';
 
 interface CanvasAreaProps {
-    onCanvasReady: (canvas: fabric.Canvas) => void;
+    onCanvasReady: (canvas: Canvas) => void;
 }
 
 export default function CanvasArea({ onCanvasReady }: CanvasAreaProps) {
@@ -14,7 +14,7 @@ export default function CanvasArea({ onCanvasReady }: CanvasAreaProps) {
     useEffect(() => {
         if (!canvasRef.current || !containerRef.current) return;
 
-        const canvas = new fabric.Canvas(canvasRef.current, {
+        const canvas = new Canvas(canvasRef.current, {
             backgroundColor: '#ffffff',
             width: 800,
             height: 600,
