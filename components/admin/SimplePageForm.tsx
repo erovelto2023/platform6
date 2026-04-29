@@ -3,13 +3,14 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createPage, updatePage } from '@/lib/actions/page-builder.actions';
-import { Save, ArrowLeft, Code, Globe, Laptop, Smartphone } from 'lucide-react';
+import { Save, ArrowLeft, Code, Globe, Laptop, Smartphone, Image as ImageIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MediaPicker from './MediaPicker';
 
 interface SimplePageFormProps {
     initialData?: any;
@@ -115,7 +116,24 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                     <div className="md:col-span-2 space-y-6">
                         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Page HTML Content</Label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Page HTML Content</Label>
+                                    <MediaPicker 
+                                        onSelect={(url) => {
+                                            const imgTag = `<img src="${url}" alt="" className="w-full h-auto rounded-2xl" />`;
+                                            setFormData(prev => ({ 
+                                                ...prev, 
+                                                html: prev.html + "\n" + imgTag 
+                                            }));
+                                            toast.success("Image tag added to bottom of content");
+                                        }} 
+                                        trigger={
+                                            <Button type="button" variant="outline" size="sm" className="rounded-xl gap-2 text-[10px] font-black uppercase tracking-widest">
+                                                <ImageIcon size={14} /> Insert Image From Gallery
+                                            </Button>
+                                        }
+                                    />
+                                </div>
                                 <textarea 
                                     name="html"
                                     value={formData.html}

@@ -6,7 +6,7 @@ import { createOffer, updateOffer } from '@/lib/actions/offer.actions';
 import { 
     Save, Globe, Code, Megaphone, DollarSign, Zap, 
     Wand2, ShoppingBag, Layers, Plus, Trash2, 
-    BarChart3, Eye, Check, ArrowLeft 
+    BarChart3, Eye, Check, ArrowLeft, Image as ImageIcon
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { SMART_VARIABLES } from '@/lib/constants/smart-variables';
 import Link from 'next/link';
+import MediaPicker from './MediaPicker';
 
 interface OfferBuilderFormProps {
     initialData?: any;
@@ -467,7 +468,22 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                                     </div>
                                     <div className="space-y-3">
                                         <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Card Image URL</Label>
-                                        <Input type="url" name="marketplaceImage" value={formData.marketplaceImage} onChange={handleChange} className="rounded-xl font-medium text-xs" placeholder="https://..." />
+                                        <div className="flex gap-2">
+                                            <Input 
+                                                type="url" 
+                                                name="marketplaceImage" 
+                                                value={formData.marketplaceImage} 
+                                                onChange={handleChange} 
+                                                className="rounded-xl font-medium text-xs h-10" 
+                                                placeholder="https://..." 
+                                            />
+                                            <MediaPicker onSelect={(url) => setFormData(prev => ({ ...prev, marketplaceImage: url }))} />
+                                        </div>
+                                        {formData.marketplaceImage && (
+                                            <div className="mt-2 w-full aspect-video rounded-2xl border border-slate-200 overflow-hidden shadow-inner bg-slate-50">
+                                                <img src={formData.marketplaceImage} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="space-y-3">
@@ -521,7 +537,22 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label className="text-xs font-bold text-slate-600">OpenGraph Image URL</Label>
-                                        <Input type="url" name="ogImage" value={formData.ogImage} onChange={handleChange} className="rounded-xl text-xs" />
+                                        <div className="flex gap-2">
+                                            <Input 
+                                                type="url" 
+                                                name="ogImage" 
+                                                value={formData.ogImage} 
+                                                onChange={handleChange} 
+                                                className="rounded-xl text-xs h-10" 
+                                                placeholder="https://..."
+                                            />
+                                            <MediaPicker onSelect={(url) => setFormData(prev => ({ ...prev, ogImage: url }))} />
+                                        </div>
+                                        {formData.ogImage && (
+                                            <div className="mt-2 w-full aspect-video rounded-2xl border border-slate-200 overflow-hidden shadow-inner bg-slate-50">
+                                                <img src={formData.ogImage} className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-xs font-bold text-slate-600">Override Title</Label>

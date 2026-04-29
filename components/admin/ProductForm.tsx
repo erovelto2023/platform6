@@ -3,13 +3,16 @@
 import { useState, useTransition } from "react";
 import { createDirectoryProduct, updateDirectoryProduct } from "@/lib/actions/directory-product.actions";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
+import MediaPicker from "./MediaPicker";
 
 export default function ProductForm({ initialData, onComplete }: { initialData?: IDirectoryProduct, onComplete?: () => void }) {
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState("");
+    const [logoUrl, setLogoUrl] = useState(initialData?.logoUrl || "");
 
     async function handleSubmit(formData: FormData) {
         setMessage("");
+        formData.set("logoUrl", logoUrl);
 
         // Helper to split comma-separated strings
         const split = (key: string) => (formData.get(key) as string)?.split(",").map((s) => s.trim()).filter(Boolean) || [];
@@ -98,11 +101,20 @@ export default function ProductForm({ initialData, onComplete }: { initialData?:
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-zinc-300 mb-1">Logo URL</label>
-                        <div className="flex gap-4 items-start">
-                            <input name="logoUrl" defaultValue={initialData?.logoUrl} className="input-field" placeholder="https://..." />
-                            {initialData?.logoUrl && (
-                                <div className="w-[42px] h-[42px] shrink-0 bg-white rounded-lg p-1 border border-zinc-800 flex items-center justify-center">
-                                    <img src={initialData.logoUrl} alt="Logo preview" className="max-w-full max-h-full object-contain mix-blend-multiply" />
+                        <div className="flex flex-col gap-3">
+                            <div className="flex gap-4 items-center">
+                                <input 
+                                    name="logoUrl" 
+                                    value={logoUrl} 
+                                    onChange={(e) => setLogoUrl(e.target.value)}
+                                    className="input-field" 
+                                    placeholder="https://..." 
+                                />
+                                <MediaPicker onSelect={setLogoUrl} />
+                            </div>
+                            {logoUrl && (
+                                <div className="w-[80px] h-[80px] shrink-0 bg-white rounded-2xl p-2 border border-zinc-800 flex items-center justify-center shadow-xl">
+                                    <img src={logoUrl} alt="Logo preview" className="max-w-full max-h-full object-contain mix-blend-multiply" />
                                 </div>
                             )}
                         </div>

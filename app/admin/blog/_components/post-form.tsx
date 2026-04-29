@@ -28,6 +28,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import MediaPicker from "@/components/admin/MediaPicker";
 
 const formSchema = z.object({
     title: z.string().min(1, "Title is required"),
@@ -321,7 +322,7 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                             <UploadButton
                                                                 endpoint="courseThumbnail"
                                                                 onClientUploadComplete={(res) => {
-                                                                    setValue("imageUrl", res[0].ufsUrl || res[0].url);
+                                                                    setValue("imageUrl", res[0].url);
                                                                     toast.success("Image uploaded");
                                                                 }}
                                                                 onUploadError={(error: Error) => {
@@ -462,15 +463,21 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                                 <ImageIcon className="h-12 w-12 text-slate-400" />
                                                             </div>
                                                         )}
-                                                        <ImageUploadButton
-                                                            onUploadComplete={(url) => {
+                                                        <div className="flex gap-2">
+                                                            <ImageUploadButton
+                                                                onUploadComplete={(url) => {
+                                                                    setValue("imageUrl", url);
+                                                                    toast.success("Image uploaded");
+                                                                }}
+                                                                onUploadError={(error) => {
+                                                                    toast.error(`Upload failed: ${error.message}`);
+                                                                }}
+                                                            />
+                                                            <MediaPicker onSelect={(url) => {
                                                                 setValue("imageUrl", url);
-                                                                toast.success("Image uploaded");
-                                                            }}
-                                                            onUploadError={(error) => {
-                                                                toast.error(`Upload failed: ${error.message}`);
-                                                            }}
-                                                        />
+                                                                toast.success("Image selected from gallery");
+                                                            }} />
+                                                        </div>
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
