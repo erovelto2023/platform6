@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { SMART_VARIABLES } from '@/lib/constants/smart-variables';
 import Link from 'next/link';
 import MediaPicker from './MediaPicker';
+import AffiliateLinkPicker from './AffiliateCatalog/AffiliateLinkPicker';
 
 interface OfferBuilderFormProps {
     initialData?: any;
@@ -411,7 +412,10 @@ export default function OfferBuilderForm({ initialData }: OfferBuilderFormProps)
                             </div>
                             <div className="space-y-6">
                                 <div className="space-y-3">
-                                    <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Checkout Link</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Checkout Link</Label>
+                                        <AffiliateLinkPicker onSelect={(url) => setFormData(prev => ({ ...prev, buyUrl: url }))} />
+                                    </div>
                                     <div className="flex items-center">
                                         <span className="bg-slate-50 border border-r-0 border-slate-200 px-4 py-[14px] rounded-l-2xl text-slate-400 font-bold text-xs">BUYURL</span>
                                         <Input type="url" name="buyUrl" value={formData.buyUrl} onChange={handleChange} className="rounded-l-none rounded-r-2xl h-12 font-bold" placeholder="https://..." />

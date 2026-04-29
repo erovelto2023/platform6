@@ -154,6 +154,15 @@ export default async function AdminDashboardPage() {
             hover: "group-hover:bg-indigo-600"
         },
         {
+            title: "Affiliate Catalog",
+            description: "Personal affiliate link tracker",
+            href: "/admin/affiliate-catalog",
+            icon: Library,
+            color: "text-blue-700",
+            bg: "bg-blue-100",
+            hover: "group-hover:bg-blue-700"
+        },
+        {
             title: "Glossary",
             description: "Manage terminology & definitions",
             href: "/admin/glossary",

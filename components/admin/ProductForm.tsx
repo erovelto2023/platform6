@@ -4,15 +4,18 @@ import { useState, useTransition } from "react";
 import { createDirectoryProduct, updateDirectoryProduct } from "@/lib/actions/directory-product.actions";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 import MediaPicker from "./MediaPicker";
+import AffiliateLinkPicker from "./AffiliateCatalog/AffiliateLinkPicker";
 
 export default function ProductForm({ initialData, onComplete }: { initialData?: IDirectoryProduct, onComplete?: () => void }) {
     const [isPending, startTransition] = useTransition();
     const [message, setMessage] = useState("");
     const [logoUrl, setLogoUrl] = useState(initialData?.logoUrl || "");
+    const [affiliateLink, setAffiliateLink] = useState(initialData?.affiliateLink || "");
 
     async function handleSubmit(formData: FormData) {
         setMessage("");
         formData.set("logoUrl", logoUrl);
+        formData.set("affiliateLink", affiliateLink);
 
         // Helper to split comma-separated strings
         const split = (key: string) => (formData.get(key) as string)?.split(",").map((s) => s.trim()).filter(Boolean) || [];
@@ -167,8 +170,17 @@ export default function ProductForm({ initialData, onComplete }: { initialData?:
                 <h3 className="text-md font-bold text-emerald-400 mb-4 uppercase tracking-wide text-xs">Revenue & Affiliate</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-emerald-300 mb-1">Affiliate Link *</label>
-                        <input name="affiliateLink" defaultValue={initialData?.affiliateLink} className="input-field border-emerald-900/50 focus:ring-emerald-500" placeholder="https://partner.xyz/..." />
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="block text-sm font-bold text-emerald-300">Affiliate Link *</label>
+                            <AffiliateLinkPicker onSelect={setAffiliateLink} />
+                        </div>
+                        <input 
+                            name="affiliateLink" 
+                            value={affiliateLink} 
+                            onChange={(e) => setAffiliateLink(e.target.value)}
+                            className="input-field border-emerald-900/50 focus:ring-emerald-500" 
+                            placeholder="https://partner.xyz/..." 
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-emerald-300 mb-1">Button Text</label>
