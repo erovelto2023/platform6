@@ -4,7 +4,8 @@ export interface IPersonalAffiliateOffer {
     _id: string;
     name: string;
     affiliateLink: string;
-    price: string;
+    destinationLink?: string;
+    productPrice: string;
     commissionLevel: string;
     payoutAmount: string;
     network: string;
@@ -17,7 +18,8 @@ export interface IPersonalAffiliateOffer {
 const PersonalAffiliateOfferSchema = new Schema({
     name: { type: String, required: true },
     affiliateLink: { type: String, required: true },
-    price: { type: String },
+    destinationLink: { type: String },
+    productPrice: { type: String },
     commissionLevel: { type: String },
     payoutAmount: { type: String },
     network: { type: String },

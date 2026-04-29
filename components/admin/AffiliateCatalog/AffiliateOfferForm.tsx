@@ -21,7 +21,8 @@ export default function AffiliateOfferForm({ initialData, onComplete }: Affiliat
     const [formData, setFormData] = useState({
         name: initialData?.name || "",
         affiliateLink: initialData?.affiliateLink || "",
-        price: initialData?.price || "",
+        destinationLink: initialData?.destinationLink || "",
+        productPrice: initialData?.productPrice || "",
         commissionLevel: initialData?.commissionLevel || "",
         payoutAmount: initialData?.payoutAmount || "",
         network: initialData?.network || "",
@@ -67,12 +68,17 @@ export default function AffiliateOfferForm({ initialData, onComplete }: Affiliat
                     <Input name="network" value={formData.network} onChange={handleChange} placeholder="e.g. ShareASale, Impact" />
                 </div>
                 <div className="md:col-span-2 space-y-2">
-                    <Label>Affiliate Link</Label>
-                    <Input name="affiliateLink" value={formData.affiliateLink} onChange={handleChange} required placeholder="https://..." />
+                    <Label className="text-blue-600 font-bold">Actual Affiliate Link (Amazon/External)</Label>
+                    <Input name="affiliateLink" value={formData.affiliateLink} onChange={handleChange} required placeholder="https://amazon.com/..." />
+                </div>
+                <div className="md:col-span-2 space-y-2">
+                    <Label className="text-emerald-600 font-bold">Tracking Destination (Internal Page/Tool)</Label>
+                    <Input name="destinationLink" value={formData.destinationLink} onChange={handleChange} placeholder="https://kbusinessacademy.com/tools/..." />
+                    <p className="text-[10px] text-slate-400">If set, the tracking link will redirect here instead of the affiliate link.</p>
                 </div>
                 <div className="space-y-2">
                     <Label>Product Price</Label>
-                    <Input name="price" value={formData.price} onChange={handleChange} placeholder="e.g. $99/mo" />
+                    <Input name="productPrice" value={formData.productPrice} onChange={handleChange} placeholder="e.g. $99/mo" />
                 </div>
                 <div className="space-y-2">
                     <Label>Commission Level</Label>

@@ -18,12 +18,14 @@ export async function GET(
             { new: true }
         );
 
-        if (!offer || !offer.affiliateLink) {
+        const targetUrl = offer.destinationLink || offer.affiliateLink;
+
+        if (!targetUrl) {
             return NextResponse.redirect(new URL("/", req.url));
         }
 
-        // Standard redirect to the affiliate link
-        return NextResponse.redirect(offer.affiliateLink);
+        // Standard redirect to the target link
+        return NextResponse.redirect(targetUrl);
 
     } catch (error) {
         console.error("[CLICK_TRACKING_ERROR]", error);

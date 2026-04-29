@@ -114,7 +114,18 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                                     <TableCell className="font-bold text-slate-900">
                                         <div className="flex flex-col">
                                             <span>{offer.name}</span>
-                                            <span className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">{offer.affiliateLink}</span>
+                                            <div className="flex flex-col gap-0.5 mt-1">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[9px] font-black uppercase text-blue-500 w-8">Aff:</span>
+                                                    <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{offer.affiliateLink}</span>
+                                                </div>
+                                                {offer.destinationLink && (
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-[9px] font-black uppercase text-emerald-500 w-8">Dest:</span>
+                                                        <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">{offer.destinationLink}</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -122,7 +133,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                                             {offer.network || "Direct"}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="text-sm font-medium">{offer.price || "—"}</TableCell>
+                                    <TableCell className="text-sm font-medium">{offer.productPrice || "—"}</TableCell>
                                     <TableCell className="text-sm font-medium text-emerald-600">{offer.commissionLevel || "—"}</TableCell>
                                     <TableCell className="text-sm font-bold text-blue-600">{offer.payoutAmount || "—"}</TableCell>
                                     <TableCell className="text-center">
