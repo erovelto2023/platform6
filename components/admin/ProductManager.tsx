@@ -70,6 +70,7 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
                                 <tr>
                                     <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Product</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Niche / Category</th>
+                                    <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Views</th>
                                     <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Price / Comm</th>
                                     <th className="px-6 py-4 text-right text-xs font-black text-zinc-400 uppercase tracking-widest">Actions</th>
                                 </tr>
@@ -97,6 +98,9 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tight">{product.niche || 'General'}</span>
+                                        </td>
+                                        <td className="px-6 py-4 text-xs font-bold text-zinc-400">
+                                            {product.views || 0}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-xs font-bold text-zinc-300">

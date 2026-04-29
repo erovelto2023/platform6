@@ -145,3 +145,14 @@ export async function addDirectoryProductReview(productId: number, review: { use
     }
 }
 
+export async function incrementProductView(slug: string) {
+    try {
+        await connectToDatabase();
+        await DirectoryProduct.findOneAndUpdate({ slug }, { $inc: { views: 1 } });
+        return { success: true };
+    } catch (error) {
+        console.error("Error incrementing product view:", error);
+        return { success: false };
+    }
+}
+

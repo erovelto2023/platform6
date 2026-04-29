@@ -1,4 +1,4 @@
-import { getDirectoryProductBySlug } from "@/lib/actions/directory-product.actions";
+import { getDirectoryProductBySlug, incrementProductView } from "@/lib/actions/directory-product.actions";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { MainNav } from "@/components/shared/MainNav";
@@ -42,6 +42,9 @@ export default async function ProductDetailPage({
     if (!product) {
         notFound();
     }
+
+    // Increment view count asynchronously (Glossary-style tracking)
+    incrementProductView(slug);
 
     const typeLabels: Record<string, string> = {
         tool: "Tool / Software",

@@ -28,6 +28,7 @@ export interface IDirectoryProduct {
     commissionRate?: string; // Internal use
     affiliateNetwork?: string; // Internal use
     clicks: number; // Analytics
+    views: number; // Page engagement tracking
     affiliateEarnings: number; // Analytics
 
     // Classification & Pricing
@@ -97,6 +98,7 @@ const DirectoryProductSchema = new Schema<IDirectoryProduct>({
     commissionRate: { type: String }, 
     affiliateNetwork: { type: String }, 
     clicks: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
     affiliateEarnings: { type: Number, default: 0 },
 
     rating: { type: Number, default: 0 },
