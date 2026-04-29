@@ -6,7 +6,7 @@ import busboy from 'busboy';
 import { Readable } from 'stream';
 import connectDB from '@/lib/db/connect';
 import Resource from '@/lib/db/models/Resource';
-import { auth } from '@clerk/nextjs/server';
+import { getUserRole } from '@/lib/roles';
 
 export const runtime = 'nodejs';
 
@@ -25,9 +25,8 @@ const ensureUploadDir = () => {
 export async function POST(req: NextRequest) {
     console.log('[API Upload] Received POST request');
     try {
-        // 1. Check Auth
-        const { sessionClaims } = await auth();
-        const role = (sessionClaims?.publicMetadata as any)?.role;
+        // 1. Check Auth - Use standardized getUserRole helper
+        const role = await getUserRole();
         console.log('[API Upload] User Role:', role);
 
         if (role !== 'admin') {
