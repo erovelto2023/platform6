@@ -16,9 +16,14 @@ import { Input } from "@/components/ui/input";
 interface AffiliateLinkPickerProps {
     onSelect: (url: string) => void;
     trigger?: React.ReactNode;
+    useTrackingLink?: boolean;
 }
 
-export default function AffiliateLinkPicker({ onSelect, trigger }: AffiliateLinkPickerProps) {
+export default function AffiliateLinkPicker({ 
+    onSelect, 
+    trigger,
+    useTrackingLink = true
+}: AffiliateLinkPickerProps) {
     const [open, setOpen] = useState(false);
     const [offers, setOffers] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -45,8 +50,12 @@ export default function AffiliateLinkPicker({ onSelect, trigger }: AffiliateLink
     );
 
     const handleSelect = (offer: any) => {
-        const trackingUrl = `${window.location.origin}/api/click/${offer._id}`;
-        onSelect(trackingUrl);
+        if (useTrackingLink) {
+            const trackingUrl = `${window.location.origin}/api/click/${offer._id}`;
+            onSelect(trackingUrl);
+        } else {
+            onSelect(offer.affiliateLink);
+        }
         setOpen(false);
     };
 

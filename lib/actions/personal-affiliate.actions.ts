@@ -50,3 +50,26 @@ export async function deletePersonalOffer(id: string) {
         return { success: false, error: error.message };
     }
 }
+
+export async function trackCatalogVisitByUrl(url: string) {
+    try {
+        await connectDB();
+        // We look for any offer that has this URL as its destination
+        // We use regex to handle potential trailing slashes or protocol differences
+        const cleanUrl = url.split('?')[0].replace(/\/$/, "");
+        
+        await PersonalAffiliateOffer.updateMany(
+            { 
+                destinationLink: { 
+                    $regex: cleanUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 
+                    $options: 'i' 
+                } 
+            },
+            { $inc: { clicks: 1 } }
+        );
+        return { success: true };
+    } catch (error) {
+        console.error('[TRACK_CATALOG_VISIT]', error);
+        return { success: false };
+    }
+}

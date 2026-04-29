@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import ReviewForm from "@/components/directory/ReviewForm";
+import TrackVisit from "@/components/admin/AffiliateCatalog/TrackVisit";
 
 export async function generateMetadata({
     params,
@@ -60,6 +61,7 @@ export default async function ProductDetailPage({
 
     return (
         <div className="flex flex-col min-h-screen bg-[#f8fafc] text-zinc-900">
+            <TrackVisit />
             <MainNav />
             
             <div className="pt-32 pb-20 px-6 md:px-12 lg:px-20 max-w-7xl mx-auto w-full">

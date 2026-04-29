@@ -172,7 +172,7 @@ export default function ProductForm({ initialData, onComplete }: { initialData?:
                     <div className="md:col-span-2">
                         <div className="flex items-center justify-between mb-1">
                             <label className="block text-sm font-bold text-emerald-300">Affiliate Link *</label>
-                            <AffiliateLinkPicker onSelect={setAffiliateLink} />
+                            <AffiliateLinkPicker onSelect={setAffiliateLink} useTrackingLink={false} />
                         </div>
                         <input 
                             name="affiliateLink" 
