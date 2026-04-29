@@ -40,9 +40,9 @@ export default function MediaPicker({ onSelect, title = "Select from Gallery", t
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[90vw] lg:max-w-[1000px] max-h-[90vh] overflow-hidden rounded-[40px] p-0">
-                <div className="p-8 h-full flex flex-col overflow-hidden">
-                    <DialogHeader className="mb-6">
+            <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[90vw] lg:max-w-[1000px] h-[90vh] overflow-hidden rounded-[40px] p-0 flex flex-col">
+                <div className="p-8 flex-1 flex flex-col min-h-0">
+                    <DialogHeader className="mb-6 flex-none">
                         <DialogTitle className="text-3xl font-black italic uppercase tracking-tighter flex items-center gap-4">
                             <div className="p-3 bg-[#6366F1]/10 rounded-[20px]">
                                 <ImageIcon className="h-6 w-6 text-[#6366F1]" />

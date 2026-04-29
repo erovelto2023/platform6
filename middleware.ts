@@ -28,6 +28,7 @@ const isStudentRoute = createRouteMatcher([
 
 const isPublic = createRouteMatcher([
     '/api/uploadthing(.*)',
+    '/api/click(.*)',
     '/invite(.*)',
     '/uploads(.*)',
     '/locations(.*)',
