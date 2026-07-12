@@ -175,6 +175,12 @@ const adminRoutes = [
         color: "text-blue-400",
     },
     {
+        label: "Affiliate Catalog",
+        icon: FileStack,
+        href: "/admin/affiliate-catalog",
+        color: "text-blue-300",
+    },
+    {
         label: "Blog & Content",
         icon: FileText,
         href: "/admin/blog",
