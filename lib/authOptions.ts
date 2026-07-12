@@ -31,12 +31,16 @@ export async function getServerSession(options?: any) {
 
     if (!user) return null;
 
+    const emailLower = user.email ? user.email.toLowerCase() : '';
+    const adminEmails = ['erovelto1@gmail.com', 'erovelto@outlook.com'];
+    const isAdmin = adminEmails.includes(emailLower) || emailLower.includes('erovelto') || user.role === 'admin';
+
     return {
       user: {
         id: user._id.toString(),
         name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username || user.email,
         email: user.email,
-        role: 'admin',
+        role: isAdmin ? 'admin' : user.role,
         hasAccess: user.hasAccess || [],
       }
     };
