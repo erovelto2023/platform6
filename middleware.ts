@@ -16,6 +16,7 @@ const isProtected = createRouteMatcher([
     '/whiteboard(.*)',
     '/partner(.*)',
     '/docs(.*)',
+    '/story-hacker(.*)',
 ]);
 
 const isStudentRoute = createRouteMatcher([
