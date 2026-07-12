@@ -78,19 +78,21 @@ export async function GET(req: Request) {
       samples: await PillarPage.find().select('keyword slug title').limit(10).lean()
     };
 
+    const fullTemplates = searchParams.get('fullTemplates') === 'true';
+
     results.storyTemplates = {
       count: await StoryTemplate.countDocuments(),
-      samples: await StoryTemplate.find().limit(10).lean()
+      samples: await StoryTemplate.find().limit(fullTemplates ? 1000 : 10).lean()
     };
 
     results.storyTemplateFamilies = {
       count: await TemplateFamily.countDocuments(),
-      samples: await TemplateFamily.find().limit(10).lean()
+      samples: await TemplateFamily.find().limit(fullTemplates ? 1000 : 10).lean()
     };
 
     results.storyTemplateSubgenres = {
       count: await TemplateSubgenre.countDocuments(),
-      samples: await TemplateSubgenre.find().limit(10).lean()
+      samples: await TemplateSubgenre.find().limit(fullTemplates ? 1000 : 10).lean()
     };
 
     return NextResponse.json({ success: true, results });
