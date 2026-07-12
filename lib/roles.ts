@@ -1,6 +1,12 @@
 import { Roles } from '@/types/globals';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 
+import connectDB from '@/lib/db/connect';
+import User from '@/lib/db/models/User';
+
+// Hardcoded admin Clerk IDs
+const ADMIN_CLERK_IDS = ['user_3Bj6dEmUZDloX8iV0KxAgq1PIMS'];
+
 // Get admin emails from environment variable or defaults
 const getAdminEmails = (): string[] => {
     const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
@@ -12,6 +18,43 @@ const getAdminEmails = (): string[] => {
     return list;
 };
 
+const checkIsAdmin = async (userId: string): Promise<boolean> => {
+    if (ADMIN_CLERK_IDS.includes(userId)) {
+        return true;
+    }
+
+    try {
+        await connectDB();
+        const dbUser = await User.findOne({ clerkId: userId }).lean();
+        if (dbUser) {
+            const emailLower = (dbUser.email || '').toLowerCase();
+            const adminEmails = getAdminEmails();
+            if (adminEmails.includes(emailLower) || emailLower.includes('erovelto') || dbUser.role === 'admin') {
+                return true;
+            }
+        }
+    } catch (dbErr) {
+        console.error('[checkIsAdmin] Database check failed:', dbErr);
+    }
+
+    try {
+        const client = await clerkClient();
+        const user = await client.users.getUser(userId);
+        const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress?.toLowerCase();
+
+        if (userEmail) {
+            const adminEmails = getAdminEmails();
+            if (adminEmails.includes(userEmail) || userEmail.includes('erovelto')) {
+                return true;
+            }
+        }
+    } catch (clerkErr) {
+        console.error('[checkIsAdmin] Clerk check failed:', clerkErr);
+    }
+
+    return false;
+};
+
 export const checkRole = async (role: Roles) => {
     const { userId } = await auth();
 
@@ -20,32 +63,26 @@ export const checkRole = async (role: Roles) => {
         return false;
     }
 
+    const isAdmin = await checkIsAdmin(userId);
+
+    if (role === 'admin') {
+        return isAdmin;
+    }
+
+    if (isAdmin) return true; // Admins have all roles
+
     try {
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-        const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress?.toLowerCase();
-
-        if (!userEmail) return false;
-
-        const adminEmails = getAdminEmails();
-        const isAdmin = adminEmails.includes(userEmail) || userEmail.includes('erovelto');
-
-        if (role === 'admin') {
-            return isAdmin;
-        }
-
-        if (isAdmin) return true; // Admins have all roles
-
-        const userPlan = (user.publicMetadata?.plan as string) || 'free';
+        await connectDB();
+        const dbUser = await User.findOne({ clerkId: userId }).lean();
+        const userPlan = dbUser?.role || 'free';
         
         if (role === 'student') return userPlan === 'student';
         if (role === 'free') return true;
-
-        return false;
     } catch (error) {
-        console.error('[checkRole] Error fetching user:', error);
-        return false;
+        console.error('[checkRole] DB fallback error:', error);
     }
+
+    return false;
 };
 
 export const getUserRole = async (): Promise<Roles> => {
@@ -55,22 +92,18 @@ export const getUserRole = async (): Promise<Roles> => {
         return 'free';
     }
 
+    const isAdmin = await checkIsAdmin(userId);
+    if (isAdmin) return 'admin';
+
     try {
-        const client = await clerkClient();
-        const user = await client.users.getUser(userId);
-        const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress?.toLowerCase();
-
-        if (!userEmail) return 'free';
-
-        const adminEmails = getAdminEmails();
-        const isAdmin = adminEmails.includes(userEmail) || userEmail.includes('erovelto');
-
-        if (isAdmin) return 'admin';
-
-        const userPlan = (user.publicMetadata?.plan as string) || 'free';
-        return userPlan === 'student' ? 'student' : 'free';
+        await connectDB();
+        const dbUser = await User.findOne({ clerkId: userId }).lean();
+        if (dbUser && dbUser.role) {
+            return dbUser.role as Roles;
+        }
     } catch (error) {
-        console.error('[getUserRole] Error fetching user:', error);
-        return 'free';
+        console.error('[getUserRole] DB fallback error:', error);
     }
+
+    return 'free';
 };
