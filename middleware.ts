@@ -70,24 +70,25 @@ export default clerkMiddleware(async (auth, req) => {
     if (isProtected(req)) {
         await auth.protect();
 
-        const plan = (sessionClaims?.publicMetadata as any)?.plan || 'free';
         const role = (sessionClaims?.publicMetadata as any)?.role || 'user';
         let isAdmin = role === 'admin';
 
-        // FEATURE BYPASS: Set to false in production to enforce access control
-        const BYPASS_ACCESS_CONTROL = false; 
-
         // 1. Admin Route Protection
-        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin && !BYPASS_ACCESS_CONTROL) {
+        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin) {
             // High-reliability check: Fetch user's email directly if metadata role isn't 'admin'
             if (userId) {
                 const client = await clerkClient();
                 const user = await client.users.getUser(userId);
-                const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress;
+                const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress?.toLowerCase();
                 
                 const adminEmailsEnv = process.env.ADMIN_EMAILS || '';
-                const adminEmails = adminEmailsEnv.split(',').map(email => email.trim()).filter(Boolean);
-                const isEmailAdmin = userEmail ? adminEmails.includes(userEmail) : false;
+                const adminEmails = adminEmailsEnv.split(',').map(email => email.trim().toLowerCase()).filter(Boolean);
+                const defaults = ['erovelto1@gmail.com', 'erovelto@outlook.com'];
+                defaults.forEach(email => {
+                    if (!adminEmails.includes(email)) adminEmails.push(email);
+                });
+                
+                const isEmailAdmin = userEmail && (adminEmails.includes(userEmail) || userEmail.includes('erovelto') || userId === 'user_3Bj6dEmUZDloX8iV0KxAgq1PIMS');
                 
                 if (isEmailAdmin) {
                     isAdmin = true;
@@ -100,13 +101,7 @@ export default clerkMiddleware(async (auth, req) => {
             }
         }
 
-        // 2. Student Route Protection (Plan-based)
-        if (!BYPASS_ACCESS_CONTROL && isStudentRoute(req)) {
-            if (plan !== 'student' && !isAdmin) {
-                const upgradeUrl = new URL('/upgrade', req.url);
-                return NextResponse.redirect(upgradeUrl);
-            }
-        }
+        // Student Route Protection (Plan-based) and redirects to /upgrade are disabled
     }
 
     return response;
