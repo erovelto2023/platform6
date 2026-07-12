@@ -6,7 +6,7 @@ import AffiliateProduct from '@/lib/db/models/AffiliateProduct';
 import UserAffiliateCompany from '@/lib/db/models/UserAffiliateCompany';
 import UserAffiliateProduct from '@/lib/db/models/UserAffiliateProduct';
 import PersonalAffiliateOffer from '@/lib/db/models/PersonalAffiliateOffer';
-import { Directory, Product, PillarPage } from '@/models';
+import { Directory, Product, PillarPage, TemplateFamily, TemplateSubgenre, StoryTemplate } from '@/models';
 import mongoose from 'mongoose';
 
 export async function GET(req: Request) {
@@ -76,6 +76,21 @@ export async function GET(req: Request) {
     results.publishingPillarPages = {
       count: await PillarPage.countDocuments(),
       samples: await PillarPage.find().select('keyword slug title').limit(10).lean()
+    };
+
+    results.storyTemplates = {
+      count: await StoryTemplate.countDocuments(),
+      samples: await StoryTemplate.find().limit(10).lean()
+    };
+
+    results.storyTemplateFamilies = {
+      count: await TemplateFamily.countDocuments(),
+      samples: await TemplateFamily.find().limit(10).lean()
+    };
+
+    results.storyTemplateSubgenres = {
+      count: await TemplateSubgenre.countDocuments(),
+      samples: await TemplateSubgenre.find().limit(10).lean()
     };
 
     return NextResponse.json({ success: true, results });

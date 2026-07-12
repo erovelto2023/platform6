@@ -3,10 +3,19 @@ import dbConnect from '@/lib/dbConnect';
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const token = searchParams.get('token');
+  if (token !== 'seed_db_7788') {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return POST();
+}
+
 export async function POST() {
   try {
     // Force delete cached models to ensure updated mongoose schemas compile correctly
-    const modelKeys = ['Product', 'Author', 'PillarPage', 'BlogPost', 'Glossary', 'Directory', 'User', 'PaymentGateway', 'ProductFunnel', 'SiteTheme', 'StoryTemplate'];
+    const modelKeys = ['Product', 'Author', 'PillarPage', 'BlogPost', 'Glossary', 'Directory', 'User', 'PaymentGateway', 'ProductFunnel', 'SiteTheme', 'StoryTemplate', 'TemplateFamily', 'TemplateSubgenre'];
     modelKeys.forEach((key) => {
       if (mongoose.models[key]) {
         delete (mongoose.models as any)[key];
@@ -14,7 +23,7 @@ export async function POST() {
     });
 
     // Dynamically require models to get latest schema compilation
-    const { Author, Product, PillarPage, BlogPost, Glossary, Directory, User, PaymentGateway, ProductFunnel, SiteTheme, StoryTemplate } = require('@/models');
+    const { Author, Product, PillarPage, BlogPost, Glossary, Directory, User, PaymentGateway, ProductFunnel, SiteTheme, StoryTemplate, TemplateFamily, TemplateSubgenre } = require('@/models');
 
     await dbConnect();
 
@@ -30,6 +39,8 @@ export async function POST() {
     await ProductFunnel.deleteMany({});
     await SiteTheme.deleteMany({});
     await StoryTemplate.deleteMany({});
+    await TemplateFamily.deleteMany({});
+    await TemplateSubgenre.deleteMany({});
 
     // 2. Create Gateways
     const simulateGateway = await PaymentGateway.create({
@@ -333,30 +344,57 @@ The moment the leash goes slack, mark the behavior using Clicker Training (or a 
       hasAccess: [courseProduct._id.toString(), coffeeProduct._id.toString()] // Admin has access to both courses
     });
 
-    // 10.5 Seed StoryTemplates
+    // 10.5 Seed StoryTemplates with TemplateFamily and TemplateSubgenre
+    const defaultFamily = await TemplateFamily.create({
+      name: 'Fiction & Novel Writing',
+      description: 'Standard genres and guides for fiction writers.',
+      isSystem: true
+    });
+
+    const plotsSubgenre = await TemplateSubgenre.create({
+      name: 'Outlines & Plots',
+      description: 'Outlines, narrative arcs, and plotting templates.',
+      familyId: defaultFamily._id,
+      isSystem: true
+    });
+
+    const charactersSubgenre = await TemplateSubgenre.create({
+      name: 'Character Development',
+      description: 'Profiles, character arcs, and dialogue builders.',
+      familyId: defaultFamily._id,
+      isSystem: true
+    });
+
+    const worldSubgenre = await TemplateSubgenre.create({
+      name: 'Worldbuilding & Settings',
+      description: 'Magic systems, locations, maps, and lore.',
+      familyId: defaultFamily._id,
+      isSystem: true
+    });
+
     await StoryTemplate.create([
       {
         name: 'Hero\'s Journey Outline',
-        family: 'Fantasy',
-        subgenre: 'Epic Quest Fantasy',
         isSystem: true,
         category: 'Plots',
+        familyId: defaultFamily._id,
+        subgenreId: plotsSubgenre._id,
         content: '1. The Ordinary World\n2. The Call of Adventure\n3. Refusal of the Call\n4. Meeting the Mentor\n5. Crossing the First Threshold\n6. Tests, Allies, Enemies\n7. Approach to the Inmost Cave\n8. The Ordeal\n9. Reward (Seizing the Sword)\n10. The Road Back\n11. Resurrection\n12. Return with the Elixir'
       },
       {
         name: 'Character Profile Worksheet',
-        family: 'Fantasy',
-        subgenre: 'Epic Quest Fantasy',
         isSystem: true,
         category: 'Characters',
+        familyId: defaultFamily._id,
+        subgenreId: charactersSubgenre._id,
         content: 'Name:\nAge:\nRole in Story:\n\nPhysical Appearance:\n- Height:\n- Distinguishing Features:\n\nPersonality & Traits:\n- Strengths:\n- Weaknesses:\n- Core Motivation:\n- Greatest Fear:\n\nBackground/Backstory:\n[Insert background here]'
       },
       {
         name: 'Worldbuilding: Magic System',
-        family: 'Fantasy',
-        subgenre: 'Epic Quest Fantasy',
         isSystem: true,
         category: 'worldbuilding',
+        familyId: defaultFamily._id,
+        subgenreId: worldSubgenre._id,
         content: 'System Name:\n\nSource of Magic:\n(Where does the power come from?)\n\nRules & Limitations:\n(What can\'t the magic do?)\n\nCost/Consequences:\n(What is the physical/mental toll of using magic?)\n\nUsers (Who can use it?):\n\nSocietal Impact:\n(How does this magic affect the economy, government, and daily life?)'
       }
     ]);
