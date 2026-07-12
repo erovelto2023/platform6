@@ -35,142 +35,174 @@ export default async function AdminDashboardPage() {
     const stats = await getDashboardStats();
     const ticketCount = await getTicketCount();
 
-    const adminTools = [
+    const categories = [
         {
-            title: "Affiliate CRM",
-            description: "Manage affiliate partners",
-            href: "/admin/affiliates",
-            icon: LinkIcon,
-            color: "text-blue-600",
-            bg: "bg-blue-100",
-            hover: "group-hover:bg-blue-600"
+            title: "ScalePlus AI & Marketing Suite",
+            description: "Automate copywriting, funnels, page creation, and marketing campaigns.",
+            borderColor: "border-violet-200",
+            bgHeader: "bg-violet-50/50",
+            tools: [
+                {
+                    title: "ScalePlus AI Suite",
+                    description: "Complete automated marketing suite with 22 specialized tools",
+                    href: "/admin/scaleplus",
+                    icon: Sparkles,
+                    color: "text-violet-600",
+                    bg: "bg-violet-100",
+                    hover: "group-hover:bg-violet-600"
+                },
+                {
+                    title: "Simple Page Builder",
+                    description: "Deploy raw custom HTML landing pages instantly",
+                    href: "/admin/page-builder-simple",
+                    icon: FileStack,
+                    color: "text-sky-600",
+                    bg: "bg-sky-100",
+                    hover: "group-hover:bg-sky-600"
+                },
+                {
+                    title: "Niche Business in a Box",
+                    description: "Business templates and setup blueprints",
+                    href: "/admin/niche-boxes",
+                    icon: Compass,
+                    color: "text-indigo-600",
+                    bg: "bg-indigo-100",
+                    hover: "group-hover:bg-indigo-600"
+                }
+            ]
         },
         {
-            title: "Blog",
-            description: "Publish posts",
-            href: "/admin/blog",
-            icon: FileText,
-            color: "text-blue-600",
-            bg: "bg-blue-100",
-            hover: "group-hover:bg-blue-600"
+            title: "Publishing & Content",
+            description: "Manage articles, blog posts, glossary pages, and library references.",
+            borderColor: "border-blue-200",
+            bgHeader: "bg-blue-50/50",
+            tools: [
+                {
+                    title: "Blog & Content",
+                    description: "Publish articles and manage news feeds",
+                    href: "/admin/blog",
+                    icon: FileText,
+                    color: "text-blue-600",
+                    bg: "bg-blue-100",
+                    hover: "group-hover:bg-blue-600"
+                },
+                {
+                    title: "Blog Analytics",
+                    description: "Track visitors, reads, and user engagement metrics",
+                    href: "/admin/blog/analytics",
+                    icon: BarChart3,
+                    color: "text-cyan-600",
+                    bg: "bg-cyan-100",
+                    hover: "group-hover:bg-cyan-600"
+                },
+                {
+                    title: "Library",
+                    description: "Manage internal documentation and guides",
+                    href: "/admin/docs",
+                    icon: Library,
+                    color: "text-indigo-600",
+                    bg: "bg-indigo-100",
+                    hover: "group-hover:bg-indigo-600"
+                },
+                {
+                    title: "Glossary",
+                    description: "Manage terminology and definitions",
+                    href: "/admin/glossary",
+                    icon: Library,
+                    color: "text-violet-600",
+                    bg: "bg-violet-100",
+                    hover: "group-hover:bg-violet-600"
+                }
+            ]
         },
         {
-            title: "Blog Analytics",
-            description: "Track visitors",
-            href: "/admin/blog/analytics",
-            icon: BarChart3,
-            color: "text-cyan-600",
-            bg: "bg-cyan-100",
-            hover: "group-hover:bg-cyan-600"
+            title: "Education & Community",
+            description: "Configure student courses, groups, and feedback surveys.",
+            borderColor: "border-emerald-200",
+            bgHeader: "bg-emerald-50/50",
+            tools: [
+                {
+                    title: "Courses",
+                    description: "Create and publish educational courses",
+                    href: "/admin/courses",
+                    icon: BookOpen,
+                    color: "text-indigo-600",
+                    bg: "bg-indigo-100",
+                    hover: "group-hover:bg-indigo-600"
+                },
+                {
+                    title: "Groups",
+                    description: "Manage community discussion groups",
+                    href: "/admin/groups",
+                    icon: Users,
+                    color: "text-emerald-600",
+                    bg: "bg-emerald-100",
+                    hover: "group-hover:bg-emerald-600"
+                },
+                {
+                    title: "Surveys",
+                    description: "Collect user feedback and reviews",
+                    href: "/admin/surveys",
+                    icon: FileQuestion,
+                    color: "text-orange-600",
+                    bg: "bg-orange-100",
+                    hover: "group-hover:bg-orange-600"
+                }
+            ]
         },
         {
-            title: "Library",
-            description: "Manage documentation",
-            href: "/admin/docs",
-            icon: Library,
-            color: "text-violet-600",
-            bg: "bg-violet-100",
-            hover: "group-hover:bg-violet-600"
-        },
-        {
-            title: "Tools & Apps",
-            description: "Enable or disable user tools",
-            href: "/admin/tools",
-            icon: Wrench,
-            color: "text-orange-600",
-            bg: "bg-orange-100",
-            hover: "group-hover:bg-orange-600"
-        },
-        {
-            title: "Simple Page Builder",
-            description: "Paste pure HTML pages",
-            href: "/admin/page-builder-simple",
-            icon: FileStack,
-            color: "text-sky-600",
-            bg: "bg-sky-100",
-            hover: "group-hover:bg-sky-600"
-        },
-        {
-            title: "Courses",
-            description: "Create & edit courses",
-            href: "/admin/courses",
-            icon: BookOpen,
-            color: "text-indigo-600",
-            bg: "bg-indigo-100",
-            hover: "group-hover:bg-indigo-600"
-        },
-        {
-            title: "Groups",
-            description: "Community groups",
-            href: "/admin/groups",
-            icon: Users,
-            color: "text-emerald-600",
-            bg: "bg-emerald-100",
-            hover: "group-hover:bg-emerald-600"
-        },
-        {
-            title: "Niche Business in a Box",
-            description: "Business blueprints",
-            href: "/admin/niche-boxes",
-            icon: Compass,
-            color: "text-sky-600",
-            bg: "bg-sky-100",
-            hover: "group-hover:bg-sky-600"
-        },
-        {
-            title: "Resources",
-            description: "Downloadable files",
-            href: "/admin/resources",
-            icon: FolderOpen,
-            color: "text-amber-600",
-            bg: "bg-amber-100",
-            hover: "group-hover:bg-amber-600"
-        },
-        {
-            title: "Surveys",
-            description: "User feedback",
-            href: "/admin/surveys",
-            icon: FileQuestion,
-            color: "text-orange-600",
-            bg: "bg-orange-100",
-            hover: "group-hover:bg-orange-600"
-        },
-        {
-            title: "Wholesale Directory",
-            description: "Manage suppliers",
-            href: "/admin/wholesale-directory",
-            icon: ShoppingBag,
-            color: "text-cyan-600",
-            bg: "bg-cyan-100",
-            hover: "group-hover:bg-cyan-600"
-        },
-        {
-            title: "Link Checker",
-            description: "Centralized external URL manager",
-            href: "/admin/link-checker",
-            icon: LinkIcon,
-            color: "text-indigo-600",
-            bg: "bg-indigo-100",
-            hover: "group-hover:bg-indigo-600"
-        },
-        {
-            title: "Affiliate Catalog",
-            description: "Personal affiliate link tracker",
-            href: "/admin/affiliate-catalog",
-            icon: Library,
-            color: "text-blue-700",
-            bg: "bg-blue-100",
-            hover: "group-hover:bg-blue-700"
-        },
-        {
-            title: "Glossary",
-            description: "Manage terminology & definitions",
-            href: "/admin/glossary",
-            icon: Library,
-            color: "text-violet-600",
-            bg: "bg-violet-100",
-            hover: "group-hover:bg-violet-600"
-        },
+            title: "Sales & Operations",
+            borderColor: "border-amber-200",
+            bgHeader: "bg-amber-50/50",
+            description: "Manage affiliate partner programs, suppliers, and media storage.",
+            tools: [
+                {
+                    title: "Affiliate CRM",
+                    description: "Coordinate affiliate partner details and stats",
+                    href: "/admin/affiliates",
+                    icon: LinkIcon,
+                    color: "text-blue-600",
+                    bg: "bg-blue-100",
+                    hover: "group-hover:bg-blue-600"
+                },
+                {
+                    title: "Affiliate Catalog",
+                    description: "Track central affiliate link redirects",
+                    href: "/admin/affiliate-catalog",
+                    icon: Library,
+                    color: "text-blue-700",
+                    bg: "bg-blue-100",
+                    hover: "group-hover:bg-blue-700"
+                },
+                {
+                    title: "Wholesale Directory",
+                    description: "Manage dropshipping and bulk suppliers list",
+                    href: "/admin/wholesale-directory",
+                    icon: ShoppingBag,
+                    color: "text-cyan-600",
+                    bg: "bg-cyan-100",
+                    hover: "group-hover:bg-cyan-600"
+                },
+                {
+                    title: "Resources",
+                    description: "Manage student downloadable resource files",
+                    href: "/admin/resources",
+                    icon: FolderOpen,
+                    color: "text-amber-600",
+                    bg: "bg-amber-100",
+                    hover: "group-hover:bg-amber-600"
+                },
+                {
+                    title: "Platform Tools",
+                    description: "Enable or disable global site tools and features",
+                    href: "/admin/tools",
+                    icon: Wrench,
+                    color: "text-orange-600",
+                    bg: "bg-orange-100",
+                    hover: "group-hover:bg-orange-600"
+                }
+            ]
+        }
     ];
 
     return (
@@ -314,27 +346,34 @@ export default async function AdminDashboardPage() {
                 </div>
             </div>
 
-            {/* Quick Actions */}
-            <div>
-                <h2 className="text-lg font-semibold mb-4 text-slate-900">Admin Tools</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {adminTools.map((tool) => (
-                        <Link href={tool.href} key={tool.title} className="block h-full">
-                            <Card className="h-full border-slate-200 shadow-sm hover:shadow-lg hover:border-slate-300 transition-all duration-300 cursor-pointer group relative overflow-hidden">
-                                <CardContent className="p-6 flex items-start gap-4">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300 ${tool.bg} ${tool.hover}`}>
-                                        <tool.icon className={`h-6 w-6 transition-colors duration-300 ${tool.color} group-hover:text-white`} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold text-slate-900 group-hover:text-slate-800 transition-colors">{tool.title}</h3>
-                                        <p className="text-sm text-slate-500 mt-1 group-hover:text-slate-600 transition-colors">{tool.description}</p>
-                                    </div>
-                                    <div className="absolute top-4 right-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                                        <ArrowUpRight className="h-4 w-4 text-slate-400" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </Link>
+            {/* Categorized Admin Tools */}
+            <div className="space-y-8">
+                <h2 className="text-xl font-bold text-slate-900">Management Portals</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {categories.map((category) => (
+                        <Card key={category.title} className={`border ${category.borderColor} shadow-sm overflow-hidden flex flex-col`}>
+                            <CardHeader className={`${category.bgHeader} py-4 px-6 border-b`}>
+                                <CardTitle className="text-md font-bold text-slate-800">{category.title}</CardTitle>
+                                <p className="text-xs text-slate-500 mt-0.5">{category.description}</p>
+                            </CardHeader>
+                            <CardContent className="p-6 flex-1 bg-white">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {category.tools.map((tool) => (
+                                        <Link href={tool.href} key={tool.title} className="block h-full">
+                                            <div className="h-full border border-slate-100 hover:border-slate-200 rounded-xl p-4 flex items-start gap-3 hover:bg-slate-50/50 transition-all group relative cursor-pointer">
+                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-300 ${tool.bg} ${tool.hover}`}>
+                                                    <tool.icon className={`h-5 w-5 transition-colors duration-300 ${tool.color} group-hover:text-white`} />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <h4 className="text-sm font-semibold text-slate-900 group-hover:text-slate-800 transition-colors">{tool.title}</h4>
+                                                    <p className="text-xs text-slate-400 leading-normal">{tool.description}</p>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     ))}
                 </div>
             </div>

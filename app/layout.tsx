@@ -30,6 +30,10 @@ const manrope = Manrope({
   subsets: ["latin"],
 });
 
+import { DEFAULT_THEME, buildCssVars } from "@/lib/theme";
+import dbConnect from "@/lib/dbConnect";
+import { SiteTheme } from "@/models";
+
 export const metadata: Metadata = {
   title: "K Business Academy",
   description: "All-in-one educational and business-building platform.",
@@ -38,14 +42,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let theme = DEFAULT_THEME;
+  try {
+    await dbConnect();
+    const doc = await SiteTheme.findOne({ isDefault: true }).lean() as any;
+    if (doc) {
+      theme = { ...DEFAULT_THEME, ...doc };
+    }
+  } catch (error) {
+    console.error("Failed to load theme:", error);
+  }
+
+  const cssVars = buildCssVars(theme);
+
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning className="scroll-smooth">
+        <head>
+          <style dangerouslySetInnerHTML={{ __html: cssVars }} />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} antialiased`}
           suppressHydrationWarning

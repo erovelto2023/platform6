@@ -299,3 +299,92 @@
     color: #666;
   }
 }
+
+/* ============================================================
+   SEMANTIC UTILITY CLASSES — reference CSS design tokens
+   Use alongside Tailwind for layout/spacing, use these for color
+   ============================================================ */
+
+/* Backgrounds */
+.page-bg    { background-color: var(--color-bg); }
+.surface    { background-color: var(--color-surface); }
+.surface-2  { background-color: var(--color-surface-2); }
+
+/* Text */
+.text-primary-t  { color: var(--color-text); }
+.text-muted-t    { color: var(--color-text-muted); }
+.text-brand      { color: var(--color-primary); }
+.text-accent     { color: var(--color-accent); }
+
+/* Borders */
+.border-t-themed { border-color: var(--color-border); }
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+  transition: background-color 0.15s ease;
+}
+.btn-primary:hover { background-color: var(--color-primary-hover); }
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #fff;
+  transition: background-color 0.15s ease;
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: var(--color-danger);
+  color: #fff;
+}
+
+/* Cards / Panels */
+.card-themed {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* Navigation */
+.nav-themed {
+  background-color: var(--nav-bg);
+  border-color: var(--nav-border);
+  color: var(--nav-text);
+}
+.nav-brand-color { color: var(--nav-brand); }
+
+/* Hub Hero */
+.hub-hero {
+  background: linear-gradient(135deg, var(--hub-hero-from), var(--hub-hero-to));
+  color: var(--hub-hero-text);
+}
+.hub-accent-color { color: var(--hub-accent); }
+.hub-accent-bg    { background-color: var(--hub-accent); }
+
+/* Checkout */
+.checkout-page { background-color: var(--checkout-bg); }
+.checkout-card { background-color: var(--checkout-card); }
+.checkout-btn  { background-color: var(--checkout-btn); color: #fff; }
+.checkout-btn:hover { background-color: var(--checkout-btn-hover); }
+
+/* Upsell */
+.upsell-banner { background-color: var(--upsell-banner); color: var(--upsell-banner-text); }
+.upsell-btn    { background-color: var(--upsell-btn); color: #fff; }
+
+/* Downsell */
+.downsell-banner { background-color: var(--downsell-banner); }
+.downsell-btn    { background-color: var(--downsell-btn); color: #fff; }
+
+/* Course Viewer */
+.course-page   { background-color: var(--course-bg); }
+.course-header { background-color: var(--course-header); }
+.course-play   { background-color: var(--course-play-btn); }
+
+/* Admin Panel */
+.admin-sidebar        { background-color: var(--admin-sidebar); }
+.admin-sidebar-active { background-color: var(--admin-sidebar-active); }
+.admin-surface        { background-color: var(--admin-surface); }

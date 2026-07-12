@@ -92,7 +92,11 @@ const UserSchema = new Schema({
     isPartner: {
         type: Boolean,
         default: true // Every user is a partner by default as requested
-    }
+    },
+    // Publishing access tracking
+    hasAccess: [{
+        type: String
+    }]
 }, { timestamps: true });
 
 const User = models.User || model('User', UserSchema);
