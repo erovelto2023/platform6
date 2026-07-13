@@ -30,7 +30,7 @@ export async function createResource(title: string) {
 export async function getResources() {
     try {
         await connectDB();
-        const resources = await Resource.find({}).sort({ createdAt: -1 }).lean();
+        const resources = await Resource.find({ isMedia: { $ne: true } }).sort({ createdAt: -1 }).lean();
         return JSON.parse(JSON.stringify(resources));
     } catch (error) {
         console.error("Get resources error:", error);

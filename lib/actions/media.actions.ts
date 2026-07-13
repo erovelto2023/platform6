@@ -45,6 +45,7 @@ export async function uploadMedia(formData: FormData) {
             originalFilename: file.name,
             storedFilename: url.split('/').pop(),
             isPublished: true,
+            isMedia: true,
             status: 'published',
             altText: title,
             thumbnailUrl: type === 'image' ? url : undefined,
@@ -73,7 +74,7 @@ export async function getResources(options: {
 
         await connectDB();
         
-        let filter: any = {};
+        let filter: any = { isMedia: true };
         if (options.query) {
             const safeQuery = escapeRegExp(options.query);
             filter.$or = [

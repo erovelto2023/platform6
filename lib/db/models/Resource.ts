@@ -57,6 +57,10 @@ const ResourceSchema = new Schema({
         type: Boolean,
         default: true,
     },
+    isMedia: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 
 const Resource = models.Resource || model('Resource', ResourceSchema);
