@@ -21,7 +21,9 @@ import {
     Link as LinkIcon,
     Layers,
     Tag,
-    Wrench
+    Wrench,
+    HelpCircle,
+    Film
 } from "lucide-react";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/actions/dashboard.actions";
@@ -108,10 +110,19 @@ export default async function AdminDashboardPage() {
                     title: "Glossary",
                     description: "Manage terminology and definitions",
                     href: "/admin/glossary",
-                    icon: Library,
+                    icon: BookOpen,
                     color: "text-violet-600",
                     bg: "bg-violet-100",
                     hover: "group-hover:bg-violet-600"
+                },
+                {
+                    title: "FAQs",
+                    description: "Configure search queries and database answers",
+                    href: "/admin/faqs",
+                    icon: HelpCircle,
+                    color: "text-teal-600",
+                    bg: "bg-teal-100",
+                    hover: "group-hover:bg-teal-600"
                 }
             ]
         },
@@ -140,6 +151,15 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:bg-emerald-600"
                 },
                 {
+                    title: "Subscribers",
+                    description: "Manage database profiles and mail list subscriptions",
+                    href: "/admin/subscribers",
+                    icon: Users,
+                    color: "text-sky-600",
+                    bg: "bg-sky-100",
+                    hover: "group-hover:bg-sky-600"
+                },
+                {
                     title: "Surveys",
                     description: "Collect user feedback and reviews",
                     href: "/admin/surveys",
@@ -166,10 +186,19 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:bg-blue-600"
                 },
                 {
+                    title: "Partner Management",
+                    description: "Review system affiliates and track referrals",
+                    href: "/admin/partners",
+                    icon: Sparkles,
+                    color: "text-amber-600",
+                    bg: "bg-amber-100",
+                    hover: "group-hover:bg-amber-600"
+                },
+                {
                     title: "Affiliate Catalog",
                     description: "Track central affiliate link redirects",
                     href: "/admin/affiliate-catalog",
-                    icon: Library,
+                    icon: FileStack,
                     color: "text-blue-700",
                     bg: "bg-blue-100",
                     hover: "group-hover:bg-blue-700"
@@ -191,6 +220,24 @@ export default async function AdminDashboardPage() {
                     color: "text-amber-600",
                     bg: "bg-amber-100",
                     hover: "group-hover:bg-amber-600"
+                },
+                {
+                    title: "Media Center",
+                    description: "Upload and organize internal asset libraries",
+                    href: "/admin/media",
+                    icon: Film,
+                    color: "text-pink-600",
+                    bg: "bg-pink-100",
+                    hover: "group-hover:bg-pink-600"
+                },
+                {
+                    title: "Link Checker",
+                    description: "Perform real-time outbound redirect checks",
+                    href: "/admin/link-checker",
+                    icon: LinkIcon,
+                    color: "text-cyan-600",
+                    bg: "bg-cyan-100",
+                    hover: "group-hover:bg-cyan-600"
                 },
                 {
                     title: "Platform Tools",
@@ -222,31 +269,33 @@ export default async function AdminDashboardPage() {
             {/* Analytics Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {/* Total Users */}
-                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-600">Total Users</CardTitle>
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                            <Users className="h-4 w-4 text-slate-500" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-slate-900">{stats.totalUsers.toLocaleString()}</div>
-                        <div className="flex items-center text-xs mt-1">
-                            {stats.userGrowth >= 0 ? (
-                                <div className="flex items-center text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
-                                    <ArrowUpRight className="h-3 w-3 mr-1" />
-                                    <span className="font-medium">+{stats.userGrowth}%</span>
-                                </div>
-                            ) : (
-                                <div className="flex items-center text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full">
-                                    <ArrowDownRight className="h-3 w-3 mr-1" />
-                                    <span className="font-medium">{stats.userGrowth}%</span>
-                                </div>
-                            )}
-                            <span className="text-slate-500 ml-2">from last month</span>
-                        </div>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/subscribers" className="block cursor-pointer">
+                    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 h-full">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Total Users</CardTitle>
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
+                                <Users className="h-4 w-4 text-slate-500" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">{stats.totalUsers.toLocaleString()}</div>
+                            <div className="flex items-center text-xs mt-1">
+                                {stats.userGrowth >= 0 ? (
+                                    <div className="flex items-center text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                                        <ArrowUpRight className="h-3 w-3 mr-1" />
+                                        <span className="font-medium">+{stats.userGrowth}%</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-full">
+                                        <ArrowDownRight className="h-3 w-3 mr-1" />
+                                        <span className="font-medium">{stats.userGrowth}%</span>
+                                    </div>
+                                )}
+                                <span className="text-slate-500 ml-2">from last month</span>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
 
                 {/* Total Content */}
                 <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
@@ -303,22 +352,24 @@ export default async function AdminDashboardPage() {
                 </Card>
 
                 {/* Support Tickets */}
-                <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-600">Support Tickets</CardTitle>
-                        <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-                            <FileQuestion className="h-4 w-4 text-slate-500" />
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold text-slate-900">
-                            {ticketCount.toLocaleString()}
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1">
-                            Total tickets
-                        </p>
-                    </CardContent>
-                </Card>
+                <Link href="/admin/tickets" className="block cursor-pointer">
+                    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 h-full">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium text-slate-600">Support Tickets</CardTitle>
+                            <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
+                                <FileQuestion className="h-4 w-4 text-slate-500" />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold text-slate-900">
+                                {ticketCount.toLocaleString()}
+                            </div>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Total tickets
+                            </p>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* Content Breakdown */}

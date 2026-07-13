@@ -152,7 +152,7 @@ const adminRoutes = [
     },
     {
         label: "Publishing Admin",
-        icon: BookOpen,
+        icon: ShieldCheck,
         href: "/admin/publishing",
         color: "text-amber-500",
     },
@@ -169,10 +169,28 @@ const adminRoutes = [
         color: "text-emerald-500",
     },
     {
+        label: "Subscribers",
+        icon: Users,
+        href: "/admin/subscribers",
+        color: "text-sky-400",
+    },
+    {
+        label: "Support Tickets",
+        icon: FileQuestion,
+        href: "/admin/tickets",
+        color: "text-rose-400",
+    },
+    {
         label: "Affiliate CRM",
         icon: LinkIcon,
         href: "/admin/affiliates",
         color: "text-blue-400",
+    },
+    {
+        label: "Partner Management",
+        icon: Sparkles,
+        href: "/admin/partners",
+        color: "text-amber-400",
     },
     {
         label: "Affiliate Catalog",
@@ -187,10 +205,28 @@ const adminRoutes = [
         color: "text-indigo-500",
     },
     {
+        label: "FAQs",
+        icon: FileQuestion,
+        href: "/admin/faqs",
+        color: "text-teal-400",
+    },
+    {
+        label: "Glossary",
+        icon: BookOpen,
+        href: "/admin/glossary",
+        color: "text-violet-500",
+    },
+    {
         label: "Media Center",
         icon: Film,
         href: "/admin/media",
-        color: "text-indigo-400",
+        color: "text-pink-400",
+    },
+    {
+        label: "Link Checker",
+        icon: LinkIcon,
+        href: "/admin/link-checker",
+        color: "text-cyan-400",
     },
     {
         label: "Platform Tools",
