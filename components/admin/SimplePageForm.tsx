@@ -174,6 +174,9 @@ export default function SimplePageForm({ initialData }: SimplePageFormProps) {
                             <p className="text-xs text-sky-700 font-medium leading-relaxed">
                                 You can paste full HTML documents including <code>&lt;style&gt;</code> tags. Our system will automatically isolate the styles to prevent them from affecting the admin interface.
                             </p>
+                            <p className="text-xs text-sky-700 font-bold leading-relaxed pt-2 border-t border-sky-200/50">
+                                🏠 To make this page the main index/homepage of your website, set the <strong>URL Slug</strong> to <code>home</code> or <code>index</code> and mark it as <strong>Published</strong>.
+                            </p>
                         </div>
                     </div>
                 </div>
