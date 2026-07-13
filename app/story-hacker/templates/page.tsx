@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import GlobalSidebar from '@/components/story-hacker/GlobalSidebar';
-import { Book, LayoutDashboard, ChevronRight, Folder, FileText, Plus, Search, Edit3, Trash2, Copy, X, Loader2 } from 'lucide-react';
+import { Book, LayoutDashboard, ChevronRight, Folder, FileText, Plus, Search, Edit3, Trash2, Copy, X, Loader2, Download, Upload } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -64,8 +64,71 @@ function TemplatesContent() {
   const [editIsSystem, setEditIsSystem] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+
   const activeFamily = families.find(f => f._id === familyIdParam);
   const activeSubgenre = subgenres.find(s => s._id === subgenreIdParam);
+
+  const handleExportBackup = async () => {
+    setIsExporting(true);
+    try {
+      const res = await fetch('/api/story/templates/backup');
+      if (!res.ok) throw new Error('Failed to fetch backup');
+      const data = await res.json();
+      if (data.success && data.data) {
+        const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `story-hacker-templates-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        alert('Export failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert('Failed to export backup: ' + error.message);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleImportBackup = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try {
+        const json = JSON.parse(evt.target?.result as string);
+        setIsImporting(true);
+        const res = await fetch('/api/story/templates/backup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(json)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          const { familiesCreated, subgenresCreated, templatesCreated, templatesUpdated } = data.summary;
+          alert(`Backup restored successfully!\n\n- Folders Created: ${familiesCreated}\n- Sub-folders Created: ${subgenresCreated}\n- Guides Created: ${templatesCreated}\n- Guides Updated: ${templatesUpdated}`);
+          await fetchData();
+        } else {
+          alert('Import failed: ' + (data.error || 'Unknown error'));
+        }
+      } catch (err: any) {
+        console.error(err);
+        alert('Invalid backup file or import error: ' + err.message);
+      } finally {
+        setIsImporting(false);
+        e.target.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
 
   useEffect(() => {
     fetchData();
@@ -461,12 +524,35 @@ function TemplatesContent() {
             <h2 className="text-2xl font-black text-white mb-1">Writing Guides</h2>
             <p className="text-slate-400 text-[13px]">Genre-specific templates to guide your writing and inform AI context.</p>
           </div>
-          <button 
-            onClick={() => { setFolderType('family'); setFolderName(''); setEditIsSystem(false); setIsFolderModalOpen(true); }}
-            className="bg-[#bd7a3a] hover:bg-[#a66a30] text-black px-4 py-2 rounded-md text-sm font-bold transition flex items-center gap-2"
-          >
-            <Folder className="w-4 h-4" /> New Folder
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleExportBackup}
+              disabled={isExporting}
+              className="bg-[#2a2a2a] hover:bg-[#333] text-white px-4 py-2 rounded-md text-sm font-bold border border-[#3a3a3a] transition flex items-center gap-2 disabled:opacity-50"
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4 text-amber-500" />}
+              Export Backup
+            </button>
+            
+            <label className="bg-[#2a2a2a] hover:bg-[#333] text-white px-4 py-2 rounded-md text-sm font-bold border border-[#3a3a3a] transition flex items-center gap-2 cursor-pointer disabled:opacity-50">
+              {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4 text-amber-500" />}
+              Import Backup
+              <input 
+                type="file" 
+                accept=".json" 
+                onChange={handleImportBackup} 
+                className="hidden" 
+                disabled={isImporting} 
+              />
+            </label>
+
+            <button 
+              onClick={() => { setFolderType('family'); setFolderName(''); setEditIsSystem(false); setIsFolderModalOpen(true); }}
+              className="bg-[#bd7a3a] hover:bg-[#a66a30] text-black px-4 py-2 rounded-md text-sm font-bold transition flex items-center gap-2"
+            >
+              <Folder className="w-4 h-4" /> New Folder
+            </button>
+          </div>
         </div>
 
         {loading ? (
