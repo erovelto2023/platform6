@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
                                 originalFilename: filename,
                                 storedFilename: storedFilename,
                                 isPublished: true,
+                                isMedia: true,
                                 status: 'published',
                                 altText: assetData.title || filename,
                                 thumbnailUrl: type === 'image' ? savedFileUrl : undefined,
