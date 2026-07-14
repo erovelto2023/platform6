@@ -26,18 +26,6 @@ export const ImageUploadButton = ({ onUploadComplete, onUploadError }: ImageUplo
                     container: "w-auto",
                     allowedContent: "hidden",
                 }}
-                content={{
-                    button({ ready, isUploading }) {
-                        if (isUploading) return "Uploading...";
-                        if (ready) return (
-                            <div className="flex items-center gap-2">
-                                <Upload className="h-4 w-4" />
-                                Upload Image
-                            </div>
-                        );
-                        return "Getting ready...";
-                    },
-                }}
             />
         </div>
     );
