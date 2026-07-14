@@ -3,6 +3,8 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
 import { auth } from "@clerk/nextjs/server";
+import connectDB from "@/lib/db/connect";
+import Resource from "@/lib/db/models/Resource";
 
 export async function POST(req: NextRequest) {
     try {
@@ -40,6 +42,32 @@ export async function POST(req: NextRequest) {
 
         // Return the public URL
         const url = `/uploads/${fileName}`;
+        
+        let type = 'file';
+        if (file.type.startsWith('image/')) type = 'image';
+        else if (file.type === 'application/pdf') type = 'pdf';
+
+        try {
+            await connectDB();
+            await Resource.create({
+                title: file.name,
+                url,
+                type,
+                category: 'General',
+                mimeType: file.type,
+                fileSizeBytes: file.size,
+                originalFilename: file.name,
+                storedFilename: fileName,
+                isPublished: true,
+                isMedia: true,
+                status: 'published',
+                altText: file.name,
+                thumbnailUrl: type === 'image' ? url : undefined,
+                tags: []
+            });
+        } catch (dbError) {
+            console.error("Failed to save resource to DB:", dbError);
+        }
 
         return NextResponse.json({
             url,

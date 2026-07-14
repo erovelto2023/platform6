@@ -1,6 +1,3 @@
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import { extractRouterConfig } from "uploadthing/server";
-import { ourFileRouter } from "@/app/api/uploadthing/core";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
 import "./globals.css";
@@ -70,14 +67,6 @@ export default async function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} antialiased`}
           suppressHydrationWarning
         >
-          <NextSSRPlugin
-            /**
-             * The `extractRouterConfig` will extract the routerConfig from the
-             * uploadthing router so that the uploadthing components can
-             * communicate with the server.
-             */
-            routerConfig={extractRouterConfig(ourFileRouter)}
-          />
           <SocketProvider>
             {children}
             <ConfettiProvider />
