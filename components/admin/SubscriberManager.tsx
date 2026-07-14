@@ -19,6 +19,7 @@ export default function SubscriberManager({ subscribers = [], lists = [] }: Subs
     const [page, setPage] = useState(1);
     const [editingSub, setEditingSub] = useState<any>(null);
     const [editLists, setEditLists] = useState<string[]>([]);
+    const [selectedListId, setSelectedListId] = useState('');
     
     const itemsPerPage = 20;
 
@@ -89,16 +90,41 @@ export default function SubscriberManager({ subscribers = [], lists = [] }: Subs
                                 <DialogTitle className="text-xl font-black uppercase">Embed Subscription Form</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4">
-                                <p className="text-sm text-slate-400">Copy this HTML code to embed a subscription form on any external website.</p>
-                                <pre className="bg-[#111622] p-4 rounded-lg text-xs font-mono text-emerald-400 overflow-x-auto border border-slate-800">
+                                <p className="text-sm text-slate-400">Select a mailing list and copy this HTML code to embed a subscription form on any external website.</p>
+                                
+                                <div>
+                                    <label className="text-xs font-bold uppercase tracking-widest text-slate-400 block mb-2">Target Mailing List</label>
+                                    <select 
+                                        className="w-full bg-[#111622] border border-slate-800 rounded-lg p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        value={selectedListId}
+                                        onChange={(e) => setSelectedListId(e.target.value)}
+                                    >
+                                        <option value="">No specific list (Global Subscribe)</option>
+                                        {lists.map(l => (
+                                            <option key={l._id} value={l._id}>{l.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="relative">
+                                    <pre className="bg-[#111622] p-4 pt-10 rounded-lg text-xs font-mono text-emerald-400 border border-slate-800 whitespace-pre-wrap break-all max-h-[300px] overflow-y-auto">
 {`<form action="https://kbusinessacademy.com/api/subscribe" method="POST" style="display:flex;flex-direction:column;gap:10px;max-width:300px;font-family:sans-serif;">
   <input type="text" name="name" placeholder="Your Name" required style="padding:10px;border-radius:5px;border:1px solid #ccc;" />
   <input type="email" name="email" placeholder="Your Email" required style="padding:10px;border-radius:5px;border:1px solid #ccc;" />
-  <!-- Optional: Add a hidden input to subscribe to a specific list by ID -->
-  <!-- <input type="hidden" name="listId" value="YOUR_LIST_ID" /> -->
-  <button type="submit" style="padding:10px;background:#4F46E5;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">Subscribe</button>
+  ${selectedListId ? `<input type="hidden" name="listId" value="${selectedListId}" />\n  ` : ''}<button type="submit" style="padding:10px;background:#4F46E5;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">Subscribe</button>
 </form>`}
-                                </pre>
+                                    </pre>
+                                    <Button 
+                                        onClick={() => {
+                                            const code = `<form action="https://kbusinessacademy.com/api/subscribe" method="POST" style="display:flex;flex-direction:column;gap:10px;max-width:300px;font-family:sans-serif;">\n  <input type="text" name="name" placeholder="Your Name" required style="padding:10px;border-radius:5px;border:1px solid #ccc;" />\n  <input type="email" name="email" placeholder="Your Email" required style="padding:10px;border-radius:5px;border:1px solid #ccc;" />\n  ${selectedListId ? `<input type="hidden" name="listId" value="${selectedListId}" />\n  ` : ''}<button type="submit" style="padding:10px;background:#4F46E5;color:white;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">Subscribe</button>\n</form>`;
+                                            navigator.clipboard.writeText(code);
+                                            alert("Code copied to clipboard!");
+                                        }}
+                                        className="absolute top-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-[10px] h-6 px-3"
+                                    >
+                                        Copy Code
+                                    </Button>
+                                </div>
                             </div>
                         </DialogContent>
                     </Dialog>
