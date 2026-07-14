@@ -29,7 +29,7 @@ export default function PublisherPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex">
+    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex flex-col w-full">
       <GlobalSidebar />
 
       <main className="flex-1 flex flex-col p-8 lg:p-12">

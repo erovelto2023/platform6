@@ -284,7 +284,7 @@ function ProjectHubContent({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="hide-during-book-print h-screen flex flex-col bg-[#0a0a0a] text-slate-200 overflow-hidden font-sans">
+    <div className="hide-during-book-print h-[calc(100vh-65px)] flex flex-col bg-[#0a0a0a] text-slate-200 overflow-hidden font-sans">
       {/* Header */}
       <header className="border-b border-[#1f1f1f] bg-[#121212] h-14 flex items-center px-4 shrink-0 justify-between">
         <div className="flex items-center gap-4">

@@ -165,10 +165,10 @@ export default function ThemesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex">
+    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex flex-col w-full">
       <GlobalSidebar />
 
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-hidden">
         <div className="h-16 border-b border-[#1f1f1f] bg-[#121212] flex items-center px-6 shrink-0">
           <Palette className="w-5 h-5 text-amber-500 mr-3" />
           <h1 className="text-xl font-black text-white tracking-tight">Book Formatting Templates</h1>

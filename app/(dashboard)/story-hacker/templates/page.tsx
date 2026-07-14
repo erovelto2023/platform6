@@ -756,9 +756,9 @@ function TemplatesContent() {
 
 export default function TemplatesPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex">
+    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex flex-col w-full">
       <GlobalSidebar />
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <main className="flex-1 flex flex-col h-[calc(100vh-65px)] overflow-y-auto">
         <header className="md:hidden border-b border-[#1f1f1f] bg-[#121212] h-16 flex items-center px-4 shrink-0">
           <Book className="w-6 h-6 text-amber-500 mr-2" />
           <h1 className="text-xl font-black text-white tracking-tight">Story Hacker</h1>

@@ -5,7 +5,7 @@ import { Book, Settings } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex">
+    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 font-sans flex flex-col w-full">
       <GlobalSidebar />
       <main className="flex-1 flex flex-col">
         <header className="md:hidden border-b border-[#1f1f1f] bg-[#121212] h-16 flex items-center px-4">

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Book, Library, LayoutDashboard, History, Settings, Palette } from 'lucide-react';
 import { useState } from 'react';
 import SettingsModal from './SettingsModal';
+import { cn } from '@/lib/utils';
 
 export default function GlobalSidebar() {
   const pathname = usePathname();
@@ -21,14 +22,19 @@ export default function GlobalSidebar() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
-    <aside className="w-64 border-r border-[#1f1f1f] bg-[#121212] flex flex-col hidden md:flex shrink-0 min-h-screen">
-      <div className="h-16 flex items-center px-6 border-b border-[#1f1f1f]">
-        <Book className="w-6 h-6 text-amber-500 mr-2" />
-        <h1 className="text-xl font-black text-white tracking-tight">Story Hacker</h1>
+    <header className="w-full h-16 border-b border-[#1f1f1f] bg-[#121212] flex items-center justify-between px-6 shrink-0 z-10">
+      <div className="flex items-center">
+        <Book className="w-6 h-6 text-amber-500 mr-2 shrink-0" />
+        <h1 className="text-xl font-black text-white tracking-tight shrink-0 hidden sm:block">Story Hacker</h1>
       </div>
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto max-w-full no-scrollbar">
         {navItems.map((item) => {
-          const isActive = pathname === item.href && !item.isAction;
+          // If pathname starts with the item href, check if it's active.
+          // For Projects, we only match exact /story-hacker or sub-projects.
+          const isProjects = item.href === '/story-hacker';
+          const isActive = isProjects 
+            ? (pathname === '/story-hacker' || pathname?.startsWith('/story-hacker/projects'))
+            : (pathname === item.href && !item.isAction);
           const Icon = item.icon;
           
           if (item.isAction && item.name === 'Settings') {
@@ -36,10 +42,10 @@ export default function GlobalSidebar() {
               <button 
                 key={item.name} 
                 onClick={() => setIsSettingsOpen(true)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition text-slate-400 hover:text-white hover:bg-[#1f1f1f]"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition text-slate-400 hover:text-white hover:bg-[#1f1f1f] shrink-0"
               >
-                <Icon className="w-5 h-5" />
-                {item.name}
+                <Icon className="w-4 h-4" />
+                <span>{item.name}</span>
               </button>
             );
           }
@@ -48,28 +54,24 @@ export default function GlobalSidebar() {
             <Link 
               key={item.name} 
               href={item.href} 
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium transition ${
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition shrink-0",
                 isActive 
-                  ? 'bg-amber-500/10 text-amber-500' 
+                  ? 'bg-amber-500/10 text-amber-500 font-semibold' 
                   : 'text-slate-400 hover:text-white hover:bg-[#1f1f1f]'
-              }`}
+              )}
             >
-              <Icon className="w-5 h-5" />
-              {item.name}
+              <Icon className="w-4 h-4" />
+              <span>{item.name}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="p-4 border-t border-[#1f1f1f]">
-        <Link href="/dashboard" className="text-xs text-slate-500 hover:text-amber-500 transition">
-          &larr; Back to Dashboard
-        </Link>
-      </div>
 
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
       />
-    </aside>
+    </header>
   );
 }
