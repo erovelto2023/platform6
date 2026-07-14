@@ -110,7 +110,7 @@ export function CreatePost({ user }: CreatePostProps) {
                                 <UploadButton
                                     endpoint="communityPostImage"
                                     onClientUploadComplete={(res) => {
-                                        setMediaUrl(res[0].ufsUrl || res[0].url);
+                                        setMediaUrl(res[0].url || res[0].url);
                                         toast.success("File uploaded");
                                     }}
                                     onUploadError={(error: Error) => {

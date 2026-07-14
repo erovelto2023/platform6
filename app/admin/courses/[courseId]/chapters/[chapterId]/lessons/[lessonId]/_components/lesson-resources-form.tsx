@@ -125,7 +125,7 @@ export const LessonResourcesForm = ({
                                 allowedContent: "text-slate-500"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ url: res[0].ufsUrl || res[0].url, title: res[0].name });
+                                onSubmit({ url: res[0].url || res[0].url, title: res[0].name });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);

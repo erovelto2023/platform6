@@ -1459,7 +1459,7 @@ export default function NicheBoxCreator() {
                               onClientUploadComplete={(res: any) => {
                                 if (res?.[0]) {
                                   updateField(`assets.${i}.fileName`, res[0].name);
-                                  updateField(`assets.${i}.fileUrl`, res[0].ufsUrl || res[0].url);
+                                  updateField(`assets.${i}.fileUrl`, res[0].url || res[0].url);
                                   toast({
                                     title: "Asset Uploaded",
                                     description: `${res[0].name} successfully attached.`
