@@ -194,109 +194,141 @@ const groups: SidebarGroup[] = [
     }
 ];
 
-const adminRoutes = [
+const adminGroups: SidebarGroup[] = [
     {
-        label: "Overview",
-        icon: LayoutDashboard,
-        href: "/admin",
-        color: "text-sky-500",
-    },
-    {
-        label: "ScalePlus AI Suite",
-        icon: Sparkles,
-        href: "/admin/scaleplus",
-        color: "text-violet-400",
-    },
-    {
-        label: "Publishing Admin",
-        icon: ShieldCheck,
-        href: "/admin/publishing",
-        color: "text-amber-500",
-    },
-    {
-        label: "Courses & LMS",
-        icon: Library,
-        href: "/admin/courses",
-        color: "text-indigo-400",
-    },
-    {
-        label: "Community Groups",
-        icon: Users,
-        href: "/admin/groups",
-        color: "text-emerald-500",
-    },
-    {
-        label: "Subscribers",
-        icon: Users,
-        href: "/admin/subscribers",
-        color: "text-sky-400",
-    },
-    {
-        label: "Support Tickets",
-        icon: FileQuestion,
-        href: "/admin/tickets",
-        color: "text-rose-400",
-    },
-    {
-        label: "Affiliate CRM",
-        icon: LinkIcon,
-        href: "/admin/affiliates",
-        color: "text-blue-400",
-    },
-    {
-        label: "Partner Management",
-        icon: Sparkles,
-        href: "/admin/partners",
-        color: "text-amber-400",
-    },
-    {
-        label: "Affiliate Catalog",
-        icon: FileStack,
-        href: "/admin/affiliate-catalog",
-        color: "text-blue-300",
-    },
-    {
-        label: "Blog & Content",
-        icon: FileText,
-        href: "/admin/blog",
-        color: "text-indigo-500",
-    },
-    {
-        label: "FAQs",
-        icon: FileQuestion,
-        href: "/admin/faqs",
-        color: "text-teal-400",
-    },
-    {
-        label: "Glossary",
-        icon: BookOpen,
-        href: "/admin/glossary",
-        color: "text-violet-500",
-    },
-    {
-        label: "Media Center",
-        icon: Film,
-        href: "/admin/media",
-        color: "text-pink-400",
-    },
-    {
-        label: "Link Checker",
-        icon: LinkIcon,
-        href: "/admin/link-checker",
-        color: "text-cyan-400",
-    },
-    {
-        label: "Platform Tools",
-        icon: Wrench,
-        href: "/admin/tools",
+        id: "admin-business-tools",
+        label: "Business Tools",
+        icon: Briefcase,
         color: "text-orange-500",
+        items: [
+            {
+                label: "Affiliate CRM",
+                icon: LinkIcon,
+                href: "/admin/affiliates",
+                color: "text-blue-400",
+            },
+            {
+                label: "Affiliate Catalog",
+                icon: FileStack,
+                href: "/admin/affiliate-catalog",
+                color: "text-blue-300",
+            },
+            {
+                label: "Campaign Manager",
+                icon: Sparkles,
+                href: "/admin/click-campaigns/new",
+                color: "text-violet-400",
+            },
+            {
+                label: "Media Center",
+                icon: Film,
+                href: "/admin/media",
+                color: "text-pink-400",
+            },
+            {
+                label: "Partner Management",
+                icon: Sparkles,
+                href: "/admin/partners",
+                color: "text-amber-400",
+            },
+            {
+                label: "Platform Tools",
+                icon: Wrench,
+                href: "/admin/tools",
+                color: "text-orange-500",
+            },
+            {
+                label: "Subscribers",
+                icon: Users,
+                href: "/admin/subscribers",
+                color: "text-sky-400",
+            },
+            {
+                label: "Support Tickets",
+                icon: FileQuestion,
+                href: "/admin/tickets",
+                color: "text-rose-400",
+            }
+        ]
     },
     {
-        label: "Exit Admin",
-        icon: LogOut,
-        href: "/dashboard",
-        color: "text-red-500",
+        id: "admin-education",
+        label: "Education",
+        icon: GraduationCap,
+        color: "text-violet-500",
+        items: [
+            {
+                label: "Community and Groups",
+                icon: Users,
+                href: "/admin/groups",
+                color: "text-emerald-500",
+            },
+            {
+                label: "Courses & LMS",
+                icon: Library,
+                href: "/admin/courses",
+                color: "text-indigo-400",
+            }
+        ]
     },
+    {
+        id: "admin-content-creation",
+        label: "Content Creation",
+        icon: PenTool,
+        color: "text-amber-500",
+        items: [
+            {
+                label: "Blogs",
+                icon: FileText,
+                href: "/admin/blog",
+                color: "text-indigo-500",
+            },
+            {
+                label: "FAQ",
+                icon: FileQuestion,
+                href: "/admin/faqs",
+                color: "text-teal-400",
+            },
+            {
+                label: "Glossary",
+                icon: BookOpen,
+                href: "/admin/glossary",
+                color: "text-violet-500",
+            },
+            {
+                label: "Page Builder",
+                icon: LayoutDashboard,
+                href: "/admin/page-builder-simple",
+                color: "text-sky-500",
+            },
+            {
+                label: "Publishing Admin",
+                icon: ShieldCheck,
+                href: "/admin/publishing",
+                color: "text-amber-500",
+            }
+        ]
+    },
+    {
+        id: "admin-misc-tools",
+        label: "Misc Tools",
+        icon: Wrench,
+        color: "text-zinc-400",
+        items: [
+            {
+                label: "ScalePlus AI Suite",
+                icon: Sparkles,
+                href: "/admin/scaleplus",
+                color: "text-violet-400",
+            },
+            {
+                label: "Link Checker",
+                icon: LinkIcon,
+                href: "/admin/link-checker",
+                color: "text-cyan-400",
+            }
+        ]
+    }
 ];
 
 interface SidebarProps {
@@ -315,6 +347,10 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
         "writing-tools": false,
         "community-tools": false,
         "research-education": false,
+        "admin-business-tools": false,
+        "admin-education": false,
+        "admin-content-creation": false,
+        "admin-misc-tools": false,
     });
 
     const toggleSection = (id: string) => {
@@ -336,6 +372,8 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     useEffect(() => {
         if (pathname) {
             const path = pathname.split('?')[0];
+            
+            // Standard view auto-open
             if (["/accounting", "/affiliates", "/tools/wholesale-directory", "/niche-boxes"].some(p => path === p || path.startsWith(p + "/"))) {
                 setOpenSections(prev => ({ ...prev, "business-tools": true }));
             } else if (["/story-hacker", "/whiteboard", "/tools/workbook-designer", "/tools/design-editor"].some(p => path === p || path.startsWith(p + "/"))) {
@@ -345,13 +383,24 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
             } else if (["/catalog", "/glossary", "/resources", "/locations"].some(p => path === p || path.startsWith(p + "/"))) {
                 setOpenSections(prev => ({ ...prev, "research-education": true }));
             }
+            
+            // Admin view auto-open
+            if (["/admin/affiliates", "/admin/affiliate-catalog", "/admin/click-campaigns", "/admin/media", "/admin/partners", "/admin/tools", "/admin/subscribers", "/admin/tickets"].some(p => path === p || path.startsWith(p + "/"))) {
+                setOpenSections(prev => ({ ...prev, "admin-business-tools": true }));
+            } else if (["/admin/groups", "/admin/courses"].some(p => path === p || path.startsWith(p + "/"))) {
+                setOpenSections(prev => ({ ...prev, "admin-education": true }));
+            } else if (["/admin/blog", "/admin/faqs", "/admin/glossary", "/admin/page-builder-simple", "/admin/publishing"].some(p => path === p || path.startsWith(p + "/"))) {
+                setOpenSections(prev => ({ ...prev, "admin-content-creation": true }));
+            } else if (["/admin/scaleplus", "/admin/link-checker"].some(p => path === p || path.startsWith(p + "/"))) {
+                setOpenSections(prev => ({ ...prev, "admin-misc-tools": true }));
+            }
         }
     }, [pathname]);
 
     const isActive = (href: string) => {
         const basePath = href.split('?')[0];
-        if (basePath === "/dashboard") {
-            return pathname === "/dashboard";
+        if (basePath === "/dashboard" || basePath === "/admin") {
+            return pathname === basePath;
         }
         return pathname === basePath || pathname?.startsWith(basePath + "/");
     };
@@ -374,23 +423,97 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
                     {/* Admin Dashboard Sidebar View */}
                     {isCurrentlyInAdmin && isActuallyAdmin ? (
                         <div className="space-y-1">
-                            {adminRoutes.map((route) => (
-                                <Link
-                                    key={route.href}
-                                    href={route.href}
-                                    className={cn(
-                                        "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                        isActive(route.href) ? "text-white bg-white/10" : "text-zinc-400",
-                                        isCollapsed && "justify-center px-2"
-                                    )}
-                                    title={isCollapsed ? route.label : undefined}
-                                >
-                                    <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                        <route.icon className={cn("h-5 w-5", route.color, isCollapsed ? "mr-0" : "mr-3")} />
-                                        {!isCollapsed && route.label}
+                            {/* Admin Dashboard Direct Link */}
+                            <Link
+                                href="/admin"
+                                className={cn(
+                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
+                                    isActive("/admin") ? "text-white bg-white/10" : "text-zinc-400",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                                title={isCollapsed ? "Admin Dashboard" : undefined}
+                            >
+                                <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
+                                    <LayoutDashboard className={cn("h-5 w-5 text-sky-500", isCollapsed ? "mr-0" : "mr-3")} />
+                                    {!isCollapsed && "Dashboard"}
+                                </div>
+                            </Link>
+
+                            {/* Admin Accordion Groups */}
+                            {adminGroups.map((group) => {
+                                const isOpen = openSections[group.id];
+                                const isAnyChildActive = group.items.some(item => isActive(item.href));
+                                
+                                return (
+                                    <div key={group.id} className="space-y-1">
+                                        <button
+                                            onClick={() => toggleSection(group.id)}
+                                            className={cn(
+                                                "w-full text-sm group flex p-3 justify-between items-center font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400",
+                                                isCollapsed ? "justify-center px-2" : "text-left",
+                                                isAnyChildActive && "text-white"
+                                            )}
+                                            title={isCollapsed ? group.label : undefined}
+                                        >
+                                            <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
+                                                <group.icon className={cn("h-5 w-5", group.color, isCollapsed ? "mr-0" : "mr-3")} />
+                                                {!isCollapsed && (
+                                                    <span className="font-semibold text-zinc-300 group-hover:text-white transition">
+                                                        {group.label}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {!isCollapsed && (
+                                                <ChevronDown
+                                                    className={cn(
+                                                        "h-4 w-4 transition-transform duration-200 text-zinc-500 group-hover:text-white",
+                                                        isOpen && "rotate-180"
+                                                    )}
+                                                />
+                                            )}
+                                        </button>
+
+                                        {/* Sub-items list */}
+                                        <div
+                                            className={cn(
+                                                "overflow-hidden transition-all duration-300 ease-in-out",
+                                                (isOpen && !isCollapsed) ? "max-h-[400px] opacity-100 pl-4 space-y-0.5" : "max-h-0 opacity-0 pointer-events-none"
+                                            )}
+                                        >
+                                            {group.items.map((item) => (
+                                                <Link
+                                                    key={item.href}
+                                                    href={item.href}
+                                                    className={cn(
+                                                        "text-xs group flex p-2 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/5 rounded-lg transition",
+                                                        isActive(item.href) ? "text-white bg-white/10 font-semibold" : "text-zinc-400"
+                                                    )}
+                                                >
+                                                    <div className="flex items-center flex-1">
+                                                        <item.icon className={cn("h-4 w-4 mr-3 shrink-0", item.color)} />
+                                                        <span className="truncate">{item.label}</span>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
                                     </div>
-                                </Link>
-                            ))}
+                                );
+                            })}
+
+                            {/* Exit Admin Direct Link */}
+                            <Link
+                                href="/dashboard"
+                                className={cn(
+                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition mt-4 border-t border-white/5 pt-4",
+                                    isCollapsed && "justify-center px-2"
+                                )}
+                                title={isCollapsed ? "Exit Admin" : undefined}
+                            >
+                                <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
+                                    <LogOut className={cn("h-5 w-5 text-red-500", isCollapsed ? "mr-0" : "mr-3")} />
+                                    {!isCollapsed && "Exit Admin"}
+                                </div>
+                            </Link>
                         </div>
                     ) : (
                         /* Standard Collapsible Accordion view */
