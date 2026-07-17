@@ -1,6 +1,7 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { getOrCreateUser } from "@/lib/actions/user.actions";
 import { getUserRole } from "@/lib/roles";
+import { redirect } from "next/navigation";
 
 // Force dynamic rendering to avoid build-time errors with Clerk
 export const dynamic = 'force-dynamic';

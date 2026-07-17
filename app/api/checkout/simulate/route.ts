@@ -24,10 +24,26 @@ export async function POST(req: Request) {
 
     const userId = (session.user as any).id;
 
-    // Add product to user's hasAccess array in MongoDB
-    await User.findByIdAndUpdate(userId, {
-      $addToSet: { hasAccess: product._id.toString() }
-    });
+    // Add product to user's hasAccess array in MongoDB and set role to student
+    const user = await User.findByIdAndUpdate(userId, {
+      $addToSet: { hasAccess: product._id.toString() },
+      role: 'student'
+    }, { new: true });
+
+    if (user) {
+      try {
+        const { clerkClient } = await import('@clerk/nextjs/server');
+        const client = await clerkClient();
+        await client.users.updateUser(user.clerkId, {
+          publicMetadata: {
+            plan: 'student',
+            role: 'student'
+          }
+        });
+      } catch (clerkErr) {
+        console.error('Failed to sync Clerk metadata in simulated checkout:', clerkErr);
+      }
+    }
 
     return NextResponse.json({
       success: true,

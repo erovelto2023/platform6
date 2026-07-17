@@ -308,6 +308,23 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
                                 </Link>
                             </div>
                         )}
+
+                        {/* Upgrade Link for Free Users */}
+                        {userRole === 'free' && (
+                            <div className="pt-4 mt-6 border-t border-white/5">
+                                <Link
+                                    href="/upgrade"
+                                    className={cn(
+                                        "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-750 text-white shadow-lg shadow-orange-500/20",
+                                        isCollapsed && "justify-center px-2"
+                                    )}
+                                    title={isCollapsed ? "Upgrade to Premium" : undefined}
+                                >
+                                    <Sparkles className="w-5 h-5 shrink-0 animate-pulse text-amber-200" />
+                                    {!isCollapsed && <span className="font-bold text-sm">Upgrade to Premium</span>}
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 </ScrollReveal>
             </div>

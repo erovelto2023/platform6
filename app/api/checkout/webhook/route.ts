@@ -42,9 +42,27 @@ export async function POST(req: Request) {
     if (metadata && metadata.userId && metadata.productId) {
       try {
         await dbConnect();
-        await User.findByIdAndUpdate(metadata.userId, {
-          $addToSet: { hasAccess: metadata.productId }
-        });
+        const user = await User.findByIdAndUpdate(metadata.userId, {
+          $addToSet: { hasAccess: metadata.productId },
+          role: 'student'
+        }, { new: true });
+
+        if (user) {
+          try {
+            const { clerkClient } = await import('@clerk/nextjs/server');
+            const client = await clerkClient();
+            await client.users.updateUser(user.clerkId, {
+              publicMetadata: {
+                plan: 'student',
+                role: 'student'
+              }
+            });
+            console.log(`Successfully upgraded Clerk role to 'student' for user ${user.clerkId}`);
+          } catch (clerkErr) {
+            console.error('Failed to sync Clerk metadata in checkout webhook:', clerkErr);
+          }
+        }
+
         console.log(`Fulfillment success: User ${metadata.userId} gained access to ${metadata.productId}`);
       } catch (error) {
         console.error('Fulfillment database error:', error);

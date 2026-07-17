@@ -42,7 +42,7 @@ export default function UpgradePage() {
                     <Button
                         size="lg"
                         className="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-semibold"
-                        onClick={() => openUserProfile()}
+                        onClick={() => router.push('/user-profile')}
                     >
                         Upgrade Now
                     </Button>

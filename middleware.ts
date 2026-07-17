@@ -17,6 +17,7 @@ const isProtected = createRouteMatcher([
     '/partner(.*)',
     '/docs(.*)',
     '/story-hacker(.*)',
+    '/user-profile(.*)',
 ]);
 
 const isStudentRoute = createRouteMatcher([
@@ -72,13 +73,12 @@ export default clerkMiddleware(async (auth, req) => {
     if (isProtected(req)) {
         await auth.protect();
 
-        const role = (sessionClaims?.publicMetadata as any)?.role || 'user';
+        const role = (sessionClaims?.publicMetadata as any)?.role || 'free';
         let isAdmin = role === 'admin';
 
-        // 1. Admin Route Protection
-        if (req.nextUrl.pathname.startsWith('/admin') && !isAdmin) {
-            // High-reliability check: Fetch user's email directly if metadata role isn't 'admin'
-            if (userId) {
+        // High-reliability check: Fetch user's email directly if metadata role isn't 'admin'
+        if (userId && !isAdmin) {
+            try {
                 const client = await clerkClient();
                 const user = await client.users.getUser(userId);
                 const userEmail = user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)?.emailAddress?.toLowerCase();
@@ -95,12 +95,27 @@ export default clerkMiddleware(async (auth, req) => {
                 if (isEmailAdmin) {
                     isAdmin = true;
                 }
+            } catch (err) {
+                console.error("Error verifying admin email in middleware:", err);
             }
+        }
 
-            // If still not admin, redirect
-            if (!isAdmin) {
-                return NextResponse.redirect(new URL('/dashboard', req.url));
-            }
+        // If user is admin, allow them through to all routes
+        if (isAdmin) {
+            return response;
+        }
+
+        // Gate free users from other premium routes, letting them access the dashboard and user-profile
+        if (role === 'free' && 
+            !req.nextUrl.pathname.startsWith('/dashboard') && 
+            !req.nextUrl.pathname.startsWith('/user-profile')
+        ) {
+            return NextResponse.redirect(new URL('/upgrade', req.url));
+        }
+
+        // Admin Route Protection (for non-admins trying to access /admin)
+        if (req.nextUrl.pathname.startsWith('/admin')) {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
         // Student Route Protection (Plan-based) and redirects to /upgrade are disabled

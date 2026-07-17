@@ -67,6 +67,25 @@ export async function POST(req: Request) {
                     user = await User.findOne({ email: customerEmail });
                 }
 
+                if (user) {
+                    user.role = 'student';
+                    await user.save();
+                    
+                    try {
+                        const { clerkClient } = await import('@clerk/nextjs/server');
+                        const client = await clerkClient();
+                        await client.users.updateUser(user.clerkId, {
+                            publicMetadata: {
+                                plan: 'student',
+                                role: 'student'
+                            }
+                        });
+                        console.log(`Successfully upgraded Clerk role to 'student' for user ${user.clerkId}`);
+                    } catch (clerkErr) {
+                        console.error('Failed to sync Clerk metadata in Stripe payment webhook:', clerkErr);
+                    }
+                }
+
                 // Create payment record
                 const payment = await Payment.create({
                     stripePaymentId: paymentIntent.id,
