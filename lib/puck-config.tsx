@@ -71,7 +71,7 @@ export type PuckBlocksProps = {
   ShareButtonsBlock: W<{ url: string; text: string; align: "left" | "center" | "right" }>;
 
   // Compound / Complex
-  HeroBlock: W<{ title: string; subtitle: string; ctaText: string; bg: "primary" | "dark" | "light"; paddingTop: "md" | "lg" | "xl" | "2xl"; paddingBottom: "md" | "lg" | "xl" | "2xl" }>;
+  HeroBlock: W<{ title: string; subtitle: string; ctaText: string; ctaLink: string; image: string; bg: "primary" | "dark" | "light"; paddingTop: "md" | "lg" | "xl" | "2xl"; paddingBottom: "md" | "lg" | "xl" | "2xl" }>;
   AccordionBlock: W<{ items: Array<{ title: string; content: string }> }>;
   PricingTableBlock: W<{ tier1Name: string; tier1Price: string; tier1Features: string; tier2Name: string; tier2Price: string; tier2Features: string; tier3Name: string; tier3Price: string; tier3Features: string; highlightTier: "1" | "2" | "3" }>;
   TestimonialsBlock: W<{ title: string; reviews: Array<{ name: string; role: string; text: string; rating: "4" | "5" }> }>;
@@ -1024,6 +1024,8 @@ export const puckConfig: Config<PuckBlocksProps> = {
         title: { type: "text" },
         subtitle: { type: "textarea" },
         ctaText: { type: "text" },
+        ctaLink: { type: "text" },
+        image: { type: "text" },
         bg: { type: "select", options: [{ label: "Primary (Emerald)", value: "primary" }, { label: "Dark", value: "dark" }, { label: "Light", value: "light" }] },
         paddingTop: { type: "select", options: [{ label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "X-Large", value: "xl" }, { label: "2X-Large", value: "2xl" }] },
         paddingBottom: { type: "select", options: [{ label: "Medium", value: "md" }, { label: "Large", value: "lg" }, { label: "X-Large", value: "xl" }, { label: "2X-Large", value: "2xl" }] },
@@ -1033,13 +1035,15 @@ export const puckConfig: Config<PuckBlocksProps> = {
         title: "Build Beautiful Pages",
         subtitle: "Deploy faster with our visual page editor built directly into the Next.js platform.",
         ctaText: "Get Started",
+        ctaLink: "#",
+        image: "",
         bg: "primary",
         paddingTop: "xl",
         paddingBottom: "xl",
         ...styleDefaults
       },
       render: (props) => {
-        const { title, subtitle, ctaText, bg, paddingTop, paddingBottom, puck: { renderDropZone } } = props;
+        const { title, subtitle, ctaText, ctaLink, image, bg, paddingTop, paddingBottom, puck: { renderDropZone } } = props;
         const bgClasses = {
           primary: "bg-emerald-600 text-white",
           dark: "bg-slate-900 text-white",
@@ -1050,19 +1054,47 @@ export const puckConfig: Config<PuckBlocksProps> = {
           dark: "bg-emerald-500 text-white hover:bg-emerald-600",
           light: "bg-emerald-600 text-white hover:bg-emerald-700"
         };
-        const pt = { md: "pt-12", lg: "pt-20", xl: "pt-32", "2xl": "pt-40" };
-        const pb = { md: "pb-12", lg: "pb-20", xl: "pb-32", "2xl": "pb-40" };
+        const pt = { md: "pt-12 md:pt-16", lg: "pt-20 md:pt-28", xl: "pt-32 md:pt-40", "2xl": "pt-40 md:pt-52" };
+        const pb = { md: "pb-12 md:pb-16", lg: "pb-20 md:pb-28", xl: "pb-32 md:pb-40", "2xl": "pb-40 md:pb-52" };
+
+        const contentEl = (
+          <div className={`flex flex-col ${image ? 'items-start text-left' : 'items-center text-center'} max-w-2xl`}>
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black mb-8 tracking-tight leading-tight">{title}</h1>
+            <p className={`text-lg md:text-2xl mb-12 leading-relaxed ${bg === 'light' ? 'text-slate-600' : 'text-slate-200'}`}>{subtitle}</p>
+            <div className="flex flex-wrap items-center gap-4">
+              {ctaText && (
+                <a href={ctaLink || "#"} className="inline-block">
+                  <button className={`px-8 py-4 rounded-xl font-bold transition-all shadow-md hover:shadow-lg text-lg ${btnClasses[bg]}`}>
+                    {ctaText}
+                  </button>
+                </a>
+              )}
+              {renderDropZone({ zone: "hero-actions" })}
+            </div>
+          </div>
+        );
+
         return (
-          <Styled p={props} className={`w-full flex flex-col items-center justify-center text-center px-4 rounded-3xl shadow-sm mx-auto my-6 overflow-hidden relative ${bgClasses[bg]} ${pt[paddingTop]} ${pb[paddingBottom]}`}>
-            <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-black mb-8 tracking-tight leading-tight">{title}</h1>
-              <p className={`text-lg md:text-2xl max-w-2xl mb-12 leading-relaxed ${bg === 'light' ? 'text-slate-600' : 'text-slate-200'}`}>{subtitle}</p>
-              <div className="flex flex-wrap items-center justify-center gap-4">
-                <button className={`px-8 py-4 rounded-xl font-bold transition-all shadow-md hover:shadow-lg text-lg ${btnClasses[bg]}`}>
-                  {ctaText}
-                </button>
-                {renderDropZone({ zone: "hero-actions" })}
-              </div>
+          <Styled p={props} className={`w-full px-6 md:px-12 rounded-3xl shadow-sm mx-auto my-6 overflow-hidden relative ${bgClasses[bg]} ${pt[paddingTop]} ${pb[paddingBottom]}`}>
+            <div className="relative z-10 max-w-7xl mx-auto">
+              {image ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                  <div className="lg:col-span-7 flex flex-col items-start">
+                    {contentEl}
+                  </div>
+                  <div className="lg:col-span-5 w-full flex justify-center">
+                    <img 
+                      src={image} 
+                      alt={title} 
+                      className="w-full max-w-md lg:max-w-full h-auto object-cover rounded-2xl shadow-2xl" 
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  {contentEl}
+                </div>
+              )}
             </div>
           </Styled>
         );
