@@ -35,6 +35,9 @@ import {
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BouncyAccordion, BouncyAccordionItem } from "@/components/motion/bouncy-accordion";
+import { MagneticButton } from "@/components/motion/button/magnetic";
+import { ScrollReveal } from "@/components/motion/scroll-reveal";
 
 interface SidebarItem {
     label: string;
@@ -58,30 +61,10 @@ const groups: SidebarGroup[] = [
         icon: Briefcase,
         color: "text-orange-500",
         items: [
-            {
-                label: "Accounting",
-                icon: BarChart3,
-                href: "/accounting",
-                color: "text-green-600",
-            },
-            {
-                label: "Affiliate CRM",
-                icon: LinkIcon,
-                href: "/affiliates",
-                color: "text-blue-500",
-            },
-            {
-                label: "Wholesale Directory",
-                icon: FolderOpen,
-                href: "/tools/wholesale-directory",
-                color: "text-amber-500",
-            },
-            {
-                label: "Niches in a Box",
-                icon: Compass,
-                href: "/niche-boxes",
-                color: "text-indigo-400",
-            }
+            { label: "Accounting", icon: BarChart3, href: "/accounting", color: "text-green-600" },
+            { label: "Affiliate CRM", icon: LinkIcon, href: "/affiliates", color: "text-blue-500" },
+            { label: "Wholesale Directory", icon: FolderOpen, href: "/tools/wholesale-directory", color: "text-amber-500" },
+            { label: "Niches in a Box", icon: Compass, href: "/niche-boxes", color: "text-indigo-400" }
         ]
     },
     {
@@ -90,30 +73,10 @@ const groups: SidebarGroup[] = [
         icon: PenTool,
         color: "text-amber-500",
         items: [
-            {
-                label: "Story Hacker",
-                icon: PenTool,
-                href: "/story-hacker",
-                color: "text-amber-500",
-            },
-            {
-                label: "Whiteboard",
-                icon: FileText,
-                href: "/whiteboard",
-                color: "text-indigo-500",
-            },
-            {
-                label: "Workbook Designer",
-                icon: BookOpen,
-                href: "/tools/workbook-designer",
-                color: "text-violet-500",
-            },
-            {
-                label: "Design Editor",
-                icon: Film,
-                href: "/tools/design-editor",
-                color: "text-pink-500",
-            }
+            { label: "Story Hacker", icon: PenTool, href: "/story-hacker", color: "text-amber-500" },
+            { label: "Whiteboard", icon: FileText, href: "/whiteboard", color: "text-indigo-500" },
+            { label: "Workbook Designer", icon: BookOpen, href: "/tools/workbook-designer", color: "text-violet-500" },
+            { label: "Design Editor", icon: Film, href: "/tools/design-editor", color: "text-pink-500" }
         ]
     },
     {
@@ -122,42 +85,12 @@ const groups: SidebarGroup[] = [
         icon: Users,
         color: "text-emerald-500",
         items: [
-            {
-                label: "Community",
-                icon: Users,
-                href: "/community",
-                color: "text-emerald-500",
-            },
-            {
-                label: "Member Search",
-                icon: Search,
-                href: "/community/members?sort=relevance",
-                color: "text-emerald-500",
-            },
-            {
-                label: "Library",
-                icon: Library,
-                href: "/docs",
-                color: "text-blue-600",
-            },
-            {
-                label: "Messages",
-                icon: MessageSquare,
-                href: "/messages",
-                color: "text-blue-500",
-            },
-            {
-                label: "Tickets",
-                icon: FileQuestion,
-                href: "/tickets",
-                color: "text-rose-500",
-            },
-            {
-                label: "Affiliate / Partner",
-                icon: Sparkles,
-                href: "/partner",
-                color: "text-amber-400",
-            }
+            { label: "Community", icon: Users, href: "/community", color: "text-emerald-500" },
+            { label: "Member Search", icon: Search, href: "/community/members?sort=relevance", color: "text-emerald-500" },
+            { label: "Library", icon: Library, href: "/docs", color: "text-blue-600" },
+            { label: "Messages", icon: MessageSquare, href: "/messages", color: "text-blue-500" },
+            { label: "Tickets", icon: FileQuestion, href: "/tickets", color: "text-rose-500" },
+            { label: "Affiliate / Partner", icon: Sparkles, href: "/partner", color: "text-amber-400" }
         ]
     },
     {
@@ -166,30 +99,10 @@ const groups: SidebarGroup[] = [
         icon: GraduationCap,
         color: "text-violet-500",
         items: [
-            {
-                label: "Browse Courses",
-                icon: BookOpen,
-                href: "/catalog",
-                color: "text-violet-500",
-            },
-            {
-                label: "Glossary",
-                icon: BookOpen,
-                href: "/glossary",
-                color: "text-teal-600",
-            },
-            {
-                label: "Resources",
-                icon: Library,
-                href: "/resources",
-                color: "text-blue-500",
-            },
-            {
-                label: "Locations",
-                icon: MapPin,
-                href: "/locations",
-                color: "text-emerald-400",
-            }
+            { label: "Browse Courses", icon: BookOpen, href: "/catalog", color: "text-violet-500" },
+            { label: "Glossary", icon: BookOpen, href: "/glossary", color: "text-teal-600" },
+            { label: "Resources", icon: Library, href: "/resources", color: "text-blue-500" },
+            { label: "Locations", icon: MapPin, href: "/locations", color: "text-emerald-400" }
         ]
     }
 ];
@@ -201,54 +114,14 @@ const adminGroups: SidebarGroup[] = [
         icon: Briefcase,
         color: "text-orange-500",
         items: [
-            {
-                label: "Affiliate CRM",
-                icon: LinkIcon,
-                href: "/admin/affiliates",
-                color: "text-blue-400",
-            },
-            {
-                label: "Affiliate Catalog",
-                icon: FileStack,
-                href: "/admin/affiliate-catalog",
-                color: "text-blue-300",
-            },
-            {
-                label: "Campaign Manager",
-                icon: Sparkles,
-                href: "/admin/click-campaigns/new",
-                color: "text-violet-400",
-            },
-            {
-                label: "Media Center",
-                icon: Film,
-                href: "/admin/media",
-                color: "text-pink-400",
-            },
-            {
-                label: "Partner Management",
-                icon: Sparkles,
-                href: "/admin/partners",
-                color: "text-amber-400",
-            },
-            {
-                label: "Platform Tools",
-                icon: Wrench,
-                href: "/admin/tools",
-                color: "text-orange-500",
-            },
-            {
-                label: "Subscribers",
-                icon: Users,
-                href: "/admin/subscribers",
-                color: "text-sky-400",
-            },
-            {
-                label: "Support Tickets",
-                icon: FileQuestion,
-                href: "/admin/tickets",
-                color: "text-rose-400",
-            }
+            { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },
+            { label: "Affiliate Catalog", icon: FileStack, href: "/admin/affiliate-catalog", color: "text-blue-300" },
+            { label: "Campaign Manager", icon: Sparkles, href: "/admin/click-campaigns/new", color: "text-violet-400" },
+            { label: "Media Center", icon: Film, href: "/admin/media", color: "text-pink-400" },
+            { label: "Partner Management", icon: Sparkles, href: "/admin/partners", color: "text-amber-400" },
+            { label: "Platform Tools", icon: Wrench, href: "/admin/tools", color: "text-orange-500" },
+            { label: "Subscribers", icon: Users, href: "/admin/subscribers", color: "text-sky-400" },
+            { label: "Support Tickets", icon: FileQuestion, href: "/admin/tickets", color: "text-rose-400" }
         ]
     },
     {
@@ -257,18 +130,8 @@ const adminGroups: SidebarGroup[] = [
         icon: GraduationCap,
         color: "text-violet-500",
         items: [
-            {
-                label: "Community and Groups",
-                icon: Users,
-                href: "/admin/groups",
-                color: "text-emerald-500",
-            },
-            {
-                label: "Courses & LMS",
-                icon: Library,
-                href: "/admin/courses",
-                color: "text-indigo-400",
-            }
+            { label: "Community and Groups", icon: Users, href: "/admin/groups", color: "text-emerald-500" },
+            { label: "Courses & LMS", icon: Library, href: "/admin/courses", color: "text-indigo-400" }
         ]
     },
     {
@@ -277,36 +140,12 @@ const adminGroups: SidebarGroup[] = [
         icon: PenTool,
         color: "text-amber-500",
         items: [
-            {
-                label: "Blogs",
-                icon: FileText,
-                href: "/admin/blog",
-                color: "text-indigo-500",
-            },
-            {
-                label: "FAQ",
-                icon: FileQuestion,
-                href: "/admin/faqs",
-                color: "text-teal-400",
-            },
-            {
-                label: "Glossary",
-                icon: BookOpen,
-                href: "/admin/glossary",
-                color: "text-violet-500",
-            },
-            {
-                label: "Page Builder",
-                icon: LayoutDashboard,
-                href: "/admin/page-builder-simple",
-                color: "text-sky-500",
-            },
-            {
-                label: "Publishing Admin",
-                icon: ShieldCheck,
-                href: "/admin/publishing",
-                color: "text-amber-500",
-            }
+            { label: "Blogs", icon: FileText, href: "/admin/blog", color: "text-indigo-500" },
+            { label: "FAQ", icon: FileQuestion, href: "/admin/faqs", color: "text-teal-400" },
+            { label: "Glossary", icon: BookOpen, href: "/admin/glossary", color: "text-violet-500" },
+            { label: "Page Builder", icon: LayoutDashboard, href: "/admin/page-builder-simple", color: "text-sky-500" },
+            { label: "Custom Page Types", icon: FileStack, href: "/admin/custom-pages", color: "text-rose-500" },
+            { label: "Publishing Admin", icon: ShieldCheck, href: "/admin/publishing", color: "text-amber-500" }
         ]
     },
     {
@@ -315,18 +154,8 @@ const adminGroups: SidebarGroup[] = [
         icon: Wrench,
         color: "text-zinc-400",
         items: [
-            {
-                label: "ScalePlus AI Suite",
-                icon: Sparkles,
-                href: "/admin/scaleplus",
-                color: "text-violet-400",
-            },
-            {
-                label: "Link Checker",
-                icon: LinkIcon,
-                href: "/admin/link-checker",
-                color: "text-cyan-400",
-            }
+            { label: "ScalePlus AI Suite", icon: Sparkles, href: "/admin/scaleplus", color: "text-violet-400" },
+            { label: "Link Checker", icon: LinkIcon, href: "/admin/link-checker", color: "text-cyan-400" }
         ]
     }
 ];
@@ -340,62 +169,23 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
     const isCurrentlyInAdmin = pathname?.startsWith("/admin");
     const isActuallyAdmin = userRole === 'admin';
     const { isCollapsed, toggle, expand } = useSidebarStore();
-
-    // Accordion group states
-    const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-        "business-tools": false,
-        "writing-tools": false,
-        "community-tools": false,
-        "research-education": false,
-        "admin-business-tools": false,
-        "admin-education": false,
-        "admin-content-creation": false,
-        "admin-misc-tools": false,
-    });
-
-    const toggleSection = (id: string) => {
-        if (isCollapsed) {
-            expand();
-            setOpenSections((prev) => ({
-                ...prev,
-                [id]: true,
-            }));
-        } else {
-            setOpenSections((prev) => ({
-                ...prev,
-                [id]: !prev[id],
-            }));
-        }
-    };
+    const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
 
     // Auto-open active section on mount / route change
     useEffect(() => {
-        if (pathname) {
+        if (pathname && !isCollapsed) {
             const path = pathname.split('?')[0];
+            const currentGroups = isCurrentlyInAdmin && isActuallyAdmin ? adminGroups : groups;
             
-            // Standard view auto-open
-            if (["/accounting", "/affiliates", "/tools/wholesale-directory", "/niche-boxes"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "business-tools": true }));
-            } else if (["/story-hacker", "/whiteboard", "/tools/workbook-designer", "/tools/design-editor"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "writing-tools": true }));
-            } else if (["/community", "/docs", "/messages", "/tickets", "/partner"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "community-tools": true }));
-            } else if (["/catalog", "/glossary", "/resources", "/locations"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "research-education": true }));
-            }
-            
-            // Admin view auto-open
-            if (["/admin/affiliates", "/admin/affiliate-catalog", "/admin/click-campaigns", "/admin/media", "/admin/partners", "/admin/tools", "/admin/subscribers", "/admin/tickets"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "admin-business-tools": true }));
-            } else if (["/admin/groups", "/admin/courses"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "admin-education": true }));
-            } else if (["/admin/blog", "/admin/faqs", "/admin/glossary", "/admin/page-builder-simple", "/admin/publishing"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "admin-content-creation": true }));
-            } else if (["/admin/scaleplus", "/admin/link-checker"].some(p => path === p || path.startsWith(p + "/"))) {
-                setOpenSections(prev => ({ ...prev, "admin-misc-tools": true }));
+            const activeGroup = currentGroups.find(group => 
+                group.items.some(item => path === item.href || path.startsWith(item.href + "/"))
+            );
+
+            if (activeGroup) {
+                setActiveAccordion(activeGroup.id);
             }
         }
-    }, [pathname]);
+    }, [pathname, isCurrentlyInAdmin, isActuallyAdmin, isCollapsed]);
 
     const isActive = (href: string) => {
         const basePath = href.split('?')[0];
@@ -405,231 +195,148 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
         return pathname === basePath || pathname?.startsWith(basePath + "/");
     };
 
+    const currentGroups = isCurrentlyInAdmin && isActuallyAdmin ? adminGroups : groups;
+
+    const accordionItems: BouncyAccordionItem[] = currentGroups.map((group) => ({
+        id: group.id,
+        title: <span className={cn("font-medium transition-colors hover:text-white", activeAccordion === group.id ? "text-white" : "text-zinc-400")}>{group.label}</span>,
+        icon: <group.icon className={cn("w-5 h-5 transition-transform", group.color, activeAccordion === group.id && "scale-110")} />,
+        description: (
+            <div className="flex flex-col gap-1 pb-2">
+                {group.items.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
+                            isActive(item.href) ? "bg-white/10 text-white shadow-sm" : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        )}
+                    >
+                        <item.icon className={cn("w-4 h-4 shrink-0 transition-transform group-hover:scale-110", item.color)} />
+                        <span className="text-sm font-medium truncate">{item.label}</span>
+                    </Link>
+                ))}
+            </div>
+        )
+    }));
+
     return (
-        <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white relative">
-            <div className="px-3 py-2 flex-1 overflow-y-auto">
-                <Link href="/dashboard" className={cn("flex items-center mb-14 transition-all duration-300", isCollapsed ? "justify-center pl-0" : "pl-3")}>
-                    <div className={cn("relative transition-all duration-300", isCollapsed ? "w-10 h-10 mr-0" : "w-8 h-8 mr-4")}>
-                        <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-teal-700 rounded-lg flex items-center justify-center font-bold text-lg">K</div>
+        <div className="flex flex-col h-full bg-[#050505] text-white relative border-r border-white/5 shadow-2xl">
+            {/* Header / Logo */}
+            <div className="px-4 py-6 border-b border-white/5">
+                <Link href="/dashboard" className={cn("flex items-center transition-all duration-300", isCollapsed ? "justify-center" : "gap-4")}>
+                    <div className={cn("shrink-0 relative transition-all duration-300 rounded-xl flex items-center justify-center font-black text-white bg-gradient-to-br from-emerald-500 to-teal-700 shadow-lg shadow-emerald-500/20", isCollapsed ? "w-10 h-10 text-lg" : "w-10 h-10 text-xl")}>
+                        K
                     </div>
                     {!isCollapsed && (
-                        <h1 className="text-2xl font-bold whitespace-nowrap overflow-hidden transition-all duration-300">
+                        <h1 className="text-xl font-bold whitespace-nowrap overflow-hidden transition-all duration-300">
                             K Academy
                         </h1>
                     )}
                 </Link>
+            </div>
 
-                <div className="space-y-2">
-                    {/* Admin Dashboard Sidebar View */}
-                    {isCurrentlyInAdmin && isActuallyAdmin ? (
-                        <div className="space-y-1">
-                            {/* Admin Dashboard Direct Link */}
-                            <Link
-                                href="/admin"
-                                className={cn(
-                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                    isActive("/admin") ? "text-white bg-white/10" : "text-zinc-400",
-                                    isCollapsed && "justify-center px-2"
-                                )}
-                                title={isCollapsed ? "Admin Dashboard" : undefined}
-                            >
-                                <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                    <LayoutDashboard className={cn("h-5 w-5 text-sky-500", isCollapsed ? "mr-0" : "mr-3")} />
-                                    {!isCollapsed && "Dashboard"}
-                                </div>
-                            </Link>
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide py-6 px-3">
+                <ScrollReveal delay={0.1} y={10} blur={5}>
+                    <div className="space-y-4">
+                        {/* Primary Dashboard Link */}
+                        <Link
+                            href={isCurrentlyInAdmin && isActuallyAdmin ? "/admin" : "/dashboard"}
+                            className={cn(
+                                "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group",
+                                isActive(isCurrentlyInAdmin && isActuallyAdmin ? "/admin" : "/dashboard") ? "bg-emerald-500/10 text-emerald-400" : "text-zinc-400 hover:text-white hover:bg-white/5",
+                                isCollapsed && "justify-center px-2"
+                            )}
+                            title={isCollapsed ? "Dashboard" : undefined}
+                        >
+                            <LayoutDashboard className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", isActive(isCurrentlyInAdmin && isActuallyAdmin ? "/admin" : "/dashboard") ? "text-emerald-400" : "text-emerald-500")} />
+                            {!isCollapsed && <span className="font-semibold text-sm">Dashboard</span>}
+                        </Link>
 
-                            {/* Admin Accordion Groups */}
-                            {adminGroups.map((group) => {
-                                const isOpen = openSections[group.id];
-                                const isAnyChildActive = group.items.some(item => isActive(item.href));
-                                
-                                return (
-                                    <div key={group.id} className="space-y-1">
-                                        <button
-                                            onClick={() => toggleSection(group.id)}
-                                            className={cn(
-                                                "w-full text-sm group flex p-3 justify-between items-center font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400",
-                                                isCollapsed ? "justify-center px-2" : "text-left",
-                                                isAnyChildActive && "text-white"
-                                            )}
-                                            title={isCollapsed ? group.label : undefined}
-                                        >
-                                            <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                                <group.icon className={cn("h-5 w-5", group.color, isCollapsed ? "mr-0" : "mr-3")} />
-                                                {!isCollapsed && (
-                                                    <span className="font-semibold text-zinc-300 group-hover:text-white transition">
-                                                        {group.label}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <ChevronDown
-                                                    className={cn(
-                                                        "h-4 w-4 transition-transform duration-200 text-zinc-500 group-hover:text-white",
-                                                        isOpen && "rotate-180"
-                                                    )}
-                                                />
-                                            )}
-                                        </button>
+                        {/* Accordion Navigation (Only visible when expanded) */}
+                        {!isCollapsed ? (
+                            <BouncyAccordion 
+                                items={accordionItems}
+                                value={activeAccordion}
+                                onValueChange={setActiveAccordion}
+                                className="mt-4"
+                                classNames={{
+                                    root: "space-y-1",
+                                    item: "bg-transparent",
+                                    trigger: "hover:bg-white/5 rounded-2xl px-4 min-h-[50px]",
+                                    content: "px-2"
+                                }}
+                            />
+                        ) : (
+                            /* Collapsed View */
+                            <div className="flex flex-col gap-2 mt-4">
+                                {currentGroups.map((group) => (
+                                    <button
+                                        key={group.id}
+                                        onClick={expand}
+                                        className="flex items-center justify-center p-3 rounded-2xl hover:bg-white/5 text-zinc-400 hover:text-white transition-colors"
+                                        title={group.label}
+                                    >
+                                        <group.icon className={cn("w-5 h-5", group.color)} />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
 
-                                        {/* Sub-items list */}
-                                        <div
-                                            className={cn(
-                                                "overflow-hidden transition-all duration-300 ease-in-out",
-                                                (isOpen && !isCollapsed) ? "max-h-[400px] opacity-100 pl-4 space-y-0.5" : "max-h-0 opacity-0 pointer-events-none"
-                                            )}
-                                        >
-                                            {group.items.map((item) => (
-                                                <Link
-                                                    key={item.href}
-                                                    href={item.href}
-                                                    className={cn(
-                                                        "text-xs group flex p-2 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/5 rounded-lg transition",
-                                                        isActive(item.href) ? "text-white bg-white/10 font-semibold" : "text-zinc-400"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center flex-1">
-                                                        <item.icon className={cn("h-4 w-4 mr-3 shrink-0", item.color)} />
-                                                        <span className="truncate">{item.label}</span>
-                                                    </div>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {/* Exit Admin Direct Link */}
-                            <Link
-                                href="/dashboard"
-                                className={cn(
-                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition mt-4 border-t border-white/5 pt-4",
-                                    isCollapsed && "justify-center px-2"
-                                )}
-                                title={isCollapsed ? "Exit Admin" : undefined}
-                            >
-                                <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                    <LogOut className={cn("h-5 w-5 text-red-500", isCollapsed ? "mr-0" : "mr-3")} />
-                                    {!isCollapsed && "Exit Admin"}
-                                </div>
-                            </Link>
-                        </div>
-                    ) : (
-                        /* Standard Collapsible Accordion view */
-                        <div className="space-y-1">
-                            {/* Dashboard Direct Link */}
-                            <Link
-                                href="/dashboard"
-                                className={cn(
-                                    "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition",
-                                    isActive("/dashboard") ? "text-white bg-white/10" : "text-zinc-400",
-                                    isCollapsed && "justify-center px-2"
-                                )}
-                                title={isCollapsed ? "Dashboard" : undefined}
-                            >
-                                <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                    <LayoutDashboard className={cn("h-5 w-5 text-sky-500", isCollapsed ? "mr-0" : "mr-3")} />
-                                    {!isCollapsed && "Dashboard"}
-                                </div>
-                            </Link>
-
-                            {/* Accordion Groups */}
-                            {groups.map((group) => {
-                                const isOpen = openSections[group.id];
-                                const isAnyChildActive = group.items.some(item => isActive(item.href));
-                                
-                                return (
-                                    <div key={group.id} className="space-y-1">
-                                        <button
-                                            onClick={() => toggleSection(group.id)}
-                                            className={cn(
-                                                "w-full text-sm group flex p-3 justify-between items-center font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition text-zinc-400",
-                                                isCollapsed ? "justify-center px-2" : "text-left",
-                                                isAnyChildActive && "text-white"
-                                            )}
-                                            title={isCollapsed ? group.label : undefined}
-                                        >
-                                            <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                                <group.icon className={cn("h-5 w-5", group.color, isCollapsed ? "mr-0" : "mr-3")} />
-                                                {!isCollapsed && (
-                                                    <span className="font-semibold text-zinc-300 group-hover:text-white transition">
-                                                        {group.label}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {!isCollapsed && (
-                                                <ChevronDown
-                                                    className={cn(
-                                                        "h-4 w-4 transition-transform duration-200 text-zinc-500 group-hover:text-white",
-                                                        isOpen && "rotate-180"
-                                                    )}
-                                                />
-                                            )}
-                                        </button>
-
-                                        {/* Sub-items list */}
-                                        <div
-                                            className={cn(
-                                                "overflow-hidden transition-all duration-300 ease-in-out",
-                                                (isOpen && !isCollapsed) ? "max-h-[400px] opacity-100 pl-4 space-y-0.5" : "max-h-0 opacity-0 pointer-events-none"
-                                            )}
-                                        >
-                                            {group.items.map((item) => (
-                                                <Link
-                                                    key={item.href}
-                                                    href={item.href}
-                                                    className={cn(
-                                                        "text-xs group flex p-2 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/5 rounded-lg transition",
-                                                        isActive(item.href) ? "text-white bg-white/10 font-semibold" : "text-zinc-400"
-                                                    )}
-                                                >
-                                                    <div className="flex items-center flex-1">
-                                                        <item.icon className={cn("h-4 w-4 mr-3 shrink-0", item.color)} />
-                                                        <span className="truncate">{item.label}</span>
-                                                    </div>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {/* Admin Direct Link (only if admin user) */}
-                            {isActuallyAdmin && (
+                        {/* Switch Context Link */}
+                        {isActuallyAdmin && (
+                            <div className="pt-4 mt-6 border-t border-white/5">
                                 <Link
-                                    href="/admin"
+                                    href={isCurrentlyInAdmin ? "/dashboard" : "/admin"}
                                     className={cn(
-                                        "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition mt-4 border-t border-white/5 pt-4",
-                                        isActive("/admin") ? "text-white bg-white/10" : "text-zinc-400",
+                                        "flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group hover:bg-white/5",
                                         isCollapsed && "justify-center px-2"
                                     )}
-                                    title={isCollapsed ? "Admin" : undefined}
+                                    title={isCollapsed ? (isCurrentlyInAdmin ? "Exit Admin" : "Admin") : undefined}
                                 >
-                                    <div className={cn("flex items-center flex-1", isCollapsed && "justify-center flex-none")}>
-                                        <ShieldCheck className={cn("h-5 w-5 text-orange-700", isCollapsed ? "mr-0" : "mr-3")} />
-                                        {!isCollapsed && "Admin"}
-                                    </div>
+                                    {isCurrentlyInAdmin ? (
+                                        <>
+                                            <LogOut className="w-5 h-5 shrink-0 text-red-400 group-hover:scale-110 transition-transform" />
+                                            {!isCollapsed && <span className="font-semibold text-sm text-zinc-400 group-hover:text-red-400 transition-colors">Exit Admin</span>}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShieldCheck className="w-5 h-5 shrink-0 text-orange-500 group-hover:scale-110 transition-transform" />
+                                            {!isCollapsed && <span className="font-semibold text-sm text-zinc-400 group-hover:text-orange-400 transition-colors">Admin Dashboard</span>}
+                                        </>
+                                    )}
                                 </Link>
-                            )}
-                        </div>
-                    )}
-                </div>
+                            </div>
+                        )}
+                    </div>
+                </ScrollReveal>
             </div>
 
-            {/* Collapse Toggle Button */}
-            <div className="px-3 py-2 border-t border-white/10">
-                <button
+            {/* Collapse Toggle */}
+            <div className="p-4 border-t border-white/5 bg-[#050505]">
+                <MagneticButton
+                    variant="outline"
+                    className="w-full rounded-2xl border-white/5 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10"
                     onClick={toggle}
-                    className={cn(
-                        "flex items-center w-full p-3 rounded-lg hover:bg-white/10 transition-colors text-zinc-400 hover:text-white",
-                        isCollapsed ? "justify-center" : "justify-start"
-                    )}
                 >
-                    {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5 mr-3" />}
-                    {!isCollapsed && <span className="text-sm font-medium">Collapse Sidebar</span>}
-                </button>
+                    {isCollapsed ? <ChevronRight className="w-5 h-5" /> : (
+                        <div className="flex items-center gap-2">
+                            <ChevronLeft className="w-5 h-5" />
+                            <span>Collapse</span>
+                        </div>
+                    )}
+                </MagneticButton>
             </div>
+            
+            <style jsx global>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
         </div>
     );
 };

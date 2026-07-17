@@ -1,9 +1,5 @@
-import SimplePageForm from "@/components/admin/SimplePageForm";
+import { PuckEditor } from "@/components/admin/PuckEditor";
 
 export default function CreateSimplePage() {
-    return (
-        <div className="p-8">
-            <SimplePageForm />
-        </div>
-    );
+    return <PuckEditor />;
 }

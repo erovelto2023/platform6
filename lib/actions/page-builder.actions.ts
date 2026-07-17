@@ -120,3 +120,32 @@ export async function publishPage(id: string, publish: boolean) {
         return { success: false, error: error.message };
     }
 }
+
+export async function duplicatePage(id: string) {
+    try {
+        await connectDB();
+        const page = await WebPage.findById(id).lean();
+        
+        if (!page) {
+            return { success: false, error: "Page not found" };
+        }
+
+        const newSlug = `${page.slug}-copy-${Date.now().toString().slice(-4)}`;
+        const newName = `${page.name} (Copy)`;
+
+        const newPage = await WebPage.create({
+            name: newName,
+            slug: newSlug,
+            sections: page.sections,
+            metaTitle: page.metaTitle,
+            metaDescription: page.metaDescription,
+            isPublished: false,
+        });
+
+        revalidatePath("/admin/page-builder-simple");
+        return { success: true, page: JSON.parse(JSON.stringify(newPage)) };
+    } catch (error: any) {
+        console.error("Error duplicating page:", error);
+        return { success: false, error: error.message };
+    }
+}

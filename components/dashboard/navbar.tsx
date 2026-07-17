@@ -20,16 +20,16 @@ export const Navbar = ({ userRole }: NavbarProps = {}) => {
     }, []);
 
     return (
-        <div className="flex items-center p-4 border-b h-[65px]">
+        <div className="flex items-center p-4 border-b border-white/5 h-[65px] bg-[#050505]">
             {mounted ? (
                 <>
                     <Sheet>
                         <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition" asChild>
-                            <button className="md:hidden pr-4 hover:opacity-75 transition">
+                            <button className="md:hidden pr-4 hover:opacity-75 transition text-white">
                                 <Menu />
                             </button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="p-0 bg-[#111827] border-none text-white">
+                        <SheetContent side="left" className="p-0 bg-[#050505] border-none text-white shadow-2xl">
                             <Sidebar userRole={userRole} />
                         </SheetContent>
                     </Sheet>

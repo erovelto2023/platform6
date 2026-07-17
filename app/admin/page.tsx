@@ -54,8 +54,8 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:bg-violet-600"
                 },
                 {
-                    title: "Simple Page Builder",
-                    description: "Deploy raw custom HTML landing pages instantly",
+                    title: "Puck Page Builder",
+                    description: "Build beautiful landing pages visually with React blocks",
                     href: "/admin/page-builder-simple",
                     icon: FileStack,
                     color: "text-sky-600",

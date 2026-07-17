@@ -1,24 +1,21 @@
 import { getPage } from "@/lib/actions/page-builder.actions";
-import SimplePageForm from "@/components/admin/SimplePageForm";
+import { PuckEditor } from "@/components/admin/PuckEditor";
 import { notFound } from "next/navigation";
 
-interface EditSimplePageProps {
-    params: Promise<{
-        id: string;
-    }>
-}
-
-export default async function EditSimplePage({ params }: EditSimplePageProps) {
+export default async function EditSimplePage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
     const { id } = await params;
-    const page = await getPage(id);
     
+    // In server actions, the page returned is a plain object 
+    // so we can pass it directly to the client component.
+    const page = await getPage(id);
+
     if (!page) {
         notFound();
     }
 
-    return (
-        <div className="p-8">
-            <SimplePageForm initialData={page} />
-        </div>
-    );
+    return <PuckEditor initialData={page} />;
 }

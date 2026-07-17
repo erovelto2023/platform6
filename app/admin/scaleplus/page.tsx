@@ -69,9 +69,9 @@ export default function ScalePlusDashboard() {
       href: "/admin/click-campaigns/new"
     },
     {
-      title: "PageBuilder.gg",
+      title: "PageBuilder.gg (Puck)",
       domain: "PageBuilder.gg",
-      description: "Drag-and-drop landing page editor featuring visual AI editing, custom style sheets, and page cloning.",
+      description: "Drag-and-drop landing page editor featuring modern visual editing and custom style sheets.",
       badge: { text: "Ready to Start", type: "ready" },
       icon: MousePointerClick,
       color: "from-sky-500 to-blue-500 text-sky-500",

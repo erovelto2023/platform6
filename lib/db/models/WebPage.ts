@@ -41,6 +41,18 @@ export interface IWebPage extends Document {
     twitterImage?: string;
     keywords?: string;
     canonicalUrl?: string;
+    headerCode?: string;
+    bodyCode?: string;
+    footerCode?: string;
+    accessControl?: "free" | "student" | "admin";
+    theme?: {
+        fontFamily?: string;
+        colorPrimary?: string;
+        colorAccent?: string;
+        colorText?: string;
+        colorBackground?: string;
+        borderRadius?: string;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -82,6 +94,11 @@ const WebPageSchema = new Schema<IWebPage>(
         twitterImage: String,
         keywords: String,
         canonicalUrl: String,
+        headerCode: String,
+        bodyCode: String,
+        footerCode: String,
+        accessControl: { type: String, enum: ["free", "student", "admin"], default: "free" },
+        theme: { type: Schema.Types.Mixed, default: {} },
     },
     { timestamps: true }
 );

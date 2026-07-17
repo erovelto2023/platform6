@@ -35,6 +35,7 @@ const isPublic = createRouteMatcher([
     '/locations(.*)',
     '/glossary(.*)',
     '/tools(.*)',
+    '/c(.*)',
     '/',
 ]);
 
