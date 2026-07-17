@@ -91,7 +91,7 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
                     return <React.Fragment>{children}</React.Fragment>;
                 }
 
-                if (domNode.name === 'script') {
+                if (domNode.name === 'script' || domNode.name === 'title' || domNode.name === 'meta') {
                     return null;
                 }
 
