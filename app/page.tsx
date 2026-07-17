@@ -1,5 +1,7 @@
 import { getPageBySlug } from "@/lib/actions/page-builder.actions";
 import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
+import { PuckRenderer } from "@/components/PuckRenderer";
+import { generateThemeCSS, defaultTheme } from "@/lib/theme-config";
 import FoundationsLandingPage from "@/components/FoundationsLandingPage";
 import { Metadata } from "next";
 
@@ -26,36 +28,63 @@ export default async function IndexPage() {
     const page = await getPageBySlug("home") || await getPageBySlug("index");
 
     if (page) {
-        return (
-            <div className="min-h-screen bg-white">
-                <style dangerouslySetInnerHTML={{ __html: `
-                    /* Reset/Isolation for custom HTML */
-                    .custom-html-wrapper {
-                        all: revert;
-                    }
-                `}} />
-                
-                {page.sections?.map((section: any, index: number) => {
-                    if (section.customHTML) {
-                        return (
-                            <CustomHTMLRenderer 
-                                key={section._id || index}
-                                className="custom-html-wrapper"
-                                html={section.customHTML}
-                            />
-                        );
-                    }
-                    return null;
-                })}
+        const themeCSS = generateThemeCSS({ ...defaultTheme, ...(page.theme || {}) } as any);
 
-                {(!page.sections || page.sections.length === 0) && (
-                    <div className="flex items-center justify-center min-h-screen text-slate-400">
-                        <div className="text-center">
-                            <p className="text-lg">This page is empty</p>
-                        </div>
-                    </div>
+        return (
+            <>
+                {/* Global theme CSS variables */}
+                <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
+
+                {page.headerCode && (
+                    <div dangerouslySetInnerHTML={{ __html: page.headerCode }} />
                 )}
-            </div>
+                {page.bodyCode && (
+                    <div dangerouslySetInnerHTML={{ __html: page.bodyCode }} />
+                )}
+                <div className="min-h-screen bg-white">
+                    <style dangerouslySetInnerHTML={{ __html: `
+                        /* Reset/Isolation for custom HTML */
+                        .custom-html-wrapper {
+                            all: revert;
+                        }
+                    `}} />
+                    
+                    {page.sections?.map((section: any, index: number) => {
+                        if (section.templateId === 'puck-blocks' && section.customHTML) {
+                            try {
+                                const data = JSON.parse(section.customHTML);
+                                return (
+                                    <div key={section._id || index}>
+                                        <PuckRenderer data={data} />
+                                    </div>
+                                );
+                            } catch (e) {
+                                return null;
+                            }
+                        } else if (section.customHTML) {
+                            return (
+                                <CustomHTMLRenderer 
+                                    key={section._id || index}
+                                    className="custom-html-wrapper"
+                                    html={section.customHTML}
+                                />
+                            );
+                        }
+                        return null;
+                    })}
+
+                    {(!page.sections || page.sections.length === 0) && (
+                        <div className="flex items-center justify-center min-h-screen text-slate-400">
+                            <div className="text-center">
+                                <p className="text-lg">This page is empty</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                {page.footerCode && (
+                    <div dangerouslySetInnerHTML={{ __html: page.footerCode }} />
+                )}
+            </>
         );
     }
 
