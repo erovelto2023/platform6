@@ -6,6 +6,7 @@ const isProtected = createRouteMatcher([
     '/catalog(.*)',
     '/niche-catalog(.*)',
     '/admin(.*)',
+    '/api/admin(.*)',
     '/docs-editor(.*)',
     '/affiliates(.*)',
     '/niche-boxes(.*)',
@@ -113,8 +114,14 @@ export default clerkMiddleware(async (auth, req) => {
             return NextResponse.redirect(new URL('/upgrade', req.url));
         }
 
-        // Admin Route Protection (for non-admins trying to access /admin)
-        if (req.nextUrl.pathname.startsWith('/admin')) {
+        // Admin Route Protection (for non-admins trying to access /admin or /api/admin)
+        if (req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin')) {
+            if (req.nextUrl.pathname.startsWith('/api/')) {
+                return new NextResponse(JSON.stringify({ error: "Forbidden: Admin access required" }), {
+                    status: 403,
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 

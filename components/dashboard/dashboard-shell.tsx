@@ -13,18 +13,21 @@ interface DashboardShellProps {
 export const DashboardShell = ({ children, userRole }: DashboardShellProps) => {
     // Force sidebar update
     const { isCollapsed } = useSidebarStore();
+    const showSidebar = userRole !== 'free';
 
     return (
         <div className="h-full relative">
-            <div className={cn(
-                "hidden h-full md:flex md:flex-col md:fixed md:top-[34px] md:bottom-0 md:left-0 z-[80] bg-transparent transition-all duration-300 ease-in-out",
-                isCollapsed ? "md:w-20" : "md:w-72"
-            )}>
-                <Sidebar userRole={userRole} />
-            </div>
+            {showSidebar && (
+                <div className={cn(
+                    "hidden h-full md:flex md:flex-col md:fixed md:top-[34px] md:bottom-0 md:left-0 z-[80] bg-transparent transition-all duration-300 ease-in-out",
+                    isCollapsed ? "md:w-20" : "md:w-72"
+                )}>
+                    <Sidebar userRole={userRole} />
+                </div>
+            )}
             <main className={cn(
                 "h-full transition-all duration-300 ease-in-out light-theme bg-background text-foreground",
-                isCollapsed ? "md:pl-20" : "md:pl-72"
+                showSidebar ? (isCollapsed ? "md:pl-20" : "md:pl-72") : "md:pl-0"
             )}>
                 <Navbar userRole={userRole} />
                 {children}

@@ -14,6 +14,7 @@ interface NavbarProps {
 
 export const Navbar = ({ userRole }: NavbarProps = {}) => {
     const [mounted, setMounted] = useState(false);
+    const showSidebar = userRole !== 'free';
 
     useEffect(() => {
         setMounted(true);
@@ -21,7 +22,7 @@ export const Navbar = ({ userRole }: NavbarProps = {}) => {
 
     return (
         <div className="flex items-center p-4 border-b border-white/5 h-[65px] bg-[#050505]">
-            {mounted ? (
+            {mounted && showSidebar ? (
                 <>
                     <Sheet>
                         <SheetTrigger className="md:hidden pr-4 hover:opacity-75 transition" asChild>
@@ -38,10 +39,14 @@ export const Navbar = ({ userRole }: NavbarProps = {}) => {
                         <BusinessSwitcher />
                     </div>
                 </>
+            ) : mounted ? (
+                null
             ) : (
-                <div className="md:hidden pr-4">
-                    <Menu className="text-slate-200 opacity-50" />
-                </div>
+                showSidebar && (
+                    <div className="md:hidden pr-4">
+                        <Menu className="text-slate-200 opacity-50" />
+                    </div>
+                )
             )}
 
             <div className="flex w-full justify-end items-center gap-4">
