@@ -38,7 +38,7 @@ export default async function AdminPage() {
           <div className="pt-2 flex flex-col gap-3">
             {session ? (
               <Link
-                href="/api/auth/signout?callbackUrl=/"
+                href="/sign-out"
                 className="block text-center w-full bg-red-950/60 hover:bg-red-900/60 text-red-400 font-bold py-3.5 px-4 rounded-xl transition text-xs border border-red-900"
               >
                 Sign Out & Switch Accounts

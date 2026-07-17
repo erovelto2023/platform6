@@ -1,0 +1,95 @@
+{
+  "root": {
+    "props": {}
+  },
+  "content": [
+    {
+      "type": "ContainerBlock",
+      "props": {
+        "maxWidth": "lg",
+        "paddingX": "md",
+        "s_color": "",
+        "s_bg": "",
+        "s_fontSize": "",
+        "s_fontWeight": "",
+        "s_fontFamily": "",
+        "s_letterSpacing": "",
+        "s_lineHeight": "",
+        "s_borderW": "",
+        "s_borderStyle": "solid",
+        "s_borderColor": "",
+        "s_borderRadius": "",
+        "s_paddingX": "",
+        "s_paddingY": "",
+        "s_marginTop": "",
+        "s_marginBottom": "",
+        "s_shadow": "",
+        "s_opacity": "",
+        "s_customCSS": "",
+        "id": "ContainerBlock-9967efba-431f-4b1d-bd4c-46e639917160"
+      }
+    },
+    {
+      "type": "ContainerBlock",
+      "props": {
+        "maxWidth": "lg",
+        "paddingX": "md",
+        "s_color": "",
+        "s_bg": "",
+        "s_fontSize": "",
+        "s_fontWeight": "",
+        "s_fontFamily": "",
+        "s_letterSpacing": "",
+        "s_lineHeight": "",
+        "s_borderW": "",
+        "s_borderStyle": "solid",
+        "s_borderColor": "",
+        "s_borderRadius": "",
+        "s_paddingX": "",
+        "s_paddingY": "",
+        "s_marginTop": "",
+        "s_marginBottom": "",
+        "s_shadow": "",
+        "s_opacity": "",
+        "s_customCSS": "",
+        "id": "ContainerBlock-41ab9fe9-63c5-41c9-8b4e-9af81ec82a9a"
+      }
+    }
+  ],
+  "zones": {
+    "ContainerBlock-9967efba-431f-4b1d-bd4c-46e639917160:container-content": [
+      {
+        "type": "HeroBlock",
+        "props": {
+          "title": "Build Beautiful Pages",
+          "subtitle": "Deploy faster with our visual page editor built directly into the Next.js platform.",
+          "ctaText": "Get Started",
+          "bg": "primary",
+          "paddingTop": "xl",
+          "paddingBottom": "xl",
+          "s_color": "",
+          "s_bg": "",
+          "s_fontSize": "",
+          "s_fontWeight": "",
+          "s_fontFamily": "",
+          "s_letterSpacing": "",
+          "s_lineHeight": "",
+          "s_borderW": "",
+          "s_borderStyle": "solid",
+          "s_borderColor": "",
+          "s_borderRadius": "",
+          "s_paddingX": "",
+          "s_paddingY": "",
+          "s_marginTop": "",
+          "s_marginBottom": "",
+          "s_shadow": "",
+          "s_opacity": "",
+          "s_customCSS": "",
+          "id": "HeroBlock-8b7423e5-5f83-4daf-aff4-218e2dd494f0"
+        }
+      }
+    ],
+    "HeroBlock-8b7423e5-5f83-4daf-aff4-218e2dd494f0:hero-actions": [],
+    "ContainerBlock-41ab9fe9-63c5-41c9-8b4e-9af81ec82a9a:container-content": []
+  }
+}
