@@ -79,8 +79,21 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
                     'header', 'footer', 'main', 'nav', 'section', 'article', 'aside', 'figure', 'figcaption', 'details', 'summary',
                     'img', 'video', 'audio', 'source', 'iframe', 'canvas', 'svg', 'path', 'g', 'circle', 'rect', 'line', 'polygon', 'polyline', 'defs', 'use',
                     'br', 'hr', 'code', 'pre', 'blockquote', 'q', 'cite', 'abbr', 'address', 'time', 'mark', 'ruby', 'rt', 'rp', 'bdi', 'bdo',
-                    'map', 'area', 'track', 'embed', 'object', 'param', 'picture', 'meter', 'progress', 'output', 'keygen', 'math'
+                    'map', 'area', 'track', 'embed', 'object', 'param', 'picture', 'meter', 'progress', 'output', 'keygen', 'math',
+                    'style', 'link'
                 ]);
+
+                if (domNode.name === 'html' || domNode.name === 'body') {
+                    return <div {...props}>{children}</div>;
+                }
+
+                if (domNode.name === 'head') {
+                    return <React.Fragment>{children}</React.Fragment>;
+                }
+
+                if (domNode.name === 'script') {
+                    return null;
+                }
 
                 if (hasInlineEvent && !customTags.includes(domNode.name)) {
                     // Only return React.createElement if it's a known standard tag to avoid React warnings
