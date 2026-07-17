@@ -39,7 +39,12 @@ const CheckboxWrapper = ({ initialChecked = false, label, className }: any) => {
 };
 
 export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, className }) => {
+    const [mounted, setMounted] = React.useState(false);
     
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // We define the parser options inside the component to return React elements
     const options: HTMLReactParserOptions = {
         replace: (domNode) => {
@@ -200,8 +205,14 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
         }
     };
 
+    if (!mounted) {
+        return (
+            <div className={className} dangerouslySetInnerHTML={{ __html: html }} suppressHydrationWarning />
+        );
+    }
+
     return (
-        <div className={className}>
+        <div className={className} suppressHydrationWarning>
             {parse(html, options)}
         </div>
     );
