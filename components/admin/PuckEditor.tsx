@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { createPage, updatePage } from "@/lib/actions/page-builder.actions";
 import { toast } from "sonner";
 import { puckConfig } from "@/lib/puck-config";
-import { useState, useRef } from "react";
-import { ArrowLeft, Download, Upload, Lock } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Download, Upload, Lock, Eye } from "lucide-react";
 import Link from "next/link";
 import { PageTheme, defaultTheme } from "@/lib/theme-config";
 
@@ -218,6 +218,15 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                     className="hidden" 
                 />
 
+                <a
+                    href={`/p/${slug || initialData?.slug || ''}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium bg-white border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                    <Eye size={13} /> Live Preview
+                </a>
+
                 <button 
                     onClick={() => setShowSettings(!showSettings)}
                     className={`text-xs px-3 py-1.5 rounded-md border font-medium transition-colors ${showSettings ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
@@ -366,6 +375,22 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                     puckDataRef.current = data;
                 }}
                 onPublish={handlePublish}
+                overrides={{
+                    iframe: ({ children, document }) => {
+                        useEffect(() => {
+                            if (document) {
+                                if (document.getElementById('tailwind-cdn')) return;
+                                const tag = document.createElement('script');
+                                tag.id = 'tailwind-cdn';
+                                tag.src = 'https://cdn.tailwindcss.com';
+                                tag.async = true;
+                                document.head.appendChild(tag);
+                            }
+                        }, [document]);
+                        
+                        return <>{children}</>;
+                    },
+                }}
             />
         </div>
     </div>
