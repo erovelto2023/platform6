@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import GlobalSidebar from '@/components/story-hacker/GlobalSidebar';
-import { Book, LayoutDashboard, ChevronRight, Folder, FileText, Plus, Search, Edit3, Trash2, Copy, X, Loader2, Download, Upload } from 'lucide-react';
+import { Book, LayoutDashboard, ChevronRight, Folder, FileText, Plus, Search, Edit3, Trash2, Copy, X, Loader2, Download, Upload, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -66,6 +66,17 @@ function TemplatesContent() {
 
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(editContent);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
 
   const activeFamily = families.find(f => f._id === familyIdParam);
   const activeSubgenre = subgenres.find(s => s._id === subgenreIdParam);
@@ -459,6 +470,26 @@ function TemplatesContent() {
             >
               Cancel
             </button>
+
+            {editContent && (
+              <button
+                type="button"
+                onClick={handleCopyPrompt}
+                className="px-4 py-2 bg-[#2a2a2a] hover:bg-[#333] border border-[#444] text-white rounded-md text-sm font-medium transition flex items-center gap-2"
+              >
+                {copiedPrompt ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-500 animate-in fade-in zoom-in-95 duration-150" />
+                    <span className="text-green-500">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-amber-500" />
+                    <span>Copy Prompt</span>
+                  </>
+                )}
+              </button>
+            )}
             
             {!isCreateMode && activeTemplate && (
               <div className="flex-1 flex justify-end gap-4">
