@@ -30,7 +30,8 @@ import {
     MapPin,
     Briefcase,
     GraduationCap,
-    ChevronDown
+    ChevronDown,
+    Megaphone
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -131,7 +132,8 @@ const adminGroups: SidebarGroup[] = [
         color: "text-violet-500",
         items: [
             { label: "Community and Groups", icon: Users, href: "/admin/groups", color: "text-emerald-500" },
-            { label: "Courses & LMS", icon: Library, href: "/admin/courses", color: "text-indigo-400" }
+            { label: "Courses & LMS", icon: Library, href: "/admin/courses", color: "text-indigo-400" },
+            { label: "Content Manager", icon: Megaphone, href: "/admin/content", color: "text-emerald-400" }
         ]
     },
     {

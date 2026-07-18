@@ -42,7 +42,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     return (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
+                <Button variant="ghost" size="icon" className="relative text-slate-300 hover:text-white hover:bg-white/5 transition-all">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-semibold">
@@ -51,7 +51,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-96 p-0">
+            <DropdownMenuContent align="end" className="w-96 p-0 bg-[#0f131a] border border-slate-800/80 text-slate-100 shadow-2xl rounded-2xl overflow-hidden">
                 <NotificationList
                     userId={userId}
                     onMarkAllRead={handleMarkAllRead}

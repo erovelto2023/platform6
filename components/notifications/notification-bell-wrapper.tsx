@@ -39,7 +39,7 @@ export function NotificationBellWrapper() {
     // Show loading skeleton while fetching
     if (loading) {
         return (
-            <Button variant="ghost" size="icon" className="relative" disabled>
+            <Button variant="ghost" size="icon" className="relative text-slate-450" disabled>
                 <Bell className="h-5 w-5 text-slate-400" />
             </Button>
         );

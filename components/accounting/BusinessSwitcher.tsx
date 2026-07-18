@@ -111,30 +111,30 @@ export function BusinessSwitcher({ currentBusinessId }: BusinessSwitcherProps) {
                         role="combobox"
                         aria-expanded={open}
                         aria-label="Select a business"
-                        className="w-[200px] justify-between"
+                        className="w-[200px] justify-between bg-slate-900/50 border-slate-800 text-slate-200 hover:bg-slate-900 hover:text-white transition-all"
                     >
-                        <Building2 className="mr-2 h-4 w-4" />
+                        <Building2 className="mr-2 h-4 w-4 text-slate-400" />
                         {selectedBusiness ? selectedBusiness.name : "Select Business"}
-                        <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50 text-slate-500" />
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                    <Command>
+                <PopoverContent className="w-[200px] p-0 bg-[#0f131a] border border-slate-800/80 text-slate-100 shadow-2xl rounded-xl overflow-hidden">
+                    <Command className="bg-[#0f131a] text-slate-200">
                         <CommandList>
-                            <CommandInput placeholder="Search business..." />
-                            <CommandEmpty>No business found.</CommandEmpty>
-                            <CommandGroup heading="Businesses">
+                            <CommandInput placeholder="Search business..." className="border-none focus:ring-0 text-xs text-white" />
+                            <CommandEmpty className="text-slate-500 text-xs py-4 text-center">No business found.</CommandEmpty>
+                            <CommandGroup heading="Businesses" className="text-slate-400 [&_[cmdk-group-heading]]:text-slate-500">
                                 {businesses.map((business) => (
                                     <CommandItem
                                         key={business._id}
                                         onSelect={() => onBusinessSelect(business)}
-                                        className="text-sm"
+                                        className="text-xs text-slate-300 hover:bg-slate-900/60 hover:text-white cursor-pointer data-[selected=true]:bg-slate-900/80 data-[selected=true]:text-white"
                                     >
-                                        <Building2 className="mr-2 h-4 w-4" />
+                                        <Building2 className="mr-2 h-3.5 w-3.5 text-slate-400" />
                                         {business.name}
                                         <Check
                                             className={cn(
-                                                "ml-auto h-4 w-4",
+                                                "ml-auto h-3.5 w-3.5 text-indigo-400",
                                                 selectedBusiness?._id === business._id
                                                     ? "opacity-100"
                                                     : "opacity-0"
@@ -144,7 +144,7 @@ export function BusinessSwitcher({ currentBusinessId }: BusinessSwitcherProps) {
                                 ))}
                             </CommandGroup>
                         </CommandList>
-                        <CommandSeparator />
+                        <CommandSeparator className="bg-slate-800" />
                         <CommandList>
                             <CommandGroup>
                                 <CommandItem
@@ -152,8 +152,9 @@ export function BusinessSwitcher({ currentBusinessId }: BusinessSwitcherProps) {
                                         setOpen(false);
                                         setShowNewBusinessDialog(true);
                                     }}
+                                    className="text-xs text-emerald-450 hover:bg-slate-900/60 hover:text-emerald-400 cursor-pointer data-[selected=true]:bg-slate-900/80 data-[selected=true]:text-emerald-400"
                                 >
-                                    <PlusCircle className="mr-2 h-5 w-5" />
+                                    <PlusCircle className="mr-2 h-4 w-4" />
                                     Create Business
                                 </CommandItem>
                             </CommandGroup>

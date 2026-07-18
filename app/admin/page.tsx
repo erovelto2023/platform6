@@ -23,12 +23,14 @@ import {
     Tag,
     Wrench,
     HelpCircle,
-    Film
+    Film,
+    Megaphone
 } from "lucide-react";
 import Link from "next/link";
-import { getDashboardStats } from "@/lib/actions/dashboard.actions";
+import { getDashboardStats, getAdminContentData } from "@/lib/actions/dashboard.actions";
 import { getTicketCount } from "@/lib/actions/ticket.actions";
 import { syncCurrentUser } from "@/lib/actions/user.actions";
+
 
 export default async function AdminDashboardPage() {
     // Sync current user to database if they don't exist
@@ -36,6 +38,13 @@ export default async function AdminDashboardPage() {
 
     const stats = await getDashboardStats();
     const ticketCount = await getTicketCount();
+    const contentData = await getAdminContentData();
+    const contentCounts = "error" in contentData ? { announcements: 0, events: 0, assignments: 0 } : {
+        announcements: contentData.announcements.length,
+        events: contentData.events.length,
+        assignments: contentData.assignments.length,
+    };
+
 
     const categories = [
         {
@@ -167,6 +176,15 @@ export default async function AdminDashboardPage() {
                     color: "text-orange-600",
                     bg: "bg-orange-100",
                     hover: "group-hover:bg-orange-600"
+                },
+                {
+                    title: "Content Manager",
+                    description: "Manage all announcements, events & assignments for the student dashboard",
+                    href: "/admin/content",
+                    icon: Megaphone,
+                    color: "text-emerald-600",
+                    bg: "bg-emerald-100",
+                    hover: "group-hover:bg-emerald-600"
                 }
             ]
         },
@@ -370,6 +388,63 @@ export default async function AdminDashboardPage() {
                         </CardContent>
                     </Card>
                 </Link>
+            </div>
+
+            {/* Student Dashboard Content Manager */}
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-slate-900">Student Dashboard Content</h2>
+                    <Link href="/admin/content" className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-full transition-all">
+                        <Megaphone className="w-3.5 h-3.5" /> Manage All Content
+                    </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Link href="/admin/content" className="block">
+                        <Card className="border-emerald-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-200 cursor-pointer">
+                            <CardContent className="pt-6 pb-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-3xl font-bold text-emerald-600">{contentCounts.announcements}</div>
+                                        <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wide">Announcements</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                                        <Megaphone className="w-5 h-5 text-emerald-500" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                    <Link href="/admin/content" className="block">
+                        <Card className="border-amber-100 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-200 cursor-pointer">
+                            <CardContent className="pt-6 pb-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-3xl font-bold text-amber-600">{contentCounts.events}</div>
+                                        <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wide">Calendar Events</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
+                                        <Calendar className="w-5 h-5 text-amber-500" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                    <Link href="/admin/content" className="block">
+                        <Card className="border-indigo-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200 cursor-pointer">
+                            <CardContent className="pt-6 pb-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-3xl font-bold text-indigo-600">{contentCounts.assignments}</div>
+                                        <p className="text-xs font-medium text-slate-500 mt-1 uppercase tracking-wide">Assignments</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                                        <FileText className="w-5 h-5 text-indigo-500" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                </div>
             </div>
 
             {/* Content Breakdown */}

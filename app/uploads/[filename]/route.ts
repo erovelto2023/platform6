@@ -8,7 +8,7 @@ const UPLOAD_DIR = resolve(process.cwd(), "public", "uploads");
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { filename: string } }
+    { params }: { params: Promise<{ filename: string }> }
 ) {
     try {
         const { filename } = await params;
