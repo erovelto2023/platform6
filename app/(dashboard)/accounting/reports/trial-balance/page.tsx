@@ -1,3 +1,6 @@
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { PrintButton } from "@/components/accounting/PrintButton";
 import { getTrialBalance } from '@/lib/actions/report.actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
@@ -9,14 +12,16 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
-import { BackButton } from "@/components/accounting/BackButton";
 
 export default async function TrialBalancePage() {
     const { success, data: accounts, error } = await getTrialBalance();
 
     if (!success || error) {
         return (
-            <div className="p-6 text-red-500">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
                 Failed to load trial balance: {error}
             </div>
         );
@@ -26,18 +31,21 @@ export default async function TrialBalancePage() {
     const totalCredit = accounts?.reduce((sum: number, acc: any) => sum + (acc.credit || 0), 0) || 0;
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4 no-print">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <BackButton href="/accounting/reports" />
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Trial Balance</h1>
-                        <p className="text-muted-foreground">Balances of all ledger accounts.</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Trial Balance</h1>
+                        <p className="text-slate-400">Balances of all ledger accounts.</p>
                     </div>
                 </div>
+                <PrintButton label="Print Report" />
             </div>
 
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-800/80 shadow-sm">
                 <CardHeader>
                     <CardTitle>As of {new Date().toLocaleDateString()}</CardTitle>
                 </CardHeader>
@@ -53,25 +61,25 @@ export default async function TrialBalancePage() {
                         <TableBody>
                             {accounts && accounts.length > 0 ? (
                                 accounts.map((acc: any) => (
-                                    <TableRow key={acc.account} className="hover:bg-slate-50">
-                                        <TableCell className="font-medium text-slate-900">{acc.account}</TableCell>
-                                        <TableCell className="text-right font-mono text-slate-600">
+                                    <TableRow key={acc.account} className="hover:bg-[#07090e]">
+                                        <TableCell className="font-medium text-white">{acc.account}</TableCell>
+                                        <TableCell className="text-right font-mono text-slate-400">
                                             {acc.debit > 0 ? formatCurrency(acc.debit) : '-'}
                                         </TableCell>
-                                        <TableCell className="text-right font-mono text-slate-600">
+                                        <TableCell className="text-right font-mono text-slate-400">
                                             {acc.credit > 0 ? formatCurrency(acc.credit) : '-'}
                                         </TableCell>
                                     </TableRow>
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={3} className="h-24 text-center text-slate-400">
                                         No data found.
                                     </TableCell>
                                 </TableRow>
                             )}
                             {/* Totals Row */}
-                            <TableRow className="bg-slate-100 font-bold border-t-2 border-slate-300">
+                            <TableRow className="bg-slate-800/40 text-white font-extrabold border-t-2 border-slate-800/80">
                                 <TableCell>Total</TableCell>
                                 <TableCell className="text-right">{formatCurrency(totalDebit)}</TableCell>
                                 <TableCell className="text-right">{formatCurrency(totalCredit)}</TableCell>

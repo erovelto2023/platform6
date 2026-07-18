@@ -1,6 +1,7 @@
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { getExpense } from "@/lib/actions/expense.actions";
 import { ExpenseForm } from "@/components/accounting/ExpenseForm";
-import { BackButton } from "@/components/accounting/BackButton";
 import { getAccounts } from "@/lib/actions/account.actions";
 import { notFound } from "next/navigation";
 import { getOrCreateBusiness } from "@/lib/actions/business.actions";
@@ -22,22 +23,25 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
     }
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div>
-                <BackButton href="/accounting/expenses" />
+                
                 <div className="mt-4">
                     <div className="flex items-baseline gap-4">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Edit Expense</h1>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Edit Expense</h1>
                         {business && (
-                            <span className="text-lg text-muted-foreground font-medium">for {business.name}</span>
+                            <span className="text-lg text-slate-400 font-medium">for {business.name}</span>
                         )}
                     </div>
-                    <p className="text-muted-foreground">Update expense details</p>
+                    <p className="text-slate-400">Update expense details</p>
                 </div>
             </div>
 
             <div className="max-w-3xl">
-                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+                <div className="bg-[#0d1117] rounded-lg border border-slate-800/80 shadow-sm p-6">
                     <ExpenseForm accounts={accounts || []} initialData={expense} />
                 </div>
             </div>

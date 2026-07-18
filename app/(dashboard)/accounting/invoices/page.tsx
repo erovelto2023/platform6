@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { BackButton } from "@/components/accounting/BackButton";
 import { InvoiceRowActions } from "@/components/accounting/InvoiceRowActions";
 import { Button } from "@/components/ui/button";
-import { Plus, Search as SearchIcon, FileText, MoreHorizontal } from "lucide-react";
+import { Plus, Search as SearchIcon, FileText, MoreHorizontal, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -34,17 +33,20 @@ export default async function InvoicesPage() {
             case 'paid': return 'bg-green-100 text-green-800 hover:bg-green-100';
             case 'overdue': return 'bg-red-100 text-red-800 hover:bg-red-100';
             case 'sent': return 'bg-blue-100 text-blue-800 hover:bg-blue-100';
-            default: return 'bg-slate-100 text-slate-800 hover:bg-slate-100';
+            default: return 'bg-slate-800 text-slate-200 hover:bg-slate-800';
         }
     };
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex justify-between items-center">
                 <div className="space-y-1">
-                    <BackButton href="/accounting" />
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Invoices</h1>
-                    <p className="text-muted-foreground">Manage your invoices and payments.</p>
+                    
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Invoices</h1>
+                    <p className="text-slate-400">Manage your invoices and payments.</p>
                 </div>
                 <Link href="/accounting/invoices/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">
@@ -69,23 +71,23 @@ export default async function InvoicesPage() {
                 />
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-[#0d1117] rounded-lg border border-slate-800/80 shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 border-slate-200 hover:bg-slate-50">
-                            <TableHead className="font-medium text-slate-600">Invoice #</TableHead>
-                            <TableHead className="font-medium text-slate-600">Client</TableHead>
-                            <TableHead className="font-medium text-slate-600">Date</TableHead>
-                            <TableHead className="font-medium text-slate-600">Due Date</TableHead>
-                            <TableHead className="font-medium text-slate-600">Amount</TableHead>
-                            <TableHead className="font-medium text-slate-600">Status</TableHead>
+                        <TableRow className="bg-[#07090e] border-slate-800/80 hover:bg-[#07090e]">
+                            <TableHead className="font-medium text-slate-400">Invoice #</TableHead>
+                            <TableHead className="font-medium text-slate-400">Client</TableHead>
+                            <TableHead className="font-medium text-slate-400">Date</TableHead>
+                            <TableHead className="font-medium text-slate-400">Due Date</TableHead>
+                            <TableHead className="font-medium text-slate-400">Amount</TableHead>
+                            <TableHead className="font-medium text-slate-400">Status</TableHead>
                             <TableHead className="w-[80px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoices && invoices.length > 0 ? (
                             invoices.map((invoice: any) => (
-                                <TableRow key={invoice._id} className="hover:bg-slate-50/50">
+                                <TableRow key={invoice._id} className="hover:bg-[#07090e]/50">
                                     <TableCell className="font-medium text-blue-600">
                                         <Link href={`/accounting/invoices/${invoice._id}`} className="hover:underline">
                                             {invoice.invoiceNumber}
@@ -107,7 +109,7 @@ export default async function InvoicesPage() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={7} className="h-24 text-center text-slate-400">
                                     No invoices found. Create your first invoice to get started.
                                 </TableCell>
                             </TableRow>

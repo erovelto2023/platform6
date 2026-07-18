@@ -238,6 +238,9 @@ async function seed() {
     console.log('Connected successfully.');
 
     const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('Database connection is not active.');
+    }
     const glossaryCollection = db.collection('glossaryterms');
     const userCollection = db.collection('users');
 

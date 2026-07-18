@@ -1,7 +1,6 @@
-import { BackButton } from "@/components/accounting/BackButton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Users, MoreHorizontal, Mail, Phone, MapPin } from "lucide-react";
+import { Plus, Search, Users, MoreHorizontal, Mail, Phone, MapPin, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -34,13 +33,16 @@ export default async function ClientsPage() {
     const { data: clients } = await getClients();
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <BackButton href="/accounting" />
+                    
                     <div className="mt-4">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Clients</h1>
-                        <p className="text-muted-foreground">Manage your customer database.</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Clients</h1>
+                        <p className="text-slate-400">Manage your customer database.</p>
                     </div>
                 </div>
 
@@ -50,7 +52,7 @@ export default async function ClientsPage() {
                             <Plus className="mr-2 h-4 w-4" /> Add Client
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="sm:max-w-[600px] bg-[#0d1117] border-slate-800 text-white dark">
                         <DialogHeader>
                             <DialogTitle>Add New Client</DialogTitle>
                             <DialogDescription>
@@ -62,38 +64,38 @@ export default async function ClientsPage() {
                 </Dialog>
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex gap-4">
+            <div className="bg-[#0d1117] rounded-lg border border-slate-800/80 shadow-sm overflow-hidden">
+                <div className="p-4 border-b border-slate-800/80 flex gap-4">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
                         <Input
                             type="search"
                             placeholder="Search clients..."
-                            className="pl-9 bg-slate-50 border-slate-200"
+                            className="pl-9 bg-[#07090e] border-slate-800/80"
                         />
                     </div>
                 </div>
 
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 border-slate-200 hover:bg-slate-50">
-                            <TableHead className="font-medium text-slate-600">Name</TableHead>
-                            <TableHead className="font-medium text-slate-600">Contact Info</TableHead>
-                            <TableHead className="font-medium text-slate-600">Address</TableHead>
+                        <TableRow className="bg-[#07090e] border-slate-800/80 hover:bg-[#07090e]">
+                            <TableHead className="font-medium text-slate-400">Name</TableHead>
+                            <TableHead className="font-medium text-slate-400">Contact Info</TableHead>
+                            <TableHead className="font-medium text-slate-400">Address</TableHead>
                             <TableHead className="w-[80px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {clients && clients.length > 0 ? (
                             clients.map((client: any) => (
-                                <TableRow key={client._id} className="hover:bg-slate-50/50">
+                                <TableRow key={client._id} className="hover:bg-[#07090e]/50">
                                     <TableCell className="font-medium">
                                         <div className="flex flex-col">
-                                            <span className="text-slate-900">{client.name}</span>
+                                            <span className="text-white">{client.name}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col gap-1 text-sm text-slate-600">
+                                        <div className="flex flex-col gap-1 text-sm text-slate-400">
                                             <div className="flex items-center gap-2">
                                                 <Mail className="h-3 w-3" />
                                                 {client.email}
@@ -108,7 +110,7 @@ export default async function ClientsPage() {
                                     </TableCell>
                                     <TableCell>
                                         {client.address?.city ? (
-                                            <div className="flex items-center gap-2 text-sm text-slate-600">
+                                            <div className="flex items-center gap-2 text-sm text-slate-400">
                                                 <MapPin className="h-3 w-3" />
                                                 {client.address.city}, {client.address.state}
                                             </div>
@@ -137,7 +139,7 @@ export default async function ClientsPage() {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="h-24 text-center text-slate-400">
                                     No clients found. Add your first client to get started.
                                 </TableCell>
                             </TableRow>

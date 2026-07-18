@@ -20,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { createAccount } from "@/lib/actions/account.actions";
+import { createAccount, updateAccount } from "@/lib/actions/account.actions";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -37,16 +37,22 @@ const formSchema = z.object({
 
 interface AccountFormProps {
     onSuccess?: () => void;
+    initialData?: {
+        _id: string;
+        name: string;
+        type: string;
+        balance: number;
+    };
 }
 
-export const AccountForm = ({ onSuccess }: AccountFormProps) => {
+export const AccountForm = ({ onSuccess, initialData }: AccountFormProps) => {
     const router = useRouter();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema) as any,
         defaultValues: {
-            name: "",
-            type: "Bank",
-            balance: 0,
+            name: initialData?.name || "",
+            type: initialData?.type || "Bank",
+            balance: initialData?.balance || 0,
         },
     });
 
@@ -54,15 +60,17 @@ export const AccountForm = ({ onSuccess }: AccountFormProps) => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            const result = await createAccount(values);
+            const result = initialData
+                ? await updateAccount(initialData._id, values)
+                : await createAccount(values);
 
             if (result.success) {
-                toast.success("Account created successfully");
-                form.reset();
+                toast.success(initialData ? "Account updated successfully" : "Account created successfully");
+                if (!initialData) form.reset();
                 router.refresh();
                 if (onSuccess) onSuccess();
             } else {
-                toast.error(result.error || "Failed to create account");
+                toast.error(result.error || "Failed to save account");
             }
         } catch (error) {
             toast.error("An error occurred");
@@ -104,6 +112,8 @@ export const AccountForm = ({ onSuccess }: AccountFormProps) => {
                                     <SelectItem value="Cash">Cash</SelectItem>
                                     <SelectItem value="PayPal">PayPal</SelectItem>
                                     <SelectItem value="Stripe">Stripe</SelectItem>
+                                    <SelectItem value="Venmo">Venmo</SelectItem>
+                                    <SelectItem value="Cash App">Cash App</SelectItem>
                                     <SelectItem value="Other">Other</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -130,10 +140,10 @@ export const AccountForm = ({ onSuccess }: AccountFormProps) => {
                     {isSubmitting ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Creating...
+                            {initialData ? "Saving..." : "Creating..."}
                         </>
                     ) : (
-                        "Create Account"
+                        initialData ? "Save Account" : "Create Account"
                     )}
                 </Button>
             </form>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, CreditCard, MoreHorizontal } from "lucide-react";
+import { Plus, CreditCard, MoreHorizontal, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Table,
@@ -21,7 +21,6 @@ import {
 import { Search } from "@/components/ui/Search";
 import { Filter } from "@/components/ui/Filter";
 import { ExpenseRowActions } from "@/components/accounting/ExpenseRowActions";
-import { BackButton } from "@/components/accounting/BackButton";
 import { getExpenses } from "@/lib/actions/expense.actions";
 import { formatCurrency } from "@/lib/utils";
 
@@ -42,12 +41,15 @@ export default async function ExpensesPage(props: ExpensesPageProps) {
     const { data: expenses } = await getExpenses(page, 50, query, category);
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex justify-between items-center">
                 <div className="space-y-1">
-                    <BackButton href="/accounting" />
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Expenses</h1>
-                    <p className="text-muted-foreground">Track and manage business expenses.</p>
+                    
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Expenses</h1>
+                    <p className="text-slate-400">Track and manage business expenses.</p>
                 </div>
                 <Link href="/accounting/expenses/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">
@@ -74,26 +76,26 @@ export default async function ExpensesPage(props: ExpensesPageProps) {
                 />
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-[#0d1117] rounded-lg border border-slate-800/80 shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 border-slate-200 hover:bg-slate-50">
-                            <TableHead className="font-medium text-slate-600">Date</TableHead>
-                            <TableHead className="font-medium text-slate-600">Vendor</TableHead>
-                            <TableHead className="font-medium text-slate-600">Category</TableHead>
-                            <TableHead className="font-medium text-slate-600">Payment Method</TableHead>
-                            <TableHead className="font-medium text-slate-600">Amount</TableHead>
+                        <TableRow className="bg-[#07090e] border-slate-800/80 hover:bg-[#07090e]">
+                            <TableHead className="font-medium text-slate-400">Date</TableHead>
+                            <TableHead className="font-medium text-slate-400">Vendor</TableHead>
+                            <TableHead className="font-medium text-slate-400">Category</TableHead>
+                            <TableHead className="font-medium text-slate-400">Payment Method</TableHead>
+                            <TableHead className="font-medium text-slate-400">Amount</TableHead>
                             <TableHead className="w-[80px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {expenses && expenses.length > 0 ? (
                             expenses.map((expense: any) => (
-                                <TableRow key={expense._id} className="hover:bg-slate-50/50">
+                                <TableRow key={expense._id} className="hover:bg-[#07090e]/50">
                                     <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
                                     <TableCell className="font-medium">{expense.vendor}</TableCell>
                                     <TableCell>
-                                        <span className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-slate-100 text-slate-700">
+                                        <span className="inline-flex items-center px-2 py-1 rounded-sm text-xs font-medium bg-slate-800 text-slate-300">
                                             {expense.category}
                                         </span>
                                     </TableCell>
@@ -106,7 +108,7 @@ export default async function ExpensesPage(props: ExpensesPageProps) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={6} className="h-24 text-center text-slate-400">
                                     No expenses found. Add your first expense to start tracking.
                                 </TableCell>
                             </TableRow>

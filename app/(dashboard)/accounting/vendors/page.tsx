@@ -1,5 +1,5 @@
 
-import { Plus, Pencil, Trash2, MoreHorizontal } from "lucide-react";
+import { Plus, Pencil, Trash2, MoreHorizontal, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Search } from "@/components/ui/Search";
-import { BackButton } from "@/components/accounting/BackButton";
 import { getVendors, deleteVendor } from "@/lib/actions/vendor.actions";
 import { Badge } from "@/components/ui/badge";
 
@@ -37,12 +36,15 @@ export default async function VendorsPage(props: VendorsPageProps) {
     const { data: vendors, pagination } = await getVendors(page, 50, query);
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex justify-between items-center">
                 <div className="space-y-1">
-                    <BackButton href="/accounting" />
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Vendors</h1>
-                    <p className="text-muted-foreground">Manage your suppliers and vendors.</p>
+                    
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Vendors</h1>
+                    <p className="text-slate-400">Manage your suppliers and vendors.</p>
                 </div>
                 <Link href="/accounting/vendors/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">
@@ -56,24 +58,24 @@ export default async function VendorsPage(props: VendorsPageProps) {
                 <Search placeholder="Search vendors..." />
             </div>
 
-            <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-[#0d1117] rounded-lg border border-slate-800/80 shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 border-slate-200 hover:bg-slate-50">
-                            <TableHead className="font-medium text-slate-600">Vendor Name</TableHead>
-                            <TableHead className="font-medium text-slate-600">Contact Person</TableHead>
-                            <TableHead className="font-medium text-slate-600">Email</TableHead>
-                            <TableHead className="font-medium text-slate-600">Phone</TableHead>
+                        <TableRow className="bg-[#07090e] border-slate-800/80 hover:bg-[#07090e]">
+                            <TableHead className="font-medium text-slate-400">Vendor Name</TableHead>
+                            <TableHead className="font-medium text-slate-400">Contact Person</TableHead>
+                            <TableHead className="font-medium text-slate-400">Email</TableHead>
+                            <TableHead className="font-medium text-slate-400">Phone</TableHead>
                             <TableHead className="w-[80px]"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {vendors && vendors.length > 0 ? (
                             vendors.map((vendor: any) => (
-                                <TableRow key={vendor._id} className="hover:bg-slate-50/50">
+                                <TableRow key={vendor._id} className="hover:bg-[#07090e]/50">
                                     <TableCell className="font-medium">
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-slate-900">{vendor.name}</span>
+                                            <span className="font-semibold text-white">{vendor.name}</span>
                                             {vendor.taxId && <span className="text-xs text-slate-500">Tax ID: {vendor.taxId}</span>}
                                         </div>
                                     </TableCell>
@@ -110,7 +112,7 @@ export default async function VendorsPage(props: VendorsPageProps) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={5} className="h-24 text-center text-slate-400">
                                     No vendors found. Add your first vendor to get started.
                                 </TableCell>
                             </TableRow>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ChevronLeft } from "lucide-react";
 import {
     Table,
     TableBody,
@@ -18,25 +18,24 @@ export default async function JournalEntriesPage() {
 
     if (error) {
         return (
-            <div className="p-6 text-center text-red-500">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
                 Failed to load journal entries: {error}
             </div>
         );
     }
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <Link href="/accounting">
-                            <Button variant="ghost" size="icon">
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Journal Entries</h1>
-                    </div>
-                    <p className="text-muted-foreground mt-1 ml-10">Manage manual accounting adjustments.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Journal Entries</h1>
+                    <p className="text-slate-400 mt-1">Manage manual accounting adjustments.</p>
                 </div>
                 <Link href="/accounting/journal/new">
                     <Button className="bg-blue-600 hover:bg-blue-700">
@@ -45,7 +44,7 @@ export default async function JournalEntriesPage() {
                 </Link>
             </div>
 
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-800/80 shadow-sm">
                 <CardHeader>
                     <CardTitle>All Journal Entries</CardTitle>
                     <CardDescription>A list of all manual journal entries.</CardDescription>
@@ -82,7 +81,7 @@ export default async function JournalEntriesPage() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                                    <TableCell colSpan={5} className="h-24 text-center text-slate-400">
                                         No journal entries found.
                                     </TableCell>
                                 </TableRow>

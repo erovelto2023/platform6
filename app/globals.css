@@ -21,6 +21,10 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
   /* Emerald Professional Brand Palette */
   --emerald-brand-500: #10b981;
@@ -388,3 +392,76 @@
 .admin-sidebar        { background-color: var(--admin-sidebar); }
 .admin-sidebar-active { background-color: var(--admin-sidebar-active); }
 .admin-surface        { background-color: var(--admin-surface); }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   PRINT STYLES FOR FINANCIAL ACCOUNTING MODULE
+   ────────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Reset color schemes to ink-friendly light mode */
+  html, body, #__next, [data-registry="plate"], [role="main"], main {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    color-scheme: light !important;
+  }
+  
+  /* Hide non-printable layout elements */
+  aside, 
+  nav, 
+  header, 
+  footer, 
+  button, 
+  .no-print, 
+  [role="dialog"], 
+  [role="menu"],
+  [data-sidebar],
+  .sidebar, 
+  .back-to-acc,
+  a[href*="/accounting"],
+  .action-buttons,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Expand container to fill maximum printable width */
+  main, .container, .max-w-4xl, .min-h-screen {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Format cards and layout grids */
+  .card, .bg-slate-900\/50, .bg-\[\#0d1117\], .bg-slate-900\/40, .bg-slate-950\/50, .bg-slate-900\/60 {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #000000 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* Keep table texts fully visible (black text on white page) */
+  table, th, td, tr, p, span, h1, h2, h3, h4, h5, h6, label {
+    color: #000000 !important;
+    background: transparent !important;
+  }
+
+  /* Format input values so they show up beautifully without dark borders/bg */
+  input, select, textarea {
+    background: transparent !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #000000 !important;
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    pointer-events: none !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+}

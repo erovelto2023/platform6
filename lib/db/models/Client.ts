@@ -5,6 +5,38 @@ export interface IClient extends Document {
     name: string;
     email: string;
     phone?: string;
+    accountNumber?: string;
+    contacts?: {
+        name: string;
+        email?: string;
+        phone?: string;
+        role?: string;
+    }[];
+    whatsapp?: string;
+    website?: string;
+    socials?: {
+        facebook?: string;
+        twitter?: string;
+        linkedin?: string;
+        instagram?: string;
+        tiktok?: string;
+        youtube?: string;
+        wechat?: string;
+        telegram?: string;
+        messenger?: string;
+        reddit?: string;
+        threads?: string;
+        pinterest?: string;
+        snapchat?: string;
+        discord?: string;
+        twitch?: string;
+        quora?: string;
+        douyin?: string;
+        kuaishou?: string;
+        weibo?: string;
+        line?: string;
+        vk?: string;
+    };
     address?: {
         street?: string;
         city?: string;
@@ -34,6 +66,40 @@ const ClientSchema = new Schema<IClient>(
             required: true,
         },
         phone: String,
+        accountNumber: String,
+        contacts: [
+            {
+                name: { type: String, required: true },
+                email: String,
+                phone: String,
+                role: String,
+            }
+        ],
+        whatsapp: String,
+        website: String,
+        socials: {
+            facebook: String,
+            twitter: String,
+            linkedin: String,
+            instagram: String,
+            tiktok: String,
+            youtube: String,
+            wechat: String,
+            telegram: String,
+            messenger: String,
+            reddit: String,
+            threads: String,
+            pinterest: String,
+            snapchat: String,
+            discord: String,
+            twitch: String,
+            quora: String,
+            douyin: String,
+            kuaishou: String,
+            weibo: String,
+            line: String,
+            vk: String,
+        },
         address: {
             street: String,
             city: String,

@@ -1,5 +1,6 @@
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import ProductForm from "@/components/accounting/ProductForm";
-import { BackButton } from "@/components/accounting/BackButton";
 import { getAllVendors } from "@/lib/actions/vendor.actions";
 
 export default async function NewProductPage() {
@@ -7,12 +8,15 @@ export default async function NewProductPage() {
     const vendors = vendorsData.success ? vendorsData.data : [];
 
     return (
-        <div className="p-6 space-y-6 bg-slate-50 min-h-screen">
+        <div className="min-h-screen bg-[#07090e] p-6 space-y-6 dark text-white">
+            <Link href="/accounting" className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors w-fit mb-4">
+                <ChevronLeft className="w-3.5 h-3.5" /> Back to Accounting
+            </Link>
             <div className="flex items-center gap-4">
-                <BackButton href="/accounting/products" />
+                
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Add New Item</h1>
-                    <p className="text-muted-foreground">Create a new product or service to sell to customers.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-white">Add New Item</h1>
+                    <p className="text-slate-400">Create a new product or service to sell to customers.</p>
                 </div>
             </div>
 

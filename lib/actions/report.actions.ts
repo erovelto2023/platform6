@@ -4,6 +4,8 @@ import { getInvoices } from './invoice.actions';
 import { getExpenses } from './expense.actions';
 import { getJournalEntries } from './journal.actions';
 import { getAccounts } from './account.actions';
+import { getBills } from './bill.actions';
+import { getVendorCredits } from './vendor-credit.actions';
 
 export async function getTrialBalance() {
     try {
@@ -20,15 +22,19 @@ export async function getTrialBalance() {
             accountsMap[accountName][type] += amount;
         };
 
-        const [invRes, expRes, journalRes] = await Promise.all([
+        const [invRes, expRes, journalRes, billRes, creditRes] = await Promise.all([
             getInvoices(),
             getExpenses(),
-            getJournalEntries()
+            getJournalEntries(),
+            getBills(),
+            getVendorCredits()
         ]);
 
         const invoices = invRes.data || [];
         const expenses = expRes.data || [];
         const journals = journalRes.data || [];
+        const bills = billRes.data || [];
+        const credits = creditRes.data || [];
 
         // Process Invoices
         // Debit: Accounts Receivable, Credit: Income
@@ -50,6 +56,33 @@ export async function getTrialBalance() {
         expenses.forEach((exp: any) => {
             addEntry(exp.category || 'Uncategorized Expense', 'debit', exp.amount);
             addEntry('Cash / Bank', 'credit', exp.amount);
+        });
+
+        // Process Bills
+        // Unpaid bills increase Accounts Payable (credit) and increase Expense (debit)
+        // Paid bills decrease Cash/Bank (credit) and increase Expense (debit)
+        bills.forEach((bill: any) => {
+            const expenseCat = bill.items?.[0]?.category || 'Uncategorized Expense';
+            if (bill.status === 'paid') {
+                bill.items.forEach((item: any) => {
+                    addEntry(item.category || 'Uncategorized Expense', 'debit', item.amount);
+                });
+                addEntry('Cash / Bank', 'credit', bill.total);
+            } else {
+                bill.items.forEach((item: any) => {
+                    addEntry(item.category || 'Uncategorized Expense', 'debit', item.amount);
+                });
+                addEntry('Accounts Payable', 'credit', bill.total);
+            }
+        });
+
+        // Process Vendor Credits
+        // Decreases Accounts Payable (debit) and reduces Expense/Credit (credit)
+        credits.forEach((credit: any) => {
+            addEntry('Accounts Payable', 'debit', credit.total);
+            credit.items.forEach((item: any) => {
+                addEntry(item.category || 'Uncategorized Expense', 'credit', item.amount);
+            });
         });
 
         // Process Journal Entries
