@@ -74,10 +74,9 @@ export function CommunitySidebar({
     
     const levelName = LEVEL_NAMES[Math.min(currentLevel, LEVEL_NAMES.length) - 1] || "Novice";
 
-    const menuItems = [
+    const menuItems: { id: string; label: string; icon: any; redirect?: string }[] = [
         { id: "feed", label: "News Feed", icon: Home },
         { id: "leaderboard", label: "Leaderboard", icon: Trophy },
-        { id: "classroom", label: "Classroom", icon: BookOpen, redirect: "/courses" },
         { id: "friends", label: "Friends", icon: Users },
         { id: "members", label: "Find Members", icon: UserPlus },
         { id: "groups", label: "Groups", icon: Users },
