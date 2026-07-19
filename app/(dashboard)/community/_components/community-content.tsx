@@ -8,14 +8,16 @@ import { PopularPosts } from "./popular-posts";
 import { SavedContent } from "./saved-content";
 import { FindMembers } from "./find-members";
 import { GroupsTab } from "./groups-tab";
+import { LeaderboardTab } from "./leaderboard-tab";
 
 interface CommunityContentProps {
     posts: any[];
     currentUser: any;
     activeTab: string;
+    leaderboard?: any[];
 }
 
-export function CommunityContent({ posts, currentUser, activeTab }: CommunityContentProps) {
+export function CommunityContent({ posts, currentUser, activeTab, leaderboard = [] }: CommunityContentProps) {
     return (
         <div className="space-y-6">
             {activeTab === "feed" && (
@@ -34,6 +36,10 @@ export function CommunityContent({ posts, currentUser, activeTab }: CommunityCon
                 </>
             )}
 
+            {activeTab === "leaderboard" && (
+                <LeaderboardTab leaderboard={leaderboard} />
+            )}
+
             {activeTab === "friends" && (
                 <FriendsActivity currentUser={currentUser} />
             )}
@@ -49,7 +55,6 @@ export function CommunityContent({ posts, currentUser, activeTab }: CommunityCon
             {activeTab === "members" && (
                 <FindMembers currentUser={currentUser} />
             )}
-
 
             {activeTab === "groups" && (
                 <GroupsTab currentUser={currentUser} />

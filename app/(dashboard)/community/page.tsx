@@ -1,4 +1,4 @@
-import { getPosts } from "@/lib/actions/community.actions";
+import { getPosts, getTrendingTopics, getLeaderboard } from "@/lib/actions/community.actions";
 import { currentUser } from "@clerk/nextjs/server";
 import { ProfileHeader } from "./_components/profile-header";
 import { getOrCreateUser } from "@/lib/actions/user.actions";
@@ -15,15 +15,22 @@ export default async function CommunityPage() {
         return <div>User not found in database. Please contact support.</div>;
     }
 
-    // Fetch global feed (public posts)
+    // Fetch global feed (public posts) and side panel/leaderboard stats
     const posts = await getPosts({ visibility: 'public' });
+    const trendingTopics = await getTrendingTopics();
+    const leaderboard = await getLeaderboard();
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-6">
             {/* Header Banner */}
             <ProfileHeader user={dbCurrentUser} isOwnProfile={true} />
 
-            <CommunityPageClient posts={posts} currentUser={dbCurrentUser} />
+            <CommunityPageClient 
+                posts={posts} 
+                currentUser={dbCurrentUser} 
+                trendingTopics={trendingTopics}
+                leaderboard={leaderboard}
+            />
         </div>
     );
 }

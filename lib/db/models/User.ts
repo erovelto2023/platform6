@@ -96,7 +96,20 @@ const UserSchema = new Schema({
     // Publishing access tracking
     hasAccess: [{
         type: String
-    }]
+    }],
+    // Gamification & Social features
+    points: {
+        type: Number,
+        default: 0
+    },
+    level: {
+        type: Number,
+        default: 1
+    },
+    xp: {
+        type: Number,
+        default: 0
+    }
 }, { timestamps: true });
 
 const User = models.User || model('User', UserSchema);

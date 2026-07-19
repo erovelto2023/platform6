@@ -30,6 +30,10 @@ export async function updateUserProfile(userId: string, data: any) {
 export async function createPost(data: { userId: string; content: string; media?: string[]; video?: string; feeling?: string; visibility?: string }) {
     await connectToDatabase();
     const post = await CommunityPost.create(data);
+    
+    // Award 5 XP for sharing a post
+    await awardPoints(data.userId, 5);
+
     revalidatePath("/community");
     revalidatePath(`/community/profile/${data.userId}`);
     return JSON.parse(JSON.stringify(post));
@@ -178,6 +182,10 @@ export async function toggleReaction(postId: string, userId: string, reactionTyp
     const newReaction = post.reactions.get(userId);
     if (newReaction) {
         await notifyLike(post.userId.toString(), userId, postId);
+        // Award 10 XP to post author!
+        if (post.userId.toString() !== userId) {
+            await awardPoints(post.userId.toString(), 10);
+        }
     }
 
     revalidatePath("/community");
@@ -196,6 +204,14 @@ export async function addComment(data: { userId: string; postId: string; content
     // Notify post author
     if (post) {
         await notifyComment(post.userId.toString(), data.userId, data.postId);
+        
+        // Award points!
+        // 2 XP to the commenter
+        await awardPoints(data.userId, 2);
+        // 5 XP to the post author
+        if (post.userId.toString() !== data.userId) {
+            await awardPoints(post.userId.toString(), 5);
+        }
     }
 
     revalidatePath("/community");
@@ -410,4 +426,107 @@ export async function rejectFriendRequest(requestId: string) {
     revalidatePath("/community/friends");
     revalidatePath("/community/members");
     return { success: true };
+}
+
+export async function awardPoints(userId: string, xpAmount: number) {
+    try {
+        await connectToDatabase();
+        const user = await User.findById(userId);
+        if (!user) return { success: false };
+
+        const currentXp = (user.xp || 0) + xpAmount;
+        const currentPoints = (user.points || 0) + xpAmount;
+
+        const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 5000, 10000, 25000];
+        let newLevel = 1;
+        for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+            if (currentXp >= LEVEL_THRESHOLDS[i]) {
+                newLevel = i + 1;
+            } else {
+                break;
+            }
+        }
+
+        user.xp = currentXp;
+        user.points = currentPoints;
+        const leveledUp = newLevel > (user.level || 1);
+        if (leveledUp) {
+            user.level = newLevel;
+        }
+
+        await user.save();
+        revalidatePath("/community");
+        return { success: true, leveledUp, level: newLevel, xp: currentXp };
+    } catch (err) {
+        console.error("Error awarding points:", err);
+        return { success: false };
+    }
+}
+
+export async function getLeaderboard(timeframe: 'week' | 'month' | 'all' = 'all') {
+    await connectToDatabase();
+    const users = await User.find({ xp: { $gt: 0 } })
+        .sort({ xp: -1 })
+        .limit(20)
+        .select('firstName lastName avatar clerkId level xp points bio')
+        .lean();
+
+    return JSON.parse(JSON.stringify(users));
+}
+
+export async function getTrendingTopics() {
+    try {
+        await connectToDatabase();
+        const defaultTopics = [
+            { name: "SEO", count: 42, color: "text-emerald-500 bg-emerald-500/10" },
+            { name: "Dropshipping", count: 35, color: "text-blue-500 bg-blue-500/10" },
+            { name: "SaaS", count: 29, color: "text-indigo-500 bg-indigo-500/10" },
+            { name: "Copywriting", count: 25, color: "text-amber-500 bg-amber-500/10" },
+            { name: "AIAutomation", count: 21, color: "text-purple-500 bg-purple-500/10" },
+            { name: "AffiliateMarketing", count: 18, color: "text-rose-500 bg-rose-500/10" },
+            { name: "Solopreneur", count: 14, color: "text-cyan-500 bg-cyan-500/10" }
+        ];
+
+        const recentPosts = await CommunityPost.find({ content: /#/ })
+            .sort({ createdAt: -1 })
+            .limit(100)
+            .select('content');
+
+        const hashtagCounts: Record<string, number> = {};
+        recentPosts.forEach(post => {
+            const tags = post.content.match(/#[a-zA-Z0-9_]+/g);
+            if (tags) {
+                tags.forEach((tag: string) => {
+                    const cleanTag = tag.replace('#', '');
+                    hashtagCounts[cleanTag] = (hashtagCounts[cleanTag] || 0) + 1;
+                });
+            }
+        });
+
+        const dbTopics = Object.entries(hashtagCounts).map(([name, count]) => {
+            const colors = [
+                "text-emerald-500 bg-emerald-500/10",
+                "text-blue-500 bg-blue-500/10",
+                "text-indigo-500 bg-indigo-500/10",
+                "text-amber-500 bg-amber-500/10",
+                "text-purple-500 bg-purple-500/10",
+                "text-rose-500 bg-rose-500/10",
+                "text-cyan-500 bg-cyan-500/10"
+            ];
+            const randomIndex = Math.floor(Math.random() * colors.length);
+            return { name, count, color: colors[randomIndex] };
+        });
+
+        const allTopics = [...dbTopics];
+        defaultTopics.forEach(dt => {
+            if (!allTopics.some(t => t.name.toLowerCase() === dt.name.toLowerCase())) {
+                allTopics.push(dt);
+            }
+        });
+
+        return allTopics.sort((a, b) => b.count - a.count).slice(0, 7);
+    } catch (err) {
+        console.error("Error getting trending topics:", err);
+        return [];
+    }
 }

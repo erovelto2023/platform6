@@ -107,14 +107,11 @@ export function InvoiceForm({ clients, products = [], initialData }: InvoiceForm
         name: "items",
     });
 
-    const items = useWatch({
-        control: form.control,
-        name: "items",
-    });
+    const items = form.watch("items") || [];
 
     // Calculate row amounts when quantity or rate changes
     useEffect(() => {
-        items.forEach((item, index) => {
+        items.forEach((item: any, index: number) => {
             const quantity = Number(item.quantity) || 0;
             const rate = Number(item.rate) || 0;
             const amount = quantity * rate;
@@ -125,7 +122,7 @@ export function InvoiceForm({ clients, products = [], initialData }: InvoiceForm
         });
     }, [items, form]);
 
-    const subtotal = items.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const subtotal = items.reduce((sum: number, item: any) => sum + (item.amount || 0), 0);
     const tax = 0; 
     const total = subtotal + tax;
 

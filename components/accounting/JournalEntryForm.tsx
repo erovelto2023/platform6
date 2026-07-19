@@ -72,7 +72,7 @@ export default function JournalEntryForm({ initialData, accounts }: JournalEntry
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const defaultValues: Partial<JournalEntryFormValues> = initialData
+    const defaultValues: JournalEntryFormValues = initialData
         ? {
             ...initialData,
             date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
