@@ -52,25 +52,73 @@ export function CreatePost({ user }: CreatePostProps) {
         }
     };
 
+    const applyStarter = (type: 'win' | 'feedback' | 'help' | 'sprint') => {
+        if (type === 'win') {
+            setFeeling("🥳 Excited");
+            setContent("🏆 MY BIG WIN TODAY:\n\n🔑 KEY LEARNING:\n\n🚀 NEXT STEP:\n\n#ShareAWin");
+        } else if (type === 'feedback') {
+            setFeeling("🤔 Thinking");
+            setContent("🌐 MY FUNNEL LINK:\n\n🎯 TARGET AUDIENCE:\n\n❓ MY QUESTIONS:\n\n#FunnelFeedback");
+        } else if (type === 'help') {
+            setFeeling("😤 Frustrated");
+            setContent("💻 THE PROBLEM:\n\n💥 ERROR MESSAGE:\n\n⚙️ MY TECH STACK:\n\n#TechHelp");
+        } else if (type === 'sprint') {
+            setFeeling("🤩 Happy");
+            setContent("📦 MY SPRINT FOCUS:\n\n📈 GOAL:\n\n⏰ TIMELINE:\n\n#DropshippingSprint");
+        }
+    };
+
     return (
-        <Card className="mb-6">
+        <Card className="mb-6 border border-slate-150 shadow-sm">
             <CardContent className="p-4">
                 <div className="flex gap-4">
-                    <Avatar>
+                    <Avatar className="h-10 w-10">
                         <AvatarImage src={user.avatar || user.imageUrl} />
                         <AvatarFallback>{user.firstName?.[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
+                        {/* Post starters */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                            <button 
+                                type="button" 
+                                onClick={() => applyStarter('win')}
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition cursor-pointer flex items-center gap-1"
+                            >
+                                🏆 Share a Win
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => applyStarter('feedback')}
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer flex items-center gap-1"
+                            >
+                                💬 Funnel Feedback
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => applyStarter('help')}
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer flex items-center gap-1"
+                            >
+                                🛠️ Tech Help
+                            </button>
+                            <button 
+                                type="button" 
+                                onClick={() => applyStarter('sprint')}
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition cursor-pointer flex items-center gap-1"
+                            >
+                                ⚡ Active Sprint
+                            </button>
+                        </div>
+
                         <div className="mb-2">
                             {feeling && (
                                 <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full flex items-center gap-1 w-fit mb-2">
                                     is feeling {feeling}
-                                    <button onClick={() => setFeeling(null)} className="hover:text-red-500 ml-1"><X className="h-3 w-3" /></button>
+                                    <button onClick={() => setFeeling(null)} className="hover:text-red-500 ml-1 cursor-pointer"><X className="h-3 w-3" /></button>
                                 </span>
                             )}
                             <Textarea
-                                placeholder={`What's on your mind, ${user.firstName}?`}
-                                className="border-none resize-none bg-slate-50 focus-visible:ring-0 min-h-[80px]"
+                                placeholder="Share a win, ask for funnel feedback, or post a tech question..."
+                                className="border-none resize-none bg-slate-50 focus-visible:ring-0 min-h-[90px] text-slate-700 placeholder-slate-400"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                             />

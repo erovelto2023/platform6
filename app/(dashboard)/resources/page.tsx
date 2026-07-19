@@ -5,7 +5,12 @@ import { File, Download, ExternalLink, Video, Image as ImageIcon, FileText, Filt
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+import { getOrCreateUser } from "@/lib/actions/user.actions";
+import { Lock } from "lucide-react";
+
 export default async function ResourcesDashboardPage() {
+    const user = await getOrCreateUser();
+    const userLevel = user?.level || 1;
     const resources = await getResources();
     const publishedResources = resources.filter((resource: any) => resource.isPublished);
 
@@ -55,48 +60,76 @@ export default async function ResourcesDashboardPage() {
                         <p className="text-slate-500 mt-2">Check back soon for new business templates and downloads.</p>
                     </div>
                 ) : (
-                    publishedResources.map((resource: any) => (
-                        <div key={resource._id} className="group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-2xl hover:border-blue-500/50 transition-all duration-300 flex flex-col h-full">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className={cn(
-                                    "p-3 rounded-xl transition-colors",
-                                    getTypeColor(resource.type)
-                                )}>
-                                    {getTypeIcon(resource.type)}
-                                </div>
-                                <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-medium">
-                                    {resource.category}
-                                </Badge>
-                            </div>
+                    publishedResources.map((resource: any) => {
+                        const requiredLevel = resource.requiredLevel || (
+                            resource.title.toLowerCase().includes('pro') ? 3 : 
+                            resource.title.toLowerCase().includes('template') ? 2 : 1
+                        );
+                        const isLocked = userLevel < requiredLevel;
 
-                            <div className="flex-1">
-                                <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
-                                    {resource.title}
-                                </h3>
-                                <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
-                                    {resource.description || "No description provided."}
-                                </p>
-                            </div>
-
-                            <div className="mt-8">
-                                <Link href={resource.url} target="_blank">
-                                    <Button className="w-full rounded-xl bg-slate-900 hover:bg-blue-600 transition-all group" size="lg">
-                                        {resource.type === 'link' ? (
-                                            <>
-                                                Visit Resource
-                                                <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                                            </>
-                                        ) : (
-                                            <>
-                                                Download {resource.type.toUpperCase()}
-                                                <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
-                                            </>
+                        return (
+                            <div key={resource._id} className={`group relative bg-white rounded-2xl border p-6 transition-all duration-300 flex flex-col h-full ${
+                                isLocked 
+                                    ? "border-slate-100 opacity-80 bg-slate-50/50" 
+                                    : "border-slate-200 hover:shadow-2xl hover:border-indigo-500/50"
+                            }`}>
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className={cn(
+                                        "p-3 rounded-xl transition-colors",
+                                        isLocked ? "bg-slate-200 text-slate-400" : getTypeColor(resource.type)
+                                    )}>
+                                        {isLocked ? <Lock className="h-5 w-5" /> : getTypeIcon(resource.type)}
+                                    </div>
+                                    <div className="flex gap-1.5 items-center">
+                                        {isLocked && (
+                                            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 font-bold border-none text-[10px]">
+                                                Lvl {requiredLevel} Locked
+                                            </Badge>
                                         )}
-                                    </Button>
-                                </Link>
+                                        <Badge variant="secondary" className="bg-slate-100 text-slate-600 font-medium">
+                                            {resource.category}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <h3 className={`text-xl font-bold transition-colors mb-2 flex items-center gap-1.5 ${
+                                        isLocked ? "text-slate-500" : "text-slate-900 group-hover:text-indigo-600"
+                                    }`}>
+                                        {resource.title}
+                                    </h3>
+                                    <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
+                                        {resource.description || "No description provided."}
+                                    </p>
+                                </div>
+
+                                <div className="mt-8">
+                                    {isLocked ? (
+                                        <Button className="w-full rounded-xl bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200 flex items-center justify-center gap-2" size="lg" disabled>
+                                            <Lock className="h-4 w-4" />
+                                            Unlock at Level {requiredLevel}
+                                        </Button>
+                                    ) : (
+                                        <Link href={resource.url} target="_blank">
+                                            <Button className="w-full rounded-xl bg-slate-900 hover:bg-indigo-600 hover:text-white transition-all group" size="lg">
+                                                {resource.type === 'link' ? (
+                                                    <>
+                                                        Visit Resource
+                                                        <ExternalLink className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Download {resource.type.toUpperCase()}
+                                                        <Download className="h-4 w-4 ml-2 group-hover:translate-y-1 transition-transform" />
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
         </div>

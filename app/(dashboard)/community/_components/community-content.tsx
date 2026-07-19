@@ -9,6 +9,7 @@ import { SavedContent } from "./saved-content";
 import { FindMembers } from "./find-members";
 import { GroupsTab } from "./groups-tab";
 import { LeaderboardTab } from "./leaderboard-tab";
+import { OnboardingChecklist } from "./onboarding-checklist";
 
 interface CommunityContentProps {
     posts: any[];
@@ -23,13 +24,18 @@ export function CommunityContent({ posts, currentUser, activeTab, leaderboard = 
             {activeTab === "feed" && (
                 <>
                     <CreatePost user={currentUser} />
+                    
+                    {/* Onboarding Milestone Checkpoint */}
+                    <OnboardingChecklist currentUser={currentUser} />
+                    
                     <div className="space-y-4">
                         {posts.map((post: any) => (
                             <PostCard key={post._id} post={post} currentUser={currentUser} />
                         ))}
                         {posts.length === 0 && (
-                            <div className="text-center py-10 text-slate-500 bg-white rounded-lg border">
-                                No posts yet. Be the first to share something!
+                            <div className="text-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-100 shadow-sm px-4">
+                                <span className="text-base font-bold text-slate-700 block mb-1">Your community feed is ready!</span>
+                                <p className="text-xs text-slate-400 max-w-sm mx-auto">Use the templates or the onboarding checklist above to share your first post and earn your first XP points.</p>
                             </div>
                         )}
                     </div>

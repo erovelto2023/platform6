@@ -61,6 +61,10 @@ const ResourceSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    requiredLevel: {
+        type: Number,
+        default: 1, // Default level 1 to unlock
+    },
 }, { timestamps: true });
 
 const Resource = models.Resource || model('Resource', ResourceSchema);

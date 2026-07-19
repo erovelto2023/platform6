@@ -185,42 +185,6 @@ export function CommunitySidebar({
                 </CardContent>
             </Card>
 
-            {/* Fleshed Out Trending Topics (Skool Hashtag Filter) */}
-            <Card className="border border-slate-100 shadow-sm">
-                <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-indigo-500" />
-                        Trending Topics
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 pt-2 space-y-2">
-                    {trendingTopics.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                            {trendingTopics.map((topic) => {
-                                const isSelected = activeTag?.toLowerCase() === topic.name.toLowerCase();
-                                return (
-                                    <button
-                                        key={topic.name}
-                                        onClick={() => onTagSelect?.(isSelected ? null : topic.name)}
-                                        className={`px-2.5 py-1 text-xs font-semibold rounded-full border cursor-pointer transition duration-200 ${
-                                            isSelected 
-                                                ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                                                : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-800"
-                                        }`}
-                                    >
-                                        #{topic.name}
-                                        <span className={`ml-1 text-[10px] ${isSelected ? "text-indigo-200" : "text-slate-400"}`}>
-                                            ({topic.count})
-                                        </span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="text-center py-4 text-xs text-slate-400">No trending topics yet</div>
-                    )}
-                </CardContent>
-            </Card>
 
             {/* Skool Leaderboard Preview Widget */}
             <Card className="border border-slate-100 shadow-sm">
@@ -273,10 +237,10 @@ export function CommunitySidebar({
                 </CardContent>
             </Card>
 
-            {/* Photos Preview Card */}
+            {/* Project Showcase Gallery */}
             <Card className="border border-slate-100 shadow-sm">
                 <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">Photos</CardTitle>
+                    <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">Project Showcase</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-2">
                     <div className="grid grid-cols-3 gap-2">
@@ -291,8 +255,8 @@ export function CommunitySidebar({
                                 </div>
                             ))
                         ) : (
-                            <div className="col-span-3 text-center text-xs text-slate-400 py-4">
-                                No photos shared yet
+                            <div className="col-span-3 text-center text-xs text-slate-400 py-6 px-2">
+                                No showcase projects shared yet. Share a screenshot of your funnel or landing page!
                             </div>
                         )}
                     </div>

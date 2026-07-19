@@ -475,58 +475,5 @@ export async function getLeaderboard(timeframe: 'week' | 'month' | 'all' = 'all'
 }
 
 export async function getTrendingTopics() {
-    try {
-        await connectToDatabase();
-        const defaultTopics = [
-            { name: "SEO", count: 42, color: "text-emerald-500 bg-emerald-500/10" },
-            { name: "Dropshipping", count: 35, color: "text-blue-500 bg-blue-500/10" },
-            { name: "SaaS", count: 29, color: "text-indigo-500 bg-indigo-500/10" },
-            { name: "Copywriting", count: 25, color: "text-amber-500 bg-amber-500/10" },
-            { name: "AIAutomation", count: 21, color: "text-purple-500 bg-purple-500/10" },
-            { name: "AffiliateMarketing", count: 18, color: "text-rose-500 bg-rose-500/10" },
-            { name: "Solopreneur", count: 14, color: "text-cyan-500 bg-cyan-500/10" }
-        ];
-
-        const recentPosts = await CommunityPost.find({ content: /#/ })
-            .sort({ createdAt: -1 })
-            .limit(100)
-            .select('content');
-
-        const hashtagCounts: Record<string, number> = {};
-        recentPosts.forEach(post => {
-            const tags = post.content.match(/#[a-zA-Z0-9_]+/g);
-            if (tags) {
-                tags.forEach((tag: string) => {
-                    const cleanTag = tag.replace('#', '');
-                    hashtagCounts[cleanTag] = (hashtagCounts[cleanTag] || 0) + 1;
-                });
-            }
-        });
-
-        const dbTopics = Object.entries(hashtagCounts).map(([name, count]) => {
-            const colors = [
-                "text-emerald-500 bg-emerald-500/10",
-                "text-blue-500 bg-blue-500/10",
-                "text-indigo-500 bg-indigo-500/10",
-                "text-amber-500 bg-amber-500/10",
-                "text-purple-500 bg-purple-500/10",
-                "text-rose-500 bg-rose-500/10",
-                "text-cyan-500 bg-cyan-500/10"
-            ];
-            const randomIndex = Math.floor(Math.random() * colors.length);
-            return { name, count, color: colors[randomIndex] };
-        });
-
-        const allTopics = [...dbTopics];
-        defaultTopics.forEach(dt => {
-            if (!allTopics.some(t => t.name.toLowerCase() === dt.name.toLowerCase())) {
-                allTopics.push(dt);
-            }
-        });
-
-        return allTopics.sort((a, b) => b.count - a.count).slice(0, 7);
-    } catch (err) {
-        console.error("Error getting trending topics:", err);
-        return [];
-    }
+    return [];
 }
