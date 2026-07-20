@@ -16,7 +16,8 @@ import GlossaryTermStructuredData from "@/components/glossary/StructuredData";
 import AIPromptsSection from "@/components/glossary/AIPromptsSection";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
-import { autoLinkContent } from "@/lib/utils/glossary-utils";
+import { autoLinkContent, autoLinkContentHTML } from "@/lib/utils/glossary-utils";
+import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -196,10 +197,10 @@ export default async function GlossaryTermPage({ params }: Props) {
                             <div className="p-10 bg-white/70 backdrop-blur-xl border border-slate-200/50 rounded-[2.5rem] dark:bg-slate-800/40 dark:border-slate-700/50 mb-12 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group">
                                 <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-indigo-500 to-blue-600" />
                                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl group-hover:bg-indigo-500/10 transition-colors duration-700" />
-                                <p className="text-2xl md:text-3xl font-semibold text-slate-800 dark:text-slate-100 leading-snug relative z-10">
+                                <div className="text-2xl md:text-3xl font-semibold text-slate-800 dark:text-slate-100 leading-snug relative z-10">
                                     <span className="text-indigo-600 dark:text-indigo-400 font-black mr-3">Definition:</span> 
-                                    {autoLinkContent(serializedTerm.shortDefinition, termMap)}
-                                </p>
+                                    <CustomHTMLRenderer html={autoLinkContentHTML(serializedTerm.shortDefinition, termMap)} />
+                                </div>
                             </div>
                         )}
 
@@ -212,7 +213,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 What is {serializedTerm.term}?
                             </h2>
                             <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap space-y-4">
-                                {autoLinkContent(serializedTerm.definition, termMap)}
+                                <CustomHTMLRenderer html={autoLinkContentHTML(serializedTerm.definition, termMap)} />
                             </div>
 
                             {/* Expanded Explanation */}
@@ -225,7 +226,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                         Deeper Dive
                                     </h2>
                                     <div className="text-lg leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-wrap space-y-4">
-                                        {autoLinkContent(serializedTerm.expandedExplanation, termMap)}
+                                        <CustomHTMLRenderer html={autoLinkContentHTML(serializedTerm.expandedExplanation, termMap)} />
                                     </div>
 
                                     {/* Modern Usage snippet inside Deeper Dive */}

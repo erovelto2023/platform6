@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
+import Link from 'next/link';
 import parse, { attributesToProps, domToReact, HTMLReactParserOptions, Element } from 'html-react-parser';
 
 // beUI Components
@@ -62,14 +63,12 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
                     }
                 }
                 
-                // If we don't return here, the parser will ignore our modified `props` and render the original.
-                // However, we only return here if it's NOT a custom tag, otherwise our custom logic below won't run.
                 const customTags = [
                     'tilt-card', 'magnetic-button', 'marquee', 'scroll-reveal', 'checkbox', 
                     'motion-select', 'motion-select-trigger', 'motion-select-value', 'motion-select-content', 'motion-select-item',
                     'button', 'input', 'textarea', 'label', 'badge',
                     'card', 'card-header', 'card-title', 'card-description', 'card-content', 'card-footer',
-                    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption'
+                    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td', 'caption', 'a'
                 ];
 
                 const standardTags = new Set([
@@ -110,6 +109,13 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
                 }
 
                 // --- Auto-Upgrade Standard HTML & Custom Elements to Shadcn UI ---
+                if (domNode.name === 'a') {
+                    const href = (props.href || "") as string;
+                    if (href.startsWith('/') || href.startsWith('https://kbusinessacademy.com') || href.startsWith('http://localhost')) {
+                        const localPath = href.replace('https://kbusinessacademy.com', '').replace('http://localhost:3000', '').replace('http://localhost', '');
+                        return <Link {...props} href={localPath}>{children}</Link>;
+                    }
+                }
                 if (domNode.name === 'button') {
                     return <Button {...props} variant={props.variant as any || 'default'} size={props.size as any || 'default'}>{children}</Button>;
                 }
@@ -146,9 +152,8 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
 
                 // --- Map custom tags to our Shadcn/beUI React components ---
                 if (domNode.name === 'tilt-card') {
-                    // Extract props specifically meant for TiltCard
                     const tiltMax = props['max'] ? Number(props['max']) : 12;
-                    const glare = props['glare'] !== 'false'; // default true
+                    const glare = props['glare'] !== 'false';
                     
                     return (
                         <TiltCard max={tiltMax} glare={glare} className={props.className as string}>

@@ -10,6 +10,9 @@ import { ResourceActions } from "./_components/resource-actions";
 import { Banner } from "@/components/banner";
 import { CategoryForm } from "./_components/category-form";
 import { TypeForm } from "./_components/type-form";
+import { AccessForm } from "./_components/access-form";
+import { ThumbnailForm } from "./_components/thumbnail-form";
+import { EmbedCodeForm } from "./_components/embed-code-form";
 
 export default async function ResourceIdPage({
     params
@@ -51,7 +54,7 @@ export default async function ResourceIdPage({
                     label="This resource is unpublished. It will not be visible to users."
                 />
             )}
-            <div className="p-6">
+            <div className="p-6 max-w-5xl mx-auto">
                 <div className="flex items-center justify-between">
                     <div className="flex flex-col gap-y-2">
                         <h1 className="text-2xl font-medium">
@@ -67,12 +70,12 @@ export default async function ResourceIdPage({
                         isPublished={resource.isPublished}
                     />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
                     <div className="space-y-6">
                         <div>
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={LayoutDashboard} />
-                                <h2 className="text-xl">
+                                <h2 className="text-xl font-semibold">
                                     Customize your resource
                                 </h2>
                             </div>
@@ -84,14 +87,22 @@ export default async function ResourceIdPage({
                                 initialData={resource}
                                 resourceId={resource._id}
                             />
+                            <ThumbnailForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
                         </div>
                         <div>
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={ListChecks} />
-                                <h2 className="text-xl">
-                                    Organization
+                                <h2 className="text-xl font-semibold">
+                                    Access & Visibility
                                 </h2>
                             </div>
+                            <AccessForm
+                                initialData={resource}
+                                resourceId={resource._id}
+                            />
                             <CategoryForm
                                 initialData={resource}
                                 resourceId={resource._id}
@@ -106,13 +117,16 @@ export default async function ResourceIdPage({
                         <div>
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={File} />
-                                <h2 className="text-xl">
-                                    Resource Content
+                                <h2 className="text-xl font-semibold">
+                                    Resource Content & Embed Code
                                 </h2>
                             </div>
                             <FileForm
                                 initialData={resource}
                                 resourceId={resource._id}
+                            />
+                            <EmbedCodeForm
+                                resource={resource}
                             />
                         </div>
                     </div>

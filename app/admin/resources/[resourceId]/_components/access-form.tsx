@@ -1,10 +1,9 @@
 "use client";
 
-
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Pencil } from "lucide-react";
+import { Pencil, ShieldAlert, Users } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -18,37 +17,23 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { updateResource } from "@/lib/actions/resource.actions";
-import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface TypeFormProps {
+interface AccessFormProps {
     initialData: {
-        type: string;
+        access?: string;
     };
     resourceId: string;
-};
+}
 
 const formSchema = z.object({
-    type: z.string().min(1),
+    access: z.enum(["user", "admin"]),
 });
 
-const options = [
-    { label: "Ebook / Guide", value: "ebook" },
-    { label: "Document (Word/Text)", value: "doc" },
-    { label: "PDF Document", value: "pdf" },
-    { label: "Audio (MP3/Sound)", value: "audio" },
-    { label: "Spreadsheet (Excel/CSV)", value: "spreadsheet" },
-    { label: "Archive (Zip/Rar)", value: "archive" },
-    { label: "Image", value: "image" },
-    { label: "Video", value: "video" },
-    { label: "External Link", value: "link" },
-    { label: "Generic File", value: "file" },
-];
-
-export const TypeForm = ({
+export const AccessForm = ({
     initialData,
     resourceId
-}: TypeFormProps) => {
+}: AccessFormProps) => {
     const [isEditing, setIsEditing] = useState(false);
 
     const toggleEdit = () => setIsEditing((current) => !current);
@@ -57,46 +42,55 @@ export const TypeForm = ({
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-        defaultValues: initialData,
+        defaultValues: {
+            access: (initialData.access as "user" | "admin") || "user",
+        },
     });
 
     const { isSubmitting, isValid } = form.formState;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
-            await updateResource(resourceId, values as any);
-            toast.success("Resource updated");
+            await updateResource(resourceId, values);
+            toast.success("Access permissions updated");
             toggleEdit();
             router.refresh();
         } catch {
             toast.error("Something went wrong");
         }
-    }
+    };
 
-    const selectedOption = options.find((option) => option.value === initialData.type);
+    const isUserAccess = (initialData.access || "user") === "user";
 
     return (
         <div className="mt-6 border bg-slate-100 rounded-md p-4">
             <div className="font-medium flex items-center justify-between">
-                Resource type
-                <Button onClick={toggleEdit} variant="ghost">
+                Access Level (User vs Admin)
+                <Button onClick={toggleEdit} variant="ghost" size="sm">
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
                             <Pencil className="h-4 w-4 mr-2" />
-                            Edit type
+                            Edit access
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
-                <p className={cn(
-                    "text-sm mt-2",
-                    !initialData.type && "text-slate-500 italic"
-                )}>
-                    {selectedOption?.label || "No type"}
-                </p>
+                <div className="flex items-center gap-x-2 mt-2">
+                    {isUserAccess ? (
+                        <div className="flex items-center gap-1.5 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            <Users className="h-3.5 w-3.5" />
+                            User / Student Accessible
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-1.5 bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-1 rounded-md text-xs font-semibold">
+                            <ShieldAlert className="h-3.5 w-3.5" />
+                            Admin Only (Hidden from Students)
+                        </div>
+                    )}
+                </div>
             )}
             {isEditing && (
                 <Form {...form}>
@@ -106,7 +100,7 @@ export const TypeForm = ({
                     >
                         <FormField
                             control={form.control}
-                            name="type"
+                            name="access"
                             render={({ field }) => (
                                 <FormItem>
                                     <Select
@@ -115,18 +109,16 @@ export const TypeForm = ({
                                     >
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a type" />
+                                                <SelectValue placeholder="Select access scope" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {options.map((option) => (
-                                                <SelectItem
-                                                    key={option.value}
-                                                    value={option.value}
-                                                >
-                                                    {option.label}
-                                                </SelectItem>
-                                            ))}
+                                            <SelectItem value="user">
+                                                User / Student Accessible (Ebooks, Public Downloads)
+                                            </SelectItem>
+                                            <SelectItem value="admin">
+                                                Admin Only (Internal platform files, restricted)
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -137,13 +129,14 @@ export const TypeForm = ({
                             <Button
                                 disabled={isSubmitting}
                                 type="submit"
+                                size="sm"
                             >
-                                Save
+                                Save Access
                             </Button>
                         </div>
                     </form>
                 </Form>
             )}
         </div>
-    )
-}
+    );
+};

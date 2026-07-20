@@ -27,10 +27,19 @@ export async function createResource(title: string) {
     }
 }
 
-export async function getResources() {
+export async function getResources(options?: { access?: 'user' | 'admin' | 'all'; forStudent?: boolean }) {
     try {
         await connectDB();
-        const resources = await Resource.find({ isMedia: { $ne: true } }).sort({ createdAt: -1 }).lean();
+        const query: any = { isMedia: { $ne: true } };
+        
+        if (options?.forStudent) {
+            query.access = { $ne: 'admin' };
+            query.isPublished = true;
+        } else if (options?.access && options.access !== 'all') {
+            query.access = options.access;
+        }
+
+        const resources = await Resource.find(query).sort({ createdAt: -1 }).lean();
         return JSON.parse(JSON.stringify(resources));
     } catch (error) {
         console.error("Get resources error:", error);
@@ -49,13 +58,15 @@ export async function getResource(resourceId: string) {
     }
 }
 
-interface IResourceUpdate {
+export interface IResourceUpdate {
     title?: string;
     description?: string;
     url?: string;
-    type?: 'file' | 'link' | 'video' | 'image' | 'pdf';
+    type?: 'file' | 'link' | 'video' | 'image' | 'pdf' | 'audio' | 'doc' | 'ebook' | 'spreadsheet' | 'archive';
     category?: string;
     isPublished?: boolean;
+    thumbnailUrl?: string;
+    access?: 'user' | 'admin';
 }
 
 export async function updateResource(resourceId: string, values: IResourceUpdate) {
@@ -65,9 +76,9 @@ export async function updateResource(resourceId: string, values: IResourceUpdate
 
         await connectDB();
 
-        const resource = await Resource.findByIdAndUpdate(resourceId, {
-            ...values,
-        }, { new: true }).lean();
+        const updateData: any = { ...values };
+
+        const resource = await Resource.findByIdAndUpdate(resourceId, updateData, { new: true }).lean();
 
         revalidatePath(`/admin/resources/${resourceId}`);
         revalidatePath("/admin/resources");

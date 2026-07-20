@@ -12,11 +12,8 @@ export function autoLinkContent(text: string, termMap: Map<string, string>) {
     const terms = Array.from(termMap.keys()).sort((a, b) => b.length - a.length);
     
     // Create a regex that matches terms, avoiding terms inside existing HTML attributes or tags
-    // This is a simplified version; for complex HTML, a more robust parser would be needed.
-    // However, since definition fields are usually plain text or simple markdown, this works.
     const pattern = new RegExp(`\\b(${terms.map(t => escapeRegExp(t)).join('|')})\\b`, 'gi');
 
-    const parts = text.split(pattern);
     const result: (string | React.ReactNode)[] = [];
 
     text.split(pattern).forEach((part, i) => {
@@ -40,6 +37,28 @@ export function autoLinkContent(text: string, termMap: Map<string, string>) {
     });
 
     return result;
+}
+
+/**
+ * Generates an HTML string version of the auto-linked content.
+ */
+export function autoLinkContentHTML(text: string, termMap: Map<string, string>): string {
+    if (!text) return "";
+
+    const terms = Array.from(termMap.keys()).sort((a, b) => b.length - a.length);
+    if (terms.length === 0) return text;
+
+    const pattern = new RegExp(`\\b(${terms.map(t => escapeRegExp(t)).join('|')})\\b`, 'gi');
+
+    return text.replace(pattern, (match) => {
+        const lowerMatch = match.toLowerCase();
+        const slug = termMap.get(lowerMatch) || termMap.get(match);
+
+        if (slug) {
+            return `<a href="/glossary/${slug}" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline decoration-2 underline-offset-4">${match}</a>`;
+        }
+        return match;
+    });
 }
 
 function escapeRegExp(string: string) {

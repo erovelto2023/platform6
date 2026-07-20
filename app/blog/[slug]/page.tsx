@@ -10,6 +10,7 @@ import { Lock } from "lucide-react";
 import { calculateReadingTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { BlogTracker } from "@/components/analytics/blog-tracker";
+import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import "../blog-content.css";
 
@@ -118,7 +119,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
                 ) : (
                     <article className="blog-content prose prose-lg prose-indigo max-w-none">
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                        <CustomHTMLRenderer html={post.content} />
                     </article>
                 )}
             </main>

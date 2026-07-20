@@ -31,7 +31,8 @@ import {
     Briefcase,
     GraduationCap,
     ChevronDown,
-    Megaphone
+    Megaphone,
+    Layers
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";

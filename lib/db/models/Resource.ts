@@ -14,8 +14,13 @@ const ResourceSchema = new Schema({
     },
     type: {
         type: String,
-        enum: ['file', 'link', 'video', 'image', 'pdf'],
+        enum: ['file', 'link', 'video', 'image', 'pdf', 'audio', 'doc', 'ebook', 'spreadsheet', 'archive'],
         default: 'file',
+    },
+    access: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user',
     },
     altText: {
         type: String,
@@ -66,6 +71,10 @@ const ResourceSchema = new Schema({
         default: 1, // Default level 1 to unlock
     },
 }, { timestamps: true });
+
+if (process.env.NODE_ENV === 'development' && models.Resource) {
+    delete (models as any).Resource;
+}
 
 const Resource = models.Resource || model('Resource', ResourceSchema);
 
