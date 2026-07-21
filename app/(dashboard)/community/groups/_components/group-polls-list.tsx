@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { BarChart2, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { getSurveys } from "@/lib/services/survey.service";
+import { getSurveys } from "@/lib/actions/survey.actions";
 import { CreatePollDialog } from "./create-poll-dialog";
 
 interface GroupPollsListProps {

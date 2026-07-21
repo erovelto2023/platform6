@@ -258,15 +258,6 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:border-pink-500/50 group-hover:bg-pink-500/20"
                 },
                 {
-                    title: "Link Checker",
-                    description: "Perform real-time outbound redirect checks",
-                    href: "/admin/link-checker",
-                    icon: LinkIcon,
-                    color: "text-teal-400",
-                    bg: "bg-teal-500/10 border-teal-500/20",
-                    hover: "group-hover:border-teal-500/50 group-hover:bg-teal-500/20"
-                },
-                {
                     title: "Platform Tools",
                     description: "Enable or disable global site tools and features",
                     href: "/admin/tools",

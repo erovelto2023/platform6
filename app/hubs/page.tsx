@@ -8,6 +8,8 @@ export const metadata = {
   description: 'Browse all published content pillar hubs — science-backed guides built with semantic SEO and expert authorship.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function HubsDirectoryPage() {
   await dbConnect();
 

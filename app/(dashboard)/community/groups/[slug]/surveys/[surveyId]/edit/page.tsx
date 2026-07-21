@@ -1,4 +1,4 @@
-import { getSurvey } from "@/lib/services/survey.service";
+import { getSurvey } from "@/lib/actions/survey.actions";
 import SurveyBuilder from "@/components/surveys/survey-builder";
 import { notFound } from "next/navigation";
 

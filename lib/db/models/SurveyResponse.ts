@@ -12,10 +12,26 @@ const SurveyResponseSchema = new mongoose.Schema(
 
         answers: [AnswerSchema],
 
+        // Quiz scoring stats (if survey is a Quiz)
+        score: { type: Number, default: 0 },
+        maxScore: { type: Number, default: 0 },
+        passed: { type: Boolean, default: false },
+        outcomeId: { type: String }, // Calculated outcome ID (bucket or point range)
+
+        // Lead capture info
+        leadData: {
+            name: String,
+            email: String,
+            phone: String,
+            company: String,
+            customFields: { type: Map, of: String },
+        },
+
         metadata: {
             ipAddress: String,
             userAgent: String,
             timeTakenSeconds: Number,
+            completedQuestionsCount: Number,
         },
 
         status: {
@@ -27,9 +43,12 @@ const SurveyResponseSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Index for faster lookups of a user's response to a specific survey
 SurveyResponseSchema.index({ survey: 1, user: 1 });
 
-const SurveyResponse = mongoose.models.SurveyResponse || mongoose.model("SurveyResponse", SurveyResponseSchema);
+if (mongoose.models.SurveyResponse) {
+    delete mongoose.models.SurveyResponse;
+}
+
+const SurveyResponse = mongoose.model("SurveyResponse", SurveyResponseSchema);
 
 export default SurveyResponse;

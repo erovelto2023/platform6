@@ -157,8 +157,7 @@ const adminGroups: SidebarGroup[] = [
         icon: Wrench,
         color: "text-zinc-400",
         items: [
-            { label: "ScalePlus AI Suite", icon: Sparkles, href: "/admin/scaleplus", color: "text-violet-400" },
-            { label: "Link Checker", icon: LinkIcon, href: "/admin/link-checker", color: "text-cyan-400" }
+            { label: "ScalePlus AI Suite", icon: Sparkles, href: "/admin/scaleplus", color: "text-violet-400" }
         ]
     }
 ];

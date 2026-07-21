@@ -1,4 +1,4 @@
-import { getSurvey, checkUserResponse } from "@/lib/services/survey.service";
+import { getSurvey, checkUserResponse } from "@/lib/actions/survey.actions";
 import SurveyViewer from "@/components/surveys/survey-viewer";
 import { notFound, redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";

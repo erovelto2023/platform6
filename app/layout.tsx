@@ -59,7 +59,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider>
-      <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <html lang="en" suppressHydrationWarning className="scroll-smooth dark">
         <head>
           <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         </head>

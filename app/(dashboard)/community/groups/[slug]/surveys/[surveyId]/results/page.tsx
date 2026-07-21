@@ -1,4 +1,4 @@
-import { getSurvey, getSurveyResponses } from "@/lib/services/survey.service";
+import { getSurvey, getSurveyResponses } from "@/lib/actions/survey.actions";
 import SurveyResults from "@/components/surveys/survey-results";
 import { notFound } from "next/navigation";
 import Link from "next/link";
