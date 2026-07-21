@@ -23,6 +23,10 @@ import {
   Sliders,
   CheckSquare,
   Brain,
+  Target,
+  FlaskConical,
+  Users,
+  Eye,
 } from "lucide-react";
 
 import { CampaignWizardModal } from "@/components/admin/click-campaigns/CampaignWizardModal";
@@ -37,6 +41,11 @@ import { EmailSequenceMapper } from "@/components/admin/click-campaigns/EmailSeq
 import { PixelChecklist } from "@/components/admin/click-campaigns/PixelChecklist";
 import { AiCreativePrompterModal } from "@/components/admin/click-campaigns/AiCreativePrompterModal";
 import { CopywritingFrameworks } from "@/components/admin/click-campaigns/CopywritingFrameworks";
+import { PixelTrackingSystem } from "@/components/admin/click-campaigns/PixelTrackingSystem";
+import { ABTestingModule } from "@/components/admin/click-campaigns/ABTestingModule";
+import { AudienceSegmentationBuilder } from "@/components/admin/click-campaigns/AudienceSegmentationBuilder";
+import { BudgetOptimizationEngine } from "@/components/admin/click-campaigns/BudgetOptimizationEngine";
+import { CompetitorIntelligenceDashboard } from "@/components/admin/click-campaigns/CompetitorIntelligenceDashboard";
 
 export default function MarketingCampaignManagerPage() {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -116,22 +125,22 @@ export default function MarketingCampaignManagerPage() {
     {
       _id: "cp1",
       title: "AIDA Hook - Stop Tool Fatigue",
-      framework: "AIDA",
-      platform: "Meta",
-      headline: "Stop Juggling 10 Different Tools Just to Run One Campaign",
-      rawAiCopy: "Attention: Most online marketers waste 15+ hours a week logging into separated platforms.\nInterest: Consolidated Media Assets, Copy Vaults, and Analytics in 1 dashboard.\nDesire: Launch fully optimized campaigns in under 10 minutes.\nAction: Click to claim your free access today!",
-      humanTouchCopy: "💡 Founder Story: When I started back in 2021, I was losing track of my Facebook pixel events constantly. This exact setup fixed everything for me.",
+      contentType: "headline",
+      platform: "facebook",
+      content: "Stop Juggling 10 Different Tools Just to Run One Campaign",
+      context: "Attention: Most online marketers waste 15+ hours a week logging into separated platforms.\nInterest: Consolidated Media Assets, Copy Vaults, and Analytics in 1 dashboard.\nDesire: Launch fully optimized campaigns in under 10 minutes.\nAction: Click to claim your free access today!",
+      source: "💡 Founder Story: When I started back in 2021, I was losing track of my Facebook pixel events constantly. This exact setup fixed everything for me.",
       performanceTag: "Winner",
       historicalCtr: 4.2,
     },
     {
       _id: "cp2",
       title: "PAS Problem Agitate Solution - Pinterest",
-      framework: "PAS",
-      platform: "Pinterest",
-      headline: "Struggling with Low Pinterest CTR?",
-      rawAiCopy: "Problem: Your pins aren't getting impressions.\nAgitate: Horizontal 16:9 images get buried by vertical pins on mobile.\nSolution: Switch to 2:3 vertical templates with bold headline overlays.",
-      humanTouchCopy: "👉 Note: Pinterest favors fresh 2:3 pins with high contrast text overlays.",
+      contentType: "headline",
+      platform: "pinterest",
+      content: "Struggling with Low Pinterest CTR?",
+      context: "Problem: Your pins aren't getting impressions.\nAgitate: Horizontal 16:9 images get buried by vertical pins on mobile.\nSolution: Switch to 2:3 vertical templates with bold headline overlays.",
+      source: "👉 Note: Pinterest favors fresh 2:3 pins with high contrast text overlays.",
       performanceTag: "High CTR",
       historicalCtr: 3.8,
     },
@@ -329,6 +338,11 @@ export default function MarketingCampaignManagerPage() {
           { id: "pixel", label: "Pixel Verification", icon: CheckSquare },
           { id: "specs", label: "Platform Specs", icon: Layers },
           { id: "brand", label: "Brand Vault", icon: ShieldCheck },
+          { id: "pixelsystem", label: "Pixel Tracking", icon: Target },
+          { id: "abtesting", label: "A/B Testing", icon: FlaskConical },
+          { id: "segments", label: "Audience Segments", icon: Users },
+          { id: "budget", label: "Budget Optimization", icon: Sliders },
+          { id: "competitors", label: "Competitor Intel", icon: Eye },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -503,6 +517,21 @@ export default function MarketingCampaignManagerPage() {
       {activeTab === "brand" && (
         <BrandVaultEditor brandData={brandVault} onSaveBrand={handleSaveBrand} />
       )}
+
+      {/* TAB CONTENT: PIXEL TRACKING SYSTEM */}
+      {activeTab === "pixelsystem" && <PixelTrackingSystem />}
+
+      {/* TAB CONTENT: A/B TESTING MODULE */}
+      {activeTab === "abtesting" && <ABTestingModule />}
+
+      {/* TAB CONTENT: AUDIENCE SEGMENTATION BUILDER */}
+      {activeTab === "segments" && <AudienceSegmentationBuilder />}
+
+      {/* TAB CONTENT: BUDGET OPTIMIZATION ENGINE */}
+      {activeTab === "budget" && <BudgetOptimizationEngine />}
+
+      {/* TAB CONTENT: COMPETITOR INTELLIGENCE DASHBOARD */}
+      {activeTab === "competitors" && <CompetitorIntelligenceDashboard />}
 
       {/* Modals */}
       <CampaignWizardModal

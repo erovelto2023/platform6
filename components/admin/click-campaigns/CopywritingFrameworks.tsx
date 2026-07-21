@@ -6,8 +6,16 @@ import {
   ChevronDown, ChevronUp, Copy, Check, Sparkles,
   Target, BarChart3, Eye, Heart, Shield, TrendingUp,
   MessageSquare, BookOpen, Lightbulb, Star, AlertCircle,
-  Users, Layers, ArrowRight, Clock, DollarSign, Award,
+  Users, Layers, ArrowRight, Clock, DollarSign, Award, X, Search, Filter,
 } from "lucide-react";
+import {
+  getRecommendedTriggers,
+  getTriggersByCategory,
+  getTriggerById,
+  PsychologicalTrigger,
+  TriggerCategory,
+  TriggerApplication,
+} from "@/lib/data/psychological-triggers";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface CopyFramework {
@@ -436,6 +444,39 @@ export const allFrameworks: CopyFramework[] = [
     ],
     appTip: "Each tier's copy should make the next tier feel like a natural upgrade, not an upsell. Never let a tier feel 'complete' — leave a compelling gap.",
   },
+  {
+    id: "makepeace-20",
+    acronym: "MAKEPEACE 20",
+    name: "Clayton Makepeace's 20-Point Long-Form Outline",
+    category: "Landing Pages & Sales Pages",
+    tagline: "The outline behind million-dollar sales letters. Complete long-form architecture.",
+    bestFor: "10,000-word sales letters, VSL scripts, high-ticket sales pages, direct mail packages",
+    complexity: "Advanced",
+    structure: [
+      { label: "1. Grab 'Em by the Eyeballs", description: "Make the attention sale. Combine the most compelling benefit with curiosity to flag down your ideal prospect.", example: "Stop the scroll instantly with your boldest claim or most disruptive hook. Pattern interrupts or direct promises both work." },
+      { label: "2. Support and Expand on Your Headline", description: "Pay off whatever you used to pull their attention. Connect headline to opening copy so it flows naturally.", example: "Reinforce the benefit promised and continue stoking curiosity. Don't make a hard left turn from your headline." },
+      { label: "3. Establish Credibility", description: "Prove you're a credible authority worth paying attention to. Counter believability challenges in crowded markets.", example: "Show credentials, results, or authority signals. Too many shysters make the same promises — prove you're different." },
+      { label: "4. Bribe Him to Read This", description: "Keep their attention with promises of what will be revealed in the advertisement itself. Readership bribes.", example: "Promise valuable revelations within the ad. The more perceived value of what they'll get, the more likely they stay to the end." },
+      { label: "5. Deliver Value", description: "Give away tons of value without revealing all. Educate on the problem while stoking curiosity for the solution.", example: "Help them understand the problem your product will solve. Don't over-teach — illuminate the problem and set criteria for solutions." },
+      { label: "6. Present Your 'Big Promise'", description: "Reveal major benefits of your product. Say 'I can help' before officially introducing the product.", example: "Promise the benefit they want or solution they crave. This is where you transition from problem to possibility." },
+      { label: "7. Prove Your Point", description: "Counter 'Yeah, right!' reactions with clear, compelling proof that you can deliver on your promise.", example: "Demonstrations, case studies, and stories. Your prospect has been burned before — prove you're different." },
+      { label: "8. Snapshot of the Future 'Him'", description: "Make it feel real in their life using future-pacing. Paint vivid word pictures of their transformed life.", example: "What will it feel like to be free of fears and frustrations? State in present tense: 'Just imagine... we've set this up and it's creating results.'" },
+      { label: "9. Present Your Product and Prove Each Benefit", description: "Convey they'll get the big promise by buying a specific product. Present USP and how it fulfills buying criteria.", example: "Go from 'I can solve this' to 'It's all part of XYZ product.' Explain how it's specially created to fulfill your promise." },
+      { label: "10. Make the Offer", description: "Present the offer risk-free and slanted toward the buyer. This happens in the last 25% but determines success.", example: "40% of success is your offer. Present great lengths you've gone to over-deliver. Make them ready to buy right now." },
+      { label: "11. Trivialize Your Price", description: "Illustrate what a great deal they're getting. Explain blood, sweat, and tears. Compare apples to oranges.", example: "If delivered in person, it would cost 100X. Make it sound like the deal of the century — because it should be." },
+      { label: "12. Add Value", description: "Throw in more value on top. Add extra bonuses. Pile value on top of value.", example: "If they thought it was a great deal before, now it should feel like the irresistible deal of a lifetime." },
+      { label: "13. Relieve Risk", description: "YOU take on the risk, NOT the buyer. Present your guarantee — the bolder, the better.", example: "100% money-back minimum. Longer guarantees = fewer refunds. 200% guarantees work for world-class marketers. Let them keep premiums." },
+      { label: "14. Sum Up", description: "Point out it's a no-brainer. Lay out details again: what they're getting, at what price, under what guarantee.", example: "Quickly sum up offer details. Tie back to the big promise from the headline. Make sure they remember everything." },
+      { label: "15. Ask for the Sale", description: "Be direct and clear. Tell them to buy. Don't get timid — they won't believe you believe in yourself.", example: "Be confident because you know their life will be better by buying. Tell them to order directly." },
+      { label: "16. Make Ordering Stupid Easy", description: "Tell them the exact process to order. What happens when they place their order and how you'll fulfill.", example: "Include multiple response methods. Eliminate confusion from the ordering process. The easier, the better." },
+      { label: "17. Place Him at the Crossroads", description: "Emphasize they have to make a decision. Lay out what happens if they do take action vs. if they don't.", example: "They're at a fork in the road. Choose to have your big promise fulfilled, or go on living without it. Make the choice clear." },
+      { label: "18. Ask for the Sale – AGAIN", description: "Again, be direct and clear. Tell them to order NOW. That's what it takes to start fulfillment.", example: "Because that's what it's going to take for them to start having that big promise fulfilled in their life." },
+      { label: "19. Sweeten the Pot", description: "They still haven't ordered? Add something else. Make it even more compelling to respond.", example: "Add another bonus or fresh look at something already in the product. Make it even more compelling!" },
+      { label: "20. Add an Urgency Element", description: "Add REAL urgency to get them off their duff. Limited quantity, deadline, or combine both. Don't fake it.", example: "Emphasize limited quantity for physical products, deadline for time-based. Create urgency around factors in their life if needed." },
+    ],
+    psychPrinciple: "Progressive Commitment: Each step builds psychological momentum. By the time they reach the urgency element, they've already invested mentally in the transformation.",
+    proTip: "This outline is for 10,000-word promos. Don't rush. Each point deserves its due. The magic is in the cumulative effect of all 20 steps working together.",
+  },
 
   // ── 4. Social Media Organic Content ────────────────────────────────────
   {
@@ -744,6 +785,29 @@ export const allFrameworks: CopyFramework[] = [
     ],
     psychPrinciple: "Commitment & Consistency + Progress Effect: Each small commitment makes the next one easier. People feel invested and continue to validate past decisions through forward action.",
   },
+  {
+    id: "direct-mail-case-studies",
+    acronym: "DIRECT MAIL CASES",
+    name: "10 Best Direct Mail Marketing Letters - Case Studies",
+    category: "Psychological Triggers",
+    tagline: "Real-world direct mail examples with proven results and ROI metrics.",
+    bestFor: "Direct mail campaigns, offline marketing, physical mail pieces, fundraising appeals",
+    complexity: "Intermediate",
+    structure: [
+      { label: "1. Special Offer Letter", description: "Robertson Piano Services used a heartfelt letter from new owner with family photo, rebranding announcement, and 20% off offer. Targeted 2010+ clients.", example: "Results: 124 new appointments in 4 months, 80% from direct mail, $12,375 revenue. Key: Personal story + generous offer." },
+      { label: "2. Visual Appeal Letter", description: "National Audubon Society used stunning bird and habitat imagery with clever page layout to capture attention for fundraising.", example: "Results: Enhanced donor engagement through powerful visuals. Key: Images that capture hearts before the ask." },
+      { label: "3. Land Investor Letter", description: "Phoenix land investor sent 20,159 letters (1,000-6,000/month) outlining benefits of selling to professional.", example: "Results: $4M revenue, 600 responses, 200 conversions, 12,233% ROI. Key: Consistent monthly mailings + clear benefits." },
+      { label: "4. Story-Based Letter", description: "Reservation Animal Rescue used heartfelt stories to humanize their cause and make donating feel personal.", example: "Results: Increased donations through emotional connection. Key: Authentic stories turn abstract needs into compelling needs." },
+      { label: "5. Personalized Checklist Letter", description: "Mini Jobs sent 16,131 letters with service list, contact cut-out, and repair checklist on back.", example: "Results: 140 responses, 100% conversion, $77,000 revenue, 355% ROI. Key: Practical utility + personalization." },
+      { label: "6. Cash Offer Letter", description: "Newport News land investor sent 5,101 letters with personalized headers, service details, and cash offer.", example: "Results: 10 responses, $180,000 revenue, 6,335% ROI on $2,797 investment. Key: Specific cash offer + weekly mailings." },
+      { label: "7. Interactive Quiz Letter", description: "Harvard Heart Letter newsletter used a quiz on outer envelope to pique curiosity before opening.", example: "Results: Higher engagement rates. Key: Interactive elements increase open rates and engagement." },
+      { label: "8. Newsletter Letter", description: "North Shore Animal League sent newsletters with stories, photos, and rescue updates to maintain donor connection.", example: "Results: Stronger donor relationships and continued commitment. Key: Consistent content delivery + gratitude." },
+      { label: "9. Multi-Channel Letter", description: "New Mexico land investor combined direct mail with Google, Instagram, and Facebook ads for coordinated approach.", example: "Results: 14 blind offers in 1 month, $600,000 estimated revenue. Key: Multi-channel coordination + targeted list." },
+      { label: "10. Welcome Reassurance Letter", description: "Asurion sent personalized letters to Verizon customers acknowledging device purchase and reassuring about insurance.", example: "Results: Increased trust and reliability perception. Key: Timely reassurance + personalized acknowledgment." },
+    ],
+    psychPrinciple: "Tangibility Effect: Physical mail creates a stronger memory imprint than digital. The tactile experience increases perceived value and trust.",
+    proTip: "Direct mail ROI often exceeds digital when combined with personalization and clear offers. The highest ROI examples (6,335% and 12,233%) came from land investing with specific, targeted offers.",
+  },
 ];
 
 // ─── Category Config ──────────────────────────────────────────────────────────
@@ -762,10 +826,316 @@ const COMPLEXITY_CONFIG: Record<string, { color: string; dot: string }> = {
   Advanced: { color: "text-rose-400", dot: "bg-rose-400" },
 };
 
+// ─── AI Prompt Modal ───────────────────────────────────────────────────────────
+const AiPromptModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  framework: CopyFramework;
+  onGenerate: (prompt: string) => void;
+}> = ({ isOpen, onClose, framework, onGenerate }) => {
+  const [formData, setFormData] = useState({
+    productService: "",
+    targetAudience: "",
+    keyBenefits: "",
+    desiredOutcome: "",
+    constraints: "",
+  });
+  
+  const [selectedTriggers, setSelectedTriggers] = useState<PsychologicalTrigger[]>([]);
+  const [showTriggerSelector, setShowTriggerSelector] = useState(false);
+  const [triggerSearch, setTriggerSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<TriggerCategory | "all">("all");
+
+  if (!isOpen) return null;
+
+  // Get recommended triggers based on framework
+  const recommendedTriggers = getRecommendedTriggers("headline" as TriggerApplication, "solution_aware", "landing_page", 3);
+  
+  // Filter triggers based on search and category
+  let availableTriggers = getTriggersByCategory(selectedCategory === "all" ? "cognitive_biases" : selectedCategory);
+  if (selectedCategory === "all") {
+    availableTriggers = [
+      ...getTriggersByCategory("cognitive_biases"),
+      ...getTriggersByCategory("social_influence"),
+      ...getTriggersByCategory("emotional_motivational"),
+    ];
+  }
+  
+  if (triggerSearch) {
+    availableTriggers = availableTriggers.filter(trigger =>
+      trigger.name.toLowerCase().includes(triggerSearch.toLowerCase()) ||
+      trigger.description.toLowerCase().includes(triggerSearch.toLowerCase())
+    );
+  }
+
+  const toggleTrigger = (trigger: PsychologicalTrigger) => {
+    setSelectedTriggers(prev =>
+      prev.find(t => t.id === trigger.id)
+        ? prev.filter(t => t.id !== trigger.id)
+        : [...prev, trigger]
+    );
+  };
+
+  const handleSubmit = () => {
+    const triggersSection = selectedTriggers.length > 0 
+      ? `PSYCHOLOGICAL TRIGGERS TO APPLY:
+${selectedTriggers.map(trigger => `- ${trigger.name}: ${trigger.description}
+  Mechanism: ${trigger.mechanism}
+  Application: ${trigger.applications.join(", ")}`).join('\n\n')}
+
+`
+      : '';
+
+    const prompt = `You are an expert direct response copywriter. Please create copy using the ${framework.name} framework (${framework.acronym}).
+
+FRAMEWORK OVERVIEW:
+- Name: ${framework.name}
+- Category: ${framework.category}
+- Best For: ${framework.bestFor}
+- Complexity: ${framework.complexity}
+- Tagline: ${framework.tagline}
+
+FRAMEWORK STRUCTURE:
+${framework.structure.map((step, idx) => `${idx + 1}. ${step.label}
+   Description: ${step.description}
+   Example: "${step.example}"
+`).join('\n')}
+
+${framework.psychPrinciple ? `FRAMEWORK PSYCHOLOGICAL PRINCIPLE:\n${framework.psychPrinciple}\n\n` : ''}${framework.proTip ? `FRAMEWORK PRO TIP:\n${framework.proTip}\n\n` : ''}${triggersSection}USER DETAILS:
+- Product/Service: ${formData.productService}
+- Target Audience: ${formData.targetAudience}
+- Key Benefits/Features: ${formData.keyBenefits}
+- Desired Outcome: ${formData.desiredOutcome}
+${formData.constraints ? `- Constraints/Requirements: ${formData.constraints}\n\n` : ''}INSTRUCTIONS:
+1. Follow the framework structure exactly as outlined above
+2. Use the framework's psychological principle to guide your approach
+3. Apply the framework's pro tips to enhance effectiveness
+${selectedTriggers.length > 0 ? `4. Incorporate the selected psychological triggers naturally throughout the copy\n5. Each trigger should enhance the persuasive impact without feeling forced\n6. Use trigger-specific mechanisms to influence decision-making\n` : `4. `}
+${selectedTriggers.length > 0 ? `7. ` : `4. `}Create compelling, conversion-focused copy for the specified product/service
+${selectedTriggers.length > 0 ? `8. ` : `5. `}Target the specified audience with relevant messaging
+${selectedTriggers.length > 0 ? `9. ` : `6. `}Highlight the key benefits/features provided
+${selectedTriggers.length > 0 ? `10. ` : `7. `}Drive toward the desired outcome
+${selectedTriggers.length > 0 ? `11. ` : `8. `}${formData.constraints ? `Respect the following constraints: ${formData.constraints}` : 'No specific constraints'}
+${selectedTriggers.length > 0 ? `12. Include all framework elements in order
+13. Ensure psychological triggers are applied ethically and appropriately for the context` : `9. Include all framework elements in order`}
+
+Please generate the complete copy following this framework with the details provided above.`;
+    onGenerate(prompt);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 space-y-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-950 border border-purple-800 rounded-xl">
+                <Brain className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-100">Generate AI Prompt</h3>
+                <p className="text-xs text-slate-400">{framework.name}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-lg transition">
+              <X className="w-4 h-4 text-slate-400" />
+            </button>
+          </div>
+
+          {/* Psychological Triggers Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-[11px] font-semibold text-slate-300">Psychological Triggers (Optional)</label>
+              <button
+                onClick={() => setShowTriggerSelector(!showTriggerSelector)}
+                className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1 transition"
+              >
+                <Zap className="w-3 h-3" /> {showTriggerSelector ? 'Hide' : 'Add Triggers'}
+              </button>
+            </div>
+
+            {selectedTriggers.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {selectedTriggers.map(trigger => (
+                  <span
+                    key={trigger.id}
+                    className="px-2 py-1 bg-purple-950 border border-purple-800 rounded-md text-[10px] text-purple-300 flex items-center gap-1"
+                  >
+                    {trigger.name}
+                    <button
+                      onClick={() => toggleTrigger(trigger)}
+                      className="hover:text-purple-100 transition"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {showTriggerSelector && (
+              <div className="bg-slate-950 border border-slate-700 rounded-xl p-4 space-y-3">
+                {/* Search and Filter */}
+                <div className="flex gap-2">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500" />
+                    <input
+                      type="text"
+                      placeholder="Search triggers..."
+                      value={triggerSearch}
+                      onChange={(e) => setTriggerSearch(e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-600 rounded-lg pl-7 pr-3 py-1.5 text-[10px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value as TriggerCategory | "all")}
+                    className="bg-slate-900 border border-slate-600 rounded-lg px-2 py-1.5 text-[10px] text-slate-200 focus:outline-none focus:border-purple-500"
+                  >
+                    <option value="all">All Categories</option>
+                    <option value="cognitive_biases">Cognitive Biases</option>
+                    <option value="social_influence">Social Influence</option>
+                    <option value="emotional_motivational">Emotional</option>
+                  </select>
+                </div>
+
+                {/* Recommended Triggers */}
+                {recommendedTriggers.length > 0 && triggerSearch === "" && selectedCategory === "all" && (
+                  <div>
+                    <div className="text-[10px] font-semibold text-purple-400 mb-2 flex items-center gap-1">
+                      <Lightbulb className="w-3 h-3" /> Recommended for this framework
+                    </div>
+                    <div className="space-y-1.5">
+                      {recommendedTriggers.map(trigger => (
+                        <button
+                          key={trigger.id}
+                          onClick={() => toggleTrigger(trigger)}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-[10px] transition ${
+                            selectedTriggers.find(t => t.id === trigger.id)
+                              ? "bg-purple-900 border border-purple-700 text-purple-200"
+                              : "bg-slate-900 border border-slate-700 text-slate-300 hover:border-slate-600"
+                          }`}
+                        >
+                          <div className="font-medium">{trigger.name}</div>
+                          <div className="text-[9px] text-slate-400 mt-0.5 truncate">{trigger.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* All Available Triggers */}
+                <div>
+                  <div className="text-[10px] font-semibold text-slate-400 mb-2">Available Triggers</div>
+                  <div className="max-h-40 overflow-y-auto space-y-1.5">
+                    {availableTriggers.slice(0, 10).map(trigger => (
+                      <button
+                        key={trigger.id}
+                        onClick={() => toggleTrigger(trigger)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-[10px] transition ${
+                          selectedTriggers.find(t => t.id === trigger.id)
+                            ? "bg-purple-900 border border-purple-700 text-purple-200"
+                            : "bg-slate-900 border border-slate-700 text-slate-300 hover:border-slate-600"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{trigger.name}</span>
+                          <span className="text-[9px] text-slate-500">{trigger.effectiveness}/10</span>
+                        </div>
+                        <div className="text-[9px] text-slate-400 mt-0.5 truncate">{trigger.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">Product/Service *</label>
+              <textarea
+                value={formData.productService}
+                onChange={(e) => setFormData({ ...formData, productService: e.target.value })}
+                placeholder="What are you selling or promoting?"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">Target Audience *</label>
+              <textarea
+                value={formData.targetAudience}
+                onChange={(e) => setFormData({ ...formData, targetAudience: e.target.value })}
+                placeholder="Who are you trying to reach?"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">Key Benefits/Features *</label>
+              <textarea
+                value={formData.keyBenefits}
+                onChange={(e) => setFormData({ ...formData, keyBenefits: e.target.value })}
+                placeholder="What are the main benefits or features?"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">Desired Outcome *</label>
+              <textarea
+                value={formData.desiredOutcome}
+                onChange={(e) => setFormData({ ...formData, desiredOutcome: e.target.value })}
+                placeholder="What do you want the reader to do?"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-semibold text-slate-300 block mb-1.5">Constraints/Requirements (Optional)</label>
+              <textarea
+                value={formData.constraints}
+                onChange={(e) => setFormData({ ...formData, constraints: e.target.value })}
+                placeholder="Any specific requirements or limitations?"
+                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-semibold rounded-xl transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={!formData.productService || !formData.targetAudience || !formData.keyBenefits || !formData.desiredOutcome}
+              className="flex-1 px-4 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Generate Prompt
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Framework Card ───────────────────────────────────────────────────────────
 const FrameworkCard: React.FC<{ fw: CopyFramework }> = ({ fw }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copiedStep, setCopiedStep] = useState<string | null>(null);
+  const [showAiPromptModal, setShowAiPromptModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
   const catConfig = CATEGORY_CONFIG[fw.category];
   const complexConfig = COMPLEXITY_CONFIG[fw.complexity];
   const CatIcon = catConfig.icon;
@@ -773,6 +1143,17 @@ const FrameworkCard: React.FC<{ fw: CopyFramework }> = ({ fw }) => {
   const copyStep = (text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedStep(id);
+    setTimeout(() => setCopiedStep(null), 1500);
+  };
+
+  const handlePromptGenerated = (prompt: string) => {
+    setAiPrompt(prompt);
+    setShowAiPromptModal(false);
+  };
+
+  const copyAiPrompt = () => {
+    navigator.clipboard.writeText(aiPrompt);
+    setCopiedStep('ai-prompt');
     setTimeout(() => setCopiedStep(null), 1500);
   };
 
@@ -880,8 +1261,44 @@ const FrameworkCard: React.FC<{ fw: CopyFramework }> = ({ fw }) => {
               </div>
             </div>
           )}
+
+          {/* AI Prompt Generator */}
+          <div className="bg-gradient-to-r from-purple-950/40 to-blue-950/40 border border-purple-800/50 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider">AI Prompt Generator</span>
+              </div>
+              <button
+                onClick={() => setShowAiPromptModal(true)}
+                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold rounded-lg transition flex items-center gap-1.5"
+              >
+                <Brain className="w-3 h-3" /> Generate Prompt
+              </button>
+            </div>
+            {aiPrompt && (
+              <div className="space-y-3">
+                <div className="bg-slate-950 border border-slate-700 rounded-lg p-3">
+                  <pre className="text-[10px] text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">{aiPrompt}</pre>
+                </div>
+                <button
+                  onClick={copyAiPrompt}
+                  className="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-[11px] font-semibold rounded-lg transition flex items-center justify-center gap-2"
+                >
+                  {copiedStep === 'ai-prompt' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedStep === 'ai-prompt' ? 'Prompt Copied!' : 'Copy AI Prompt'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
+      <AiPromptModal
+        isOpen={showAiPromptModal}
+        onClose={() => setShowAiPromptModal(false)}
+        framework={fw}
+        onGenerate={handlePromptGenerated}
+      />
     </div>
   );
 };

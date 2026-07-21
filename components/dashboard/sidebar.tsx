@@ -118,7 +118,7 @@ const adminGroups: SidebarGroup[] = [
         items: [
             { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },
             { label: "Affiliate Catalog", icon: FileStack, href: "/admin/affiliate-catalog", color: "text-blue-300" },
-            { label: "Campaign Manager", icon: Sparkles, href: "/admin/click-campaigns/new", color: "text-violet-400" },
+            { label: "Campaign Manager", icon: Sparkles, href: "/admin/click-campaigns", color: "text-violet-400" },
             { label: "Media Center", icon: Film, href: "/admin/media", color: "text-pink-400" },
             { label: "Partner Management", icon: Sparkles, href: "/admin/partners", color: "text-amber-400" },
             { label: "Platform Tools", icon: Wrench, href: "/admin/tools", color: "text-orange-500" },
