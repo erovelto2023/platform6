@@ -4,6 +4,8 @@ export interface IPowerWord {
   _id?: string;
   word: string;
   category: "urgency_scarcity" | "curiosity_mystery" | "ease_speed" | "trust_authority" | "exclusivity_belonging" | "value_gain" | "fear_pain";
+  subcategory?: string;
+  pressureLevel?: "low" | "medium" | "high";
   synonyms?: string[];
   examples?: string[];
   psychology: string;
@@ -21,6 +23,8 @@ const PowerWordSchema = new Schema<IPowerWord>(
       enum: ["urgency_scarcity", "curiosity_mystery", "ease_speed", "trust_authority", "exclusivity_belonging", "value_gain", "fear_pain"],
       required: true 
     },
+    subcategory: { type: String },
+    pressureLevel: { type: String, enum: ["low", "medium", "high"] },
     synonyms: [{ type: String }],
     examples: [{ type: String }],
     psychology: { type: String, required: true },

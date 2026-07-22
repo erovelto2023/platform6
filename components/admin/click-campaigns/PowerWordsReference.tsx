@@ -11,6 +11,8 @@ export interface PowerWord {
   _id?: string;
   word: string;
   category: string;
+  subcategory?: string;
+  pressureLevel?: "low" | "medium" | "high";
   synonyms?: string[];
   examples?: string[];
   psychology: string;
@@ -28,6 +30,65 @@ const CATEGORIES = [
   { value: "fear_pain", label: "Fear & Pain", icon: AlertTriangle, color: "orange", description: "The 'Problem Agitation' Trigger" },
 ];
 
+const PRESSURE_LEVELS = [
+  { value: "all", label: "All Pressure Levels", color: "slate" },
+  { value: "low", label: "Low Pressure (Nurture)", color: "blue", description: "Gentle urgency for brand-building" },
+  { value: "medium", label: "Medium Pressure (Announcement)", color: "amber", description: "Balanced urgency for announcements" },
+  { value: "high", label: "High Pressure (Closing)", color: "red", description: "Strong urgency for final calls" },
+];
+
+const SUBCATEGORIES = {
+  urgency_scarcity: [
+    { value: "time_based", label: "Time-Based (The Clock)", description: "Time is running out" },
+    { value: "deadline_driven", label: "Deadline-Driven", description: "Specific end point" },
+    { value: "speed_efficiency", label: "Speed/Efficiency", description: "Fast results" },
+    { value: "quantity_based", label: "Quantity-Based (The Vault)", description: "Supply is limited" },
+    { value: "exclusivity", label: "Exclusivity", description: "Special status" },
+    { value: "action_oriented", label: "Action-Oriented (The Push)", description: "Direct commands" },
+    { value: "soft_urgency", label: "Soft Urgency", description: "Brand-building" },
+  ],
+  curiosity_mystery: [
+    { value: "secret_hidden", label: "Secret/Hidden", description: "Insider information" },
+    { value: "contrarian", label: "Unexpected/Contrarian", description: "Challenges beliefs" },
+    { value: "question_gap", label: "Question/Gap", description: "Information gaps" },
+    { value: "story_narrative", label: "Story/Narrative", description: "Personal journeys" },
+    { value: "specificity", label: "Specificity (Oddball Effect)", description: "Specific details" },
+  ],
+  ease_speed: [
+    { value: "simplicity", label: "Simplicity (Low Effort)", description: "Removes fear of difficulty" },
+    { value: "speed", label: "Speed (Fast Results)", description: "Instant gratification" },
+    { value: "system_structure", label: "System/Structure (Guided Path)", description: "Pre-built path" },
+    { value: "automation", label: "Automation/Assistance (Done For You)", description: "Heavy lifting done" },
+    { value: "beginner_friendly", label: "Beginner-Friendly (Safety)", description: "No fear of mistakes" },
+  ],
+  trust_authority: [
+    { value: "proof_evidence", label: "Proof & Evidence", description: "Opinion to fact" },
+    { value: "guarantee_safety", label: "Guarantee & Safety", description: "Risk reduction" },
+    { value: "expertise_credibility", label: "Expertise & Credibility", description: "Established status" },
+    { value: "social_proof", label: "Social Proof & Community", description: "Others are doing it" },
+    { value: "transparency", label: "Transparency & Authenticity", description: "Real connection" },
+  ],
+  exclusivity_belonging: [
+    { value: "inner_circle", label: "Inner Circle (Status)", description: "Special and chosen" },
+    { value: "tribe_community", label: "Tribe & Community (Connection)", description: "Like-minded people" },
+    { value: "shared_identity", label: "Shared Identity (Empathy)", description: "They get me" },
+    { value: "access_privilege", label: "Access & Privilege (Value)", description: "Gate and key" },
+  ],
+  value_gain: [
+    { value: "financial_monetary", label: "Financial & Monetary", description: "Wealth and ROI" },
+    { value: "growth_improvement", label: "Growth & Improvement", description: "Self-betterment" },
+    { value: "discovery_access", label: "Discovery & Access", description: "Unlock opportunities" },
+    { value: "abundance_volume", label: "Abundance & Volume", description: "More is better" },
+  ],
+  fear_pain: [
+    { value: "loss_waste", label: "Loss & Waste", description: "What's slipping away" },
+    { value: "emotional_distress", label: "Emotional Distress", description: "Internal feeling" },
+    { value: "danger_warning", label: "Danger & Warning", description: "Survival instinct" },
+    { value: "failure_mistake", label: "Failure & Mistake", description: "Fear of incompetence" },
+    { value: "obstacle_barrier", label: "Obstacle & Barrier", description: "Friction preventing success" },
+  ],
+};
+
 const CATEGORY_COLORS = {
   red: { bg: "bg-red-950", border: "border-red-800", text: "text-red-400" },
   purple: { bg: "bg-purple-950", border: "border-purple-800", text: "text-purple-400" },
@@ -42,6 +103,8 @@ export const PowerWordsReference: React.FC = () => {
   const [powerWords, setPowerWords] = useState<PowerWord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>("all");
+  const [selectedPressureLevel, setSelectedPressureLevel] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedWord, setCopiedWord] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -51,6 +114,8 @@ export const PowerWordsReference: React.FC = () => {
   const [newWord, setNewWord] = useState({
     word: "",
     category: "urgency_scarcity",
+    subcategory: "",
+    pressureLevel: "medium" as "low" | "medium" | "high",
     psychology: "",
     appUseCase: "",
     examples: [] as string[],
@@ -102,6 +167,8 @@ export const PowerWordsReference: React.FC = () => {
         setNewWord({
           word: "",
           category: "urgency_scarcity",
+          subcategory: "",
+          pressureLevel: "medium",
           psychology: "",
           appUseCase: "",
           examples: [],
@@ -125,9 +192,11 @@ export const PowerWordsReference: React.FC = () => {
 
   const filteredWords = powerWords.filter(word => {
     const matchesCategory = selectedCategory === "all" || word.category === selectedCategory;
+    const matchesSubcategory = selectedSubcategory === "all" || word.subcategory === selectedSubcategory;
+    const matchesPressure = selectedPressureLevel === "all" || word.pressureLevel === selectedPressureLevel;
     const matchesSearch = word.word.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (word.synonyms?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase())));
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSubcategory && matchesPressure && matchesSearch;
   });
 
   const wordsByCategory = CATEGORIES.reduce((acc, category) => {
@@ -178,12 +247,116 @@ export const PowerWordsReference: React.FC = () => {
 
         <select
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          onChange={(e) => {
+            setSelectedCategory(e.target.value);
+            setSelectedSubcategory("all");
+          }}
           className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
         >
           <option value="all">All Categories</option>
           {CATEGORIES.map(cat => (
             <option key={cat.value} value={cat.value}>{cat.label}</option>
+          ))}
+        </select>
+
+        {selectedCategory === "urgency_scarcity" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.urgency_scarcity.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "curiosity_mystery" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.curiosity_mystery.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "ease_speed" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.ease_speed.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "trust_authority" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.trust_authority.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "exclusivity_belonging" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.exclusivity_belonging.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "value_gain" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.value_gain.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        {selectedCategory === "fear_pain" && (
+          <select
+            value={selectedSubcategory}
+            onChange={(e) => setSelectedSubcategory(e.target.value)}
+            className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+          >
+            <option value="all">All Subcategories</option>
+            {SUBCATEGORIES.fear_pain.map(sub => (
+              <option key={sub.value} value={sub.value}>{sub.label}</option>
+            ))}
+          </select>
+        )}
+
+        <select
+          value={selectedPressureLevel}
+          onChange={(e) => setSelectedPressureLevel(e.target.value)}
+          className="bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500 transition"
+        >
+          {PRESSURE_LEVELS.map(level => (
+            <option key={level.value} value={level.value}>{level.label}</option>
           ))}
         </select>
       </div>
@@ -380,11 +553,136 @@ export const PowerWordsReference: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Category *</label>
                   <select
                     value={newWord.category}
-                    onChange={(e) => setNewWord({ ...newWord, category: e.target.value })}
+                    onChange={(e) => setNewWord({ ...newWord, category: e.target.value, subcategory: "" })}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {newWord.category === "urgency_scarcity" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.urgency_scarcity.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "curiosity_mystery" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.curiosity_mystery.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "ease_speed" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.ease_speed.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "trust_authority" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.trust_authority.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "exclusivity_belonging" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.exclusivity_belonging.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "value_gain" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.value_gain.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {newWord.category === "fear_pain" && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
+                    <select
+                      value={newWord.subcategory}
+                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                    >
+                      <option value="">Select subcategory</option>
+                      {SUBCATEGORIES.fear_pain.map(sub => (
+                        <option key={sub.value} value={sub.value}>{sub.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">Pressure Level</label>
+                  <select
+                    value={newWord.pressureLevel}
+                    onChange={(e) => setNewWord({ ...newWord, pressureLevel: e.target.value as "low" | "medium" | "high" })}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
+                  >
+                    {PRESSURE_LEVELS.filter(l => l.value !== "all").map(level => (
+                      <option key={level.value} value={level.value}>{level.label}</option>
                     ))}
                   </select>
                 </div>
