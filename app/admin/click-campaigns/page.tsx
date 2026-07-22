@@ -27,6 +27,7 @@ import {
   FlaskConical,
   Users,
   Eye,
+  Wand2,
 } from "lucide-react";
 
 import { CampaignWizardModal } from "@/components/admin/click-campaigns/CampaignWizardModal";
@@ -46,6 +47,7 @@ import { ABTestingModule } from "@/components/admin/click-campaigns/ABTestingMod
 import { AudienceSegmentationBuilder } from "@/components/admin/click-campaigns/AudienceSegmentationBuilder";
 import { BudgetOptimizationEngine } from "@/components/admin/click-campaigns/BudgetOptimizationEngine";
 import { CompetitorIntelligenceDashboard } from "@/components/admin/click-campaigns/CompetitorIntelligenceDashboard";
+import { HeadlineBuilder } from "@/components/admin/click-campaigns/HeadlineBuilder";
 
 export default function MarketingCampaignManagerPage() {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -343,6 +345,7 @@ export default function MarketingCampaignManagerPage() {
           { id: "segments", label: "Audience Segments", icon: Users },
           { id: "budget", label: "Budget Optimization", icon: Sliders },
           { id: "competitors", label: "Competitor Intel", icon: Eye },
+          { id: "headlines", label: "Headline Builder", icon: Wand2 },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -532,6 +535,9 @@ export default function MarketingCampaignManagerPage() {
 
       {/* TAB CONTENT: COMPETITOR INTELLIGENCE DASHBOARD */}
       {activeTab === "competitors" && <CompetitorIntelligenceDashboard />}
+
+      {/* TAB CONTENT: HEADLINE BUILDER */}
+      {activeTab === "headlines" && <HeadlineBuilder />}
 
       {/* Modals */}
       <CampaignWizardModal
