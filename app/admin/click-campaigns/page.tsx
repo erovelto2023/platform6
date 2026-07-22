@@ -28,6 +28,7 @@ import {
   Users,
   Eye,
   Wand2,
+  Zap,
 } from "lucide-react";
 
 import { CampaignWizardModal } from "@/components/admin/click-campaigns/CampaignWizardModal";
@@ -48,6 +49,7 @@ import { AudienceSegmentationBuilder } from "@/components/admin/click-campaigns/
 import { BudgetOptimizationEngine } from "@/components/admin/click-campaigns/BudgetOptimizationEngine";
 import { CompetitorIntelligenceDashboard } from "@/components/admin/click-campaigns/CompetitorIntelligenceDashboard";
 import { HeadlineBuilder } from "@/components/admin/click-campaigns/HeadlineBuilder";
+import { PowerWordsReference } from "@/components/admin/click-campaigns/PowerWordsReference";
 
 export default function MarketingCampaignManagerPage() {
   const [activeTab, setActiveTab] = useState<string>("overview");
@@ -304,6 +306,13 @@ export default function MarketingCampaignManagerPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <button
+              onClick={() => setActiveTab("powerwords")}
+              className="px-4 py-3 bg-cyan-950/60 border border-cyan-800/60 hover:bg-cyan-900/80 text-cyan-300 rounded-2xl text-xs font-bold flex items-center gap-2 transition"
+            >
+              <Zap className="w-4 h-4 text-cyan-400" /> Power Words
+            </button>
+
+            <button
               onClick={() => setIsRoasModalOpen(true)}
               className="px-4 py-3 bg-emerald-950/60 border border-emerald-800/60 hover:bg-emerald-900/80 text-emerald-300 rounded-2xl text-xs font-bold flex items-center gap-2 transition"
             >
@@ -346,6 +355,7 @@ export default function MarketingCampaignManagerPage() {
           { id: "budget", label: "Budget Optimization", icon: Sliders },
           { id: "competitors", label: "Competitor Intel", icon: Eye },
           { id: "headlines", label: "Headline Builder", icon: Wand2 },
+          { id: "powerwords", label: "Power Words", icon: Zap },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -538,6 +548,9 @@ export default function MarketingCampaignManagerPage() {
 
       {/* TAB CONTENT: HEADLINE BUILDER */}
       {activeTab === "headlines" && <HeadlineBuilder />}
+
+      {/* TAB CONTENT: POWER WORDS REFERENCE */}
+      {activeTab === "powerwords" && <PowerWordsReference />}
 
       {/* Modals */}
       <CampaignWizardModal
