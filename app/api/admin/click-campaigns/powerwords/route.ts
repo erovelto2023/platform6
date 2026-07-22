@@ -509,7 +509,11 @@ export async function GET(req: NextRequest) {
     const initialize = searchParams.get("initialize");
 
     // Initialize database with default power words if requested
-    if (initialize === "true") {
+    if (initialize === "force") {
+      // Force reseed: delete all existing and insert fresh data
+      await PowerWord.deleteMany({});
+      await PowerWord.insertMany(INITIAL_POWER_WORDS);
+    } else if (initialize === "true") {
       const existingCount = await PowerWord.countDocuments();
       if (existingCount === 0) {
         await PowerWord.insertMany(INITIAL_POWER_WORDS);

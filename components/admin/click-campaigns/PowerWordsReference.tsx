@@ -128,8 +128,8 @@ export const PowerWordsReference: React.FC = () => {
   const fetchPowerWords = async () => {
     try {
       setLoading(true);
-      // Initialize with default data if empty
-      await fetch("/api/admin/click-campaigns/powerwords?initialize=true");
+      // Force reseed with comprehensive data
+      await fetch("/api/admin/click-campaigns/powerwords?initialize=force");
       
       const response = await fetch("/api/admin/click-campaigns/powerwords");
       const data = await response.json();
