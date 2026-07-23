@@ -5,7 +5,8 @@ import {
   Mail, Plus, Copy, Check, Send, Sparkles, UserCheck, Trash2, ArrowRight,
   ShieldAlert, BookOpen, Layers, Eye, RefreshCw, HelpCircle, Lightbulb,
   Search, Filter, ShieldCheck, CheckCircle2, DollarSign, Folder, Download,
-  Tag, Edit3, Save, FileText, Share2, Star, ThumbsUp
+  Tag, Edit3, Save, FileText, Share2, Star, ThumbsUp, Heart, ShoppingCart,
+  Activity, Award, UserPlus, Flame
 } from "lucide-react";
 
 export interface EmailSequenceStep {
@@ -21,12 +22,14 @@ export interface EmailSequenceStep {
   ctaText: string;
   whenToUse?: string;
   whyItWorks?: string;
+  campaignPack?: "Trust Builder" | "Sales Driver" | "List Health";
 }
 
 export interface OutreachTemplate {
   id: string;
   name: string;
   category: string;
+  campaignPack?: "Trust Builder" | "Sales Driver" | "List Health";
   subjectLine: string;
   preheader: string;
   bodyCopy: string;
@@ -95,63 +98,190 @@ const DEFAULT_SWIPE_FILE: SwipeEmailItem[] = [
   },
 ];
 
-// Complete 55 Battle-Tested Sales Email Master Catalog from Outreach.ai
+// Complete Master Catalog including templates 1 to 15 categorized into Campaign Goal Packs
 export const outreach55Templates: OutreachTemplate[] = [
   // 1 to 5: Prospecting & Initial Outreach
   {
     id: "tpl_1_cold",
     name: "1. Cold Email (New Prospect)",
     category: "Prospecting",
+    campaignPack: "List Health",
     subjectLine: "Quick chat about {{company_name}}?",
     preheader: "Noticed your company's growth in {{relevant_detail}}...",
     bodyCopy: "Hi {{first_name}},\n\nI noticed your company is {{relevant_detail}}.\n\nWe help companies like yours achieve {{specific_benefit}}.\n\nI’d love to schedule a quick call to explore how {{product_name}} could support your goals.\n\nLet me know if next Tuesday or Wednesday works for you.\n\nBest,\nEric",
     ctaText: "Schedule a Quick Call",
     whenToUse: "• First outreach to a prospect you’ve never contacted.\n• When there’s a relevant, timely hook like recent news or an industry milestone.",
-    whyItWorks: "Highlights personalization while keeping the message concise and action-oriented. Balances curiosity with value, encouraging engagement without feeling pressured.",
+    whyItWorks: "Highlights personalization while keeping the message concise and action-oriented.",
   },
   {
     id: "tpl_2_followup",
     name: "2. Follow-Up Email (Post Outreach)",
     category: "Follow-Up & Re-Engagement",
+    campaignPack: "List Health",
     subjectLine: "Still thinking about {{company_name}}'s goals?",
     preheader: "Following up on my previous email regarding {{product_name}}...",
     bodyCopy: "Hi {{first_name}},\n\nJust following up on my previous email about {{product_name}}.\n\nI wanted to see if you had a chance to review my message.\n\nI’m happy to answer any questions or discuss how we can help with {{specific_need}}.\n\nLooking forward to hearing your thoughts.\n\nBest,\nEric",
     ctaText: "Reply with Your Thoughts",
-    whenToUse: "• After no response to initial cold email within 3-5 days.\n• To maintain momentum after a positive interaction when no next steps were locked in.",
-    whyItWorks: "Polite but persistent. Reminds the prospect of the initial message and offers assistance without being pushy, keeping dialogue focused on their needs.",
+    whenToUse: "• After no response to initial cold email within 3-5 days.",
+    whyItWorks: "Polite but persistent. Reminds the prospect without being pushy.",
   },
   {
     id: "tpl_3_warm",
     name: "3. Warm Email (Engaged Lead)",
     category: "Prospecting",
+    campaignPack: "Trust Builder",
     subjectLine: "Saw you were interested — let's connect",
     preheader: "Noticed you recently downloaded {{resource_name}}...",
     bodyCopy: "Hi {{first_name}},\n\nI saw that you recently downloaded our {{resource_name}} or visited our website.\n\nI wanted to share how {{product_name}} can help with {{specific_challenge}}.\n\nWould you be open to a brief call to explore this further?\n\nBest,\nEric",
     ctaText: "Book an Exploration Call",
-    whenToUse: "• When a lead shows active engagement (downloading content, viewing pricing, visiting site).\n• After an inbound inquiry or demo request.",
-    whyItWorks: "Reaches out when lead interest is hot, increasing response probability with a natural, logical next step.",
+    whenToUse: "• When a lead shows active engagement (downloading content, viewing pricing).",
+    whyItWorks: "Reaches out when lead interest is hot, increasing response probability.",
   },
   {
     id: "tpl_4_intro",
     name: "4. Introductory Email (Formal Intro)",
     category: "Prospecting",
+    campaignPack: "Trust Builder",
     subjectLine: "Introducing {{my_company}} to {{company_name}}",
     preheader: "Helping businesses like yours achieve {{desired_result}}...",
     bodyCopy: "Hi {{first_name}},\n\nI’m Eric from {{my_company}}.\n\nWe specialize in {{product_name}} that helps businesses like yours {{specific_benefit}}.\n\nI’d love to chat and see how we can help your team achieve {{desired_result}}.\n\nCan we set up a quick call next week?\n\nBest,\nEric",
     ctaText: "Set Up a Quick Call Next Week",
-    whenToUse: "• Reaching out to new prospects for the first time.\n• Making a clean, formal introduction to decision-makers.",
-    whyItWorks: "Brief and to the point. Quickly positions your product or service as a direct solution to potential operational challenges.",
+    whenToUse: "• Making a clean, formal introduction to decision-makers.",
+    whyItWorks: "Brief and to the point. Quickly positions your product as a direct solution.",
   },
   {
     id: "tpl_5_referral",
     name: "5. Referral Request (Existing Contacts)",
     category: "Prospecting",
+    campaignPack: "List Health",
     subjectLine: "Need a referral? I'd appreciate the help",
     preheader: "Quick favor regarding colleagues in {{relevant_detail}}...",
     bodyCopy: "Hi {{first_name}},\n\nI hope things are going well!\n\nI wanted to ask if you know anyone who might benefit from {{product_name}}.\n\nIf so, I’d appreciate an introduction, and I’m happy to share more details if needed.\n\nThanks,\nEric",
     ctaText: "Introduce a Colleague",
-    whenToUse: "• After a positive interaction or experience with a client or contact.\n• Expanding network through warm, trusted referrals.",
-    whyItWorks: "Casual but specific. Makes it easy for the recipient to consider referring someone without feeling put on the spot.",
+    whenToUse: "• After a positive interaction or experience with a client.",
+    whyItWorks: "Casual but specific. Makes it easy for the recipient to refer someone.",
+  },
+
+  // 6 to 15: MASTER EMAIL TEMPLATES (THE 10 ICONIC PATTERNS)
+  {
+    id: "tpl_6_welcome",
+    name: "6. The Welcome Email (The 'Handshake')",
+    category: "Onboarding & Post-Sale",
+    campaignPack: "Trust Builder",
+    subjectLine: "Welcome to the tribe! Here’s your {{lead_magnet}}",
+    preheader: "Your download link and welcome guide are inside...",
+    bodyCopy: "Hi {{first_name}},\n\nWelcome to the family! I’m so excited to have you here.\n\nAs promised, here is your instant access to {{lead_magnet}}.\n\nOver the next few days, I’ll be sharing my best strategies to help you achieve {{desired_result}}.\n\nIf you ever have a question, hit reply — I read every single message!\n\nBest,\nEric",
+    ctaText: "Download {{lead_magnet}} Now",
+    whenToUse: "• Immediately after someone opts into your lead magnet or signs up.\n• Highest open rates of any email. Sets brand tone & delivers immediate value.",
+    whyItWorks: "Psychology: Reciprocity & First Impressions. Establishes immediate trust and human connection.",
+  },
+  {
+    id: "tpl_7_nurture",
+    name: "7. The Nurture/Value Email (The 'Teacher')",
+    category: "Prospecting",
+    campaignPack: "Trust Builder",
+    subjectLine: "The #1 mistake most {{audience}} make with {{topic}}",
+    preheader: "Avoid this common bottleneck to save hours of effort...",
+    bodyCopy: "Hi {{first_name}},\n\nWhen it comes to {{topic}}, most people make one critical mistake: {{common_mistake}}.\n\nHere’s what you should do instead to achieve {{specific_benefit}} quickly:\n1. Focus on {{action_step_1}}\n2. Eliminate {{friction_point}}\n\nTry this today and let me know how it works for you!\n\nBest,\nEric",
+    ctaText: "Read Full Value Guide",
+    whenToUse: "• Send during nurture sequence to build authority before asking for a sale.\n• Solving a small problem for free.",
+    whyItWorks: "Psychology: Reciprocity & Authority. Gaining trust by teaching actionable lessons.",
+  },
+  {
+    id: "tpl_8_story",
+    name: "8. The Story/Behind-the-Scenes Email (The 'Human')",
+    category: "Prospecting",
+    campaignPack: "Trust Builder",
+    subjectLine: "I almost quit last week... (What {{topic}} taught me)",
+    preheader: "A quick personal story about overcoming failure...",
+    bodyCopy: "Hi {{first_name}},\n\nI want to be completely honest with you.\n\nA few years ago, when I was struggling with {{past_challenge}}, I almost threw in the towel.\n\nThen I realized one key truth: {{key_insight}}.\n\nThat realization changed everything for me, and it can do the same for you with {{product_name}}.\n\nBest,\nEric",
+    ctaText: "Read My Full Story",
+    whenToUse: "• Building emotional connection and likability.\n• Turning personal failures or experiences into relatable marketing lessons.",
+    whyItWorks: "Psychology: Vulnerability & Likability. People buy from humans, not faceless logos.",
+  },
+  {
+    id: "tpl_9_casestudy",
+    name: "9. The Case Study/Social Proof Email (The 'Validator')",
+    category: "Demo & Proposals",
+    campaignPack: "Sales Driver",
+    subjectLine: "How {{customer_name}} went from {{pain_point}} to {{result}}",
+    preheader: "Real results from real users using {{product_name}}...",
+    bodyCopy: "Hi {{first_name}},\n\nMeet {{customer_name}}.\n\nBefore finding {{product_name}}, they were struggling with {{pain_point}}.\n\nAfter implementing our {{method_name}} method, they achieved {{result}} in just {{timeframe}}.\n\nHere's how you can replicate their success for {{company_name}}.\n\nBest,\nEric",
+    ctaText: "Replicate {{customer_name}}'s Results",
+    whenToUse: "• Removing doubt and proving safety before a buyer commits.\n• Highlights concrete metrics and specific customer journeys.",
+    whyItWorks: "Psychology: Social Proof & Safety. Reduces perceived risk by showcasing real success.",
+  },
+  {
+    id: "tpl_10_objection",
+    name: "10. The Objection Handling Email (The 'Reassurer')",
+    category: "Closing & Contracts",
+    campaignPack: "Sales Driver",
+    subjectLine: "Is {{product_name}} right for you? (Let’s be honest)",
+    preheader: "Addressing the elephant in the room about {{topic}}...",
+    bodyCopy: "Hi {{first_name}},\n\nI get it. You might be wondering: 'Will {{product_name}} actually work for me?'\n\nLet’s address the common fears:\n- 'I don't have time': Takes less than 15 minutes a day.\n- 'I'm not tech-savvy': Built with 1-click simplicity.\n\nIf you're ready to overcome {{pain_point}}, we're here to help.\n\nBest,\nEric",
+    ctaText: "See Risk-Free Trial",
+    whenToUse: "• Addressing unstated buyer hesitation near the end of a sales cycle.\n• Tackling time, technical, or cost objections head-on.",
+    whyItWorks: "Psychology: Empathy & Transparency. Disarms skepticism by acknowledging doubts directly.",
+  },
+  {
+    id: "tpl_11_launch",
+    name: "11. The Launch/Announcement Email (The 'Event')",
+    category: "Closing & Contracts",
+    campaignPack: "Sales Driver",
+    subjectLine: "It’s finally here: {{product_name}} is live!",
+    preheader: "Official launch announcement! Special launch pricing inside...",
+    bodyCopy: "Hi {{first_name}},\n\nThe wait is officially over!\n\nWe just launched {{product_name}}, designed specifically to help you {{specific_benefit}}.\n\nFor the next 48 hours, claim your early-bird launch pricing before it expires.\n\nBest,\nEric",
+    ctaText: "Claim Launch Discount Now",
+    whenToUse: "• Opening a sales window or launching a new product offer.\n• Uses the AIDA framework (Attention, Interest, Desire, Action).",
+    whyItWorks: "Psychology: Excitement & Urgency. Triggers early-bird action.",
+  },
+  {
+    id: "tpl_12_cartabandonment",
+    name: "12. The Cart Abandonment/Reminder Email (The 'Nudge')",
+    category: "Follow-Up & Re-Engagement",
+    campaignPack: "Sales Driver",
+    subjectLine: "Did you forget this? {{product_name}} is waiting",
+    preheader: "Your order is saved, but special terms expire shortly...",
+    bodyCopy: "Hi {{first_name}},\n\nI noticed you started setting up {{product_name}} but didn't finish.\n\nYour spot and special terms are saved, but they will expire shortly.\n\nClick below to complete your checkout and get started today!\n\nBest,\nEric",
+    ctaText: "Complete Checkout Now",
+    whenToUse: "• Sent 1-24 hours after a lead leaves a checkout or setup incomplete.\n• Gentle reminder with loss-aversion hook.",
+    whyItWorks: "Psychology: Loss Aversion. Recovers distracted buyers before interest cools off.",
+  },
+  {
+    id: "tpl_13_winback",
+    name: "13. The Re-engagement/Win-Back Email (The 'Cleaner')",
+    category: "Follow-Up & Re-Engagement",
+    campaignPack: "List Health",
+    subjectLine: "Should I remove you from the list?",
+    preheader: "Checking in before updating our active subscriber list...",
+    bodyCopy: "Hi {{first_name}},\n\nI noticed it’s been a while since you opened our emails about {{topic}}.\n\nI only want to send messages you love. Are you still interested in learning about {{topic}}?\n\nIf yes, click below to stay on the list. If not, no hard feelings!\n\nBest,\nEric",
+    ctaText: "Yes, Keep Me On The List!",
+    whenToUse: "• For leads who haven't opened an email in 90+ days.\n• Cleans dormant contacts to boost overall sender deliverability.",
+    whyItWorks: "Psychology: Curiosity & FOMO. Triggers responses while pruning dead list weight.",
+  },
+  {
+    id: "tpl_14_upsell",
+    name: "14. The Upsell/Cross-Sell Email (The 'Growth')",
+    category: "Upselling & Loyalty",
+    campaignPack: "Sales Driver",
+    subjectLine: "Since you loved {{product_a}}, you’ll love this...",
+    preheader: "Special upgrade recommendation to double your results...",
+    bodyCopy: "Hi {{first_name}},\n\nNow that you’re getting great results with {{product_a}}, I wanted to show you {{product_b}}.\n\nIt’s designed to work seamlessly with {{product_a}} to supercharge your {{desired_result}}.\n\nBest,\nEric",
+    ctaText: "Upgrade to {{product_b}}",
+    whenToUse: "• Sent to existing happy buyers to increase Customer Lifetime Value (LTV).\n• Offering complementary tools or advanced tiers.",
+    whyItWorks: "Psychology: Consistency & Momentum. Existing buyers are 5x more likely to convert.",
+  },
+  {
+    id: "tpl_15_feedback",
+    name: "15. The Feedback/Survey Email (The 'Listener')",
+    category: "Onboarding & Post-Sale",
+    campaignPack: "Trust Builder",
+    subjectLine: "Quick question for you, {{first_name}}",
+    preheader: "Spare 60 seconds to tell us how we can serve you better?",
+    bodyCopy: "Hi {{first_name}},\n\nI have a quick 1-question favor to ask.\n\nWhat is your #1 biggest challenge right now when it comes to {{topic}}?\n\nHit reply or click below to share your thoughts — we use your answers to build better tools for you!\n\nBest,\nEric",
+    ctaText: "Take 1-Click Survey",
+    whenToUse: "• Gathering audience insights and customer voice for future product launches.\n• Makes subscribers feel heard and valued.",
+    whyItWorks: "Psychology: Respect & Engagement. Proves you care about user input, not just sales.",
   },
 ];
 
@@ -205,6 +335,7 @@ export const EmailSequenceMapper: React.FC = () => {
   // SEQUENCE BUILDER STATE
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("All");
+  const [selectedCampaignPackFilter, setSelectedCampaignPackFilter] = useState<string>("All");
   const [showBestPractices, setShowBestPractices] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
@@ -212,30 +343,47 @@ export const EmailSequenceMapper: React.FC = () => {
     {
       id: "s1",
       stepNumber: 1,
-      title: "1. Cold Email (New Prospect)",
-      templateId: "tpl_1_cold",
-      category: "Prospecting",
+      title: "6. The Welcome Email (The 'Handshake')",
+      templateId: "tpl_6_welcome",
+      category: "Onboarding & Post-Sale",
+      campaignPack: "Trust Builder",
       delay: "Immediate (Day 0)",
-      subjectLine: outreach55Templates[0].subjectLine,
-      preheader: outreach55Templates[0].preheader,
-      bodyCopy: outreach55Templates[0].bodyCopy,
-      ctaText: outreach55Templates[0].ctaText,
-      whenToUse: outreach55Templates[0].whenToUse,
-      whyItWorks: outreach55Templates[0].whyItWorks,
+      subjectLine: outreach55Templates[5].subjectLine,
+      preheader: outreach55Templates[5].preheader,
+      bodyCopy: outreach55Templates[5].bodyCopy,
+      ctaText: outreach55Templates[5].ctaText,
+      whenToUse: outreach55Templates[5].whenToUse,
+      whyItWorks: outreach55Templates[5].whyItWorks,
     },
     {
       id: "s2",
       stepNumber: 2,
-      title: "Follow-Up Email (Post Outreach)",
-      templateId: "tpl_2_followup",
-      category: "Follow-Up & Re-Engagement",
-      delay: "3 Days After Step 1",
-      subjectLine: outreach55Templates[1].subjectLine,
-      preheader: outreach55Templates[1].preheader,
-      bodyCopy: outreach55Templates[1].bodyCopy,
-      ctaText: outreach55Templates[1].ctaText,
-      whenToUse: outreach55Templates[1].whenToUse,
-      whyItWorks: outreach55Templates[1].whyItWorks,
+      title: "7. The Nurture/Value Email (The 'Teacher')",
+      templateId: "tpl_7_nurture",
+      category: "Prospecting",
+      campaignPack: "Trust Builder",
+      delay: "2 Days After Welcome",
+      subjectLine: outreach55Templates[6].subjectLine,
+      preheader: outreach55Templates[6].preheader,
+      bodyCopy: outreach55Templates[6].bodyCopy,
+      ctaText: outreach55Templates[6].ctaText,
+      whenToUse: outreach55Templates[6].whenToUse,
+      whyItWorks: outreach55Templates[6].whyItWorks,
+    },
+    {
+      id: "s3",
+      stepNumber: 3,
+      title: "11. The Launch/Announcement Email (The 'Event')",
+      templateId: "tpl_11_launch",
+      category: "Closing & Contracts",
+      campaignPack: "Sales Driver",
+      delay: "5 Days After Nurture",
+      subjectLine: outreach55Templates[10].subjectLine,
+      preheader: outreach55Templates[10].preheader,
+      bodyCopy: outreach55Templates[10].bodyCopy,
+      ctaText: outreach55Templates[10].ctaText,
+      whenToUse: outreach55Templates[10].whenToUse,
+      whyItWorks: outreach55Templates[10].whyItWorks,
     },
   ]);
 
@@ -249,10 +397,21 @@ export const EmailSequenceMapper: React.FC = () => {
     relevant_detail: "expanding multi-platform ad spend",
     specific_benefit: "30% higher CTR and 75% faster launches",
     product_name: "Campaign Manager Dashboard",
-    specific_need: "reducing ad aspect ratio errors",
-    resource_name: "2026 Marketing Playbook",
-    specific_challenge: "fragmented media asset management",
-    my_company: "KB Academy",
+    lead_magnet: "2026 Marketing Playbook PDF",
+    audience: "Digital Marketers",
+    topic: "Facebook Ad Scaling",
+    common_mistake: "scaling budgets without capping cost-per-lead",
+    action_step_1: "setting strict target ROAS guardrails",
+    friction_point: "manual daily bid adjustments",
+    past_challenge: "losing $5,000 on unoptimized ads",
+    key_insight: "automating pixel tracking changes everything",
+    customer_name: "Sarah M.",
+    pain_point: "spending 15 hours a week on manual reporting",
+    result: "300% ROI boost in 14 days",
+    method_name: "AI Co-Pilot Workflow",
+    timeframe: "14 Days",
+    product_a: "Campaign Starter Suite",
+    product_b: "ROAS Profit Optimizer Pro",
     desired_result: "scalable affiliate campaign growth",
     discount_code: "BLACKFRIDAY50",
   });
@@ -293,6 +452,7 @@ export const EmailSequenceMapper: React.FC = () => {
               title: tpl.name,
               templateId: tpl.id,
               category: tpl.category,
+              campaignPack: tpl.campaignPack,
               subjectLine: tpl.subjectLine,
               preheader: tpl.preheader,
               bodyCopy: tpl.bodyCopy,
@@ -303,6 +463,32 @@ export const EmailSequenceMapper: React.FC = () => {
           : item
       )
     );
+  };
+
+  // APPLY CAMPAIGN PACK TO SEQUENCE (3-STEP PACK PRESISTENCE)
+  const handleLoadCampaignPack = (packName: "Trust Builder" | "Sales Driver" | "List Health") => {
+    const packTemplates = outreach55Templates.filter((t) => t.campaignPack === packName);
+    if (packTemplates.length === 0) return;
+
+    const newSequenceSteps: EmailSequenceStep[] = packTemplates.slice(0, 4).map((tpl, idx) => ({
+      id: `pack_s_${Date.now()}_${idx}`,
+      stepNumber: idx + 1,
+      title: tpl.name,
+      templateId: tpl.id,
+      category: tpl.category,
+      campaignPack: tpl.campaignPack,
+      delay: idx === 0 ? "Immediate (Day 0)" : `${idx * 2} Days After Previous`,
+      subjectLine: tpl.subjectLine,
+      preheader: tpl.preheader,
+      bodyCopy: tpl.bodyCopy,
+      ctaText: tpl.ctaText,
+      whenToUse: tpl.whenToUse,
+      whyItWorks: tpl.whyItWorks,
+    }));
+
+    setSequence(newSequenceSteps);
+    setActiveStepId(newSequenceSteps[0].id);
+    setActiveViewMode("sequence");
   };
 
   // APPLY SWIPE FILE EMAIL TO SEQUENCE
@@ -386,6 +572,7 @@ export const EmailSequenceMapper: React.FC = () => {
       type: "template",
       name: `Custom: ${activeStep.title}`,
       category: activeStep.category,
+      campaignPack: activeStep.campaignPack,
       subjectLine: activeStep.subjectLine,
       preheader: activeStep.preheader,
       bodyCopy: activeStep.bodyCopy,
@@ -408,7 +595,6 @@ export const EmailSequenceMapper: React.FC = () => {
       }
     } catch (err) {
       console.error("Failed to save template to MongoDB:", err);
-      // Fallback local
       setCustomTemplates([{ ...createdData, id: `custom_${Date.now()}` } as any, ...customTemplates]);
     }
   };
@@ -530,10 +716,11 @@ export const EmailSequenceMapper: React.FC = () => {
 
   const filteredTemplates = allTemplatesList.filter((t) => {
     const matchesCategory = selectedCategoryFilter === "All" || t.category === selectedCategoryFilter;
+    const matchesPack = selectedCampaignPackFilter === "All" || t.campaignPack === selectedCampaignPackFilter;
     const matchesSearch =
       t.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
       t.subjectLine.toLowerCase().includes(searchFilter.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesPack && matchesSearch;
   });
 
   const filteredSwipeList = swipeList.filter((s) => {
@@ -559,10 +746,10 @@ export const EmailSequenceMapper: React.FC = () => {
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-100 tracking-tight">
-              Email Sequences, Custom Templates & For-Sale Swipe File Vault
+              Master Email Sequences, Goal Packs & For-Sale Swipe File Vault
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Build sequences, store emails to sell, and create reusable custom email templates
+              Build sequences by Campaign Goal Packs, store emails for sale, and customize email templates
             </p>
           </div>
         </div>
@@ -601,6 +788,57 @@ export const EmailSequenceMapper: React.FC = () => {
           >
             <Edit3 className="w-4 h-4 text-pink-300" /> Custom Templates ({customTemplates.length})
           </button>
+        </div>
+      </div>
+
+      {/* CAMPAIGN GOAL PACKS QUICK SELECTOR BAR */}
+      <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-3 shadow-xl">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-yellow-400" /> Select Campaign Goal Pack (Quick Start)
+          </h3>
+          <span className="text-xs text-purple-400 font-semibold">1-Click load campaign workflow</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div
+            onClick={() => handleLoadCampaignPack("Trust Builder")}
+            className="p-4 bg-slate-950 border border-slate-800 hover:border-purple-500 rounded-2xl cursor-pointer transition space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <Heart className="w-4 h-4 text-rose-400" /> The "Trust Builder" Pack
+              </span>
+              <span className="text-[10px] text-purple-400 font-mono group-hover:translate-x-1 transition">Load Pack ➔</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Welcome (#6), Nurture/Value (#7), Story (#8), Feedback (#15). Establishes authority & likability.</p>
+          </div>
+
+          <div
+            onClick={() => handleLoadCampaignPack("Sales Driver")}
+            className="p-4 bg-slate-950 border border-slate-800 hover:border-emerald-500 rounded-2xl cursor-pointer transition space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                <ShoppingCart className="w-4 h-4 text-emerald-400" /> The "Sales Driver" Pack
+              </span>
+              <span className="text-[10px] text-emerald-400 font-mono group-hover:translate-x-1 transition">Load Pack ➔</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Launch (#11), Objection Handling (#10), Case Study (#9), Cart Abandonment (#12), Upsell (#14).</p>
+          </div>
+
+          <div
+            onClick={() => handleLoadCampaignPack("List Health")}
+            className="p-4 bg-slate-950 border border-slate-800 hover:border-amber-500 rounded-2xl cursor-pointer transition space-y-2 group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-amber-400" /> The "List Health" Pack
+              </span>
+              <span className="text-[10px] text-amber-400 font-mono group-hover:translate-x-1 transition">Load Pack ➔</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Re-engagement (#13), Referral Request (#5), Cold Outreach (#1). Cleans list & revives cold leads.</p>
+          </div>
         </div>
       </div>
 
@@ -854,27 +1092,6 @@ export const EmailSequenceMapper: React.FC = () => {
                   </div>
                   <p className="text-[11px] text-slate-400">Every email must end with a single, clear action ask (e.g. "Schedule a quick call").</p>
                 </div>
-
-                <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                  <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> 4. Domain Authentication
-                  </div>
-                  <p className="text-[11px] text-slate-400">Ensure proper SPF, DKIM, and DMARC record implementation to maintain primary inbox placement.</p>
-                </div>
-
-                <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                  <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> 5. Proactive Renewal Check-In
-                  </div>
-                  <p className="text-[11px] text-slate-400">Initiate renewal check-ins 60-90 days early (Template #55) to eliminate last-minute churn surprises.</p>
-                </div>
-
-                <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                  <div className="font-bold text-slate-200 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> 6. Consistent Sequencing
-                  </div>
-                  <p className="text-[11px] text-slate-400">Space follow-ups 3-5 days apart. Consistent multi-touch cadence increases reply rates by 2.4x.</p>
-                </div>
               </div>
             </div>
           )}
@@ -900,25 +1117,26 @@ export const EmailSequenceMapper: React.FC = () => {
               </div>
             </div>
 
-            {/* Category Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              {["All", "Prospecting", "Follow-Up & Re-Engagement", "Demo & Proposals", "Closing & Contracts", "Onboarding & Post-Sale", "Upselling & Loyalty"].map((cat) => (
+            {/* Campaign Pack & Category Filter Buttons */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-slate-800/80 pb-2">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Campaign Pack Filter:</span>
+              {["All", "Trust Builder", "Sales Driver", "List Health"].map((pack) => (
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategoryFilter(cat)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition ${
-                    selectedCategoryFilter === cat
-                      ? "bg-purple-600 text-white"
+                  key={pack}
+                  onClick={() => setSelectedCampaignPackFilter(pack)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                    selectedCampaignPackFilter === pack
+                      ? "bg-purple-600 text-white shadow-md shadow-purple-600/30"
                       : "bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  {cat}
+                  {pack}
                 </button>
               ))}
             </div>
 
             {/* Templates Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-1">
               {filteredTemplates.map((tpl, idx) => (
                 <button
                   key={tpl.id || idx}
@@ -938,9 +1156,14 @@ export const EmailSequenceMapper: React.FC = () => {
                       "{tpl.subjectLine}"
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[9px]">
-                    <span className="px-2 py-0.5 bg-slate-900 text-slate-300 rounded font-semibold truncate max-w-[120px]">{tpl.category}</span>
-                    <span className="text-purple-400 font-bold shrink-0">Apply ➔</span>
+
+                  <div className="space-y-1 pt-1 border-t border-slate-800/60 text-[9px]">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 bg-slate-900 text-purple-300 rounded font-semibold truncate max-w-[110px]">
+                        Pack: {tpl.campaignPack || "General"}
+                      </span>
+                      <span className="text-purple-400 font-bold shrink-0">Apply ➔</span>
+                    </div>
                   </div>
                 </button>
               ))}

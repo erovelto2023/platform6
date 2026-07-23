@@ -81,7 +81,143 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
   const handleExportReport = () => {
     setReportGenerated(true);
-    setTimeout(() => setReportGenerated(false), 4000);
+    setTimeout(() => setReportGenerated(false), 5000);
+
+    const reportHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Cross-Platform Marketing Campaign Analytics Report</title>
+          <style>
+            @media print {
+              body { font-size: 12pt; }
+              .no-print { display: none; }
+            }
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px; color: #0f172a; line-height: 1.5; background: #ffffff; }
+            .header-bar { border-bottom: 3px solid #2563eb; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
+            h1 { color: #1e1b4b; margin: 0; font-size: 24px; font-weight: 800; }
+            .subtitle { color: #64748b; font-size: 12px; margin-top: 4px; }
+            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px; }
+            .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; }
+            .kpi-title { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; tracking: 0.05em; }
+            .kpi-val { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 6px; }
+            .kpi-sub { font-size: 10px; color: #16a34a; font-weight: 600; margin-top: 2px; }
+            .alert-box { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 18px; border-radius: 12px; margin-bottom: 30px; }
+            .alert-title { font-weight: 800; font-size: 13px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; color: #b45309; }
+            .alert-item { background: rgba(255,255,255,0.7); padding: 10px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 8px; border: 1px solid #fef3c7; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+            th, td { border: 1px solid #cbd5e1; padding: 12px 14px; text-align: left; }
+            th { background: #f1f5f9; font-weight: 700; color: #334155; text-transform: uppercase; font-size: 10px; letter-spacing: 0.05em; }
+            tr:nth-child(even) { background: #f8fafc; }
+            .status-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; }
+            .status-good { background: #dcfce7; color: #15803d; }
+            .status-warn { background: #ffe4e6; color: #be123c; }
+            .footer { margin-top: 50px; font-size: 11px; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+            .print-btn { background: #2563eb; color: #ffffff; border: none; padding: 10px 20px; font-weight: 700; border-radius: 8px; cursor: pointer; }
+          </style>
+        </head>
+        <body>
+          <div className="header-bar">
+            <div>
+              <h1>📊 Cross-Platform Campaign Performance Report</h1>
+              <p className="subtitle">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()} • Click-Campaign Command Center</p>
+            </div>
+            <button onclick="window.print()" class="no-print print-btn">🖨️ Print / Save as PDF</button>
+          </div>
+          
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-title">Total Spend</div>
+              <div className="kpi-val">$${totalSpend.toLocaleString()}</div>
+              <div className="kpi-sub">Across 4 channels</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-title">Total Impressions</div>
+              <div className="kpi-val">${totalImpressions.toLocaleString()}</div>
+              <div className="kpi-sub">Cross-channel reach</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-title">Avg Click-Through Rate</div>
+              <div className="kpi-val">${avgCtr.toFixed(2)}%</div>
+              <div className="kpi-sub">High Engagement</div>
+            </div>
+            <div className="kpi-card">
+              <div className="kpi-title">Avg Return on Ad Spend</div>
+              <div className="kpi-val">${avgRoas.toFixed(1)}x</div>
+              <div className="kpi-sub">Target ROAS exceeded</div>
+            </div>
+          </div>
+
+          <div className="alert-box">
+            <div className="alert-title">⚠️ Automated Gap Analysis & Creative Fatigue Alerts</div>
+            <div className="alert-item">
+              <strong>TikTok Campaign Warning:</strong> ROAS is 1.6x (below your 2.5x target threshold). CPA rose 35% in 48 hrs. Consider refreshing video creatives with 9:16 vertical hook variations.
+            </div>
+            <div className="alert-item">
+              <strong>Pinterest Opportunity:</strong> ROAS is 4.1x with $0.26 CPC. Shift $50/day budget from TikTok to Pinterest Idea Pins for higher overall ROI.
+            </div>
+          </div>
+
+          <h3>Multi-Platform Channel Breakdown</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Spend</th>
+                <th>Impressions</th>
+                <th>Clicks</th>
+                <th>CTR</th>
+                <th>CPC</th>
+                <th>CPA</th>
+                <th>ROAS</th>
+                <th>Health Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${channelData
+                .map(
+                  (c) => `
+                <tr>
+                  <td><strong>${c.platform}</strong></td>
+                  <td>$${c.spend}</td>
+                  <td>${c.impressions.toLocaleString()}</td>
+                  <td>${c.clicks}</td>
+                  <td>${c.ctr}%</td>
+                  <td>$${c.cpc}</td>
+                  <td>$${c.cpa}</td>
+                  <td><strong>${c.roas}x</strong></td>
+                  <td>
+                    <span class="status-badge ${c.status === "Performing Well" ? "status-good" : "status-warn"}">
+                      ${c.status}
+                    </span>
+                  </td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+
+          <div className="footer">
+            Click-Campaign Command Center • Proprietary & Confidential Executive Report
+          </div>
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 400);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    if (printWindow) {
+      printWindow.document.write(reportHtml);
+      printWindow.document.close();
+    }
   };
 
   return (
@@ -100,7 +236,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
         <button
           onClick={handleExportReport}
-          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md shadow-blue-600/20"
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md shadow-blue-600/20 cursor-pointer"
         >
           <Download className="w-4 h-4" /> Export Shareable PDF Report
         </button>
@@ -110,7 +246,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div className="p-4 bg-emerald-950/60 border border-emerald-800/60 rounded-xl text-emerald-300 text-xs flex items-center justify-between animate-in fade-in duration-200">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-            <span><strong>Report Generated:</strong> Campaign_Analytics_Summary_July2026.pdf has been compiled.</span>
+            <span><strong>Report Generated:</strong> Campaign_Analytics_Summary_July2026.pdf has been compiled. Print window opened!</span>
           </div>
           <span className="text-[10px] bg-emerald-900 px-2 py-0.5 rounded font-mono font-bold">READY</span>
         </div>

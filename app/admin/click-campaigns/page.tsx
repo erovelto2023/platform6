@@ -2,39 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Megaphone,
-  Sparkles,
-  FileImage,
-  BookOpen,
-  Calendar,
-  Layers,
-  BarChart3,
-  ShieldCheck,
-  Plus,
-  Rocket,
-  DollarSign,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle2,
-  Share2,
-  RefreshCw,
-  Mail,
-  Calculator,
-  Sliders,
-  CheckSquare,
-  Brain,
-  Target,
-  FlaskConical,
-  Users,
-  Eye,
-  Wand2,
-  Zap,
-  Trash2,
-  ChevronRight,
-  Search,
-  Filter,
-  Copy,
-  KeyRound
+  Megaphone, Sparkles, FileImage, BookOpen, Calendar, Layers, BarChart3,
+  ShieldCheck, Plus, Rocket, DollarSign, TrendingUp, AlertCircle, CheckCircle2,
+  Share2, RefreshCw, Mail, Calculator, Sliders, CheckSquare, Brain, Target,
+  FlaskConical, Users, Eye, Wand2, Zap, Trash2, ChevronRight, Search, Filter,
+  Copy, KeyRound, Grid, Layers3, Compass, Folder
 } from "lucide-react";
 
 import { CampaignWizardModal } from "@/components/admin/click-campaigns/CampaignWizardModal";
@@ -59,14 +31,69 @@ import { PowerWordsReference } from "@/components/admin/click-campaigns/PowerWor
 import { CampaignBuilderWorkspace } from "@/components/admin/click-campaigns/CampaignBuilderWorkspace";
 import { KeywordVaultManager } from "@/components/admin/click-campaigns/KeywordVaultManager";
 
+interface ToolTab {
+  id: string;
+  label: string;
+  icon: any;
+  category: string;
+  description: string;
+}
+
+const ALL_TOOLS: ToolTab[] = [
+  // Hub 1: Campaigns & Copywriting
+  { id: "overview", label: "Overview & Campaigns", icon: Megaphone, category: "campaigns", description: "Campaign command & 7-step builder" },
+  { id: "headlines", label: "Headline Builder", icon: Wand2, category: "campaigns", description: "AI performance headline generator" },
+  { id: "powerwords", label: "Power Words Vault", icon: Zap, category: "campaigns", description: "Psychological triggers & word vaults" },
+  { id: "frameworks", label: "Copy Frameworks", icon: Brain, category: "campaigns", description: "AIDA, PAS, FAB & 4P copy formulas" },
+
+  // Hub 2: Media Assets & Email Vaults
+  { id: "dam", label: "Media Assets (DAM)", icon: FileImage, category: "assets", description: "Digital asset manager & aspect mapper" },
+  { id: "swipe", label: "Copy & Swipe Vault", icon: BookOpen, category: "assets", description: "Proven ad hooks & copy swipes" },
+  { id: "email", label: "Email Sequences & Swipes", icon: Mail, category: "assets", description: "Multi-touch sequences & for-sale swipe file" },
+  { id: "keywords", label: "Keywords & Intent", icon: KeyRound, category: "assets", description: "Search intent & volume vault" },
+
+  // Hub 3: Analytics & Performance Optimization
+  { id: "analytics", label: "Analytics & Gap Alerts", icon: BarChart3, category: "analytics", description: "KPI performance & conversion alerts" },
+  { id: "abtesting", label: "A/B Testing Studio", icon: FlaskConical, category: "analytics", description: "Variant generator & statistical tests" },
+  { id: "budget", label: "Budget Optimization", icon: Sliders, category: "analytics", description: "Budget scaling & ROAS rules" },
+  { id: "competitors", label: "Competitor Intel", icon: Eye, category: "analytics", description: "Ad spy & competitor positioning" },
+
+  // Hub 4: Audience & Pixel Tracking
+  { id: "segments", label: "Audience Segments", icon: Users, category: "audience", description: "Persona builder & audience targeting" },
+  { id: "pixelsystem", label: "Pixel Tracking System", icon: Target, category: "audience", description: "Meta CAPI & multi-channel pixel engine" },
+  { id: "pixel", label: "Pixel Verification", icon: CheckSquare, category: "audience", description: "Health checklist & event setup" },
+
+  // Hub 5: Strategy, Specs & Brand
+  { id: "scheduler", label: "Launch Scheduler", icon: Calendar, category: "brand", description: "Visual ad launch calendar" },
+  { id: "specs", label: "Platform Specs Matrix", icon: Layers, category: "brand", description: "Aspect ratio & ad format specs" },
+  { id: "brand", label: "Brand Vault", icon: ShieldCheck, category: "brand", description: "Brand voice, colors & guidelines" },
+];
+
+const HUB_CATEGORIES = [
+  { id: "campaigns", label: "Campaigns & Copy", icon: Rocket, color: "from-blue-600 to-indigo-600" },
+  { id: "assets", label: "Assets & Email Vaults", icon: Folder, color: "from-purple-600 to-pink-600" },
+  { id: "analytics", label: "Analytics & Optimization", icon: BarChart3, color: "from-emerald-600 to-teal-600" },
+  { id: "audience", label: "Audience & Pixels", icon: Target, color: "from-cyan-600 to-blue-600" },
+  { id: "brand", label: "Strategy & Brand", icon: ShieldCheck, color: "from-amber-600 to-orange-600" },
+];
+
 export default function MarketingCampaignManagerPage() {
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [activeHub, setActiveHub] = useState<string>("campaigns");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
   const [isRoasModalOpen, setIsRoasModalOpen] = useState<boolean>(false);
   const [isAiPrompterOpen, setIsAiPrompterOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
+
+  // Synchronize Active Hub when activeTab changes
+  useEffect(() => {
+    const currentTool = ALL_TOOLS.find((t) => t.id === activeTab);
+    if (currentTool && currentTool.category !== activeHub) {
+      setActiveHub(currentTool.category);
+    }
+  }, [activeTab]);
 
   // State Management
   const [campaigns, setCampaigns] = useState<any[]>([
@@ -395,9 +422,12 @@ export default function MarketingCampaignManagerPage() {
     );
   }
 
+  // Get tools for active hub
+  const activeHubTools = ALL_TOOLS.filter((t) => t.category === activeHub);
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
-      {/* Top Main Bar */}
+      {/* Top Main Command Banner */}
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 p-12 bg-blue-600/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
@@ -412,7 +442,7 @@ export default function MarketingCampaignManagerPage() {
                   Marketing Campaign Command Center
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-400">
-                  Build, manage, and optimize multi-channel marketing campaigns in 7 guided steps.
+                  Build, manage, and optimize multi-channel marketing campaigns across 18 specialized hubs.
                 </p>
               </div>
             </div>
@@ -428,7 +458,10 @@ export default function MarketingCampaignManagerPage() {
 
           <div className="flex flex-wrap items-center gap-3">
             <button
-              onClick={() => setActiveTab("powerwords")}
+              onClick={() => {
+                setActiveHub("campaigns");
+                setActiveTab("powerwords");
+              }}
               className="px-4 py-3 bg-cyan-950/60 border border-cyan-800/60 hover:bg-cyan-900/80 text-cyan-300 rounded-2xl text-xs font-bold flex items-center gap-2 transition"
             >
               <Zap className="w-4 h-4 text-cyan-400" /> Power Words
@@ -458,44 +491,107 @@ export default function MarketingCampaignManagerPage() {
         </div>
       </div>
 
-      {/* Main Tab Navigation */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800/80">
-        {[
-          { id: "overview", label: "Overview & Campaigns", icon: Megaphone },
-          { id: "keywords", label: "Keywords & Search Intent", icon: KeyRound },
-          { id: "dam", label: "Media Assets (DAM)", icon: FileImage },
-          { id: "swipe", label: "Copy & Swipe Vault", icon: BookOpen },
-          { id: "frameworks", label: "Copy Frameworks", icon: Brain },
-          { id: "email", label: "Email Sequences", icon: Mail },
-          { id: "scheduler", label: "Launch Scheduler", icon: Calendar },
-          { id: "analytics", label: "Analytics & Gap Alerts", icon: BarChart3 },
-          { id: "pixel", label: "Pixel Verification", icon: CheckSquare },
-          { id: "specs", label: "Platform Specs", icon: Layers },
-          { id: "brand", label: "Brand Vault", icon: ShieldCheck },
-          { id: "pixelsystem", label: "Pixel Tracking", icon: Target },
-          { id: "abtesting", label: "A/B Testing", icon: FlaskConical },
-          { id: "segments", label: "Audience Segments", icon: Users },
-          { id: "budget", label: "Budget Optimization", icon: Sliders },
-          { id: "competitors", label: "Competitor Intel", icon: Eye },
-          { id: "headlines", label: "Headline Builder", icon: Wand2 },
-          { id: "powerwords", label: "Power Words", icon: Zap },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 rounded-2xl text-xs font-bold flex items-center gap-2 whitespace-nowrap transition-all ${
-                isActive
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                  : "text-slate-400 hover:bg-slate-900 hover:text-slate-200"
-              }`}
+      {/* RESTRUCTURED NAVIGATION SYSTEM (NO HORIZONTAL SCROLLBAR) */}
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
+        {/* Tier 1: 5 Clean Category Hub Cards (Responsive Grid Layout) */}
+        <div className="flex flex-col sm:flex-row items-stretch justify-between gap-3 border-b border-slate-800 pb-4">
+          <div className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <Grid className="w-4 h-4 text-blue-400" /> Command Hub Categories:
+          </div>
+
+          {/* Quick Jump Tool Select Box */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 hidden sm:inline">Jump to Tool:</span>
+            <select
+              value={activeTab}
+              onChange={(e) => {
+                const selectedTool = ALL_TOOLS.find((t) => t.id === e.target.value);
+                if (selectedTool) {
+                  setActiveHub(selectedTool.category);
+                  setActiveTab(selectedTool.id);
+                }
+              }}
+              className="bg-slate-950 border border-slate-800 text-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
             >
-              <Icon className="w-4 h-4" /> {tab.label}
-            </button>
-          );
-        })}
+              {ALL_TOOLS.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Tier 1 Hub Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {HUB_CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = activeHub === cat.id;
+
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setActiveHub(cat.id);
+                  const firstTool = ALL_TOOLS.find((t) => t.category === cat.id);
+                  if (firstTool) setActiveTab(firstTool.id);
+                }}
+                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-2 cursor-pointer ${
+                  isSelected
+                    ? "bg-slate-950 border-blue-500 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500"
+                    : "bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-950"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className={`p-2 rounded-xl bg-gradient-to-r ${cat.color} text-white shadow-md`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  {isSelected && (
+                    <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+                  )}
+                </div>
+
+                <div>
+                  <div className={`text-xs font-bold ${isSelected ? "text-blue-300" : "text-slate-200"}`}>
+                    {cat.label}
+                  </div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">
+                    {ALL_TOOLS.filter((t) => t.category === cat.id).length} Tools
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tier 2: Sub-Tools Pills (Fits directly in grid row, NO SCROLLBAR) */}
+        <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 space-y-2">
+          <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+            Available Tools in Active Hub:
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {activeHubTools.map((tool) => {
+              const ToolIcon = tool.icon;
+              const isToolActive = activeTab === tool.id;
+
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => setActiveTab(tool.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer ${
+                    isToolActive
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30"
+                      : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  <ToolIcon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tool.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* TAB CONTENT: OVERVIEW */}
