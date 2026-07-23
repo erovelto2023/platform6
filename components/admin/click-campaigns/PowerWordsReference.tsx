@@ -133,11 +133,9 @@ export const PowerWordsReference: React.FC = () => {
   const fetchPowerWords = async () => {
     try {
       setLoading(true);
-      await fetch("/api/admin/click-campaigns/powerwords?initialize=force");
-      
       const response = await fetch("/api/admin/click-campaigns/powerwords");
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.data) {
         setPowerWords(data.data);
       }
     } catch (error) {
