@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import {
   BookOpen, Copy, Check, Plus, X, Search, Filter, Zap,
   Lightbulb, Clock, Target, Shield, Users, TrendingUp,
-  AlertTriangle, ChevronDown, ChevronUp, RefreshCw,
+  AlertTriangle, ChevronDown, ChevronUp, RefreshCw, Layers
 } from "lucide-react";
 
 export interface PowerWord {
@@ -108,7 +108,12 @@ export const PowerWordsReference: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedWord, setCopiedWord] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+
+  // ALL CATEGORIES EXPANDED BY DEFAULT SO ALL WORDS ARE VISIBLE
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(
+    CATEGORIES.map((c) => c.value)
+  );
+
   const [selectedWord, setSelectedWord] = useState<PowerWord | null>(null);
 
   const [newWord, setNewWord] = useState({
@@ -128,7 +133,6 @@ export const PowerWordsReference: React.FC = () => {
   const fetchPowerWords = async () => {
     try {
       setLoading(true);
-      // Force reseed with comprehensive data
       await fetch("/api/admin/click-campaigns/powerwords?initialize=force");
       
       const response = await fetch("/api/admin/click-campaigns/powerwords");
@@ -147,6 +151,22 @@ export const PowerWordsReference: React.FC = () => {
     navigator.clipboard.writeText(word);
     setCopiedWord(word);
     setTimeout(() => setCopiedWord(null), 2000);
+  };
+
+  const toggleCategoryExpand = (categoryValue: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryValue)
+        ? prev.filter((c) => c !== categoryValue)
+        : [...prev, categoryValue]
+    );
+  };
+
+  const toggleExpandAll = () => {
+    if (expandedCategories.length === CATEGORIES.length) {
+      setExpandedCategories([]);
+    } else {
+      setExpandedCategories(CATEGORIES.map((c) => c.value));
+    }
   };
 
   const addWord = async () => {
@@ -221,16 +241,26 @@ export const PowerWordsReference: React.FC = () => {
             <h3 className="text-lg font-bold text-slate-100">Power Words Reference</h3>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Psychological trigger words for high-converting copy
+            Psychological trigger words for high-converting copy ({powerWords.length} words loaded)
           </p>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md shadow-blue-600/20"
-        >
-          <Plus className="w-4 h-4" /> Add New Word
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleExpandAll}
+            className="px-3.5 py-2.5 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+          >
+            <Layers className="w-4 h-4 text-purple-400" />
+            {expandedCategories.length === CATEGORIES.length ? "Collapse All" : "Expand All Categories"}
+          </button>
+
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-md shadow-blue-600/20"
+          >
+            <Plus className="w-4 h-4" /> Add New Word
+          </button>
+        </div>
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-wrap gap-3 items-center">
@@ -369,13 +399,13 @@ export const PowerWordsReference: React.FC = () => {
 
             const Icon = category.icon;
             const colors = CATEGORY_COLORS[category.color as keyof typeof CATEGORY_COLORS];
-            const isExpanded = expandedCategory === category.value;
+            const isExpanded = expandedCategories.includes(category.value);
 
             return (
               <div key={category.value} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
                 <button
-                  onClick={() => setExpandedCategory(isExpanded ? null : category.value)}
-                  className="w-full p-4 flex items-center justify-between hover:bg-slate-800/50 transition"
+                  onClick={() => toggleCategoryExpand(category.value)}
+                  className="w-full p-4 flex items-center justify-between hover:bg-slate-800/50 transition cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${colors.bg} border ${colors.border}`}>
@@ -387,13 +417,13 @@ export const PowerWordsReference: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-slate-500">{categoryWords.length} words</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">{categoryWords.length} words</span>
                     {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   </div>
                 </button>
 
                 {isExpanded && (
-                  <div className="p-4 border-t border-slate-800">
+                  <div className="p-4 border-t border-slate-800 bg-slate-950/40">
                     <div className="flex flex-wrap gap-2">
                       {categoryWords.map((word) => (
                         <div
@@ -402,7 +432,7 @@ export const PowerWordsReference: React.FC = () => {
                         >
                           <button
                             onClick={() => copyWord(word.word)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
                               copiedWord === word.word
                                 ? "bg-emerald-950 border-emerald-700 text-emerald-300"
                                 : `${colors.bg} ${colors.border} ${colors.text} hover:opacity-80`
@@ -416,7 +446,7 @@ export const PowerWordsReference: React.FC = () => {
                           </button>
                           <button
                             onClick={() => setSelectedWord(word)}
-                            className="absolute -top-2 -right-2 p-1 bg-slate-800 rounded-full opacity-0 group-hover:opacity-100 transition"
+                            className="absolute -top-2 -right-2 p-1 bg-slate-800 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
                           >
                             <Lightbulb className="w-3 h-3 text-slate-400" />
                           </button>
@@ -561,118 +591,6 @@ export const PowerWordsReference: React.FC = () => {
                     ))}
                   </select>
                 </div>
-
-                {newWord.category === "urgency_scarcity" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.urgency_scarcity.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "curiosity_mystery" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.curiosity_mystery.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "ease_speed" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.ease_speed.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "trust_authority" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.trust_authority.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "exclusivity_belonging" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.exclusivity_belonging.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "value_gain" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.value_gain.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {newWord.category === "fear_pain" && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">Subcategory</label>
-                    <select
-                      value={newWord.subcategory}
-                      onChange={(e) => setNewWord({ ...newWord, subcategory: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100"
-                    >
-                      <option value="">Select subcategory</option>
-                      {SUBCATEGORIES.fear_pain.map(sub => (
-                        <option key={sub.value} value={sub.value}>{sub.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1.5">Pressure Level</label>
