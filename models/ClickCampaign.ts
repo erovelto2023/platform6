@@ -64,9 +64,34 @@ const ClickCampaignSchema = new Schema(
     totalBudget: { type: Number, default: 500 },
     startDate: { type: Date, default: Date.now },
     endDate: { type: Date },
-    // Linked references
+    // Linked references & selections
     assetIds: [{ type: Schema.Types.ObjectId, ref: "DigitalAsset" }],
     copyIds: [{ type: Schema.Types.ObjectId, ref: "SwipeCopy" }],
+    selectedAssetIds: [{ type: String }],
+    selectedCopyIds: [{ type: String }],
+    // Product & Strategy Details
+    productName: { type: String, default: "" },
+    productType: { type: String, default: "Digital Product / eBook" },
+    targetAudience: { type: String, default: "" },
+    corePainPoint: { type: String, default: "" },
+    uniqueValue: { type: String, default: "" },
+    // Step completion progress (1 through 7)
+    completedSteps: [{ type: Number }],
+    currentStep: { type: Number, default: 1 },
+    // Pixel Verification State
+    pixelChecklistState: { type: Schema.Types.Mixed, default: {} },
+    // Keywords & Ad Group Mapping
+    targetKeywords: [
+      {
+        keyword: String,
+        matchType: { type: String, default: "Phrase" },
+        intent: { type: String, default: "Transactional" },
+        monthlyVolume: { type: Number, default: 1200 },
+        estimatedCpc: { type: Number, default: 1.5 },
+        headlines: [String],
+        adCopy: [String],
+      },
+    ],
     // Metrics snapshot
     metrics: {
       spend: { type: Number, default: 0 },
@@ -82,7 +107,26 @@ const ClickCampaignSchema = new Schema(
   { timestamps: true }
 );
 
+// 5. Keyword & Ad Group Schema
+const KeywordItemSchema = new Schema(
+  {
+    userId: { type: String, required: true, index: true },
+    keyword: { type: String, required: true },
+    matchType: { type: String, enum: ["Exact", "Phrase", "Broad"], default: "Phrase" },
+    intent: { type: String, enum: ["Transactional", "Commercial", "Informational", "Navigational"], default: "Transactional" },
+    monthlyVolume: { type: Number, default: 1200 },
+    estimatedCpc: { type: Number, default: 1.5 },
+    difficulty: { type: Number, default: 45 },
+    associatedHeadlines: [{ type: String }],
+    associatedAdCopy: [{ type: String }],
+    negativeKeywords: [{ type: String }],
+    targetPlatforms: [{ type: String }],
+  },
+  { timestamps: true }
+);
+
 export const BrandVault = mongoose.models.BrandVault || mongoose.model("BrandVault", BrandVaultSchema);
 export const DigitalAsset = mongoose.models.DigitalAsset || mongoose.model("DigitalAsset", DigitalAssetSchema);
 export const SwipeCopy = mongoose.models.SwipeCopy || mongoose.model("SwipeCopy", SwipeCopySchema);
 export const ClickCampaign = mongoose.models.ClickCampaign || mongoose.model("ClickCampaign", ClickCampaignSchema);
+export const KeywordItem = mongoose.models.KeywordItem || mongoose.model("KeywordItem", KeywordItemSchema);

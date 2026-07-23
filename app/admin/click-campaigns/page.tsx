@@ -29,6 +29,12 @@ import {
   Eye,
   Wand2,
   Zap,
+  Trash2,
+  ChevronRight,
+  Search,
+  Filter,
+  Copy,
+  KeyRound
 } from "lucide-react";
 
 import { CampaignWizardModal } from "@/components/admin/click-campaigns/CampaignWizardModal";
@@ -50,34 +56,60 @@ import { BudgetOptimizationEngine } from "@/components/admin/click-campaigns/Bud
 import { CompetitorIntelligenceDashboard } from "@/components/admin/click-campaigns/CompetitorIntelligenceDashboard";
 import { HeadlineBuilder } from "@/components/admin/click-campaigns/HeadlineBuilder";
 import { PowerWordsReference } from "@/components/admin/click-campaigns/PowerWordsReference";
+import { CampaignBuilderWorkspace } from "@/components/admin/click-campaigns/CampaignBuilderWorkspace";
+import { KeywordVaultManager } from "@/components/admin/click-campaigns/KeywordVaultManager";
 
 export default function MarketingCampaignManagerPage() {
   const [activeTab, setActiveTab] = useState<string>("overview");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [isWizardOpen, setIsWizardOpen] = useState<boolean>(false);
   const [isRoasModalOpen, setIsRoasModalOpen] = useState<boolean>(false);
   const [isAiPrompterOpen, setIsAiPrompterOpen] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
   // State Management
   const [campaigns, setCampaigns] = useState<any[]>([
     {
       _id: "c1",
       title: "Summer Affiliate Masterclass Launch",
+      productName: "Affiliate Accelerator Program",
+      productType: "Digital Product / eBook",
+      targetAudience: "Aspiring online entrepreneurs & side hustlers",
+      corePainPoint: "Low CTR and fragmented marketing tools",
+      uniqueValue: "10-minute setup with built-in asset specs",
       objective: "Lead Generation",
       status: "Active",
       platforms: ["Meta", "Pinterest"],
       dailyBudget: 50,
       totalBudget: 700,
+      completedSteps: [1, 2, 3, 5, 7],
+      currentStep: 1,
+      selectedAssetIds: ["a1", "a2"],
+      selectedCopyIds: ["cp1"],
+      targetKeywords: [
+        { keyword: "affiliate campaign software", matchType: "Phrase", intent: "Transactional", monthlyVolume: 3400, estimatedCpc: 2.85 }
+      ],
       metrics: { spend: 350, impressions: 24500, clicks: 980, ctr: 4.0, cpc: 0.35, cpa: 14.0, roas: 3.8 },
       gapAlerts: ["💡 Optimal performance: ROAS is 3.8x on Pinterest Idea Pins!"],
     },
     {
       _id: "c2",
       title: "TikTok Spark Booster Campaign",
+      productName: "Viral Hook Masterclass",
+      productType: "Video Course",
+      targetAudience: "Content Creators & Coaches",
+      corePainPoint: "Struggling to hook viewers in first 3 seconds",
+      uniqueValue: "9:16 vertical video templates",
       objective: "Traffic",
       status: "Active",
       platforms: ["TikTok"],
       dailyBudget: 40,
       totalBudget: 400,
+      completedSteps: [1, 3],
+      currentStep: 1,
+      selectedAssetIds: ["a3"],
+      selectedCopyIds: ["cp2"],
       metrics: { spend: 280, impressions: 38000, clicks: 760, ctr: 2.0, cpc: 0.36, cpa: 28.0, roas: 1.6 },
       gapAlerts: ["⚠️ Underperforming alert: Refresh 9:16 vertical video hooks to boost CTR."],
     },
@@ -203,19 +235,73 @@ export default function MarketingCampaignManagerPage() {
   }, []);
 
   const handleCreateWizardCampaign = async (campaignData: any) => {
-    setCampaigns((prev) => [
-      {
-        ...campaignData,
-        _id: `c_${Date.now()}`,
-      },
-      ...prev,
-    ]);
+    const tempId = `c_${Date.now()}`;
+    const newCamp = { ...campaignData, _id: tempId };
+    
+    setCampaigns((prev) => [newCamp, ...prev]);
+    setSelectedCampaignId(tempId);
 
     try {
-      await fetch("/api/admin/click-campaigns", {
+      const res = await fetch("/api/admin/click-campaigns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "campaign", data: campaignData }),
+      });
+      const data = await res.json();
+      if (data.success && data.campaign?._id) {
+        setCampaigns((prev) =>
+          prev.map((c) => (c._id === tempId ? { ...data.campaign } : c))
+        );
+        setSelectedCampaignId(data.campaign._id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCloneCampaign = async (campaignToClone: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const clonedData = {
+      ...campaignToClone,
+      title: `${campaignToClone.title} (Copy)`,
+      status: "Draft",
+      metrics: { spend: 0, impressions: 0, clicks: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0 },
+    };
+    delete clonedData._id;
+
+    handleCreateWizardCampaign(clonedData);
+  };
+
+  const handleUpdateCampaign = async (updatedCampaign: any) => {
+    setCampaigns((prev) =>
+      prev.map((c) => (c._id === updatedCampaign._id ? updatedCampaign : c))
+    );
+
+    try {
+      await fetch("/api/admin/click-campaigns", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "campaign",
+          id: updatedCampaign._id,
+          data: updatedCampaign,
+        }),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteCampaign = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this campaign?")) return;
+
+    setCampaigns((prev) => prev.filter((c) => c._id !== id));
+    if (selectedCampaignId === id) setSelectedCampaignId(null);
+
+    try {
+      await fetch(`/api/admin/click-campaigns?type=campaign&id=${id}`, {
+        method: "DELETE",
       });
     } catch (err) {
       console.error(err);
@@ -260,6 +346,16 @@ export default function MarketingCampaignManagerPage() {
     setSchedules((prev) => [scheduleItem, ...prev]);
   };
 
+  const handleUpdateSchedule = (updatedItem: ScheduledCampaignItem) => {
+    setSchedules((prev) =>
+      prev.map((s) => (s.id === updatedItem.id ? updatedItem : s))
+    );
+  };
+
+  const handleDeleteSchedule = (id: string) => {
+    setSchedules((prev) => prev.filter((s) => s.id !== id));
+  };
+
   const handleSaveBrand = async (data: BrandVaultData) => {
     setBrandVault(data);
     try {
@@ -272,6 +368,32 @@ export default function MarketingCampaignManagerPage() {
       console.error(err);
     }
   };
+
+  // Filter campaigns
+  const filteredCampaigns = campaigns.filter((c) => {
+    const matchesSearch = c.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.objective?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "All" || c.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const selectedCampaignObject = campaigns.find((c) => c._id === selectedCampaignId);
+
+  // Render Campaign Workspace if a specific campaign is selected
+  if (selectedCampaignObject) {
+    return (
+      <CampaignBuilderWorkspace
+        campaign={selectedCampaignObject}
+        allAssets={assets}
+        allCopyList={copyList}
+        brandVault={brandVault}
+        onUpdateCampaign={handleUpdateCampaign}
+        onBackToDashboard={() => setSelectedCampaignId(null)}
+        onAddAsset={handleAddAsset}
+        onSaveCopy={handleSaveCopy}
+      />
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
@@ -287,10 +409,10 @@ export default function MarketingCampaignManagerPage() {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
-                  Marketing Campaign Manager
+                  Marketing Campaign Command Center
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-400">
-                  All-in-one command center solving fragmentation for online entrepreneurs & affiliate marketers.
+                  Build, manage, and optimize multi-channel marketing campaigns in 7 guided steps.
                 </p>
               </div>
             </div>
@@ -330,7 +452,7 @@ export default function MarketingCampaignManagerPage() {
               onClick={() => setIsWizardOpen(true)}
               className="px-5 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white rounded-2xl text-xs font-bold flex items-center gap-2.5 transition shadow-lg shadow-indigo-600/30 hover:scale-[1.02]"
             >
-              <Rocket className="w-4 h-4 text-yellow-300" /> Launch Setup Wizard
+              <Rocket className="w-4 h-4 text-yellow-300" /> + Create New Campaign
             </button>
           </div>
         </div>
@@ -339,7 +461,8 @@ export default function MarketingCampaignManagerPage() {
       {/* Main Tab Navigation */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800/80">
         {[
-          { id: "overview", label: "Overview & Active", icon: Megaphone },
+          { id: "overview", label: "Overview & Campaigns", icon: Megaphone },
+          { id: "keywords", label: "Keywords & Search Intent", icon: KeyRound },
           { id: "dam", label: "Media Assets (DAM)", icon: FileImage },
           { id: "swipe", label: "Copy & Swipe Vault", icon: BookOpen },
           { id: "frameworks", label: "Copy Frameworks", icon: Brain },
@@ -381,7 +504,7 @@ export default function MarketingCampaignManagerPage() {
           {/* Summary KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-              <div className="text-xs text-slate-400">Active Campaigns</div>
+              <div className="text-xs text-slate-400">Total Campaigns</div>
               <div className="text-2xl font-extrabold text-slate-100 mt-1">{campaigns.length}</div>
               <div className="text-[10px] text-emerald-400 mt-0.5">Running Multi-Channel</div>
             </div>
@@ -405,11 +528,42 @@ export default function MarketingCampaignManagerPage() {
             </div>
           </div>
 
+          {/* Search and Filters Bar */}
+          <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search campaigns..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Filter className="w-4 h-4 text-slate-400" />
+              <span className="text-xs text-slate-400">Status:</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-slate-950 border border-slate-800 text-slate-200 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="All">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Draft">Draft</option>
+                <option value="Scheduled">Scheduled</option>
+                <option value="Paused">Paused</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
           {/* Active Campaigns List */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-blue-400" /> Active Marketing Campaigns
+                <Rocket className="w-5 h-5 text-blue-400" /> Campaign Command List ({filteredCampaigns.length})
               </h3>
               <button
                 onClick={() => setIsWizardOpen(true)}
@@ -420,77 +574,121 @@ export default function MarketingCampaignManagerPage() {
             </div>
 
             <div className="space-y-4">
-              {campaigns.map((camp) => (
-                <div
-                  key={camp._id}
-                  className="bg-slate-950 p-5 border border-slate-800 hover:border-slate-700 rounded-2xl space-y-4 transition"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-base text-slate-100">{camp.title}</span>
-                        <span className="px-2.5 py-0.5 bg-emerald-950 text-emerald-300 border border-emerald-800/40 rounded-full text-[10px] font-bold">
-                          {camp.status}
-                        </span>
+              {filteredCampaigns.map((camp) => {
+                const completedCount = camp.completedSteps?.length || 1;
+                const progressPct = Math.round((completedCount / 7) * 100);
+
+                return (
+                  <div
+                    key={camp._id}
+                    className="bg-slate-950 p-5 border border-slate-800 hover:border-slate-700 rounded-2xl space-y-4 transition group"
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-base text-slate-100">{camp.title}</span>
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                              camp.status === "Active"
+                                ? "bg-emerald-950 border-emerald-800/40 text-emerald-300"
+                                : camp.status === "Scheduled"
+                                ? "bg-indigo-950 border-indigo-800/40 text-indigo-300"
+                                : "bg-slate-900 border-slate-800 text-slate-400"
+                            }`}
+                          >
+                            {camp.status}
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 bg-blue-950 text-blue-300 border border-blue-800/40 rounded font-semibold">
+                            {completedCount}/7 Steps Complete ({progressPct}%)
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-400">
+                          Objective: <span className="text-slate-200">{camp.objective}</span> | Channels:{" "}
+                          <span className="text-indigo-300 font-semibold">{camp.platforms?.join(", ") || "None"}</span>
+                        </div>
                       </div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        Objective: <span className="text-slate-200">{camp.objective}</span> | Target Platforms:{" "}
-                        <span className="text-indigo-300 font-semibold">{camp.platforms.join(", ")}</span>
+
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-xs font-bold text-emerald-400">${camp.dailyBudget}/day</div>
+                          <div className="text-[10px] text-slate-400">Spend: ${camp.metrics?.spend || 0}</div>
+                        </div>
+
+                        <button
+                          onClick={() => setSelectedCampaignId(camp._id)}
+                          className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-lg shadow-blue-600/20"
+                        >
+                          Manage & Build Out <ChevronRight className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={(e) => handleCloneCampaign(camp, e)}
+                          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition"
+                          title="Clone Campaign"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={(e) => handleDeleteCampaign(camp._id, e)}
+                          className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-950/40 rounded-xl transition"
+                          title="Delete Campaign"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-xs font-bold text-emerald-400">${camp.dailyBudget}/day</div>
-                      <div className="text-[10px] text-slate-400">Spend: ${camp.metrics?.spend || 0}</div>
-                    </div>
+                    {/* Metrics Bar */}
+                    {camp.metrics && (
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 bg-slate-900 p-3 rounded-xl text-center text-xs">
+                        <div>
+                          <div className="text-[10px] text-slate-400">Impressions</div>
+                          <div className="font-bold text-slate-200">{camp.metrics.impressions?.toLocaleString() || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400">Clicks</div>
+                          <div className="font-bold text-slate-200">{camp.metrics.clicks || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400">CTR</div>
+                          <div className="font-bold text-emerald-400">{camp.metrics.ctr || 0}%</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400">CPC</div>
+                          <div className="font-bold text-slate-200">${camp.metrics.cpc || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400">CPA</div>
+                          <div className="font-bold text-slate-200">${camp.metrics.cpa || 0}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400">ROAS</div>
+                          <div className="font-bold text-amber-400">{camp.metrics.roas || 0}x</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Gap Alerts */}
+                    {camp.gapAlerts?.map((alert: string, i: number) => (
+                      <div
+                        key={i}
+                        className="p-3 bg-blue-950/40 border border-blue-800/40 rounded-xl text-xs text-blue-200 flex items-center gap-2"
+                      >
+                        <AlertCircle className="w-4 h-4 text-blue-400 shrink-0" />
+                        <span>{alert}</span>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* Metrics Bar */}
-                  {camp.metrics && (
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 bg-slate-900 p-3 rounded-xl text-center text-xs">
-                      <div>
-                        <div className="text-[10px] text-slate-400">Impressions</div>
-                        <div className="font-bold text-slate-200">{camp.metrics.impressions.toLocaleString()}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400">Clicks</div>
-                        <div className="font-bold text-slate-200">{camp.metrics.clicks}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400">CTR</div>
-                        <div className="font-bold text-emerald-400">{camp.metrics.ctr}%</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400">CPC</div>
-                        <div className="font-bold text-slate-200">${camp.metrics.cpc}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400">CPA</div>
-                        <div className="font-bold text-slate-200">${camp.metrics.cpa}</div>
-                      </div>
-                      <div>
-                        <div className="text-[10px] text-slate-400">ROAS</div>
-                        <div className="font-bold text-amber-400">{camp.metrics.roas}x</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Gap Alerts */}
-                  {camp.gapAlerts?.map((alert: string, i: number) => (
-                    <div
-                      key={i}
-                      className="p-3 bg-blue-950/40 border border-blue-800/40 rounded-xl text-xs text-blue-200 flex items-center gap-2"
-                    >
-                      <AlertCircle className="w-4 h-4 text-blue-400 shrink-0" />
-                      <span>{alert}</span>
-                    </div>
-                  ))}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
       )}
+
+      {/* TAB CONTENT: KEYWORDS */}
+      {activeTab === "keywords" && <KeywordVaultManager />}
 
       {/* TAB CONTENT: DAM */}
       {activeTab === "dam" && (
@@ -514,7 +712,12 @@ export default function MarketingCampaignManagerPage() {
 
       {/* TAB CONTENT: LAUNCH SCHEDULER */}
       {activeTab === "scheduler" && (
-        <VisualCalendar schedules={schedules} onAddSchedule={handleAddSchedule} />
+        <VisualCalendar
+          schedules={schedules}
+          onAddSchedule={handleAddSchedule}
+          onUpdateSchedule={handleUpdateSchedule}
+          onDeleteSchedule={handleDeleteSchedule}
+        />
       )}
 
       {/* TAB CONTENT: ANALYTICS & GAP ALERTS */}

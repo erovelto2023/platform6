@@ -57,11 +57,17 @@ export const CampaignWizardModal: React.FC<CampaignWizardModalProps> = ({
       dailyBudget: formData.dailyBudget,
       totalBudget: formData.dailyBudget * 14,
       startDate: new Date(),
+      productName: formData.productName,
+      productType: formData.productType,
+      targetAudience: formData.targetAudience,
+      corePainPoint: formData.corePainPoint,
+      uniqueValue: formData.uniqueValue,
+      completedSteps: [1],
+      currentStep: 1,
       metrics: { spend: 0, impressions: 0, clicks: 0, ctr: 0, cpc: 0, cpa: 0, roas: 0 },
       gapAlerts: [
         "💡 Newbie Tip: Set up your Meta Pixel & Pinterest Tag before scaling daily spend above $50.",
       ],
-      productDetails: formData,
     });
     setStep(1);
     onClose();
