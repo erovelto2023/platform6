@@ -5,7 +5,7 @@ import {
   BookOpen, Copy, Check, Plus, X, Search, Filter, Zap,
   Lightbulb, Clock, Target, Shield, Users, TrendingUp,
   AlertTriangle, ChevronDown, ChevronUp, RefreshCw, Layers,
-  Sparkles, FileText, Hash, DollarSign, Edit3, Heart, ThumbsDown
+  Sparkles, FileText, Hash, DollarSign, Edit3, Heart, ThumbsDown, Flame, Star
 } from "lucide-react";
 
 export interface PowerWord {
@@ -29,6 +29,11 @@ const CATEGORIES = [
   { value: "exclusivity_belonging", label: "Exclusivity & Belonging", icon: Users, color: "amber", description: "The 'Tribe' Trigger" },
   { value: "value_gain", label: "Value & Gain", icon: TrendingUp, color: "green", description: "The 'Greed/Benefit' Trigger" },
   { value: "fear_pain", label: "Fear & Pain", icon: AlertTriangle, color: "orange", description: "The 'Problem Agitation' Trigger" },
+  { value: "fresh_release", label: "Fresh Release", icon: Flame, color: "red", description: "The 'Timeliness' Trigger - Signals brand-new availability" },
+  { value: "breakthrough_discovery", label: "Breakthrough & Discovery", icon: Sparkles, color: "purple", description: "The 'Innovation' Trigger - Signals a massive leap forward" },
+  { value: "modern_future", label: "Modern & Future-Facing", icon: Layers, color: "blue", description: "The 'Next-Gen' Trigger - Positions as smart forward-thinking choice" },
+  { value: "unique_different", label: "Unique & Different", icon: Star, color: "emerald", description: "The 'One-of-a-Kind' Trigger - Separates offer from competitors" },
+  { value: "reinvention", label: "Reinvention & Fresh Start", icon: RefreshCw, color: "amber", description: "The 'Fresh Start' Trigger - Overhauls old failed attempts" },
 ];
 
 const PRESSURE_LEVELS = [

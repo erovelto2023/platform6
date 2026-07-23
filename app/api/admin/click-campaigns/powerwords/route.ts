@@ -76,10 +76,41 @@ const FEAR_PAIN_WORDS = [
   "Sabotage", "Backfire", "Bury"
 ];
 
+// NEW 5 TRIGGER CATEGORIES
+const FRESH_RELEASE_WORDS = [
+  "New", "Latest", "Just Released", "Fresh", "Brand-New", "Newly Updated", "Now Available",
+  "Hot Off the Press", "Premiere", "Debut", "Launch", "Unveiled", "Introduced", "Arrived"
+];
+
+const BREAKTHROUGH_DISCOVERY_WORDS = [
+  "Breakthrough", "Discovery", "Revelation", "Uncovered", "Found", "Pioneering", "Groundbreaking",
+  "Revolutionary", "Game-Changer", "Paradigm Shift", "Leap", "Advancement", "Innovation", "Invention"
+];
+
+const MODERN_FUTURE_WORDS = [
+  "Modern", "Next-Gen", "Next Generation", "Future-Proof", "Cutting-Edge", "State-of-the-Art",
+  "Advanced", "Evolved", "Upgraded", "Refined", "Enhanced", "Improved", "Superior", "Ahead of the Curve", "Trending"
+];
+
+const UNIQUE_DIFFERENT_WORDS = [
+  "Unique", "One-of-a-Kind", "Unlike Any Other", "Distinct", "Original", "Exclusive Method",
+  "Proprietary", "Signature", "Custom", "Bespoke", "Rare", "Unmatched", "Singular", "First-Ever"
+];
+
+const REINVENTION_WORDS = [
+  "Reinvented", "Reimagined", "Redesigned", "Transformed", "Overhauled", "Revamped", "Refreshed",
+  "Renewed", "Restored", "Revived", "New Approach", "New Way", "New Standard", "New Era"
+];
+
 function generateDataset() {
   const dataset: any[] = [];
 
-  const addCategoryWords = (words: string[], category: string, defaultPressure: "low" | "medium" | "high") => {
+  const addCategoryWords = (
+    words: string[],
+    category: string,
+    defaultPressure: "low" | "medium" | "high",
+    customPsychology?: string
+  ) => {
     words.forEach((w, idx) => {
       dataset.push({
         _id: `pw_${category}_${idx + 1}`,
@@ -89,7 +120,7 @@ function generateDataset() {
         pressureLevel: defaultPressure,
         synonyms: [w.toLowerCase(), `${w.toLowerCase()} offer`],
         examples: [`Get ${w} Access Now!`, `The ${w} Strategy for Marketers`],
-        psychology: `Triggers strong psychological motivation via ${category.replace("_", " ")}.`,
+        psychology: customPsychology || `Triggers strong psychological motivation via ${category.replace("_", " ")}.`,
         appUseCase: `Use in primary headlines, CTA buttons, and high-impact email subject lines.`,
         isActive: true,
       });
@@ -103,6 +134,13 @@ function generateDataset() {
   addCategoryWords(EXCLUSIVITY_BELONGING_WORDS, "exclusivity_belonging", "medium");
   addCategoryWords(VALUE_GAIN_WORDS, "value_gain", "medium");
   addCategoryWords(FEAR_PAIN_WORDS, "fear_pain", "high");
+
+  // ADD THE 5 NEW CATEGORIES
+  addCategoryWords(FRESH_RELEASE_WORDS, "fresh_release", "medium", "Signals immediate availability and timeliness: 'This just happened, and you are among the first to know.'");
+  addCategoryWords(BREAKTHROUGH_DISCOVERY_WORDS, "breakthrough_discovery", "high", "Implies a significant leap forward, suggesting that previous methods are now obsolete.");
+  addCategoryWords(MODERN_FUTURE_WORDS, "modern_future", "low", "Positions the product as the smart, forward-thinking choice for early adopters.");
+  addCategoryWords(UNIQUE_DIFFERENT_WORDS, "unique_different", "medium", "Separates the offer from competitors: 'Why should I care if I've seen this before?'");
+  addCategoryWords(REINVENTION_WORDS, "reinvention", "high", "Acknowledges past failures or old ways and promises a fresh start.");
 
   return dataset;
 }
