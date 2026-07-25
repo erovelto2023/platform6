@@ -3,21 +3,16 @@ import Link from 'next/link';
 
 /**
  * Automatically wraps glossary terms found in text with Links.
- * This is a simple but effective SEO and navigation enhancer.
+ * Simple & effective SEO navigation enhancer.
  */
 export function autoLinkContent(text: string, termMap: Map<string, string>) {
     if (!text) return text;
 
-    // Sort terms by length descending to avoid partial matches (e.g., "SEO" vs "SEO Expert")
     const terms = Array.from(termMap.keys()).sort((a, b) => b.length - a.length);
-    
-    // Create a regex that matches terms, avoiding terms inside existing HTML attributes or tags
     const pattern = new RegExp(`\\b(${terms.map(t => escapeRegExp(t)).join('|')})\\b`, 'gi');
-
     const result: (string | React.ReactNode)[] = [];
 
     text.split(pattern).forEach((part, i) => {
-        // Every second part is a match due to capturing group in regex
         const lowerPart = part.toLowerCase();
         const slug = termMap.get(lowerPart) || termMap.get(part);
 
@@ -26,7 +21,7 @@ export function autoLinkContent(text: string, termMap: Map<string, string>) {
                 <Link 
                     key={i} 
                     href={`/glossary/${slug}`}
-                    className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline decoration-2 underline-offset-4"
+                    className="text-cyan-400 font-bold hover:underline decoration-cyan-500/50 underline-offset-4 transition-colors"
                 >
                     {part}
                 </Link>
@@ -55,7 +50,7 @@ export function autoLinkContentHTML(text: string, termMap: Map<string, string>):
         const slug = termMap.get(lowerMatch) || termMap.get(match);
 
         if (slug) {
-            return `<a href="/glossary/${slug}" class="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline decoration-2 underline-offset-4">${match}</a>`;
+            return `<a href="/glossary/${slug}" class="text-cyan-400 font-bold hover:underline decoration-cyan-500/50 underline-offset-4 transition-colors">${match}</a>`;
         }
         return match;
     });

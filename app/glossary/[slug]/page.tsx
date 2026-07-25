@@ -37,6 +37,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
 }
 
+function formatDefinitionHTML(rawText: string, termMap: Map<string, string>): string {
+    if (!rawText) return "";
+
+    let html = rawText
+        .replace(/^### (.*$)/gim, '<h4 class="text-lg font-bold text-slate-100 mt-6 mb-3">$1</h4>')
+        .replace(/^## (.*$)/gim, '<h3 class="text-xl font-extrabold text-cyan-400 mt-8 mb-4 border-b border-slate-800 pb-2">$1</h3>')
+        .replace(/^# (.*$)/gim, '<h2 class="text-2xl font-black text-slate-100 mt-8 mb-4">$1</h2>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-white">$1</strong>');
+
+    html = html.replace(/^\s*[-*]\s+(.*$)/gim, '<li class="ml-4 list-disc text-slate-300 mb-1 font-sans leading-relaxed">$1</li>');
+    html = html.replace(/(<li.*<\/li>\s*)+/g, (match) => `<ul class="my-4 space-y-1.5 bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 font-sans">${match}</ul>`);
+
+    const paragraphs = html.split(/\n\s*\n/);
+    html = paragraphs.map(p => {
+        const trimmed = p.trim();
+        if (!trimmed) return "";
+        if (trimmed.startsWith("<h") || trimmed.startsWith("<ul") || trimmed.startsWith("<ol") || trimmed.startsWith("<div") || trimmed.startsWith("<p")) {
+            return trimmed;
+        }
+        return `<p class="mb-5 leading-relaxed text-slate-200 text-base font-sans">${trimmed.replace(/\n/g, "<br/>")}</p>`;
+    }).join("\n");
+
+    return autoLinkContentHTML(html, termMap);
+}
+
 const renderList = (items: any[] | undefined, icon: React.ReactNode, title: string, requireUrl = false) => {
     if (!items || items.length === 0) return null;
 
@@ -106,12 +131,18 @@ export default async function GlossaryTermPage({ params }: Props) {
         }
     });
 
+    const rawCategory = String(serializedTerm.category || 'General');
+    const categoriesList = rawCategory.includes(',') 
+        ? rawCategory.split(',').map(c => c.trim()).filter(Boolean)
+        : [rawCategory];
+    const primaryCategory = categoriesList[0] || 'General';
+
     const updatedDate = serializedTerm.lastUpdated ? new Date(serializedTerm.lastUpdated).toLocaleDateString("en-US", { month: "long", year: "numeric" }) : "March 2026";
     const readingTime = getReadingTimeEstimate(serializedTerm);
 
     const breadcrumbs = [
         { label: "Glossary", href: "/glossary" },
-        { label: serializedTerm.category || "General", href: `/glossary?category=${serializedTerm.category}` },
+        { label: primaryCategory, href: `/glossary?category=${encodeURIComponent(primaryCategory)}` },
         { label: serializedTerm.term, href: `/glossary/${serializedTerm.slug}` }
     ];
 
@@ -169,16 +200,22 @@ export default async function GlossaryTermPage({ params }: Props) {
                     <div className="lg:col-span-2 space-y-10">
                         {/* Term Header & Meta */}
                         <div>
-                            <div className="flex items-center flex-wrap gap-3 mb-4 font-mono text-xs">
-                                <Link href={`/glossary?category=${serializedTerm.category}`} className="px-3 py-1 rounded-xl text-cyan-300 bg-slate-900 border border-slate-800 hover:border-cyan-500 uppercase font-bold tracking-wider cursor-pointer">
-                                    {serializedTerm.category || 'General'}
-                                </Link>
+                            <div className="flex items-center flex-wrap gap-2 mb-4 font-mono text-xs">
+                                {categoriesList.map((cat, i) => (
+                                    <Link 
+                                        key={i} 
+                                        href={`/glossary?category=${encodeURIComponent(cat)}`} 
+                                        className="px-3 py-1 rounded-xl text-cyan-300 bg-slate-900 border border-slate-800 hover:border-cyan-500 uppercase font-bold tracking-wider cursor-pointer"
+                                    >
+                                        {cat}
+                                    </Link>
+                                ))}
                                 {serializedTerm.entityType && (
                                     <span className="px-3 py-1 rounded-xl text-purple-300 bg-slate-900 border border-slate-800 uppercase font-bold tracking-wider">
                                         {serializedTerm.entityType}
                                     </span>
                                 )}
-                                <span className="text-slate-500">Updated {updatedDate}</span>
+                                <span className="text-slate-500 ml-2">Updated {updatedDate}</span>
                                 <div className="flex items-center gap-1 text-slate-400">
                                     <Clock size={14} />
                                     <span>{readingTime}</span>
@@ -204,8 +241,14 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     <span className="text-slate-100 font-bold">{serializedTerm.entityType || 'Core Business Concept'}</span>
                                 </div>
                                 <div>
-                                    <span className="text-slate-400 block mb-1">Knowledge Cluster:</span>
-                                    <span className="text-cyan-300 font-bold">{serializedTerm.category || 'General'}</span>
+                                    <span className="text-slate-400 block mb-1">Knowledge Clusters:</span>
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                        {categoriesList.map((cat, i) => (
+                                            <span key={i} className="text-cyan-300 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
+                                                {cat}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,8 +258,8 @@ export default async function GlossaryTermPage({ params }: Props) {
                             <div className="flex items-center gap-2 text-cyan-400 font-mono font-bold text-xs uppercase tracking-wider mb-3">
                                 <Sparkles size={16} /> AI Search Direct Answer (AEO Snippet)
                             </div>
-                            <div className="text-lg md:text-xl font-medium text-slate-100 leading-relaxed font-mono" data-aeo-summary data-direct-answer>
-                                <CustomHTMLRenderer html={autoLinkContentHTML(serializedTerm.aeoSummary || serializedTerm.shortDefinition || serializedTerm.definition, termMap)} />
+                            <div className="text-base md:text-lg font-medium text-slate-100 leading-relaxed font-sans" data-aeo-summary data-direct-answer>
+                                <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.aeoSummary || serializedTerm.shortDefinition || serializedTerm.definition, termMap)} />
                             </div>
                         </div>
 
@@ -227,11 +270,11 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     <Target size={16} /> Real-World Execution Scenario & ROI Impact
                                 </div>
                                 {serializedTerm.realWorldScenario.context && (
-                                    <p className="text-sm font-mono text-slate-300 italic">{serializedTerm.realWorldScenario.context}</p>
+                                    <p className="text-sm font-sans text-slate-300 italic">{serializedTerm.realWorldScenario.context}</p>
                                 )}
                                 <div className="space-y-3 pt-2">
                                     <h4 className="text-xs font-mono font-bold uppercase text-slate-400">Step-by-Step Execution:</h4>
-                                    <ol className="space-y-2 font-mono text-xs text-slate-200">
+                                    <ol className="space-y-2 font-sans text-sm text-slate-200">
                                         {serializedTerm.realWorldScenario.stepByStep.map((step: string, idx: number) => (
                                             <li key={idx} className="flex items-start gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
                                                 <span className="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center text-[10px] font-bold shrink-0">{idx + 1}</span>
@@ -269,7 +312,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                                     {pathway.type}
                                                 </span>
                                                 <h4 className="font-bold text-slate-100 group-hover:text-cyan-300 text-sm">{pathway.title}</h4>
-                                                {pathway.description && <p className="text-xs text-slate-400 font-mono mt-1 line-clamp-2">{pathway.description}</p>}
+                                                {pathway.description && <p className="text-xs text-slate-400 font-sans mt-1 line-clamp-2">{pathway.description}</p>}
                                             </div>
                                             <div className="mt-4 flex items-center justify-end text-xs font-mono text-cyan-400 gap-1">
                                                 Explore <ExternalLink size={12} />
@@ -286,17 +329,17 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 <div className="flex items-center gap-2 text-cyan-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
                                     <HelpCircle size={16} /> User Intent & Problem Query Variations (AEO Accordion)
                                 </div>
-                                <div className="space-y-3 font-mono text-xs">
+                                <div className="space-y-3 font-sans text-sm">
                                     {serializedTerm.questionVariations.map((qv: any, idx: number) => (
                                         <details key={idx} className="group bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
                                             <summary className="p-4 cursor-pointer font-bold text-slate-100 flex items-center justify-between">
                                                 <span className="flex items-center gap-2">
-                                                    <span className="px-2 py-0.5 rounded-lg bg-slate-900 text-cyan-400 border border-slate-800 text-[9px] uppercase">{qv.intentType || 'Query'}</span>
+                                                    <span className="px-2 py-0.5 rounded-lg bg-slate-900 text-cyan-400 border border-slate-800 text-[9px] font-mono uppercase">{qv.intentType || 'Query'}</span>
                                                     {qv.question}
                                                 </span>
                                                 <ChevronRight size={14} className="group-open:rotate-90 transition-transform text-slate-400" />
                                             </summary>
-                                            <div className="p-4 border-t border-slate-800 text-slate-300 leading-relaxed bg-slate-900">
+                                            <div className="p-4 border-t border-slate-800 text-slate-300 leading-relaxed bg-slate-900 font-sans">
                                                 {qv.targetAnswer}
                                             </div>
                                         </details>
@@ -311,8 +354,8 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 <BookOpen size={20} className="text-cyan-400" />
                                 Detailed Technical Analysis
                             </h2>
-                            <div className="text-sm font-mono leading-relaxed text-slate-300 space-y-4 bg-slate-900 p-6 rounded-3xl border border-slate-800">
-                                <CustomHTMLRenderer html={autoLinkContentHTML(serializedTerm.definition, termMap)} />
+                            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl font-sans text-base leading-relaxed text-slate-200">
+                                <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.definition, termMap)} />
                             </div>
                         </div>
 
@@ -337,7 +380,7 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                     {/* Sidebar Column */}
                     <div className="lg:col-span-1">
-                        <div className="sticky top-24 space-y-6 font-mono text-xs">
+                        <div className="sticky top-24 space-y-6 font-sans text-xs">
                             
                             <RotatingAffiliateBanner products={products} />
 
@@ -349,7 +392,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     Entity Overview
                                 </h4>
                                 
-                                <div className="space-y-3">
+                                <div className="space-y-3 font-mono">
                                     {serializedTerm.skillRequired && (
                                         <div className="p-3 bg-slate-950 rounded-xl border border-slate-800">
                                             <span className="block text-[9px] font-bold uppercase text-slate-400 mb-0.5">Skill Level</span>
@@ -372,10 +415,10 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                                 {serializedTerm.synonyms && serializedTerm.synonyms.length > 0 && (
                                     <div>
-                                        <span className="block text-[10px] font-bold uppercase text-slate-400 mb-2">Also Known As</span>
+                                        <span className="block text-[10px] font-mono font-bold uppercase text-slate-400 mb-2">Also Known As</span>
                                         <div className="flex flex-wrap gap-1.5">
                                             {serializedTerm.synonyms.map((syn: string, i: number) => (
-                                                <span key={i} className="text-[10px] bg-slate-950 text-cyan-300 px-2.5 py-1 rounded-xl border border-slate-800">
+                                                <span key={i} className="text-[10px] font-mono bg-slate-950 text-cyan-300 px-2.5 py-1 rounded-xl border border-slate-800">
                                                     {syn}
                                                 </span>
                                             ))}
