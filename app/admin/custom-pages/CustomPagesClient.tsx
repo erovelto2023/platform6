@@ -121,16 +121,16 @@ export default function CustomPagesClient({ initialTypes }: Props) {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-6 font-sans">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl">
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Custom Page Types</h1>
-                    <p className="text-sm text-slate-500 font-medium">Create page types, define schemas, design layout templates, and generate bulk keyword pages.</p>
+                    <h1 className="text-2xl md:text-3xl font-black text-slate-100 tracking-tight uppercase">Custom Page Types</h1>
+                    <p className="text-xs font-mono font-bold text-slate-400 mt-1">Define schemas, custom field templates, and bulk keyword landing pages.</p>
                 </div>
                 {view === "list" && (
                     <button
                         onClick={handleAddTypeClick}
-                        className="bg-black text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-all shadow-md shadow-slate-900/10"
+                        className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white px-6 py-3 rounded-2xl font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/30 text-xs uppercase border-0 cursor-pointer"
                     >
                         <Plus size={18} /> New Page Type
                     </button>
@@ -138,7 +138,7 @@ export default function CustomPagesClient({ initialTypes }: Props) {
             </div>
 
             {error && (
-                <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl font-bold text-sm">
+                <div className="p-4 bg-rose-950/80 border border-rose-800 text-rose-300 rounded-2xl font-bold text-xs">
                     {error}
                 </div>
             )}
@@ -146,63 +146,63 @@ export default function CustomPagesClient({ initialTypes }: Props) {
             {view === "list" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {pageTypes.map((type) => (
-                        <div key={type.slug} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                        <div key={type.slug} className="bg-slate-900 rounded-3xl border border-slate-800 hover:border-cyan-500/80 p-6 shadow-xl transition-all flex flex-col justify-between group">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
+                                    <div className="p-3 bg-slate-950 border border-slate-800 text-rose-400 rounded-2xl">
                                         <Layout size={24} />
                                     </div>
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleEditTypeClick(type)}
-                                            className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                                            className="p-2 text-slate-400 hover:text-cyan-300 transition-colors"
                                             title="Edit Page Type Properties"
                                         >
                                             <Edit size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(type.slug)}
-                                            className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                                            className="p-2 text-slate-400 hover:text-rose-400 transition-colors"
                                             title="Delete Page Type"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-black text-slate-900 mb-1">{type.name}</h3>
-                                <p className="text-xs font-mono text-slate-400 bg-slate-50 p-1.5 rounded border border-slate-100 italic inline-block mb-3">
+                                <h3 className="text-xl font-black text-slate-100 mb-1">{type.name}</h3>
+                                <p className="text-xs font-mono text-cyan-400 bg-slate-950 p-2 rounded-xl border border-slate-800 inline-block mb-3">
                                     /c/{type.slug}/[slug]
                                 </p>
-                                <div className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-6">
+                                <div className="text-xs text-slate-400 font-mono font-bold uppercase tracking-wider mb-4">
                                     Fields: {type.fields?.length || 0} defined
                                 </div>
                             </div>
                             
-                            <div className="space-y-2 mt-4 pt-4 border-t border-slate-100">
+                            <div className="space-y-2 mt-4 pt-4 border-t border-slate-800">
                                 <Link
                                     href={`/admin/custom-pages/types/${type.slug}`}
-                                    className="w-full py-2.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                    className="w-full py-2.5 bg-slate-950 border border-slate-800 text-slate-100 hover:text-white hover:bg-slate-800 rounded-2xl font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
                                 >
-                                    <FileText size={14} /> Manage Entries
+                                    <FileText size={14} className="text-cyan-400" /> Manage Entries
                                 </Link>
                                 <Link
                                     href={`/admin/custom-pages/types/${type.slug}/edit-template`}
-                                    className="w-full py-2.5 bg-white text-slate-700 border border-slate-200 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                                    className="w-full py-2.5 bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 rounded-2xl font-mono font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
                                 >
-                                    <Settings size={14} /> Design Template
+                                    <Settings size={14} className="text-purple-400" /> Design Template
                                 </Link>
                             </div>
                         </div>
                     ))}
 
                     {pageTypes.length === 0 && (
-                        <div className="col-span-full bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center">
-                            <Layout className="mx-auto text-slate-300 mb-4" size={48} />
-                            <h3 className="text-lg font-black text-slate-800 mb-1">No custom page types yet</h3>
-                            <p className="text-sm text-slate-500 mb-6">Get started by creating a Directory, Affiliate Review, or custom Landing Page type.</p>
+                        <div className="col-span-full bg-slate-900 border border-slate-800 border-dashed rounded-3xl p-12 text-center">
+                            <Layout className="mx-auto text-slate-500 mb-4" size={48} />
+                            <h3 className="text-lg font-black text-slate-100 mb-1">No custom page types yet</h3>
+                            <p className="text-xs text-slate-400 font-mono mb-6">Get started by creating a Directory, Affiliate Review, or custom Landing Page type.</p>
                             <button
                                 onClick={handleAddTypeClick}
-                                className="bg-black text-white px-6 py-2.5 rounded-xl font-bold hover:bg-slate-800 transition-all"
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white px-6 py-2.5 rounded-2xl font-extrabold text-xs uppercase tracking-wider"
                             >
                                 Create First Page Type
                             </button>
@@ -212,10 +212,10 @@ export default function CustomPagesClient({ initialTypes }: Props) {
             )}
 
             {(view === "create" || view === "edit") && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm max-w-4xl">
+                <div className="bg-slate-900 rounded-3xl border border-slate-800 p-8 shadow-2xl max-w-4xl text-slate-100">
                     <button
                         onClick={() => setView("list")}
-                        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-black font-bold uppercase text-xs tracking-widest transition-all"
+                        className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-all"
                     >
                         <ArrowLeft size={16} /> Back to Page Types
                     </button>

@@ -9,7 +9,7 @@ export default async function CustomPagesAdminPage() {
     const pageTypes = await getPageTypes();
 
     return (
-        <div className="p-8">
+        <div className="p-6 md:p-8 max-w-7xl mx-auto font-sans">
             <CustomPagesClient initialTypes={pageTypes} />
         </div>
     );

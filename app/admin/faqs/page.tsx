@@ -19,7 +19,7 @@ export default async function FAQsAdminPage({ searchParams }: PageProps) {
     ]);
 
     return (
-        <div className="p-8">
+        <div className="p-6 md:p-8 max-w-7xl mx-auto font-sans">
             <FAQManager 
                 faqs={publishedData.faqs}
                 draftFaqs={draftData.faqs}

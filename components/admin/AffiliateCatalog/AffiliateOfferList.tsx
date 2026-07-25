@@ -94,13 +94,13 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-sans">
             {/* A-Z Filter */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm overflow-x-auto scrollbar-hide">
+            <div className="bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl overflow-x-auto scrollbar-hide">
                 <div className="flex items-center gap-1 min-w-max">
                     <button
                         onClick={() => { setSelectedLetter(null); setCurrentPage(1); }}
-                        className={`h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!selectedLetter ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                        className={`h-8 px-3.5 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider transition-all ${!selectedLetter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
                     >
                         All
                     </button>
@@ -108,7 +108,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                         <button
                             key={letter}
                             onClick={() => { setSelectedLetter(letter); setCurrentPage(1); }}
-                            className={`h-8 w-8 flex items-center justify-center rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${selectedLetter === letter ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                            className={`h-8 w-8 flex items-center justify-center rounded-xl text-[10px] font-mono font-black uppercase transition-all ${selectedLetter === letter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
                         >
                             {letter}
                         </button>
@@ -117,67 +117,67 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
             </div>
 
             <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input 
-                    placeholder="Search your catalog..." 
-                    className="pl-10 h-12 rounded-xl"
+                    placeholder="Search your catalog by offer name or affiliate network..." 
+                    className="pl-10 h-12 rounded-2xl bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 text-xs font-mono"
                     value={searchTerm}
                     onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                 />
             </div>
 
-            <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
+            <div className="rounded-3xl border border-slate-800 bg-slate-900 overflow-hidden shadow-2xl">
                 <Table>
-                    <TableHeader className="bg-slate-50">
-                        <TableRow>
-                            <TableHead>Product</TableHead>
-                            <TableHead>Network</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Commission</TableHead>
-                            <TableHead>Payout</TableHead>
-                            <TableHead className="text-center">Clicks</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
+                    <TableHeader className="bg-slate-950">
+                        <TableRow className="border-b border-slate-800/80">
+                            <TableHead className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">Product</TableHead>
+                            <TableHead className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">Network</TableHead>
+                            <TableHead className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">Price</TableHead>
+                            <TableHead className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">Commission</TableHead>
+                            <TableHead className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">Payout</TableHead>
+                            <TableHead className="text-center text-slate-300 font-extrabold text-xs uppercase tracking-wider">Clicks</TableHead>
+                            <TableHead className="text-right text-slate-300 font-extrabold text-xs uppercase tracking-wider">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody className="divide-y divide-slate-800/80">
                         {paginatedOffers.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-center py-10 text-slate-500 font-bold uppercase text-xs tracking-widest">
+                                <TableCell colSpan={7} className="text-center py-12 text-slate-400 font-mono font-bold uppercase text-xs tracking-widest">
                                     No offers found matching your criteria.
                                 </TableCell>
                             </TableRow>
                         ) : (
                             paginatedOffers.map((offer) => (
-                                <TableRow key={offer._id} className="hover:bg-slate-50/50 transition-colors">
-                                    <TableCell className="font-bold text-slate-900">
+                                <TableRow key={offer._id} className="hover:bg-slate-950/60 transition-colors">
+                                    <TableCell className="font-extrabold text-slate-100">
                                         <div className="flex flex-col">
                                             <span className="text-sm">{offer.name}</span>
                                             <div className="flex flex-col gap-0.5 mt-1">
                                                 <div className="flex items-center gap-1">
-                                                    <span className="text-[8px] font-black uppercase text-blue-500 w-8">Aff:</span>
-                                                    <span className="text-[10px] text-slate-400 font-mono truncate max-w-[120px]">{offer.affiliateLink}</span>
+                                                    <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 w-8">Aff:</span>
+                                                    <span className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">{offer.affiliateLink}</span>
                                                 </div>
                                                 {offer.destinationLink && (
                                                     <div className="flex items-center gap-1">
-                                                        <span className="text-[8px] font-black uppercase text-emerald-500 w-8">Dest:</span>
-                                                        <span className="text-[10px] text-slate-400 font-mono truncate max-w-[120px]">{offer.destinationLink}</span>
+                                                        <span className="text-[9px] font-mono font-bold uppercase text-emerald-400 w-8">Dest:</span>
+                                                        <span className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">{offer.destinationLink}</span>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span className="px-2 py-1 bg-slate-100 rounded text-[9px] font-black uppercase text-slate-600">
+                                        <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-xl text-[10px] font-mono font-bold uppercase text-cyan-300">
                                             {offer.network || "Direct"}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="text-xs font-bold text-slate-600">{offer.productPrice || "—"}</TableCell>
-                                    <TableCell className="text-xs font-black text-emerald-600">{offer.commissionLevel || "—"}</TableCell>
-                                    <TableCell className="text-xs font-black text-blue-600">{offer.payoutAmount || "—"}</TableCell>
+                                    <TableCell className="text-xs font-mono font-bold text-slate-300">{offer.productPrice || "—"}</TableCell>
+                                    <TableCell className="text-xs font-mono font-black text-emerald-400">{offer.commissionLevel || "—"}</TableCell>
+                                    <TableCell className="text-xs font-mono font-black text-cyan-400">{offer.payoutAmount || "—"}</TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex flex-col items-center">
-                                            <span className="text-sm font-black text-slate-900">{offer.clicks || 0}</span>
-                                            <span className="text-[8px] text-slate-400 uppercase font-black tracking-tighter">Total Clicks</span>
+                                            <span className="text-sm font-black text-slate-100 font-mono">{offer.clicks || 0}</span>
+                                            <span className="text-[8px] text-slate-500 uppercase font-mono font-bold">Total Clicks</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -185,7 +185,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                                             <Button 
                                                 variant="outline" 
                                                 size="sm" 
-                                                className="h-8 gap-1.5 rounded-lg px-2 text-[9px] font-black uppercase tracking-tight border-blue-100 text-blue-600 hover:bg-blue-50"
+                                                className="h-8 gap-1.5 rounded-xl px-2.5 text-[9px] font-mono font-bold uppercase tracking-tight bg-slate-950 border-indigo-900/60 text-indigo-300 hover:bg-indigo-950"
                                                 onClick={() => handleCopy(offer.affiliateLink, offer._id, 'tracking')}
                                             >
                                                 {copiedId === offer._id && copiedType === 'tracking' ? <Check className="h-3 w-3" /> : <MousePointerClick className="h-3 w-3" />}
@@ -194,27 +194,37 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                                             <Button 
                                                 variant="outline" 
                                                 size="icon" 
-                                                className="h-8 w-8 rounded-lg shrink-0"
+                                                className="h-8 w-8 rounded-xl shrink-0 bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-800"
                                                 title="Copy Direct Link"
                                                 onClick={() => handleCopy(offer.affiliateLink, offer._id, 'direct')}
                                             >
-                                                {copiedId === offer._id && copiedType === 'direct' ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+                                                {copiedId === offer._id && copiedType === 'direct' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                                             </Button>
+                                            {offer.destinationLink && (
+                                                <a 
+                                                    href={offer.destinationLink} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="h-8 w-8 rounded-xl shrink-0 bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 hover:bg-slate-800 flex items-center justify-center transition"
+                                                >
+                                                    <ExternalLink className="h-3 w-3" />
+                                                </a>
+                                            )}
                                             <Button 
-                                                variant="ghost" 
+                                                variant="outline" 
                                                 size="icon" 
-                                                className="h-8 w-8 shrink-0"
+                                                className="h-8 w-8 rounded-xl shrink-0 bg-slate-950 border-slate-800 text-slate-400 hover:text-cyan-300 hover:bg-slate-800"
                                                 onClick={() => setEditingOffer(offer)}
                                             >
-                                                <Edit className="h-3.5 w-3.5 text-slate-400" />
+                                                <Edit className="h-3 w-3" />
                                             </Button>
                                             <Button 
-                                                variant="ghost" 
+                                                variant="outline" 
                                                 size="icon" 
-                                                className="h-8 w-8 shrink-0"
+                                                className="h-8 w-8 rounded-xl shrink-0 bg-slate-950 border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-rose-950"
                                                 onClick={() => handleDelete(offer._id)}
                                             >
-                                                <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+                                                <Trash2 className="h-3 w-3" />
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -225,39 +235,11 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                 </Table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        Page {currentPage} of {totalPages} ({filteredOffers.length} total offers)
-                    </p>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            className="h-8 text-[10px] font-black uppercase tracking-widest rounded-lg"
-                        >
-                            Prev
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            className="h-8 text-[10px] font-black uppercase tracking-widest rounded-lg"
-                        >
-                            Next
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            <Dialog open={!!editingOffer} onOpenChange={() => setEditingOffer(null)}>
-                <DialogContent>
+            {/* Edit Dialog */}
+            <Dialog open={!!editingOffer} onOpenChange={(open) => !open && setEditingOffer(null)}>
+                <DialogContent className="max-w-2xl bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl">
                     <DialogHeader>
-                        <DialogTitle>Edit Offer Details</DialogTitle>
+                        <DialogTitle className="text-slate-100 font-black">Edit Affiliate Offer</DialogTitle>
                     </DialogHeader>
                     {editingOffer && (
                         <AffiliateOfferForm 

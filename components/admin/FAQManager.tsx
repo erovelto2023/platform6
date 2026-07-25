@@ -203,18 +203,18 @@ export default function FAQManager({
 
     if (view !== 'list') {
         return (
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 text-slate-100 font-sans">
                 {view === 'create' || view === 'edit' ? (
                     <FAQForm initialData={editingFAQ} onCancel={() => setView('list')} offers={offers} />
                 ) : view === 'import' ? (
                     <div>
                         <div className="flex items-center gap-2 mb-6">
-                            <button onClick={() => setView('list')} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><ArrowLeft size={20} /></button>
-                            <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Import JSON</h2>
+                            <button onClick={() => setView('list')} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-300"><ArrowLeft size={20} /></button>
+                            <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">Import JSON FAQ Data</h2>
                         </div>
-                        <textarea className="w-full h-96 p-6 font-mono text-xs border border-slate-200 rounded-2xl focus:ring-2 focus:ring-black outline-none bg-slate-50" placeholder='[{"question": "...", "answerSnippet": "..."}]' value={importText} onChange={(e) => setImportText(e.target.value)} />
+                        <textarea className="w-full h-96 p-6 font-mono text-xs border border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500 outline-none bg-slate-950 text-slate-100 placeholder:text-slate-500" placeholder='[{"question": "...", "answerSnippet": "..."}]' value={importText} onChange={(e) => setImportText(e.target.value)} />
                         <div className="mt-6 flex justify-end">
-                            <button onClick={handleImport} disabled={isPending || !importText} className="bg-black text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-800 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl">
+                            <button onClick={handleImport} disabled={isPending || !importText} className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-wider hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl">
                                 {isPending ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />} Import FAQ Data
                             </button>
                         </div>
@@ -227,12 +227,12 @@ export default function FAQManager({
     }
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden font-sans">
             {/* Header */}
-            <div className="flex justify-between items-center p-6 border-b border-slate-100">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 border-b border-slate-800 gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Questions / FAQs</h2>
-                    <p className="text-xs text-slate-400 mt-1">{totalCount} published · <span className="text-amber-600 font-bold">{draftTotal} need answers</span></p>
+                    <h2 className="text-2xl font-black text-slate-100 tracking-tight">Questions / FAQs Manager</h2>
+                    <p className="text-xs font-mono font-bold text-slate-400 mt-1">{totalCount} published · <span className="text-amber-400">{draftTotal} need answers</span></p>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end">
                     <Link href="/admin/glossary" className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all text-sm">
