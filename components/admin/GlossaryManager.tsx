@@ -299,54 +299,57 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 font-sans">
             {view === 'list' && (
                 <>
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Glossary Management</h2>
-                        <div className="flex gap-2">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-100 tracking-tight">Glossary Management</h2>
+                            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mt-1">Terminology Database & AI Prompt Engine</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
                             <button
                                 onClick={handleBackfillPrompts}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-sky-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-sky-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-sky-600 hover:bg-sky-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
-                                <Sparkles size={15} /> Backfill Prompts
+                                <Sparkles size={14} /> Backfill Prompts
                             </button>
                             <button
                                 onClick={handleVideoAudit}
                                 disabled={isPending || initialTerms.length === 0 || auditStatus === "running"}
-                                className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-rose-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
                                 {auditStatus === "running" ? `Auditing... ${auditProgress}` : "Video Audit"}
                             </button>
                             <button
                                 onClick={handleScrubUrls}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
-                                <ExternalLink size={15} /> Scrub URLs
+                                <ExternalLink size={14} /> Scrub URLs
                             </button>
                             <button
                                 onClick={handleAffiliateAudit}
                                 disabled={isPending}
-                                className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
-                                <ExternalLink size={15} /> Affiliate Audit
+                                <ExternalLink size={14} /> Affiliate Audit
                             </button>
                             <button
                                 onClick={handleRemoveDuplicates}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-amber-600 transition-all disabled:opacity-50 text-sm"
+                                className="bg-amber-600 hover:bg-amber-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
-                                <Copy size={15} /> Remove Duplicates
+                                <Copy size={14} /> Remove Duplicates
                             </button>
                             <button
                                 onClick={() => {
-                                    if (!confirm('This will fix data structural issues (converting strings to objects in podcast/product lists) to prevent save errors. Continue?')) return;
+                                    if (!confirm('This will fix data structural issues to prevent save errors. Continue?')) return;
                                     startTransition(async () => {
                                         const res = await normalizeGlossaryData();
                                         if (res.success) {
-                                            alert(`✅ Successfully normalized ${res.updatedCount} terms. Save errors should be fixed now.`);
+                                            alert(`✅ Successfully normalized ${res.updatedCount} terms.`);
                                             window.location.reload();
                                         } else {
                                             alert('Error: ' + (res as any).error);
@@ -354,66 +357,65 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                     });
                                 }}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs shadow-md"
                             >
-                                <RotateCcw size={15} /> Normalize Data
+                                <RotateCcw size={14} /> Normalize
                             </button>
                             <button
                                 onClick={handleFlushGlossary}
                                 disabled={isPending || initialTerms.length === 0}
-                                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50 text-sm"
+                                className="bg-rose-950 border border-rose-800 text-rose-300 hover:bg-rose-900 px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 text-xs"
                             >
-                                <RotateCcw size={15} /> Flush All
+                                <RotateCcw size={14} /> Flush All
                             </button>
                             <button
                                 onClick={() => { setEditingTerm(undefined); setView('create'); }}
-                                className="bg-black text-white px-6 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-slate-800 transition-all"
+                                className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white px-5 py-2 rounded-xl font-extrabold flex items-center gap-1.5 transition-all shadow-lg shadow-indigo-600/30 text-xs cursor-pointer"
                             >
                                 <Plus size={16} /> New Term
                             </button>
                             <button
                                 onClick={() => setView('import')}
-                                className="bg-slate-100 text-slate-700 px-6 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all"
+                                className="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs"
                             >
-                                <Download size={16} /> Bulk Import
+                                <Download size={14} /> Bulk Import
                             </button>
                             <button
                                 onClick={handleExportCSV}
-                                className="bg-white text-indigo-600 px-6 py-2 rounded-lg font-bold flex items-center gap-2 border border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm"
+                                className="bg-slate-950 border border-indigo-800/80 text-cyan-300 hover:bg-indigo-950 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md"
                             >
-                                <FileText size={16} /> Export CSV
+                                <FileText size={14} /> Export CSV
                             </button>
                         </div>
                     </div>
                     
                     {/* Broken Videos Report */}
                     {brokenVideos.length > 0 && (
-                        <div className="mb-6 p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                        <div className="p-6 bg-rose-950/60 border border-rose-800 rounded-2xl">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest flex items-center gap-2">
+                                <h3 className="text-xs font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
                                     <AlertCircle size={16} />
                                     Broken YouTube Links Found ({brokenVideos.length})
                                 </h3>
                                 <button
                                     onClick={handleAutoReplace}
                                     disabled={isPending}
-                                    className="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                    className="bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-rose-500 transition-all disabled:opacity-50 flex items-center gap-2"
                                 >
-                                    <Sparkles size={14} />
-                                    Auto-Fix All
+                                    <Sparkles size={14} /> Auto-Fix All
                                 </button>
                             </div>
                             <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                                 {brokenVideos.map((item) => (
-                                    <div key={item.id} className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">
+                                    <div key={item.id} className="bg-slate-950 p-3 rounded-xl border border-rose-900/60 flex items-center justify-between shadow-sm">
                                         <div>
-                                            <p className="text-sm font-black text-slate-900">{item.term}</p>
-                                            <p className="text-xs text-rose-500 font-mono truncate max-w-lg">{item.videoUrl}</p>
+                                            <p className="text-sm font-extrabold text-slate-100">{item.term}</p>
+                                            <p className="text-xs text-rose-400 font-mono truncate max-w-lg">{item.videoUrl}</p>
                                         </div>
                                         <Link
                                             href={`/admin/glossary?edit=${item.id}`}
                                             target="_blank"
-                                            className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-slate-800 transition-all"
+                                            className="px-4 py-2 bg-rose-600 text-white text-[10px] font-black uppercase rounded-lg hover:bg-rose-500 transition-all"
                                         >
                                             Fix Now
                                         </Link>
@@ -423,27 +425,27 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     )}
 
-                    <div className="mb-4 flex gap-3 items-center">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <div className="flex flex-col sm:flex-row gap-3 items-center">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search terms or categories..."
-                                className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50"
+                                className="w-full pl-10 pr-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all bg-slate-950 text-slate-100 placeholder:text-slate-500 text-xs font-sans"
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-slate-500 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-xs font-mono text-slate-400 whitespace-nowrap">
                             <span>Per page:</span>
                             {[10, 20, 50, 100].map(n => (
                                 <button
                                     key={n}
                                     onClick={() => { setItemsPerPage(n); setCurrentPage(1); }}
-                                    className={`px-3 py-1.5 rounded-lg border font-bold text-xs transition-all ${
+                                    className={`px-3 py-1.5 rounded-xl border font-bold text-xs transition-all ${
                                         itemsPerPage === n
-                                            ? 'bg-black text-white border-black'
-                                            : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                                            ? 'bg-cyan-600 text-white border-cyan-500'
+                                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
                                     }`}
                                 >
                                     {n}
@@ -454,103 +456,103 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
 
                     {/* Bulk action bar or Icon Legend */}
                     {selectedIds.size > 0 ? (
-                        <div className="mb-4 flex items-center justify-between bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                            <span className="text-sm font-bold text-red-700">
+                        <div className="flex items-center justify-between bg-rose-950/80 border border-rose-800 rounded-2xl px-5 py-3">
+                            <span className="text-xs font-extrabold text-rose-200">
                                 {selectedIds.size} term{selectedIds.size > 1 ? 's' : ''} selected
                             </span>
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setSelectedIds(new Set())}
-                                    className="text-xs text-red-500 hover:underline font-semibold"
+                                    className="text-xs text-rose-400 hover:underline font-bold"
                                 >
                                     Deselect All
                                 </button>
                                 <button
                                     onClick={handleBulkDelete}
                                     disabled={isPending}
-                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+                                    className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
                                 >
-                                    <Trash size={15} /> Delete {selectedIds.size} Selected
+                                    <Trash size={14} /> Delete {selectedIds.size} Selected
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap items-center gap-6">
-                            <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Icon Legend:</span>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <Video size={14} className="text-rose-500" /> Video
+                        <div className="p-4 bg-slate-950 border border-slate-800/80 rounded-2xl flex flex-wrap items-center gap-6">
+                            <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">Icon Legend:</span>
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <Video size={14} className="text-rose-400" /> Video
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <ShoppingCart size={14} className="text-amber-500" /> Products
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <ShoppingCart size={14} className="text-amber-400" /> Products
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <Globe size={14} className="text-blue-500" /> Website
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <Globe size={14} className="text-blue-400" /> Website
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <Mic size={14} className="text-sky-500" /> Podcast
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <Mic size={14} className="text-sky-400" /> Podcast
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <FileText size={14} className="text-emerald-500" /> Case Study
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <FileText size={14} className="text-emerald-400" /> Case Study
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                                <Lightbulb size={14} className="text-indigo-500" /> AI Prompts
+                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                                <Lightbulb size={14} className="text-indigo-400" /> AI Prompts
                             </div>
                         </div>
                     )}
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
+                    <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                        <table className="min-w-full divide-y divide-slate-800">
+                            <thead className="bg-slate-950">
                                 <tr>
                                     <th className="pl-4 pr-2 py-4 w-10">
-                                        <button onClick={toggleSelectAll} className="text-slate-400 hover:text-black transition-colors">
-                                            {allPageSelected ? <CheckSquare size={18} className="text-black" /> : <Square size={18} />}
+                                        <button onClick={toggleSelectAll} className="text-slate-400 hover:text-white transition-colors">
+                                            {allPageSelected ? <CheckSquare size={18} className="text-cyan-400" /> : <Square size={18} />}
                                         </button>
                                     </th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Term</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Category</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Views</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Slug</th>
-                                    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Actions</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Term</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Category</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Views</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Slug</th>
+                                    <th className="px-6 py-4 text-right text-xs font-extrabold text-slate-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-100">
+                            <tbody className="bg-slate-950 divide-y divide-slate-800/80">
                                 {paginatedTerms.map(term => (
-                                    <tr key={term.id} className={selectedIds.has(term.id) ? 'bg-red-50' : 'hover:bg-slate-50'}>
+                                    <tr key={term.id} className={selectedIds.has(term.id) ? 'bg-rose-950/40' : 'hover:bg-slate-900/60 transition'}>
                                         <td className="pl-4 pr-2 py-4">
-                                            <button onClick={() => toggleSelect(term.id)} className="text-slate-400 hover:text-black transition-colors">
-                                                {selectedIds.has(term.id) ? <CheckSquare size={16} className="text-red-600" /> : <Square size={16} />}
+                                            <button onClick={() => toggleSelect(term.id)} className="text-slate-400 hover:text-white transition-colors">
+                                                {selectedIds.has(term.id) ? <CheckSquare size={16} className="text-rose-400" /> : <Square size={16} />}
                                             </button>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="text-sm font-bold text-slate-900">{term.term}</div>
+                                                <div className="text-sm font-extrabold text-slate-100">{term.term}</div>
                                                 <div className="flex items-center gap-1">
-                                                    {term.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-500" /></span>}
-                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <span title="Has Products"><ShoppingCart size={12} className="text-amber-500" /></span>}
-                                                    {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={12} className="text-blue-500" /></span>}
-                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-sky-500" /></span>}
-                                                    {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={12} className="text-emerald-500" /></span>}
+                                                    {term.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-400" /></span>}
+                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <span title="Has Products"><ShoppingCart size={12} className="text-amber-400" /></span>}
+                                                    {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={12} className="text-blue-400" /></span>}
+                                                    {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-sky-400" /></span>}
+                                                    {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={12} className="text-emerald-400" /></span>}
                                                     {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0)) && (
-                                                        <span title="Has Social Prompts"><Lightbulb size={12} className="text-indigo-500" /></span>
+                                                        <span title="Has Social Prompts"><Lightbulb size={12} className="text-indigo-400" /></span>
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-slate-500 truncate max-w-xs">{term.shortDefinition}</div>
+                                            <div className="text-xs text-slate-400 truncate max-w-xs mt-0.5">{term.shortDefinition}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-slate-500">
-                                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-black uppercase">{term.category}</span>
+                                        <td className="px-6 py-4 text-sm">
+                                            <span className="bg-slate-900 border border-slate-800 text-cyan-300 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase">{term.category}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="text-sm font-bold text-slate-700">{(term as any).views || 0}</span>
+                                            <span className="text-xs font-mono font-bold text-slate-200">{(term as any).views || 0}</span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-mono bg-slate-50 p-1 rounded border border-slate-100 italic">/glossary/{term.slug}</span>
-                                                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/glossary/${term.slug}`); alert('Copied!'); }} className="text-slate-300 hover:text-black" title="Copy Link">
+                                                <span className="text-[10px] font-mono bg-slate-900 border border-slate-800 text-cyan-400 px-2 py-1 rounded-xl">/glossary/{term.slug}</span>
+                                                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/glossary/${term.slug}`); alert('Copied link!'); }} className="text-slate-400 hover:text-white" title="Copy Link">
                                                     <Copy size={12} />
                                                 </button>
-                                                <Link href={`/glossary/${term.slug}`} target="_blank" className="text-slate-300 hover:text-emerald-600 transition-colors" title="Visit Page">
+                                                <Link href={`/glossary/${term.slug}`} target="_blank" className="text-slate-400 hover:text-emerald-400 transition-colors" title="Visit Page">
                                                     <ExternalLink size={12} />
                                                 </Link>
                                             </div>
@@ -558,22 +560,24 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                                             <button
                                                 onClick={() => { setEditingTerm(term); setView('edit'); }}
-                                                className="text-slate-400 hover:text-blue-600 mr-4 transition-colors"
+                                                className="p-2 bg-slate-950 border border-slate-800 hover:border-cyan-500 text-slate-300 hover:text-white rounded-xl transition mr-2"
+                                                title="Edit Term"
                                             >
-                                                <Edit size={18} />
+                                                <Edit size={14} />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(term.id)}
-                                                className="text-slate-400 hover:text-red-600 transition-colors"
+                                                className="p-2 bg-slate-950 border border-slate-800 hover:border-rose-500 text-slate-400 hover:text-rose-400 rounded-xl transition"
+                                                title="Delete Term"
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={14} />
                                             </button>
                                         </td>
                                     </tr>
                                 ))}
                                 {paginatedTerms.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold uppercase text-xs tracking-widest">No terms found.</td>
+                                        <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-mono font-bold uppercase text-xs tracking-widest">No terms found.</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -582,20 +586,19 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
-                        <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-                            <p className="text-sm text-slate-500">
-                                Showing <strong>{(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTerms.length)}</strong> of <strong>{filteredTerms.length}</strong> terms
+                        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between border-t border-slate-800 pt-4 gap-4">
+                            <p className="text-xs font-mono text-slate-400">
+                                Showing <strong className="text-slate-200">{(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredTerms.length)}</strong> of <strong className="text-slate-200">{filteredTerms.length}</strong> terms
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                     disabled={currentPage === 1}
-                                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                    className="p-2 bg-slate-950 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                 >
                                     <ChevronLeft size={16} />
                                 </button>
                                 {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-                                    // Show pages around current page
                                     let page: number;
                                     if (totalPages <= 7) page = i + 1;
                                     else if (currentPage <= 4) page = i + 1;
@@ -605,10 +608,10 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         <button
                                             key={page}
                                             onClick={() => setCurrentPage(page)}
-                                            className={`w-9 h-9 rounded-lg border text-sm font-bold transition-all ${
+                                            className={`w-9 h-9 rounded-xl border text-xs font-mono font-bold transition-all ${
                                                 currentPage === page
-                                                    ? 'bg-black text-white border-black'
-                                                    : 'border-slate-200 text-slate-600 hover:bg-slate-100'
+                                                    ? 'bg-cyan-600 text-white border-cyan-500 shadow-md'
+                                                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800'
                                             }`}
                                         >
                                             {page}
@@ -618,7 +621,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 <button
                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                     disabled={currentPage === totalPages}
-                                    className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                    className="p-2 bg-slate-950 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                 >
                                     <ChevronRight size={16} />
                                 </button>
@@ -632,9 +635,9 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                 <div>
                      <button
                         onClick={() => setView('list')}
-                        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-black font-bold uppercase text-xs tracking-widest transition-all"
+                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
                     >
-                        <ArrowLeft size={16} /> Back to List
+                        <ArrowLeft size={16} /> Back to Glossary Terms List
                     </button>
                     <GlossaryForm
                         initialData={editingTerm}
@@ -648,9 +651,9 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                 <div>
                     <button
                         onClick={() => setView('list')}
-                        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-black font-bold uppercase text-xs tracking-widest transition-all"
+                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
                     >
-                        <ArrowLeft size={16} /> Back to List
+                        <ArrowLeft size={16} /> Back to Glossary Terms List
                     </button>
                     <GlossaryImporter />
                 </div>

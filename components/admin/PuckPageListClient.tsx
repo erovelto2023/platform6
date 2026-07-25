@@ -68,17 +68,17 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
     });
 
     return (
-        <div className="p-8 space-y-8 bg-slate-50/50 min-h-screen">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto font-sans">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-                        <LayoutTemplate className="w-8 h-8 text-sky-500" />
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-100 flex items-center gap-3">
+                        <LayoutTemplate className="w-8 h-8 text-cyan-400" />
                         Puck Page Builder
                     </h1>
-                    <p className="text-slate-500 mt-1">Design beautiful landing pages instantly.</p>
+                    <p className="text-slate-400 font-mono text-xs mt-1">Design beautiful landing pages instantly with visual React blocks.</p>
                 </div>
                 <Link href="/admin/page-builder-simple/create">
-                    <Button className="bg-sky-500 hover:bg-sky-600">
+                    <Button className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-extrabold px-5 py-2.5 rounded-2xl transition-all shadow-lg shadow-indigo-600/30 border-0 cursor-pointer">
                         <Plus className="w-4 h-4 mr-2" />
                         Create New Page
                     </Button>
@@ -86,26 +86,26 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
             </div>
 
             {/* Filters Bar */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl">
                 <div className="relative w-full md:max-w-xs">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <input
                         type="text"
                         placeholder="Search pages by name or slug..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-9 pr-4 py-2 w-full text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 bg-slate-50 focus:bg-white transition-colors"
+                        className="pl-10 pr-4 py-2.5 w-full text-xs font-mono border border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-slate-950 text-slate-100 placeholder:text-slate-500 transition-colors"
                     />
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
                     {/* Status Tabs */}
-                    <div className="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
+                    <div className="flex bg-slate-950 rounded-2xl p-1 border border-slate-800">
                         {(["all", "published", "draft"] as const).map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setStatusFilter(tab)}
-                                className={`text-xs px-3 py-1.5 font-semibold rounded-md capitalize transition-all ${statusFilter === tab ? "bg-white text-sky-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                className={`text-xs px-3.5 py-1.5 font-bold rounded-xl capitalize transition-all ${statusFilter === tab ? "bg-cyan-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
                             >
                                 {tab}
                             </button>
@@ -116,7 +116,7 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
                     <select
                         value={typeFilter}
                         onChange={(e: any) => setTypeFilter(e.target.value)}
-                        className="text-xs bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:border-sky-500 font-semibold text-slate-650"
+                        className="text-xs bg-slate-950 border border-slate-800 text-slate-100 rounded-2xl px-3 py-2 focus:outline-none focus:border-cyan-500 font-mono font-bold"
                     >
                         <option value="all">📁 All Formats</option>
                         <option value="visual">🎨 Visual Editor</option>
@@ -131,39 +131,39 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
                     const isHtmlPage = firstSectionTemplate !== "puck-blocks";
                     
                     return (
-                        <Card key={page._id} className="flex flex-col overflow-hidden hover:shadow-md transition-shadow group bg-white border border-slate-200">
-                            <div className="p-5 flex-1 space-y-4">
+                        <Card key={page._id} className="flex flex-col overflow-hidden hover:shadow-2xl hover:border-cyan-500/80 transition-all group bg-slate-900 border border-slate-800 rounded-3xl shadow-xl">
+                            <div className="p-6 flex-1 space-y-4">
                                 <div className="flex items-start justify-between">
-                                    <div className="space-y-1.5">
-                                        <h3 className="font-semibold text-lg text-slate-900 group-hover:text-sky-600 transition-colors">
+                                    <div className="space-y-2">
+                                        <h3 className="font-black text-lg text-slate-100 group-hover:text-cyan-300 transition-colors">
                                             {page.name}
                                         </h3>
-                                        <div className="flex items-center text-xs text-slate-500 font-mono">
-                                            <span>/p/{page.slug}</span>
+                                        <div className="flex items-center">
+                                            <span className="text-xs font-mono bg-slate-950 border border-slate-800 text-cyan-400 px-2.5 py-1 rounded-xl">/p/{page.slug}</span>
                                         </div>
                                     </div>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl">
                                                 <MoreVertical className="w-4 h-4" />
                                             </Button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48 bg-white">
-                                            <DropdownMenuItem asChild>
+                                        <DropdownMenuContent align="end" className="w-48 bg-slate-900 border border-slate-800 text-slate-100 font-sans shadow-2xl rounded-2xl p-1.5">
+                                            <DropdownMenuItem asChild className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold">
                                                 <Link href={`/admin/page-builder-simple/${page._id}`}>
-                                                    <Pencil className="w-4 h-4 mr-2" /> Edit Page
+                                                    <Pencil className="w-4 h-4 mr-2 text-cyan-400" /> Edit Page
                                                 </Link>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem asChild>
+                                            <DropdownMenuItem asChild className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold">
                                                 <a href={`/p/${page.slug}`} target="_blank" rel="noopener noreferrer">
-                                                    <ExternalLink className="w-4 h-4 mr-2" /> View Live
+                                                    <ExternalLink className="w-4 h-4 mr-2 text-emerald-400" /> View Live
                                                 </a>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleDuplicate(page._id)}>
-                                                <Copy className="w-4 h-4 mr-2" /> Duplicate
+                                            <DropdownMenuItem onClick={() => handleDuplicate(page._id)} className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold">
+                                                <Copy className="w-4 h-4 mr-2 text-purple-400" /> Duplicate
                                             </DropdownMenuItem>
                                             <DropdownMenuItem 
-                                                className="text-red-600 focus:bg-red-50"
+                                                className="text-rose-400 hover:bg-rose-950 focus:text-rose-300 cursor-pointer rounded-xl font-bold"
                                                 onClick={() => handleDelete(page._id)}
                                                 disabled={isDeleting === page._id}
                                             >
@@ -177,22 +177,22 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
                                 {/* Metadata Badges */}
                                 <div className="flex flex-wrap gap-2 pt-1">
                                     {isHtmlPage ? (
-                                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold bg-slate-900 text-slate-100 px-2.5 py-1 rounded-md border border-slate-805">
-                                            <Code className="w-3 h-3 text-emerald-450" /> HTML Code
+                                        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold bg-slate-950 text-emerald-300 px-2.5 py-1 rounded-xl border border-emerald-900/60">
+                                            <Code className="w-3 h-3 text-emerald-400" /> HTML Code
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold bg-sky-50 text-sky-700 px-2.5 py-1 rounded-md border border-sky-100">
-                                            <FileText className="w-3 h-3 text-sky-500" /> Puck Visual
+                                        <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold bg-slate-950 text-sky-300 px-2.5 py-1 rounded-xl border border-sky-900/60">
+                                            <FileText className="w-3 h-3 text-sky-400" /> Puck Visual
                                         </span>
                                     )}
 
                                     {page.accessControl && (
-                                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-md border ${
+                                        <span className={`inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2.5 py-1 rounded-xl border ${
                                             page.accessControl === "admin" 
-                                                ? "bg-red-50 text-red-700 border-red-105" 
+                                                ? "bg-slate-950 text-rose-300 border-rose-900/60" 
                                                 : page.accessControl === "student" 
-                                                    ? "bg-indigo-50 text-indigo-700 border-indigo-105" 
-                                                    : "bg-emerald-50 text-emerald-700 border-emerald-105"
+                                                    ? "bg-slate-950 text-indigo-300 border-indigo-900/60" 
+                                                    : "bg-slate-950 text-emerald-300 border-emerald-900/60"
                                         }`}>
                                             <Lock className="w-3 h-3 opacity-80" /> 
                                             {page.accessControl === "admin" 
@@ -204,14 +204,14 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
                                     )}
                                 </div>
                             </div>
-                            <div className="px-5 py-3 bg-slate-50 border-t flex items-center justify-between text-xs text-slate-505">
+                            <div className="px-6 py-3.5 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
                                 <div className="flex items-center gap-2">
                                     {page.isPublished ? (
-                                        <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
                                             <Globe className="w-3.5 h-3.5" /> Published
                                         </span>
                                     ) : (
-                                        <span className="flex items-center gap-1 text-amber-600 font-medium">
+                                        <span className="flex items-center gap-1.5 text-amber-400 font-bold">
                                             <EyeOff className="w-3.5 h-3.5" /> Draft
                                         </span>
                                     )}
@@ -224,11 +224,11 @@ export function PuckPageListClient({ pages }: { pages: any[] }) {
             </div>
             
             {filteredPages.length === 0 && (
-                <div className="text-center py-20 bg-white border border-slate-205 border-dashed rounded-xl">
-                    <LayoutTemplate className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-900 mb-1">No pages match your filter</h3>
-                    <p className="text-slate-500 mb-6">Try clearing your search term or selecting another filter category.</p>
-                    <Button onClick={() => { setSearchTerm(""); setStatusFilter("all"); setTypeFilter("all"); }} className="bg-sky-500 hover:bg-sky-600">
+                <div className="text-center py-20 bg-slate-900 border border-slate-800 border-dashed rounded-3xl p-8">
+                    <LayoutTemplate className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-black text-slate-100 mb-1">No pages match your filter</h3>
+                    <p className="text-slate-400 text-xs font-mono mb-6">Try clearing your search term or selecting another filter category.</p>
+                    <Button onClick={() => { setSearchTerm(""); setStatusFilter("all"); setTypeFilter("all"); }} className="bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold rounded-2xl">
                         Reset Filters
                     </Button>
                 </div>
