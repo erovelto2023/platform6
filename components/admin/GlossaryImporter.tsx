@@ -150,6 +150,8 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
         return url.trim();
     };
 
+    const normalizeKey = (str: string) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+
     const handleImport = async () => {
         if (!importData.trim()) {
             setMessage("Please paste some data first.");
@@ -157,7 +159,7 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
             return;
         }
 
-        let parsedData;
+        let parsedData: any[] = [];
         let trimmedData = importData.trim();
 
         if (trimmedData.startsWith('```')) {
@@ -261,7 +263,26 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                 setMessage("Error: " + result.error);
                 setStatus("error");
             } else {
-                setMessage(`Successfully imported ${result.count} terms!`);
+                // Smart Keyword Scrubbing: Remove ONLY keywords that were successfully imported
+                const importedKeys = new Set(
+                    parsedData.map((item: any) => normalizeKey(item.term || item.slug || ''))
+                );
+
+                let removedCount = 0;
+                if (bulkKeywords.trim()) {
+                    const currentLines = bulkKeywords.split('\n');
+                    const remainingLines = currentLines.filter(line => {
+                        const trimmed = line.trim();
+                        if (!trimmed) return false;
+                        const key = normalizeKey(trimmed);
+                        const isImported = importedKeys.has(key);
+                        if (isImported) removedCount++;
+                        return !isImported;
+                    });
+                    setBulkKeywords(remainingLines.join('\n'));
+                }
+
+                setMessage(`Successfully imported ${result.count} terms! ${removedCount > 0 ? `Removed ${removedCount} matching imported keyword(s) from your batch list.` : ''}`);
                 setStatus("success");
                 setImportData("");
             }
@@ -340,21 +361,19 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                             />
                             <button 
                                 onClick={() => {
-                                    const keywords = bulkKeywords.split('\n').filter(k => k.trim()).slice(0, 20).join('\n');
+                                    const keywordsList = bulkKeywords.split('\n').filter(k => k.trim());
+                                    const keywords = keywordsList.slice(0, 20).join('\n');
                                     if (!keywords) { alert('Please paste some keywords first.'); return; }
                                     
                                     const batchPrompt = `${MASTER_JSON_SCHEMA}\n\nPlease generate the robust JSON array for the following terms:\n${keywords}`;
 
                                     navigator.clipboard.writeText(batchPrompt);
                                     
-                                    const remaining = bulkKeywords.split('\n').filter(k => k.trim()).slice(20).join('\n');
-                                    setBulkKeywords(remaining);
-                                    
-                                    alert('✅ Prompt for next 20 keywords copied! Paste into ChatGPT/Claude, then paste output into Data Input box.');
+                                    alert('✅ Prompt for top 20 keywords copied! Keywords REMAIN in your list until you click "Import Glossary Terms".');
                                 }}
                                 className="w-full py-3 bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white rounded-xl font-extrabold text-xs uppercase tracking-wider hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer"
                             >
-                                <Bot size={16} /> Copy Complete Prompt (Next 20 Keywords)
+                                <Bot size={16} /> Copy Complete Prompt (Top 20 Keywords)
                             </button>
                         </div>
                     </div>
