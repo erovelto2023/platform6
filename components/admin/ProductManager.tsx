@@ -35,120 +35,99 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
     };
 
     return (
-        <div className="bg-zinc-950 p-6 rounded-xl border border-zinc-800 shadow-sm">
+        <div className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 font-sans">
             {view === 'list' && (
                 <>
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
                         <div>
-                            <h2 className="text-2xl font-black text-white tracking-tight">Tools & Products</h2>
-                            <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Directory & Affiliate Management</p>
+                            <h2 className="text-2xl font-black text-slate-100 tracking-tight">Recommended Tools & Products</h2>
+                            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mt-1">Directory & Affiliate Management Database</p>
                         </div>
                         <button
                             onClick={() => { setEditingProduct(undefined); setView('create'); }}
-                            className="bg-white text-black hover:bg-zinc-200 px-6 py-2 rounded-lg font-bold flex items-center gap-2 transition-all"
+                            className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white px-5 py-2.5 rounded-2xl font-extrabold flex items-center gap-2 transition-all shadow-lg shadow-indigo-600/30 cursor-pointer"
                         >
-                            <Plus size={16} /> Add Product
+                            <Plus size={16} /> Add Product / Tool
                         </button>
                     </div>
 
-                    <div className="mb-6">
+                    <div>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search products or niches..."
-                                className="w-full pl-10 pr-4 py-3 border border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all bg-zinc-900 text-white placeholder:text-zinc-500"
+                                placeholder="Search tools, products, categories or niches..."
+                                className="w-full pl-10 pr-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all bg-slate-950 text-slate-100 placeholder:text-slate-500 font-sans text-xs"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-zinc-800">
-                            <thead className="bg-zinc-900">
+                    <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                        <table className="min-w-full divide-y divide-slate-800">
+                            <thead className="bg-slate-950">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Product</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Niche / Category</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Views</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-zinc-400 uppercase tracking-widest">Price / Comm</th>
-                                    <th className="px-6 py-4 text-right text-xs font-black text-zinc-400 uppercase tracking-widest">Actions</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Product</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Niche / Category</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Views</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Price / Comm</th>
+                                    <th className="px-6 py-4 text-right text-xs font-extrabold text-slate-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-zinc-950 divide-y divide-zinc-800">
+                            <tbody className="bg-slate-950 divide-y divide-slate-800/80">
                                 {filteredProducts.map(product => (
-                                    <tr key={product.id}>
+                                    <tr key={product.id} className="hover:bg-slate-900/60 transition">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-4">
                                                 {product.logoUrl ? (
-                                                    <img src={product.logoUrl} alt={product.name} className="w-10 h-10 rounded-lg object-cover bg-zinc-800" />
+                                                    <img src={product.logoUrl} alt={product.name} className="w-10 h-10 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800" />
                                                 ) : (
-                                                    <div className="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-400">
+                                                    <div className="w-10 h-10 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-slate-400">
                                                         <Tag size={16} />
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <div className="text-sm font-bold text-white">{product.name}</div>
+                                                    <div className="text-sm font-extrabold text-slate-100">{product.name}</div>
                                                     <div className="flex items-center gap-2 mt-1">
-                                                        <span className="text-[10px] font-mono bg-zinc-800 px-1.5 py-0.5 rounded border border-zinc-700 text-zinc-400">/{product.slug}</span>
-                                                        {product.affiliateLink && <ShieldCheck size={12} className="text-emerald-500" />}
+                                                        <span className="text-[10px] font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800 text-cyan-400">/{product.slug}</span>
+                                                        {product.affiliateLink && <ShieldCheck size={14} className="text-emerald-400" />}
                                                     </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="bg-zinc-800 text-zinc-300 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tight">{product.niche || 'General'}</span>
+                                            <span className="bg-slate-900 border border-slate-800 text-slate-300 px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase">{product.niche || 'General'}</span>
                                         </td>
-                                        <td className="px-6 py-4 text-xs font-bold text-zinc-400">
+                                        <td className="px-6 py-4 text-xs font-mono font-bold text-slate-400">
                                             {product.views || 0}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-xs font-bold text-zinc-300">
+                                            <div className="text-xs font-bold text-slate-200">
                                                 {product.startingPrice ? `$${product.startingPrice}` : 'Free'}
-                                                {product.commissionRate && <span className="text-emerald-600 ml-2">({product.commissionRate})</span>}
+                                                {product.commissionRate && <span className="text-emerald-400 font-mono ml-2">({product.commissionRate})</span>}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                            <a
-                                                href={`/tools/${product.slug}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-zinc-500 hover:text-emerald-400 mr-4 transition-colors inline-block"
-                                                title="View Live"
-                                            >
-                                                <ExternalLink size={18} />
-                                            </a>
-                                            <button
-                                                onClick={() => {
-                                                    const url = `${window.location.origin}/tools/${product.slug}`;
-                                                    navigator.clipboard.writeText(url);
-                                                    alert('Link Copied: ' + url);
-                                                }}
-                                                className="text-zinc-500 hover:text-white mr-4 transition-colors"
-                                                title="Copy Live Link"
-                                            >
-                                                <Copy size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => { setEditingProduct(product); setView('edit'); }}
-                                                className="text-zinc-500 hover:text-blue-400 mr-4 transition-colors"
-                                            >
-                                                <Edit size={18} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(product.id)}
-                                                className="text-zinc-500 hover:text-indigo-500 transition-colors"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => { setEditingProduct(product); setView('edit'); }}
+                                                    className="p-2 bg-slate-900 border border-slate-800 hover:border-cyan-500 text-slate-300 hover:text-white rounded-xl transition"
+                                                    title="Edit Product"
+                                                >
+                                                    <Edit size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(product.id)}
+                                                    className="p-2 bg-slate-900 border border-slate-800 hover:border-rose-500 text-slate-400 hover:text-rose-400 rounded-xl transition"
+                                                    title="Delete Product"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
-                                {filteredProducts.length === 0 && (
-                                    <tr>
-                                        <td colSpan={4} className="px-6 py-12 text-center text-zinc-500 font-bold uppercase text-xs tracking-widest">No products found.</td>
-                                    </tr>
-                                )}
                             </tbody>
                         </table>
                     </div>
@@ -157,19 +136,18 @@ export default function ProductManager({ products = [] }: ProductManagerProps) {
 
             {(view === 'create' || view === 'edit') && (
                 <div>
-                     <button
+                    <button
                         onClick={() => setView('list')}
-                        className="mb-8 flex items-center gap-2 text-zinc-500 hover:text-white font-bold uppercase text-xs tracking-widest transition-all"
+                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
                     >
-                        <ArrowLeft size={16} /> Back to Directory
+                        <ArrowLeft size={16} /> Back to Products List
                     </button>
                     <ProductForm
                         initialData={editingProduct}
-                        onComplete={() => { window.location.reload(); }}
+                        onComplete={() => { setView('list'); window.location.reload(); }}
                     />
                 </div>
             )}
         </div>
     );
 }
-

@@ -256,18 +256,18 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             </div>
 
             {/* Related Tools / Resources */}
-            <div className="bg-indigo-50 p-6 rounded-xl border border-indigo-100 space-y-6">
-                <h3 className="font-bold text-indigo-900 border-b border-indigo-200 pb-2 flex items-center gap-2">
-                    <LinkIcon size={18} />
+            <div className="bg-slate-950 p-6 rounded-2xl border border-indigo-900/50 space-y-6 shadow-xl">
+                <h3 className="font-extrabold text-indigo-300 border-b border-indigo-900/50 pb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <LinkIcon size={18} className="text-cyan-400" />
                     Related Resources / Tools
                 </h3>
                 <div className="space-y-4">
-                    <p className="text-sm text-indigo-800">Select tools or resources from the database to recommend with this term:</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-4 bg-white rounded-lg border border-indigo-100">
+                    <p className="text-xs text-slate-300">Select tools or resources from the database to recommend with this term:</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-4 bg-slate-900 rounded-xl border border-slate-800">
                         {products.map(product => {
                             const isSelected = formData.recommendedTools?.some(t => t.productId === product.id);
                             return (
-                                <label key={product.id} className={`flex items-start gap-3 p-3 rounded border cursor-pointer transition-all ${isSelected ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-transparent hover:bg-slate-50'}`}>
+                                <label key={product.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${isSelected ? 'bg-indigo-950/80 border-indigo-500/80 text-white' : 'bg-slate-950 border-slate-800/80 text-slate-300 hover:border-slate-700'}`}>
                                     <input
                                         type="checkbox"
                                         checked={isSelected}
@@ -279,18 +279,18 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                                                 handleChange("recommendedTools", current.filter(t => t.productId !== product.id));
                                             }
                                         }}
-                                        className="mt-1 w-4 h-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500"
+                                        className="mt-1 w-4 h-4 rounded border-indigo-500 text-indigo-500 focus:ring-indigo-500"
                                     />
                                     <div>
-                                        <span className="font-bold text-slate-800 block text-sm">{product.name}</span>
-                                        <span className="text-xs text-slate-500 block">{product.category} • {product.niche}</span>
+                                        <span className="font-extrabold text-slate-100 block text-sm">{product.name}</span>
+                                        <span className="text-xs text-cyan-400 font-mono block mt-0.5">{product.category} • {product.niche}</span>
                                     </div>
                                 </label>
                             );
                         })}
                         {products.length === 0 && (
-                            <div className="col-span-full text-center text-slate-500 text-sm py-4">
-                                No products found in database.
+                            <div className="col-span-full text-center text-slate-400 text-xs py-4 font-mono">
+                                No tools found in product database.
                             </div>
                         )}
                     </div>
