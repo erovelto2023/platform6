@@ -34,25 +34,25 @@ import { cn } from "@/lib/utils";
 export const getResourceTypeIcon = (type: string) => {
     switch (type) {
         case 'ebook':
-            return <BookOpen className="h-4 w-4 text-emerald-600" />;
+            return <BookOpen className="h-4 w-4 text-emerald-400" />;
         case 'doc':
-            return <FileText className="h-4 w-4 text-blue-600" />;
+            return <FileText className="h-4 w-4 text-sky-400" />;
         case 'pdf':
-            return <FileText className="h-4 w-4 text-rose-600" />;
+            return <FileText className="h-4 w-4 text-rose-400" />;
         case 'audio':
-            return <Music className="h-4 w-4 text-purple-600" />;
+            return <Music className="h-4 w-4 text-purple-400" />;
         case 'spreadsheet':
-            return <FileSpreadsheet className="h-4 w-4 text-emerald-700" />;
+            return <FileSpreadsheet className="h-4 w-4 text-emerald-400" />;
         case 'video':
-            return <Video className="h-4 w-4 text-red-600" />;
+            return <Video className="h-4 w-4 text-red-400" />;
         case 'archive':
-            return <Archive className="h-4 w-4 text-amber-600" />;
+            return <Archive className="h-4 w-4 text-amber-400" />;
         case 'image':
-            return <ImageIcon className="h-4 w-4 text-sky-600" />;
+            return <ImageIcon className="h-4 w-4 text-sky-400" />;
         case 'link':
-            return <Globe className="h-4 w-4 text-cyan-600" />;
+            return <Globe className="h-4 w-4 text-cyan-400" />;
         default:
-            return <File className="h-4 w-4 text-slate-600" />;
+            return <File className="h-4 w-4 text-slate-400" />;
     }
 };
 
@@ -69,7 +69,7 @@ export const columns: ColumnDef<any>[] = [
             if (thumbnailUrl || isImage) {
                 const imgSrc = thumbnailUrl || url;
                 return (
-                    <div className="relative h-10 w-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 shrink-0">
+                    <div className="relative h-10 w-10 rounded-xl overflow-hidden border border-slate-800 bg-slate-950 shrink-0">
                         <img 
                             src={imgSrc} 
                             alt={row.original.title} 
@@ -80,7 +80,7 @@ export const columns: ColumnDef<any>[] = [
             }
 
             return (
-                <div className="h-10 w-10 rounded-lg border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
+                <div className="h-10 w-10 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-center shrink-0">
                     {getResourceTypeIcon(type)}
                 </div>
             );
@@ -93,20 +93,21 @@ export const columns: ColumnDef<any>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="text-slate-300 font-extrabold text-xs uppercase tracking-wider hover:text-white"
                 >
                     Title
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="ml-2 h-4 w-4 text-cyan-400" />
                 </Button>
             );
         },
         cell: ({ row }) => {
             return (
                 <div className="flex flex-col min-w-[200px]">
-                    <span className="font-semibold text-sm text-slate-900 line-clamp-1">
+                    <span className="font-extrabold text-sm text-slate-100 line-clamp-1">
                         {row.original.title}
                     </span>
                     {row.original.description && (
-                        <span className="text-xs text-slate-500 line-clamp-1">
+                        <span className="text-xs text-slate-400 font-mono line-clamp-1">
                             {row.original.description}
                         </span>
                     )}
@@ -121,12 +122,20 @@ export const columns: ColumnDef<any>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="text-slate-300 font-extrabold text-xs uppercase tracking-wider hover:text-white"
                 >
                     Category
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="ml-2 h-4 w-4 text-cyan-400" />
                 </Button>
             );
         },
+        cell: ({ row }) => {
+            return (
+                <span className="text-xs font-mono font-bold text-cyan-300 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-xl uppercase">
+                    {row.getValue("category") || "General"}
+                </span>
+            );
+        }
     },
     {
         accessorKey: "type",
@@ -135,16 +144,17 @@ export const columns: ColumnDef<any>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="text-slate-300 font-extrabold text-xs uppercase tracking-wider hover:text-white"
                 >
                     Type
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    <ArrowUpDown className="ml-2 h-4 w-4 text-cyan-400" />
                 </Button>
             );
         },
         cell: ({ row }) => {
             const type = row.getValue("type") as string;
             return (
-                <Badge variant="outline" className="capitalize flex items-center gap-1.5 w-fit font-medium">
+                <Badge variant="outline" className="capitalize flex items-center gap-1.5 w-fit font-mono font-bold text-[10px] bg-slate-950 border-slate-800 text-slate-200 px-2.5 py-1 rounded-xl">
                     {getResourceTypeIcon(type)}
                     <span>{type}</span>
                 </Badge>
@@ -158,105 +168,61 @@ export const columns: ColumnDef<any>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                    className="text-slate-300 font-extrabold text-xs uppercase tracking-wider hover:text-white"
                 >
-                    Access Scope
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                    Access
+                    <ArrowUpDown className="ml-2 h-4 w-4 text-cyan-400" />
                 </Button>
             );
         },
         cell: ({ row }) => {
-            const access = (row.original.access || "user") as string;
-            const isUser = access === "user";
-
+            const access = row.getValue("access") as string;
             return (
-                <Badge 
-                    className={cn(
-                        "font-semibold text-xs py-0.5 px-2.5 flex items-center gap-1 w-fit",
-                        isUser 
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200" 
-                            : "bg-rose-100 text-rose-800 border border-rose-300 hover:bg-rose-200"
-                    )}
-                >
-                    {isUser ? (
-                        <>
-                            <Users className="h-3 w-3" />
-                            <span>Students & Users</span>
-                        </>
-                    ) : (
-                        <>
-                            <ShieldAlert className="h-3 w-3" />
-                            <span>Admin Only</span>
-                        </>
-                    )}
-                </Badge>
-            );
-        }
-    },
-    {
-        accessorKey: "isPublished",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Published
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            );
-        },
-        cell: ({ row }) => {
-            const isPublished = row.getValue("isPublished") || false;
-
-            return (
-                <Badge className={cn("bg-slate-500", isPublished && "bg-sky-700")}>
-                    {isPublished ? "Published" : "Draft"}
-                </Badge>
+                <span className={`px-2.5 py-1 rounded-xl text-[10px] font-mono font-bold uppercase border ${
+                    access === 'admin' 
+                        ? 'bg-slate-950 text-rose-300 border-rose-900/60' 
+                        : access === 'student' 
+                            ? 'bg-slate-950 text-indigo-300 border-indigo-900/60' 
+                            : 'bg-slate-950 text-emerald-300 border-emerald-900/60'
+                }`}>
+                    {access}
+                </span>
             );
         }
     },
     {
         id: "actions",
         cell: ({ row }) => {
-            const { _id, title, url } = row.original;
-
-            const copyHtmlSnippet = () => {
-                const html = `<a href="${url || "#"}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-2 font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-md transition-all">📥 Download ${title || "Resource"}</a>`;
-                navigator.clipboard.writeText(html);
-                toast.success("HTML Download Button code copied!");
-            };
-
-            const copyDirectLink = () => {
-                navigator.clipboard.writeText(url || "#");
-                toast.success("Direct file URL copied!");
-            };
+            const resource = row.original;
 
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
+                        <Button variant="ghost" className="h-8 w-8 p-0 bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <Link href={`/admin/resources/${_id}`}>
-                            <DropdownMenuItem className="cursor-pointer">
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Edit Resource
-                            </DropdownMenuItem>
-                        </Link>
-                        <DropdownMenuItem onClick={copyHtmlSnippet} className="cursor-pointer">
-                            <Code className="h-4 w-4 mr-2 text-indigo-600" />
-                            Copy HTML Snippet
+                    <DropdownMenuContent align="end" className="bg-slate-900 border border-slate-800 text-slate-100 font-sans shadow-2xl rounded-2xl p-1.5">
+                        <DropdownMenuItem asChild className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold">
+                            <Link href={`/admin/resources/edit/${resource._id}`}>
+                                <Pencil className="mr-2 h-4 w-4 text-cyan-400" />
+                                Edit
+                            </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={copyDirectLink} className="cursor-pointer">
-                            <Copy className="h-4 w-4 mr-2 text-emerald-600" />
-                            Copy Direct Link
+                        <DropdownMenuItem 
+                            onClick={() => {
+                                navigator.clipboard.writeText(resource.url);
+                                toast.success("URL copied to clipboard!");
+                            }}
+                            className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold"
+                        >
+                            <Copy className="mr-2 h-4 w-4 text-emerald-400" />
+                            Copy Link
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );
-        }
-    }
+        },
+    },
 ];

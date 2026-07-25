@@ -99,94 +99,94 @@ export default function FAQManager({
     };
 
     const handleScrubUrls = () => {
-        if (!confirm('Scan and remove placeholder URLs? Continue?')) return;
+        if (!confirm('Scrub tracking parameters from external URLs across all FAQs? Continue?')) return;
         startTransition(async () => {
             const res = await scrubFaqUrls();
-            if (res.success) { alert(`✅ Scrubbed URLs! Pages updating.`); window.location.reload(); }
-            else alert('Error: ' + res.error);
-        });
-    };
-
-    const handleAffiliateAudit = () => {
-        if (!confirm('Scan Amazon links and attach affiliate ID? Continue?')) return;
-        startTransition(async () => {
-            const res = await backfillFaqAffiliateLinks();
-            if (res.success) { alert(`✅ Updated ${res.updatedCount} FAQs!`); window.location.reload(); }
-            else alert('Error: ' + res.error);
-        });
-    };
-
-    const handleRemoveDuplicates = () => {
-        if (!confirm('Scan and remove duplicate questions? Continue?')) return;
-        startTransition(async () => {
-            const res = await removeDuplicateFAQs();
-            if (res.success) { alert(`✅ Removed ${res.removed} duplicates!`); window.location.reload(); }
-            else alert('Error: ' + res.error);
-        });
-    };
-
-    const handleFlushFAQs = () => {
-        if (!confirm('⚠️ WARNING: Delete ALL FAQs? Cannot be undone. Continue?')) return;
-        startTransition(async () => {
-            const res = await flushAllFAQs();
-            if (res.success) { alert(`✅ Successfully deleted all FAQs.`); window.location.reload(); }
+            if (res.success) { alert(`✅ Cleaned URLs in ${res.updatedTerms} FAQs!`); window.location.reload(); }
             else alert('Error: ' + res.error);
         });
     };
 
     const handleNormalizeData = () => {
-        if (!confirm('Fix structural data issues? Continue?')) return;
+        if (!confirm('Normalize FAQ titles, trim whitespace, and clean formatting? Continue?')) return;
         startTransition(async () => {
             const res = await normalizeFaqData();
-            if (res.success) { alert(`✅ Successfully normalized data.`); window.location.reload(); }
+            if (res.success) { alert(`✅ Normalized ${res.updatedCount} FAQs!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleAffiliateAudit = () => {
+        if (!confirm('Scan all FAQ links and attach tracking parameters? Continue?')) return;
+        startTransition(async () => {
+            const res = await backfillFaqAffiliateLinks();
+            if (res.success) { alert(`✅ Backfilled affiliate links in ${res.updatedCount} FAQs!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleRemoveDuplicates = () => {
+        if (!confirm('Find and remove duplicate FAQ entries? Continue?')) return;
+        startTransition(async () => {
+            const res = await removeDuplicateFAQs();
+            if (res.success) { alert(`✅ Removed ${res.removed} duplicate FAQs!`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleFlushFAQs = () => {
+        if (!confirm('⚠️ PERMANENTLY DELETE ALL FAQS? This cannot be undone!')) return;
+        startTransition(async () => {
+            const res = await flushAllFAQs();
+            if (res.success) { alert('Flushed all FAQs'); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleBulkUnpublish = () => {
+        if (!confirm(`Unpublish ${emptyCount} empty FAQs? Continue?`)) return;
+        startTransition(async () => {
+            const res = await bulkUnpublishEmptyFAQs();
+            if (res.success) { alert(`Unpublished ${res.count} empty FAQs`); window.location.reload(); }
+            else alert('Error: ' + res.error);
+        });
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this FAQ?')) return;
+        startTransition(async () => {
+            const res = await deleteFAQ(id);
+            if (res.success) window.location.reload();
             else alert('Error: ' + res.error);
         });
     };
 
     const updateSearch = (term: string) => {
         setSearchTerm(term);
-        const params = new URLSearchParams(searchParams?.toString() || "");
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
         if (term) params.set('search', term); else params.delete('search');
         params.set('page', '1');
-        router.push(`?${params.toString()}`);
+        router.push(`/admin/faqs?${params.toString()}`);
     };
 
     const updateDraftSearch = (term: string) => {
         setDraftSearchTerm(term);
-        const params = new URLSearchParams(searchParams?.toString() || "");
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
         if (term) params.set('draftSearch', term); else params.delete('draftSearch');
         params.set('draftPage', '1');
-        router.push(`?${params.toString()}`);
+        router.push(`/admin/faqs?${params.toString()}`);
     };
 
     const handlePageChange = (newPage: number) => {
-        const params = new URLSearchParams(searchParams?.toString() || "");
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
         params.set('page', newPage.toString());
-        router.push(`?${params.toString()}`);
+        router.push(`/admin/faqs?${params.toString()}`);
     };
 
     const handleDraftPageChange = (newPage: number) => {
-        const params = new URLSearchParams(searchParams?.toString() || "");
+        const params = new URLSearchParams(searchParams ? searchParams.toString() : "");
         params.set('draftPage', newPage.toString());
-        router.push(`?${params.toString()}`);
-    };
-
-    const handleDelete = (id: string) => {
-        if (!confirm('Are you sure you want to delete this FAQ?')) return;
-        startTransition(async () => {
-            const res = await deleteFAQ(id);
-            if (res.success) { alert('Deleted successfully'); window.location.reload(); }
-            else alert('Error: ' + res.error);
-        });
-    };
-
-    const handleBulkUnpublish = () => {
-        if (!confirm(`This will unpublish ${emptyCount} questions with no text answer. Continue?`)) return;
-        startTransition(async () => {
-            const res = await bulkUnpublishEmptyFAQs();
-            if (res.success) { alert(`✅ Unpublished ${res.count} empty questions. They are now in the "Needs Answers" tab.`); window.location.reload(); }
-            else alert('Error: ' + res.error);
-        });
+        router.push(`/admin/faqs?${params.toString()}`);
     };
 
     const handleImport = async () => {
@@ -214,7 +214,7 @@ export default function FAQManager({
                         </div>
                         <textarea className="w-full h-96 p-6 font-mono text-xs border border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500 outline-none bg-slate-950 text-slate-100 placeholder:text-slate-500" placeholder='[{"question": "...", "answerSnippet": "..."}]' value={importText} onChange={(e) => setImportText(e.target.value)} />
                         <div className="mt-6 flex justify-end">
-                            <button onClick={handleImport} disabled={isPending || !importText} className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-wider hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl">
+                            <button onClick={handleImport} disabled={isPending || !importText} className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-wider hover:opacity-90 disabled:opacity-50 flex items-center gap-2 transition-all shadow-xl border-0 cursor-pointer">
                                 {isPending ? <RefreshCw className="animate-spin" size={16} /> : <Download size={16} />} Import FAQ Data
                             </button>
                         </div>
@@ -231,48 +231,35 @@ export default function FAQManager({
             {/* Header */}
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 border-b border-slate-800 gap-4">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-100 tracking-tight">Questions / FAQs Manager</h2>
+                    <h2 className="text-2xl font-black text-slate-100 tracking-tight uppercase">Questions & FAQs Manager</h2>
                     <p className="text-xs font-mono font-bold text-slate-400 mt-1">{totalCount} published · <span className="text-amber-400">{draftTotal} need answers</span></p>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end">
-                    <Link href="/admin/glossary" className="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all text-sm">
-                        Glossary Management
+                    <Link href="/admin/glossary" className="bg-slate-950 text-slate-300 hover:text-white px-4 py-2 rounded-xl font-mono text-xs font-bold flex items-center gap-2 border border-slate-800 hover:bg-slate-800 transition-all">
+                        Glossary Manager
                     </Link>
-                    <button onClick={handleBackfillAnswers} disabled={isPending || draftTotal === 0} className="bg-sky-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-sky-700 transition-all disabled:opacity-50 text-sm">
+                    <button onClick={handleBackfillAnswers} disabled={isPending || draftTotal === 0} className="bg-cyan-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-cyan-500 transition-all disabled:opacity-50 text-xs font-mono">
                         <Sparkles size={15} /> Backfill Answers
                     </button>
-                    <button onClick={handleVideoAudit} disabled={isPending || faqs.length === 0 || auditStatus === "running"} className="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-rose-700 transition-all disabled:opacity-50 text-sm">
+                    <button onClick={handleVideoAudit} disabled={isPending || faqs.length === 0 || auditStatus === "running"} className="bg-rose-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-rose-500 transition-all disabled:opacity-50 text-xs font-mono">
                         {auditStatus === "running" ? `Auditing... ${auditProgress}` : "Video Audit"}
                     </button>
-                    <button onClick={handleScrubUrls} disabled={isPending || faqs.length === 0} className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all disabled:opacity-50 text-sm">
+                    <button onClick={handleScrubUrls} disabled={isPending || faqs.length === 0} className="bg-indigo-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-500 transition-all disabled:opacity-50 text-xs font-mono">
                         <ExternalLink size={15} /> Scrub URLs
                     </button>
-                    <button onClick={handleAffiliateAudit} disabled={isPending || faqs.length === 0} className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-emerald-700 transition-all disabled:opacity-50 text-sm">
+                    <button onClick={handleAffiliateAudit} disabled={isPending || faqs.length === 0} className="bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-500 transition-all disabled:opacity-50 text-xs font-mono">
                         <ExternalLink size={15} /> Affiliate Audit
                     </button>
-                    <button onClick={handleRemoveDuplicates} disabled={isPending || faqs.length === 0} className="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-amber-600 transition-all disabled:opacity-50 text-sm">
+                    <button onClick={handleRemoveDuplicates} disabled={isPending || faqs.length === 0} className="bg-amber-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-amber-500 transition-all disabled:opacity-50 text-xs font-mono">
                         <Copy size={15} /> Remove Duplicates
                     </button>
-                    <button onClick={handleNormalizeData} disabled={isPending || faqs.length === 0} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50 text-sm">
-                        <RotateCcw size={15} /> Normalize Data
+                    <button onClick={() => { setEditingFAQ(undefined); setView('create'); }} className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white px-5 py-2 rounded-xl font-extrabold flex items-center gap-2 hover:opacity-90 transition-all text-xs uppercase border-0 cursor-pointer">
+                        <Plus size={15} /> Add New FAQ
                     </button>
-                    <button onClick={handleFlushFAQs} disabled={isPending || faqs.length === 0} className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-all disabled:opacity-50 text-sm">
-                        <RotateCcw size={15} /> Flush All
-                    </button>
-                    {emptyCount > 0 && (
-                        <button onClick={handleBulkUnpublish} disabled={isPending} className="bg-amber-50 text-amber-700 px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-amber-200 hover:bg-amber-100 transition-all text-sm disabled:opacity-50">
-                            <EyeOff size={15} />
-                            Unpublish Empty
-                            <span className="bg-amber-500 text-white text-xs font-black px-2 py-0.5 rounded-full">{emptyCount}</span>
-                        </button>
-                    )}
-                    <button onClick={() => { setEditingFAQ(undefined); setView('create'); }} className="bg-black text-white px-5 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-slate-800 transition-all text-sm">
-                        <Plus size={15} /> Add New
-                    </button>
-                    <button onClick={() => setView('import-csv')} className="bg-emerald-50 text-emerald-700 px-5 py-2 rounded-lg font-bold flex items-center gap-2 border border-emerald-100 hover:bg-emerald-100 transition-all text-sm">
+                    <button onClick={() => setView('import-csv')} className="bg-slate-950 text-emerald-400 px-4 py-2 rounded-xl font-mono text-xs font-bold flex items-center gap-2 border border-emerald-900/60 hover:bg-emerald-950 transition-all">
                         <FileUp size={15} /> Import CSV
                     </button>
-                    <button onClick={() => setView('import')} className="bg-slate-100 text-slate-700 px-5 py-2 rounded-lg font-bold flex items-center gap-2 border border-slate-200 hover:bg-slate-200 transition-all text-sm">
+                    <button onClick={() => setView('import')} className="bg-slate-950 text-cyan-400 px-4 py-2 rounded-xl font-mono text-xs font-bold flex items-center gap-2 border border-cyan-900/60 hover:bg-cyan-950 transition-all">
                         <Download size={15} /> Import JSON
                     </button>
                 </div>
@@ -280,26 +267,26 @@ export default function FAQManager({
 
             {/* Broken Videos Report */}
             {view === 'list' && brokenVideos.length > 0 && (
-                <div className="m-6 p-6 bg-rose-50 border border-rose-200 rounded-2xl">
+                <div className="m-6 p-6 bg-rose-950/80 border border-rose-800 rounded-3xl">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-black text-rose-800 uppercase tracking-widest flex items-center gap-2">
+                        <h3 className="text-xs font-mono font-bold text-rose-300 uppercase tracking-wider flex items-center gap-2">
                             <AlertCircle size={16} />
                             Broken YouTube Links Found ({brokenVideos.length})
                         </h3>
-                        <button onClick={handleAutoReplace} disabled={isPending} className="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-rose-700 transition-all disabled:opacity-50 flex items-center gap-2">
+                        <button onClick={handleAutoReplace} disabled={isPending} className="bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-rose-500 transition-all disabled:opacity-50 flex items-center gap-2">
                             <Sparkles size={14} /> Auto-Fix All
                         </button>
                     </div>
                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
                         {brokenVideos.map((item) => (
-                            <div key={item.id} className="bg-white p-3 rounded-xl border border-rose-100 flex items-center justify-between shadow-sm">
+                            <div key={item.id} className="bg-slate-900 p-3 rounded-2xl border border-rose-900/60 flex items-center justify-between shadow-sm">
                                 <div>
-                                    <p className="text-sm font-black text-slate-900">{item.term}</p>
-                                    <p className="text-xs text-rose-500 font-mono truncate max-w-lg">{item.videoUrl}</p>
+                                    <p className="text-sm font-extrabold text-slate-100">{item.term}</p>
+                                    <p className="text-xs text-rose-400 font-mono truncate max-w-lg">{item.videoUrl}</p>
                                 </div>
                                 <button
                                     onClick={() => { const faqToEdit = faqs.find(f => (f._id as unknown as string) === item.id); if (faqToEdit) { setEditingFAQ(faqToEdit); setView('edit'); } }}
-                                    className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-lg hover:bg-slate-800 transition-all"
+                                    className="px-4 py-2 bg-slate-950 text-white text-[10px] font-mono font-bold uppercase rounded-xl hover:bg-slate-800 transition-all border border-slate-800"
                                 >
                                     Fix Now
                                 </button>
@@ -310,72 +297,72 @@ export default function FAQManager({
             )}
 
             {/* Tabs */}
-            <div className="flex border-b border-slate-100">
+            <div className="flex border-b border-slate-800 bg-slate-950">
                 <button
                     onClick={() => setActiveTab('published')}
-                    className={`px-8 py-4 text-xs font-black uppercase tracking-widest border-b-2 transition-all ${activeTab === 'published' ? 'border-black text-black' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                    className={`px-8 py-4 text-xs font-mono font-bold uppercase tracking-wider border-b-2 transition-all ${activeTab === 'published' ? 'border-cyan-400 text-cyan-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                 >
-                    ✅ Published <span className="ml-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{totalCount}</span>
+                    ✅ Published <span className="ml-1.5 bg-slate-900 text-cyan-400 border border-slate-800 px-2 py-0.5 rounded-xl">{totalCount}</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('drafts')}
-                    className={`px-8 py-4 text-xs font-black uppercase tracking-widest border-b-2 transition-all flex items-center gap-2 ${activeTab === 'drafts' ? 'border-amber-500 text-amber-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
+                    className={`px-8 py-4 text-xs font-mono font-bold uppercase tracking-wider border-b-2 transition-all flex items-center gap-2 ${activeTab === 'drafts' ? 'border-amber-400 text-amber-400' : 'border-transparent text-slate-400 hover:text-slate-200'}`}
                 >
                     <AlertTriangle size={13} /> Needs Answers
-                    {draftTotal > 0 && <span className="bg-amber-500 text-white text-xs font-black px-2 py-0.5 rounded-full">{draftTotal}</span>}
+                    {draftTotal > 0 && <span className="bg-amber-500 text-white text-xs font-black px-2 py-0.5 rounded-xl">{draftTotal}</span>}
                 </button>
             </div>
 
             {/* Published Tab */}
             {activeTab === 'published' && (
-                <div className="p-6">
-                    <div className="mb-4">
+                <div className="p-6 space-y-4">
+                    <div>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input type="text" placeholder="Search published questions..." className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50" value={searchTerm} onChange={(e) => updateSearch(e.target.value)} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input type="text" placeholder="Search published questions..." className="w-full pl-10 pr-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:border-cyan-500 transition-all bg-slate-950 text-slate-100 placeholder:text-slate-500 text-xs font-mono" value={searchTerm} onChange={(e) => updateSearch(e.target.value)} />
                         </div>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
+                    <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-950">
+                        <table className="min-w-full divide-y divide-slate-800/80">
+                            <thead className="bg-slate-950">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Question ({totalCount})</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Parent</th>
-                                    <th className="px-6 py-4 text-left text-xs font-black text-slate-500 uppercase tracking-widest">Slug</th>
-                                    <th className="px-6 py-4 text-right text-xs font-black text-slate-500 uppercase tracking-widest">Actions</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Question ({totalCount})</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Parent</th>
+                                    <th className="px-6 py-4 text-left text-xs font-extrabold text-slate-300 uppercase tracking-wider">Slug</th>
+                                    <th className="px-6 py-4 text-right text-xs font-extrabold text-slate-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-100">
+                            <tbody className="bg-slate-950 divide-y divide-slate-800/80">
                                 {faqs.map(faq => (
-                                    <tr key={(faq._id as unknown) as string} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={(faq._id as unknown) as string} className="hover:bg-slate-900/60 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
-                                                <div className="text-sm font-bold text-slate-900 line-clamp-1">{faq.question}</div>
-                                                {faq.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-500" /></span>}
+                                                <div className="text-sm font-extrabold text-slate-100 line-clamp-1">{faq.question}</div>
+                                                {faq.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-400" /></span>}
                                             </div>
-                                            <div className="text-xs text-slate-500 truncate max-w-xs">{faq.answerSnippet}</div>
+                                            <div className="text-xs text-slate-400 truncate max-w-md font-mono mt-0.5">{faq.answerSnippet}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-sm text-slate-500">{faq.parentQuestion || '-'}</td>
-                                        <td className="px-6 py-4 text-xs font-mono text-slate-400">/{faq.slug}</td>
+                                        <td className="px-6 py-4 text-xs font-mono text-slate-400">{faq.parentQuestion || '-'}</td>
+                                        <td className="px-6 py-4 text-xs font-mono text-cyan-400">/{faq.slug}</td>
                                         <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                            <Link href={`/questions/${faq.slug}`} target="_blank" className="text-slate-400 hover:text-black mr-4 transition-colors inline-block"><Eye size={18} /></Link>
-                                            <button onClick={() => { setEditingFAQ(faq); setView('edit'); }} className="text-slate-400 hover:text-blue-600 mr-4 transition-colors"><Edit size={18} /></button>
-                                            <button onClick={() => handleDelete((faq._id as unknown) as string)} className="text-slate-400 hover:text-red-600 transition-colors"><Trash2 size={18} /></button>
+                                            <Link href={`/questions/${faq.slug}`} target="_blank" className="text-slate-400 hover:text-emerald-400 mr-4 transition-colors inline-block"><Eye size={18} /></Link>
+                                            <button onClick={() => { setEditingFAQ(faq); setView('edit'); }} className="text-slate-400 hover:text-cyan-300 mr-4 transition-colors"><Edit size={18} /></button>
+                                            <button onClick={() => handleDelete((faq._id as unknown) as string)} className="text-slate-400 hover:text-rose-400 transition-colors"><Trash2 size={18} /></button>
                                         </td>
                                     </tr>
                                 ))}
                                 {faqs.length === 0 && (
-                                    <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold uppercase text-xs tracking-widest">No published FAQs found.</td></tr>
+                                    <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400 font-mono font-bold uppercase text-xs tracking-widest">No published FAQs found.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
                     {totalPages > 1 && (
-                        <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
-                            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">Page <span className="text-black">{initialPage}</span> of {totalPages}</div>
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
+                            <div className="text-xs font-mono text-slate-400 uppercase">Page <span className="text-cyan-400 font-bold">{initialPage}</span> of {totalPages}</div>
                             <div className="flex gap-2">
-                                <button onClick={() => handlePageChange(initialPage - 1)} disabled={initialPage === 1} className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all">Prev</button>
-                                <button onClick={() => handlePageChange(initialPage + 1)} disabled={initialPage >= totalPages} className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all">Next</button>
+                                <button onClick={() => handlePageChange(initialPage - 1)} disabled={initialPage === 1} className="px-4 py-2 text-xs font-bold uppercase text-slate-300 bg-slate-950 border border-slate-800 rounded-xl disabled:opacity-30 hover:bg-slate-800 transition-all">Prev</button>
+                                <button onClick={() => handlePageChange(initialPage + 1)} disabled={initialPage >= totalPages} className="px-4 py-2 text-xs font-bold uppercase text-slate-300 bg-slate-950 border border-slate-800 rounded-xl disabled:opacity-30 hover:bg-slate-800 transition-all">Next</button>
                             </div>
                         </div>
                     )}
@@ -384,18 +371,18 @@ export default function FAQManager({
 
             {/* Drafts / Needs Answers Tab */}
             {activeTab === 'drafts' && (
-                <div className="p-6">
-                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-                        <AlertTriangle className="text-amber-600 mt-0.5 shrink-0" size={18} />
+                <div className="p-6 space-y-4">
+                    <div className="p-4 bg-amber-950/60 border border-amber-800/80 rounded-2xl flex items-start gap-3">
+                        <AlertTriangle className="text-amber-400 mt-0.5 shrink-0" size={18} />
                         <div>
-                            <p className="text-sm font-bold text-amber-800">These questions have no answer text and are hidden from the public.</p>
-                            <p className="text-xs text-amber-600 mt-1">Add an answer to each question and click "Publish" to make it live.</p>
+                            <p className="text-sm font-bold text-amber-200">These questions have no answer text and are hidden from the public.</p>
+                            <p className="text-xs text-amber-400 mt-1 font-mono">Add an answer to each question and click "Publish" to make it live.</p>
                         </div>
                     </div>
-                    <div className="mb-4">
+                    <div>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input type="text" placeholder="Search questions needing answers..." className="w-full pl-10 pr-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all bg-slate-50" value={draftSearchTerm} onChange={(e) => updateDraftSearch(e.target.value)} />
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input type="text" placeholder="Search questions needing answers..." className="w-full pl-10 pr-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:border-amber-400 transition-all bg-slate-950 text-slate-100 placeholder:text-slate-500 text-xs font-mono" value={draftSearchTerm} onChange={(e) => updateDraftSearch(e.target.value)} />
                         </div>
                     </div>
 
@@ -404,20 +391,20 @@ export default function FAQManager({
                             <DraftFAQCard key={(faq._id as unknown) as string} faq={faq} />
                         ))}
                         {draftFaqs.length === 0 && (
-                            <div className="text-center py-16">
-                                <CheckCircle2 className="text-emerald-500 mx-auto mb-3" size={48} />
-                                <p className="font-black text-slate-800 text-lg">All questions have answers!</p>
-                                <p className="text-slate-500 text-sm mt-1">There are no unpublished questions needing attention.</p>
+                            <div className="text-center py-16 bg-slate-950 rounded-3xl border border-slate-800">
+                                <CheckCircle2 className="text-emerald-400 mx-auto mb-3" size={48} />
+                                <p className="font-extrabold text-slate-100 text-lg">All questions have answers!</p>
+                                <p className="text-slate-400 text-xs font-mono mt-1">There are no unpublished questions needing attention.</p>
                             </div>
                         )}
                     </div>
 
                     {draftTotalPages > 1 && (
-                        <div className="flex justify-between items-center mt-6 pt-6 border-t border-slate-100">
-                            <div className="text-xs font-black text-slate-400 uppercase tracking-widest">Page <span className="text-black">{draftPage}</span> of {draftTotalPages}</div>
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-slate-800">
+                            <div className="text-xs font-mono text-slate-400 uppercase">Page <span className="text-amber-400 font-bold">{draftPage}</span> of {draftTotalPages}</div>
                             <div className="flex gap-2">
-                                <button onClick={() => handleDraftPageChange(draftPage - 1)} disabled={draftPage === 1} className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all">Prev</button>
-                                <button onClick={() => handleDraftPageChange(draftPage + 1)} disabled={draftPage >= draftTotalPages} className="px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 rounded-lg disabled:opacity-30 hover:bg-slate-50 transition-all">Next</button>
+                                <button onClick={() => handleDraftPageChange(draftPage - 1)} disabled={draftPage === 1} className="px-4 py-2 text-xs font-bold uppercase text-slate-300 bg-slate-950 border border-slate-800 rounded-xl disabled:opacity-30 hover:bg-slate-800 transition-all">Prev</button>
+                                <button onClick={() => handleDraftPageChange(draftPage + 1)} disabled={draftPage >= draftTotalPages} className="px-4 py-2 text-xs font-bold uppercase text-slate-300 bg-slate-950 border border-slate-800 rounded-xl disabled:opacity-30 hover:bg-slate-800 transition-all">Next</button>
                             </div>
                         </div>
                     )}
@@ -451,46 +438,46 @@ function DraftFAQCard({ faq }: { faq: IFAQ }) {
 
     if (saved) {
         return (
-            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-pulse">
-                <CheckCircle2 className="text-emerald-500" size={20} />
-                <span className="font-bold text-emerald-700 text-sm">Published! Refreshing…</span>
+            <div className="p-4 bg-emerald-950/80 border border-emerald-800 rounded-2xl flex items-center gap-3 animate-pulse">
+                <CheckCircle2 className="text-emerald-400" size={20} />
+                <span className="font-bold text-emerald-300 text-xs font-mono">Published! Refreshing…</span>
             </div>
         );
     }
 
     return (
-        <div className={`border rounded-xl transition-all overflow-hidden ${isExpanded ? 'border-amber-300 shadow-md shadow-amber-100' : 'border-slate-200 hover:border-amber-300'}`}>
+        <div className={`border rounded-2xl transition-all overflow-hidden bg-slate-950 ${isExpanded ? 'border-amber-500/80 shadow-lg' : 'border-slate-800 hover:border-amber-500/50'}`}>
             {/* Question Row */}
             <div className="flex items-start gap-4 p-4 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="mt-1 w-2 h-2 rounded-full bg-amber-400 shrink-0" />
                 <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-slate-800 line-clamp-2">{faq.question}</p>
-                    {faq.parentQuestion && <p className="text-xs text-slate-400 mt-1">{faq.parentQuestion}</p>}
+                    <p className="text-sm font-extrabold text-slate-100 line-clamp-2">{faq.question}</p>
+                    {faq.parentQuestion && <p className="text-xs text-slate-400 font-mono mt-1">{faq.parentQuestion}</p>}
                 </div>
-                <button className={`shrink-0 text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${isExpanded ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500 hover:bg-amber-50 hover:text-amber-600'}`}>
+                <button className={`shrink-0 text-xs font-mono font-bold uppercase tracking-wider px-3 py-1.5 rounded-xl transition-colors ${isExpanded ? 'bg-amber-950 text-amber-300 border border-amber-800' : 'bg-slate-900 text-slate-300 border border-slate-800 hover:text-white'}`}>
                     {isExpanded ? 'Cancel' : 'Add Answer'}
                 </button>
             </div>
 
             {/* Inline Answer Panel */}
             {isExpanded && (
-                <div className="border-t border-amber-100 p-4 bg-amber-50/50">
-                    <label className="block text-xs font-black text-amber-700 uppercase tracking-widest mb-2 flex items-center gap-1">
+                <div className="border-t border-slate-800 p-4 bg-slate-900">
+                    <label className="block text-xs font-mono font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1">
                         <Pencil size={12} /> Write the Answer
                     </label>
                     <textarea
-                        className="w-full p-4 text-sm border border-amber-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white resize-y min-h-[120px] transition-all"
+                        className="w-full p-4 text-xs font-mono border border-slate-800 rounded-2xl focus:outline-none focus:border-amber-400 bg-slate-950 text-slate-100 placeholder:text-slate-500 resize-y min-h-[120px] transition-all"
                         placeholder={`Answer: "${faq.question}"`}
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         autoFocus
                     />
                     <div className="flex items-center justify-between mt-3">
-                        <p className="text-xs text-slate-400">{answer.length} characters</p>
+                        <p className="text-xs font-mono text-slate-400">{answer.length} characters</p>
                         <button
                             onClick={handlePublish}
                             disabled={isPending || !answer.trim()}
-                            className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 text-sm"
+                            className="bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-extrabold uppercase tracking-wider hover:bg-emerald-500 disabled:opacity-50 flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 text-xs"
                         >
                             {isPending ? <RefreshCw className="animate-spin" size={14} /> : <Send size={14} />}
                             Publish Answer
@@ -520,72 +507,65 @@ function CSVImportView({ onCancel, isPending, startTransition }: { onCancel: () 
             header: true,
             skipEmptyLines: true,
             complete: async (results) => {
-                const data = (results.data as any[])
-                    .map((row: any) => ({
-                        question: row['Question'] || row['question'],
-                        parentQuestion: row['Parent Question'] || row['parentQuestion'],
-                        linkTitle: row['Link Title'] || row['linkTitle'],
-                        linkUrl: row['Link'] || row['linkUrl'] || row['link'],
-                        sourceText: row['Text'] || row['sourceText'] || row['text']
-                    }))
-                    .filter((row: any) => row.question);
-
-                const BATCH_SIZE = 50;
-                const batches: any[][] = [];
-                for (let i = 0; i < data.length; i += BATCH_SIZE) batches.push(data.slice(i, i + BATCH_SIZE));
+                const rows = results.data as any[];
+                if (!rows || rows.length === 0) { alert("CSV file appears to be empty."); return; }
+                const validRows = rows.filter(r => (r.question || r.Question || r.term || r.Term) && (r.answer || r.Answer || r.answerSnippet));
+                if (validRows.length === 0) { alert("No valid rows found. CSV must contain 'question' and 'answer' columns."); return; }
 
                 setIsProcessing(true);
-                setProgress({ current: 0, total: batches.length, done: false });
-
+                const batchSize = 100;
+                const totalBatches = Math.ceil(validRows.length / batchSize);
                 let totalImported = 0;
-                for (let bIdx = 0; bIdx < batches.length; bIdx++) {
-                    try {
-                        const res = await importCSVFAQs(batches[bIdx]);
-                        if (res.success) { totalImported += res.count ?? batches[bIdx].length; }
-                        else { alert(`Batch ${bIdx + 1} failed: ${res.error}`); setIsProcessing(false); return; }
-                    } catch (err: any) { alert(`Batch ${bIdx + 1} error: ${err.message}`); setIsProcessing(false); return; }
-                    setProgress({ current: bIdx + 1, total: batches.length, done: bIdx === batches.length - 1 });
+
+                for (let i = 0; i < totalBatches; i++) {
+                    const batch = validRows.slice(i * batchSize, (i + 1) * batchSize);
+                    setProgress({ current: i + 1, total: totalBatches, done: false });
+                    const res = await importCSVFAQs(batch);
+                    if (res.success) totalImported += res.count;
                 }
 
                 setIsProcessing(false);
-                alert(`✅ Import complete! ${totalImported} FAQs imported.`);
+                setProgress({ current: totalBatches, total: totalBatches, done: true });
+                alert(`✅ Successfully imported ${totalImported} FAQs from CSV!`);
                 window.location.reload();
             },
-            error: (err) => alert('Parsing error: ' + err.message)
+            error: (err) => { alert("Error parsing CSV: " + err.message); }
         });
     };
 
     return (
-        <div>
+        <div className="font-sans">
             <div className="flex items-center gap-2 mb-6">
-                <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><ArrowLeft size={20} /></button>
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Import CSV</h2>
+                <button onClick={onCancel} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-300"><ArrowLeft size={20} /></button>
+                <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">Import CSV FAQ Data</h2>
             </div>
-            <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center">
-                <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100"><FileUp className="text-slate-400" /></div>
-                <h3 className="text-lg font-bold text-slate-800 mb-2">Upload your FAQ CSV</h3>
-                <p className="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Headers: <strong>Question, Parent Question, Link Title, Link, Text</strong></p>
-                <input type="file" accept=".csv" onChange={handleFileChange} className="hidden" id="csv-upload" disabled={isProcessing} />
-                <label htmlFor="csv-upload" className="bg-white border border-slate-200 px-6 py-2 rounded-lg font-bold cursor-pointer hover:bg-slate-50 transition-all shadow-sm inline-block mb-4">
-                    {file ? file.name : 'Select CSV File'}
+            <div className="border-2 border-dashed border-slate-800 bg-slate-950 p-8 rounded-3xl text-center space-y-4">
+                <FileUp className="mx-auto text-cyan-400" size={48} />
+                <div>
+                    <p className="text-sm font-extrabold text-slate-100">Select a CSV file containing FAQ questions and answers</p>
+                    <p className="text-xs text-slate-400 font-mono mt-1">Columns needed: <code className="bg-slate-900 text-cyan-400 px-2 py-0.5 rounded border border-slate-800">question</code>, <code className="bg-slate-900 text-cyan-400 px-2 py-0.5 rounded border border-slate-800">answer</code></p>
+                </div>
+                <input type="file" accept=".csv" onChange={handleFileChange} className="hidden" id="csv-file-input" />
+                <label htmlFor="csv-file-input" className="inline-block bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer transition-all">
+                    {file ? file.name : "Choose CSV File"}
                 </label>
-                {file && !isProcessing && (
-                    <div className="mt-4">
-                        <button onClick={handleImport} className="bg-black text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest hover:bg-slate-800 flex items-center gap-2 transition-all shadow-xl mx-auto">
-                            <Download size={16} /> Process &amp; Import Data
+                {file && (
+                    <div>
+                        <button onClick={handleImport} disabled={isProcessing} className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white px-8 py-3 rounded-2xl font-extrabold text-xs uppercase tracking-wider hover:opacity-90 disabled:opacity-50 flex items-center gap-2 mx-auto transition-all shadow-xl border-0 cursor-pointer">
+                            {isProcessing ? <RefreshCw className="animate-spin" size={16} /> : <FileUp size={16} />} Start CSV Import
                         </button>
                     </div>
                 )}
-                {isProcessing && progress && (
+                {progress && (
                     <div className="mt-6 max-w-sm mx-auto">
-                        <div className="flex justify-between text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
+                        <div className="flex justify-between text-xs font-mono text-slate-400 uppercase mb-2">
                             <span className="flex items-center gap-2"><RefreshCw className="animate-spin" size={12} /> Importing...</span>
                             <span>{progress.current} / {progress.total} batches</span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                            <div className="bg-emerald-500 h-3 rounded-full transition-all duration-300" style={{ width: `${Math.round((progress.current / progress.total) * 100)}%` }} />
+                        <div className="w-full bg-slate-900 rounded-full h-3 overflow-hidden border border-slate-800">
+                            <div className="bg-cyan-500 h-3 rounded-full transition-all duration-300" style={{ width: `${Math.round((progress.current / progress.total) * 100)}%` }} />
                         </div>
-                        <p className="text-xs text-slate-400 mt-3 italic">Please keep this tab open until the import completes.</p>
+                        <p className="text-xs text-slate-400 mt-3 italic font-mono">Please keep this tab open until the import completes.</p>
                     </div>
                 )}
             </div>
@@ -623,67 +603,67 @@ function FAQForm({ initialData, onCancel, offers = [] }: { initialData?: IFAQ, o
     };
 
     return (
-        <div>
+        <div className="font-sans text-slate-100">
             <div className="flex items-center gap-2 mb-8">
-                <button onClick={onCancel} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><ArrowLeft size={20} /></button>
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">{initialData ? 'Edit Question' : 'New Question'}</h2>
+                <button onClick={onCancel} className="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-300"><ArrowLeft size={20} /></button>
+                <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">{initialData ? 'Edit Question' : 'New Question'}</h2>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="col-span-2">
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Question Text *</label>
-                        <input name="question" defaultValue={initialData?.question} required className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" placeholder="e.g. How does energy healing work?" />
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Question Text *</label>
+                        <input name="question" defaultValue={initialData?.question} required className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" placeholder="e.g. How does energy healing work?" />
                     </div>
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Parent Context</label>
-                        <input name="parentQuestion" defaultValue={initialData?.parentQuestion} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" />
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Parent Context</label>
+                        <input name="parentQuestion" defaultValue={initialData?.parentQuestion} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" />
                     </div>
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Custom Slug</label>
-                        <input name="slug" defaultValue={initialData?.slug} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" />
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Custom Slug</label>
+                        <input name="slug" defaultValue={initialData?.slug} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" />
                     </div>
                     <div className="col-span-2">
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">H1 Title (SEO)</label>
-                        <input name="h1Title" defaultValue={initialData?.h1Title} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" />
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">H1 Title (SEO)</label>
+                        <input name="h1Title" defaultValue={initialData?.h1Title} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" />
                     </div>
                     <div className="col-span-2">
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Answer Snippet</label>
-                        <textarea name="answerSnippet" defaultValue={initialData?.answerSnippet} rows={3} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" />
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Answer Snippet</label>
+                        <textarea name="answerSnippet" defaultValue={initialData?.answerSnippet} rows={3} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" />
                     </div>
 
-                    <div className="col-span-2 border-t pt-8">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">Deep Dive Content</h3>
+                    <div className="col-span-2 border-t border-slate-800 pt-8">
+                        <h3 className="text-sm font-black text-slate-100 uppercase tracking-wider mb-6">Deep Dive Content</h3>
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-xs font-black text-red-500 uppercase tracking-widest mb-2">The Problem / Pain Point</label>
-                                <textarea name="deepDive.problem" defaultValue={initialData?.deepDive?.problem} rows={4} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-red-400" />
+                                <label className="block text-xs font-mono font-bold text-rose-400 uppercase tracking-wider mb-2">The Problem / Pain Point</label>
+                                <textarea name="deepDive.problem" defaultValue={initialData?.deepDive?.problem} rows={4} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-rose-500" />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-blue-500 uppercase tracking-widest mb-2">The Methodology / Science</label>
-                                <textarea name="deepDive.methodology" defaultValue={initialData?.deepDive?.methodology} rows={5} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-blue-400" />
+                                <label className="block text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider mb-2">The Methodology / Science</label>
+                                <textarea name="deepDive.methodology" defaultValue={initialData?.deepDive?.methodology} rows={5} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-green-500 uppercase tracking-widest mb-2">Practical Application</label>
-                                <textarea name="deepDive.application" defaultValue={initialData?.deepDive?.application} rows={5} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-emerald-400" />
+                                <label className="block text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider mb-2">Practical Application</label>
+                                <textarea name="deepDive.application" defaultValue={initialData?.deepDive?.application} rows={5} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="col-span-2 border-t pt-8">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">References</h3>
+                    <div className="col-span-2 border-t border-slate-800 pt-8">
+                        <h3 className="text-sm font-black text-slate-100 uppercase tracking-wider mb-6">References</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Link Title</label><input name="linkTitle" defaultValue={initialData?.linkTitle} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" /></div>
-                            <div><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Link URL</label><input name="linkUrl" defaultValue={initialData?.linkUrl} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-black" /></div>
-                            <div className="col-span-2"><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Video URL</label><input name="videoUrl" defaultValue={initialData?.videoUrl} className="w-full border rounded-xl p-3 text-sm bg-slate-50 focus:outline-none focus:border-rose-400" placeholder="https://youtube.com/watch?v=..." /></div>
-                            <div className="col-span-2"><label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Source Text</label><textarea name="sourceText" defaultValue={initialData?.sourceText} rows={2} className="w-full border rounded-xl p-3 text-sm bg-slate-50 font-mono text-[10px] focus:outline-none focus:border-black" /></div>
+                            <div><label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Link Title</label><input name="linkTitle" defaultValue={initialData?.linkTitle} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" /></div>
+                            <div><label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Link URL</label><input name="linkUrl" defaultValue={initialData?.linkUrl} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500" /></div>
+                            <div className="col-span-2"><label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Video URL</label><input name="videoUrl" defaultValue={initialData?.videoUrl} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-rose-500" placeholder="https://youtube.com/watch?v=..." /></div>
+                            <div className="col-span-2"><label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Source Text</label><textarea name="sourceText" defaultValue={initialData?.sourceText} rows={2} className="w-full border border-slate-800 rounded-2xl p-3.5 text-xs font-mono bg-slate-950 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 text-[10px]" /></div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex justify-end gap-4 pt-8 border-t">
-                    <button type="button" onClick={onCancel} className="px-8 py-3 text-xs font-black uppercase tracking-widest border border-slate-200 rounded-xl hover:bg-slate-50 transition-all">Cancel</button>
-                    <button type="submit" disabled={isPending} className="px-8 py-3 bg-black text-white rounded-xl hover:bg-slate-800 font-black uppercase tracking-widest shadow-xl transition-all disabled:opacity-50">
+                <div className="flex justify-end gap-4 pt-8 border-t border-slate-800">
+                    <button type="button" onClick={onCancel} className="px-8 py-3 text-xs font-bold uppercase tracking-wider bg-slate-950 border border-slate-800 text-slate-300 rounded-2xl hover:bg-slate-800 transition-all">Cancel</button>
+                    <button type="submit" disabled={isPending} className="px-8 py-3 bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white rounded-2xl font-extrabold uppercase tracking-wider shadow-xl transition-all disabled:opacity-50 border-0 cursor-pointer text-xs">
                         {isPending ? 'Processing...' : 'Save Question'}
                     </button>
                 </div>
