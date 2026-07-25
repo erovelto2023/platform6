@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
@@ -16,7 +16,7 @@ interface GlossaryManagerProps {
 }
 
 export default function GlossaryManager({ initialTerms = [], products = [] }: GlossaryManagerProps) {
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'performance'>('list');
     const [editingTerm, setEditingTerm] = useState<IGlossaryTerm | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
     const [isPending, startTransition] = useTransition();
@@ -300,14 +300,20 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
 
     return (
         <div className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 font-sans">
-            {view === 'list' && (
+            {(view === 'list' || view === 'performance') && (
                 <>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
                         <div>
-                            <h2 className="text-2xl font-black text-slate-100 tracking-tight">Glossary Management</h2>
-                            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mt-1">Terminology Database & AI Prompt Engine</p>
+                            <h2 className="text-2xl font-black text-slate-100 tracking-tight">Glossary & AEO Ecosystem Management</h2>
+                            <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mt-1">Terminology Database, AI Extraction & Keyword Ecosystem</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
+                            <button
+                                onClick={() => setView(view === 'performance' ? 'list' : 'performance')}
+                                className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md cursor-pointer"
+                            >
+                                <TrendingUp size={14} /> {view === 'performance' ? 'Standard View' : 'Performance Analytics'}
+                            </button>
                             <button
                                 onClick={handleBackfillPrompts}
                                 disabled={isPending || initialTerms.length === 0}
@@ -425,7 +431,9 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-3 items-center">
+                    {view === 'list' && (
+                        <>
+                            <div className="flex flex-col sm:flex-row gap-3 items-center">
                         <div className="relative flex-1 w-full">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
@@ -629,6 +637,76 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     )}
                 </>
+            )}
+
+            {view === 'performance' && (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div>
+                            <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight">Performance & AEO Readiness Analytics</h3>
+                            <p className="text-xs font-mono text-slate-400">Track organic search views, deep pathway clicks, and AEO AI-citation readiness across all concepts.</p>
+                        </div>
+                        <button
+                            onClick={() => setView('list')}
+                            className="px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+                        >
+                            <ArrowLeft size={16} /> Back to Standard List
+                        </button>
+                    </div>
+
+                    <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                        <table className="min-w-full divide-y divide-slate-800 font-mono text-xs">
+                            <thead className="bg-slate-950 text-slate-300 uppercase">
+                                <tr>
+                                    <th className="px-6 py-4 text-left font-extrabold">Term & Entity</th>
+                                    <th className="px-6 py-4 text-left font-extrabold">Views</th>
+                                    <th className="px-6 py-4 text-left font-extrabold">Pathway Clicks</th>
+                                    <th className="px-6 py-4 text-left font-extrabold">AEO Direct Answer</th>
+                                    <th className="px-6 py-4 text-left font-extrabold">Intent Variations</th>
+                                    <th className="px-6 py-4 text-left font-extrabold">Readiness Score</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-slate-950 divide-y divide-slate-800/80">
+                                {initialTerms.map((term: any) => {
+                                    const hasAeo = Boolean(term.aeoSummary || term.shortDefinition);
+                                    const hasQuestions = Boolean(term.questionVariations && term.questionVariations.length > 0);
+                                    const hasScenario = Boolean(term.realWorldScenario?.stepByStep && term.realWorldScenario.stepByStep.length > 0);
+                                    const hasPathways = Boolean(term.deepPathways && term.deepPathways.length > 0);
+
+                                    let score = 0;
+                                    if (hasAeo) score += 30;
+                                    if (hasQuestions) score += 25;
+                                    if (hasScenario) score += 25;
+                                    if (hasPathways) score += 20;
+
+                                    return (
+                                        <tr key={term.id} className="hover:bg-slate-900/60 transition">
+                                            <td className="px-6 py-4">
+                                                <div className="font-extrabold text-slate-100">{term.term}</div>
+                                                <div className="text-[10px] text-cyan-400">{term.entityType || 'Core Concept'} • {term.category}</div>
+                                            </td>
+                                            <td className="px-6 py-4 font-bold text-slate-200">{term.views || 0}</td>
+                                            <td className="px-6 py-4 font-bold text-purple-400">{term.deepLinkClicks || 0}</td>
+                                            <td className="px-6 py-4">
+                                                {hasAeo ? <span className="text-emerald-400 font-bold">✅ Configured</span> : <span className="text-rose-400">❌ Missing</span>}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-slate-300 font-bold">{term.questionVariations?.length || 0} Queries</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-3 py-1 rounded-xl font-bold text-[10px] ${score >= 75 ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}`}>
+                                                    {score}% Ready
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+            </>
             )}
 
             {(view === 'create' || view === 'edit') && (

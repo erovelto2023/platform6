@@ -5,6 +5,26 @@ export interface IRecommendedTool {
     context?: string; // "Best For" context
 }
 
+export interface IDeepPathway {
+    title: string;
+    url: string;
+    type: 'blog' | 'tool' | 'product' | 'conversion';
+    description?: string;
+}
+
+export interface IQuestionVariation {
+    question: string;
+    intentType: 'Informational' | 'Transactional' | 'Commercial' | 'Problem-Solving';
+    targetAnswer: string;
+}
+
+export interface IRealWorldScenario {
+    context?: string;
+    stepByStep?: string[];
+    citableMetric?: string;
+    outcome?: string;
+}
+
 export interface IGlossaryTerm {
     // --- Core Glossary Fields ---
     id: string;
@@ -12,8 +32,17 @@ export interface IGlossaryTerm {
     slug: string;
     shortDefinition: string; // 1-sentence plain-language
     definition: string;      // Full in-depth explanation
-    category: string;        // High-level grouping (e.g. Energy Healing)
-    subCategory?: string;    // More specific (e.g. Ancestral Healing)
+    category: string;        // High-level grouping (e.g. Energy Healing, Core Business Models)
+    subCategory?: string;    // More specific (e.g. Ancestral Healing, Affiliate Systems)
+
+    // --- AI-Search (AEO) & Entity Graph Layer ---
+    aeoSummary?: string;          // Direct answer (~50 words) optimized for ChatGPT/SearchGPT extraction
+    entityType?: string;          // e.g. 'Core Concept', 'Performance Metric', 'Revenue System'
+    parentTermSlug?: string;      // Knowledge Graph Hierarchy Parent
+    childTermSlugs?: string[];    // Knowledge Graph Hierarchy Children
+    deepPathways?: IDeepPathway[];// Authority loops & Conversion funnels
+    questionVariations?: IQuestionVariation[]; // Long-tail problem & intent expansion
+    realWorldScenario?: IRealWorldScenario;     // Citable data & practical application
 
     // --- Meaning & Context ---
     origin?: string;             // Cultural/Historical origin
@@ -28,7 +57,6 @@ export interface IGlossaryTerm {
     useCases?: string;         // Real-world applications
     whoUsesIt?: string;        // Practitioners/Audiences
 
-    
     // --- Monetization & Business (MMO) ---
     howItMakesMoney?: string;
     bestFor?: string;
@@ -88,7 +116,6 @@ export interface IGlossaryTerm {
     scientificPerspective?: string;
     culturalNotes?: string;
 
-
     // --- Technical / App-Ready ---
     status?: 'Draft' | 'Reviewed' | 'Published';
     lastUpdated?: Date;
@@ -96,15 +123,19 @@ export interface IGlossaryTerm {
     aiTrainingEligible?: boolean;
     sponsoredBy?: string; // Vendor/sponsor name
 
+    // --- Analytics & Performance Monitoring ---
+    views?: number;
+    deepLinkClicks?: number;
+    aiCitationCount?: number;
+
     // --- Legacy / Compat ---
-    niche?: string; // Kept for backward compatibility, sync with category
+    niche?: string;
     recommendedTools: IRecommendedTool[];
     imageUrl?: string;
     isFeatured?: boolean;
     imagePrompt?: string;
     productPrompt?: string;
     socialPrompt?: string;
-    views?: number;
 
     // --- Timestamps (Mongoose) ---
     createdAt?: Date;
@@ -117,9 +148,32 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     term: { type: String, required: true },
     slug: { type: String, unique: true, sparse: true },
     shortDefinition: { type: String },
-    definition: { type: String, required: true }, // Main content body
+    definition: { type: String, required: true },
     category: { type: String, required: true, default: "General" },
     subCategory: { type: String },
+
+    // AEO & Entity Graph Layer
+    aeoSummary: { type: String },
+    entityType: { type: String, default: "Core Concept" },
+    parentTermSlug: { type: String },
+    childTermSlugs: [String],
+    deepPathways: [{
+        title: String,
+        url: String,
+        type: { type: String, enum: ['blog', 'tool', 'product', 'conversion'], default: 'blog' },
+        description: String
+    }],
+    questionVariations: [{
+        question: String,
+        intentType: { type: String, enum: ['Informational', 'Transactional', 'Commercial', 'Problem-Solving'], default: 'Informational' },
+        targetAnswer: String
+    }],
+    realWorldScenario: {
+        context: String,
+        stepByStep: [String],
+        citableMetric: String,
+        outcome: String
+    },
 
     // Meaning & Context
     origin: { type: String },
@@ -133,9 +187,6 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     commonPractices: { type: String },
     useCases: { type: String },
     whoUsesIt: { type: String },
-
-
-    // Monetization & Business (MMO)
 
     // Monetization & Business (MMO)
     howItMakesMoney: { type: String },
@@ -190,45 +241,42 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     metaDescription: { type: String },
     contentLevel: { type: String, enum: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
 
-    // Trust
+    // Trust & Authority
     sources: { type: String },
     lineageOrTradition: { type: String },
     scientificPerspective: { type: String },
     culturalNotes: { type: String },
 
-
     // Technical
     status: { type: String, enum: ['Draft', 'Reviewed', 'Published'], default: 'Published' },
     lastUpdated: { type: Date, default: Date.now },
-    authorOrReviewer: { type: String },
+    authorOrReviewer: { type: String, default: "KB Academy Editorial Board" },
     aiTrainingEligible: { type: Boolean, default: true },
     sponsoredBy: { type: String },
 
+    // Analytics
+    views: { type: Number, default: 0 },
+    deepLinkClicks: { type: Number, default: 0 },
+    aiCitationCount: { type: Number, default: 0 },
+
     // Legacy / Compat
-    niche: { type: String, default: "General" },
+    niche: { type: String },
     recommendedTools: [{
-        productId: Number,
-        context: String
+        productId: { type: Number },
+        context: { type: String }
     }],
     imageUrl: { type: String },
     isFeatured: { type: Boolean, default: false },
-
-    // AI Prompts
     imagePrompt: { type: String },
     productPrompt: { type: String },
-    socialPrompt: { type: String },
-    views: { type: Number, default: 0 }
-}, { timestamps: true });
-
-GlossaryTermSchema.pre('save', async function () {
-    this.lastUpdated = new Date();
-    if (!this.category && this.niche) {
-        this.category = this.niche;
-    }
-    if (!this.niche && this.category) {
-        this.niche = this.category;
-    }
+    socialPrompt: { type: String }
+}, {
+    timestamps: true
 });
+
+GlossaryTermSchema.index({ category: 1 });
+GlossaryTermSchema.index({ isFeatured: 1 });
+GlossaryTermSchema.index({ entityType: 1 });
 
 const GlossaryTerm: Model<IGlossaryTerm> = mongoose.models.GlossaryTerm || mongoose.model<IGlossaryTerm>('GlossaryTerm', GlossaryTermSchema);
 

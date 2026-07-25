@@ -171,6 +171,47 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                 </div>
             </div>
 
+            {/* AEO & Entity Graph Optimization Section */}
+            <div className="bg-slate-950 p-6 rounded-2xl border border-cyan-900/60 space-y-6 shadow-xl text-slate-100 font-sans">
+                <h3 className="font-extrabold text-cyan-400 border-b border-cyan-900/60 pb-2 flex items-center gap-2 text-sm uppercase tracking-wider">
+                    <Rocket size={18} className="text-cyan-400" />
+                    AI-Search (AEO) & Knowledge Graph Layer
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="col-span-full">
+                        <label className="block text-xs font-mono font-bold text-cyan-300 uppercase mb-1">AEO Direct Answer Summary (~50 Words for ChatGPT/SearchGPT Extraction)</label>
+                        <textarea
+                            rows={3}
+                            value={formData.aeoSummary || ""}
+                            onChange={e => handleChange("aeoSummary", e.target.value)}
+                            className="w-full p-3 rounded-xl border border-slate-800 bg-slate-900 text-slate-100 focus:ring-2 focus:ring-cyan-500 outline-none font-mono text-xs"
+                            placeholder="Direct, fact-dense 50-word answer optimized for AI search engine citations..."
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Entity Type / Classification</label>
+                        <input
+                            type="text"
+                            value={formData.entityType || "Core Concept"}
+                            onChange={e => handleChange("entityType", e.target.value)}
+                            className="w-full p-3 rounded-xl border border-slate-800 bg-slate-900 text-slate-100 focus:ring-2 focus:ring-cyan-500 outline-none font-mono text-xs"
+                            placeholder="e.g. Performance Metric, Revenue System, Core Concept"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Parent Term Slug (Knowledge Hierarchy)</label>
+                        <input
+                            type="text"
+                            value={formData.parentTermSlug || ""}
+                            onChange={e => handleChange("parentTermSlug", e.target.value)}
+                            className="w-full p-3 rounded-xl border border-slate-800 bg-slate-900 text-slate-100 focus:ring-2 focus:ring-cyan-500 outline-none font-mono text-xs"
+                            placeholder="e.g. affiliate-marketing"
+                        />
+                    </div>
+                </div>
+            </div>
+
             {/* Meaning & Context */}
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 space-y-6">
                 <h3 className="font-bold text-slate-900 border-b border-slate-200 pb-2">History & Meaning</h3>

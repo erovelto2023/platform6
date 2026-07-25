@@ -4,135 +4,141 @@ interface GlossaryTermStructuredDataProps {
     slug: string;
     definition: string;
     shortDefinition: string;
+    aeoSummary?: string;
+    entityType?: string;
     category?: string;
     contentLevel?: string;
     keywords?: string[];
     lastUpdated?: Date | string;
     imageUrl?: string;
     faqs?: { question: string; answer: string }[];
+    questionVariations?: { question: string; intentType: string; targetAnswer: string }[];
+    realWorldScenario?: { context?: string; stepByStep?: string[]; citableMetric?: string; outcome?: string };
   };
   baseUrl: string;
 }
 
 export default function GlossaryTermStructuredData({ term, baseUrl }: GlossaryTermStructuredDataProps) {
-  const structuredData: any = {
+  const pageUrl = `${baseUrl}/glossary/${term.slug}`;
+
+  // Graph schema combining DefinedTerm, Article & Speakable AEO
+  const graphSchema: any = {
     "@context": "https://schema.org",
-    "@type": ["DefinedTerm", "Article"],
-    "name": term.term,
-    "description": term.shortDefinition,
-    "definition": term.definition,
-    "inDefinedTermSet": {
-      "@type": "DefinedTermSet",
-      "name": "Internet Marketing & Online Business Glossary",
-      "url": `${baseUrl}/glossary`
-    },
-    "termCode": term.slug,
-    "url": `${baseUrl}/glossary/${term.slug}`,
-    "dateModified": term.lastUpdated || new Date().toISOString(),
-    "author": {
-      "@type": "Organization",
-      "name": "KB Academy"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "KB Academy",
-      "url": baseUrl
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `${baseUrl}/glossary/${term.slug}`
-    }
-  };
-
-  // Add category if present
-  if (term.category) {
-    structuredData.about = {
-      "@type": "Thing",
-      "name": term.category
-    };
-  }
-
-  // Add difficulty level if present
-  if (term.contentLevel) {
-    structuredData.educationalLevel = term.contentLevel;
-    structuredData.audience = {
-      "@type": "EducationalAudience",
-      "educationalRole": term.contentLevel.toLowerCase()
-    };
-  }
-
-  // Add keywords if present
-  if (term.keywords && term.keywords.length > 0) {
-    structuredData.keywords = term.keywords.join(", ");
-  }
-
-  // Add image if present
-  if (term.imageUrl) {
-    structuredData.image = term.imageUrl;
-  }
-
-  // Add breadcrumb data
-  const breadcrumbData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
+    "@graph": [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": baseUrl
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Glossary",
-        "item": `${baseUrl}/glossary`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": term.category || "General",
-        "item": `${baseUrl}/glossary?category=${encodeURIComponent(term.category || 'General')}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
+        "@type": ["DefinedTerm", "Article"],
+        "@id": `${pageUrl}#definedterm`,
         "name": term.term,
-        "item": `${baseUrl}/glossary/${term.slug}`
+        "description": term.aeoSummary || term.shortDefinition,
+        "definition": term.definition,
+        "inDefinedTermSet": {
+          "@type": "DefinedTermSet",
+          "@id": `${baseUrl}/glossary#definedtermset`,
+          "name": "K Business Academy Digital Monetization Glossary",
+          "url": `${baseUrl}/glossary`
+        },
+        "termCode": term.slug,
+        "url": pageUrl,
+        "dateModified": term.lastUpdated || new Date().toISOString(),
+        "author": {
+          "@type": "Organization",
+          "name": "K Business Academy Editorial Board",
+          "url": baseUrl
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "K Business Academy",
+          "url": baseUrl
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": pageUrl
+        },
+        "speakable": {
+          "@type": "SpeakableSpecification",
+          "cssSelector": ["[data-aeo-summary]", "[data-direct-answer]"]
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": `${pageUrl}#breadcrumb`,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": baseUrl
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Glossary",
+            "item": `${baseUrl}/glossary`
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": term.category || "General",
+            "item": `${baseUrl}/glossary?category=${encodeURIComponent(term.category || 'General')}`
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": term.term,
+            "item": pageUrl
+          }
+        ]
       }
     ]
   };
 
-  // Add FAQ Schema if FAQs exist
-  const faqSchema = term.faqs && term.faqs.length > 0 ? {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": term.faqs.map((faq: any) => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
+  // Build FAQ schema combining standard FAQs and Question Variations
+  const allQuestions: { question: string; answer: string }[] = [];
+  if (term.faqs && term.faqs.length > 0) {
+    allQuestions.push(...term.faqs);
+  }
+  if (term.questionVariations && term.questionVariations.length > 0) {
+    term.questionVariations.forEach(qv => {
+      if (qv.question && qv.targetAnswer) {
+        allQuestions.push({ question: qv.question, answer: qv.targetAnswer });
       }
-    }))
-  } : null;
+    });
+  }
+
+  if (allQuestions.length > 0) {
+    graphSchema["@graph"].push({
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      "mainEntity": allQuestions.map(q => ({
+        "@type": "Question",
+        "name": q.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": q.answer
+        }
+      }))
+    });
+  }
+
+  // HowTo Schema for Real World Step-by-Step Scenario
+  if (term.realWorldScenario?.stepByStep && term.realWorldScenario.stepByStep.length > 0) {
+    graphSchema["@graph"].push({
+      "@type": "HowTo",
+      "@id": `${pageUrl}#howto`,
+      "name": `How to Apply ${term.term} in Real-World Business`,
+      "description": term.realWorldScenario.context || term.shortDefinition,
+      "step": term.realWorldScenario.stepByStep.map((step, idx) => ({
+        "@type": "HowToStep",
+        "position": idx + 1,
+        "text": step
+      }))
+    });
+  }
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData, null, 2) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData, null, 2) }}
-      />
-      {faqSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema, null, 2) }}
-        />
-      )}
-    </>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(graphSchema, null, 2) }}
+    />
   );
 }

@@ -558,6 +558,17 @@ export async function incrementGlossaryView(slug: string) {
     }
 }
 
+export async function incrementGlossaryPathwayClick(slug: string) {
+    try {
+        await connectToDatabase();
+        await GlossaryTerm.findOneAndUpdate({ slug }, { $inc: { deepLinkClicks: 1 } });
+        return { success: true };
+    } catch (error) {
+        console.error("Error incrementing pathway click:", error);
+        return { success: false };
+    }
+}
+
 export async function getGlossaryHealthData() {
     try {
         await connectToDatabase();
