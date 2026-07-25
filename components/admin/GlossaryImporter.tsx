@@ -25,21 +25,28 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
   {
     "term": "The Keyword Name",
     "slug": "url-friendly-version-of-the-keyword",
-    "category": "Broad Category (e.g. Marketing, Business Models, Development, Technical SEO, AI & Automation)",
-    "subCategory": "Specific Sub-Category (e.g. Performance Marketing, Conversion Rate Optimization)",
+    "category": "Skills & Concepts",
+    "subCategory": "Performance Marketing",
     "shortDefinition": "1-2 sentence quick definition under 50 words.",
     "definition": "Detailed, comprehensive explanation of what it means, why it exists, and where it is used. Include markdown headers (## Concept Overview) and paragraphs.",
     "aeoSummary": "Direct, fact-dense 50-word answer optimized for AI search engine citations (ChatGPT/SearchGPT/Perplexity).",
     "entityType": "Must be one of: 'Core Concept', 'Performance Metric', 'Revenue System', or 'Traffic Channel'",
-    "parentTermSlug": "Slug of the parent concept in the knowledge hierarchy (or empty string)",
+    "parentTermSlug": "",
+    "childTermSlugs": [],
     "origin": "History, Origin, and Etymology of the term.",
     "traditionalMeaning": "The traditional or classic historical understanding of the term.",
+    "modernUsage": "Modern digital application and current industry context.",
     "expandedExplanation": "Expanded history and deeper conceptual context.",
     "howItWorks": "Mechanism or technical/strategic principle of how it works.",
     "benefits": "Key physical, emotional, strategic, or monetary benefits.",
     "commonPractices": "Common practices, exercises, or methods related to this concept.",
     "useCases": "Real-world use cases or practical application scenarios.",
     "whoUsesIt": "Target practitioners, audiences, or business roles who use it.",
+    "beginnerExplanation": "Simplified explanation for absolute beginners.",
+    "advancedPerspective": "Advanced, deep strategy interpretation.",
+    "misconceptions": "Common misunderstandings or false myths.",
+    "warningsOrNotes": "Safety, ethics, or compliance notes.",
+    "guidedPractice": "Step-by-step mental or operational exercise.",
     "realWorldScenario": {
       "context": "Context of a real-world business execution scenario.",
       "stepByStep": [
@@ -47,7 +54,7 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
         "Step 2: Implement strategy",
         "Step 3: Track conversion lift"
       ],
-      "citableMetric": "Quantifiable metric or ROI impact (e.g. +34% Conversion Rate Lift)",
+      "citableMetric": "+34% Conversion Rate Lift",
       "outcome": "Final measurable business outcome"
     },
     "deepPathways": [
@@ -102,12 +109,15 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
       {"question": "Common Question 2?", "answer": "Detailed answer 2"}
     ],
     "caseStudies": [
-      {"title": "Case Study Title", "description": "Short explanation of case study"}
+      {"title": "Case Study Title", "description": "Short explanation of case study", "url": ""}
     ],
-    "relatedTermIds": ["slug-1", "slug-2"],
+    "sources": "Verified industry publications or case research.",
+    "scientificPerspective": "Empirical data or statistical research backing.",
+    "culturalNotes": "Cultural background or broader industry impact.",
+    "relatedTermIds": [],
     "synonyms": ["Alternative Name 1", "Alternative Name 2"],
-    "antonyms": ["Opposite Concept 1"],
-    "seeAlso": ["Related Concept 1"],
+    "antonyms": [],
+    "seeAlso": [],
     "metaTitle": "SEO Optimized Meta Title under 60 characters",
     "metaDescription": "SEO Meta Description under 160 characters",
     "keywords": ["keyword 1", "keyword 2", "keyword 3"],
@@ -291,7 +301,7 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                                 onClick={() => {
                                     const fullPrompt = `${MASTER_JSON_SCHEMA}\n\nPlease generate the robust JSON array for the following terms:\n1.\n2.\n3.`;
                                     navigator.clipboard.writeText(fullPrompt);
-                                    alert('✅ Complete Glossary JSON Prompt copied to clipboard! (Covers ALL 40+ fields)');
+                                    alert('✅ Complete Glossary JSON Prompt copied to clipboard! (Covers ALL fields)');
                                 }}
                                 className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold flex items-center gap-1 text-[11px] transition-all cursor-pointer shadow-md"
                             >

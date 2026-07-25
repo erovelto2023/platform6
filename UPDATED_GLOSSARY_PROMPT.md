@@ -13,137 +13,115 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
 ```json
 [
   {
-    "term": "Conversion Rate Optimization (CRO)",
-    "slug": "conversion-rate-optimization",
+    "term": "The Keyword Name",
+    "slug": "url-friendly-version-of-the-keyword",
     "category": "Skills & Concepts",
     "subCategory": "Performance Marketing",
-    "shortDefinition": "Learn the fundamentals of Conversion Rate Optimization (CRO) in the context of making money online.",
-    "definition": "## What is CRO?\nConversion Rate Optimization (CRO) is the systematic process of increasing the percentage of website visitors who take a desired action—such as filling out a form, becoming a customer, or purchasing an affiliate offer.\n\n## Why CRO Matters for Online Business\nBy optimizing your conversion rates, you generate more revenue from your existing traffic without spending more money on ads or SEO.",
-    "aeoSummary": "Conversion Rate Optimization (CRO) is the systematic process of increasing the percentage of website visitors who complete a desired goal, such as buying a product or signing up. It uses A/B testing, user behavior analytics, and copywriting enhancements to maximize revenue per visitor.",
-    "entityType": "Performance Metric",
-    "parentTermSlug": "digital-marketing",
-    "origin": "Coined in the early 2000s alongside web analytics and user experience (UX) testing tools.",
-    "traditionalMeaning": "Improving website usability and landing page mechanics to convert traffic into leads.",
-    "expandedExplanation": "CRO combines psychology, quantitative analytics, and rapid testing to turn passive website visitors into active buyers.",
-    "howItWorks": "Uses A/B split testing tools, heatmaps, and funnel analytics to test variations of headlines, CTA buttons, forms, and offers.",
-    "benefits": "Increases customer acquisition efficiency, lowers Customer Acquisition Cost (CAC), and doubles profit margins without increasing traffic.",
-    "commonPractices": "A/B testing, user survey analysis, heatmap tracking, page speed optimization, clear Call-to-Action placement.",
-    "useCases": "Optimizing affiliate landing page opt-ins, e-commerce checkout pages, or SaaS trial signup forms.",
-    "whoUsesIt": "Digital marketers, affiliate marketers, e-commerce store owners, and SaaS founders.",
+    "shortDefinition": "1-2 sentence quick definition under 50 words.",
+    "definition": "Detailed, comprehensive explanation of what it means, why it exists, and where it is used. Include markdown headers (## Concept Overview) and paragraphs.",
+    "aeoSummary": "Direct, fact-dense 50-word answer optimized for AI search engine citations (ChatGPT/SearchGPT/Perplexity).",
+    "entityType": "Must be one of: 'Core Concept', 'Performance Metric', 'Revenue System', or 'Traffic Channel'",
+    "parentTermSlug": "",
+    "childTermSlugs": [],
+    "origin": "History, Origin, and Etymology of the term.",
+    "traditionalMeaning": "The traditional or classic historical understanding of the term.",
+    "modernUsage": "Modern digital application and current industry context.",
+    "expandedExplanation": "Expanded history and deeper conceptual context.",
+    "howItWorks": "Mechanism or technical/strategic principle of how it works.",
+    "benefits": "Key physical, emotional, strategic, or monetary benefits.",
+    "commonPractices": "Common practices, exercises, or methods related to this concept.",
+    "useCases": "Real-world use cases or practical application scenarios.",
+    "whoUsesIt": "Target practitioners, audiences, or business roles who use it.",
+    "beginnerExplanation": "Simplified explanation for absolute beginners.",
+    "advancedPerspective": "Advanced, deep strategy interpretation.",
+    "misconceptions": "Common misunderstandings or false myths.",
+    "warningsOrNotes": "Safety, ethics, or compliance notes.",
+    "guidedPractice": "Step-by-step mental or operational exercise.",
     "realWorldScenario": {
-      "context": "An affiliate site receives 10,000 visitors per month with a 1% conversion rate (100 sales).",
+      "context": "Context of a real-world business execution scenario.",
       "stepByStep": [
-        "Step 1: Run heatmap analysis to detect user drop-off points",
-        "Step 2: Rewrite headline and move CTA button above the fold",
-        "Step 3: A/B test new variation against baseline"
+        "Step 1: Audit current metrics",
+        "Step 2: Implement strategy",
+        "Step 3: Track conversion lift"
       ],
-      "citableMetric": "+100% Conversion Lift (1% -> 2% Conversion Rate = 200 sales)",
-      "outcome": "Doubled monthly profit from identical traffic volume."
+      "citableMetric": "+34% Conversion Rate Lift",
+      "outcome": "Final measurable business outcome"
     },
     "deepPathways": [
       {
-        "title": "Complete CRO Masterclass Guide",
-        "url": "https://kbusinessacademy.com/blog/cro-guide",
+        "title": "Comprehensive Strategy Guide",
+        "url": "https://kbusinessacademy.com/blog/guide-slug",
         "type": "blog",
-        "description": "In-depth step-by-step tutorial on optimizing conversion funnels."
+        "description": "In-depth guide on executing this strategy."
       }
     ],
     "questionVariations": [
       {
-        "question": "How long does it take to see results from CRO?",
+        "question": "What is the fastest way to get started with this?",
         "intentType": "Problem-Solving",
-        "targetAnswer": "CRO results can be observed immediately after running split tests with statistically significant traffic, typically within 1-2 weeks."
+        "targetAnswer": "Direct actionable answer addressing the problem query."
       }
     ],
-    "howItMakesMoney": "Generates direct revenue growth by turning more existing traffic into paying buyers or affiliate leads.",
-    "bestFor": "Marketers and business owners with existing website traffic looking to maximize ROI.",
-    "startupCost": "$0",
-    "skillRequired": "Intermediate",
-    "timeToFirstDollar": "1-3 Months",
-    "platformPreference": "WordPress, Shopify, Google Analytics, VWO, Hotjar",
-    "lowPhysicalEffort": true,
+    "howItMakesMoney": "Detailed explanation of how this concept generates revenue or cuts costs.",
+    "bestFor": "Ideal target audience or person best suited for this.",
+    "startupCost": "Must be exactly one of: '$0', '<$100', or '$100+'",
+    "skillRequired": "Must be exactly one of: 'Beginner', 'Intermediate', or 'Advanced'",
+    "timeToFirstDollar": "Estimated time it realistically takes to make the first dollar (e.g. '1-30 days', '1-3 months').",
+    "platformPreference": "Preferred software, platform, or environment (e.g. Shopify, WordPress, Mobile-first).",
+    "lowPhysicalEffort": false,
     "gettingStartedChecklist": [
-      "Set up Google Analytics and conversion tracking",
-      "Install heatmap software (e.g. Hotjar or Clarity)",
-      "Identify the highest traffic landing page",
-      "Create a new high-converting Headline & CTA",
-      "Run an A/B split test"
+      "Step 1: Choose a niche",
+      "Step 2: Set up tracking",
+      "Step 3: Launch first test",
+      "Step 4: Optimize funnel",
+      "Step 5: Scale traffic"
     ],
-    "commonMistakes": "Testing too many variables at once, stopping tests before reaching statistical significance, neglecting mobile users.",
-    "realExamples": "An e-commerce store changed CTA button color and added customer review badges, increasing checkout conversions by 34%.",
-    "whyItMatters": "CRO is the highest-leverage marketing activity because it increases revenue without requiring additional ad spend.",
-    "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "takeaways": [
-      "CRO increases revenue from existing traffic",
-      "Small tweaks to headlines and CTAs create big profit lifts",
-      "Always rely on data rather than gut feelings"
-    ],
-    "headlines": [
-      "How to Double Your Website Sales with CRO",
-      "10 Conversion Rate Optimization Tricks for 2026",
-      "The Beginner's Guide to A/B Split Testing"
-    ],
-    "youtubeTitles": [
-      "CRO Explained in 5 Minutes",
-      "How I Doubled My Conversion Rate Overnight",
-      "Top 3 Landing Page Fixes for High Conversions"
-    ],
-    "pinterestIdeas": [
-      "CRO Checklist Infographic",
-      "High Converting Landing Page Formula",
-      "5 Split Testing Myths Busted"
-    ],
-    "instagramIdeas": [
-      "Swipe for 5 CRO Hacks",
-      "How to turn 100 visitors into 10 sales",
-      "Conversion Rate vs Traffic Growth"
-    ],
+    "commonMistakes": "Common mistakes and pitfalls to avoid.",
+    "realExamples": "Short case study of a real person or business using this concept.",
+    "whyItMatters": "1-3 sentences explaining why someone in business/marketing should care.",
+    "videoUrl": "Actual YouTube Video URL (e.g. https://www.youtube.com/watch?v=...) or ''",
+    "takeaways": ["Takeaway 1", "Takeaway 2", "Takeaway 3"],
+    "headlines": ["Headline 1", "Headline 2", "Headline 3", "Headline 4", "Headline 5"],
+    "youtubeTitles": ["YT Title 1", "YT Title 2", "YT Title 3"],
+    "pinterestIdeas": ["Pin Idea 1", "Pin Idea 2", "Pin Idea 3"],
+    "instagramIdeas": ["IG Idea 1", "IG Idea 2", "IG Idea 3"],
     "amazonProducts": [
-      {"name": "Don't Make Me Think by Steve Krug", "url": "https://www.amazon.com/dp/0321965515?tag=weightlo0f57d-20"}
+      {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or ''"}
     ],
     "websitesRanking": [
-      {"name": "ConversionXL (CXL)", "url": "https://cxl.com"},
-      {"name": "Unbounce Blog", "url": "https://unbounce.com/blog"}
+      {"name": "Real Authority Website Name", "url": "Actual LIVE URL"}
     ],
     "podcastsRanking": [
-      {"name": "The CRO Podcast", "url": "https://example.com/podcast"}
+      {"name": "Real Podcast Name", "url": "Actual Podcast URL"}
     ],
     "faqs": [
-      {"question": "What is a good conversion rate?", "answer": "A good conversion rate generally ranges between 2% and 5% depending on your industry and traffic source."}
+      {"question": "Common Question 1?", "answer": "Detailed answer 1"},
+      {"question": "Common Question 2?", "answer": "Detailed answer 2"}
     ],
     "caseStudies": [
-      {"title": "SaaS Signup Funnel Optimization", "description": "Removing credit card requirement on trial signups increased conversions by 120%."}
+      {"title": "Case Study Title", "description": "Short explanation of case study", "url": ""}
     ],
-    "relatedTermIds": ["ab-testing", "landing-page", "bounce-rate"],
-    "synonyms": ["CRO", "Conversion Optimization", "Funnel Optimization"],
-    "antonyms": ["Traffic Bleed"],
-    "seeAlso": ["A/B Testing", "User Experience (UX)"],
-    "metaTitle": "Conversion Rate Optimization (CRO) Guide | KB Academy",
-    "metaDescription": "Learn how Conversion Rate Optimization (CRO) works to double your online business sales and leads without buying more traffic.",
-    "keywords": ["CRO", "conversion rate optimization", "A/B testing", "landing page optimization"],
-    "tags": ["CRO", "Conversion Rate", "Marketing", "Optimization"],
-    "imagePrompt": "A futuristic digital dashboard showing a 3D upward trending conversion graph with cyan holographic highlights, 8k resolution, professional UI.",
-    "productPrompt": "Create a 5-step CRO Audit Checklist digital download product for e-commerce owners.",
-    "socialPrompt": "Generate a 3-part carousel post detailing the 3 biggest landing page conversion killers and how to fix them.",
-    "isFeatured": true,
+    "sources": "Verified industry publications or case research.",
+    "scientificPerspective": "Empirical data or statistical research backing.",
+    "culturalNotes": "Cultural background or broader industry impact.",
+    "relatedTermIds": [],
+    "synonyms": ["Alternative Name 1", "Alternative Name 2"],
+    "antonyms": [],
+    "seeAlso": [],
+    "metaTitle": "SEO Optimized Meta Title under 60 characters",
+    "metaDescription": "SEO Meta Description under 160 characters",
+    "keywords": ["keyword 1", "keyword 2", "keyword 3"],
+    "tags": ["tag1", "tag2", "tag3"],
+    "imagePrompt": "Detailed AI image prompt for Midjourney/DALL-E capturing the essence of this keyword.",
+    "productPrompt": "AI prompt to help the user brainstorm a digital/physical product for this keyword.",
+    "socialPrompt": "AI prompt to generate a viral social media content strategy for this keyword.",
+    "isFeatured": false,
     "status": "Published",
     "aiTrainingEligible": true,
     "niche": "Internet Marketing / Online Business"
   }
 ]
 ```
-
-## Field Structure Reference:
-- **Core Concept Details**: `term`, `slug`, `category`, `subCategory`, `shortDefinition`, `definition`
-- **AEO & Entity Layer**: `aeoSummary`, `entityType`, `parentTermSlug`
-- **History & Context**: `origin`, `traditionalMeaning`, `expandedExplanation`
-- **Practical Application**: `howItWorks`, `benefits`, `commonPractices`, `useCases`, `whoUsesIt`
-- **Real-World Execution**: `realWorldScenario` (`context`, `stepByStep`, `citableMetric`, `outcome`)
-- **Deep Pathways**: `deepPathways` (`title`, `url`, `type`, `description`)
-- **Question Variations**: `questionVariations` (`question`, `intentType`, `targetAnswer`)
-- **Monetization (MMO)**: `howItMakesMoney`, `bestFor`, `startupCost`, `skillRequired`, `timeToFirstDollar`, `platformPreference`, `lowPhysicalEffort`, `gettingStartedChecklist`, `commonMistakes`, `realExamples`
-- **SEO & Social Assets**: `whyItMatters`, `videoUrl`, `takeaways`, `headlines`, `youtubeTitles`, `pinterestIdeas`, `instagramIdeas`, `amazonProducts`, `websitesRanking`, `podcastsRanking`, `faqs`, `caseStudies`
-- **Prompts & Meta**: `metaTitle`, `metaDescription`, `keywords`, `tags`, `imagePrompt`, `productPrompt`, `socialPrompt`, `relatedTermIds`, `synonyms`, `antonyms`, `seeAlso`
 
 Please generate the robust JSON array for the following terms:
 1. 
