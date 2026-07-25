@@ -32,11 +32,12 @@ import {
     GraduationCap,
     ChevronDown,
     Megaphone,
-    Layers
+    Layers,
+    Globe
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { BouncyAccordion, BouncyAccordionItem } from "@/components/motion/bouncy-accordion";
 import { MagneticButton } from "@/components/motion/button/magnetic";
 import { ScrollReveal } from "@/components/motion/scroll-reveal";
@@ -65,6 +66,7 @@ const groups: SidebarGroup[] = [
         items: [
             { label: "Accounting", icon: BarChart3, href: "/accounting", color: "text-green-600" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/affiliates", color: "text-blue-500" },
+            { label: "Swipe File Vault", icon: BookOpen, href: "/admin/click-campaigns?tab=swipe", color: "text-purple-400" },
             { label: "Wholesale Directory", icon: FolderOpen, href: "/tools/wholesale-directory", color: "text-amber-500" },
             { label: "Niches in a Box", icon: Compass, href: "/niche-boxes", color: "text-indigo-400" }
         ]
@@ -119,9 +121,14 @@ const adminGroups: SidebarGroup[] = [
             { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },
             { label: "Affiliate Catalog", icon: FileStack, href: "/admin/affiliate-catalog", color: "text-blue-300" },
             { label: "Campaign Manager", icon: Sparkles, href: "/admin/click-campaigns", color: "text-violet-400" },
+            { label: "Swipe File Vault", icon: BookOpen, href: "/admin/click-campaigns?tab=swipe", color: "text-purple-400" },
             { label: "Media Center", icon: Film, href: "/admin/media", color: "text-pink-400" },
             { label: "Partner Management", icon: Sparkles, href: "/admin/partners", color: "text-amber-400" },
             { label: "Platform Tools", icon: Wrench, href: "/admin/tools", color: "text-orange-500" },
+            { label: "Recommended Tools Database", icon: Wrench, href: "/admin/tools-products", color: "text-amber-400" },
+            { label: "Niches in a Box", icon: Compass, href: "/admin/niche-boxes", color: "text-indigo-400" },
+            { label: "Wholesale Directory", icon: FolderOpen, href: "/admin/wholesale-directory", color: "text-emerald-400" },
+            { label: "Platform Analytics", icon: BarChart3, href: "/admin/analytics", color: "text-cyan-400" },
             { label: "Subscribers", icon: Users, href: "/admin/subscribers", color: "text-sky-400" },
             { label: "Support Tickets", icon: FileQuestion, href: "/admin/tickets", color: "text-rose-400" }
         ]
@@ -148,7 +155,10 @@ const adminGroups: SidebarGroup[] = [
             { label: "Glossary", icon: BookOpen, href: "/admin/glossary", color: "text-violet-500" },
             { label: "Page Builder", icon: LayoutDashboard, href: "/admin/page-builder-simple", color: "text-sky-500" },
             { label: "Custom Page Types", icon: FileStack, href: "/admin/custom-pages", color: "text-rose-500" },
-            { label: "Publishing Admin", icon: ShieldCheck, href: "/admin/publishing", color: "text-amber-500" }
+            { label: "Publishing Admin", icon: ShieldCheck, href: "/admin/publishing", color: "text-amber-500" },
+            { label: "Resources Manager", icon: Library, href: "/admin/resources", color: "text-blue-400" },
+            { label: "Surveys & Quizzes", icon: FileQuestion, href: "/admin/surveys", color: "text-purple-400" },
+            { label: "Docs Admin", icon: FileText, href: "/admin/docs", color: "text-emerald-400" }
         ]
     },
     {
@@ -189,12 +199,30 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
         }
     }, [pathname, isCurrentlyInAdmin, isActuallyAdmin, isCollapsed]);
 
+    const searchParams = useSearchParams();
+
     const isActive = (href: string) => {
-        const basePath = href.split('?')[0];
+        const [basePath, queryString] = href.split('?');
         if (basePath === "/dashboard" || basePath === "/admin") {
             return pathname === basePath;
         }
-        return pathname === basePath || pathname?.startsWith(basePath + "/");
+        const matchesPath = pathname === basePath || pathname?.startsWith(basePath + "/");
+        if (!matchesPath) return false;
+
+        if (queryString) {
+            const params = new URLSearchParams(queryString);
+            for (const [key, value] of params.entries()) {
+                if (searchParams?.get(key) !== value) return false;
+            }
+            return true;
+        } else {
+            const currentTab = searchParams?.get("tab");
+            if (currentTab && currentTab === "swipe" && href === "/admin/click-campaigns") {
+                return false;
+            }
+        }
+
+        return true;
     };
 
     const currentGroups = isCurrentlyInAdmin && isActuallyAdmin ? adminGroups : groups;

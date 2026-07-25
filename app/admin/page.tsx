@@ -60,6 +60,33 @@ export default async function AdminDashboardPage() {
             badgeColor: "bg-violet-500/20 text-violet-300 border-violet-500/30",
             tools: [
                 {
+                    title: "Campaign Manager",
+                    description: "End-to-end ad builder, DAM, pixel checklist, and 18 marketing tools",
+                    href: "/admin/click-campaigns",
+                    icon: Megaphone,
+                    color: "text-violet-400",
+                    bg: "bg-violet-500/10 border-violet-500/20",
+                    hover: "group-hover:border-violet-500/50 group-hover:bg-violet-500/20"
+                },
+                {
+                    title: "Swipe File Vault",
+                    description: "Proven ad copy hooks, frameworks, and AI Co-Pilot copy generator",
+                    href: "/admin/click-campaigns?tab=swipe",
+                    icon: BookOpen,
+                    color: "text-purple-400",
+                    bg: "bg-purple-500/10 border-purple-500/20",
+                    hover: "group-hover:border-purple-500/50 group-hover:bg-purple-500/20"
+                },
+                {
+                    title: "Recommended Tools Database",
+                    description: "Manage product recommendations, tools, pricing, and affiliate links",
+                    href: "/admin/tools-products",
+                    icon: Wrench,
+                    color: "text-amber-400",
+                    bg: "bg-amber-500/10 border-amber-500/20",
+                    hover: "group-hover:border-amber-500/50 group-hover:bg-amber-500/20"
+                },
+                {
                     title: "ScalePlus AI Suite",
                     description: "Complete automated marketing suite with 22 specialized tools",
                     href: "/admin/scaleplus",
