@@ -67,6 +67,13 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
 
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
+    const getVisiblePages = (current: number, total: number) => {
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+        if (current <= 4) return [1, 2, 3, 4, 5, "...", total];
+        if (current >= total - 3) return [1, "...", total - 4, total - 3, total - 2, total - 1, total];
+        return [1, "...", current - 1, current, current + 1, "...", total];
+    };
+
     const handleCopy = (url: string, id: string, type: 'direct' | 'tracking') => {
         const finalUrl = type === 'tracking' ? `${window.location.origin}/api/click/${id}` : url;
         navigator.clipboard.writeText(finalUrl);
@@ -98,7 +105,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
     return (
         <div className="space-y-6 font-sans">
             {/* A-Z Filter */}
-            <div className="bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl overflow-x-auto scrollbar-hide">
+            <div className="bg-slate-900 p-4 rounded-3xl border border-slate-800 shadow-xl overflow-x-auto [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 <div className="flex items-center gap-1 min-w-max">
                     <button
                         onClick={() => { setSelectedLetter(null); setCurrentPage(1); }}
@@ -250,7 +257,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                         <span>offers</span>
                     </div>
 
-                    <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+                    <div className="flex items-center gap-2 [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <Button
                             variant="outline"
                             size="sm"
@@ -262,19 +269,29 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                         </Button>
 
                         <div className="flex items-center gap-1">
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`h-9 w-9 rounded-xl font-bold font-mono transition-all cursor-pointer ${
-                                        currentPage === page
-                                            ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30'
-                                            : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
-                                    }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                            {getVisiblePages(currentPage, totalPages).map((page, idx) => {
+                                if (page === "...") {
+                                    return (
+                                        <span key={`ellipsis-${idx}`} className="h-9 px-2 flex items-center justify-center text-slate-500 font-bold font-mono">
+                                            ...
+                                        </span>
+                                    );
+                                }
+                                const pageNum = page as number;
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={`h-9 w-9 rounded-xl font-bold font-mono transition-all cursor-pointer ${
+                                            currentPage === pageNum
+                                                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30'
+                                                : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                                        }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <Button

@@ -14,10 +14,21 @@ import AssetWarehouse from "./_components/AssetWarehouse";
 import { UploadModal } from "./_components/upload-modal";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 export default function MediaCenterPage() {
+    const router = useRouter();
     const [activeTab, setActiveTab] = useState<"library" | "warehouse">("library");
     const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const handleUploadSuccess = () => {
+        setRefreshKey(prev => prev + 1);
+        if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("media-uploaded"));
+        }
+        router.refresh();
+    };
 
     return (
         <div className="min-h-screen bg-[#0A0D14] text-white p-6 lg:p-10">
@@ -46,7 +57,7 @@ export default function MediaCenterPage() {
                     
                     <Button 
                         onClick={() => setIsUploadOpen(true)}
-                        className="bg-[#6366F1] hover:bg-[#5850EC] text-white rounded-2xl px-8 h-14 font-black uppercase tracking-widest shadow-2xl shadow-[#6366F1]/20 transition-all hover:scale-105 active:scale-95"
+                        className="bg-[#6366F1] hover:bg-[#5850EC] text-white rounded-2xl px-8 h-14 font-black uppercase tracking-widest shadow-2xl shadow-[#6366F1]/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                     >
                         <Plus className="mr-2 h-5 w-5" />
                         Upload Files
@@ -59,7 +70,7 @@ export default function MediaCenterPage() {
                 <button 
                     onClick={() => setActiveTab("library")}
                     className={`
-                        relative flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all
+                        relative flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all cursor-pointer
                         ${activeTab === "library" ? "bg-[#6366F1] text-white shadow-xl shadow-[#6366F1]/20" : "bg-[#111622] text-slate-500 hover:text-white border border-slate-800"}
                     `}
                 >
@@ -72,7 +83,7 @@ export default function MediaCenterPage() {
                 <button 
                     onClick={() => setActiveTab("warehouse")}
                     className={`
-                        relative flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all
+                        relative flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all cursor-pointer
                         ${activeTab === "warehouse" ? "bg-[#6366F1] text-white shadow-xl shadow-[#6366F1]/20" : "bg-[#111622] text-slate-500 hover:text-white border border-slate-800"}
                     `}
                 >
@@ -104,9 +115,9 @@ export default function MediaCenterPage() {
                     transition={{ duration: 0.3 }}
                 >
                     {activeTab === "library" ? (
-                        <MediaLibrary />
+                        <MediaLibrary refreshKey={refreshKey} />
                     ) : (
-                        <AssetWarehouse />
+                        <AssetWarehouse refreshKey={refreshKey} />
                     )}
                 </motion.div>
             </AnimatePresence>
@@ -115,9 +126,7 @@ export default function MediaCenterPage() {
             <UploadModal 
                 isOpen={isUploadOpen}
                 onClose={() => setIsUploadOpen(false)}
-                onSuccess={() => {
-                    // Logic to refresh components is handled by their internal useEffect on focus/refresh
-                }}
+                onSuccess={handleUploadSuccess}
             />
         </div>
     );

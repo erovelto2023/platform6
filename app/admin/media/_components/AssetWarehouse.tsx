@@ -23,7 +23,11 @@ import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
-export default function AssetWarehouse() {
+interface AssetWarehouseProps {
+    refreshKey?: number;
+}
+
+export default function AssetWarehouse({ refreshKey }: AssetWarehouseProps) {
     const [assets, setAssets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -33,11 +37,9 @@ export default function AssetWarehouse() {
         setLoading(true);
         const result = await getResources({ 
             query: search, 
-            type: "file" // This includes 'file', 'pdf'
+            type: "file"
         });
         if (result.success) {
-            // Filter out 'image' if the server action returns them (it shouldn't if we passed type='file')
-            // Actually our server action handles 'type' filter correctly.
             setAssets(result.data);
         }
         setLoading(false);
@@ -46,6 +48,14 @@ export default function AssetWarehouse() {
     useEffect(() => {
         const timer = setTimeout(() => fetchAssets(), 300);
         return () => clearTimeout(timer);
+    }, [fetchAssets, refreshKey]);
+
+    useEffect(() => {
+        const handleMediaUploaded = () => {
+            fetchAssets();
+        };
+        window.addEventListener("media-uploaded", handleMediaUploaded);
+        return () => window.removeEventListener("media-uploaded", handleMediaUploaded);
     }, [fetchAssets]);
 
     const handleCopy = (url: string, id: string) => {
@@ -68,9 +78,8 @@ export default function AssetWarehouse() {
     };
 
     const handleDownload = async (id: string, url: string) => {
-        // Use the secure download API instead of direct URL
         window.open(`/api/media/download/${id}`, "_blank");
-        setTimeout(() => fetchAssets(), 1000); // Refresh UI to show updated download count
+        setTimeout(() => fetchAssets(), 1000);
     };
 
     const formatSize = (bytes: number) => {
@@ -99,161 +108,128 @@ export default function AssetWarehouse() {
                 <div className="lg:col-span-3 relative group">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-focus-within:text-[#6366F1] transition-colors" />
                     <input 
-                        type="text"
-                        placeholder="Search warehouse by title or filename..."
-                        className="w-full bg-[#111622] border border-slate-800 rounded-[24px] pl-12 pr-4 py-4 text-sm focus:ring-2 focus:ring-[#6366F1]/20 focus:border-[#6366F1] outline-none transition-all text-white shadow-xl"
+                        type="text" 
+                        placeholder="Search digital assets, zip archives, PDFs, lead magnets..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-[#111622] border border-slate-800 rounded-3xl pl-12 pr-4 py-4 text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-[#6366F1] transition-all shadow-xl"
                     />
                 </div>
-                <div className="bg-[#111622] rounded-[24px] border border-slate-800 p-4 flex items-center justify-between shadow-xl">
+
+                <div className="bg-[#111622] border border-slate-800 rounded-3xl p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-[#6366F1]/10 rounded-xl">
-                            <HardDrive className="h-5 w-5 text-[#6366F1]" />
+                        <div className="p-2.5 bg-[#6366F1]/10 rounded-2xl text-[#6366F1]">
+                            <Package size={20} />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Vault Total</p>
-                            <p className="text-xl font-bold text-white tracking-tight leading-none">{assets.length}</p>
+                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total Vault Files</p>
+                            <p className="text-lg font-black text-white font-mono">{assets.length}</p>
                         </div>
                     </div>
                     <Button 
+                        onClick={() => fetchAssets()} 
                         variant="ghost" 
-                        onClick={() => fetchAssets()}
-                        className="p-2 h-auto rounded-xl hover:bg-slate-800"
+                        size="icon"
+                        className="text-slate-500 hover:text-white rounded-xl hover:bg-slate-900"
                     >
-                        <RefreshCw className={`h-5 w-5 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin text-[#6366F1]" : ""}`} />
                     </Button>
                 </div>
             </div>
 
-            {/* Assets Table */}
-            <div className="bg-[#111622] border border-slate-800 rounded-[32px] overflow-hidden shadow-2xl">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="border-b border-slate-800 bg-slate-900/30">
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Asset Fingerprint</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Payload Data</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Interactions</th>
-                                <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Access</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-800/50">
-                            {loading ? (
-                                Array(5).fill(0).map((_, i) => (
-                                    <tr key={i} className="animate-pulse">
-                                        <td colSpan={4} className="px-8 py-8">
-                                            <div className="flex items-center gap-4">
-                                                <div className="h-12 w-12 bg-slate-800 rounded-2xl"></div>
-                                                <div className="space-y-2">
-                                                    <div className="h-4 bg-slate-800 rounded w-48"></div>
-                                                    <div className="h-3 bg-slate-800/50 rounded w-32"></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : assets.length === 0 ? (
+            {/* Warehouse Table */}
+            {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-500">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#6366F1]" />
+                    <p className="text-xs font-mono font-bold uppercase tracking-widest">Querying Digital Warehouse...</p>
+                </div>
+            ) : assets.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 bg-[#111622] rounded-3xl border border-slate-800 text-center p-8 space-y-4">
+                    <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800">
+                        <HardDrive className="h-10 w-10 text-slate-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-white uppercase">Digital Warehouse Empty</h3>
+                        <p className="text-xs text-slate-500 font-mono mt-1">No downloadable files, PDFs, or archives found matching query.</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="bg-[#111622] rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left">
+                            <thead className="bg-[#0A0D14] border-b border-slate-800/80">
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-32 text-center">
-                                        <div className="flex flex-col items-center justify-center opacity-40">
-                                            <Package className="h-20 w-20 text-slate-800 mb-6" />
-                                            <p className="text-2xl font-bold text-slate-500 tracking-tight">Warehouse Vacuum Detected</p>
-                                            <p className="text-sm text-slate-600 mt-2">The secure vault is currently empty.</p>
-                                        </div>
-                                    </td>
+                                    <th className="px-6 py-4 font-mono font-bold text-slate-400 uppercase tracking-wider">Asset File</th>
+                                    <th className="px-6 py-4 font-mono font-bold text-slate-400 uppercase tracking-wider">Category</th>
+                                    <th className="px-6 py-4 font-mono font-bold text-slate-400 uppercase tracking-wider">File Size</th>
+                                    <th className="px-6 py-4 font-mono font-bold text-slate-400 uppercase tracking-wider text-center">Downloads</th>
+                                    <th className="px-6 py-4 font-mono font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
-                            ) : (
-                                assets.map((asset) => (
-                                    <tr key={asset._id} className="hover:bg-white/[0.02] transition-colors group">
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-5">
-                                                <div className="p-4 bg-[#0A0D14] rounded-2xl border border-slate-800 group-hover:border-[#6366F1]/30 transition-all shadow-inner">
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/80 bg-[#111622]">
+                                {assets.map((asset) => (
+                                    <tr key={asset._id} className="hover:bg-[#0A0D14]/60 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2.5 bg-[#0A0D14] rounded-2xl border border-slate-800 shrink-0">
                                                     {getFileIcon(asset.mimeType)}
                                                 </div>
-                                                <div className="overflow-hidden max-w-[300px]">
-                                                    <h4 className="font-bold text-white text-sm leading-tight flex items-center gap-2 truncate">
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-white truncate max-w-[280px]" title={asset.title}>
                                                         {asset.title}
-                                                        {asset.type === 'pdf' && (
-                                                            <span className="px-2 py-0.5 bg-rose-500/10 text-[9px] font-black uppercase text-rose-500 rounded-md border border-rose-500/20">
-                                                                PDF
-                                                            </span>
-                                                        )}
-                                                    </h4>
-                                                    <p className="text-[10px] text-slate-500 font-medium mt-1 truncate font-mono">
-                                                        {asset.storedFilename}
+                                                    </p>
+                                                    <p className="text-[10px] font-mono text-slate-500 truncate mt-0.5">
+                                                        {asset.originalName || asset.url}
                                                     </p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-8 py-5">
-                                            <div className="space-y-1.5">
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-xs font-bold text-slate-300">
-                                                        {formatSize(asset.fileSizeBytes)}
-                                                    </p>
-                                                    <div className="h-1 w-1 rounded-full bg-slate-700" />
-                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
-                                                        {asset.mimeType?.split('/')[1] || 'BIN'}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-slate-600">
-                                                    <Shield className="h-3 w-3" />
-                                                    <p className="text-[9px] font-black uppercase tracking-widest">Secure Hostinger Storage</p>
-                                                </div>
-                                            </div>
+                                        <td className="px-6 py-4">
+                                            <span className="px-3 py-1 bg-[#0A0D14] border border-slate-800 text-[#6366F1] font-mono font-bold text-[10px] uppercase rounded-xl">
+                                                {asset.category || "General"}
+                                            </span>
                                         </td>
-                                        <td className="px-8 py-5 text-center">
-                                            <div className="inline-flex flex-col items-center">
-                                                <span className="text-xl font-black text-[#6366F1] leading-none">{asset.downloadCount || 0}</span>
-                                                <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest mt-1">Downloads</span>
-                                            </div>
+                                        <td className="px-6 py-4 font-mono text-slate-300 font-bold">
+                                            {formatSize(asset.size)}
                                         </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <button 
-                                                    onClick={() => handleCopy(asset.url, asset._id)}
-                                                    className={`p-3 rounded-2xl border border-slate-800 transition-all hover:scale-105 active:scale-95 ${copiedId === asset._id ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[#0A0D14] text-slate-400 hover:text-white hover:border-[#6366F1]'}`}
-                                                    title="Copy Download URL"
-                                                >
-                                                    {copiedId === asset._id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                                                </button>
-                                                <button 
+                                        <td className="px-6 py-4 text-center font-mono">
+                                            <span className="px-3 py-1 bg-[#0A0D14] border border-slate-800 text-emerald-400 font-bold text-xs rounded-xl">
+                                                {asset.downloadCount || 0}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button
                                                     onClick={() => handleDownload(asset._id, asset.url)}
-                                                    className="p-3 bg-[#6366F1] text-white rounded-2xl hover:bg-[#5850EC] transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[#6366F1]/20"
-                                                    title="Download Asset"
+                                                    className="h-9 bg-[#6366F1] hover:bg-[#5850EC] text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl px-3 flex items-center gap-1.5"
                                                 >
-                                                    <Download className="h-4 w-4" />
-                                                </button>
-                                                <button 
+                                                    <Download size={14} /> Download
+                                                </Button>
+                                                <Button
+                                                    onClick={() => handleCopy(asset.url, asset._id)}
+                                                    variant="outline"
+                                                    className="h-9 bg-[#0A0D14] border-slate-800 text-slate-400 hover:text-white rounded-xl px-3"
+                                                    title="Copy Vault Link"
+                                                >
+                                                    {copiedId === asset._id ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                                                </Button>
+                                                <Button
                                                     onClick={() => handleDelete(asset._id)}
-                                                    className="p-3 bg-white/5 text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 rounded-2xl border border-slate-800 hover:border-rose-500/30 transition-all hover:scale-105 active:scale-95"
-                                                    title="Purge Asset"
+                                                    variant="outline"
+                                                    className="h-9 bg-[#0A0D14] border-slate-800 text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 rounded-xl px-3"
+                                                    title="Delete Asset"
                                                 >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
+                                                    <Trash2 size={14} />
+                                                </Button>
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-
-            {/* Security Notice */}
-            <div className="flex items-start gap-4 p-6 bg-indigo-500/5 border border-indigo-500/10 rounded-[32px]">
-                <div className="p-3 bg-indigo-500/10 rounded-2xl">
-                    <Shield className="h-6 w-6 text-indigo-500" />
-                </div>
-                <div>
-                    <h5 className="font-bold text-indigo-200 uppercase tracking-widest text-xs">Digital Asset Encryption Protocol</h5>
-                    <p className="text-indigo-400/60 text-xs mt-1 leading-relaxed">
-                        All files in the warehouse are stored using unique server-generated keys. Hot-linking is restricted to authorized domains, and download metrics are tracked in real-time to prevent unauthorized distribution.
-                    </p>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

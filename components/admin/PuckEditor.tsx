@@ -543,38 +543,38 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
   }, [editorMode, htmlContent, name, slug, isPublished, metaTitle, metaDescription, headerCode, bodyCode, footerCode, accessControl, theme]);
 
   return (
-    <div className="h-screen w-full flex flex-col bg-slate-50">
+    <div className="h-screen w-full flex flex-col bg-slate-950 text-slate-100">
         {/* Top Meta Bar */}
-        <div className="h-14 bg-white border-b flex items-center justify-between px-4 shrink-0">
+        <div className="h-16 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6 shrink-0 text-slate-100 shadow-xl z-30">
             <div className="flex items-center gap-4">
-                <Link href="/admin/page-builder-simple" className="p-2 hover:bg-slate-100 rounded-md text-slate-500 transition-colors">
+                <Link href="/admin/page-builder-simple" className="p-2 hover:bg-slate-950 rounded-xl text-slate-400 hover:text-cyan-400 transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
-                <div className="h-6 w-px bg-slate-200" />
+                <div className="h-6 w-px bg-slate-800" />
                 <div className="flex items-center gap-3">
                     <input 
                         type="text" 
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Page Name"
-                        className="font-semibold text-sm border-none bg-transparent focus:ring-0 w-48 placeholder-slate-400"
+                        className="font-bold text-sm border border-slate-800 bg-slate-950 text-slate-100 rounded-xl px-3 py-1.5 focus:outline-none focus:border-cyan-500 font-mono w-48 placeholder:text-slate-600"
                     />
-                    <span className="text-slate-300">/</span>
-                    <div className="flex items-center text-sm text-slate-500">
-                        <span className="bg-slate-100 px-2 py-1 rounded-l-md border border-r-0 text-xs">/p/</span>
+                    <span className="text-cyan-400 font-mono font-bold">/</span>
+                    <div className="flex items-center text-xs font-mono font-bold">
+                        <span className="bg-slate-950 text-cyan-400 px-3 py-1.5 rounded-l-xl border border-r-0 border-slate-800">/p/</span>
                         <input 
                             type="text" 
                             value={slug}
                             onChange={(e) => setSlug(e.target.value)}
                             placeholder="url-slug"
-                            className="text-sm border border-slate-200 rounded-r-md px-2 py-1 w-48 focus:outline-none focus:border-sky-500"
+                            className="text-xs font-mono font-bold border border-slate-800 bg-slate-950 text-slate-100 rounded-r-xl px-3 py-1.5 w-44 focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
                         />
                     </div>
                 </div>
             </div>
 
             {/* Mode Switcher */}
-            <div className="flex border border-slate-200 rounded-lg overflow-hidden p-0.5 bg-slate-50">
+            <div className="flex border border-slate-800 rounded-xl overflow-hidden p-1 bg-slate-950 font-mono text-xs">
                 <button
                     onClick={() => {
                         if (editorMode === "code") {
@@ -583,7 +583,7 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                             }
                         }
                     }}
-                    className={`text-xs px-3 py-1 font-semibold rounded-md transition-all ${editorMode === "visual" ? "bg-white text-sky-650 shadow-sm border border-slate-100/50" : "text-slate-500 hover:text-slate-700"}`}
+                    className={`text-xs px-3.5 py-1.5 font-bold rounded-lg transition-all cursor-pointer ${editorMode === "visual" ? "bg-cyan-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
                 >
                     🎨 Visual Builder
                 </button>
@@ -595,7 +595,7 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                             }
                         }
                     }}
-                    className={`text-xs px-3 py-1 font-semibold rounded-md transition-all ${editorMode === "code" ? "bg-white text-sky-650 shadow-sm border border-slate-100/50" : "text-slate-500 hover:text-slate-700"}`}
+                    className={`text-xs px-3.5 py-1.5 font-bold rounded-lg transition-all cursor-pointer ${editorMode === "code" ? "bg-cyan-600 text-white shadow-md" : "text-slate-400 hover:text-white"}`}
                 >
                     💻 Pure HTML Editor
                 </button>
@@ -606,17 +606,17 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                     <>
                         <button 
                             onClick={handleExportTemplate}
-                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium bg-white border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                            className="flex items-center gap-1.5 text-xs font-mono font-bold px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Export Template JSON"
                         >
-                            <Download size={13} /> Export Layout
+                            <Download size={13} className="text-cyan-400" /> Export Layout
                         </button>
                         <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium bg-white border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                            className="flex items-center gap-1.5 text-xs font-mono font-bold px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Import Template JSON"
                         >
-                            <Upload size={13} /> Import Layout
+                            <Upload size={13} className="text-purple-400" /> Import Layout
                         </button>
                         <input 
                             type="file" 
@@ -629,7 +629,7 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                 ) : (
                     <button
                         onClick={handleSaveCodeMode}
-                        className="flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-md font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 text-xs font-mono font-bold px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-lg cursor-pointer uppercase tracking-wider"
                     >
                         Save Page
                     </button>
@@ -639,53 +639,53 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                     href={`/p/${slug || initialData?.slug || ''}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border font-medium bg-white border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-1.5 text-xs font-mono font-bold px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
                 >
-                    <Eye size={13} /> Live Preview
+                    <Eye size={13} className="text-cyan-400" /> Live Preview
                 </a>
 
                 <button 
                     onClick={() => setShowSettings(!showSettings)}
-                    className={`text-xs px-3 py-1.5 rounded-md border font-medium transition-colors ${showSettings ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    className={`text-xs font-mono font-bold px-3 py-1.5 rounded-xl border transition-colors cursor-pointer ${showSettings ? 'bg-cyan-950 border-cyan-800 text-cyan-400' : 'bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'}`}
                 >
                     Page Settings
                 </button>
                 
                 {showSettings && (
-                    <div className="absolute top-10 right-24 w-[440px] bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden flex flex-col max-h-[600px]">
+                    <div className="absolute top-12 right-24 w-[440px] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col max-h-[600px] text-slate-100">
                         {/* Tab Bar */}
-                        <div className="flex border-b border-slate-200 bg-slate-50 shrink-0">
+                        <div className="flex border-b border-slate-800 bg-slate-950 shrink-0 font-mono text-xs font-bold">
                             {(["seo", "theme", "code"] as const).map((tab) => (
                               <button 
                                 key={tab}
                                 onClick={() => setSettingsTab(tab)} 
-                                className={`flex-1 py-3 text-xs font-semibold capitalize ${settingsTab === tab ? "bg-white text-sky-600 border-b-2 border-sky-500" : "text-slate-500 hover:text-slate-700"}`}
+                                className={`flex-1 py-3 text-xs font-bold uppercase transition-colors cursor-pointer ${settingsTab === tab ? "bg-slate-900 text-cyan-400 border-b-2 border-cyan-500" : "text-slate-400 hover:text-white"}`}
                               >
                                 {tab === "seo" ? "SEO & Access" : tab === "theme" ? "🎨 Theme" : "Custom Code"}
                               </button>
                             ))}
                         </div>
                         
-                        <div className="p-5 overflow-y-auto flex-1">
+                        <div className="p-5 overflow-y-auto flex-1 font-sans">
                             {/* ── SEO Tab ── */}
                             {settingsTab === "seo" && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Meta Title</label>
-                                        <input type="text" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500" placeholder="e.g. My Awesome Page" />
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Meta Title</label>
+                                        <input type="text" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className="w-full text-xs font-mono border border-slate-800 bg-slate-950 text-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500" placeholder="e.g. My Awesome Page" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Meta Description</label>
-                                        <textarea value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 h-24 resize-none" placeholder="Write a compelling description for search engines..." />
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Meta Description</label>
+                                        <textarea value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} className="w-full text-xs font-mono border border-slate-800 bg-slate-950 text-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 h-24 resize-none" placeholder="Write a compelling description for search engines..." />
                                     </div>
-                                    <div className="border-t pt-4">
-                                        <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center gap-1.5">
-                                            <Lock size={13} className="text-slate-500" /> Page Access Level
+                                    <div className="border-t border-slate-800 pt-4">
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1.5 flex items-center gap-1.5">
+                                            <Lock size={13} className="text-cyan-400" /> Page Access Level
                                         </label>
                                         <select 
                                             value={accessControl} 
                                             onChange={(e) => setAccessControl(e.target.value as any)} 
-                                            className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 bg-white"
+                                            className="w-full text-xs font-mono border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 bg-slate-950 text-slate-100"
                                         >
                                             <option value="free">🔓 Free / Public (Anyone can view)</option>
                                             <option value="student">🎓 Student Only (Logged-in students/admins)</option>
@@ -699,20 +699,20 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                             {settingsTab === "theme" && (
                                 <div className="space-y-5">
                                   <div>
-                                    <p className="text-xs text-slate-500 mb-4 leading-relaxed">Global design tokens applied to the entire page. These override default styles.</p>
+                                    <p className="text-xs text-slate-400 font-mono mb-4 leading-relaxed">Global design tokens applied to the entire page. These override default styles.</p>
                                     
                                     {/* Font Family */}
                                     <div className="space-y-1 mb-4">
-                                      <label className="block text-xs font-semibold text-slate-700">Font Family</label>
-                                      <select value={theme.fontFamily} onChange={(e) => updateTheme("fontFamily", e.target.value as any)} className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 bg-white">
+                                      <label className="block text-xs font-mono font-bold text-slate-300 uppercase">Font Family</label>
+                                      <select value={theme.fontFamily} onChange={(e) => updateTheme("fontFamily", e.target.value as any)} className="w-full text-xs font-mono border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 bg-slate-950 text-slate-100">
                                         {FONT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                                       </select>
                                     </div>
 
                                     {/* Border Radius */}
                                     <div className="space-y-1 mb-4">
-                                      <label className="block text-xs font-semibold text-slate-700">Global Border Radius</label>
-                                      <select value={theme.borderRadius} onChange={(e) => updateTheme("borderRadius", e.target.value as any)} className="w-full text-sm border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 bg-white">
+                                      <label className="block text-xs font-mono font-bold text-slate-300 uppercase">Global Border Radius</label>
+                                      <select value={theme.borderRadius} onChange={(e) => updateTheme("borderRadius", e.target.value as any)} className="w-full text-xs font-mono border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 bg-slate-950 text-slate-100">
                                         {RADIUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                                       </select>
                                     </div>
@@ -726,20 +726,20 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                         { label: "Background", key: "colorBackground" },
                                       ] as { label: string; key: keyof PageTheme }[]).map(({ label, key }) => (
                                         <div key={key} className="space-y-1">
-                                          <label className="block text-xs font-semibold text-slate-700">{label}</label>
-                                          <div className="flex items-center gap-2 border border-slate-200 rounded-md px-2 py-1.5 bg-slate-50">
+                                          <label className="block text-xs font-mono font-bold text-slate-300 uppercase">{label}</label>
+                                          <div className="flex items-center gap-2 border border-slate-800 rounded-xl px-2 py-1.5 bg-slate-950">
                                             <input type="color" value={theme[key] as string} onChange={(e) => updateTheme(key, e.target.value)} className="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent" />
-                                            <span className="text-xs font-mono text-slate-600">{theme[key] as string}</span>
+                                            <span className="text-xs font-mono text-slate-300">{theme[key] as string}</span>
                                           </div>
                                         </div>
                                       ))}
                                     </div>
 
                                     {/* Base Font Size */}
-                                    <div className="space-y-1.5 mb-4">
+                                    <div className="space-y-1.5 mb-4 font-mono text-xs">
                                       <div className="flex justify-between items-center">
-                                        <label className="block text-xs font-semibold text-slate-700">Base Font Size</label>
-                                        <span className="text-xs font-mono font-bold text-sky-600">{theme.fontSizeBase || "16px"}</span>
+                                        <label className="block font-bold text-slate-300 uppercase">Base Font Size</label>
+                                        <span className="font-bold text-cyan-400">{theme.fontSizeBase || "16px"}</span>
                                       </div>
                                       <input 
                                         type="range" 
@@ -747,15 +747,15 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                         max="24" 
                                         value={parseInt(theme.fontSizeBase || "16")} 
                                         onChange={(e) => updateTheme("fontSizeBase", e.target.value + "px")} 
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
                                       />
                                     </div>
 
                                     {/* Line Height */}
-                                    <div className="space-y-1.5 mb-4">
+                                    <div className="space-y-1.5 mb-4 font-mono text-xs">
                                       <div className="flex justify-between items-center">
-                                        <label className="block text-xs font-semibold text-slate-700">Line Height</label>
-                                        <span className="text-xs font-mono font-bold text-sky-600">{theme.lineHeight || "1.5"}</span>
+                                        <label className="block font-bold text-slate-300 uppercase">Line Height</label>
+                                        <span className="font-bold text-cyan-400">{theme.lineHeight || "1.5"}</span>
                                       </div>
                                       <input 
                                         type="range" 
@@ -764,15 +764,15 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                         step="0.1"
                                         value={parseFloat(theme.lineHeight || "1.5")} 
                                         onChange={(e) => updateTheme("lineHeight", e.target.value)} 
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
                                       />
                                     </div>
 
                                     {/* Content Padding */}
-                                    <div className="space-y-1.5 mb-4">
+                                    <div className="space-y-1.5 mb-4 font-mono text-xs">
                                       <div className="flex justify-between items-center">
-                                        <label className="block text-xs font-semibold text-slate-700">Page Spacing / Padding</label>
-                                        <span className="text-xs font-mono font-bold text-sky-600">{theme.contentPadding || "1.5rem"}</span>
+                                        <label className="block font-bold text-slate-300 uppercase">Page Spacing / Padding</label>
+                                        <span className="font-bold text-cyan-400">{theme.contentPadding || "1.5rem"}</span>
                                       </div>
                                       <input 
                                         type="range" 
@@ -781,15 +781,15 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                         step="0.5"
                                         value={parseFloat(theme.contentPadding || "1.5")} 
                                         onChange={(e) => updateTheme("contentPadding", e.target.value + "rem")} 
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
                                       />
                                     </div>
 
                                     {/* Container Width */}
-                                    <div className="space-y-1.5 mb-4">
+                                    <div className="space-y-1.5 mb-4 font-mono text-xs">
                                       <div className="flex justify-between items-center">
-                                        <label className="block text-xs font-semibold text-slate-700">Max Container Width</label>
-                                        <span className="text-xs font-mono font-bold text-sky-600">{theme.containerWidth || "1200px"}</span>
+                                        <label className="block font-bold text-slate-300 uppercase">Max Container Width</label>
+                                        <span className="font-bold text-cyan-400">{theme.containerWidth || "1200px"}</span>
                                       </div>
                                       <input 
                                         type="range" 
@@ -798,12 +798,12 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                         step="50"
                                         value={parseInt(theme.containerWidth || "1200")} 
                                         onChange={(e) => updateTheme("containerWidth", e.target.value + "px")} 
-                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500" 
+                                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500" 
                                       />
                                     </div>
 
                                     {/* Live Preview Swatch */}
-                                    <div className="mt-5 rounded-lg overflow-hidden border border-slate-200">
+                                    <div className="mt-5 rounded-xl overflow-hidden border border-slate-800">
                                       <div className="p-4 text-sm font-semibold" style={{ background: theme.colorBackground, color: theme.colorText }}>
                                         <span style={{ color: theme.colorPrimary }}>Primary text</span> · <span style={{ color: theme.colorAccent }}>Accent</span> · Body text
                                         <div className="mt-2 flex gap-2">
@@ -820,16 +820,16 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                             {settingsTab === "code" && (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Header Code (inside &lt;head&gt;)</label>
-                                        <textarea value={headerCode} onChange={(e) => setHeaderCode(e.target.value)} className="w-full text-xs font-mono bg-slate-900 text-green-400 border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 h-24 resize-none" placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->" />
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Header Code (inside &lt;head&gt;)</label>
+                                        <textarea value={headerCode} onChange={(e) => setHeaderCode(e.target.value)} className="w-full text-xs font-mono bg-slate-950 text-cyan-400 border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 h-24 resize-none" placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Body Start Code (after &lt;body&gt;)</label>
-                                        <textarea value={bodyCode} onChange={(e) => setBodyCode(e.target.value)} className="w-full text-xs font-mono bg-slate-900 text-green-400 border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 h-24 resize-none" placeholder="<!-- GTM NoScript, etc. -->" />
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Body Start Code (after &lt;body&gt;)</label>
+                                        <textarea value={bodyCode} onChange={(e) => setBodyCode(e.target.value)} className="w-full text-xs font-mono bg-slate-950 text-cyan-400 border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500 h-24 resize-none" placeholder="<!-- GTM NoScript, etc. -->" />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-slate-700 mb-1">Footer Code (before &lt;/body&gt;)</label>
-                                        <textarea value={footerCode} onChange={(e) => setFooterCode(e.target.value)} className="w-full text-xs font-mono bg-slate-900 text-green-400 border border-slate-200 rounded-md px-3 py-2 focus:outline-none focus:border-sky-500 h-24 resize-none" placeholder="<!-- Chat widgets, tracking scripts, etc. -->" />
+                                        <label className="block text-xs font-mono font-bold text-slate-300 uppercase mb-1">Footer Code (before &lt;/body&gt;)</label>
+                                        <textarea value={footerCode} onChange={(e) => setFooterCode(e.target.value)} className="w-full text-xs font-mono bg-slate-950 text-cyan-400 border border-slate-800 rounded-xl px-3 py-2 focus:outline-none focus:border-cyan-500 h-24 resize-none" placeholder="<!-- Chat widgets, tracking scripts, etc. -->" />
                                     </div>
                                 </div>
                             )}
@@ -837,12 +837,12 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                     </div>
                 )}
 
-                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-mono font-bold text-slate-200 cursor-pointer">
                     <input 
                         type="checkbox" 
                         checked={isPublished}
                         onChange={(e) => setIsPublished(e.target.checked)}
-                        className="rounded text-sky-500 focus:ring-sky-500"
+                        className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-cyan-500"
                     />
                     Published
                 </label>

@@ -31,9 +31,10 @@ import {
 
 interface MediaLibraryProps {
     onSelect?: (url: string) => void;
+    refreshKey?: number;
 }
 
-export default function MediaLibrary({ onSelect }: MediaLibraryProps) {
+export default function MediaLibrary({ onSelect, refreshKey }: MediaLibraryProps) {
     const [assets, setAssets] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -67,6 +68,14 @@ export default function MediaLibrary({ onSelect }: MediaLibraryProps) {
     useEffect(() => {
         const timer = setTimeout(() => fetchAssets(), 300);
         return () => clearTimeout(timer);
+    }, [fetchAssets, refreshKey]);
+
+    useEffect(() => {
+        const handleMediaUploaded = () => {
+            fetchAssets();
+        };
+        window.addEventListener("media-uploaded", handleMediaUploaded);
+        return () => window.removeEventListener("media-uploaded", handleMediaUploaded);
     }, [fetchAssets]);
 
     const handleCopy = (text: string, id: string) => {
@@ -98,12 +107,14 @@ export default function MediaLibrary({ onSelect }: MediaLibraryProps) {
     const handleUpdate = async () => {
         if (!editingAsset) return;
         setSaving(true);
+        const tagsArray = editTags.split(",").map(t => t.trim()).filter(Boolean);
         const result = await updateResource(editingAsset._id, {
             title: editTitle,
             altText: editAlt,
-            tags: editTags,
-            status: editStatus,
+            tags: tagsArray,
+            status: editStatus
         });
+
         if (result.success) {
             toast.success("Asset updated successfully");
             setEditingAsset(null);
@@ -114,290 +125,247 @@ export default function MediaLibrary({ onSelect }: MediaLibraryProps) {
         setSaving(false);
     };
 
-    const formatSize = (bytes: number) => {
-        if (!bytes) return "0 B";
-        const k = 1024;
-        const sizes = ["B", "KB", "MB", "GB"];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-    };
-
-    const APP_URL = typeof window !== 'undefined' ? window.location.origin : '';
-
     return (
         <div className="space-y-6">
-            {/* Filters */}
-            <div className="flex flex-col lg:flex-row gap-4 bg-[#111622] p-6 rounded-[32px] border border-slate-800 shadow-xl">
-                <div className="relative flex-1 group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-[#6366F1] transition-colors" />
+            {/* Filters & Search */}
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-[#111622] p-4 rounded-3xl border border-slate-800">
+                <div className="relative w-full md:w-96">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                     <input 
-                        type="text"
-                        placeholder="Search assets or tags..."
-                        className="w-full bg-[#0A0D14] border border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm focus:ring-2 focus:ring-[#6366F1]/20 focus:border-[#6366F1] outline-none transition-all"
+                        type="text" 
+                        placeholder="Search assets by title, alt text, or tags..." 
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-[#0A0D14] border border-slate-800 rounded-2xl pl-11 pr-4 py-3 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-[#6366F1] transition-all"
                     />
+                    {search && (
+                        <button onClick={() => setSearch("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white">
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    {/* Status Filter */}
+                    <div className="flex items-center bg-[#0A0D14] p-1 rounded-2xl border border-slate-800 text-[10px] font-mono font-bold uppercase">
+                        <button 
+                            onClick={() => setStatusFilter("all")}
+                            className={`px-3 py-1.5 rounded-xl transition-all ${statusFilter === "all" ? "bg-[#6366F1] text-white" : "text-slate-400 hover:text-white"}`}
+                        >
+                            All
+                        </button>
+                        <button 
+                            onClick={() => setStatusFilter("published")}
+                            className={`px-3 py-1.5 rounded-xl transition-all ${statusFilter === "published" ? "bg-[#6366F1] text-white" : "text-slate-400 hover:text-white"}`}
+                        >
+                            Published
+                        </button>
+                        <button 
+                            onClick={() => setStatusFilter("draft")}
+                            className={`px-3 py-1.5 rounded-xl transition-all ${statusFilter === "draft" ? "bg-[#6366F1] text-white" : "text-slate-400 hover:text-white"}`}
+                        >
+                            Draft
+                        </button>
+                    </div>
+
+                    {/* Category Filter */}
                     <select 
-                        className="bg-[#0A0D14] border border-slate-800 rounded-2xl px-4 py-3 text-xs font-bold uppercase tracking-widest text-slate-400 outline-none focus:ring-2 focus:ring-[#6366F1]/20"
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="bg-[#0A0D14] border border-slate-800 rounded-2xl px-4 py-2.5 text-xs text-slate-300 font-mono focus:outline-none focus:border-[#6366F1]"
                     >
-                        <option value="all">All Status</option>
-                        <option value="published">Published</option>
-                        <option value="draft">Draft</option>
+                        <option value="all">All Categories</option>
+                        <option value="General">General</option>
+                        <option value="Course Content">Course Content</option>
+                        <option value="Lead Magnets">Lead Magnets</option>
+                        <option value="Graphics">Graphics</option>
+                        <option value="Documents">Documents</option>
+                        <option value="Workshop Assets">Workshop Assets</option>
+                        <option value="Bonus Materials">Bonus Materials</option>
                     </select>
-                    <Button 
-                        onClick={() => fetchAssets()}
-                        variant="ghost"
-                        className="rounded-2xl border border-slate-800 h-full aspect-square p-0 hover:bg-slate-800"
-                    >
-                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Filter className="h-4 w-4" />}
-                    </Button>
                 </div>
             </div>
 
-            {/* Grid */}
+            {/* Grid display */}
             {loading ? (
-                <div className="flex flex-col items-center justify-center py-40 space-y-4">
-                    <Loader2 className="h-12 w-12 text-[#6366F1] animate-spin" />
-                    <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px]">Scanning Database</p>
+                <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-500">
+                    <Loader2 className="h-8 w-8 animate-spin text-[#6366F1]" />
+                    <p className="text-xs font-mono font-bold uppercase tracking-widest">Loading Asset Vault...</p>
                 </div>
             ) : assets.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-40 border-2 border-dashed border-slate-800 rounded-[40px] bg-[#111622]/50">
-                    <ImageIcon className="h-16 w-16 text-slate-800 mb-4" />
-                    <p className="text-xl font-bold text-slate-500">No images found</p>
-                    <p className="text-sm text-slate-600 mt-1">Try adjusting your filters or upload new assets.</p>
+                <div className="flex flex-col items-center justify-center py-20 bg-[#111622] rounded-3xl border border-slate-800 text-center p-8 space-y-4">
+                    <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800">
+                        <ImageIcon className="h-10 w-10 text-slate-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-white uppercase">No Media Assets Found</h3>
+                        <p className="text-xs text-slate-500 font-mono mt-1">Try adjusting your filters or upload new image assets.</p>
+                    </div>
                 </div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                    <AnimatePresence>
-                        {assets.map((asset) => (
-                            <motion.div 
-                                key={asset._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="group relative bg-[#111622] border border-slate-800 rounded-[28px] overflow-hidden hover:border-[#6366F1]/50 transition-all shadow-lg hover:shadow-[#6366F1]/5"
-                            >
-                                {/* Thumbnail */}
-                                <div className="aspect-square relative overflow-hidden bg-slate-900/50">
-                                    <img 
-                                        src={asset.url} 
-                                        alt={asset.altText || asset.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
-                                    
-                                    {/* Badges */}
-                                    <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                                        <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${asset.status === 'published' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}`}>
-                                            {asset.status}
-                                        </span>
-                                        {asset.category !== 'General' && (
-                                            <span className="px-2 py-0.5 bg-[#6366F1] text-white rounded-lg text-[8px] font-black uppercase tracking-widest">
-                                                {asset.category}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Hover Actions */}
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-[2px]">
-                                        <button 
-                                            onClick={() => setSnippetAsset(asset)}
-                                            className="p-3 bg-white/10 hover:bg-[#6366F1] rounded-2xl text-white transition-all hover:scale-110"
-                                            title="Embed Code"
-                                        >
-                                            <Copy className="h-4 w-4" />
-                                        </button>
-                                        <button 
-                                            onClick={() => openEdit(asset)}
-                                            className="p-3 bg-white/10 hover:bg-white text-slate-900 rounded-2xl transition-all hover:scale-110"
-                                            title="Edit Metadata"
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                        </button>
-                                        <button 
-                                            onClick={() => handleDelete(asset._id)}
-                                            className="p-3 bg-white/10 hover:bg-rose-500 rounded-2xl text-white transition-all hover:scale-110"
-                                            title="Delete"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Info */}
-                                <div className="p-4 space-y-1">
-                                    <h4 className="text-sm font-bold text-white truncate">{asset.title}</h4>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                            {formatSize(asset.fileSizeBytes)}
-                                        </p>
-                                        <div className="flex gap-1">
-                                            {asset.tags?.slice(0, 2).map((tag: string) => (
-                                                <span key={tag} className="text-[8px] text-[#6366F1] font-bold">#{tag}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Select Button for Overlays */}
-                                {onSelect && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {assets.map((asset) => (
+                        <motion.div 
+                            key={asset._id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="group bg-[#111622] border border-slate-800 hover:border-[#6366F1] rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 shadow-xl"
+                        >
+                            <div className="relative aspect-video bg-[#0A0D14] overflow-hidden flex items-center justify-center border-b border-slate-800">
+                                <img 
+                                    src={asset.url} 
+                                    alt={asset.altText || asset.title} 
+                                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                                />
+                                <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-md p-1.5 rounded-2xl border border-white/10">
                                     <button 
-                                        onClick={() => onSelect(asset.url)}
-                                        className="absolute bottom-4 left-4 right-4 py-2 bg-[#6366F1] text-white rounded-xl text-[10px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => openEdit(asset)}
+                                        className="p-1.5 text-slate-300 hover:text-white rounded-xl hover:bg-white/10 transition"
+                                        title="Edit Asset Properties"
                                     >
-                                        Select Asset
+                                        <Pencil size={14} />
                                     </button>
-                                )}
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                                    <button 
+                                        onClick={() => setSnippetAsset(asset)}
+                                        className="p-1.5 text-slate-300 hover:text-[#6366F1] rounded-xl hover:bg-white/10 transition"
+                                        title="View HTML Snippet"
+                                    >
+                                        <ExternalLink size={14} />
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(asset._id)}
+                                        className="p-1.5 text-slate-300 hover:text-rose-400 rounded-xl hover:bg-white/10 transition"
+                                        title="Delete Asset"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                                <span className={`absolute top-3 left-3 px-2.5 py-1 rounded-xl text-[9px] font-mono font-bold uppercase border backdrop-blur-md ${asset.status === 'published' ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800' : 'bg-amber-950/80 text-amber-400 border-amber-800'}`}>
+                                    {asset.status || 'published'}
+                                </span>
+                            </div>
+
+                            <div className="p-5 space-y-4">
+                                <div>
+                                    <h4 className="font-bold text-sm text-white truncate" title={asset.title}>
+                                        {asset.title}
+                                    </h4>
+                                    <p className="text-[10px] font-mono text-slate-500 truncate mt-0.5">
+                                        {asset.category || 'General'}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+                                    {onSelect ? (
+                                        <Button 
+                                            onClick={() => onSelect(asset.url)}
+                                            className="w-full bg-[#6366F1] hover:bg-[#5850EC] text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-9"
+                                        >
+                                            Select Asset
+                                        </Button>
+                                    ) : (
+                                        <Button 
+                                            onClick={() => handleCopy(asset.url, asset._id)}
+                                            variant="outline"
+                                            className="w-full bg-[#0A0D14] border-slate-800 hover:bg-slate-900 text-slate-300 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-9 flex items-center justify-center gap-2"
+                                        >
+                                            {copied === asset._id ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} className="text-[#6366F1]" />}
+                                            {copied === asset._id ? "Copied Link" : "Copy URL"}
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             )}
 
-            {/* Snippet Modal */}
-            <Dialog open={!!snippetAsset} onOpenChange={() => setSnippetAsset(null)}>
-                <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[600px] p-0 overflow-hidden rounded-[32px]">
-                    <div className="p-8 space-y-6">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-3">
-                                <div className="p-2 bg-[#6366F1]/10 rounded-xl">
-                                    <ExternalLink className="h-5 w-5 text-[#6366F1]" />
-                                </div>
-                                Embed Snippets
-                            </DialogTitle>
-                        </DialogHeader>
-
-                        {snippetAsset && (
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-4 p-4 bg-[#111622] rounded-2xl border border-slate-800">
-                                    <img src={snippetAsset.url} className="h-16 w-16 object-cover rounded-xl" />
-                                    <div>
-                                        <p className="font-bold text-white">{snippetAsset.title}</p>
-                                        <p className="text-xs text-slate-500">{snippetAsset.altText || "No alt text"}</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">HTML Image Tag</label>
-                                        <div className="relative group">
-                                            <pre className="bg-[#0A0D14] p-4 rounded-2xl border border-slate-800 text-[10px] text-emerald-400 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                                                {`<img \n  src="${APP_URL}${snippetAsset.url}" \n  alt="${snippetAsset.altText || snippetAsset.title}" \n  loading="lazy" \n/>`}
-                                            </pre>
-                                            <button 
-                                                onClick={() => handleCopy(`<img src="${APP_URL}${snippetAsset.url}" alt="${snippetAsset.altText || snippetAsset.title}" loading="lazy" />`, 'html')}
-                                                className="absolute top-3 right-3 p-2 bg-[#6366F1] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                {copied === 'html' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Direct URL</label>
-                                        <div className="relative group">
-                                            <div className="bg-[#0A0D14] p-4 rounded-2xl border border-slate-800 text-[10px] text-[#6366F1] font-mono truncate pr-12">
-                                                {APP_URL}{snippetAsset.url}
-                                            </div>
-                                            <button 
-                                                onClick={() => handleCopy(`${APP_URL}${snippetAsset.url}`, 'url')}
-                                                className="absolute top-3 right-3 p-2 bg-[#6366F1] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                            >
-                                                {copied === 'url' ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <Button 
-                                    onClick={() => setSnippetAsset(null)}
-                                    className="w-full bg-slate-800 hover:bg-slate-700 text-white rounded-2xl h-14 font-bold"
-                                >
-                                    Close Snippet Vault
-                                </Button>
-                            </div>
-                        )}
+            {/* Edit Asset Modal */}
+            <Dialog open={!!editingAsset} onOpenChange={(open) => !open && setEditingAsset(null)}>
+                <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[500px] p-6 rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold uppercase tracking-tight text-white">Edit Asset Properties</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 pt-4 font-mono text-xs">
+                        <div>
+                            <label className="block text-slate-400 font-bold uppercase mb-1">Title</label>
+                            <input 
+                                type="text"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                className="w-full bg-[#111622] border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-slate-400 font-bold uppercase mb-1">Alt Text</label>
+                            <input 
+                                type="text"
+                                value={editAlt}
+                                onChange={(e) => setEditAlt(e.target.value)}
+                                className="w-full bg-[#111622] border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-slate-400 font-bold uppercase mb-1">Tags (Comma Separated)</label>
+                            <input 
+                                type="text"
+                                value={editTags}
+                                onChange={(e) => setEditTags(e.target.value)}
+                                className="w-full bg-[#111622] border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#6366F1]"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-slate-400 font-bold uppercase mb-1">Status</label>
+                            <select 
+                                value={editStatus}
+                                onChange={(e) => setEditStatus(e.target.value)}
+                                className="w-full bg-[#111622] border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#6366F1]"
+                            >
+                                <option value="published">Published</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+                        <div className="pt-4 flex gap-2">
+                            <Button 
+                                onClick={handleUpdate}
+                                disabled={saving}
+                                className="w-full bg-[#6366F1] hover:bg-[#5850EC] text-white font-bold uppercase rounded-xl h-10"
+                            >
+                                {saving ? "Saving..." : "Save Changes"}
+                            </Button>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>
 
-            {/* Edit Modal */}
-            <Dialog open={!!editingAsset} onOpenChange={() => setEditingAsset(null)}>
-                <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[500px] p-0 overflow-hidden rounded-[32px]">
-                    <div className="p-8 space-y-6">
-                        <DialogHeader>
-                            <DialogTitle className="text-2xl font-bold uppercase tracking-tight flex items-center gap-3">
-                                <div className="p-2 bg-[#6366F1]/10 rounded-xl">
-                                    <Pencil className="h-5 w-5 text-[#6366F1]" />
-                                </div>
-                                Edit Metadata
-                            </DialogTitle>
-                        </DialogHeader>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Asset Title</label>
-                                <input 
-                                    type="text"
-                                    className="w-full bg-[#111622] border border-slate-800 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                                    value={editTitle}
-                                    onChange={(e) => setEditTitle(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Alt Text (SEO)</label>
-                                <input 
-                                    type="text"
-                                    className="w-full bg-[#111622] border border-slate-800 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                                    value={editAlt}
-                                    onChange={(e) => setEditAlt(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Tags (Comma Separated)</label>
-                                <input 
-                                    type="text"
-                                    className="w-full bg-[#111622] border border-slate-800 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#6366F1]/20 outline-none"
-                                    placeholder="marketing, course, banner"
-                                    value={editTags}
-                                    onChange={(e) => setEditTags(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-1">Visibility Status</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {['published', 'draft'].map((s) => (
-                                        <button 
-                                            key={s}
-                                            onClick={() => setEditStatus(s)}
-                                            className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${editStatus === s ? 'bg-[#6366F1] border-[#6366F1] text-white' : 'bg-[#111622] border-slate-800 text-slate-500 hover:border-slate-600'}`}
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
+            {/* View Snippet Modal */}
+            <Dialog open={!!snippetAsset} onOpenChange={(open) => !open && setSnippetAsset(null)}>
+                <DialogContent className="bg-[#0A0D14] border-slate-800 text-white sm:max-w-[550px] p-6 rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold uppercase tracking-tight text-white">Embed Code Snippet</DialogTitle>
+                    </DialogHeader>
+                    {snippetAsset && (
+                        <div className="space-y-4 pt-4 font-mono text-xs">
+                            <div>
+                                <label className="block text-slate-400 font-bold uppercase mb-1">HTML Image Tag</label>
+                                <div className="bg-[#111622] p-3 rounded-xl border border-slate-800 flex items-center justify-between text-[#6366F1]">
+                                    <code className="truncate max-w-[380px]">{`<img src="${snippetAsset.url}" alt="${snippetAsset.altText || snippetAsset.title}" />`}</code>
+                                    <button onClick={() => handleCopy(`<img src="${snippetAsset.url}" alt="${snippetAsset.altText || snippetAsset.title}" />`, 'snippet-html')} className="p-1 hover:text-white">
+                                        <Copy size={14} />
+                                    </button>
                                 </div>
                             </div>
-
-                            <div className="flex gap-3 pt-4">
-                                <Button 
-                                    variant="ghost"
-                                    onClick={() => setEditingAsset(null)}
-                                    className="flex-1 rounded-2xl border border-slate-800 h-14 font-bold"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button 
-                                    onClick={handleUpdate}
-                                    disabled={saving}
-                                    className="flex-[1.5] bg-[#6366F1] hover:bg-[#5850EC] text-white rounded-2xl h-14 font-black uppercase tracking-widest shadow-xl shadow-[#6366F1]/20"
-                                >
-                                    {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
-                                </Button>
+                            <div>
+                                <label className="block text-slate-400 font-bold uppercase mb-1">Direct URL</label>
+                                <div className="bg-[#111622] p-3 rounded-xl border border-slate-800 flex items-center justify-between text-slate-300">
+                                    <code className="truncate max-w-[380px]">{snippetAsset.url}</code>
+                                    <button onClick={() => handleCopy(snippetAsset.url, 'snippet-url')} className="p-1 hover:text-white">
+                                        <Copy size={14} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
