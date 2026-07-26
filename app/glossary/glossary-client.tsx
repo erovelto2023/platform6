@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart, ArrowRight, HelpCircle, Sparkles, Target, ShieldCheck, Cpu, DollarSign, Layers } from 'lucide-react';
+import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart, ArrowRight, HelpCircle, Sparkles, Target, ShieldCheck, Cpu, DollarSign, Layers, RefreshCw } from 'lucide-react';
 import TagCloud from '../../components/glossary/TagCloud';
 import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
 import { SiteHeader } from '@/components/shared/SiteHeader';
@@ -12,15 +12,6 @@ interface GlossaryClientProps {
   initialTerms: any[];
   categories: string[];
   products?: any[];
-}
-
-function shuffleArray<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
 }
 
 const SEMANTIC_CLUSTERS = [
@@ -43,16 +34,23 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const [selectedCluster, setSelectedCluster] = useState<string>('all');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [pillarTerm, setPillarTerm] = useState<any>(null);
-  const [showLetters, setShowLetters] = useState(false);
-  const [showCategories, setShowCategories] = useState(false);
-  const [categoryActiveLetter, setCategoryActiveLetter] = useState<string | null>(null);
+
+  const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
   useEffect(() => {
     if (!initialTerms || initialTerms.length === 0) return;
     setTerms(initialTerms);
-    const featured = initialTerms.find((t: any) => t.isFeatured) || initialTerms[0];
-    setPillarTerm(featured);
+    // Rotate to a different pillar term on every page load
+    const randomIndex = Math.floor(Math.random() * initialTerms.length);
+    setPillarTerm(initialTerms[randomIndex]);
   }, [initialTerms]);
+
+  const rotatePillar = () => {
+    if (terms && terms.length > 0) {
+      const randomIndex = Math.floor(Math.random() * terms.length);
+      setPillarTerm(terms[randomIndex]);
+    }
+  };
 
   useEffect(() => {
     if (!searchParams) return;
@@ -68,8 +66,10 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                             term.term.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             term.shortDefinition?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                             term.aeoSummary?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const termFirstChar = (term.term || '').trim().toUpperCase();
       const matchesLetter = !activeLetter || 
-                            (activeLetter === '0-9' ? /^[0-9]/.test(term.term) : term.term.toUpperCase().startsWith(activeLetter));
+                            (activeLetter === '0-9' ? /^[0-9]/.test(termFirstChar) : termFirstChar.startsWith(activeLetter));
       
       const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
 
@@ -100,19 +100,8 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
     setSelectedCategory('all');
     setSelectedCluster('all');
     setSelectedTag('all');
-    setCategoryActiveLetter(null);
     setCurrentPage(1);
-    setShowLetters(false);
-    setShowCategories(false);
   };
-
-  const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-
-  const filteredCategories = useMemo(() => {
-    if (!categoryActiveLetter) return [];
-    return categories.filter(cat => cat.toUpperCase().startsWith(categoryActiveLetter));
-  }, [categoryActiveLetter, categories]);
 
   return (
     <div className="bg-slate-950 min-h-screen pb-20 font-sans text-slate-100">
@@ -146,20 +135,29 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
             />
           </div>
 
-          {/* Pillar Definition of the Day Banner */}
+          {/* Pillar Definition Rotating Banner */}
           {pillarTerm && (
-            <div className="mt-8 p-6 md:p-8 bg-slate-900 border border-slate-800 rounded-3xl text-left relative overflow-hidden shadow-2xl">
+            <div className="mt-8 p-6 md:p-8 bg-slate-900 border border-slate-800 rounded-3xl text-left relative overflow-hidden shadow-2xl group">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-cyan-400 uppercase">
                   <ShieldCheck size={16} /> Main Pillar Definition
                 </div>
-                <span className="text-[10px] font-mono font-bold bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl text-slate-400 uppercase">
-                  {pillarTerm.category || 'Core Concept'}
-                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={rotatePillar}
+                    className="flex items-center gap-1 text-[10px] font-mono font-bold bg-slate-950 hover:bg-slate-800 border border-slate-800 px-3 py-1 rounded-xl text-cyan-400 hover:text-cyan-300 transition-all uppercase cursor-pointer"
+                    title="Rotate Featured Main Pillar Concept"
+                  >
+                    <RefreshCw size={12} className="group-hover:rotate-180 transition-transform duration-500" /> Rotate Pillar Concept
+                  </button>
+                  <span className="text-[10px] font-mono font-bold bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl text-slate-400 uppercase">
+                    {pillarTerm.category || 'Core Concept'}
+                  </span>
+                </div>
               </div>
               <h2 className="text-2xl md:text-3xl font-black text-slate-100 mb-2">{pillarTerm.term}</h2>
-              <p className="text-xs md:text-sm font-mono text-slate-300 mb-4 leading-relaxed" data-aeo-summary>
-                {pillarTerm.aeoSummary || pillarTerm.shortDefinition}
+              <p className="text-xs md:text-sm font-sans text-slate-300 mb-4 leading-relaxed" data-aeo-summary>
+                {pillarTerm.aeoSummary || pillarTerm.shortDefinition || pillarTerm.definition}
               </p>
               <div className="flex items-center justify-between pt-2">
                 <div className="text-[10px] font-mono text-slate-500 uppercase">
@@ -171,6 +169,55 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Alphabetical Character Filter Bar (0-9, A-Z) */}
+      <div className="max-w-7xl mx-auto px-6 pt-10">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span className="text-xs font-mono font-bold text-slate-200 uppercase flex items-center gap-2">
+              <Book size={16} className="text-cyan-400" /> Alphabetical Index (0-9, A-Z)
+            </span>
+            {activeLetter && (
+              <button 
+                onClick={() => { setActiveLetter(null); setCurrentPage(1); }} 
+                className="text-xs font-mono text-cyan-400 hover:underline"
+              >
+                Clear Alphabet Filter
+              </button>
+            )}
+          </div>
+          
+          <div className="flex items-center flex-wrap gap-2 pt-1">
+            <button
+              onClick={() => { setActiveLetter(null); setCurrentPage(1); }}
+              className={`px-3.5 py-2 rounded-xl font-mono font-black text-xs transition-all cursor-pointer ${
+                activeLetter === null
+                  ? 'bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20'
+                  : 'bg-slate-950 border border-slate-800 text-slate-300 hover:border-cyan-500 hover:text-cyan-400'
+              }`}
+            >
+              ALL
+            </button>
+
+            {characters.map(char => {
+              const isActive = activeLetter === char;
+              return (
+                <button
+                  key={char}
+                  onClick={() => { setActiveLetter(char); setCurrentPage(1); }}
+                  className={`min-w-[38px] px-2.5 py-2 rounded-xl font-mono font-black text-xs transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-cyan-500/20 scale-105'
+                      : 'bg-slate-950 border border-slate-800 text-slate-300 hover:border-cyan-500 hover:text-cyan-400'
+                  }`}
+                >
+                  {char}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -197,7 +244,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                 <button
                   key={cluster.id}
                   onClick={() => { setSelectedCluster(cluster.id); setCurrentPage(1); }}
-                  className={`p-3.5 rounded-2xl border text-left transition-all ${
+                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                     isActive 
                       ? 'bg-cyan-950/80 border-cyan-500 text-cyan-300 shadow-xl' 
                       : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700 hover:text-white'
@@ -220,72 +267,72 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
           <div>Page <span className="text-slate-100 font-bold">{currentPage}</span> of {totalPages || 1}</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {currentItems.map(term => (
-            <Link
-              key={term._id || term.id}
-              href={`/glossary/${term.slug}`}
-              className="group bg-slate-900 border border-slate-800 hover:border-cyan-500/80 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold bg-slate-950 border border-slate-800 text-cyan-400 px-2.5 py-1 rounded-xl">
-                    {term.category || 'General'}
-                  </span>
-                  {term.entityType && (
-                    <span className="text-[10px] font-mono text-slate-400">
-                      {term.entityType}
+        {filteredTerms.length === 0 ? (
+          <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-4">
+            <Book size={32} className="text-slate-600 mx-auto" />
+            <h3 className="text-xl font-bold text-slate-200 uppercase">No Terms Found</h3>
+            <p className="text-xs font-mono text-slate-400 max-w-md mx-auto">No glossary terms matched your current filter criteria.</p>
+            <button onClick={resetFilters} className="px-4 py-2 bg-cyan-600 text-white font-mono font-bold text-xs rounded-xl hover:bg-cyan-500 transition-colors uppercase">
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentItems.map(term => (
+              <Link
+                key={term._id || term.id}
+                href={`/glossary/${term.slug}`}
+                className="group bg-slate-900 border border-slate-800 hover:border-cyan-500/80 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold bg-slate-950 border border-slate-800 text-cyan-400 px-2.5 py-1 rounded-xl">
+                      {term.category || 'General'}
                     </span>
-                  )}
+                    {term.entityType && (
+                      <span className="text-[10px] font-mono text-slate-400">
+                        {term.entityType}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-xl font-black text-slate-100 group-hover:text-cyan-300 transition-colors">
+                    {term.term}
+                  </h3>
+
+                  <p className="text-xs font-sans text-slate-300 line-clamp-3 leading-relaxed">
+                    {term.aeoSummary || term.shortDefinition || term.definition}
+                  </p>
                 </div>
 
-                <h3 className="text-xl font-black text-slate-100 group-hover:text-cyan-300 transition-colors">
-                  {term.term}
-                </h3>
-
-                <p className="text-xs font-mono text-slate-400 line-clamp-3 leading-relaxed">
-                  {term.aeoSummary || term.shortDefinition || term.definition}
-                </p>
-              </div>
-
-              <div className="pt-6 border-t border-slate-800/80 flex items-center justify-between mt-4">
-                <span className="text-[10px] font-mono text-slate-500">/glossary/{term.slug}</span>
-                <span className="text-xs font-mono font-bold text-cyan-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                  View <ArrowRight size={12} />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {filteredTerms.length === 0 && (
-          <div className="text-center py-20 bg-slate-900 border border-slate-800 border-dashed rounded-3xl p-8">
-            <Book className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-            <h3 className="text-lg font-black text-slate-100 mb-1">No terms found</h3>
-            <p className="text-xs font-mono text-slate-400 mb-6">Try searching for a different keyword or resetting your category filter.</p>
-            <button onClick={resetFilters} className="bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold text-xs uppercase px-6 py-3 rounded-2xl">
-              Reset Filters
-            </button>
+                <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-slate-400">
+                  <span className="group-hover:text-cyan-400 transition-colors font-bold uppercase text-[10px]">View Entity Guide</span>
+                  <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform text-cyan-400" />
+                </div>
+              </Link>
+            ))}
           </div>
         )}
 
-        {/* Pagination controls */}
+        {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-12 pt-6 border-t border-slate-800 font-mono text-xs">
+          <div className="flex items-center justify-center gap-2 mt-12 font-mono text-xs">
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-5 py-2.5 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-30"
+              className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl hover:border-cyan-500 disabled:opacity-40 transition-colors"
             >
-              Previous Page
+              Previous
             </button>
-            <span className="text-slate-400">Page {currentPage} of {totalPages}</span>
+            <span className="px-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-cyan-400 font-bold">
+              {currentPage} / {totalPages}
+            </span>
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="px-5 py-2.5 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white rounded-xl disabled:opacity-30"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl hover:border-cyan-500 disabled:opacity-40 transition-colors"
             >
-              Next Page
+              Next
             </button>
           </div>
         )}
@@ -296,7 +343,11 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
 export default function GlossaryClient(props: GlossaryClientProps) {
   return (
-    <Suspense fallback={<div className="bg-slate-950 min-h-screen p-12 text-center text-cyan-400 font-mono text-xs">Loading Knowledge Base...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center font-mono text-xs">
+        Loading Glossary Registry...
+      </div>
+    }>
       <GlossaryClientInner {...props} />
     </Suspense>
   );
