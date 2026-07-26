@@ -61,24 +61,27 @@ export const PremiumForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Course access
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="mt-6 border border-slate-800 bg-slate-900 rounded-3xl p-6 shadow-2xl space-y-3">
+            <div className="font-bold text-slate-100 flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                <span>Course Access Tier</span>
+                <Button onClick={toggleEdit} variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:bg-slate-950 rounded-xl">
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit access
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Access
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
-                <p className={!initialData.isPremium ? "text-slate-500 italic" : ""}>
-                    {initialData.isPremium ? "Premium members only" : "Free for everyone"}
-                </p>
+                <div className="text-sm font-mono bg-slate-950 p-4 rounded-2xl border border-slate-800 flex items-center gap-2">
+                    <span className="text-slate-400">Access Setting:</span>
+                    <span className={initialData.isPremium ? "text-purple-400 font-bold" : "text-emerald-400 font-bold"}>
+                        {initialData.isPremium ? "Premium Members Only" : "Free for Everyone"}
+                    </span>
+                </div>
             )}
             {isEditing && (
                 <Form {...form}>
@@ -90,16 +93,17 @@ export const PremiumForm = ({
                             control={form.control}
                             name="isPremium"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-2xl border border-slate-800 bg-slate-950 p-4">
                                     <FormControl>
                                         <Checkbox
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
+                                            className="border-slate-700 text-cyan-500 focus:ring-cyan-500"
                                         />
                                     </FormControl>
                                     <div className="space-y-1 leading-none">
-                                        <FormDescription>
-                                            Check this box if you want to make this course exclusive to premium members.
+                                        <FormDescription className="text-xs font-mono text-slate-300">
+                                            Check this box if this course is restricted to paid premium subscribers.
                                         </FormDescription>
                                     </div>
                                 </FormItem>
@@ -109,6 +113,7 @@ export const PremiumForm = ({
                             <Button
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-10"
                             >
                                 Save
                             </Button>
@@ -117,5 +122,5 @@ export const PremiumForm = ({
                 </Form>
             )}
         </div>
-    )
-}
+    );
+};

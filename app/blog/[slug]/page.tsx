@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getPostBySlug } from "@/lib/actions/post.actions";
+import { getPostBySlug, incrementBlogPostView } from "@/lib/actions/post.actions";
 import { format } from "date-fns";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     if (!post || !post.isPublished) {
         return notFound();
     }
+
+    // Increment blog post view count
+    incrementBlogPostView(slug);
 
     const isLocked = (post.accessLevel === "members" || post.accessLevel === "paid") && !userId;
     const readingTime = calculateReadingTime(post.content);
@@ -98,35 +101,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <div dangerouslySetInnerHTML={{ __html: post.content.substring(0, 1000) }} />
                         </div>
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                            <div className="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-md border border-slate-100">
-                                <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <Lock className="h-6 w-6 text-indigo-600" />
+                            <div className="bg-slate-900 text-white p-8 rounded-2xl max-w-md text-center shadow-2xl space-y-4">
+                                <div className="p-3 bg-amber-500/20 text-amber-400 rounded-full w-fit mx-auto">
+                                    <Lock className="h-8 w-8" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-2 text-slate-900">This post is for members only</h3>
-                                <p className="text-slate-600 mb-6">
-                                    Join K Business Academy to get access to this article and our full library of resources.
+                                <h2 className="text-2xl font-bold">Exclusive Content</h2>
+                                <p className="text-sm text-slate-300">
+                                    This article is reserved for Academy members. Sign in or upgrade your membership to unlock full access.
                                 </p>
-                                <Link href="/sign-up">
-                                    <Button size="lg" className="w-full bg-indigo-600 hover:bg-indigo-700 text-lg h-12">
-                                        Become a Member
-                                    </Button>
-                                </Link>
-                                <p className="mt-4 text-sm text-slate-500">
-                                    Already a member? <Link href="/sign-in" className="text-indigo-600 hover:underline font-medium">Sign in</Link>
-                                </p>
+                                <div className="pt-2 flex flex-col gap-2">
+                                    <Link href="/sign-in">
+                                        <Button className="w-full bg-cyan-600 hover:bg-cyan-500 font-bold">Sign In to Read</Button>
+                                    </Link>
+                                    <Link href="/pricing">
+                                        <Button variant="outline" className="w-full border-slate-700 text-slate-200 hover:bg-slate-800">View Membership Plans</Button>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <article className="blog-content prose prose-lg prose-indigo max-w-none">
+                    <div className="prose prose-lg prose-indigo max-w-none font-sans text-slate-800 leading-relaxed">
                         <CustomHTMLRenderer html={post.content} />
-                    </article>
+                    </div>
                 )}
             </main>
-
-            <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-                <p className="text-xs text-gray-500">© 2025 K Business Academy. All rights reserved.</p>
-            </footer>
         </div>
     );
 }

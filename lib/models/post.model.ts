@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema({
     author: { type: String, default: "K Business Academy" },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
+    views: { type: Number, default: 0 },
     tags: [{ type: String }],
     categories: [{ type: String }],
     accessLevel: { type: String, enum: ["public", "members", "paid"], default: "public" },

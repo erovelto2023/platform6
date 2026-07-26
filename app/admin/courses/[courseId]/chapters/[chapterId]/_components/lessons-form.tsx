@@ -88,30 +88,32 @@ export const LessonsForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4 relative">
+        <div className="mt-6 border border-slate-800 bg-slate-900 rounded-3xl p-6 shadow-2xl space-y-4 relative">
             {isUpdating && (
-                <div className="absolute h-full w-full bg-slate-500/20 top-0 right-0 rounded-m flex items-center justify-center z-10">
-                    <Loader2 className="animate-spin h-6 w-6 text-sky-700" />
+                <div className="absolute h-full w-full bg-slate-950/80 top-0 right-0 rounded-3xl flex items-center justify-center z-10 font-mono text-xs text-cyan-400 gap-2">
+                    <Loader2 className="animate-spin h-5 w-5 text-cyan-400" />
+                    Reordering Lessons...
                 </div>
             )}
-            <div className="font-medium flex items-center justify-between">
-                Chapter lessons
-                <Button onClick={toggleCreating} variant="ghost">
+            <div className="font-bold text-slate-100 flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                <span>Chapter Lessons</span>
+                <Button onClick={toggleCreating} variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:bg-slate-950 rounded-xl">
                     {isCreating ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            Add a lesson
+                            <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Add a Lesson
                         </>
                     )}
                 </Button>
             </div>
+
             {isCreating && (
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4 mt-4"
+                        className="space-y-4 mt-4 bg-slate-950 p-4 rounded-2xl border border-slate-800"
                     >
                         <FormField
                             control={form.control}
@@ -121,29 +123,32 @@ export const LessonsForm = ({
                                     <FormControl>
                                         <Input
                                             disabled={isSubmitting}
-                                            placeholder="e.g. 'Introduction to the course'"
+                                            placeholder="e.g. 'Lesson 1: Overview & Tools'"
+                                            className="bg-slate-900 border border-slate-800 text-slate-100 placeholder:text-slate-500 font-mono text-xs rounded-xl h-11 focus:border-cyan-500"
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                 </FormItem>
                             )}
                         />
                         <Button
                             disabled={!isValid || isSubmitting}
                             type="submit"
+                            className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-10"
                         >
-                            Create
+                            Create Lesson
                         </Button>
                     </form>
                 </Form>
             )}
+
             {!isCreating && (
                 <div className={cn(
-                    "text-sm mt-2",
-                    !initialData.lessons.length && "text-slate-500 italic"
+                    "text-xs font-mono mt-2",
+                    !initialData.lessons.length && "text-slate-500 italic bg-slate-950 p-4 rounded-2xl border border-slate-800"
                 )}>
-                    {!initialData.lessons.length && "No lessons"}
+                    {!initialData.lessons.length && "No lessons added yet."}
                     <LessonsList
                         onEdit={onEdit}
                         onReorder={onReorder}
@@ -151,11 +156,12 @@ export const LessonsForm = ({
                     />
                 </div>
             )}
-            {!isCreating && (
-                <p className="text-xs text-muted-foreground mt-4">
-                    Drag and drop to reorder the lessons
+            
+            {initialData.lessons.length > 0 && (
+                <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider pt-2">
+                    Drag and drop to reorder lessons
                 </p>
             )}
         </div>
-    )
-}
+    );
+};

@@ -124,37 +124,37 @@ export const PostForm = ({ initialData }: PostFormProps) => {
 
     return (
         <Form {...form}>
-            <div className="h-full flex flex-col bg-white">
+            <div className="h-full flex flex-col bg-slate-950 text-slate-100 min-h-screen">
                 {/* Top Bar */}
-                <div className="flex items-center justify-between px-6 py-4 border-b bg-white sticky top-0 z-40">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900 sticky top-0 z-40 shadow-xl">
                     <div className="flex items-center gap-4">
-                        <Link href="/admin/blog" className="text-slate-500 hover:text-slate-700">
+                        <Link href="/admin/blog" className="text-slate-400 hover:text-cyan-400 transition-colors">
                             <ArrowLeft className="h-5 w-5" />
                         </Link>
-                        <span className="text-sm text-slate-500">
+                        <span className="text-sm font-mono font-bold text-slate-200 uppercase">
                             {initialData ? "Editing Post" : "New Post"}
                         </span>
-                        <span className="text-slate-300">|</span>
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${watch("isPublished") ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}`}>
+                        <span className="text-slate-700">|</span>
+                        <span className={`text-xs font-mono font-bold uppercase px-3 py-1 rounded-xl border ${watch("isPublished") ? "bg-emerald-950 text-emerald-400 border-emerald-800" : "bg-slate-950 text-amber-400 border-amber-800"}`}>
                             {watch("isPublished") ? "Published" : "Draft"}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => setPreviewMode(!previewMode)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            {previewMode ? "Edit" : "Preview"}
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" size="sm" onClick={() => setPreviewMode(!previewMode)} className="h-9 px-3 text-cyan-400 hover:text-cyan-300 font-mono text-xs bg-slate-950 border border-slate-800 hover:bg-slate-800 rounded-xl">
+                            <Eye className="h-4 w-4 mr-2 text-cyan-400" />
+                            {previewMode ? "Edit Mode" : "Preview Mode"}
                         </Button>
 
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="outline" size="icon">
+                                <Button variant="outline" size="icon" className="h-9 w-9 bg-slate-950 border-slate-800 text-slate-300 hover:text-cyan-400 hover:bg-slate-800 rounded-xl">
                                     <Settings className="h-4 w-4" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-                                <SheetHeader>
-                                    <SheetTitle>Post Settings</SheetTitle>
-                                    <SheetDescription>
+                            <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto bg-slate-900 border-slate-800 text-slate-100 p-6 shadow-2xl">
+                                <SheetHeader className="border-b border-slate-800 pb-4">
+                                    <SheetTitle className="text-slate-100 font-black uppercase text-lg">Post Settings</SheetTitle>
+                                    <SheetDescription className="text-slate-400 font-mono text-xs">
                                         Manage post metadata, SEO, and access control.
                                     </SheetDescription>
                                 </SheetHeader>
@@ -164,28 +164,28 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                         name="slug"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Post URL</FormLabel>
+                                                <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Post URL Slug</FormLabel>
                                                 <FormControl>
                                                     <div className="flex items-center">
-                                                        <span className="text-slate-400 text-sm mr-1">/blog/</span>
-                                                        <Input {...field} className="h-8" />
+                                                        <span className="text-slate-500 text-xs font-mono mr-2">/blog/</span>
+                                                        <Input {...field} className="h-10 bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs rounded-xl focus:border-cyan-500" />
                                                     </div>
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-rose-400 text-xs font-mono" />
                                             </FormItem>
                                         )}
                                     />
 
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-medium text-slate-900">Publishing</h3>
+                                    <div className="space-y-4 pt-2 border-t border-slate-800">
+                                        <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase">Publishing</h3>
                                         <FormField
                                             control={form.control}
                                             name="isPublished"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                                <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-sm">
                                                     <div className="space-y-0.5">
-                                                        <FormLabel>Publish Post</FormLabel>
-                                                        <FormDescription>
+                                                        <FormLabel className="text-xs font-mono font-bold text-slate-200">Publish Post</FormLabel>
+                                                        <FormDescription className="text-[11px] font-mono text-slate-400">
                                                             Make this post visible to the public.
                                                         </FormDescription>
                                                     </div>
@@ -202,11 +202,11 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                             control={form.control}
                                             name="featured"
                                             render={({ field }) => (
-                                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                                <FormItem className="flex flex-row items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-sm">
                                                     <div className="space-y-0.5">
-                                                        <FormLabel>Featured Post</FormLabel>
-                                                        <FormDescription>
-                                                            Pin to the top of the blog.
+                                                        <FormLabel className="text-xs font-mono font-bold text-slate-200">Featured Post</FormLabel>
+                                                        <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                            Pin to the top of the blog feed.
                                                         </FormDescription>
                                                     </div>
                                                     <FormControl>
@@ -223,36 +223,36 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                             name="accessLevel"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Access Level</FormLabel>
+                                                    <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Access Level</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
-                                                            <SelectTrigger>
+                                                            <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs rounded-xl h-10">
                                                                 <SelectValue placeholder="Select access level" />
                                                             </SelectTrigger>
                                                         </FormControl>
-                                                        <SelectContent>
+                                                        <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
                                                             <SelectItem value="public">Public (Everyone)</SelectItem>
                                                             <SelectItem value="members">Members Only (Free)</SelectItem>
                                                             <SelectItem value="paid">Paid Members Only</SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <FormDescription>
-                                                        Who can view this post?
+                                                    <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                        Who can view this article?
                                                     </FormDescription>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-medium text-slate-900">Organization</h3>
+                                    <div className="space-y-4 pt-2 border-t border-slate-800">
+                                        <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase">Organization</h3>
                                         <FormField
                                             control={form.control}
                                             name="categories"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Categories</FormLabel>
+                                                    <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Categories</FormLabel>
                                                     <FormControl>
                                                         <TagInput
                                                             placeholder="Add category..."
@@ -260,10 +260,10 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                             setTags={field.onChange}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        Press Enter to add.
+                                                    <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                        Press Enter to add category tags.
                                                     </FormDescription>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
@@ -272,7 +272,7 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                             name="tags"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Tags</FormLabel>
+                                                    <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Tags</FormLabel>
                                                     <FormControl>
                                                         <TagInput
                                                             placeholder="Add tag..."
@@ -280,26 +280,26 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                             setTags={field.onChange}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        Press Enter to add.
+                                                    <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                        Press Enter to add keyword tags.
                                                     </FormDescription>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-medium text-slate-900">Featured Image</h3>
+                                    <div className="space-y-4 pt-2 border-t border-slate-800">
+                                        <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase">Featured Image</h3>
                                         <FormField
                                             control={form.control}
                                             name="imageUrl"
                                             render={({ field }) => (
                                                 <FormItem>
                                                     <FormControl>
-                                                        <div className="border rounded-md p-4 bg-slate-50">
+                                                        <div className="border border-slate-800 rounded-2xl p-4 bg-slate-950">
                                                             {imageUrl ? (
-                                                                <div className="relative aspect-video rounded-md overflow-hidden mb-4">
+                                                                <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-slate-800">
                                                                     <Image
                                                                         src={imageUrl}
                                                                         alt="Featured image"
@@ -309,18 +309,21 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => setValue("imageUrl", "")}
-                                                                        className="absolute top-2 right-2 bg-rose-500 text-white p-1 rounded-full hover:bg-rose-600"
+                                                                        className="absolute top-2 right-2 bg-rose-600 text-white p-1.5 rounded-full hover:bg-rose-500 transition"
                                                                     >
                                                                         <X className="h-4 w-4" />
                                                                     </button>
                                                                 </div>
                                                             ) : (
-                                                                <div className="flex items-center justify-center h-32 bg-slate-200 rounded-md mb-4">
-                                                                    <ImageIcon className="h-8 w-8 text-slate-400" />
+                                                                <div className="flex items-center justify-center h-32 bg-slate-900 rounded-xl mb-4 border border-slate-800">
+                                                                    <ImageIcon className="h-8 w-8 text-slate-600" />
                                                                 </div>
                                                             )}
                                                             <UploadButton
                                                                 endpoint="courseThumbnail"
+                                                                appearance={{
+                                                                    button: "bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase rounded-xl px-4 py-2"
+                                                                }}
                                                                 onClientUploadComplete={(res) => {
                                                                     setValue("imageUrl", res[0].url);
                                                                     toast.success("Image uploaded");
@@ -331,27 +334,27 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                             />
                                                         </div>
                                                     </FormControl>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-medium text-slate-900">SEO & Social</h3>
+                                    <div className="space-y-4 pt-2 border-t border-slate-800">
+                                        <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase">SEO & Social Metadata</h3>
                                         <FormField
                                             control={form.control}
                                             name="seoTitle"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Meta Title</FormLabel>
+                                                    <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Meta Title</FormLabel>
                                                     <FormControl>
-                                                        <Input {...field} placeholder={title} />
+                                                        <Input {...field} placeholder={title} className="h-10 bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs rounded-xl focus:border-cyan-500" />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        Recommended: 60 chars.
+                                                    <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                        Recommended length: ~60 characters.
                                                     </FormDescription>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
@@ -360,24 +363,24 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                             name="seoDescription"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Meta Description</FormLabel>
+                                                    <FormLabel className="text-xs font-mono font-bold text-slate-300 uppercase">Meta Description</FormLabel>
                                                     <FormControl>
-                                                        <Textarea {...field} placeholder="Summary for search engines..." className="h-20" />
+                                                        <Textarea {...field} placeholder="Summary for search engine result snippets..." className="h-20 bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs rounded-xl focus:border-cyan-500 p-3" />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        Recommended: 145-160 chars.
+                                                    <FormDescription className="text-[11px] font-mono text-slate-400">
+                                                        Recommended length: 145-160 characters.
                                                     </FormDescription>
-                                                    <FormMessage />
+                                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                                 </FormItem>
                                             )}
                                         />
                                     </div>
 
                                     {initialData && (
-                                        <div className="pt-6 border-t">
+                                        <div className="pt-6 border-t border-slate-800">
                                             <Button
                                                 variant="destructive"
-                                                className="w-full"
+                                                className="w-full bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 font-mono font-bold uppercase text-xs rounded-xl h-10"
                                                 onClick={onDelete}
                                                 disabled={isSubmitting}
                                             >
@@ -390,20 +393,20 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                             </SheetContent>
                         </Sheet>
 
-                        <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700">
+                        <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} className="h-9 px-5 bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer">
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save
+                            Save Article
                         </Button>
                     </div>
                 </div>
 
                 {/* Main Editor Area */}
-                <div className="flex-1 overflow-y-auto bg-white">
-                    <div className="max-w-4xl mx-auto px-6 py-12">
+                <div className="flex-1 overflow-y-auto bg-slate-950 p-6">
+                    <div className="max-w-4xl mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-12 shadow-2xl space-y-8">
                         <form className="space-y-8">
                             {previewMode ? (
-                                <div className="prose prose-lg prose-indigo max-w-none">
-                                    <h1>{title}</h1>
+                                <div className="prose prose-invert max-w-none font-sans leading-relaxed">
+                                    <h1 className="text-4xl font-black text-slate-100 mb-4">{title}</h1>
                                     <div dangerouslySetInnerHTML={{ __html: content }} />
                                 </div>
                             ) : (
@@ -416,19 +419,18 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                 <FormControl>
                                                     <Textarea
                                                         {...field}
-                                                        placeholder="Post Title"
-                                                        className="text-4xl md:text-5xl font-bold border-none shadow-none resize-none px-0 focus-visible:ring-0 min-h-[80px] overflow-hidden"
+                                                        placeholder="Enter Post Title..."
+                                                        className="text-3xl md:text-5xl font-black border-none shadow-none resize-none px-0 focus-visible:ring-0 min-h-[80px] overflow-hidden bg-transparent text-slate-100 placeholder:text-slate-600 leading-tight"
                                                         rows={1}
                                                         onChange={(e) => {
                                                             field.onChange(e);
                                                             handleTitleChange(e);
-                                                            // Auto-resize
                                                             e.target.style.height = 'auto';
                                                             e.target.style.height = e.target.scrollHeight + 'px';
                                                         }}
                                                     />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-rose-400 text-xs font-mono" />
                                             </FormItem>
                                         )}
                                     />
@@ -439,11 +441,11 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                         name="imageUrl"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-base font-semibold">Featured Image</FormLabel>
+                                                <FormLabel className="text-xs font-mono font-bold uppercase text-slate-300">Featured Banner Image</FormLabel>
                                                 <FormControl>
-                                                    <div className="border rounded-lg p-4 bg-slate-50">
+                                                    <div className="border border-slate-800 rounded-2xl p-4 bg-slate-950">
                                                         {imageUrl ? (
-                                                            <div className="relative aspect-video rounded-lg overflow-hidden mb-4">
+                                                            <div className="relative aspect-video rounded-xl overflow-hidden mb-4 border border-slate-800">
                                                                 <Image
                                                                     src={imageUrl}
                                                                     alt="Featured image"
@@ -453,14 +455,14 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setValue("imageUrl", "")}
-                                                                    className="absolute top-2 right-2 bg-rose-500 text-white p-2 rounded-full hover:bg-rose-600 transition"
+                                                                    className="absolute top-2 right-2 bg-rose-600 text-white p-2 rounded-full hover:bg-rose-500 transition"
                                                                 >
                                                                     <X className="h-4 w-4" />
                                                                 </button>
                                                             </div>
                                                         ) : (
-                                                            <div className="flex items-center justify-center h-48 bg-slate-200 rounded-lg mb-4">
-                                                                <ImageIcon className="h-12 w-12 text-slate-400" />
+                                                            <div className="flex items-center justify-center h-48 bg-slate-900 border border-slate-800 rounded-xl mb-4">
+                                                                <ImageIcon className="h-10 w-10 text-slate-600" />
                                                             </div>
                                                         )}
                                                         <div className="flex gap-2">
@@ -480,7 +482,7 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                                         </div>
                                                     </div>
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-rose-400 text-xs font-mono" />
                                             </FormItem>
                                         )}
                                     />
@@ -490,15 +492,15 @@ export const PostForm = ({ initialData }: PostFormProps) => {
                                         name="content"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-base font-semibold">Content</FormLabel>
+                                                <FormLabel className="text-xs font-mono font-bold uppercase text-slate-300">Article Content</FormLabel>
                                                 <FormControl>
                                                     <RichTextEditor
                                                         content={field.value}
                                                         onChange={field.onChange}
-                                                        placeholder="Tell your story..."
+                                                        placeholder="Write your article content here..."
                                                     />
                                                 </FormControl>
-                                                <FormMessage />
+                                                <FormMessage className="text-rose-400 text-xs font-mono" />
                                             </FormItem>
                                         )}
                                     />

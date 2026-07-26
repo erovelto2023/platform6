@@ -68,27 +68,27 @@ export const DescriptionForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Course description
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="mt-6 border border-slate-800 bg-slate-900 rounded-3xl p-6 shadow-2xl space-y-3">
+            <div className="font-bold text-slate-100 flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                <span>Course Description</span>
+                <Button onClick={toggleEdit} variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:bg-slate-950 rounded-xl">
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit description
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Description
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
-                <p className={cn(
-                    "text-sm mt-2",
-                    !initialData.description && "text-slate-500 italic"
+                <div className={cn(
+                    "text-sm mt-2 font-sans bg-slate-950 p-4 rounded-2xl border border-slate-800 leading-relaxed",
+                    !initialData.description ? "text-slate-500 italic" : "text-slate-300"
                 )}>
-                    {initialData.description || "No description"}
-                </p>
+                    {initialData.description || "No description provided."}
+                </div>
             )}
             {isEditing && (
                 <Form {...form}>
@@ -104,11 +104,12 @@ export const DescriptionForm = ({
                                     <FormControl>
                                         <Textarea
                                             disabled={isSubmitting}
-                                            placeholder="e.g. 'This course is about...'"
+                                            placeholder="e.g. 'This course covers end-to-end digital monetization strategies...'"
+                                            className="bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-500 font-sans text-xs rounded-2xl p-4 min-h-28 focus:border-cyan-500"
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                 </FormItem>
                             )}
                         />
@@ -116,6 +117,7 @@ export const DescriptionForm = ({
                             <Button
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-10"
                             >
                                 Save
                             </Button>
@@ -124,5 +126,5 @@ export const DescriptionForm = ({
                 </Form>
             )}
         </div>
-    )
-}
+    );
+};

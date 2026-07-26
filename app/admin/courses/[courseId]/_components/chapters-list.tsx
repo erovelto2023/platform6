@@ -64,7 +64,7 @@ export const ChaptersList = ({
         <DragDropContext onDragEnd={onDragEnd}>
             <Droppable droppableId="chapters">
                 {(provided) => (
-                    <div {...provided.droppableProps} ref={provided.innerRef}>
+                    <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2 mt-2">
                         {chapters.map((chapter, index) => (
                             <Draggable
                                 key={chapter._id}
@@ -73,41 +73,25 @@ export const ChaptersList = ({
                             >
                                 {(provided) => (
                                     <div
-                                        className={cn(
-                                            "flex items-center gap-x-2 bg-slate-200 border-slate-200 border text-slate-700 rounded-md mb-4 text-sm",
-                                            // chapter.isPublished && "bg-sky-100 border-sky-200 text-sky-700"
-                                        )}
+                                        className="flex items-center gap-x-3 bg-slate-950 border border-slate-800 text-slate-100 rounded-2xl text-xs font-mono font-bold hover:border-cyan-500/80 transition-all p-1.5 shadow-md"
                                         ref={provided.innerRef}
                                         {...provided.draggableProps}
                                     >
                                         <div
-                                            className={cn(
-                                                "px-2 py-3 border-r border-r-slate-200 hover:bg-slate-300 rounded-l-md transition",
-                                                // chapter.isPublished && "border-r-sky-200 hover:bg-sky-200"
-                                            )}
+                                            className="px-2.5 py-2.5 border-r border-slate-800 hover:bg-slate-900 text-slate-400 hover:text-cyan-400 rounded-l-xl transition cursor-grab"
                                             {...provided.dragHandleProps}
                                         >
-                                            <Grip className="h-5 w-5" />
+                                            <Grip className="h-4 w-4" />
                                         </div>
-                                        {chapter.title}
-                                        <div className="ml-auto pr-2 flex items-center gap-x-2">
-                                            {/* {chapter.isFree && (
-                        <Badge>
-                          Free
-                        </Badge>
-                      )}
-                      <Badge
-                        className={cn(
-                          "bg-slate-500",
-                          chapter.isPublished && "bg-sky-700"
-                        )}
-                      >
-                        {chapter.isPublished ? "Published" : "Draft"}
-                      </Badge> */}
-                                            <Pencil
+                                        <span className="truncate py-1 text-slate-200">{chapter.title}</span>
+                                        <div className="ml-auto pr-2 flex items-center gap-x-2 shrink-0">
+                                            <button
                                                 onClick={() => onEdit(chapter._id)}
-                                                className="w-4 h-4 cursor-pointer hover:opacity-75 transition"
-                                            />
+                                                className="p-1.5 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-cyan-400 transition-colors"
+                                                title="Edit Chapter"
+                                            >
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -118,5 +102,5 @@ export const ChaptersList = ({
                 )}
             </Droppable>
         </DragDropContext>
-    )
-}
+    );
+};

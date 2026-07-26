@@ -44,70 +44,73 @@ export default async function CourseIdPage({
     const isComplete = requiredFields.every(Boolean);
 
     return (
-        <>
+        <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 font-sans space-y-6 max-w-7xl mx-auto">
             {!course.isPublished && (
                 <Banner
-                    label="This course is unpublished. It will not be visible to the students."
+                    label="This course is unpublished. It will not be visible to students."
                 />
             )}
-            <div className="p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-y-2">
-                        <h1 className="text-2xl font-medium">
-                            Course setup
-                        </h1>
-                        <span className="text-sm text-slate-700">
-                            Complete all fields {completionText}
-                        </span>
+            
+            <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+                <div className="flex flex-col gap-y-1">
+                    <h1 className="text-3xl font-black uppercase tracking-tight text-slate-100">
+                        Course Setup
+                    </h1>
+                    <span className="text-xs font-mono font-bold text-slate-400">
+                        Complete all required fields {completionText}
+                    </span>
+                </div>
+                <CourseActions
+                    disabled={!isComplete}
+                    courseId={course._id}
+                    isPublished={course.isPublished}
+                />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-x-3 border-b border-slate-800 pb-4">
+                        <IconBadge icon={LayoutDashboard} />
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">
+                                Customize Your Course
+                            </h2>
+                            <p className="text-xs font-mono text-slate-400">Course title, description, thumbnail, and pricing access.</p>
+                        </div>
                     </div>
-                    <CourseActions
-                        disabled={!isComplete}
+                    <TitleForm
+                        initialData={course}
                         courseId={course._id}
-                        isPublished={course.isPublished}
+                    />
+                    <DescriptionForm
+                        initialData={course}
+                        courseId={course._id}
+                    />
+                    <ImageForm
+                        initialData={course}
+                        courseId={course._id}
+                    />
+                    <PremiumForm
+                        initialData={course}
+                        courseId={course._id}
                     />
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-                    <div>
-                        <div className="flex items-center gap-x-2">
-                            <IconBadge icon={LayoutDashboard} />
-                            <h2 className="text-xl">
-                                Customize your course
-                            </h2>
-                        </div>
-                        <TitleForm
-                            initialData={course}
-                            courseId={course._id}
-                        />
-                        <DescriptionForm
-                            initialData={course}
-                            courseId={course._id}
-                        />
-                        <ImageForm
-                            initialData={course}
-                            courseId={course._id}
-                        />
-                        <PremiumForm
-                            initialData={course}
-                            courseId={course._id}
-                        />
-                    </div>
-                    <div className="space-y-6">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-x-3 border-b border-slate-800 pb-4">
+                        <IconBadge icon={ListChecks} />
                         <div>
-                            <div className="flex items-center gap-x-2">
-                                <IconBadge icon={ListChecks} />
-                                <h2 className="text-xl">
-                                    Course chapters
-                                </h2>
-                            </div>
-                            <ChaptersForm
-                                initialData={course}
-                                courseId={course._id}
-                            />
+                            <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">
+                                Course Chapters & Lessons
+                            </h2>
+                            <p className="text-xs font-mono text-slate-400">Organize and structure course curriculum modules.</p>
                         </div>
                     </div>
+                    <ChaptersForm
+                        initialData={course}
+                        courseId={course._id}
+                    />
                 </div>
             </div>
-        </>
+        </div>
     );
 }

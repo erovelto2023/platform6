@@ -7,7 +7,6 @@ import { revalidatePath } from "next/cache";
 export async function createPost(data: any) {
     try {
         await connectDB();
-        // Set publishedAt if isPublished is true
         if (data.isPublished && !data.publishedAt) {
             data.publishedAt = new Date();
         }
@@ -25,7 +24,6 @@ export async function updatePost(id: string, data: any) {
     try {
         await connectDB();
 
-        // If isPublished is being set to true, set publishedAt if not already set
         if (data.isPublished) {
             const existingPost = await Post.findById(id);
             if (existingPost && !existingPost.publishedAt) {
@@ -75,6 +73,15 @@ export async function getPostBySlug(slug: string) {
     } catch (error) {
         console.error("Error getting post by slug:", error);
         return null;
+    }
+}
+
+export async function incrementBlogPostView(slug: string) {
+    try {
+        await connectDB();
+        await Post.findOneAndUpdate({ slug }, { $inc: { views: 1 } });
+    } catch (error) {
+        console.error("Error incrementing blog post view:", error);
     }
 }
 

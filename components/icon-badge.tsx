@@ -12,8 +12,8 @@ export const IconBadge = ({
     size,
 }: IconBadgeProps) => {
     return (
-        <div className="bg-sky-100 p-2 rounded-full">
-            <Icon className="h-8 w-8 text-sky-700" />
+        <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-2xl text-cyan-400 shadow-md">
+            <Icon className="h-6 w-6 text-cyan-400" />
         </div>
-    )
+    );
 };

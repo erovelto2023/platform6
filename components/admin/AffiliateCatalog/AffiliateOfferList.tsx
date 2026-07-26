@@ -18,7 +18,9 @@ import {
     Check,
     MousePointerClick,
     ExternalLink,
-    Trash2
+    Trash2,
+    ChevronLeft,
+    ChevronRight
 } from "lucide-react";
 import { deletePersonalOffer } from "@/lib/actions/personal-affiliate.actions";
 import { toast } from "sonner";
@@ -100,7 +102,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                 <div className="flex items-center gap-1 min-w-max">
                     <button
                         onClick={() => { setSelectedLetter(null); setCurrentPage(1); }}
-                        className={`h-8 px-3.5 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider transition-all ${!selectedLetter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
+                        className={`h-8 px-3.5 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider transition-all cursor-pointer ${!selectedLetter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
                     >
                         All
                     </button>
@@ -108,7 +110,7 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                         <button
                             key={letter}
                             onClick={() => { setSelectedLetter(letter); setCurrentPage(1); }}
-                            className={`h-8 w-8 flex items-center justify-center rounded-xl text-[10px] font-mono font-black uppercase transition-all ${selectedLetter === letter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
+                            className={`h-8 w-8 flex items-center justify-center rounded-xl text-[10px] font-mono font-black uppercase transition-all cursor-pointer ${selectedLetter === letter ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'}`}
                         >
                             {letter}
                         </button>
@@ -234,6 +236,59 @@ export default function AffiliateOfferList({ offers: initialOffers }: AffiliateO
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl font-mono text-xs text-slate-400">
+                    <div className="flex items-center gap-2">
+                        <span>Showing</span>
+                        <span className="font-bold text-cyan-400">{(currentPage - 1) * itemsPerPage + 1}</span>
+                        <span>-</span>
+                        <span className="font-bold text-cyan-400">{Math.min(currentPage * itemsPerPage, filteredOffers.length)}</span>
+                        <span>of</span>
+                        <span className="font-bold text-slate-100">{filteredOffers.length}</span>
+                        <span>offers</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="h-9 px-3 rounded-xl bg-slate-950 border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer"
+                        >
+                            <ChevronLeft size={14} className="mr-1" /> Previous
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`h-9 w-9 rounded-xl font-bold font-mono transition-all cursor-pointer ${
+                                        currentPage === page
+                                            ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30'
+                                            : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                                    }`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="h-9 px-3 rounded-xl bg-slate-950 border-slate-800 text-slate-300 hover:text-white disabled:opacity-40 cursor-pointer"
+                        >
+                            Next <ChevronRight size={14} className="ml-1" />
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Dialog */}
             <Dialog open={!!editingOffer} onOpenChange={(open) => !open && setEditingOffer(null)}>

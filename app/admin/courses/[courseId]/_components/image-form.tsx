@@ -52,65 +52,63 @@ export const ImageForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Course image
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="mt-6 border border-slate-800 bg-slate-900 rounded-3xl p-6 shadow-2xl space-y-3">
+            <div className="font-bold text-slate-100 flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                <span>Course Image</span>
+                <Button onClick={toggleEdit} variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:bg-slate-950 rounded-xl">
                     {isEditing && (
                         <>Cancel</>
                     )}
                     {!isEditing && !initialData.thumbnail && (
                         <>
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            Add an image
+                            <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Add Image
                         </>
                     )}
                     {!isEditing && initialData.thumbnail && (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit image
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Image
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
                 !initialData.thumbnail ? (
-                    <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md mt-2">
-                        <ImageIcon className="h-10 w-10 text-slate-500" />
+                    <div className="flex flex-col items-center justify-center h-52 bg-slate-950 border border-slate-800 rounded-2xl mt-2 gap-2 text-slate-500">
+                        <ImageIcon className="h-10 w-10 text-slate-600" />
+                        <span className="text-xs font-mono">No Thumbnail Uploaded</span>
                     </div>
                 ) : (
-                    <div className="relative aspect-video mt-2">
+                    <div className="relative aspect-video mt-2 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950">
                         <Image
                             alt="Upload"
                             fill
-                            className="object-cover rounded-md"
+                            className="object-cover"
                             src={initialData.thumbnail}
                         />
                     </div>
                 )
             )}
             {isEditing && (
-                <div>
-                    <div className="flex items-center justify-center w-full">
+                <div className="pt-2">
+                    <div className="flex items-center justify-center w-full bg-slate-950 p-6 rounded-2xl border border-slate-800">
                         <UploadButton
                             endpoint="courseThumbnail"
                             appearance={{
-                                button: "bg-slate-900 text-white hover:bg-slate-800 ut-uploading:cursor-not-allowed",
-                                allowedContent: "text-slate-500"
+                                button: "bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl px-4 py-2 ut-uploading:cursor-not-allowed",
+                                allowedContent: "text-slate-400 text-xs font-mono mt-2"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ thumbnail: res[0].url || res[0].url });
+                                onSubmit({ thumbnail: res?.[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);
                             }}
                         />
                     </div>
-                    <div className="text-xs text-muted-foreground mt-4">
-                        16:9 aspect ratio recommended
-                    </div>
                 </div>
             )}
         </div>
-    )
-}
+    );
+};

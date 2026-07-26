@@ -66,16 +66,16 @@ export const CourseActions = ({
             <Button
                 onClick={onClick}
                 disabled={disabled || isLoading}
-                variant="outline"
                 size="sm"
+                className="h-10 px-4 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer"
             >
-                {isPublished ? "Unpublish" : "Publish"}
+                {isPublished ? "Unpublish" : "Publish Course"}
             </Button>
             <ConfirmModal onConfirm={onDelete}>
-                <Button size="sm" disabled={isLoading}>
+                <Button size="sm" disabled={isLoading} className="h-10 w-10 p-0 bg-rose-950 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl cursor-pointer">
                     <Trash className="h-4 w-4" />
                 </Button>
             </ConfirmModal>
         </div>
-    )
-}
+    );
+};

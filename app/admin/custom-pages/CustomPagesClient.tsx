@@ -53,7 +53,6 @@ export default function CustomPagesClient({ initialTypes }: Props) {
             if (i === index) {
                 let cleanedValue = value;
                 if (key === "name") {
-                    // Force lowercase, replace spaces/special chars with underscores
                     cleanedValue = value.toLowerCase().replace(/[^a-z0-9_]/g, "");
                 }
                 const updated = { ...f, [key]: cleanedValue };
@@ -67,7 +66,7 @@ export default function CustomPagesClient({ initialTypes }: Props) {
     };
 
     const handleDelete = async (slug: string) => {
-        if (!confirm("Are you sure you want to delete this custom page type? All content entries associated with it will be deleted permanently. This action cannot be undone.")) {
+        if (!confirm("Are you sure you want to delete this custom page type? All content entries associated with it will be deleted permanently.")) {
             return;
         }
 
@@ -91,7 +90,6 @@ export default function CustomPagesClient({ initialTypes }: Props) {
             return;
         }
 
-        // Validate fields
         for (const field of fields) {
             if (!field.name.trim() || !field.label.trim()) {
                 setError("All fields must have a valid Name and Label.");
@@ -149,7 +147,7 @@ export default function CustomPagesClient({ initialTypes }: Props) {
                         <div key={type.slug} className="bg-slate-900 rounded-3xl border border-slate-800 hover:border-cyan-500/80 p-6 shadow-xl transition-all flex flex-col justify-between group">
                             <div>
                                 <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-slate-950 border border-slate-800 text-rose-400 rounded-2xl">
+                                    <div className="p-3 bg-slate-950 border border-slate-800 text-cyan-400 rounded-2xl">
                                         <Layout size={24} />
                                     </div>
                                     <div className="flex gap-2">
@@ -215,52 +213,52 @@ export default function CustomPagesClient({ initialTypes }: Props) {
                 <div className="bg-slate-900 rounded-3xl border border-slate-800 p-8 shadow-2xl max-w-4xl text-slate-100">
                     <button
                         onClick={() => setView("list")}
-                        className="mb-6 flex items-center gap-2 text-slate-400 hover:text-white font-bold uppercase text-xs tracking-widest transition-all"
+                        className="mb-6 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-mono font-bold uppercase text-xs tracking-widest transition-all cursor-pointer"
                     >
                         <ArrowLeft size={16} /> Back to Page Types
                     </button>
 
-                    <h2 className="text-2xl font-black text-slate-900 mb-6">
+                    <h2 className="text-2xl font-black text-slate-100 mb-6 uppercase tracking-tight">
                         {view === "create" ? "Create Custom Page Type" : `Edit Custom Page Type: ${editingType?.name}`}
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Page Type Name</label>
+                                <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">Page Type Name</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Directory Product"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50"
+                                    className="w-full px-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:border-cyan-500 transition-all bg-slate-950 text-slate-100 font-mono text-xs placeholder:text-slate-500"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">URL Route Slug</label>
+                                <label className="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">URL Route Slug</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. directory"
                                     value={slug}
                                     onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all bg-slate-50"
+                                    className="w-full px-4 py-3 border border-slate-800 rounded-2xl focus:outline-none focus:border-cyan-500 transition-all bg-slate-950 text-slate-100 font-mono text-xs placeholder:text-slate-500 disabled:opacity-50"
                                     disabled={view === "edit"}
                                     required
                                 />
                                 {view === "create" && (
-                                    <p className="text-[10px] text-slate-400 mt-1">This will determine the path structure: /c/{slug || "slug"}/[entry-slug]</p>
+                                    <p className="text-[10px] font-mono text-slate-400 mt-1.5">This will determine the path structure: <span className="text-cyan-400">/c/{slug || "slug"}/[entry-slug]</span></p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="border-t border-slate-100 pt-6">
+                        <div className="border-t border-slate-800 pt-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-xs font-black text-slate-700 uppercase tracking-widest">Fields Definition Schema</h3>
+                                <h3 className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider">Fields Definition Schema</h3>
                                 <button
                                     type="button"
                                     onClick={handleAddField}
-                                    className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"
+                                    className="text-xs font-mono text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1.5 cursor-pointer"
                                 >
                                     <PlusCircle size={14} /> Add Schema Field
                                 </button>
@@ -268,36 +266,36 @@ export default function CustomPagesClient({ initialTypes }: Props) {
 
                             <div className="space-y-4">
                                 {fields.map((field, index) => (
-                                    <div key={index} className="flex gap-4 items-center bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    <div key={index} className="flex gap-4 items-center bg-slate-950 p-4 rounded-2xl border border-slate-800">
                                         <div className={`flex-1 grid grid-cols-1 ${field.type === "relationship" ? "md:grid-cols-4" : "md:grid-cols-3"} gap-4`}>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Field Key (Dynamic Placeholder)</label>
+                                                <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1.5">Field Key (Dynamic Placeholder)</label>
                                                 <input
                                                     type="text"
                                                     placeholder="e.g. price"
                                                     value={field.name}
                                                     onChange={(e) => handleFieldChange(index, "name", e.target.value)}
-                                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs font-mono focus:outline-none focus:ring-1 focus:ring-black bg-white"
+                                                    className="w-full px-3 py-2 border border-slate-800 rounded-xl text-xs font-mono focus:outline-none focus:border-cyan-500 bg-slate-900 text-slate-100"
                                                     required
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Label (Editor Form)</label>
+                                                <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1.5">Label (Editor Form)</label>
                                                 <input
                                                     type="text"
                                                     placeholder="e.g. Product Price ($)"
                                                     value={field.label}
                                                     onChange={(e) => handleFieldChange(index, "label", e.target.value)}
-                                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-black bg-white"
+                                                    className="w-full px-3 py-2 border border-slate-800 rounded-xl text-xs font-mono focus:outline-none focus:border-cyan-500 bg-slate-900 text-slate-100"
                                                     required
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Data Type</label>
+                                                <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1.5">Data Type</label>
                                                 <select
                                                     value={field.type}
                                                     onChange={(e) => handleFieldChange(index, "type", e.target.value)}
-                                                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-black bg-white"
+                                                    className="w-full px-3 py-2 border border-slate-800 rounded-xl text-xs font-mono focus:outline-none focus:border-cyan-500 bg-slate-900 text-slate-100"
                                                 >
                                                     <option value="text">Text Input</option>
                                                     <option value="textarea">Rich Text/Text Area</option>
@@ -309,11 +307,11 @@ export default function CustomPagesClient({ initialTypes }: Props) {
                                             </div>
                                             {field.type === "relationship" && (
                                                 <div>
-                                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Target Model</label>
+                                                    <label className="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1.5">Target Model</label>
                                                     <select
                                                         value={field.refCollection || "GlossaryTerm"}
                                                         onChange={(e) => handleFieldChange(index, "refCollection", e.target.value)}
-                                                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-black bg-white"
+                                                        className="w-full px-3 py-2 border border-slate-800 rounded-xl text-xs font-mono focus:outline-none focus:border-cyan-500 bg-slate-900 text-slate-100"
                                                     >
                                                         <option value="GlossaryTerm">Glossary Term</option>
                                                         <option value="Offer">Affiliate Offer</option>
@@ -327,7 +325,7 @@ export default function CustomPagesClient({ initialTypes }: Props) {
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveField(index)}
-                                            className="text-slate-400 hover:text-red-500 mt-5 transition-colors"
+                                            className="text-slate-500 hover:text-rose-400 mt-5 transition-colors cursor-pointer"
                                             title="Delete Field"
                                         >
                                             <Trash2 size={16} />
@@ -336,23 +334,23 @@ export default function CustomPagesClient({ initialTypes }: Props) {
                                 ))}
 
                                 {fields.length === 0 && (
-                                    <p className="text-xs text-slate-400 italic text-center py-4">No custom fields defined. Add some fields to create custom content properties!</p>
+                                    <p className="text-xs text-slate-400 italic text-center py-4 font-mono">No custom fields defined. Add some fields to create custom content properties!</p>
                                 )}
                             </div>
                         </div>
 
-                        <div className="flex gap-4 pt-4 border-t border-slate-100">
+                        <div className="flex gap-4 pt-4 border-t border-slate-800">
                             <button
                                 type="submit"
                                 disabled={isPending}
-                                className="bg-black hover:bg-slate-800 disabled:opacity-50 text-white font-black px-8 py-3 rounded-xl shadow-xl transition-all uppercase tracking-widest text-xs"
+                                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white font-mono font-bold px-8 py-3 rounded-2xl shadow-xl transition-all uppercase tracking-wider text-xs cursor-pointer"
                             >
                                 {isPending ? "Saving..." : "Save Page Type"}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setView("list")}
-                                className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl border border-slate-200 transition-all uppercase tracking-widest text-xs"
+                                className="px-6 bg-slate-950 hover:bg-slate-800 text-slate-300 font-mono font-bold rounded-2xl border border-slate-800 transition-all uppercase tracking-wider text-xs cursor-pointer"
                             >
                                 Cancel
                             </button>

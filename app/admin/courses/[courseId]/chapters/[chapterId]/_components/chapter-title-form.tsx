@@ -65,22 +65,22 @@ export const ChapterTitleForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Chapter title
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="mt-6 border border-slate-800 bg-slate-900 rounded-3xl p-6 shadow-2xl space-y-3">
+            <div className="font-bold text-slate-100 flex items-center justify-between text-xs font-mono uppercase tracking-wider">
+                <span>Chapter Title</span>
+                <Button onClick={toggleEdit} variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 font-mono text-xs hover:bg-slate-950 rounded-xl">
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit title
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Title
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
-                <p className="text-sm mt-2">
+                <p className="text-sm font-mono text-slate-200 mt-2 font-bold bg-slate-950 p-4 rounded-2xl border border-slate-800">
                     {initialData.title}
                 </p>
             )}
@@ -98,11 +98,12 @@ export const ChapterTitleForm = ({
                                     <FormControl>
                                         <Input
                                             disabled={isSubmitting}
-                                            placeholder="e.g. 'Introduction to the course'"
+                                            placeholder="e.g. 'Introduction & Setup'"
+                                            className="bg-slate-950 border border-slate-800 text-slate-100 placeholder:text-slate-500 font-mono text-xs rounded-2xl h-11 focus:border-cyan-500"
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage className="text-rose-400 text-xs font-mono" />
                                 </FormItem>
                             )}
                         />
@@ -110,6 +111,7 @@ export const ChapterTitleForm = ({
                             <Button
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl h-10"
                             >
                                 Save
                             </Button>
@@ -118,5 +120,5 @@ export const ChapterTitleForm = ({
                 </Form>
             )}
         </div>
-    )
-}
+    );
+};

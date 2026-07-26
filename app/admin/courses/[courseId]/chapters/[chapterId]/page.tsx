@@ -36,50 +36,55 @@ export default async function ChapterIdPage({
     const completionText = `(${completedFields}/${totalFields})`;
 
     return (
-        <div className="p-6">
-            <div className="flex items-center justify-between">
+        <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 font-sans space-y-6 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-6">
                 <div className="w-full">
                     <Link
                         href={`/admin/courses/${courseId}`}
-                        className="flex items-center text-sm hover:opacity-75 transition mb-6"
+                        className="flex items-center text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition mb-4 w-fit"
                     >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to course setup
+                        <ArrowLeft className="h-4 w-4 mr-1.5" />
+                        Back to Course Setup
                     </Link>
                     <div className="flex items-center justify-between w-full">
-                        <div className="flex flex-col gap-y-2">
-                            <h1 className="text-2xl font-medium">
-                                Chapter Creation
+                        <div className="flex flex-col gap-y-1">
+                            <h1 className="text-3xl font-black uppercase tracking-tight text-slate-100">
+                                Chapter Setup
                             </h1>
-                            <span className="text-sm text-slate-700">
+                            <span className="text-xs font-mono font-bold text-slate-400">
                                 Complete all fields {completionText}
                             </span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-                <div className="space-y-4">
-                    <div>
-                        <div className="flex items-center gap-x-2">
-                            <IconBadge icon={LayoutDashboard} />
-                            <h2 className="text-xl">
-                                Customize your chapter
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-x-3 border-b border-slate-800 pb-4">
+                        <IconBadge icon={LayoutDashboard} />
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">
+                                Customize Your Chapter
                             </h2>
+                            <p className="text-xs font-mono text-slate-400">Manage chapter title and configuration.</p>
                         </div>
-                        <ChapterTitleForm
-                            initialData={moduleData}
-                            courseId={courseId}
-                            chapterId={chapterId}
-                        />
                     </div>
+                    <ChapterTitleForm
+                        initialData={moduleData}
+                        courseId={courseId}
+                        chapterId={chapterId}
+                    />
                 </div>
-                <div>
-                    <div className="flex items-center gap-x-2">
+                <div className="space-y-6">
+                    <div className="flex items-center gap-x-3 border-b border-slate-800 pb-4">
                         <IconBadge icon={Video} />
-                        <h2 className="text-xl">
-                            Add a video
-                        </h2>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">
+                                Chapter Lessons & Content
+                            </h2>
+                            <p className="text-xs font-mono text-slate-400">Add and arrange lessons within this chapter.</p>
+                        </div>
                     </div>
                     <LessonsForm
                         initialData={moduleData}
