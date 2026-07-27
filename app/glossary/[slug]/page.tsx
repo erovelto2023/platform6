@@ -272,6 +272,31 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         </div>
 
+                        {/* Video Masterclass (Moved directly below AEO Direct Answer Snippet) */}
+                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
+                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                <PlayCircle className="text-cyan-400" size={20} /> Video Masterclass
+                            </h3>
+                            {youtubeEmbedUrl ? (
+                                <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-800 bg-slate-950">
+                                    <iframe 
+                                        width="100%" 
+                                        height="100%" 
+                                        src={youtubeEmbedUrl} 
+                                        title="YouTube video player" 
+                                        frameBorder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+                            ) : (
+                                <div className="p-8 bg-slate-950 rounded-2xl border border-slate-800 text-center font-mono text-xs text-slate-400">
+                                    <PlayCircle className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+                                    <span>Video masterclass for {serializedTerm.term} is currently scheduled for production.</span>
+                                </div>
+                            )}
+                        </div>
+
                         {/* Real-World Business Scenario & ROI Impact (ALWAYS RENDERED) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
@@ -587,7 +612,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 ))}
                             </div>
                         </div>
-
                         {/* Pitfalls, Misconceptions & Safety Warnings (ALWAYS RENDERED) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
@@ -614,31 +638,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     </p>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Video Masterclass (ALWAYS RENDERED) */}
-                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                <PlayCircle className="text-cyan-400" size={20} /> Video Masterclass
-                            </h3>
-                            {youtubeEmbedUrl ? (
-                                <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-800 bg-slate-950">
-                                    <iframe 
-                                        width="100%" 
-                                        height="100%" 
-                                        src={youtubeEmbedUrl} 
-                                        title="YouTube video player" 
-                                        frameBorder="0" 
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                        allowFullScreen
-                                    ></iframe>
-                                </div>
-                            ) : (
-                                <div className="p-8 bg-slate-950 rounded-2xl border border-slate-800 text-center font-mono text-xs text-slate-400">
-                                    <PlayCircle className="w-10 h-10 text-slate-600 mx-auto mb-2" />
-                                    <span>Video masterclass for {serializedTerm.term} is currently scheduled for production.</span>
-                                </div>
-                            )}
                         </div>
 
                         {/* FAQs Accordion (ALWAYS RENDERED) */}
