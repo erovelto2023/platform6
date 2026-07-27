@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon } from 'lucide-react';
@@ -29,6 +29,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [singleFixingId, setSingleFixingId] = useState<string | null>(null);
     const [isAutoFixingAll, setIsAutoFixingAll] = useState(false);
     const searchParams = useSearchParams();
+    const router = useRouter();
 
     const legendStats = useMemo(() => {
         let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0;
@@ -45,11 +46,18 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         return { images, videos, products, websites, podcasts, caseStudies, aiPrompts, aeoFaqs };
     }, [initialTerms]);
 
-    // Auto-edit from query param
+    // Auto-edit / tab from query param
     useEffect(() => {
         if (!searchParams) return;
+        const tab = searchParams.get('tab') || searchParams.get('view');
         const editId = searchParams.get('edit');
-        if (editId && initialTerms.length > 0) {
+        if (tab === 'import') {
+            setView('import');
+        } else if (tab === 'create') {
+            setView('create');
+        } else if (tab === 'performance') {
+            setView('performance');
+        } else if (editId && initialTerms.length > 0) {
             const term = initialTerms.find(t => t.id === editId || (t as any)._id === editId);
             if (term) {
                 setEditingTerm(term);
@@ -416,14 +424,14 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 <RotateCcw size={14} /> Flush All
                             </button>
                             <button
-                                onClick={() => { setEditingTerm(undefined); setView('create'); }}
+                                onClick={() => { setEditingTerm(undefined); setView('create'); router.push('/admin/glossary?tab=create', { scroll: false }); }}
                                 className="bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white px-5 py-2 rounded-xl font-extrabold flex items-center gap-1.5 transition-all shadow-lg shadow-indigo-600/30 text-xs cursor-pointer"
                             >
                                 <Plus size={16} /> New Term
                             </button>
                             <button
-                                onClick={() => setView('import')}
-                                className="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs"
+                                onClick={() => { setView('import'); router.push('/admin/glossary?tab=import', { scroll: false }); }}
+                                className="bg-slate-950 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer"
                             >
                                 <Download size={14} /> Bulk Import
                             </button>
@@ -786,8 +794,8 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
             {(view === 'create' || view === 'edit') && (
                 <div>
                      <button
-                        onClick={() => setView('list')}
-                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+                        onClick={() => { setView('list'); setEditingTerm(undefined); router.push('/admin/glossary', { scroll: false }); }}
+                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer"
                     >
                         <ArrowLeft size={16} /> Back to Glossary Terms List
                     </button>
@@ -802,8 +810,8 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
             {view === 'import' && (
                 <div>
                     <button
-                        onClick={() => setView('list')}
-                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+                        onClick={() => { setView('list'); router.push('/admin/glossary', { scroll: false }); }}
+                        className="mb-6 px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer"
                     >
                         <ArrowLeft size={16} /> Back to Glossary Terms List
                     </button>
