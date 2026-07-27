@@ -4,7 +4,7 @@ import connectToDatabase from "@/lib/db/connect";
 import GlossaryTerm from "@/lib/db/models/GlossaryTerm";
 import { revalidatePath } from "next/cache";
 
-export async function getGlossaryTerms(options: { limit?: number; niche?: string; sortBy?: "term" | "views" } = {}) {
+export async function getGlossaryTerms(options: { limit?: number; niche?: string; sortBy?: "term" | "views"; summaryOnly?: boolean; selectFields?: any } = {}) {
     try {
         await connectToDatabase();
         const query = options.niche ? { niche: options.niche } : {};
@@ -14,10 +14,25 @@ export async function getGlossaryTerms(options: { limit?: number; niche?: string
             sortConfig = { views: -1 };
         }
 
-        const terms = await GlossaryTerm.find(query)
-            .sort(sortConfig)
-            .limit(options.limit || 10000) // Increase default limit to ensure all terms are fetched
-            .lean();
+        let dbQuery = GlossaryTerm.find(query).sort(sortConfig);
+
+        if (options.selectFields) {
+            dbQuery = dbQuery.select(options.selectFields);
+        } else if (options.summaryOnly) {
+            dbQuery = dbQuery.select({
+                id: 1, term: 1, slug: 1, category: 1, subCategory: 1, entityType: 1,
+                shortDefinition: 1, aeoSummary: 1, definition: 1,
+                imageUrl: 1, videoUrl: 1, amazonProducts: 1, recommendedTools: 1,
+                websitesRanking: 1, podcastsRanking: 1, caseStudies: 1,
+                youtubeTitles: 1, pinterestIdeas: 1, instagramIdeas: 1,
+                imagePrompt: 1, productPrompt: 1, socialPrompt: 1,
+                faqs: 1, questionVariations: 1, tags: 1, views: 1, startupCost: 1,
+                timeToFirstDollar: 1, skillRequired: 1
+            });
+        }
+
+        const maxLimit = options.limit !== undefined && options.limit > 0 ? options.limit : 5000;
+        const terms = await dbQuery.limit(maxLimit).lean();
         return { terms: JSON.parse(JSON.stringify(terms)) };
     } catch (e) {
         console.error("Failed to fetch glossary terms", e);
@@ -440,6 +455,27 @@ export async function verifyYouTubeLinksBatch(termsToVerify: { id: string; term:
     } catch (error: any) {
         console.error("Error verifying batch of YouTube links:", error);
         return { error: error.message || "Failed to verify links" };
+    }
+}
+
+export async function autoReplaceSingleVideo(id: string, term: string) {
+    try {
+        await connectToDatabase();
+        const ytSearch = (await import('yt-search')).default;
+        const searchResults = await ytSearch(term);
+        const bestVideo = searchResults && searchResults.videos.length > 0 ? searchResults.videos[0].url : null;
+        
+        if (bestVideo) {
+            await GlossaryTerm.findOneAndUpdate({ id }, { videoUrl: bestVideo });
+            revalidatePath('/admin/glossary');
+            revalidatePath('/glossary');
+            return { success: true, newVideoUrl: bestVideo };
+        } else {
+            return { success: false, error: "Could not find a relevant YouTube video automatically." };
+        }
+    } catch (error: any) {
+        console.error(`Failed to auto-replace video for term ${term}:`, error);
+        return { success: false, error: error.message || "Failed to search YouTube." };
     }
 }
 

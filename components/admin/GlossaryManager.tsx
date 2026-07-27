@@ -8,7 +8,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, autoReplaceSingleVideo, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -26,6 +26,8 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [brokenVideos, setBrokenVideos] = useState<{ id: string; term: string; videoUrl: string; reason: string }[]>([]);
     const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
     const [auditProgress, setAuditProgress] = useState<string>("");
+    const [singleFixingId, setSingleFixingId] = useState<string | null>(null);
+    const [isAutoFixingAll, setIsAutoFixingAll] = useState(false);
     const searchParams = useSearchParams();
 
     const legendStats = useMemo(() => {
@@ -251,21 +253,45 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         }
     };
 
-    const handleAutoReplace = () => {
-        if (!confirm('This will automatically search YouTube and replace broken videos with relevant new ones. Continue?')) return;
-        startTransition(async () => {
-            const res = await autoReplaceBrokenVideos(brokenVideos.map(v => ({ id: v.id, term: v.term })));
-            if (res.success) {
-                if (res.fixedCount > 0) {
-                    alert(`✅ Successfully auto-replaced ${res.fixedCount} videos!`);
-                } else {
-                    alert(`Unable to find relevant replacements for the remaining videos.`);
-                }
-                setBrokenVideos(res.remainingBroken || []);
+    const handleAutoReplaceSingle = async (item: { id: string; term: string }) => {
+        setSingleFixingId(item.id);
+        try {
+            const res = await autoReplaceSingleVideo(item.id, item.term);
+            if (res.success && res.newVideoUrl) {
+                alert(`✅ Successfully auto-replaced video for "${item.term}"!\nNew Video URL: ${res.newVideoUrl}`);
+                setBrokenVideos(prev => prev.filter(v => v.id !== item.id));
             } else {
-                alert('Error auto-replacing videos: ' + (res as any).error);
+                alert(`⚠️ Could not auto-fix "${item.term}": ${res.error || "No video found"}`);
             }
-        });
+        } catch (e: any) {
+            alert(`Error auto-replacing video: ${e.message}`);
+        }
+        setSingleFixingId(null);
+    };
+
+    const handleAutoReplace = async () => {
+        if (!confirm(`Sequentially auto-fix ${brokenVideos.length} broken video(s)? This replaces 1 video at a time to prevent server timeouts.`)) return;
+        setIsAutoFixingAll(true);
+        let fixed = 0;
+        const currentList = [...brokenVideos];
+
+        for (let i = currentList.length - 1; i >= 0; i--) {
+            const item = currentList[i];
+            setSingleFixingId(item.id);
+            try {
+                const res = await autoReplaceSingleVideo(item.id, item.term);
+                if (res.success) {
+                    fixed++;
+                    currentList.splice(i, 1);
+                    setBrokenVideos([...currentList]);
+                }
+            } catch (err) {
+                console.error(`Error fixing ${item.term}:`, err);
+            }
+        }
+        setIsAutoFixingAll(false);
+        setSingleFixingId(null);
+        alert(`✅ Process complete! Successfully auto-replaced ${fixed} video(s).`);
     };
 
     const handleExportCSV = () => {
@@ -412,34 +438,52 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     
                     {/* Broken Videos Report */}
                     {brokenVideos.length > 0 && (
-                        <div className="p-6 bg-rose-950/60 border border-rose-800 rounded-2xl">
-                            <div className="flex items-center justify-between mb-4">
+                        <div className="p-6 bg-rose-950/60 border border-rose-800 rounded-2xl space-y-4 shadow-2xl">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-900/60 pb-3">
                                 <h3 className="text-xs font-black text-rose-300 uppercase tracking-widest flex items-center gap-2">
                                     <AlertCircle size={16} />
                                     Broken YouTube Links Found ({brokenVideos.length})
                                 </h3>
                                 <button
                                     onClick={handleAutoReplace}
-                                    disabled={isPending}
-                                    className="bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-rose-500 transition-all disabled:opacity-50 flex items-center gap-2"
+                                    disabled={isPending || isAutoFixingAll}
+                                    className="bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-rose-500 transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer shadow-md self-start sm:self-auto"
                                 >
-                                    <Sparkles size={14} /> Auto-Fix All
+                                    <Sparkles size={14} className={isAutoFixingAll ? "animate-spin" : ""} /> 
+                                    {isAutoFixingAll ? `Auto-Fixing All (${brokenVideos.length} left)...` : "Auto-Fix All (Safe Sequential)"}
                                 </button>
                             </div>
-                            <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                            <div className="space-y-3 max-h-72 overflow-y-auto pr-2">
                                 {brokenVideos.map((item) => (
-                                    <div key={item.id} className="bg-slate-950 p-3 rounded-xl border border-rose-900/60 flex items-center justify-between shadow-sm">
-                                        <div>
+                                    <div key={item.id} className="bg-slate-950 p-4 rounded-2xl border border-rose-900/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+                                        <div className="min-w-0 flex-1">
                                             <p className="text-sm font-extrabold text-slate-100">{item.term}</p>
-                                            <p className="text-xs text-rose-400 font-mono truncate max-w-lg">{item.videoUrl}</p>
+                                            <p className="text-xs text-rose-400 font-mono truncate max-w-lg mt-0.5" title={item.videoUrl}>{item.videoUrl}</p>
                                         </div>
-                                        <Link
-                                            href={`/admin/glossary?edit=${item.id}`}
-                                            target="_blank"
-                                            className="px-4 py-2 bg-rose-600 text-white text-[10px] font-black uppercase rounded-lg hover:bg-rose-500 transition-all"
-                                        >
-                                            Fix Now
-                                        </Link>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <button
+                                                onClick={() => handleAutoReplaceSingle(item)}
+                                                disabled={singleFixingId === item.id || isAutoFixingAll}
+                                                className="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10px] font-mono font-bold uppercase rounded-xl transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-md"
+                                            >
+                                                <Sparkles size={13} className={singleFixingId === item.id ? "animate-spin" : ""} />
+                                                {singleFixingId === item.id ? "Fixing..." : "Auto-Fix"}
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    const termToEdit = initialTerms.find(t => t.id === item.id || (t as any)._id === item.id);
+                                                    if (termToEdit) {
+                                                        setEditingTerm(termToEdit);
+                                                        setView('edit');
+                                                    } else {
+                                                        window.open(`/admin/glossary?edit=${item.id}`, '_blank');
+                                                    }
+                                                }}
+                                                className="px-3.5 py-2 bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 hover:text-white text-[10px] font-mono font-bold uppercase rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                                            >
+                                                <Edit size={13} /> Fix / Edit
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

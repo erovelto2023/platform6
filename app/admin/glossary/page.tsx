@@ -3,7 +3,7 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import GlossaryManager from "@/components/admin/GlossaryManager";
 
 export default async function GlossaryAdminPage() {
-    const { terms } = await getGlossaryTerms({ sortBy: "views" });
+    const { terms } = await getGlossaryTerms({ sortBy: "views", summaryOnly: true });
     const { products } = await getDirectoryProducts();
 
     return (

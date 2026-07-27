@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default async function GlossaryPage() {
     try {
-        const result = await getGlossaryTerms() as any;
+        const result = await getGlossaryTerms({ summaryOnly: true }) as any;
         const terms = result?.terms || [];
         
         const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
