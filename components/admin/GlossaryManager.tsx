@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
 import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
@@ -27,6 +27,21 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [auditStatus, setAuditStatus] = useState<"idle" | "running" | "done">("idle");
     const [auditProgress, setAuditProgress] = useState<string>("");
     const searchParams = useSearchParams();
+
+    const legendStats = useMemo(() => {
+        let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0;
+        initialTerms.forEach(t => {
+            if (t.imageUrl) images++;
+            if (t.videoUrl) videos++;
+            if ((t.amazonProducts && t.amazonProducts.length > 0) || (t.recommendedTools && t.recommendedTools.length > 0)) products++;
+            if (t.websitesRanking && t.websitesRanking.length > 0) websites++;
+            if (t.podcastsRanking && t.podcastsRanking.length > 0) podcasts++;
+            if (t.caseStudies && t.caseStudies.length > 0) caseStudies++;
+            if (t.imagePrompt || t.productPrompt || t.socialPrompt || (t.youtubeTitles && t.youtubeTitles.length > 0) || (t.pinterestIdeas && t.pinterestIdeas.length > 0) || (t.instagramIdeas && t.instagramIdeas.length > 0)) aiPrompts++;
+            if ((t.faqs && t.faqs.length > 0) || (t.questionVariations && t.questionVariations.length > 0) || t.aeoSummary) aeoFaqs++;
+        });
+        return { images, videos, products, websites, podcasts, caseStudies, aiPrompts, aeoFaqs };
+    }, [initialTerms]);
 
     // Auto-edit from query param
     useEffect(() => {
@@ -462,51 +477,60 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                         </div>
                     </div>
 
-                    {/* Bulk action bar or Icon Legend */}
-                    {selectedIds.size > 0 ? (
-                        <div className="flex items-center justify-between bg-rose-950/80 border border-rose-800 rounded-2xl px-5 py-3">
-                            <span className="text-xs font-extrabold text-rose-200">
+                    {/* Bulk Action Bar (when terms are selected) */}
+                    {selectedIds.size > 0 && (
+                        <div className="flex items-center justify-between bg-rose-950/80 border border-rose-800 rounded-2xl px-5 py-3 shadow-lg">
+                            <span className="text-xs font-extrabold text-rose-200 font-mono">
                                 {selectedIds.size} term{selectedIds.size > 1 ? 's' : ''} selected
                             </span>
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setSelectedIds(new Set())}
-                                    className="text-xs text-rose-400 hover:underline font-bold"
+                                    className="text-xs text-rose-400 hover:underline font-bold cursor-pointer"
                                 >
                                     Deselect All
                                 </button>
                                 <button
                                     onClick={handleBulkDelete}
                                     disabled={isPending}
-                                    className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all disabled:opacity-50"
+                                    className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all disabled:opacity-50 cursor-pointer shadow-md"
                                 >
                                     <Trash size={14} /> Delete {selectedIds.size} Selected
                                 </button>
                             </div>
                         </div>
-                    ) : (
-                        <div className="p-4 bg-slate-950 border border-slate-800/80 rounded-2xl flex flex-wrap items-center gap-6">
-                            <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest">Icon Legend:</span>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <Video size={14} className="text-rose-400" /> Video
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <ShoppingCart size={14} className="text-amber-400" /> Products
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <Globe size={14} className="text-blue-400" /> Website
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <Mic size={14} className="text-sky-400" /> Podcast
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <FileText size={14} className="text-emerald-400" /> Case Study
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                                <Lightbulb size={14} className="text-indigo-400" /> AI Prompts
-                            </div>
-                        </div>
                     )}
+
+                    {/* Icon Legend Bar */}
+                    <div className="p-4 bg-slate-950 border border-slate-800/80 rounded-2xl flex flex-wrap items-center gap-x-5 gap-y-2 shadow-inner">
+                        <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                            Icon Legend:
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.images} terms have an Image`}>
+                            <ImageIcon size={14} className="text-cyan-400" /> Image <span className="text-[10px] font-mono text-cyan-400 font-bold">({legendStats.images})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.videos} terms have a Video`}>
+                            <Video size={14} className="text-rose-400" /> Video <span className="text-[10px] font-mono text-rose-400 font-bold">({legendStats.videos})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.products} terms have Products or Tools`}>
+                            <ShoppingCart size={14} className="text-amber-400" /> Products <span className="text-[10px] font-mono text-amber-400 font-bold">({legendStats.products})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.websites} terms have Authority Websites`}>
+                            <Globe size={14} className="text-blue-400" /> Website <span className="text-[10px] font-mono text-blue-400 font-bold">({legendStats.websites})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.podcasts} terms have Podcasts`}>
+                            <Mic size={14} className="text-sky-400" /> Podcast <span className="text-[10px] font-mono text-sky-400 font-bold">({legendStats.podcasts})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.caseStudies} terms have Case Studies`}>
+                            <FileText size={14} className="text-emerald-400" /> Case Study <span className="text-[10px] font-mono text-emerald-400 font-bold">({legendStats.caseStudies})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aiPrompts} terms have AI Prompts`}>
+                            <Lightbulb size={14} className="text-indigo-400" /> AI Prompts <span className="text-[10px] font-mono text-indigo-400 font-bold">({legendStats.aiPrompts})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aeoFaqs} terms have AEO Summaries or FAQs`}>
+                            <Sparkles size={14} className="text-purple-400" /> AEO / FAQs <span className="text-[10px] font-mono text-purple-400 font-bold">({legendStats.aeoFaqs})</span>
+                        </div>
+                    </div>
 
                     <div className="overflow-x-auto rounded-2xl border border-slate-800">
                         <table className="min-w-full divide-y divide-slate-800">
@@ -535,14 +559,20 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <div className="text-sm font-extrabold text-slate-100">{term.term}</div>
-                                                <div className="flex items-center gap-1">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    {term.imageUrl && <span title="Image Available"><ImageIcon size={12} className="text-cyan-400" /></span>}
                                                     {term.videoUrl && <span title="Video Available"><Video size={12} className="text-rose-400" /></span>}
-                                                    {term.amazonProducts && term.amazonProducts.length > 0 && <span title="Has Products"><ShoppingCart size={12} className="text-amber-400" /></span>}
+                                                    {((term.amazonProducts && term.amazonProducts.length > 0) || (term.recommendedTools && term.recommendedTools.length > 0)) && (
+                                                        <span title="Has Products/Tools"><ShoppingCart size={12} className="text-amber-400" /></span>
+                                                    )}
                                                     {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={12} className="text-blue-400" /></span>}
                                                     {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={12} className="text-sky-400" /></span>}
                                                     {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={12} className="text-emerald-400" /></span>}
-                                                    {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0)) && (
-                                                        <span title="Has Social Prompts"><Lightbulb size={12} className="text-indigo-400" /></span>
+                                                    {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0) || term.imagePrompt || term.productPrompt || term.socialPrompt) && (
+                                                        <span title="Has AI Prompts"><Lightbulb size={12} className="text-indigo-400" /></span>
+                                                    )}
+                                                    {((term.faqs && term.faqs.length > 0) || (term.questionVariations && term.questionVariations.length > 0) || term.aeoSummary) && (
+                                                        <span title="Has AEO Summary / FAQs"><Sparkles size={12} className="text-purple-400" /></span>
                                                     )}
                                                 </div>
                                             </div>
