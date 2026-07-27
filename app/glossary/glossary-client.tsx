@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart, ArrowRight, HelpCircle, Sparkles, Target, ShieldCheck, Cpu, DollarSign, Layers, RefreshCw } from 'lucide-react';
+import { Book, Clock, ChevronRight, TrendingUp, Search, Zap, LayoutList, Trophy, Heart, ArrowRight, HelpCircle, Sparkles, Target, ShieldCheck, Cpu, DollarSign, Layers, RefreshCw, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, Image as ImageIcon } from 'lucide-react';
 import TagCloud from '../../components/glossary/TagCloud';
 import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
 import { SiteHeader } from '@/components/shared/SiteHeader';
@@ -36,6 +36,21 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const [pillarTerm, setPillarTerm] = useState<any>(null);
 
   const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+
+  const legendStats = useMemo(() => {
+    let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0;
+    (initialTerms || []).forEach(t => {
+      if (t.imageUrl) images++;
+      if (t.videoUrl) videos++;
+      if ((t.amazonProducts && t.amazonProducts.length > 0) || (t.recommendedTools && t.recommendedTools.length > 0)) products++;
+      if (t.websitesRanking && t.websitesRanking.length > 0) websites++;
+      if (t.podcastsRanking && t.podcastsRanking.length > 0) podcasts++;
+      if (t.caseStudies && t.caseStudies.length > 0) caseStudies++;
+      if (t.imagePrompt || t.productPrompt || t.socialPrompt || (t.youtubeTitles && t.youtubeTitles.length > 0) || (t.pinterestIdeas && t.pinterestIdeas.length > 0) || (t.instagramIdeas && t.instagramIdeas.length > 0)) aiPrompts++;
+      if ((t.faqs && t.faqs.length > 0) || (t.questionVariations && t.questionVariations.length > 0) || t.aeoSummary) aeoFaqs++;
+    });
+    return { images, videos, products, websites, podcasts, caseStudies, aiPrompts, aeoFaqs };
+  }, [initialTerms]);
 
   useEffect(() => {
     if (!initialTerms || initialTerms.length === 0) return;
@@ -262,9 +277,40 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
 
       {/* Term Cards Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-6 text-xs font-mono text-slate-400">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 text-xs font-mono text-slate-400">
           <div>Showing <span className="text-cyan-400 font-bold">{filteredTerms.length}</span> terms in knowledge index</div>
           <div>Page <span className="text-slate-100 font-bold">{currentPage}</span> of {totalPages || 1}</div>
+        </div>
+
+        {/* Icon Legend Bar */}
+        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex flex-wrap items-center gap-x-5 gap-y-2 mb-8 shadow-xl">
+          <span className="text-xs font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            Icon Legend:
+          </span>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.images} terms have an Image`}>
+            <ImageIcon size={14} className="text-cyan-400" /> Image <span className="text-[10px] font-mono text-cyan-400 font-bold">({legendStats.images})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.videos} terms have a Video`}>
+            <Video size={14} className="text-rose-400" /> Video <span className="text-[10px] font-mono text-rose-400 font-bold">({legendStats.videos})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.products} terms have Products or Tools`}>
+            <ShoppingCart size={14} className="text-amber-400" /> Products <span className="text-[10px] font-mono text-amber-400 font-bold">({legendStats.products})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.websites} terms have Authority Websites`}>
+            <Globe size={14} className="text-blue-400" /> Website <span className="text-[10px] font-mono text-blue-400 font-bold">({legendStats.websites})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.podcasts} terms have Podcasts`}>
+            <Mic size={14} className="text-sky-400" /> Podcast <span className="text-[10px] font-mono text-sky-400 font-bold">({legendStats.podcasts})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.caseStudies} terms have Case Studies`}>
+            <FileText size={14} className="text-emerald-400" /> Case Study <span className="text-[10px] font-mono text-emerald-400 font-bold">({legendStats.caseStudies})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aiPrompts} terms have AI Prompts`}>
+            <Lightbulb size={14} className="text-indigo-400" /> AI Prompts <span className="text-[10px] font-mono text-indigo-400 font-bold">({legendStats.aiPrompts})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aeoFaqs} terms have AEO Summaries or FAQs`}>
+            <Sparkles size={14} className="text-purple-400" /> AEO / FAQs <span className="text-[10px] font-mono text-purple-400 font-bold">({legendStats.aeoFaqs})</span>
+          </div>
         </div>
 
         {filteredTerms.length === 0 ? (
@@ -285,15 +331,27 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
                 className="group bg-slate-900 border border-slate-800 hover:border-cyan-500/80 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
               >
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-mono font-bold bg-slate-950 border border-slate-800 text-cyan-400 px-2.5 py-1 rounded-xl">
                       {term.category || 'General'}
                     </span>
-                    {term.entityType && (
-                      <span className="text-[10px] font-mono text-slate-400">
-                        {term.entityType}
-                      </span>
-                    )}
+                    
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {term.imageUrl && <span title="Image Available"><ImageIcon size={13} className="text-cyan-400" /></span>}
+                      {term.videoUrl && <span title="Video Available"><Video size={13} className="text-rose-400" /></span>}
+                      {((term.amazonProducts && term.amazonProducts.length > 0) || (term.recommendedTools && term.recommendedTools.length > 0)) && (
+                        <span title="Has Products/Tools"><ShoppingCart size={13} className="text-amber-400" /></span>
+                      )}
+                      {term.websitesRanking && term.websitesRanking.length > 0 && <span title="Has Authority Sites"><Globe size={13} className="text-blue-400" /></span>}
+                      {term.podcastsRanking && term.podcastsRanking.length > 0 && <span title="Has Podcasts"><Mic size={13} className="text-sky-400" /></span>}
+                      {term.caseStudies && term.caseStudies.length > 0 && <span title="Has Case Studies"><FileText size={13} className="text-emerald-400" /></span>}
+                      {((term.youtubeTitles && term.youtubeTitles.length > 0) || (term.pinterestIdeas && term.pinterestIdeas.length > 0) || (term.instagramIdeas && term.instagramIdeas.length > 0) || term.imagePrompt || term.productPrompt || term.socialPrompt) && (
+                        <span title="Has AI Prompts"><Lightbulb size={13} className="text-indigo-400" /></span>
+                      )}
+                      {((term.faqs && term.faqs.length > 0) || (term.questionVariations && term.questionVariations.length > 0) || term.aeoSummary) && (
+                        <span title="Has AEO Summary / FAQs"><Sparkles size={13} className="text-purple-400" /></span>
+                      )}
+                    </div>
                   </div>
 
                   <h3 className="text-xl font-black text-slate-100 group-hover:text-cyan-300 transition-colors">
