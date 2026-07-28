@@ -187,6 +187,20 @@ export interface ILocation extends Document {
         url: string;
         description: string;
     }>;
+    b2bVenture?: Array<{
+        name: string;
+        type: string;
+        city: string;
+        url: string;
+        description: string;
+    }>;
+    compliance?: Array<{
+        name: string;
+        category: string;
+        city: string;
+        url: string;
+        description: string;
+    }>;
     educationalInstitutions?: Array<{
         name: string;
         url?: string;
@@ -449,6 +463,20 @@ const LocationSchema = new Schema<ILocation>(
             description: String,
         }],
         tourismUtilities: [{
+            name: String,
+            category: String,
+            city: String,
+            url: String,
+            description: String,
+        }],
+        b2bVenture: [{
+            name: String,
+            type: String,
+            city: String,
+            url: String,
+            description: String,
+        }],
+        compliance: [{
             name: String,
             category: String,
             city: String,

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio, Plane, Building2, Compass } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio, Plane, Building2, Compass, Rocket } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -14,6 +14,7 @@ import { StateBroadcastStations } from "@/components/locations/state-broadcast-s
 import { StateAirportsSection } from "@/components/locations/state-airports-section";
 import { StateChambersSection } from "@/components/locations/state-chambers-section";
 import { StateTourismSection } from "@/components/locations/state-tourism-section";
+import { StateB2BComplianceSection } from "@/components/locations/state-b2b-compliance-section";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 import { getStateFacts } from "@/lib/utils/state-facts";
@@ -579,6 +580,9 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="tourism" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <Compass size={14} /> Tourism, PUCs & Real Estate ({state.tourismUtilities?.length || 0})
                                 </TabsTrigger>
+                                <TabsTrigger value="b2b" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Rocket size={14} /> B2B Employers, VC & Compliance ({(state.b2bVenture?.length || 0) + (state.compliance?.length || 0)})
+                                </TabsTrigger>
                                 {state.detailedPopulation && (
                                     <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
@@ -790,6 +794,15 @@ const uniqueLabels = Array.from(new Set([
                                 <StateTourismSection
                                     tourismItems={state.tourismUtilities}
                                     realtorCpas={state.realtorCpa}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
+
+                            {/* B2B Employers, VC & Compliance Tab */}
+                            <TabsContent value="b2b" className="space-y-8">
+                                <StateB2BComplianceSection
+                                    b2bItems={state.b2bVenture}
+                                    complianceItems={state.compliance}
                                     stateName={state.name}
                                 />
                             </TabsContent>

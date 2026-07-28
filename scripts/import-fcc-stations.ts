@@ -56,7 +56,8 @@ async function importFccStations() {
     }
 
     console.log(`Reading FCC Radio & TV Excel file: ${excelPath}`);
-    const workbook = XLSX.readFile(excelPath);
+    const fileBuffer = fs.readFileSync(excelPath);
+    const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const rawRows: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });

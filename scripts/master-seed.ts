@@ -12,6 +12,8 @@ import { US_STATE_CHAMBERS } from "../lib/utils/state-chambers";
 import { US_STATE_LEGAL } from "../lib/utils/state-legal-associations";
 import { US_STATE_REALTOR_CPA } from "../lib/utils/state-real-estate-cpa";
 import { US_STATE_TOURISM_UTILITIES } from "../lib/utils/state-tourism-utilities";
+import { US_STATE_B2B_VENTURE } from "../lib/utils/state-b2b-venture";
+import { US_STATE_COMPLIANCE } from "../lib/utils/state-privacy-compliance";
 import { slugify } from "../lib/utils/slugify";
 
 dotenv.config({ path: ".env.local" });
@@ -128,7 +130,7 @@ async function runMasterSeed() {
     const LocationModel = mongoose.models.Location || mongoose.model("Location", new mongoose.Schema({}, { strict: false }));
 
     // ─── STEP 1: INITIALIZE 50 STATES & FACTS ──────────────────────────────────
-    console.log("📍 [STEP 1/4] Initializing 50 US State Records, Chambers, Legal, Real Estate, Tourism & PUCs...");
+    console.log("📍 [STEP 1/4] Initializing 50 US State Records, B2B Employers, VC, Privacy Laws, SOS & Festivals...");
     let stateInitCount = 0;
     for (const [stateName, abbr] of Object.entries(STATE_NAME_TO_ABBR)) {
       const slug = stateName.replace(/\s+/g, "-");
@@ -142,6 +144,8 @@ async function runMasterSeed() {
       const legalList = US_STATE_LEGAL[slug] || US_STATE_LEGAL[stateName.toLowerCase()] || [];
       const realtorCpaList = US_STATE_REALTOR_CPA[slug] || US_STATE_REALTOR_CPA[stateName.toLowerCase()] || [];
       const tourismUtilList = US_STATE_TOURISM_UTILITIES[slug] || US_STATE_TOURISM_UTILITIES[stateName.toLowerCase()] || [];
+      const b2bList = US_STATE_B2B_VENTURE[slug] || US_STATE_B2B_VENTURE[stateName.toLowerCase()] || [];
+      const complianceList = US_STATE_COMPLIANCE[slug] || US_STATE_COMPLIANCE[stateName.toLowerCase()] || [];
 
       await LocationModel.updateOne(
         { slug, type: "state" },
@@ -165,6 +169,8 @@ async function runMasterSeed() {
             legalAssociations: legalList,
             realtorCpa: realtorCpaList,
             tourismUtilities: tourismUtilList,
+            b2bVenture: b2bList,
+            compliance: complianceList,
             symbols: {
               motto: facts.motto,
               mottoTranslation: facts.mottoTranslation,
