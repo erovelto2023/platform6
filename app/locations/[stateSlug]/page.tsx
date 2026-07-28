@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -14,6 +14,7 @@ import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 import { getStateFacts } from "@/lib/utils/state-facts";
 import { getStateNewspapers } from "@/lib/utils/state-newspapers";
+import { LocalEventsRadar } from "@/components/locations/local-events-radar";
 
 export const dynamic = 'force-dynamic';
 
@@ -571,6 +572,9 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="newspapers" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <Newspaper size={14} /> State Press ({stateNewspapersList.length})
                                 </TabsTrigger>
+                                <TabsTrigger value="events" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Calendar size={14} /> State Events Radar
+                                </TabsTrigger>
                                 {(state as any).educationalInstitutions?.length > 0 && (
                                     <TabsTrigger value="education" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Education
@@ -799,6 +803,11 @@ const uniqueLabels = Array.from(new Set([
                                         </div>
                                     ))}
                                 </div>
+                            </TabsContent>
+
+                            {/* State Events Radar Tab */}
+                            <TabsContent value="events" className="space-y-8">
+                                <LocalEventsRadar stateName={state.name} />
                             </TabsContent>
 
                             {/* Education Tab */}

@@ -14,6 +14,8 @@ import { MetroRankings } from "@/components/locations/metro-rankings";
 import { CitySearchTrends } from "@/components/locations/city-search-trends";
 import { fetchLiveCitySearchTrends } from "@/lib/services/search-trends.service";
 import { getStateNewspapers } from "@/lib/utils/state-newspapers";
+import { MarketingCampaignToolkit } from "@/components/locations/marketing-campaign-toolkit";
+import { LocalEventsRadar } from "@/components/locations/local-events-radar";
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +124,22 @@ export default async function CityPage({
                 {/* Live Google Search Trends */}
                 <section>
                     <CitySearchTrends trends={searchTrends} cityName={city.name} stateName={state.name} />
+                </section>
+
+                {/* One-Click Local Marketing Toolkit */}
+                <section>
+                    <MarketingCampaignToolkit 
+                        cityName={city.name} 
+                        stateName={state.name} 
+                        medianIncome={censusData?.medianIncome}
+                        medianAge={censusData?.audience?.medianAge}
+                        population={censusData?.population}
+                    />
+                </section>
+
+                {/* State & Local Events Radar */}
+                <section>
+                    <LocalEventsRadar stateName={state.name} cityName={city.name} />
                 </section>
 
                 {/* Metro Area Rankings */}
