@@ -395,69 +395,9 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
         if (!stateAbbr) throw new Error(`Abbreviation not found for state: ${state.name}`);
 
         // Fetch from Hospital Safety Grade API
-        console.log(`[DEBUG] About to call HospitalService.fetchHospitalsByState for ${stateAbbr}`);
         const hospitalData = await HospitalService.fetchHospitalsByState(stateAbbr);
-        console.log(`[DEBUG] HospitalService returned:`, !!hospitalData);
         
-        console.log(`[DEBUG] Hospital data fetched for ${stateAbbr}:`, {
-            success: !!hospitalData,
-            hospitalsCount: hospitalData?.hospitals?.length || 0,
-            firstHospital: hospitalData?.hospitals?.[0] ? {
-                name: hospitalData.hospitals[0].name,
-                address: hospitalData.hospitals[0].address,
-                website: hospitalData.hospitals[0].website,
-                phone: hospitalData.hospitals[0].phone
-            } : null
-        });
-        
-        if (!hospitalData) {
-            console.warn(`[Sync] Failed to fetch hospital data for ${state.name}, using sample data`);
-            // Fallback to sample data for demonstration
-            const sampleData = HospitalService.getSampleHospitalData(stateAbbr);
-            console.log(`[DEBUG] Sample data for ${stateAbbr}:`, {
-                hospitalsCount: sampleData.hospitals.length,
-                firstHospital: sampleData.hospitals[0] ? {
-                    name: sampleData.hospitals[0].name,
-                    address: sampleData.hospitals[0].address,
-                    website: sampleData.hospitals[0].website,
-                    phone: sampleData.hospitals[0].phone
-                } : null
-            });
-            
-            // Ensure we're saving proper objects, not strings
-            const hospitalArray = sampleData.hospitals.map((h: any) => ({
-                name: h.name,
-                city: h.city,
-                state: h.state,
-                type: h.type,
-                beds: h.beds,
-                safetyGrade: h.safetyGrade,
-                url: h.url,
-                address: h.address,
-                phone: h.phone,
-                website: h.website,
-                safetyGradeUrl: h.safetyGradeUrl
-            }));
-            
-            console.log(`[DEBUG] About to save ${hospitalArray.length} hospitals`);
-            console.log(`[DEBUG] First hospital being saved:`, hospitalArray[0]);
-            
-            // Use direct MongoDB update to bypass Mongoose casting issues
-            await Location.updateOne(
-                { _id: state._id },
-                { 
-                    $set: { 
-                        hospitals: hospitalArray,
-                        hospitalStats: sampleData.stats
-                    }
-                }
-            );
-            
-            console.log(`[DEBUG] Direct MongoDB update completed`);
-        } else {
-            // Update database with real hospital data
-            console.log(`[DEBUG] Using real hospital data for ${stateAbbr}`);
-            // Ensure we're saving proper objects, not strings
+        if (hospitalData && hospitalData.hospitals.length > 0) {
             const hospitalArray = hospitalData.hospitals.map((h: any) => ({
                 name: h.name,
                 city: h.city,
@@ -472,10 +412,6 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
                 safetyGradeUrl: h.safetyGradeUrl
             }));
             
-            console.log(`[DEBUG] About to save ${hospitalArray.length} hospitals`);
-            console.log(`[DEBUG] First hospital being saved:`, hospitalArray[0]);
-            
-            // Use direct MongoDB update to bypass Mongoose casting issues
             await Location.updateOne(
                 { _id: state._id },
                 { 
@@ -485,8 +421,6 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
                     }
                 }
             );
-            
-            console.log(`[DEBUG] Direct MongoDB update completed`);
         }
         
         // Reload the state to get the updated data
