@@ -159,6 +159,9 @@ export interface ILocation extends Document {
         stateAbbr?: string;
         zip?: string;
         description?: string;
+        rating?: number;
+        reviewsCount?: number;
+        hours?: string;
         detailUrl?: string;
         source?: string;
     }>;
@@ -451,6 +454,9 @@ const LocationSchema = new Schema<ILocation>(
             stateAbbr: String,
             zip: String,
             description: String,
+            rating: Number,
+            reviewsCount: Number,
+            hours: String,
             detailUrl: String,
             source: String,
         }],
