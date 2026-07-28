@@ -16,6 +16,11 @@ import { fetchLiveCitySearchTrends } from "@/lib/services/search-trends.service"
 import { getStateNewspapers } from "@/lib/utils/state-newspapers";
 import { MarketingCampaignToolkit } from "@/components/locations/marketing-campaign-toolkit";
 import { LocalEventsRadar } from "@/components/locations/local-events-radar";
+import { LocalAdRoiCalculator } from "@/components/locations/local-ad-roi-calculator";
+import { CityComparisonModal } from "@/components/locations/city-comparison-modal";
+import { SeasonalVelocityIndex } from "@/components/locations/seasonal-velocity-index";
+import { LocalOpportunityGap } from "@/components/locations/local-opportunity-gap";
+import { ExportMarketReportButton } from "@/components/locations/export-market-report-button";
 
 export const dynamic = 'force-dynamic';
 
@@ -112,10 +117,10 @@ export default async function CityPage({
                         <span className="px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider">
                             US Census & Live Google Intelligence
                         </span>
-                        <span className="text-slate-600">•</span>
-                        <span className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider">
-                            {state.name} State Ecosystem
-                        </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-6">
+                        <CityComparisonModal currentCity={city.name} currentState={state.name} currentStats={censusData} />
+                        <ExportMarketReportButton cityName={city.name} stateName={state.name} />
                     </div>
                 </div>
             </header>
@@ -124,6 +129,15 @@ export default async function CityPage({
                 {/* Live Google Search Trends */}
                 <section>
                     <CitySearchTrends trends={searchTrends} cityName={city.name} stateName={state.name} />
+                </section>
+
+                {/* Local Ad Budget & ROI Estimator */}
+                <section>
+                    <LocalAdRoiCalculator 
+                        cityName={city.name} 
+                        population={censusData?.population || 14850} 
+                        medianIncome={censusData?.medianIncome || 74200} 
+                    />
                 </section>
 
                 {/* One-Click Local Marketing Toolkit */}
@@ -135,6 +149,20 @@ export default async function CityPage({
                         medianAge={censusData?.audience?.medianAge}
                         population={censusData?.population}
                     />
+                </section>
+
+                {/* Local Business Gap & Opportunity Spotlight */}
+                <section>
+                    <LocalOpportunityGap 
+                        cityName={city.name} 
+                        medianIncome={censusData?.medianIncome || 74200} 
+                        medianAge={censusData?.audience?.medianAge || 38} 
+                    />
+                </section>
+
+                {/* Seasonal Foot-Traffic Velocity Index */}
+                <section>
+                    <SeasonalVelocityIndex cityName={city.name} stateName={state.name} />
                 </section>
 
                 {/* State & Local Events Radar */}
@@ -163,6 +191,7 @@ export default async function CityPage({
                     <CityCensusStats 
                         data={censusData} 
                         cityName={city.name} 
+                        stateName={state.name}
                         zipCodes={city.zipCodes}
                         areaCodes={city.areaCodes}
                         timezone={city.timezone}

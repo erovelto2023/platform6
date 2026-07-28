@@ -7,23 +7,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { AIBusinessAdvisor } from "./ai-business-advisor";
 import { CityStats } from "@/lib/services/census.service";
+import { LocationCodesService } from "@/lib/services/location-codes.service";
 
 interface CityCensusStatsProps {
     data: CityStats | null;
     cityName: string;
+    stateName?: string;
     zipCodes?: string[];
     areaCodes?: string[];
     timezone?: string;
 }
 
-export function CityCensusStats({ data, cityName, zipCodes = [], areaCodes = [], timezone = "EST (Eastern Standard Time)" }: CityCensusStatsProps) {
+export function CityCensusStats({ data, cityName, stateName = "South Carolina", zipCodes = [], areaCodes = [], timezone }: CityCensusStatsProps) {
     if (!data) return null;
 
     const totalPop = data.population || 1;
     const isSmallTown = totalPop < 5000;
 
-    const displayZipCodes = zipCodes.length > 0 ? zipCodes : ["19703", "19709"];
-    const displayAreaCodes = areaCodes.length > 0 ? areaCodes : ["302"];
+    const codeInfo = LocationCodesService.getCityCodes(cityName, stateName, zipCodes, areaCodes);
+    const displayZipCodes = codeInfo.zipCodes;
+    const displayAreaCodes = codeInfo.areaCodes;
+    const displayTimezone = timezone && timezone !== "EST (Eastern Standard Time)" ? timezone : codeInfo.timezone;
 
     return (
         <div className="space-y-10">

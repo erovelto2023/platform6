@@ -16,6 +16,10 @@ import { getStateFacts } from "@/lib/utils/state-facts";
 import { getStateNewspapers } from "@/lib/utils/state-newspapers";
 import { LocalEventsRadar } from "@/components/locations/local-events-radar";
 import { HospitalService } from "@/lib/services/hospital.service";
+import { StateSymbolsGrid } from "@/components/locations/state-symbols-grid";
+import { StateGeographyCard } from "@/components/locations/state-geography-card";
+import { StateAdminTelecomDirectory } from "@/components/locations/state-admin-telecom-directory";
+import { StateFactSheetExporter } from "@/components/locations/state-fact-sheet-exporter";
 
 export const dynamic = 'force-dynamic';
 
@@ -568,121 +572,54 @@ const uniqueLabels = Array.from(new Set([
 
                             {/* State Details Tab Content */}
                             <TabsContent value="details" className="space-y-12 w-full max-w-full" suppressHydrationWarning>
-                                <div className="border-l-4 border-cyan-500 pl-6 mb-8">
-                                    <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight">Important State Facts</h2>
-                                    <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
-                                        <span className="text-cyan-400">• Symbols</span> 
-                                        <span className="text-emerald-400">• Heritage</span> 
-                                        <span className="text-indigo-400">• Key Info</span>
-                                    </p>
-                                </div>
-
-                                {/* Section 1: Symbols */}
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-black uppercase tracking-wider text-cyan-400 flex items-center gap-2">
-                                        <Award size={18} /> Official State Symbols
-                                    </h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Bird</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.bird}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Flower</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.flower}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Tree</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.tree}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Song</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.song}</div>
-                                        </div>
-                                        {verifiedFacts.insect && (
-                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Bug / Insect</div>
-                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.insect}</div>
-                                            </div>
-                                        )}
-                                        {verifiedFacts.mineral && (
-                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Gemstone / Mineral</div>
-                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.mineral}</div>
-                                            </div>
-                                        )}
-                                        {verifiedFacts.fish && (
-                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Fish</div>
-                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.fish}</div>
-                                            </div>
-                                        )}
-                                        {verifiedFacts.beverage && (
-                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
-                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Beverage</div>
-                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.beverage}</div>
-                                            </div>
-                                        )}
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-l-4 border-cyan-500 pl-6 mb-8">
+                                    <div>
+                                        <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight">{state.name} State Facts & Heritage</h2>
+                                        <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
+                                            <span className="text-cyan-400">• Official Symbols</span> 
+                                            <span className="text-emerald-400">• Topography & Climate</span> 
+                                            <span className="text-indigo-400">• State Portals</span>
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Link 
+                                            href="/locations/compare" 
+                                            className="px-4 py-2 bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 hover:text-white transition-all inline-flex items-center gap-2"
+                                        >
+                                            Compare States Matrix →
+                                        </Link>
                                     </div>
                                 </div>
 
-                                {/* Section 2: Heritage & Statehood */}
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="text-lg font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
-                                        <Building size={18} /> Heritage & Statehood
-                                    </h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Capital</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.capital}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Motto</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.motto}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Nickname</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.nickname}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">Statehood Date</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.statehood}</div>
-                                        </div>
-                                    </div>
-                                </div>
+                                {/* Fact Sheet Exporter */}
+                                <StateFactSheetExporter 
+                                    stateName={state.name} 
+                                    facts={verifiedFacts} 
+                                    symbolsFromDb={state.symbols} 
+                                />
 
-                                {/* Section 3: Key Info & Metrics */}
-                                <div className="space-y-4 pt-4">
-                                    <h3 className="text-lg font-black uppercase tracking-wider text-indigo-400 flex items-center gap-2">
-                                        <Globe size={18} /> Key Info & Demographics
-                                    </h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Largest Metropolitan City</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.largestCity}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">US Geographic Region</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.region}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Time Zone</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.timezone}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">State Abbreviation</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.abbreviation}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Total Land Area</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.landArea}</div>
-                                        </div>
-                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
-                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">State Population</div>
-                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.population}</div>
-                                        </div>
-                                    </div>
-                                </div>
+                                {/* Official Symbols Grid */}
+                                <StateSymbolsGrid 
+                                    stateName={state.name} 
+                                    facts={verifiedFacts} 
+                                    symbolsFromDb={state.symbols} 
+                                />
+
+                                {/* Geography & Elevation */}
+                                <StateGeographyCard 
+                                    stateName={state.name} 
+                                    facts={verifiedFacts} 
+                                    elevationData={state.elevation} 
+                                    areaData={state.area} 
+                                    koppenClimate={state.koppen_climate} 
+                                />
+
+                                {/* Administrative & Telecom Directory */}
+                                <StateAdminTelecomDirectory 
+                                    stateName={state.name} 
+                                    facts={verifiedFacts} 
+                                    locationDoc={state} 
+                                />
                             </TabsContent>
 
                             {/* Market Cities Tab Content */}

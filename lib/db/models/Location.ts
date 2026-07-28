@@ -92,6 +92,19 @@ export interface ILocation extends Document {
         dinosaur?: string;
         mineral?: string;
         polka?: string;
+        beverage?: string;
+        fruit?: string;
+        gemstone?: string;
+        rock?: string;
+        soil?: string;
+        freshwaterFish?: string;
+        saltwaterFish?: string;
+        butterfly?: string;
+        quarterYear?: string;
+        mottoTranslation?: string;
+        statehoodRank?: string;
+        sosUrl?: string;
+        taxDeptUrl?: string;
     };
     subdivisions?: string[];
     extendedFacts?: Array<{
@@ -296,6 +309,19 @@ const LocationSchema = new Schema<ILocation>(
             dinosaur: String,
             mineral: String,
             polka: String,
+            beverage: String,
+            fruit: String,
+            gemstone: String,
+            rock: String,
+            soil: String,
+            freshwaterFish: String,
+            saltwaterFish: String,
+            butterfly: String,
+            quarterYear: String,
+            mottoTranslation: String,
+            statehoodRank: String,
+            sosUrl: String,
+            taxDeptUrl: String,
         },
         subdivisions: [String],
         extendedFacts: [{
