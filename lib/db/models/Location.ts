@@ -138,6 +138,19 @@ export interface ILocation extends Document {
         url: string;
         description?: string;
         type?: 'Local' | 'Regional' | 'Statewide';
+        city?: string;
+    }>;
+    broadcastStations?: Array<{
+        callSign: string;
+        facilityId?: number;
+        type?: string;
+        city?: string;
+        state?: string;
+        licensee?: string;
+        network?: string;
+        rfChannel?: number;
+        virtualChannel?: number;
+        dma?: string;
     }>;
     educationalInstitutions?: Array<{
         name: string;
@@ -359,6 +372,18 @@ const LocationSchema = new Schema<ILocation>(
                 enum: ['Local', 'Regional', 'Statewide'],
                 default: 'Local',
             },
+        }],
+        broadcastStations: [{
+            callSign: String,
+            facilityId: Number,
+            type: String,
+            city: String,
+            state: String,
+            licensee: String,
+            network: String,
+            rfChannel: Number,
+            virtualChannel: Number,
+            dma: String
         }],
         educationalInstitutions: [{
             name: String,

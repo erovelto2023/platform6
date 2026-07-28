@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -10,6 +10,7 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { StateEducationSection } from "@/components/locations/state-education-section";
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
+import { StateBroadcastStations } from "@/components/locations/state-broadcast-stations";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 import { getStateFacts } from "@/lib/utils/state-facts";
@@ -563,6 +564,9 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="education" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <GraduationCap size={14} /> Universities & Colleges
                                 </TabsTrigger>
+                                <TabsTrigger value="broadcast" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Radio size={14} /> Radio & TV Stations ({state.broadcastStations?.length || 0})
+                                </TabsTrigger>
                                 {state.detailedPopulation && (
                                     <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
@@ -740,6 +744,14 @@ const uniqueLabels = Array.from(new Set([
                                 <StateHealthcareSection
                                     hospitals={hospitals}
                                     stats={hospitalStats || (state as any).hospitalStats}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
+
+                            {/* Radio & TV Broadcast Stations Tab */}
+                            <TabsContent value="broadcast" className="space-y-8">
+                                <StateBroadcastStations
+                                    stations={state.broadcastStations}
                                     stateName={state.name}
                                 />
                             </TabsContent>
