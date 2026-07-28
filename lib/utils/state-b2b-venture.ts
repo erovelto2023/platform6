@@ -122,7 +122,7 @@ export const US_STATE_B2B_VENTURE: Record<string, B2BVentureItem[]> = {
   ],
   missouri: [
     { name: "BJC HealthCare", type: "Top Employer / Enterprise", city: "St. Louis", url: "https://www.bjc.org", description: "Non-profit healthcare system employing over 31,000 personnel in St. Louis." },
-    { name: "Cortex Innovation Community", type: "Co-working & Tech Hub", city: "St. Louis", url: "https://cortexstl.com", description:-[[200-acre urban bioscience and technology district in Midtown St. Louis.]] }
+    { name: "Cortex Innovation Community", type: "Co-working & Tech Hub", city: "St. Louis", url: "https://cortexstl.com", description: "200-acre urban bioscience and technology district in Midtown St. Louis." }
   ],
   montana: [
     { name: "Billings Clinic Healthcare", type: "Top Employer / Enterprise", city: "Billings", url: "https://www.billingsclinic.com", description: "Montana's largest independent healthcare organization with 4,500 employees." },
