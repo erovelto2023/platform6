@@ -10,6 +10,8 @@ import { STATE_NEWSPAPERS_MAP } from "../lib/utils/state-newspapers";
 import { US_STATE_AIRPORTS } from "../lib/utils/state-airports";
 import { US_STATE_CHAMBERS } from "../lib/utils/state-chambers";
 import { US_STATE_LEGAL } from "../lib/utils/state-legal-associations";
+import { US_STATE_REALTOR_CPA } from "../lib/utils/state-real-estate-cpa";
+import { US_STATE_TOURISM_UTILITIES } from "../lib/utils/state-tourism-utilities";
 import { slugify } from "../lib/utils/slugify";
 
 dotenv.config({ path: ".env.local" });
@@ -126,7 +128,7 @@ async function runMasterSeed() {
     const LocationModel = mongoose.models.Location || mongoose.model("Location", new mongoose.Schema({}, { strict: false }));
 
     // ─── STEP 1: INITIALIZE 50 STATES & FACTS ──────────────────────────────────
-    console.log("📍 [STEP 1/4] Initializing 50 US State Records, Chambers, Legal, Airports & Education...");
+    console.log("📍 [STEP 1/4] Initializing 50 US State Records, Chambers, Legal, Real Estate, Tourism & PUCs...");
     let stateInitCount = 0;
     for (const [stateName, abbr] of Object.entries(STATE_NAME_TO_ABBR)) {
       const slug = stateName.replace(/\s+/g, "-");
@@ -138,6 +140,8 @@ async function runMasterSeed() {
       const airportList = US_STATE_AIRPORTS[slug] || US_STATE_AIRPORTS[stateName.toLowerCase()] || [];
       const chamberList = US_STATE_CHAMBERS[slug] || US_STATE_CHAMBERS[stateName.toLowerCase()] || [];
       const legalList = US_STATE_LEGAL[slug] || US_STATE_LEGAL[stateName.toLowerCase()] || [];
+      const realtorCpaList = US_STATE_REALTOR_CPA[slug] || US_STATE_REALTOR_CPA[stateName.toLowerCase()] || [];
+      const tourismUtilList = US_STATE_TOURISM_UTILITIES[slug] || US_STATE_TOURISM_UTILITIES[stateName.toLowerCase()] || [];
 
       await LocationModel.updateOne(
         { slug, type: "state" },
@@ -159,6 +163,8 @@ async function runMasterSeed() {
             airports: airportList,
             chambers: chamberList,
             legalAssociations: legalList,
+            realtorCpa: realtorCpaList,
+            tourismUtilities: tourismUtilList,
             symbols: {
               motto: facts.motto,
               mottoTranslation: facts.mottoTranslation,
@@ -174,6 +180,7 @@ async function runMasterSeed() {
               fish: facts.freshwaterFish || facts.fish,
               quarterYear: facts.quarterYear,
               sosUrl: facts.sosUrl,
+              taxDeptUrl: facts.taxDeptUrl
             }
           }
         },

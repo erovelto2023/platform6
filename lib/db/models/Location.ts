@@ -173,6 +173,20 @@ export interface ILocation extends Document {
         url: string;
         description: string;
     }>;
+    realtorCpa?: Array<{
+        name: string;
+        type: string;
+        city: string;
+        url: string;
+        description: string;
+    }>;
+    tourismUtilities?: Array<{
+        name: string;
+        category: string;
+        city: string;
+        url: string;
+        description: string;
+    }>;
     educationalInstitutions?: Array<{
         name: string;
         url?: string;
@@ -423,6 +437,20 @@ const LocationSchema = new Schema<ILocation>(
         legalAssociations: [{
             name: String,
             type: String,
+            city: String,
+            url: String,
+            description: String,
+        }],
+        realtorCpa: [{
+            name: String,
+            type: String,
+            city: String,
+            url: String,
+            description: String,
+        }],
+        tourismUtilities: [{
+            name: String,
+            category: String,
             city: String,
             url: String,
             description: String,
