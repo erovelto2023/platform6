@@ -26,6 +26,7 @@ import { StateSymbolsGrid } from "@/components/locations/state-symbols-grid";
 import { StateGeographyCard } from "@/components/locations/state-geography-card";
 import { StateAdminTelecomDirectory } from "@/components/locations/state-admin-telecom-directory";
 import { StateFactSheetExporter } from "@/components/locations/state-fact-sheet-exporter";
+import { MarketCitiesGrid } from "@/components/locations/market-cities-grid";
 import { getStateEducation } from "@/lib/utils/state-education";
 import { getStateAirports } from "@/lib/utils/state-airports";
 import { getStateChambers } from "@/lib/utils/state-chambers";
@@ -690,52 +691,14 @@ const uniqueLabels = Array.from(new Set([
                                 />
                             </TabsContent>
 
-                            {/* Market Cities Tab Content */}
+                            {/* Market Cities Tab Content with A-Z Pagination */}
                             <TabsContent value="cities" className="space-y-8">
-                                <div className="flex items-center justify-between mb-8 border-l-4 border-cyan-500 pl-6">
-                                    <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight">
-                                        {query ? `Results for "${query}"` : 'Market Cities'}
-                                    </h2>
-                                    <span className="text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
-                                        {cities.length} Cities Available
-                                    </span>
-                                </div>
-
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                    {cities.map((city: any) => (
-                                        <Link 
-                                            key={city.slug}
-                                            href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-slate-900 border border-slate-800 hover:border-cyan-500 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300">
-                                                        <MapPin size={24} />
-                                                    </div>
-                                                    <span className="font-bold text-slate-100 text-lg group-hover:text-cyan-400 transition-colors leading-tight">
-                                                        {city.name}
-                                                    </span>
-                                                </div>
-                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-cyan-400 -translate-x-2 group-hover:translate-x-0" size={18} />
-                                            </div>
-                                            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
-                                                <span>{state.name} Market</span>
-                                                <span className="text-cyan-400 font-bold">View Insights →</span>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                                
-                                {cities.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-800 bg-slate-900/50 rounded-3xl text-center">
-                                        <SearchIcon className="h-12 w-12 text-slate-600 mb-4" />
-                                        <h2 className="text-xl font-bold text-slate-400 uppercase italic">No Cities Found</h2>
-                                        <p className="text-slate-500 mt-2 max-w-sm text-sm">
-                                            We couldn't find any cities matching your search query.
-                                        </p>
-                                    </div>
-                                )}
+                                <MarketCitiesGrid 
+                                    cities={cities} 
+                                    stateName={state.name} 
+                                    stateSlug={stateSlug} 
+                                    initialQuery={query} 
+                                />
                             </TabsContent>
 
                             {/* All You Can Read State Press Hub */}
