@@ -499,7 +499,7 @@ const uniqueLabels = Array.from(new Set([
 
     const verifiedFacts = getStateFacts(stateSlug || state.name);
     const stateNewspapersList = getStateNewspapers(stateSlug || state.name);
-    const hospitalData = await HospitalService.fetchHospitalsByState(verifiedFacts.abbreviation);
+    const hospitalData = await HospitalService.fetchHospitalsByState(state.postal || verifiedFacts.abbreviation || stateSlug);
     const hospitals = (state?.hospitals && state.hospitals.length > 0) 
         ? state.hospitals 
         : (hospitalData?.hospitals || []);

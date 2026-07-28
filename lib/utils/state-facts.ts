@@ -1588,11 +1588,12 @@ export const US_STATE_FACTS: Record<string, StateFactGroup> = {
   }
 };
 
+import { STATE_NAME_TO_ABBR } from "./state-mapping";
+
 export function getStateFacts(stateSlugOrName: string): StateFactGroup {
-  const normalized = (stateSlugOrName || '')
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z]/g, '');
+  const rawInput = (stateSlugOrName || '').toLowerCase().trim();
+  const cleanedName = rawInput.replace(/-/g, ' ');
+  const normalized = rawInput.replace(/[^a-z]/g, '');
 
   if (US_STATE_FACTS[normalized]) {
     return US_STATE_FACTS[normalized];
@@ -1605,6 +1606,8 @@ export function getStateFacts(stateSlugOrName: string): StateFactGroup {
   if (matchedKey) {
     return US_STATE_FACTS[matchedKey];
   }
+
+  const knownAbbr = (STATE_NAME_TO_ABBR[cleanedName] || STATE_NAME_TO_ABBR[rawInput] || normalized.slice(0, 2)).toUpperCase();
 
   // Fallback default for edge cases
   const nameClean = stateSlugOrName ? stateSlugOrName.charAt(0).toUpperCase() + stateSlugOrName.slice(1) : "State";
@@ -1627,14 +1630,14 @@ export function getStateFacts(stateSlugOrName: string): StateFactGroup {
     quarterYear: "Commemorative Series",
     highestPoint: `${nameClean} High Peak: 3,500 ft`,
     lowestPoint: `${nameClean} Base Valley: 0 ft`,
-    stateWebsite: `https://www.${normalized || 'usa'}.gov`,
-    sosUrl: `https://sos.${normalized || 'usa'}.gov`,
-    taxDeptUrl: `https://revenue.${normalized || 'usa'}.gov`,
+    stateWebsite: `https://www.${knownAbbr.toLowerCase()}.gov`,
+    sosUrl: `https://sos.${knownAbbr.toLowerCase()}.gov`,
+    taxDeptUrl: `https://revenue.${knownAbbr.toLowerCase()}.gov`,
     largestCity: `${nameClean} Metro Center`,
     region: "United States",
     timezone: "US Standard Timezone",
     landArea: "Territory Area",
     population: "State Population",
-    abbreviation: nameClean.slice(0, 2).toUpperCase()
+    abbreviation: knownAbbr
   };
 }
