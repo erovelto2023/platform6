@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -15,6 +15,7 @@ import { StatePopulationStats } from "@/components/locations/state-population-st
 import { getStateFacts } from "@/lib/utils/state-facts";
 import { getStateNewspapers } from "@/lib/utils/state-newspapers";
 import { LocalEventsRadar } from "@/components/locations/local-events-radar";
+import { HospitalService } from "@/lib/services/hospital.service";
 
 export const dynamic = 'force-dynamic';
 
@@ -465,32 +466,6 @@ export default async function StatePage({
     
     console.log(`[DEBUG] Loaded state ${state.name}. Extended facts count: ${state.extendedFacts?.length || 0}`);
 
-    // TEMPORARILY DISABLE HOSPITAL SYNC TO FIX OTHER TABS
-    // The hospital sync is causing database validation errors that break the entire page
-    console.log(`[DEBUG] Hospital sync temporarily disabled to fix other tabs`);
-    
-    // Get hospital data using raw MongoDB to bypass Mongoose issues (Next.js caching)
-    let hospitals = [];
-    let mongoState = null;
-    try {
-        const { MongoClient } = require('mongodb');
-        const client = new MongoClient(process.env.MONGODB_URI!);
-        
-        await client.connect();
-        const db = client.db();
-        const locations = db.collection('locations');
-        
-        mongoState = await locations.findOne({ slug: stateSlug, type: 'state' });
-        if (mongoState?.hospitals && Array.isArray(mongoState.hospitals)) {
-            hospitals = mongoState.hospitals;
-            console.log(`[DEBUG] Found ${hospitals.length} hospitals using raw MongoDB for ${stateSlug}`);
-        }
-        
-        await client.close();
-    } catch (error) {
-        console.error(`[DEBUG] Error getting hospitals with raw MongoDB:`, error);
-    }
-
     const cities = await getCitiesByState(stateSlug, query);
 
 const uniqueLabels = Array.from(new Set([
@@ -522,6 +497,9 @@ const uniqueLabels = Array.from(new Set([
     const { products } = await getDirectoryProducts();
     const verifiedFacts = getStateFacts(stateSlug || state.name);
     const stateNewspapersList = getStateNewspapers(stateSlug || state.name);
+    const hospitalData = await HospitalService.fetchHospitalsByState(verifiedFacts.abbreviation);
+    const hospitals = hospitalData?.hospitals || stateDoc?.hospitals || [];
+    const hospitalStats = hospitalData?.stats || stateDoc?.hospitalStats;
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
@@ -575,16 +553,12 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="events" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <Calendar size={14} /> State Events Radar
                                 </TabsTrigger>
-                                {(state as any).educationalInstitutions?.length > 0 && (
-                                    <TabsTrigger value="education" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                                        Education
-                                    </TabsTrigger>
-                                )}
-                                {(hospitals.length > 0 || (state as any).hospitalStats) && (
-                                    <TabsTrigger value="healthcare" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
-                                        Healthcare
-                                    </TabsTrigger>
-                                )}
+                                <TabsTrigger value="healthcare" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Activity size={14} /> Healthcare & Doctors ({hospitals.length})
+                                </TabsTrigger>
+                                <TabsTrigger value="education" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <GraduationCap size={14} /> Universities & Colleges
+                                </TabsTrigger>
                                 {state.detailedPopulation && (
                                     <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
@@ -811,25 +785,21 @@ const uniqueLabels = Array.from(new Set([
                             </TabsContent>
 
                             {/* Education Tab */}
-                            {(state as any).educationalInstitutions?.length > 0 && (
-                                <TabsContent value="education" className="space-y-8">
-                                    <StateEducationSection
-                                        institutions={(state as any).educationalInstitutions}
-                                        stateName={state.name}
-                                    />
-                                </TabsContent>
-                            )}
+                            <TabsContent value="education" className="space-y-8">
+                                <StateEducationSection
+                                    institutions={(state as any).educationalInstitutions}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
 
                             {/* Healthcare Tab */}
-                            {(hospitals.length > 0 || (mongoState as any)?.hospitalStats) && (
-                                <TabsContent value="healthcare" className="space-y-8">
-                                    <StateHealthcareSection
-                                        hospitals={hospitals}
-                                        stats={(mongoState as any)?.hospitalStats || (state as any).hospitalStats}
-                                        stateName={state.name}
-                                    />
-                                </TabsContent>
-                            )}
+                            <TabsContent value="healthcare" className="space-y-8">
+                                <StateHealthcareSection
+                                    hospitals={hospitals}
+                                    stats={hospitalStats || (state as any).hospitalStats}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
 
                             {/* Demographics Tab Content */}
                             {state.detailedPopulation && (
