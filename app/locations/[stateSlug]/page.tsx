@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio, Plane, Building2 } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -11,6 +11,8 @@ import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBann
 import { StateEducationSection } from "@/components/locations/state-education-section";
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
 import { StateBroadcastStations } from "@/components/locations/state-broadcast-stations";
+import { StateAirportsSection } from "@/components/locations/state-airports-section";
+import { StateChambersSection } from "@/components/locations/state-chambers-section";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 import { getStateFacts } from "@/lib/utils/state-facts";
@@ -567,6 +569,12 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="broadcast" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <Radio size={14} /> Radio & TV Stations ({state.broadcastStations?.length || 0})
                                 </TabsTrigger>
+                                <TabsTrigger value="airports" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Plane size={14} /> Airports & Aviation ({state.airports?.length || 0})
+                                </TabsTrigger>
+                                <TabsTrigger value="chambers" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Building2 size={14} /> Chambers & EDCs ({state.chambers?.length || 0})
+                                </TabsTrigger>
                                 {state.detailedPopulation && (
                                     <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
@@ -752,6 +760,23 @@ const uniqueLabels = Array.from(new Set([
                             <TabsContent value="broadcast" className="space-y-8">
                                 <StateBroadcastStations
                                     stations={state.broadcastStations}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
+
+                            {/* Commercial Airports Tab */}
+                            <TabsContent value="airports" className="space-y-8">
+                                <StateAirportsSection
+                                    airports={state.airports}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
+
+                            {/* Chambers of Commerce & EDCs Tab */}
+                            <TabsContent value="chambers" className="space-y-8">
+                                <StateChambersSection
+                                    chambers={state.chambers}
+                                    legalAssocs={state.legalAssociations}
                                     stateName={state.name}
                                 />
                             </TabsContent>

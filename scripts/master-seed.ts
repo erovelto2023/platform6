@@ -5,6 +5,11 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { STATE_NAME_TO_ABBR } from "../lib/utils/state-mapping";
 import { US_STATE_FACTS, getStateFacts } from "../lib/utils/state-facts";
+import { US_STATE_EDUCATION } from "../lib/utils/state-education";
+import { STATE_NEWSPAPERS_MAP } from "../lib/utils/state-newspapers";
+import { US_STATE_AIRPORTS } from "../lib/utils/state-airports";
+import { US_STATE_CHAMBERS } from "../lib/utils/state-chambers";
+import { US_STATE_LEGAL } from "../lib/utils/state-legal-associations";
 import { slugify } from "../lib/utils/slugify";
 
 dotenv.config({ path: ".env.local" });
@@ -121,13 +126,18 @@ async function runMasterSeed() {
     const LocationModel = mongoose.models.Location || mongoose.model("Location", new mongoose.Schema({}, { strict: false }));
 
     // ─── STEP 1: INITIALIZE 50 STATES & FACTS ──────────────────────────────────
-    console.log("📍 [STEP 1/4] Initializing 50 US State Records & Fact Overrides...");
+    console.log("📍 [STEP 1/4] Initializing 50 US State Records, Chambers, Legal, Airports & Education...");
     let stateInitCount = 0;
     for (const [stateName, abbr] of Object.entries(STATE_NAME_TO_ABBR)) {
       const slug = stateName.replace(/\s+/g, "-");
       const formattedName = toTitleCase(stateName);
       const postal = abbr.toUpperCase();
       const facts = getStateFacts(slug);
+      const eduList = US_STATE_EDUCATION[slug] || US_STATE_EDUCATION[stateName.toLowerCase()] || [];
+      const newspaperList = STATE_NEWSPAPERS_MAP[slug] || STATE_NEWSPAPERS_MAP[stateName.toLowerCase()] || [];
+      const airportList = US_STATE_AIRPORTS[slug] || US_STATE_AIRPORTS[stateName.toLowerCase()] || [];
+      const chamberList = US_STATE_CHAMBERS[slug] || US_STATE_CHAMBERS[stateName.toLowerCase()] || [];
+      const legalList = US_STATE_LEGAL[slug] || US_STATE_LEGAL[stateName.toLowerCase()] || [];
 
       await LocationModel.updateOne(
         { slug, type: "state" },
@@ -144,6 +154,11 @@ async function runMasterSeed() {
             lowest_point: facts.lowestPoint,
             capital: { name: facts.capital },
             area: { land_mi: facts.landArea },
+            educationalInstitutions: eduList,
+            newspapers: newspaperList,
+            airports: airportList,
+            chambers: chamberList,
+            legalAssociations: legalList,
             symbols: {
               motto: facts.motto,
               mottoTranslation: facts.mottoTranslation,
@@ -159,7 +174,6 @@ async function runMasterSeed() {
               fish: facts.freshwaterFish || facts.fish,
               quarterYear: facts.quarterYear,
               sosUrl: facts.sosUrl,
-              taxDeptUrl: facts.taxDeptUrl
             }
           }
         },
