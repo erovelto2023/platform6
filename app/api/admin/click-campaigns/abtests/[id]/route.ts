@@ -6,7 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 // GET single A/B test
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -14,9 +14,10 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
     
-    const abTest = await ABTest.findOne({ _id: params.id, userId });
+    const abTest = await ABTest.findOne({ _id: id, userId });
     
     if (!abTest) {
       return NextResponse.json({ success: false, error: "A/B test not found" }, { status: 404 });
@@ -31,7 +32,7 @@ export async function GET(
 // PUT update A/B test
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -39,14 +40,14 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
+    const body = await request.json();
     await dbConnect();
     
-    const body = await request.json();
-    
     const abTest = await ABTest.findOneAndUpdate(
-      { _id: params.id, userId },
-      { ...body, updatedAt: new Date() },
-      { new: true }
+      { _id: id, userId },
+      { ...body },
+      { new: true, runValidators: true }
     );
     
     if (!abTest) {
@@ -62,7 +63,7 @@ export async function PUT(
 // DELETE A/B test
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -70,15 +71,16 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
     
-    const abTest = await ABTest.findOneAndDelete({ _id: params.id, userId });
+    const abTest = await ABTest.findOneAndDelete({ _id: id, userId });
     
     if (!abTest) {
       return NextResponse.json({ success: false, error: "A/B test not found" }, { status: 404 });
     }
     
-    return NextResponse.json({ success: true, data: abTest }, { status: 200 });
+    return NextResponse.json({ success: true, message: "A/B test deleted" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to delete A/B test" }, { status: 500 });
   }

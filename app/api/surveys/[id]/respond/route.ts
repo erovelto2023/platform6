@@ -1,11 +1,12 @@
 import { submitSurveyResponse } from "@/lib/services/survey.service";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(
-    req: Request,
-    { params }: { params: { id: string } }
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const formData = await req.formData();
         
         // Extract answers from form data
@@ -27,7 +28,7 @@ export async function POST(
 
         // Submit response (without user ID for public embeds)
         const result = await submitSurveyResponse(
-            params.id,
+            id,
             null, // No user ID for public embeds
             answers,
             {},

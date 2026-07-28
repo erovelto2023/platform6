@@ -5,7 +5,7 @@ import { PowerWord } from "@/lib/models/powerWords.model";
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -13,11 +13,12 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
 
     const body = await req.json();
     const powerWord = await PowerWord.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true }
     );
@@ -35,7 +36,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -43,9 +44,10 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
 
-    const powerWord = await PowerWord.findByIdAndDelete(params.id);
+    const powerWord = await PowerWord.findByIdAndDelete(id);
     if (!powerWord) {
       return NextResponse.json({ success: false, error: "Power word not found" }, { status: 404 });
     }

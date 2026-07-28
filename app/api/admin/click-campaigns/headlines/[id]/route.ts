@@ -5,7 +5,7 @@ import { GeneratedHeadline } from "@/lib/models/headline.model";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -13,9 +13,10 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
 
-    const headline = await GeneratedHeadline.findById(params.id);
+    const headline = await GeneratedHeadline.findById(id);
     if (!headline) {
       return NextResponse.json({ success: false, error: "Headline not found" }, { status: 404 });
     }
@@ -29,7 +30,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -37,11 +38,12 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
 
     const body = await req.json();
     const headline = await GeneratedHeadline.findByIdAndUpdate(
-      params.id,
+      id,
       body,
       { new: true }
     );
@@ -59,7 +61,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -67,14 +69,15 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
 
-    const headline = await GeneratedHeadline.findByIdAndDelete(params.id);
+    const headline = await GeneratedHeadline.findByIdAndDelete(id);
     if (!headline) {
       return NextResponse.json({ success: false, error: "Headline not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: headline });
+    return NextResponse.json({ success: true, message: "Headline deleted successfully" });
   } catch (error) {
     console.error("Error deleting headline:", error);
     return NextResponse.json({ success: false, error: "Failed to delete headline" }, { status: 500 });

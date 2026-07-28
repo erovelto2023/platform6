@@ -6,7 +6,7 @@ import { auth } from "@clerk/nextjs/server";
 // GET single pixel
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -14,9 +14,10 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
     
-    const pixel = await Pixel.findOne({ _id: params.id, userId });
+    const pixel = await Pixel.findOne({ _id: id, userId });
     
     if (!pixel) {
       return NextResponse.json({ success: false, error: "Pixel not found" }, { status: 404 });
@@ -31,7 +32,7 @@ export async function GET(
 // PUT update pixel
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -39,12 +40,13 @@ export async function PUT(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
     
     const body = await request.json();
     
     const pixel = await Pixel.findOneAndUpdate(
-      { _id: params.id, userId },
+      { _id: id, userId },
       { ...body, updatedAt: new Date() },
       { new: true }
     );
@@ -62,7 +64,7 @@ export async function PUT(
 // DELETE pixel
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { userId } = await auth();
@@ -70,15 +72,16 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await dbConnect();
     
-    const pixel = await Pixel.findOneAndDelete({ _id: params.id, userId });
+    const pixel = await Pixel.findOneAndDelete({ _id: id, userId });
     
     if (!pixel) {
       return NextResponse.json({ success: false, error: "Pixel not found" }, { status: 404 });
     }
     
-    return NextResponse.json({ success: true, data: pixel }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Pixel deleted successfully" }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: "Failed to delete pixel" }, { status: 500 });
   }

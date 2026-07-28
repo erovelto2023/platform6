@@ -502,8 +502,10 @@ const uniqueLabels = Array.from(new Set([
     const verifiedFacts = getStateFacts(stateSlug || state.name);
     const stateNewspapersList = getStateNewspapers(stateSlug || state.name);
     const hospitalData = await HospitalService.fetchHospitalsByState(verifiedFacts.abbreviation);
-    const hospitals = hospitalData?.hospitals || stateDoc?.hospitals || [];
-    const hospitalStats = hospitalData?.stats || stateDoc?.hospitalStats;
+    const hospitals = (stateDoc?.hospitals && stateDoc.hospitals.length > 0) 
+        ? stateDoc.hospitals 
+        : (hospitalData?.hospitals || []);
+    const hospitalStats = stateDoc?.hospitalStats || hospitalData?.stats;
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">

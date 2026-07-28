@@ -1,53 +1,37 @@
 "use client";
 
 import { useState } from "react";
+import { getStateEducation, EducationalInstitution } from "@/lib/utils/state-education";
 import { GraduationCap, Search, ExternalLink, School, BookOpen } from "lucide-react";
 
-interface Institution {
-    name: string;
-    url?: string;
-    type?: string;
-}
-
 interface StateEducationSectionProps {
-    institutions?: Institution[];
+    institutions?: EducationalInstitution[];
     stateName: string;
 }
 
 export function StateEducationSection({ institutions = [], stateName }: StateEducationSectionProps) {
     const [query, setQuery] = useState("");
 
-    const isDelaware = stateName.toLowerCase().includes("delaware");
-
-    const defaultInstitutions: Institution[] = isDelaware ? [
-        { name: "University of Delaware", url: "https://www.udel.edu", type: "Public Research University" },
-        { name: "Delaware State University", url: "https://www.desu.edu", type: "Public HBCU Land-Grant University" },
-        { name: "Wilmington University", url: "https://www.wilmu.edu", type: "Private Doctoral Research University" },
-        { name: "Delaware Technical Community College", url: "https://www.dtcc.edu", type: "Public Community College System" },
-        { name: "Goldey-Beacom College", url: "https://www.gbc.edu", type: "Private Business & Professional College" },
-        { name: "Delaware College of Art and Design", url: "https://www.dcad.edu", type: "Private Art & Design Academy" }
-    ] : [
-        { name: `University of ${stateName}`, url: `https://www.google.com/search?q=${encodeURIComponent("University of " + stateName)}`, type: "Flagship Public University" },
-        { name: `${stateName} State University`, url: `https://www.google.com/search?q=${encodeURIComponent(stateName + " State University")}`, type: "Public State University" },
-        { name: `${stateName} Community College System`, url: `https://www.google.com/search?q=${encodeURIComponent(stateName + " community colleges")}`, type: "Community & Vocational System" }
-    ];
-
-    const displayList = institutions.length > 0 ? institutions : defaultInstitutions;
+    const defaultVerified = getStateEducation(stateName);
+    const displayList = institutions.length > 0 ? institutions : defaultVerified;
 
     const filtered = displayList.filter(i =>
-        i.name.toLowerCase().includes(query.toLowerCase())
+        i.name.toLowerCase().includes(query.toLowerCase()) ||
+        (i.type && i.type.toLowerCase().includes(query.toLowerCase()))
     );
 
     return (
         <div className="space-y-8">
             {/* Header */}
-            <div className="border-l-4 border-cyan-500 pl-6">
-                <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
-                    <GraduationCap className="text-cyan-400" /> {stateName} Higher Education & Universities
-                </h2>
-                <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">
-                    {displayList.length} Colleges, Universities & Higher Learning Centers in {stateName}
-                </p>
+            <div className="border-l-4 border-cyan-500 pl-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                        <GraduationCap className="text-cyan-400" /> {stateName} Higher Education & Universities
+                    </h2>
+                    <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">
+                        {displayList.length} Top Colleges, Universities & Higher Learning Centers in {stateName}
+                    </p>
+                </div>
             </div>
 
             {/* Search filter */}
@@ -57,7 +41,7 @@ export function StateEducationSection({ institutions = [], stateName }: StateEdu
                     type="text"
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    placeholder="Search universities or colleges..."
+                    placeholder="Search universities, colleges, or degrees..."
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500 transition-colors shadow-lg"
                 />
             </div>

@@ -38,7 +38,7 @@ import {
   FileCode
 } from "lucide-react";
 import { DigitalAssetItem } from "./DigitalAssetManager";
-import { SwipeCopyItem } from "./SwipeFileVault";
+import { SwipeCopyItem, Platform } from "./SwipeFileVault";
 import { BrandVaultData } from "./BrandVaultEditor";
 
 export interface CampaignBuilderWorkspaceProps {
@@ -193,7 +193,7 @@ export const CampaignBuilderWorkspace: React.FC<CampaignBuilderWorkspaceProps> =
       _id: `cp_${Date.now()}`,
       title: newCopy.title,
       contentType: "headline",
-      platform: newCopy.platform,
+      platform: newCopy.platform as Platform,
       content: newCopy.content,
       framework: newCopy.framework,
       performanceTag: "Testing",
@@ -862,11 +862,11 @@ ${selectedCopy.map((c) => `### ${c.title} (${c.framework})\n"${c.content}"\n`).j
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {allAssets.map((asset) => {
-                  const isSelected = (campaign.selectedAssetIds || []).includes(asset._id);
+                  const isSelected = asset._id ? (campaign.selectedAssetIds || []).includes(asset._id) : false;
                   return (
                     <div
                       key={asset._id}
-                      onClick={() => handleToggleAsset(asset._id)}
+                      onClick={() => asset._id && handleToggleAsset(asset._id)}
                       className={`p-3 bg-slate-950 border rounded-2xl cursor-pointer transition relative group ${
                         isSelected ? "border-blue-500 bg-blue-950/20 shadow-md" : "border-slate-800 hover:border-slate-700"
                       }`}
@@ -1002,11 +1002,11 @@ ${selectedCopy.map((c) => `### ${c.title} (${c.framework})\n"${c.content}"\n`).j
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {allCopyList.map((copy) => {
-                  const isSelected = (campaign.selectedCopyIds || []).includes(copy._id);
+                  const isSelected = copy._id ? (campaign.selectedCopyIds || []).includes(copy._id) : false;
                   return (
                     <div
                       key={copy._id}
-                      onClick={() => handleToggleCopy(copy._id)}
+                      onClick={() => copy._id && handleToggleCopy(copy._id)}
                       className={`p-4 bg-slate-950 border rounded-2xl cursor-pointer transition ${
                         isSelected ? "border-indigo-500 bg-indigo-950/20 shadow-md" : "border-slate-800 hover:border-slate-700"
                       }`}
