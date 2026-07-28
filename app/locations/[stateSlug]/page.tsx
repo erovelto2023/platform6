@@ -497,15 +497,13 @@ const uniqueLabels = Array.from(new Set([
         return "Not Specified";
     };
 
-    const stateDoc = await getLocation(stateSlug, "");
-    const { products } = await getDirectoryProducts();
     const verifiedFacts = getStateFacts(stateSlug || state.name);
     const stateNewspapersList = getStateNewspapers(stateSlug || state.name);
     const hospitalData = await HospitalService.fetchHospitalsByState(verifiedFacts.abbreviation);
-    const hospitals = (stateDoc?.hospitals && stateDoc.hospitals.length > 0) 
-        ? stateDoc.hospitals 
+    const hospitals = (state?.hospitals && state.hospitals.length > 0) 
+        ? state.hospitals 
         : (hospitalData?.hospitals || []);
-    const hospitalStats = stateDoc?.hospitalStats || hospitalData?.stats;
+    const hospitalStats = state?.hospitalStats || hospitalData?.stats;
 
     return (
         <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
