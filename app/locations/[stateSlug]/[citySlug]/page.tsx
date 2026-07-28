@@ -5,7 +5,7 @@ import { CensusService } from "@/lib/services/census.service";
 import { MarketService } from "@/lib/services/market.service";
 import { CityCensusStats } from "@/components/locations/city-census-stats";
 import { MarketPulse } from "@/components/locations/market-pulse";
-import { ArrowLeft, Sparkles, MapPin, Search as SearchIcon } from "lucide-react";
+import { ArrowLeft, Sparkles, MapPin, Search as SearchIcon, Globe, ExternalLink } from "lucide-react";
 import { Metadata } from "next";
 import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
@@ -121,6 +121,14 @@ export default async function CityPage({
                     <div className="flex flex-wrap items-center gap-3 mt-6">
                         <CityComparisonModal currentCity={city.name} currentState={state.name} currentStats={censusData} />
                         <ExportMarketReportButton cityName={city.name} stateName={state.name} />
+                        <a 
+                            href={city.website || `https://www.${city.name.toLowerCase().replace(/[^a-z]/g, '')}.gov`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-cyan-500 rounded-xl text-xs font-mono font-bold uppercase text-slate-200 hover:text-white transition-all shadow-md"
+                        >
+                            <Globe size={14} className="text-cyan-400" /> {city.name} Municipal Portal <ExternalLink size={12} className="text-slate-500" />
+                        </a>
                     </div>
                 </div>
             </header>

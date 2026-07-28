@@ -159,6 +159,15 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:border-violet-500/50 group-hover:bg-violet-500/20"
                 },
                 {
+                    title: "State & Location Facts",
+                    description: "Manage official state facts, symbols, elevations, and government URLs",
+                    href: "/admin/locations",
+                    icon: Compass,
+                    color: "text-emerald-400",
+                    bg: "bg-emerald-500/10 border-emerald-500/20",
+                    hover: "group-hover:border-emerald-500/50 group-hover:bg-emerald-500/20"
+                },
+                {
                     title: "FAQs",
                     description: "Configure search queries and database answers",
                     href: "/admin/faqs",

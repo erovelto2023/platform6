@@ -2,7 +2,7 @@
 
 import { StateFactGroup } from "@/lib/utils/state-facts";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Building2, Scale, PhoneCall, Hash, Globe, Clock, ShieldCheck, FileText } from "lucide-react";
+import { ExternalLink, Building2, Scale, PhoneCall, Hash, Globe, Clock, ShieldCheck } from "lucide-react";
 
 interface StateAdminTelecomDirectoryProps {
   stateName: string;
@@ -11,21 +11,22 @@ interface StateAdminTelecomDirectoryProps {
 }
 
 export function StateAdminTelecomDirectory({ stateName, facts, locationDoc }: StateAdminTelecomDirectoryProps) {
-  const sosUrl = locationDoc?.website || facts.sosUrl || `https://sos.${facts.abbreviation.toLowerCase()}.gov`;
+  const statePortalUrl = locationDoc?.website || facts.stateWebsite || `https://www.${facts.abbreviation.toLowerCase()}.gov`;
+  const sosUrl = facts.sosUrl || `https://sos.${facts.abbreviation.toLowerCase()}.gov`;
   const taxUrl = facts.taxDeptUrl || `https://revenue.${facts.abbreviation.toLowerCase()}.gov`;
   const cpaUrl = locationDoc?.cpaBoardUrl || `https://www.nasba.org/stateboards/`;
 
-  const fips = locationDoc?.fips || "Verified State FIPS";
+  const fips = locationDoc?.fips || "US State FIPS";
   const federalRegion = locationDoc?.standard_federal_region || locationDoc?.census_bureau?.region || facts.region;
   const timezones = locationDoc?.time_zones?.join(", ") || facts.timezone;
 
   const areaCodes = locationDoc?.areaCodes?.length > 0 
     ? locationDoc.areaCodes.join(", ") 
-    : (facts.areaCodesRange || "Multiple Regional Area Codes");
+    : (facts.areaCodesRange || "Regional Area Codes");
 
   const zipCodes = locationDoc?.zipCodes?.length > 0 
     ? `${locationDoc.zipCodes[0]} – ${locationDoc.zipCodes[locationDoc.zipCodes.length - 1]}` 
-    : (facts.zipCodesRange || "Statewide Postal Zip Code Range");
+    : (facts.zipCodesRange || "Statewide Zip Code Range");
 
   return (
     <div className="space-y-8">
@@ -35,56 +36,80 @@ export function StateAdminTelecomDirectory({ stateName, facts, locationDoc }: St
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs font-mono font-bold uppercase tracking-wider px-3 py-1">
-                <Building2 className="w-3.5 h-3.5 mr-1.5 inline" /> Official State Filings & Agencies
+                <Building2 className="w-3.5 h-3.5 mr-1.5 inline" /> Live State Portals & Filings
               </Badge>
             </div>
             <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight">
-              {stateName} Government & Business Portals
+              {stateName} Official Government & Business Portals
             </h3>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Official State Website */}
           <a 
-            href={sosUrl}
+            href={statePortalUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="p-5 bg-slate-950 border border-slate-800 rounded-2xl hover:border-cyan-500/50 transition-all group flex flex-col justify-between space-y-4"
           >
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl text-cyan-400 group-hover:scale-105 transition-transform">
-                <Building2 className="w-5 h-5" />
+                <Globe className="w-5 h-5" />
               </div>
               <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
             </div>
             <div>
               <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight group-hover:text-cyan-300 transition-colors">
-                Secretary of State
+                Official State Portal
               </h4>
-              <p className="text-xs text-slate-400 mt-1">LLC & Corporate Entity Filings</p>
+              <p className="text-xs text-slate-400 mt-1">{stateName} Government Portal</p>
             </div>
           </a>
 
+          {/* Secretary of State */}
           <a 
-            href={taxUrl}
+            href={sosUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="p-5 bg-slate-950 border border-slate-800 rounded-2xl hover:border-emerald-500/50 transition-all group flex flex-col justify-between space-y-4"
           >
             <div className="flex items-center justify-between">
               <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 group-hover:scale-105 transition-transform">
-                <Scale className="w-5 h-5" />
+                <Building2 className="w-5 h-5" />
               </div>
               <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-emerald-400 transition-colors" />
             </div>
             <div>
               <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight group-hover:text-emerald-300 transition-colors">
-                Department of Revenue
+                Secretary of State
               </h4>
-              <p className="text-xs text-slate-400 mt-1">State Tax Forms & Business Licensing</p>
+              <p className="text-xs text-slate-400 mt-1">LLC & Corporate Entity Filings</p>
             </div>
           </a>
 
+          {/* Department of Revenue */}
+          <a 
+            href={taxUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-5 bg-slate-950 border border-slate-800 rounded-2xl hover:border-amber-500/50 transition-all group flex flex-col justify-between space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-400 group-hover:scale-105 transition-transform">
+                <Scale className="w-5 h-5" />
+              </div>
+              <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
+            </div>
+            <div>
+              <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight group-hover:text-amber-300 transition-colors">
+                Dept of Revenue
+              </h4>
+              <p className="text-xs text-slate-400 mt-1">State Taxes & Business Licenses</p>
+            </div>
+          </a>
+
+          {/* CPA Board */}
           <a 
             href={cpaUrl}
             target="_blank"
@@ -101,7 +126,7 @@ export function StateAdminTelecomDirectory({ stateName, facts, locationDoc }: St
               <h4 className="text-sm font-black text-slate-100 uppercase tracking-tight group-hover:text-indigo-300 transition-colors">
                 State CPA Board
               </h4>
-              <p className="text-xs text-slate-400 mt-1">Accounting License Verification</p>
+              <p className="text-xs text-slate-400 mt-1">CPA License Verification</p>
             </div>
           </a>
         </div>

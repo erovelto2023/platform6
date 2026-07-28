@@ -583,6 +583,12 @@ const uniqueLabels = Array.from(new Set([
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <Link 
+                                            href={`/admin/locations?state=${stateSlug}`} 
+                                            className="px-4 py-2 bg-slate-900 border border-slate-700 hover:border-amber-500/50 rounded-xl text-xs font-mono font-bold uppercase tracking-wider text-amber-400 hover:text-white transition-all inline-flex items-center gap-2"
+                                        >
+                                            ✏️ Edit State Facts
+                                        </Link>
+                                        <Link 
                                             href="/locations/compare" 
                                             className="px-4 py-2 bg-slate-900 border border-slate-700 hover:border-cyan-500/50 rounded-xl text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 hover:text-white transition-all inline-flex items-center gap-2"
                                         >

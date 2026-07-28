@@ -514,3 +514,94 @@ export async function syncHospitalData(stateSlug: string, shouldRevalidate: bool
         return { success: false, error: error?.message };
     }
 }
+
+/**
+ * Update state or city location facts and admin overrides manually.
+ */
+export async function updateLocationFacts(
+    slug: string, 
+    type: 'state' | 'city', 
+    updateData: any,
+    stateSlug?: string
+) {
+    try {
+        await connectToDatabase();
+        const query: any = { slug, type };
+        if (stateSlug && type === 'city') {
+            query.stateSlug = stateSlug;
+        }
+        let location = await Location.findOne(query);
+        
+        // Upsert state if missing from MongoDB
+        if (!location && type === 'state') {
+            location = new Location({
+                name: slug.charAt(0).toUpperCase() + slug.slice(1),
+                slug,
+                type: 'state'
+            });
+        }
+        
+        if (!location) throw new Error(`Location not found: ${slug}`);
+
+        // Update basic fields
+        if (updateData.name) location.name = updateData.name;
+        if (updateData.nickname !== undefined) location.nickname = updateData.nickname;
+        if (updateData.highest_point !== undefined) location.highest_point = updateData.highest_point;
+        if (updateData.lowest_point !== undefined) location.lowest_point = updateData.lowest_point;
+        if (updateData.website !== undefined) location.website = updateData.website;
+        if (updateData.postal !== undefined) location.postal = updateData.postal;
+        if (updateData.date !== undefined) location.date = updateData.date;
+        if (updateData.fips !== undefined) location.fips = updateData.fips;
+        if (updateData.demonym !== undefined) location.demonym = updateData.demonym;
+        if (updateData.per_capita_income !== undefined) location.per_capita_income = updateData.per_capita_income;
+        if (updateData.median_household_income !== undefined) location.median_household_income = updateData.median_household_income;
+
+        // Update objects
+        if (updateData.capital) {
+            location.capital = {
+                ...(location.capital || {}),
+                ...updateData.capital
+            };
+        }
+
+        if (updateData.elevation) {
+            location.elevation = {
+                ...(location.elevation || {}),
+                ...updateData.elevation
+            };
+        }
+
+        if (updateData.area) {
+            location.area = {
+                ...(location.area || {}),
+                ...updateData.area
+            };
+        }
+
+        if (updateData.symbols) {
+            location.symbols = {
+                ...(location.symbols || {}),
+                ...updateData.symbols
+            };
+        }
+
+        if (updateData.zipCodes) location.zipCodes = updateData.zipCodes;
+        if (updateData.areaCodes) location.areaCodes = updateData.areaCodes;
+        if (updateData.koppen_climate) location.koppen_climate = updateData.koppen_climate;
+        if (updateData.extendedFacts) location.extendedFacts = updateData.extendedFacts;
+
+        await location.save();
+
+        revalidatePath(`/locations`);
+        if (type === 'state') {
+            revalidatePath(`/locations/${slug}`);
+        } else if (type === 'city' && stateSlug) {
+            revalidatePath(`/locations/${stateSlug}/${slug}`);
+        }
+
+        return { success: true, message: `Successfully updated location facts for ${location.name}`, data: JSON.parse(JSON.stringify(location)) };
+    } catch (error: any) {
+        console.error("Error updating location facts:", error);
+        return { success: false, error: error?.message || "Failed to update location facts" };
+    }
+}
