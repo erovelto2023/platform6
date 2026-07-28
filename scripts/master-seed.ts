@@ -561,107 +561,129 @@ async function runMasterSeed() {
       console.warn("⚠️ FCC Broadcast Excel file not found, skipping Step 4.\n");
     }
 
-    // ─── STEP 5: SCRAPE & SEED DOG PARKS WITH DETAILS ───────────────────────────
-    console.log("🐕 [STEP 5/5] Scraping & Seeding Enriched Dog Parks from animalshelter.org...");
-    let totalDogParks = 0;
-    let dogParkStatesSeeded = 0;
+    // ─── STEP 5: SEED DOG PARKS WITH DETAILS ─────────────────────────────────────
+    console.log("🐕 [STEP 5/5] Seeding Enriched Dog Parks Dataset...");
+    const jsonPath = path.join(process.cwd(), "docs", "dog_parks_dataset.json");
 
-    for (const state of DOG_PARK_STATES) {
-      const baseUrl = `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}.html`;
-      const allParkLinks: Array<{ name: string; urlSlug: string }> = [];
+    if (fs.existsSync(jsonPath)) {
+      console.log("📁 Loading pre-packaged dog parks dataset from docs/dog_parks_dataset.json...");
+      const rawJson = fs.readFileSync(jsonPath, "utf-8");
+      const dogParksDataset: Record<string, any[]> = JSON.parse(rawJson);
+      let totalDogParks = 0;
+      let dogParkStatesSeeded = 0;
 
-      try {
-        const html1 = await fetchHtml(baseUrl);
-        allParkLinks.push(...parseDogParkLinks(html1));
-
-        const maxPage = getMaxDogParkPage(html1, state.abbr);
-        for (let page = 2; page <= maxPage; page++) {
-          await sleep(400);
-          try {
-            const htmlN = await fetchHtml(
-              `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}/${page}.html`
-            );
-            allParkLinks.push(...parseDogParkLinks(htmlN));
-          } catch { break; }
-        }
-      } catch (err: any) {
-        console.warn(`  ⚠ Skipped ${state.slug}: ${err.message}`);
-        continue;
+      for (const [stateSlug, parks] of Object.entries(dogParksDataset)) {
+        await LocationModel.updateOne(
+          { slug: stateSlug, type: "state" },
+          { $set: { dogParks: parks } },
+          { upsert: true }
+        );
+        totalDogParks += parks.length;
+        dogParkStatesSeeded++;
       }
+      console.log(`✅ STEP 5 COMPLETE: ${totalDogParks.toLocaleString()} Enriched Dog Parks Seeded into ${dogParkStatesSeeded} States from pre-packaged dataset.\n`);
+    } else {
+      console.log("🌐 Pre-packaged dataset not found. Scraping live from animalshelter.org...");
+      let totalDogParks = 0;
+      let dogParkStatesSeeded = 0;
 
-      const seen = new Set<string>();
-      const unique = allParkLinks.filter(p => {
-        if (seen.has(p.name)) return false;
-        seen.add(p.name);
-        return true;
-      });
+      for (const state of DOG_PARK_STATES) {
+        const baseUrl = `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}.html`;
+        const allParkLinks: Array<{ name: string; urlSlug: string }> = [];
 
-      if (unique.length === 0) continue;
-
-      const enrichedParks = [];
-      for (const park of unique) {
-        const detailUrl = `https://www.animalshelter.org/dogParks/${park.urlSlug}`;
         try {
-          const detailHtml = await fetchHtml(detailUrl);
-          const detail = parseDogParkDetailPage(detailHtml);
-          enrichedParks.push({
-            name: park.name,
-            address: detail.address,
-            city: detail.city || "",
-            stateAbbr: detail.stateAbbr || state.abbr,
-            zip: detail.zip,
-            description: detail.description,
-            detailUrl,
-            source: "animalshelter.org",
-          });
-        } catch {
-          enrichedParks.push({
-            name: park.name,
-            address: "",
-            city: "",
-            stateAbbr: state.abbr,
-            zip: "",
-            description: "",
-            detailUrl: "",
-            source: "animalshelter.org",
-          });
-        }
-        await sleep(250);
-      }
+          const html1 = await fetchHtml(baseUrl);
+          allParkLinks.push(...parseDogParkLinks(html1));
 
-      if (state.abbr === "AL") {
-        const mobileParks = await fetchMobileCityParks();
-        if (mobileParks.length > 0) {
-          const parkMap = new Map<string, any>();
-          for (const p of enrichedParks) parkMap.set(p.name.toLowerCase().trim(), p);
-          for (const mp of mobileParks) {
-            const k = mp.name.toLowerCase().trim();
-            const matchedKey = Array.from(parkMap.keys()).find(key => key === k || key.includes(k) || k.includes(key));
-            if (matchedKey) {
-              const existing = parkMap.get(matchedKey);
-              parkMap.set(matchedKey, { ...existing, ...mp, detailUrl: mp.detailUrl, source: "cityofmobile.gov" });
-            } else {
-              parkMap.set(k, mp);
-            }
+          const maxPage = getMaxDogParkPage(html1, state.abbr);
+          for (let page = 2; page <= maxPage; page++) {
+            await sleep(400);
+            try {
+              const htmlN = await fetchHtml(
+                `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}/${page}.html`
+              );
+              allParkLinks.push(...parseDogParkLinks(htmlN));
+            } catch { break; }
           }
-          const mergedList = Array.from(parkMap.values());
-          enrichedParks.length = 0;
-          enrichedParks.push(...mergedList);
+        } catch (err: any) {
+          console.warn(`  ⚠ Skipped ${state.slug}: ${err.message}`);
+          continue;
         }
+
+        const seen = new Set<string>();
+        const unique = allParkLinks.filter(p => {
+          if (seen.has(p.name)) return false;
+          seen.add(p.name);
+          return true;
+        });
+
+        if (unique.length === 0) continue;
+
+        const enrichedParks = [];
+        for (const park of unique) {
+          const detailUrl = `https://www.animalshelter.org/dogParks/${park.urlSlug}`;
+          try {
+            const detailHtml = await fetchHtml(detailUrl);
+            const detail = parseDogParkDetailPage(detailHtml);
+            enrichedParks.push({
+              name: park.name,
+              address: detail.address,
+              city: detail.city || "",
+              stateAbbr: detail.stateAbbr || state.abbr,
+              zip: detail.zip,
+              description: detail.description,
+              detailUrl,
+              source: "animalshelter.org",
+            });
+          } catch {
+            enrichedParks.push({
+              name: park.name,
+              address: "",
+              city: "",
+              stateAbbr: state.abbr,
+              zip: "",
+              description: "",
+              detailUrl: "",
+              source: "animalshelter.org",
+            });
+          }
+          await sleep(250);
+        }
+
+        if (state.abbr === "AL") {
+          const mobileParks = await fetchMobileCityParks();
+          if (mobileParks.length > 0) {
+            const parkMap = new Map<string, any>();
+            for (const p of enrichedParks) parkMap.set(p.name.toLowerCase().trim(), p);
+            for (const mp of mobileParks) {
+              const k = mp.name.toLowerCase().trim();
+              const matchedKey = Array.from(parkMap.keys()).find(key => key === k || key.includes(k) || k.includes(key));
+              if (matchedKey) {
+                const existing = parkMap.get(matchedKey);
+                parkMap.set(matchedKey, { ...existing, ...mp, detailUrl: mp.detailUrl, source: "cityofmobile.gov" });
+              } else {
+                parkMap.set(k, mp);
+              }
+            }
+            const mergedList = Array.from(parkMap.values());
+            enrichedParks.length = 0;
+            enrichedParks.push(...mergedList);
+          }
+        }
+
+        await LocationModel.updateOne(
+          { slug: state.slug, type: "state" },
+          { $set: { dogParks: enrichedParks } },
+          { upsert: true }
+        );
+
+        totalDogParks += enrichedParks.length;
+        dogParkStatesSeeded++;
+        console.log(`  → ${state.slug}: ${enrichedParks.length} enriched dog parks`);
+        await sleep(500);
       }
-
-      await LocationModel.updateOne(
-        { slug: state.slug, type: "state" },
-        { $set: { dogParks: enrichedParks } },
-        { upsert: true }
-      );
-
-      totalDogParks += enrichedParks.length;
-      dogParkStatesSeeded++;
-      console.log(`  → ${state.slug}: ${enrichedParks.length} enriched dog parks`);
-      await sleep(500);
+      console.log(`✅ STEP 5 COMPLETE: ${totalDogParks} Enriched Dog Parks Seeded into ${dogParkStatesSeeded} States.\n`);
     }
-    console.log(`✅ STEP 5 COMPLETE: ${totalDogParks} Enriched Dog Parks Seeded into ${dogParkStatesSeeded} States.\n`);
 
     console.log("=========================================");
     console.log("🎉 ALL SEEDING OPERATIONS FINISHED!");
