@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { STATE_NAME_TO_ABBR } from "../lib/utils/state-mapping";
 import { US_STATE_FACTS, getStateFacts } from "../lib/utils/state-facts";
+import { slugify } from "../lib/utils/slugify";
 
 dotenv.config({ path: ".env.local" });
 
@@ -26,6 +27,59 @@ const STATE_ABBR_TO_SLUG: Record<string, string> = {
   OK: "oklahoma", OR: "oregon", PA: "pennsylvania", RI: "rhode-island", SC: "south-carolina",
   SD: "south-dakota", TN: "tennessee", TX: "texas", UT: "utah", VT: "vermont",
   VA: "virginia", WA: "washington", WV: "west-virginia", WI: "wisconsin", WY: "wyoming"
+};
+
+const cityData: Record<string, string[]> = {
+  "alabama": ["Birmingham", "Montgomery", "Mobile", "Huntsville", "Tuscaloosa", "Hoover", "Dothan", "Auburn"],
+  "alaska": ["Anchorage", "Juneau", "Fairbanks", "Sitka", "Ketchikan", "Wasilla"],
+  "arizona": ["Phoenix", "Tucson", "Mesa", "Chandler", "Scottsdale", "Glendale", "Gilbert", "Tempe", "Peoria", "Surprise"],
+  "arkansas": ["Little Rock", "Fort Smith", "Fayetteville", "Springdale", "Jonesboro", "Rogers", "Conway"],
+  "california": ["Los Angeles", "San Diego", "San Jose", "San Francisco", "Fresno", "Sacramento", "Long Beach", "Oakland", "Bakersfield", "Anaheim", "Santa Ana", "Riverside", "Stockton", "Irvine"],
+  "colorado": ["Denver", "Colorado Springs", "Aurora", "Fort Collins", "Lakewood", "Pueblo", "Thornton", "Arvada"],
+  "connecticut": ["Bridgeport", "New Haven", "Stamford", "Hartford", "Waterbury", "Norwalk", "Danbury"],
+  "delaware": ["Wilmington", "Dover", "Newark", "Middletown", "Smyrna", "Milford"],
+  "florida": ["Jacksonville", "Miami", "Tampa", "Orlando", "St. Petersburg", "Hialeah", "Tallahassee", "Fort Lauderdale", "Port St. Lucie", "Cape Coral", "Pembroke Pines", "Gainesville"],
+  "georgia": ["Atlanta", "Columbus", "Augusta", "Macon", "Savannah", "Athens", "Sandy Springs", "Roswell"],
+  "hawaii": ["Honolulu", "Pearl City", "Hilo", "Kailua", "Waipahu", "Kaneohe"],
+  "idaho": ["Boise", "Meridian", "Nampa", "Idaho Falls", "Pocatello", "Caldwell", "Coeur d'Alene"],
+  "illinois": ["Chicago", "Aurora", "Rockford", "Joliet", "Naperville", "Springfield", "Peoria", "Elgin"],
+  "indiana": ["Indianapolis", "Fort Wayne", "Evansville", "South Bend", "Carmel", "Fishers", "Bloomington"],
+  "iowa": ["Des Moines", "Cedar Rapids", "Davenport", "Sioux City", "Iowa City", "Waterloo", "Ames"],
+  "kansas": ["Wichita", "Overland Park", "Kansas City", "Olathe", "Topeka", "Lawrence", "Shawnee"],
+  "kentucky": ["Louisville", "Lexington", "Bowling Green", "Owensboro", "Covington", "Richmond", "Georgetown"],
+  "louisiana": ["New Orleans", "Baton Rouge", "Shreveport", "Metairie", "Lafayette", "Lake Charles", "Kenner"],
+  "maine": ["Portland", "Lewiston", "Bangor", "South Portland", "Auburn", "Biddeford", "Augusta"],
+  "maryland": ["Baltimore", "Columbia", "Germantown", "Silver Spring", "Waldorf", "Frederick", "Rockville"],
+  "massachusetts": ["Boston", "Worcester", "Springfield", "Lowell", "Cambridge", "New Bedford", "Brockton"],
+  "michigan": ["Detroit", "Grand Rapids", "Warren", "Sterling Heights", "Ann Arbor", "Lansing", "Flint", "Dearborn"],
+  "minnesota": ["Minneapolis", "St. Paul", "Rochester", "Duluth", "Bloomington", "Brooklyn Park", "Plymouth"],
+  "mississippi": ["Jackson", "Gulfport", "Southaven", "Hattiesburg", "Biloxi", "Meridian", "Tupelo"],
+  "missouri": ["Kansas City", "St. Louis", "Springfield", "Independence", "Columbia", "Lee's Summit", "O'Fallon"],
+  "montana": ["Billings", "Missoula", "Great Falls", "Bozeman", "Butte", "Helena", "Kalispell"],
+  "nebraska": ["Omaha", "Lincoln", "Bellevue", "Grand Island", "Kearney", "Fremont", "Hastings"],
+  "nevada": ["Las Vegas", "Henderson", "Reno", "North Las Vegas", "Sparks", "Carson City", "Elko"],
+  "new-hampshire": ["Manchester", "Nashua", "Concord", "Derry", "Dover", "Rochester", "Salem"],
+  "new-jersey": ["Newark", "Jersey City", "Paterson", "Elizabeth", "Lakewood", "Edison", "Woodbridge", "Toms River"],
+  "new-mexico": ["Albuquerque", "Las Cruces", "Rio Rancho", "Santa Fe", "Roswell", "Farmington", "South Valley"],
+  "new-york": ["New York City", "Buffalo", "Rochester", "Yonkers", "Syracuse", "Albany", "New Rochelle", "Mount Vernon"],
+  "north-carolina": ["Charlotte", "Raleigh", "Greensboro", "Durham", "Winston-Salem", "Fayetteville", "Cary", "Wilmington"],
+  "north-dakota": ["Fargo", "Bismarck", "Grand Forks", "Minot", "West Fargo", "Williston", "Dickinson"],
+  "ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo", "Akron", "Dayton", "Parma", "Canton"],
+  "oklahoma": ["Oklahoma City", "Tulsa", "Norman", "Broken Arrow", "Edmond", "Lawton", "Moore"],
+  "oregon": ["Portland", "Salem", "Eugene", "Gresham", "Hillsboro", "Beaverton", "Bend", "Medford"],
+  "pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie", "Reading", "Scranton", "Bethlehem", "Lancaster"],
+  "rhode-island": ["Providence", "Warwick", "Cranston", "Pawtucket", "East Providence", "Woonsocket", "Newport"],
+  "south-carolina": ["Charleston", "Columbia", "North Charleston", "Mount Pleasant", "Rock Hill", "Greenville", "Summerville"],
+  "south-dakota": ["Sioux Falls", "Rapid City", "Aberdeen", "Brookings", "Watertown", "Mitchell", "Yankton"],
+  "tennessee": ["Nashville", "Memphis", "Knoxville", "Chattanooga", "Clarksville", "Murfreesboro", "Franklin"],
+  "texas": ["Houston", "San Antonio", "Dallas", "Austin", "Fort Worth", "El Paso", "Arlington", "Corpus Christi", "Plano", "Laredo", "Lubbock", "Garland", "Irving"],
+  "utah": ["Salt Lake City", "West Valley City", "Provo", "West Jordan", "Orem", "Sandy", "Ogden", "St. George"],
+  "vermont": ["Burlington", "South Burlington", "Rutland", "Essex Junction", "Bennington", "Barre", "Montpelier"],
+  "virginia": ["Virginia Beach", "Norfolk", "Chesapeake", "Richmond", "Newport News", "Alexandria", "Hampton", "Roanoke"],
+  "washington": ["Seattle", "Spokane", "Tacoma", "Vancouver", "Bellevue", "Kent", "Everett", "Renton", "Spokane Valley"],
+  "west-virginia": ["Charleston", "Huntington", "Morgantown", "Parkersburg", "Wheeling", "Weirton", "Fairmont"],
+  "wisconsin": ["Milwaukee", "Madison", "Green Bay", "Kenosha", "Racine", "Appleton", "Waukesha", "Oshkosh"],
+  "wyoming": ["Cheyenne", "Casper", "Laramie", "Gillette", "Rock Springs", "Sheridan", "Green River"]
 };
 
 function toTitleCase(str: string): string {
@@ -67,7 +121,7 @@ async function runMasterSeed() {
     const LocationModel = mongoose.models.Location || mongoose.model("Location", new mongoose.Schema({}, { strict: false }));
 
     // ─── STEP 1: INITIALIZE 50 STATES & FACTS ──────────────────────────────────
-    console.log("📍 [STEP 1/3] Initializing 50 US State Records & Fact Overrides...");
+    console.log("📍 [STEP 1/4] Initializing 50 US State Records & Fact Overrides...");
     let stateInitCount = 0;
     for (const [stateName, abbr] of Object.entries(STATE_NAME_TO_ABBR)) {
       const slug = stateName.replace(/\s+/g, "-");
@@ -115,8 +169,33 @@ async function runMasterSeed() {
     }
     console.log(`✅ STEP 1 COMPLETE: ${stateInitCount} States Initialized.\n`);
 
-    // ─── STEP 2: IMPORT 5,356 CMS HOSPITALS ────────────────────────────────────
-    console.log("🏥 [STEP 2/3] Importing 5,356 CMS Hospitals Dataset...");
+    // ─── STEP 2: SEED MARKET CITIES FOR ALL 50 STATES ──────────────────────────
+    console.log("🏙️ [STEP 2/4] Seeding 350+ Market Cities for all 50 States...");
+    let totalCitiesSeeded = 0;
+    for (const [stateSlug, cities] of Object.entries(cityData)) {
+      for (const cityName of cities) {
+        const citySlug = slugify(cityName);
+        await LocationModel.updateOne(
+          { slug: citySlug, stateSlug: stateSlug, type: "city" },
+          {
+            $set: {
+              name: cityName,
+              slug: citySlug,
+              stateSlug: stateSlug,
+              type: "city",
+              metaTitle: `${cityName}, ${stateSlug.replace(/-/g, ' ').replace(/(?:^|\s)\S/g, a => a.toUpperCase())} Market Opportunities`,
+              metaDescription: `Discover business intelligence, healthcare networks, and local market resources in ${cityName}.`
+            }
+          },
+          { upsert: true }
+        );
+        totalCitiesSeeded++;
+      }
+    }
+    console.log(`✅ STEP 2 COMPLETE: ${totalCitiesSeeded} Market Cities Seeded across all 50 States.\n`);
+
+    // ─── STEP 3: IMPORT 5,356 CMS HOSPITALS ────────────────────────────────────
+    console.log("🏥 [STEP 3/4] Importing 5,356 CMS Hospitals Dataset...");
     const csvPath = path.join(process.cwd(), "docs", "Hospital_General_Information.csv");
     if (fs.existsSync(csvPath)) {
       const fileContent = fs.readFileSync(csvPath, "utf-8");
@@ -206,13 +285,13 @@ async function runMasterSeed() {
           { upsert: true }
         );
       }
-      console.log(`✅ STEP 2 COMPLETE: ${totalHospitals.toLocaleString()} Hospitals Seeded into 50 States.\n`);
+      console.log(`✅ STEP 3 COMPLETE: ${totalHospitals.toLocaleString()} Hospitals Seeded into 50 States.\n`);
     } else {
-      console.warn("⚠️ Hospital CSV file not found, skipping Step 2.\n");
+      console.warn("⚠️ Hospital CSV file not found, skipping Step 3.\n");
     }
 
-    // ─── STEP 3: IMPORT 1,725 FCC BROADCAST STATIONS ───────────────────────────
-    console.log("📻 [STEP 3/3] Importing 1,725 FCC Radio & TV Broadcast Stations...");
+    // ─── STEP 4: IMPORT 1,725 FCC BROADCAST STATIONS ───────────────────────────
+    console.log("📻 [STEP 4/4] Importing 1,725 FCC Radio & TV Broadcast Stations...");
     const excelPath = path.join(process.cwd(), "docs", "DOC-306948A1.xls");
     if (fs.existsSync(excelPath)) {
       const workbook = XLSX.readFile(excelPath);
@@ -286,9 +365,9 @@ async function runMasterSeed() {
           { upsert: true }
         );
       }
-      console.log(`✅ STEP 3 COMPLETE: ${totalStations.toLocaleString()} FCC Radio & TV Stations Seeded into 50 States.\n`);
+      console.log(`✅ STEP 4 COMPLETE: ${totalStations.toLocaleString()} FCC Radio & TV Stations Seeded into 50 States.\n`);
     } else {
-      console.warn("⚠️ FCC Broadcast Excel file not found, skipping Step 3.\n");
+      console.warn("⚠️ FCC Broadcast Excel file not found, skipping Step 4.\n");
     }
 
     console.log("=========================================");
