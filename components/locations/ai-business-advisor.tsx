@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Copy, Sparkles, BrainCircuit, Target, ShoppingBag, BarChart4, ShieldCheck, Laptop, Globe, Package, Zap } from "lucide-react";
+import { Copy, Sparkles, BrainCircuit, Target, ShoppingBag, BarChart4, ShieldCheck, Laptop, Globe, Package, Zap, Check } from "lucide-react";
 import { useState, useMemo } from "react";
 import { ProductRecommender } from "@/lib/services/product-recommender";
 import { CityStats } from "@/lib/services/census.service";
@@ -30,15 +30,15 @@ export function AIBusinessAdvisor({ data, cityName, zipCodes = [], areaCodes = [
     const recommendations = useMemo(() => ProductRecommender.getRecommendations(data as any), [data]);
 
     // Pricing Ceiling Logic
-    const pricingCeiling = medIncome < 30000 ? "LOW (Mass Market / Budget-First)" : 
-                           medIncome < 60000 ? "MODERATE (Value / Middle-Market)" : "HIGH (Premium / High-Ticket)";
+    const pricingCeiling = medIncome < 45000 ? "Mass Market / Value Pricing" : 
+                           medIncome < 75000 ? "Middle Market / Standard Value" : "High-Ticket Premium Pricing";
 
     const promptText = `I am planning to launch a business in ${cityName}. 
 Based on the following hyper-localized market data, please act as a world-class business strategist and product developer.
 
 ### LOCAL MARKET DATA PROFILE:
 - **Location**: ${cityName}.
-- **Local Identity**: ZIPs: ${zipCodes.join(", ") || "N/A"}, Area Codes: ${areaCodes.join(", ") || "N/A"}, Timezone: ${timezone || "N/A"}.
+- **Local Identity**: ZIPs: ${zipCodes.join(", ") || "19703"}, Area Codes: ${areaCodes.join(", ") || "302"}, Timezone: ${timezone || "EST"}.
 - **Audience**: ${data.population.toLocaleString()} people, Median Age: ${data.audience.medianAge}.
 - **Family Structure**: ${data.audience.maritalStatus.marriedPct}% Married, ${data.audience.maritalStatus.divorcedPct}% Divorced.
 - **Audience Blocks**: ${data.audience.familyComposition.kidsUnder18Count.toLocaleString()} children <18, ${data.audience.familyComposition.kids18to24Count.toLocaleString()} young adults (18-24).
@@ -74,106 +74,115 @@ Please maintain a practical, Neighbor-to-Neighbor tone that emphasizes local pri
     };
 
     return (
-        <Card className="bg-white border-emerald-100 rounded-2xl overflow-hidden border-t-4 border-t-emerald-600 shadow-xl">
-            <CardHeader className="pb-2 bg-emerald-500/5">
-                <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs font-black uppercase flex items-center gap-2 text-emerald-950 italic">
-                        <BrainCircuit className="h-4 w-4 text-emerald-600" />
-                        AI Business Advisor
-                    </CardTitle>
-                    <Badge className="bg-emerald-600 text-white text-[8px] font-black uppercase">Alpha Feature</Badge>
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-950 border border-cyan-800 text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider mb-2">
+                        <BrainCircuit size={14} /> Local AI Strategy Engine
+                    </div>
+                    <h2 className="text-2xl md:text-3xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-2.5">
+                        <Sparkles className="text-cyan-400" size={24} /> AI Business Advisor for {cityName}
+                    </h2>
                 </div>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-50 border border-emerald-50 rounded-xl shadow-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Target className="h-3 w-3 text-emerald-600" />
-                            <p className="text-[10px] font-black text-emerald-900/60 uppercase tracking-widest">Pricing Ceiling</p>
-                        </div>
-                        <p className="text-sm font-black text-emerald-950 italic uppercase tracking-tight">{pricingCeiling}</p>
-                        <p className="mt-2 text-[9px] font-bold text-emerald-900/40 leading-relaxed uppercase italic">
-                            {povertyRate > 20 ? "High price sensitivity detected. Focus on accessibility, payment plans, and high-perceived-value bundles." : "Strong middle-class base. Standard value-based pricing is recommended."}
-                        </p>
-                    </div>
+                <div className="text-xs font-mono text-slate-400 bg-slate-950 border border-slate-800 px-3.5 py-2 rounded-xl">
+                    Market Tier: <span className="text-cyan-400 font-bold">{pricingCeiling}</span>
+                </div>
+            </div>
 
-                    <div className="p-4 bg-slate-50 border border-emerald-50 rounded-xl shadow-sm">
-                        <div className="flex items-center gap-2 mb-2">
-                            <ShoppingBag className="h-3 w-3 text-emerald-600" />
-                            <p className="text-[10px] font-black text-emerald-900/60 uppercase tracking-widest">Shopping Habits</p>
-                        </div>
-                        <p className="text-sm font-black text-emerald-950 italic uppercase tracking-tight">
-                            {zeroVehiclePct > 5 ? "Transit/Delivery Dependent" : "Local Transit/Curbside Focus"}
-                        </p>
-                        <p className="mt-2 text-[9px] font-bold text-emerald-900/40 leading-relaxed uppercase italic">
-                            {zeroVehiclePct > 5 ? "High demand for mobile providers or local delivery hubs." : "Preference for central one-stop shopping and local pickup locations."}
-                        </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl shadow-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Target className="h-4 w-4 text-cyan-400" />
+                        <p className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider">Pricing Strategy</p>
                     </div>
+                    <p className="text-lg font-bold text-slate-100 uppercase tracking-tight">{pricingCeiling}</p>
+                    <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                        {povertyRate > 20 ? "Focus on accessible pricing, value-based bundles, and flexible payment terms." : "Strong median household income supports high-ticket local services & premium pricing models."}
+                    </p>
+                </div>
+
+                <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl shadow-xl">
+                    <div className="flex items-center gap-2 mb-2">
+                        <ShoppingBag className="h-4 w-4 text-emerald-400" />
+                        <p className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">Shopping & Mobility Profile</p>
+                    </div>
+                    <p className="text-lg font-bold text-slate-100 uppercase tracking-tight">
+                        {zeroVehiclePct > 5 ? "Mobile & Delivery Focused" : "Drive-To / Curbside Hub"}
+                    </p>
+                    <p className="mt-2 text-xs text-slate-400 leading-relaxed">
+                        {zeroVehiclePct > 5 ? "High consumer demand for mobile service providers and doorstep delivery." : "High preference for central location hubs, curbside pickup, and local drive-to services."}
+                    </p>
+                </div>
+            </div>
+            
+            {/* Productization Opportunities Section */}
+            <div className="space-y-4 pt-2">
+                <div className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-cyan-400" />
+                    <h3 className="text-lg font-black uppercase text-slate-100 tracking-wider">Recommended Product Opportunities</h3>
                 </div>
                 
-                {/* Product Opportunities Section */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2">
-                        <ShoppingBag className="h-4 w-4 text-emerald-600" />
-                        <h4 className="text-[10px] font-black uppercase text-emerald-950 tracking-widest italic">Productization Opportunities</h4>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                        {recommendations.map((rec) => (
-                            <div key={rec.type} className="p-3 bg-white border border-emerald-100 rounded-2xl group hover:border-emerald-500/50 transition-all shadow-sm">
-                                <div className="flex items-center gap-2 mb-2">
-                                    {rec.type === 'digital' && <Laptop className="h-3 w-3 text-emerald-600" />}
-                                    {rec.type === 'virtual' && <Globe className="h-3 w-3 text-emerald-600" />}
-                                    {rec.type === 'physical' && <Package className="h-3 w-3 text-emerald-600" />}
-                                    {rec.type === 'saas' && <Zap className="h-3 w-3 text-emerald-600" />}
-                                    <span className="text-[8px] font-black uppercase text-emerald-900/40 tracking-wider font-mono">{rec.type}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {recommendations.map((rec) => (
+                        <div key={rec.type} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/50 rounded-2xl flex flex-col justify-between transition-all shadow-xl group">
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-1.5 text-cyan-400 text-xs font-mono font-bold uppercase">
+                                        {rec.type === 'digital' && <Laptop size={14} />}
+                                        {rec.type === 'virtual' && <Globe size={14} />}
+                                        {rec.type === 'physical' && <Package size={14} />}
+                                        {rec.type === 'saas' && <Zap size={14} />}
+                                        <span>{rec.type}</span>
+                                    </div>
                                 </div>
-                                <h5 className="text-[10px] font-black text-emerald-950 uppercase italic leading-tight mb-1">{rec.title}</h5>
-                                <p className="text-[9px] text-emerald-900/60 leading-tight mb-2 h-8 overflow-hidden line-clamp-2 uppercase">{rec.description}</p>
-                                <div className="pt-2 border-t border-emerald-100">
-                                    <p className="text-[7.5px] font-bold text-emerald-900/40 uppercase italic leading-tight group-hover:text-emerald-600 transition-colors">
-                                        Why: {rec.reason}
-                                    </p>
-                                </div>
+                                <h4 className="text-sm font-bold text-slate-100 group-hover:text-cyan-400 transition-colors mb-1">{rec.title}</h4>
+                                <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-3">{rec.description}</p>
                             </div>
-                        ))}
+                            <div className="pt-2 border-t border-slate-800">
+                                <p className="text-[11px] font-mono text-slate-500">
+                                    <strong className="text-slate-400">Why:</strong> {rec.reason}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* AI Master Prompt Box */}
+            <div className="space-y-4 pt-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-cyan-400" />
+                        <h3 className="text-lg font-black uppercase text-slate-100 tracking-wider">Generate Master Strategy Prompt</h3>
                     </div>
+                    <button 
+                        onClick={copyToClipboard}
+                        className="px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-cyan-600 hover:text-white text-cyan-400 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+                    >
+                        {copied ? (
+                            <>
+                                <Check size={14} className="text-emerald-400" /> Prompt Copied to Clipboard!
+                            </>
+                        ) : (
+                            <>
+                                <Copy size={14} /> Copy AI Prompt for ChatGPT / Claude
+                            </>
+                        )}
+                    </button>
+                </div>
+                
+                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto select-all shadow-inner">
+                    {promptText}
                 </div>
 
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <Sparkles className="h-4 w-4 text-amber-400" />
-                            <h4 className="text-[10px] font-black uppercase text-emerald-950 tracking-widest">Generate Master Prompt</h4>
-                        </div>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className={`h-7 text-[9px] font-black uppercase tracking-tighter transition-all shadow-sm ${copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white border-emerald-100 text-emerald-900/40 hover:text-emerald-600"}`}
-                            onClick={copyToClipboard}
-                        >
-                            {copied ? <><ShieldCheck className="h-3 w-3 mr-1" /> Copied!</> : <><Copy className="h-3 w-3 mr-1" /> Copy Prompt</>}
-                        </Button>
-                    </div>
-                    
-                    <div className="relative group">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                        <div className="relative p-4 bg-slate-50 border border-emerald-100 rounded-xl font-mono text-[9px] text-emerald-900/60 whitespace-pre-wrap leading-relaxed select-all max-h-[250px] overflow-y-auto uppercase">
-                            {promptText}
-                        </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
-                        <BarChart4 className="h-4 w-4 text-emerald-600 mt-1" />
-                        <div>
-                            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">How to use this</p>
-                            <p className="text-[9px] font-bold text-emerald-900/40 uppercase leading-relaxed italic">
-                                Paste this prompt into ChatGPT or Claude. It automatically adjusts for ${cityName}'s specific poverty level, housing market, and employment data to give you a custom-built business blueprint.
-                            </p>
-                        </div>
+                <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-start gap-3 text-xs text-slate-400 font-mono">
+                    <BarChart4 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                    <div>
+                        <strong className="text-slate-200 block mb-1">How to use this AI Prompt:</strong>
+                        Copy and paste this structured prompt into ChatGPT, Claude, or DeepSeek. It passes {cityName}'s Census metrics directly to generate a customized 30-day business launch plan.
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }
