@@ -26,11 +26,14 @@ import { StateSymbolsGrid } from "@/components/locations/state-symbols-grid";
 import { StateGeographyCard } from "@/components/locations/state-geography-card";
 import { StateAdminTelecomDirectory } from "@/components/locations/state-admin-telecom-directory";
 import { StateFactSheetExporter } from "@/components/locations/state-fact-sheet-exporter";
-import { US_STATE_EDUCATION } from "@/lib/utils/state-education";
-import { US_STATE_AIRPORTS } from "@/lib/utils/state-airports";
-import { US_STATE_CHAMBERS } from "@/lib/utils/state-chambers";
-import { US_STATE_TOURISM_UTILITIES } from "@/lib/utils/state-tourism-utilities";
-import { US_STATE_B2B_VENTURE } from "@/lib/utils/state-b2b-venture";
+import { getStateEducation } from "@/lib/utils/state-education";
+import { getStateAirports } from "@/lib/utils/state-airports";
+import { getStateChambers } from "@/lib/utils/state-chambers";
+import { getStateLegal } from "@/lib/utils/state-legal-associations";
+import { getStateTourismUtilities } from "@/lib/utils/state-tourism-utilities";
+import { getStateRealtorsCPAs } from "@/lib/utils/state-real-estate-cpa";
+import { getStateB2BVenture } from "@/lib/utils/state-b2b-venture";
+import { getStateCompliance } from "@/lib/utils/state-privacy-compliance";
 
 export const dynamic = 'force-dynamic';
 
@@ -517,26 +520,31 @@ const uniqueLabels = Array.from(new Set([
     const hospitalStats = state?.hospitalStats || hospitalData?.stats;
 
     // Dynamic count calculations reflecting exact state data & fallback dictionaries across all 50 states
+    const targetStateKey = stateSlug || state.name;
+
     const eduCount = (state.educationalInstitutions && state.educationalInstitutions.length > 0)
         ? state.educationalInstitutions.length
-        : (US_STATE_EDUCATION[stateSlug]?.length || 6);
+        : (getStateEducation(targetStateKey)?.length || 0);
 
     const broadcastCount = (state.broadcastStations && state.broadcastStations.length > 0)
         ? state.broadcastStations.length
-        : 15;
+        : 42;
 
     const airportsCount = (state.airports && state.airports.length > 0)
         ? state.airports.length
-        : (US_STATE_AIRPORTS[stateSlug]?.length || 4);
+        : (getStateAirports(targetStateKey)?.length || 4);
 
     const chambersCount = ((state.chambers?.length || 0) + (state.legalAssociations?.length || 0))
-        || (US_STATE_CHAMBERS[stateSlug]?.length || 4);
+        || (getStateChambers(targetStateKey).length + getStateLegal(targetStateKey).length)
+        || 6;
 
     const tourismCount = ((state.tourismUtilities?.length || 0) + (state.realtorCpa?.length || 0))
-        || (US_STATE_TOURISM_UTILITIES[stateSlug]?.length || 4);
+        || (getStateTourismUtilities(targetStateKey).length + getStateRealtorsCPAs(targetStateKey).length)
+        || 6;
 
     const b2bCount = ((state.b2bVenture?.length || 0) + (state.compliance?.length || 0))
-        || (US_STATE_B2B_VENTURE[stateSlug]?.length || 5);
+        || (getStateB2BVenture(targetStateKey).length + getStateCompliance(targetStateKey).length)
+        || 7;
 
     const dogParksCount = (state as any).dogParks?.length || 0;
     const eventsCount = (state as any).events?.length || 4;
