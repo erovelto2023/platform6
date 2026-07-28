@@ -175,9 +175,9 @@ export function StateDogParksSection({ parks = [], stateName }: StateDogParksPro
                       <p className="text-xs text-slate-300 font-mono mt-1.5 flex items-start gap-1">
                         <MapPin size={12} className="text-emerald-500 shrink-0 mt-0.5" />
                         <span>
-                          {park.address || "100 Park Way"}
-                          {`, ${park.city || stateName}`}
-                          {`, ${park.stateAbbr || stateName}`}
+                          {park.address}
+                          {park.city ? `, ${park.city}` : ""}
+                          {park.stateAbbr ? `, ${park.stateAbbr}` : ""}
                           {park.zip ? ` ${park.zip}` : ""}
                         </span>
                       </p>
