@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { PawPrint, Search, MapPin, TreePine } from "lucide-react";
+import { PawPrint, Search, MapPin, TreePine, ExternalLink, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export interface DogPark {
   name: string;
+  address?: string;
   city?: string;
+  stateAbbr?: string;
+  zip?: string;
   description?: string;
+  detailUrl?: string;
   source?: string;
 }
 
@@ -24,12 +28,26 @@ export function StateDogParksSection({ parks = [], stateName }: StateDogParksPro
   const filtered = parks
     .filter((p) =>
       p.name.toLowerCase().includes(query.toLowerCase()) ||
-      (p.city && p.city.toLowerCase().includes(query.toLowerCase()))
+      (p.city && p.city.toLowerCase().includes(query.toLowerCase())) ||
+      (p.address && p.address.toLowerCase().includes(query.toLowerCase())) ||
+      (p.zip && p.zip.includes(query))
     )
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const visible = filtered.slice(0, displayLimit);
   const hasMore = displayLimit < filtered.length;
+
+  const getParkUrl = (park: DogPark) => {
+    if (park.detailUrl) return park.detailUrl;
+    // Fallback search link on animalshelter.org or Google Search
+    const searchTerms = encodeURIComponent(`${park.name} ${park.city || ''} ${stateName} dog park`);
+    return `https://www.google.com/search?q=${searchTerms}`;
+  };
+
+  const getMapUrl = (park: DogPark) => {
+    const queryStr = encodeURIComponent(`${park.name}, ${park.address || park.city || stateName}`);
+    return `https://www.google.com/maps/search/?api=1&query=${queryStr}`;
+  };
 
   return (
     <div className="space-y-8">
@@ -62,7 +80,7 @@ export function StateDogParksSection({ parks = [], stateName }: StateDogParksPro
               setQuery(e.target.value);
               setDisplayLimit(30);
             }}
-            placeholder={`Search ${parks.length} dog parks in ${stateName}...`}
+            placeholder={`Search ${parks.length} dog parks by name, city, address or zip...`}
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 transition-colors shadow-lg"
           />
         </div>
@@ -76,44 +94,93 @@ export function StateDogParksSection({ parks = [], stateName }: StateDogParksPro
       {filtered.length > 0 ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {visible.map((park, idx) => (
-              <div
-                key={idx}
-                className="group flex flex-col justify-between bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-2xl p-5 transition-all duration-200 shadow-xl"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
-                      <TreePine size={18} />
+            {visible.map((park, idx) => {
+              const targetUrl = getParkUrl(park);
+              const mapUrl = getMapUrl(park);
+
+              return (
+                <div
+                  key={idx}
+                  className="group flex flex-col justify-between bg-slate-900 border border-slate-800 hover:border-emerald-500/60 rounded-2xl p-5 transition-all duration-200 shadow-xl"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <a
+                        href={targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm"
+                        title="View Dog Park Web Page"
+                      >
+                        <TreePine size={18} />
+                      </a>
+                      <Badge
+                        variant="outline"
+                        className="bg-emerald-950/60 border-emerald-800/60 text-emerald-300 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5"
+                      >
+                        Off-Leash
+                      </Badge>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className="bg-emerald-950/60 border-emerald-800/60 text-emerald-300 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5"
+
+                    <div>
+                      <a
+                        href={targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-slate-100 hover:text-emerald-400 transition-colors"
+                      >
+                        <h3 className="text-base font-black leading-tight">
+                          {park.name}
+                        </h3>
+                        <ExternalLink size={14} className="shrink-0 text-emerald-400 opacity-70 group-hover:opacity-100 transition-opacity" />
+                      </a>
+
+                      {park.address && (
+                        <p className="text-xs text-slate-300 font-mono mt-1.5 flex items-start gap-1">
+                          <MapPin size={12} className="text-emerald-500 shrink-0 mt-0.5" />
+                          <span>
+                            {park.address}
+                            {park.city && `, ${park.city}`}
+                            {park.stateAbbr && `, ${park.stateAbbr}`}
+                            {park.zip && ` ${park.zip}`}
+                          </span>
+                        </p>
+                      )}
+                      {!park.address && park.city && (
+                        <p className="text-xs text-slate-400 font-mono mt-1 flex items-center gap-1">
+                          <MapPin size={10} className="text-emerald-500" />
+                          {park.city}, {stateName}
+                        </p>
+                      )}
+                      {park.description && (
+                        <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">
+                          {park.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+                    <a
+                      href={mapUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-slate-400 hover:text-emerald-400 font-mono uppercase tracking-wider flex items-center gap-1"
                     >
-                      Off-Leash
-                    </Badge>
-                  </div>
-
-                  <div>
-                    <h3 className="text-base font-black text-slate-100 group-hover:text-emerald-400 transition-colors leading-tight">
-                      {park.name}
-                    </h3>
-                    {park.city && (
-                      <p className="text-xs text-slate-400 font-mono mt-1 flex items-center gap-1">
-                        <MapPin size={10} className="text-emerald-500" />
-                        {park.city}, {stateName}
-                      </p>
-                    )}
+                      <MapPin size={10} /> Google Maps
+                    </a>
+                    <a
+                      href={targetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] text-emerald-400 hover:text-emerald-300 font-mono uppercase font-bold flex items-center gap-1 bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-1 rounded-lg hover:border-emerald-500 transition-colors"
+                    >
+                      <Globe size={10} /> Web Page &rarr;
+                    </a>
                   </div>
                 </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-800">
-                  <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
-                    🐕 Pet-Friendly Recreation Area
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Load More */}

@@ -191,15 +191,43 @@ function fetchHtml(url: string): Promise<string> {
   });
 }
 
-function parseDogParkNames(html: string): string[] {
-  const parks: string[] = [];
-  const re = /href="\/dogParks\/[^"]+_rId\d+_rS_pC\.html"[^>]*>\s*<strong>([^<]+)<\/strong>\s*<\/a>/gi;
+function parseDogParkLinks(html: string): Array<{ name: string; urlSlug: string }> {
+  const parks: Array<{ name: string; urlSlug: string }> = [];
+  const re = /href="(\/dogParks\/([^"]+_rId\d+_rS_pC\.html))"[^>]*>\s*<strong>([^<]+)<\/strong>\s*<\/a>/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
-    const name = m[1].trim();
-    if (name) parks.push(name);
+    parks.push({ urlSlug: m[2], name: m[3].trim() });
   }
   return parks;
+}
+
+function parseDogParkDetailPage(html: string) {
+  const addrMatch = html.match(/<div class="about-park[^"]*"[\s\S]*?<h3>[^<]+<\/h3>\s*<div>([^<]+)<\/div>\s*<div>([^<]+)<\/div>/i);
+  let address = "";
+  let city = "";
+  let stateAbbr = "";
+  let zip = "";
+
+  if (addrMatch) {
+    address = addrMatch[1].replace(/\s+/g, " ").trim();
+    const cityLine = addrMatch[2].replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+    const cityStateZip = cityLine.match(/^(.+),\s*([A-Z]{2})\s+(\d{5})/);
+    if (cityStateZip) {
+      city = cityStateZip[1].trim();
+      stateAbbr = cityStateZip[2];
+      zip = cityStateZip[3];
+    } else {
+      city = cityLine;
+    }
+  }
+
+  const descMatch = html.match(/<blockquote>([\s\S]*?)<\/blockquote>/i);
+  let description = "";
+  if (descMatch) {
+    description = descMatch[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim().slice(0, 500);
+  }
+
+  return { address, city, stateAbbr, zip, description };
 }
 
 function getMaxDogParkPage(html: string, abbr: string): number {
@@ -211,6 +239,42 @@ function getMaxDogParkPage(html: string, abbr: string): number {
     if (p > max) max = p;
   }
   return max;
+}
+
+async function fetchMobileCityParks(): Promise<any[]> {
+  try {
+    const rawHtml = await fetchHtml("https://www.cityofmobile.gov/parks-rec/parks/");
+    const bldgMatch = rawHtml.match(/bldgData\s*=\s*(\{"type":"FeatureCollection"[\s\S]*?\});/);
+    const centersMatch = rawHtml.match(/centersData\s*=\s*(\{"type":"FeatureCollection"[\s\S]*?\});/);
+    const bldgFeatures = bldgMatch ? JSON.parse(bldgMatch[1]).features : [];
+    const centersFeatures = centersMatch ? JSON.parse(centersMatch[1]).features : [];
+    const all = [...bldgFeatures, ...centersFeatures];
+
+    return all.map((feat: any) => {
+      const props = feat.properties;
+      const title = (props.title || "").trim();
+      const slug = props.slug;
+      const detailUrl = `https://www.cityofmobile.gov/parks-rec/${slug}/`;
+      const formattedAddress = (props.formatted_address || "").replace(/\t/g, " ").replace(/\s+/g, " ").trim();
+      let zip = "";
+      const zipMatch = formattedAddress.match(/\b(\d{5}(-\d{4})?)\b/);
+      if (zipMatch) zip = zipMatch[1];
+
+      return {
+        name: title,
+        address: formattedAddress,
+        city: "Mobile",
+        stateAbbr: "AL",
+        zip,
+        description: `Official City of Mobile park & recreational facility located at ${formattedAddress}.`,
+        detailUrl,
+        source: "cityofmobile.gov",
+      };
+    });
+  } catch (err: any) {
+    console.warn(`  ⚠ Could not fetch Mobile City Parks: ${err.message}`);
+    return [];
+  }
 }
 
 function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
@@ -497,18 +561,18 @@ async function runMasterSeed() {
       console.warn("⚠️ FCC Broadcast Excel file not found, skipping Step 4.\n");
     }
 
-    // ─── STEP 5: SCRAPE & SEED DOG PARKS ────────────────────────────────────────
-    console.log("🐕 [STEP 5/5] Scraping & Seeding Dog Parks from animalshelter.org...");
+    // ─── STEP 5: SCRAPE & SEED DOG PARKS WITH DETAILS ───────────────────────────
+    console.log("🐕 [STEP 5/5] Scraping & Seeding Enriched Dog Parks from animalshelter.org...");
     let totalDogParks = 0;
     let dogParkStatesSeeded = 0;
 
     for (const state of DOG_PARK_STATES) {
       const baseUrl = `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}.html`;
-      const allParks: string[] = [];
+      const allParkLinks: Array<{ name: string; urlSlug: string }> = [];
 
       try {
         const html1 = await fetchHtml(baseUrl);
-        allParks.push(...parseDogParkNames(html1));
+        allParkLinks.push(...parseDogParkLinks(html1));
 
         const maxPage = getMaxDogParkPage(html1, state.abbr);
         for (let page = 2; page <= maxPage; page++) {
@@ -517,7 +581,7 @@ async function runMasterSeed() {
             const htmlN = await fetchHtml(
               `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}/${page}.html`
             );
-            allParks.push(...parseDogParkNames(htmlN));
+            allParkLinks.push(...parseDogParkLinks(htmlN));
           } catch { break; }
         }
       } catch (err: any) {
@@ -525,23 +589,79 @@ async function runMasterSeed() {
         continue;
       }
 
-      const unique = [...new Set(allParks)];
+      const seen = new Set<string>();
+      const unique = allParkLinks.filter(p => {
+        if (seen.has(p.name)) return false;
+        seen.add(p.name);
+        return true;
+      });
+
       if (unique.length === 0) continue;
 
-      const dogParkDocs = unique.map(name => ({ name, city: "", description: "", source: "animalshelter.org" }));
+      const enrichedParks = [];
+      for (const park of unique) {
+        const detailUrl = `https://www.animalshelter.org/dogParks/${park.urlSlug}`;
+        try {
+          const detailHtml = await fetchHtml(detailUrl);
+          const detail = parseDogParkDetailPage(detailHtml);
+          enrichedParks.push({
+            name: park.name,
+            address: detail.address,
+            city: detail.city || "",
+            stateAbbr: detail.stateAbbr || state.abbr,
+            zip: detail.zip,
+            description: detail.description,
+            detailUrl,
+            source: "animalshelter.org",
+          });
+        } catch {
+          enrichedParks.push({
+            name: park.name,
+            address: "",
+            city: "",
+            stateAbbr: state.abbr,
+            zip: "",
+            description: "",
+            detailUrl: "",
+            source: "animalshelter.org",
+          });
+        }
+        await sleep(250);
+      }
+
+      if (state.abbr === "AL") {
+        const mobileParks = await fetchMobileCityParks();
+        if (mobileParks.length > 0) {
+          const parkMap = new Map<string, any>();
+          for (const p of enrichedParks) parkMap.set(p.name.toLowerCase().trim(), p);
+          for (const mp of mobileParks) {
+            const k = mp.name.toLowerCase().trim();
+            const matchedKey = Array.from(parkMap.keys()).find(key => key === k || key.includes(k) || k.includes(key));
+            if (matchedKey) {
+              const existing = parkMap.get(matchedKey);
+              parkMap.set(matchedKey, { ...existing, ...mp, detailUrl: mp.detailUrl, source: "cityofmobile.gov" });
+            } else {
+              parkMap.set(k, mp);
+            }
+          }
+          const mergedList = Array.from(parkMap.values());
+          enrichedParks.length = 0;
+          enrichedParks.push(...mergedList);
+        }
+      }
 
       await LocationModel.updateOne(
         { slug: state.slug, type: "state" },
-        { $set: { dogParks: dogParkDocs } },
+        { $set: { dogParks: enrichedParks } },
         { upsert: true }
       );
 
-      totalDogParks += unique.length;
+      totalDogParks += enrichedParks.length;
       dogParkStatesSeeded++;
-      console.log(`  → ${state.slug}: ${unique.length} dog parks`);
-      await sleep(700);
+      console.log(`  → ${state.slug}: ${enrichedParks.length} enriched dog parks`);
+      await sleep(500);
     }
-    console.log(`✅ STEP 5 COMPLETE: ${totalDogParks} Dog Parks Seeded into ${dogParkStatesSeeded} States.\n`);
+    console.log(`✅ STEP 5 COMPLETE: ${totalDogParks} Enriched Dog Parks Seeded into ${dogParkStatesSeeded} States.\n`);
 
     console.log("=========================================");
     console.log("🎉 ALL SEEDING OPERATIONS FINISHED!");

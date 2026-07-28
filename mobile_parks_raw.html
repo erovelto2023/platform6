@@ -1,0 +1,599 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content=".map-overlay {position: absolute;width: auto;top: 0;left: 0;padding:">
+    <title>Parks</title>
+	<!-- Schema.org markup for Google+ -->
+	<meta itemprop="name" content="Parks">
+	<meta itemprop="description" content=".map-overlay {position: absolute;width: auto;top: 0;left: 0;padding:">
+	<meta itemprop="image" content="">
+
+	<!-- Twitter Card data -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:site" content="@publisher_handle">
+	<meta name="twitter:title" content="Parks">
+	<meta name="twitter:description" content=".map-overlay {position: absolute;width: auto;top: 0;left: 0;padding:">
+	<meta name="twitter:creator" content="@author_handle">
+	<!-- Twitter summary card with large image must be at least 280x150px -->
+	<meta name="twitter:image:src" content="">
+
+	<!-- Open Graph data -->
+	<meta property="og:title" content="Parks" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://www.cityofmobile.gov/parks-rec/parks/" />
+
+	<meta property="og:image" content="" />
+	<meta property="og:description" content=".map-overlay {position: absolute;width: auto;top: 0;left: 0;padding:" />
+	<meta property="og:site_name" content="City of Mobile : Parks and Recreation" />
+    
+    <link rel="canonical" href="https://www.cityofmobile.gov/parks-rec/parks/" />
+    <script async src="https://docaccess.com/docbox.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.3/css/all.css" integrity="sha384-SZXxX4whJ79/gErwcOYf+zWLeJdY/qpuqC4cAa9rOGUstPomtqpuNWT9wdPEn2fk" crossorigin="anonymous">
+	
+	<!-- EVENTS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.9.0/main.min.js"></script>
+	<!--LOCATOR -->
+	
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+	
+	<link href="https://www.cityofmobile.gov/parks-rec/assets/css/styles.css" rel='stylesheet' type='text/css' >
+	<link href="https://www.cityofmobile.gov/parks-rec/assets/vendor/AOS/aos.css" rel='stylesheet' type='text/css' >
+	<link href="https://www.cityofmobile.gov/parks-rec/assets/css/custom.css" rel='stylesheet' type='text/css' >
+	<link rel="stylesheet" href="https://www.cityofmobile.gov/parks-rec/assets/vendor/layerslider/css/layerslider.css" type="text/css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=UA-64450506-1"></script>
+			<script>
+			  window.dataLayer = window.dataLayer || [];
+			  function gtag(){dataLayer.push(arguments);}
+			  gtag('js', new Date());
+
+			  gtag('config', 'UA-64450506-1');
+			</script>    			<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://www.cityofmobile.gov/parks-rec/assets/vendor/layerslider/js/layerslider.utils.js" type="text/javascript"></script>
+ 
+	<!-- LayerSlider script files -->
+	<script src="https://www.cityofmobile.gov/parks-rec/assets/vendor/layerslider/js/layerslider.transitions.js" type="text/javascript"></script>
+	<script src="https://www.cityofmobile.gov/parks-rec/assets/vendor/layerslider/js/layerslider.kreaturamedia.jquery.js" type="text/javascript"></script>
+	    
+    
+  </head>
+<body  >
+<a class="visually-hidden visually-hidden-focusable text-dark" href="#content">Skip to main content</a>
+<div aria-live="polite" aria-atomic="true" class="position-relative" style="z-index:1062">
+	<div class="position-fixed bottom-0 end-0 p-3 p-3" id="toasts-container"></div>
+</div>
+<script>
+										$( document ).ready(function() {
+											var response_toast = '<div class="toast border-0 mb-2 position-relative" role="alert" data-bs-autohide="false" aria-live="assertive" aria-atomic="true"  id="response-toast" style="border-radius:12px">'+
+															'<div class="toast-body bg-white" style="border-radius:12px">'+
+															' <button type="button" class="btn btn-dark btn-sm position-absolute  text-white font-weight-bold" data-bs-dismiss="toast" aria-label="Close" style="top:-10px;left:-10px;font-size:0.8rem;z-index:1062">X</button> <p style="text-align: center;"><a href="https://www.cityofmobile.gov/parks-rec/uploads/aMPRDActivityGuide-Summer2026-FINAL.pdf"><img alt="" class="img-fluid" src="https://www.cityofmobile.gov/parks-rec/uploads/l_MPRD-Activity-Guide---Summer-2026---FINAL-1.jpg" /></a></p>'+
+															'</div>'+
+														 ' </div>';
+										  $('#toasts-container').append(response_toast);
+											$('.toast').toast('show');
+	
+										});
+									</script><div class="bg-green py-2">
+	<div class="container">
+		<a href="https://www.cityofmobile.gov/" class="text-white small"><i class="fas fa-arrow-left"></i> Back to City of Mobile</a>
+	</div>
+</div>
+<header class="navbar navbar-expand-xl navbar-light navbar-sticky" >
+
+	<div class="container">
+		  <a class="navbar-brand" href="https://www.cityofmobile.gov/parks-rec/">
+		  	<img src="https://www.cityofmobile.gov/parks-rec/uploads/City-of-Mobile-Full-Logo.png" class="logo" alt="City Logo"></a>
+		  	 <button type="button" class="btn btn-link d-xl-none p-0 text-dark ms-auto" onClick="$('.swiper-container-notifications').toggleClass('d-none')">
+							<i class="far fa-bell" style="font-size: 1.4em;"></i><span class="badge bg-dark small rounded-circle position-relative" style="top: -13px;left: -5px;">1</span>
+						</button>		  <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<div class="animated-icon1"><span></span><span></span><span></span></div>
+		  </button>
+		 
+		  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav ms-auto"> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/" class="nav-link " title="Home">Home</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/about" class="nav-link " title="About">About</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/parks" class="nav-link " title="Parks">Parks</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/community-centers" class="nav-link " title="Community Centers">Community Centers</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/news" class="nav-link " title="News">News</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/events" class="nav-link " title="Events">Events</a></li> <li class="nav-item"> <a href="https://www.cityofmobile.gov/parks-rec/rentals-permits" class="nav-link " title="Rentals & Permits">Rentals & Permits</a></li></ul>		
+			
+		  </div>
+	</div>
+</header><section id="site_content"   >
+	<main id="main-content">
+
+<div class="container py-4">
+		<h1 class="font-weight-bold border-heading display-4 text-darkblue">Parks</h1>			
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css' rel='stylesheet' />
+
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<style>
+.map-overlay {
+position: absolute;
+width: auto;
+top: 0;
+left: 0;
+padding: 10px;
+max-height:100%;
+overflow:scroll;
+}
+.map-overlay .map-overlay-inner {
+background-color: #fff;
+box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+border-radius: 3px;
+padding: 10px;
+margin-bottom: 10px;
+}
+#menu {
+background: #fff;
+position:absolute;
+z-index: 1;
+top: 10px;
+right: 5%;
+}
+.modal-backdrop.show {
+	display:none !important;
+}
+</style>
+
+<div class="row g-1">
+	<div class="col-lg-4">
+			<form id="parks_loc" action="" method="post" class="row g-1">
+				<div class="col-10">
+					<div class="form-floating">
+					<select name="amenities[]" id="amenities" class="form-select amenities-select"  multiple data-placeholder="Search Amenities" >
+					<option value="11" >3 Artificial Turf Field (Soccer, Lacrosse, Football) </option><option value="42" >A.E.N.P. Program</option><option value="21" >Amphitheater</option><option value="37" >Baseball</option><option value="5" >Basketball</option><option value="41" >Benches</option><option value="24" >Boat Ramp</option><option value="29" >Ceramics</option><option value="36" >Champion Field</option><option value="47" >Classroom/ Meeting Room</option><option value="44" >Community Center</option><option value="51" >Community Garden</option><option value="33" >Concessions</option><option value="12" >Disc Golf</option><option value="20" >Dog Park</option><option value="28" >Facility</option><option value="4" >Facility (Boys & Girls Club)</option><option value="25" >Facility (United Methodist Inner City Mission)</option><option value="14" >Fishing</option><option value="16" >Fitness Zone</option><option value="1" >Football</option><option value="48" >Fountain</option><option value="32" >Golf</option><option value="53" >Greenway</option><option value="34" >Gymnasium</option><option value="31" >Gymnastics Facility</option><option value="15" >Kayak Launch</option><option value="39" >Lake</option><option value="27" >Museum</option><option value="45" >Neighborhood Center</option><option value="6" >Pavilions</option><option value="18" >Pickle Ball</option><option value="7" >Picnic Tables</option><option value="23" >Pier</option><option value="8" >Playground</option><option value="9" >Restrooms</option><option value="43" >Senior Programming</option><option value="26" >Skate Park</option><option value="30" >Soccer</option><option value="50" >Softball</option><option value="2" >Softball and Baseball</option><option value="13" >Splash Pad</option><option value="38" >Sprayground</option><option value="49" >Stage</option><option value="3" >Swimming</option><option value="54" >Tennis Centers</option><option value="17" >Tennis Courts</option><option value="46" >Therapeutic Recreation Center</option><option value="35" >Trailhead for the Mobile Greenway Trail</option><option value="52" >Volleyball</option><option value="19" >Wading Pool</option><option value="10" >Walking Trail</option><option value="40" >Water Fountain</option><option value="22" >Waterfront</option>					</select>
+						<label for="amenities" class="sr-only">Search Amenities</label>
+					</div>
+				</div>
+				<div class="col-2">
+					<div class="d-grid">
+					<button type="submit" class="btn btn-dark text-uppercase font-weight-bold btn-sm"><i class="fas fa-search"></i><span class="sr-only">Search Amenities</span></button>
+					</div>
+				</div>
+		</form>
+		
+		<hr>
+		
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item" role="presentation">
+			<button class="nav-link active small fw-bold" id="parks-tab" data-bs-toggle="tab" data-bs-target="#parks" type="button" role="tab" aria-controls="parks" aria-selected="true"><img src="https://www.cityofmobile.org/parks-rec/uploads/park-icon.png" alt="Parks icon" style="width:40px"> Parks</button>
+			</li>
+			<li class="nav-item" role="presentation">
+			<button class="nav-link small fw-bold" id="centers-tab" data-bs-toggle="tab" data-bs-target="#centers" type="button" role="tab" aria-controls="centers" aria-selected="false"><img src="https://www.cityofmobile.org/parks-rec/uploads/centers-icon.png"  alt="Community Center icon" style="width:40px"> Community Centers</button>
+			</li>
+		</ul>
+		<div class="tab-content" id="myTabContent">
+		  	<div class="tab-pane fade show active" id="parks" role="tabpanel" aria-labelledby="parks-tab">
+		  		<div class="d-lg-none">
+		  			<div class="form-floating mb-3">
+		  			<select id="parks_select" class="form-select">
+		  				<option value="">Select</option>
+		  			</select>
+		  			<label for="parks_select">Select a Park</label>
+		  			</div>
+		  		</div>
+		  		<div style="max-height:720px;overflow:scroll">
+		  			<div id="parks_list" class="d-none d-lg-block"></div>
+		  		</div>
+		  	</div>
+		  	<div class="tab-pane fade" id="centers" role="tabpanel" aria-labelledby="centers-tab">
+		  		<div style="max-height:720px;overflow:scroll"><div id="centers_list" class="d-none d-lg-block"></div></div>
+		  		<div class="d-lg-none">
+		  			<div class="form-floating mb-3">
+		  			<select id="centers_select" class="form-select">
+		  				<option value="">Select</option>
+		  			</select>
+		  			<label for="centers_select">Select a Community Center</label>
+		  			</div>
+		  		</div>
+		  	</div>
+		</div>
+	
+	</div>
+	<div class="col-lg-8">
+		<div class="position-relative">
+		<div id="parks-map" class=" w-100 " style="height:850px"></div>
+		<div id="menu"></div>
+		<div class="modal fade  position-absolute" id="ParkModal" tabindex="-1" aria-labelledby="ParkModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-dialog-vertical ">
+			<div class="modal-content p-0 border-0">
+			  <div class="modal-header border-0">
+				<p class="h4" id="park_title"></p>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			  </div>
+			  <div class="modal-body"> </div>
+			  
+			</div>
+		  </div>
+</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+<script>
+var site = 'https://www.cityofmobile.org/parks-rec/';
+$(document).ready(function(){
+	$('.amenities-select').select2();
+
+	var parksModal = new bootstrap.Modal(document.getElementById('ParkModal'), {
+	  keyboard: false
+	})
+
+ 	if (!('remove' in Element.prototype)) {
+    	Element.prototype.remove = function() {
+      	if (this.parentNode) {
+        	this.parentNode.removeChild(this);
+      	}
+    	};
+  	}
+  	
+	var query_data;
+	var site ='https://www.cityofmobile.gov/parks-rec/';
+	var bldgData = {"type":"FeatureCollection","features":[{"geometry":{"coordinates":["-88.061322","30.62664"],"type":"Point"},"type":"Feature","properties":{"title":"Arlington Park","id":216,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1705 S Broad St  Mobile, AL\t36615","slug":"arlington-park"}},{"geometry":{"coordinates":["-88.168513","30.70297"],"type":"Point"},"type":"Feature","properties":{"title":"Azalea City Golf Course","id":82,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1000 Gaillard Drive  Mobile, AL\t36608","slug":"azalea-city-golf-course"}},{"geometry":{"coordinates":["-88.110541","30.665424"],"type":"Point"},"type":"Feature","properties":{"title":"Bailey Joe A. Park","id":276,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"712 Magnolia Rd  Mobile, AL\t36606","slug":"bailey-joe-a-park"}},{"geometry":{"coordinates":["-88.08547","30.662011"],"type":"Point"},"type":"Feature","properties":{"title":"Baumhauer-Randle Park","id":84,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1909 Duval Street  Mobile, AL\t36606","slug":"baumhauer-randle-park"}},{"geometry":{"coordinates":["-88.042281","30.692501"],"type":"Point"},"type":"Feature","properties":{"title":"Bienville Square ","id":9,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"150 Dauphin Street  Mobile, AL\t36607","slug":"bienville-square"}},{"geometry":{"coordinates":["-88.18462","30.56975"],"type":"Point"},"type":"Feature","properties":{"title":"Boykin Park","id":298,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"5850 Carol Plantation Rd  Mobile, AL\t36582","slug":"boykin-park"}},{"geometry":{"coordinates":["-88.048044","30.684855"],"type":"Point"},"type":"Feature","properties":{"title":"British Park","id":256,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"209 S Dearborn St  Mobile, AL\t36602-160","slug":"british-park"}},{"geometry":{"coordinates":["-88.111397","30.713035"],"type":"Point"},"type":"Feature","properties":{"title":"Bush Park","id":358,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"712 Rice Street  Mobile, AL\t36607","slug":"bush-park"}},{"geometry":{"coordinates":["-88.044845","30.690407"],"type":"Point"},"type":"Feature","properties":{"title":"Cathedral Square ","id":79,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"300 Conti Street   Mobile, AL\t36602","slug":"cathedral-square"}},{"geometry":{"coordinates":["-88.03777","30.69032"],"type":"Point"},"type":"Feature","properties":{"title":"Cooper Riverside Park","id":70,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1 Government Street  Mobile, AL\t36602","slug":"cooper-riverside-park"}},{"geometry":{"coordinates":["-88.18410","30.65876"],"type":"Point"},"type":"Feature","properties":{"title":"Cottage Hill Gymnastics Center","id":2,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1711 Hillcrest Rd  Mobile, AL\t36695","slug":"cottage-hill-gymnastics-center"}},{"geometry":{"coordinates":["-88.06663","30.677536"],"type":"Point"},"type":"Feature","properties":{"title":"Crawford-Murphy Park","id":89,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"351 S Ann St  Mobile, AL\t36604","slug":"crawford-murphy-park"}},{"geometry":{"coordinates":["-88.141832","30.626768"],"type":"Point"},"type":"Feature","properties":{"title":"Crestview Park","id":284,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1600 Roland Drive  Mobile, AL\t36609","slug":"crestview-park"}},{"geometry":{"coordinates":["-88.045748","30.697079"],"type":"Point"},"type":"Feature","properties":{"title":"Detonti Square","id":360,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"311 N. Conception Street  Mobile, AL\t36603","slug":"detonti-square"}},{"geometry":{"coordinates":["-88.076172","30.624475"],"type":"Point"},"type":"Feature","properties":{"title":"Doyle Park","id":277,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1728 Rosedale Rd  Mobile, AL\t36605","slug":"doyle-park"}},{"geometry":{"coordinates":["-88.088006","30.698076"],"type":"Point"},"type":"Feature","properties":{"title":"Frederick D Richardson Jr Tricentennial Park\t","id":66,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2121 Bragg Avenue  Mobile, AL\t36617","slug":"frederick-d-richardson-jr-tricentennial-park"}},{"geometry":{"coordinates":["-88.093438","30.652177"],"type":"Point"},"type":"Feature","properties":{"title":"Fry Park","id":361,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1114 Gimon Circle W  Mobile, AL\t36605","slug":"fry-park"}},{"geometry":{"coordinates":["-88.13659","30.67967"],"type":"Point"},"type":"Feature","properties":{"title":"Hackmeyer Park","id":312,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"3710 S. Conway Drive  Mobile, AL\t36608","slug":"hackmeyer-park"}},{"geometry":{"coordinates":["-88.11184","30.689367"],"type":"Point"},"type":"Feature","properties":{"title":"Herndon-Sage Park","id":21,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2900 Dauphin Street  Mobile, AL\t36606","slug":"herndon-sage-park"}},{"geometry":{"coordinates":["-88.163925","30.541788"],"type":"Point"},"type":"Feature","properties":{"title":"Heroes Park","id":296,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"7161 Old Military Rd  Theodore, AL\t36582","slug":"heroes-park"}},{"geometry":{"coordinates":["-88.154917","30.706522"],"type":"Point"},"type":"Feature","properties":{"title":"Joseph N Langan Park","id":4,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"4901 Zeigler Blvd.  Mobile, AL\t36608","slug":"joseph-n-langan-park"}},{"geometry":{"coordinates":["-88.16028","30.69289"],"type":"Point"},"type":"Feature","properties":{"title":"Lavretta Park","id":71,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"200 W. Parkway Drive  Mobile, AL\t36608","slug":"lavretta-park"}},{"geometry":{"coordinates":["-88.07365","30.694025"],"type":"Point"},"type":"Feature","properties":{"title":"Lyons Park","id":77,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"180 Lyons Park Avenue  Mobile, AL\t36604","slug":"lyons-park"}},{"geometry":{"coordinates":["-88.063419","30.673516"],"type":"Point"},"type":"Feature","properties":{"title":"Magnolia Cemetery","id":237,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1202 Virginia Street  Mobile, AL\t36604","slug":"magnolia-cemetery"}},{"geometry":{"coordinates":["-88.102803","30.658804"],"type":"Point"},"type":"Feature","properties":{"title":"Maitre Martha B Park","id":258,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2412 Halls Mill Rd  Mobile, AL\t36606-460","slug":"maitre-martha-b-park"}},{"geometry":{"coordinates":["-88.045401","30.687277"],"type":"Point"},"type":"Feature","properties":{"title":"Malaga Square","id":310,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"403 Church Street  Mobile, AL\t36602","slug":"malaga-square"}},{"geometry":{"coordinates":["-88.166268","30.653786"],"type":"Point"},"type":"Feature","properties":{"title":"Malibar Heights Park","id":363,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"5355 Raines Drive  Mobile, AL\t36609","slug":"malibar-heights-park"}},{"geometry":{"coordinates":["-88.040222","30.690108"],"type":"Point"},"type":"Feature","properties":{"title":"Mardi Gras Park","id":210,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"109 Government St  Mobile, AL\t36602","slug":"mardi-gras-park"}},{"geometry":{"coordinates":["-88.060507","30.698135"],"type":"Point"},"type":"Feature","properties":{"title":"Martin Luther King, Jr Park","id":372,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1101 Dr. Martin Luther King, Jr. Ave  Mobile, AL\t36603","slug":"martin-luther-king-jr-park"}},{"geometry":{"coordinates":["-88.136909","30.668112"],"type":"Point"},"type":"Feature","properties":{"title":"Matthews Park","id":262,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"3700 Michael Blvd  Mobile, AL\t36609","slug":"matthews-park"}},{"geometry":{"coordinates":["-88.210329","30.700252"],"type":"Point"},"type":"Feature","properties":{"title":"McCants-Chavers Park","id":148,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"7251 13th St  Mobile, AL\t36608","slug":"mccants-chavers-park"}},{"geometry":{"coordinates":["-88.097751","30.698383"],"type":"Point"},"type":"Feature","properties":{"title":"McLean Park","id":364,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"320 Park Avenue   Mobile, AL\t36607","slug":"mclean-park"}},{"geometry":{"coordinates":["-88.075593","30.582034"],"type":"Point"},"type":"Feature","properties":{"title":"McNally Park","id":215,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"4380 Park Rd  Mobile, AL\t36605","slug":"mcnally-park"}},{"geometry":{"coordinates":["-88.189292","30.655104"],"type":"Point"},"type":"Feature","properties":{"title":"Medal of Honor Park\t","id":74,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1711 Hillcrest Rd  Mobile, AL\t36695","slug":"medal-of-honor-park"}},{"geometry":{"coordinates":["-88.082603","30.677195"],"type":"Point"},"type":"Feature","properties":{"title":"Memorial Park","id":76,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1800 Airport Blvd  Mobile, AL\t36606","slug":"memorial-park"}},{"geometry":{"coordinates":["-88.101394","30.705593"],"type":"Point"},"type":"Feature","properties":{"title":"Mill Street Park","id":295,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2665 Mill Street   Mobile, AL\t36607","slug":"mill-street-park"}},{"geometry":{"coordinates":["-88.222891","30.734696"],"type":"Point"},"type":"Feature","properties":{"title":"Miller Park","id":304,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"7451 Lamplighter Dr.  Mobile, AL\t36608","slug":"miller-park"}},{"geometry":{"coordinates":["-88.166625","30.62322"],"type":"Point"},"type":"Feature","properties":{"title":"Mims Lambert C Park","id":283,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"5400 Grishilde Drive  Mobile, AL\t36693","slug":"mims-lambert-c-park"}},{"geometry":{"coordinates":["-88.164492","30.707805"],"type":"Point"},"type":"Feature","properties":{"title":"Mobile Tennis Center","id":81,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"851 Gaillard Drive  Mobile, AL\t36608","slug":"mobile-tennis-center"}},{"geometry":{"coordinates":["-88.16046","30.70883"],"type":"Point"},"type":"Feature","properties":{"title":"Municipal Ball Park","id":266,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"4901 Zeigler Blvd  Mobile, AL\t36608","slug":"municipal-ball-park"}},{"geometry":{"coordinates":["-88.114276","30.633069"],"type":"Point"},"type":"Feature","properties":{"title":"PFC Howard Johnson II Park","id":362,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2661 Atoll Drive  Mobile, AL\t36605","slug":"pfc-howard-johnson-ii-park"}},{"geometry":{"coordinates":["-88.09459","30.67558"],"type":"Point"},"type":"Feature","properties":{"title":"Public Safety Memorial Park","id":221,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2301 Airport Blvd  Mobile, AL\t36606","slug":"public-safety-memorial-park"}},{"geometry":{"coordinates":["-88.105583","30.681992"],"type":"Point"},"type":"Feature","properties":{"title":"Rich Park","id":369,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"2700 Foreman Circle  Mobile, AL\t36606","slug":"rich-park"}},{"geometry":{"coordinates":["-88.124518","30.604734"],"type":"Point"},"type":"Feature","properties":{"title":"Schwartz Park","id":367,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"3701 Riviere du Chien Rd  Mobile, AL\t36693","slug":"schwartz-park"}},{"geometry":{"coordinates":["-88.15223","30.633062"],"type":"Point"},"type":"Feature","properties":{"title":"Skyland Park","id":368,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"4212 Arcturus Lane  Mobile, AL\t36693","slug":"skyland-park"}},{"geometry":{"coordinates":["-88.045836","30.688426"],"type":"Point"},"type":"Feature","properties":{"title":"Spanish Plaza","id":219,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"401 Government St  Mobile, AL\t36602","slug":"spanish-plaza"}},{"geometry":{"coordinates":["-88.071306","30.600953"],"type":"Point"},"type":"Feature","properties":{"title":"Stewart Park","id":291,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1320 Stewart Rd  Mobile, AL\t36605","slug":"stewart-park"}},{"geometry":{"coordinates":["-88.062336","30.667218"],"type":"Point"},"type":"Feature","properties":{"title":"Taylor Park","id":206,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1050 Baltimore Street  Mobile, AL\t36605","slug":"taylor-park"}},{"geometry":{"coordinates":["-88.151065","30.708494"],"type":"Point"},"type":"Feature","properties":{"title":"The Charles Wood Japanese Garden ","id":503,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"800 Forest Hill Dr  Mobile, AL\t36618","slug":"the-charles-wood-japanese-garden"}},{"geometry":{"coordinates":["-88.114035","30.692178"],"type":"Point"},"type":"Feature","properties":{"title":"Three Mile Creek Greenway","id":370,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"48 N. Sage Ave  Mobile, AL\t36607","slug":"three-mile-creek-greenway"}},{"geometry":{"coordinates":["-88.098403","30.597439"],"type":"Point"},"type":"Feature","properties":{"title":"Trimmier Park","id":238,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"3600 Alba Club Road  Mobile, AL\t36605","slug":"trimmier-park"}},{"geometry":{"coordinates":["-88.056081","30.690468"],"type":"Point"},"type":"Feature","properties":{"title":"Unity Point Park","id":371,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"900 Spring Hill Ave  Mobile, AL\t36602","slug":"unity-point-park"}},{"geometry":{"coordinates":["-88.086378","30.644789"],"type":"Point"},"type":"Feature","properties":{"title":"Walsh Park ","id":290,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1401 Windsor Ave  Mobile, AL\t36605","slug":"walsh-park"}},{"geometry":{"coordinates":["-88.05671","30.68256"],"type":"Point"},"type":"Feature","properties":{"title":"Washington Square","id":223,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"251 Chatham St  Mobile, AL\t36604","slug":"washington-square"}},{"geometry":{"coordinates":["-88.22446","30.66856"],"type":"Point"},"type":"Feature","properties":{"title":"Westside Park","id":289,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/park-icon.png","formatted_address":"1001 Hitt Rd  Mobile, AL\t36695","slug":"westside-park"}}]};
+	var centersData = {"type":"FeatureCollection","features":[{"geometry":{"coordinates":["-88.189289","30.624792"],"type":"Point"},"type":"Feature","properties":{"title":"Connie Hudson Senior Center","id":41,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"3201 Hillcrest Rd  Mobile, AL\t36693","slug":"connie-hudson-senior-center"}},{"geometry":{"coordinates":["-88.102098","30.631194"],"type":"Point"},"type":"Feature","properties":{"title":"Dog River Park","id":217,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"2459 N Dog River Dr  Mobile, AL\t36605","slug":"dog-river-park"}},{"geometry":{"coordinates":["-88.077215","30.6676"],"type":"Point"},"type":"Feature","properties":{"title":"Harmon - Thomas Community Center & Park","id":11,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"1611 Belfast Street  Mobile, AL\t36605","slug":"harmon-thomas-community-center-park"}},{"geometry":{"coordinates":["-88.201944","30.702903"],"type":"Point"},"type":"Feature","properties":{"title":"Hillsdale Community Center & Park","id":13,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"558 E. Felhorn Road  Mobile, AL\t36608","slug":"hillsdale-community-center-park"}},{"geometry":{"coordinates":["-88.046437","30.678702"],"type":"Point"},"type":"Feature","properties":{"title":"James Seals Community Center & Park\t","id":23,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"540 Texas St  Mobile, AL\t36603","slug":"james-seals-community-center-park"}},{"geometry":{"coordinates":["-88.114215","30.723378"],"type":"Point"},"type":"Feature","properties":{"title":"Joseph C. Dotch Community Center & Park","id":1,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"3100 Bank Avenue  Mobile, AL\t36617","slug":"joseph-c-dotch-community-center-park"}},{"geometry":{"coordinates":["-88.166598","30.638056"],"type":"Point"},"type":"Feature","properties":{"title":"Laun Community Center & Park","id":45,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"5401 Windmill Drive  Mobile, AL\t36693","slug":"laun-community-center-park"}},{"geometry":{"coordinates":["-88.086803","30.713372"],"type":"Point"},"type":"Feature","properties":{"title":"Michael A. Figures Community Center & Park   ","id":3,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"658 Donald Street Building C  Mobile, AL\t36617","slug":"michael-a-figures-community-center-park"}},{"geometry":{"coordinates":["-88.164704","30.730386"],"type":"Point"},"type":"Feature","properties":{"title":"Mitternight Community Center & Park","id":46,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"5310 Colonial Oaks Dr. N.  Mobile, AL\t36618","slug":"mitternight-community-center-park"}},{"geometry":{"coordinates":["-88.079285","30.611035"],"type":"Point"},"type":"Feature","properties":{"title":"Newhouse Teen Center & Park","id":47,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"2960 Alston Drive  Mobile, AL\t36605","slug":"newhouse-teen-center-park"}},{"geometry":{"coordinates":["-88.079599","30.594451"],"type":"Point"},"type":"Feature","properties":{"title":"Parkway Senior Center","id":43,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"1600 Boykin Blvd. Ste. B Mobile, AL\t36605","slug":"parkway-senior-center"}},{"geometry":{"coordinates":["-88.084646","30.671635"],"type":"Point"},"type":"Feature","properties":{"title":"Rickarby Community Center & Park","id":48,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"550 Rickarby Street  Mobile, AL\t36606","slug":"rickarby-community-center-park"}},{"geometry":{"coordinates":["-88.058756","30.737804"],"type":"Point"},"type":"Feature","properties":{"title":"Robert Hope Community Center","id":20,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"850 Edwards St  Mobile, AL\t36610","slug":"robert-hope-community-center"}},{"geometry":{"coordinates":["-88.062301","30.69052"],"type":"Point"},"type":"Feature","properties":{"title":"Springhill Fitness & Community Center ","id":22,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"1151 Spring Hill Ave  Mobile, AL\t36604","slug":"springhill-fitness-community-center"}},{"geometry":{"coordinates":["-88.157225","30.646703"],"type":"Point"},"type":"Feature","properties":{"title":"Stotts Community Center & Park","id":80,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"2150 Demetropolis Road  Mobile, AL\t36693","slug":"stotts-community-center-park"}},{"geometry":{"coordinates":["-88.072957","30.70052"],"type":"Point"},"type":"Feature","properties":{"title":"Thomas Sullivan Community Center & Park","id":12,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"351 N. Catherine Street  Mobile, AL\t36603","slug":"thomas-sullivan-community-center-park"}},{"geometry":{"coordinates":["-88.112765","30.722039"],"type":"Point"},"type":"Feature","properties":{"title":"Tricksey Senior Center","id":44,"icon":"https:\/\/www.cityofmobile.gov\/parks-rec\/uploads\/centers-icon.png","formatted_address":"3055 Bank Ave.  Mobile, AL\t36617","slug":"tricksey-senior-center"}}]};
+	var timevar;
+	var markers_out = []
+	mapboxgl.accessToken = 'pk.eyJ1IjoiZG9nd29vZDY1MyIsImEiOiJjbGRleGZpaHQwaHpuM29uZXoyc2RnOTU3In0.2JgtIN5-d-dI_vZDgBx3SA';
+var map = new mapboxgl.Map({
+    style: 'mapbox://styles/dogwood653/cldaec88g001s01mnansns750',
+    	zoom: 11,
+    	center: [-88.1498102,30.6780647],
+    	container: 'parks-map'
+	});
+	map.addControl(new mapboxgl.NavigationControl());
+	map.on('load', function() {
+		map.loadImage(site+'uploads/park-icon.png', function(error, image) {
+		  if (error) throw error;
+		  // add image to the active style and make it SDF-enabled
+		  map.addImage('park-icon', image, { sdf: false });
+		});
+		map.loadImage(site+'uploads/centers-icon.png', function(error, image) {
+		  if (error) throw error;
+		  // add image to the active style and make it SDF-enabled
+		  map.addImage('centers-icon', image, { sdf: false });
+		});
+		map.addSource("parks", {
+			  "type": "geojson",
+			  "data": bldgData
+			});
+		map.addLayer({
+				'id': 'parkslayer',
+				'source': 'parks',
+				'type': 'symbol',
+				'layout': {
+					'icon-image': 'park-icon',
+					'icon-size': 0.5
+					},
+			});
+	
+		map.addSource("centers", {
+			  "type": "geojson",
+			  "data": centersData
+			});
+		map.addLayer({
+				'id': 'centerslayer',
+				'source': 'centers',
+				'type': 'symbol',
+				'layout': {
+					'icon-image': 'centers-icon',
+					'icon-size': 0.5
+					},
+			});
+		map.addControl(
+			new mapboxgl.GeolocateControl({
+				positionOptions: {
+					enableHighAccuracy: true
+				},
+				trackUserLocation: true,
+				showUserHeading: true
+			})
+		);
+	 bldgData.features.forEach(function(marker, i) {
+		var el = document.createElement('div');
+			el.id = "marker-" + i;
+			el.className = 'marker';
+			el.dataset.locid = marker.properties.id;
+			el.innerHTML = '<i class="fas fa-map-marker-alt fa-2x d-none" data-locid="'+marker.properties.id+'"></i>';
+		
+		var del = document.createElement('div');
+			del.id = "marker-" + i;
+			del.className = 'slocation-toggle';
+			del.dataset.location = marker.properties.id;
+			del.innerHTML = '<p class="border-bottom mb-0 p-2 h6">'+marker.properties.title+'</p>';
+		
+		var m	=  new mapboxgl.Marker(el)
+			.setLngLat(marker.geometry.coordinates)
+			.addTo(map);
+	
+		var sel = $('#parks_select');
+		sel.append($("<option></option>").attr("value",marker.properties.id).text(marker.properties.title).attr('data-slug',marker.properties.slug).attr('data-title',marker.properties.title).attr('data-address',marker.properties.formatted_address));
+		
+		$('#parks_list').append(del);
+	
+		del.addEventListener('click', function(e){
+			$('#ParkModal').find('.modal-header').find('#park_title').html('<p class="h3 font-weight-bold mb-0">'+marker.properties.title+'</p><p class="small text-secondary m-0">'+marker.properties.formatted_address+'<a class="d-block" href="'+site+ marker.properties.slug+'/">View Facility <i class="fas fa-long-arrow-alt-right"></i></a></p>');
+			$.ajax({
+			'url': site+'assets/includes/recdesk/recdesk-handler.php',
+			'data':{action:'load_recdesk_park',locid:marker.properties.id},
+			'success': function (data) {
+				$('#ParkModal').find('.modal-body').html(data);
+				parksModal.show();
+			}
+			});
+			flyToItem(marker);
+		   // createPopUp(marker);
+			parksModal.show();
+
+		});
+	
+	
+	
+	  });
+  
+	 centersData.features.forEach(function(marker, i) {
+		var el = document.createElement('div');
+			el.id = "c-marker-" + i;
+			el.className = 'marker';
+			el.dataset.locid = marker.properties.id;
+			el.innerHTML = '<i class="fas fa-map-marker-alt fa-2x d-none" data-locid="'+marker.properties.id+'"></i>';
+	
+		var del = document.createElement('div');
+			del.id = "marker-" + i;
+			del.className = 'slocation-toggle';
+			del.dataset.location = marker.properties.id;
+			del.innerHTML = '<p class="border-bottom mb-0 p-2 h6">'+marker.properties.title+'</p>';
+		var sel = $('#centers_select');
+sel.append($("<option></option>").attr("value",marker.properties.id).text(marker.properties.title).attr('data-slug',marker.properties.slug).attr('data-title',marker.properties.title).attr('data-address',marker.properties.formatted_address));
+		var m	=  new mapboxgl.Marker(el)
+			.setLngLat(marker.geometry.coordinates)
+			.addTo(map);
+		
+		$('#centers_list').append(del);
+	
+		del.addEventListener('click', function(e){
+			 $('#ParkModal').find('.modal-header').find('#park_title').html('<p class="h3 font-weight-bold mb-0">'+marker.properties.title+'</p><p class="small text-secondary m-0">'+marker.properties.formatted_address+'<a class="d-block" href="'+site+ marker.properties.slug+'/">View Facility <i class="fas fa-long-arrow-alt-right"></i></a></p>');
+			$.ajax({
+			'url': site+'assets/includes/recdesk/recdesk-handler.php',
+			'data':{action:'load_recdesk_park',locid:marker.properties.id},
+			'success': function (data) {
+				$('#ParkModal').find('.modal-body').html(data);
+				parksModal.show();
+			}
+			});
+			flyToItem(marker);
+		   // createPopUp(marker);
+			parksModal.show();
+
+		});
+	
+		
+	  });
+	});
+// After the last frame rendered before the map enters an "idle" state.
+map.on('idle', () => {
+// If these two layers were not added to the map, abort
+if (!map.getLayer('parkslayer') || !map.getLayer('centerslayer')  ) {
+return;
+}
+ 
+// Enumerate ids of the layers.
+const toggleableLayerIds = ['parkslayer','centerslayer'];
+ 
+// Set up the corresponding toggle button for each layer.
+for (const id of toggleableLayerIds) {
+// Skip layers that already have a button set up.
+if (document.getElementById(id)) {
+continue;
+}
+ 
+// Create a link.
+var link = document.createElement('a');
+link.id = id;
+link.href = '#';
+
+link.textContent = id.replaceAll('layer', '');
+link.textContent = link.textContent.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+    return letter.toUpperCase();
+});
+link.className = 'btn btn-dark active btn-sm mx-1';
+ 
+// Show or hide layer when the toggle is clicked.
+link.onclick = function (e) {
+var clickedLayer = this.textContent.toLowerCase()+'layer';
+e.preventDefault();
+e.stopPropagation();
+ 
+var visibility = map.getLayoutProperty(
+clickedLayer,
+'visibility') || 'visible';
+var classList = this.className.split(/\s+/);
+// console.log(this.className.split(/\s+/));
+// Toggle layer visibility by changing the layout object's visibility property.
+console.log(visibility);
+if (visibility === 'visible') {
+	console.log('hide-layer');
+	map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+
+this.classList = 'btn btn-outline-dark btn-sm mx-1';
+} else {
+console.log('show-layer');
+this.className = 'btn btn-dark btn-sm mx-1 active';
+
+map.setLayoutProperty(
+clickedLayer,
+'visibility',
+'visible'
+);
+}
+};
+ 
+const layers = document.getElementById('menu');
+layers.appendChild(link);
+}
+});
+
+map.on('click', 'parkslayer', (e) => {
+var locid = e.features[0].properties.id;
+console.log(e.features[0]);
+ $('#ParkModal').find('.modal-header').find('#park_title').html('<p class="h3 font-weight-bold mb-0">'+e.features[0].properties.title+'</p><p class="small text-secondary m-0">'+e.features[0].properties.formatted_address+'<a class="d-block" href="'+site+ e.features[0].properties.slug+'/">View Facility <i class="fas fa-long-arrow-alt-right"></i></a></p>');
+
+
+$.ajax({
+        'url': site+'assets/includes/recdesk/recdesk-handler.php',
+        'data':{action:'load_recdesk_park',locid:locid},
+        'success': function (data) {
+        	$('#ParkModal').find('.modal-body').html(data);
+            parksModal.show();
+        }
+    	});
+      //  flyToItem(marker);
+       // createPopUp(marker);
+      	//parksModal.show();
+});
+
+map.on('click', 'centerslayer', (e) => {
+var locid = e.features[0].properties.id;
+console.log(e.features[0]);
+ $('#ParkModal').find('.modal-header').find('#park_title').html('<p class="h3 font-weight-bold mb-0">'+e.features[0].properties.title+'</p><p class="small text-secondary m-0">'+e.features[0].properties.formatted_address+'<a class="d-block" href="'+site+ e.features[0].properties.slug+'/">View Facility <i class="fas fa-long-arrow-alt-right"></i></a></p>');
+$.ajax({
+        'url': site+'assets/includes/recdesk/recdesk-handler.php',
+        'data':{action:'load_recdesk_park',locid:locid},
+        'success': function (data) {
+        	$('#ParkModal').find('.modal-body').html(data);
+            parksModal.show();
+        }
+    	});
+      //  flyToItem(marker);
+       // createPopUp(marker);
+      	parksModal.show();
+});
+  
+$('body').on('change','#parks_select,#centers_select',function(e){
+	console.log($(this));
+			 $('#ParkModal').find('.modal-header').find('#park_title').html('<p class="h3 font-weight-bold mb-0">'+$(this).find("option:selected").attr('data-title')+'</p><p class="small text-secondary m-0">'+$(this).find("option:selected").attr('data-address')+'<a class="d-block" href="'+site+$(this).find("option:selected").attr('data-slug')+'/">View Facility <i class="fas fa-long-arrow-alt-right"></i></a></p>');
+			$.ajax({
+			'url': site+'assets/includes/recdesk/recdesk-handler.php',
+			'data':{action:'load_recdesk_park',locid:$(this).val()},
+			'success': function (data) {
+				$('#ParkModal').find('.modal-body').html(data);
+				parksModal.show();
+			}
+			});
+			
+		   // createPopUp(marker);
+			//parksModal.show();
+
+		});
+
+$('body').on('click','.location-toggle',function(e){
+	var lat= $(this).data('lat');
+	var lng = $(this).data('lng');
+	  map.setCenter( [lng,lat]);
+	 map.setZoom(16);
+});
+
+
+function buildLocationList(data) {}
+function flyToItem(currentFeature) {
+	console.log(currentFeature);
+    map.flyTo({
+        center: currentFeature.geometry.coordinates,
+        zoom: 18
+      });
+  }
+function createPopUp(currentFeature) {
+    var popUps = document.getElementsByClassName('mapboxgl-popup');
+    if (popUps[0]) popUps[0].remove();
+    var div = 'test';
+
+    var popup = new mapboxgl.Popup({closeOnClick: false})
+          .setLngLat(currentFeature.geometry.coordinates)
+          .setHTML(div)
+          .addTo(map);
+  }
+});
+
+   
+</script>
+		
+	</div>
+</main></section>
+<footer class="py-4 py-md-5 bg-darkblue " id="footer" >
+      <div class="container">
+        <div class="row justify-content-start align-items-start">
+          <div class="col-lg-4 text-white text-center order-last order-sm-first mt-1">
+    		<img src="https://www.cityofmobile.org/assets/images/COM-logo-white.png" class="logo w-25 mb-3" alt="White City Logo">
+    		<p class="text-white">48 North Sage Avenue<br>Mobile, AL 36607<br>251-208-1600<br><a href="mailto:MPRD@cityofmobile.org" class="text-white">MPRD@cityofmobile.org</a></p>
+            <!-- Social -->
+            <ul class="list-inline"><li class="list-inline-item"><a href="https://www.facebook.com/mobileparksandrec/" target="_blank" rel="nofollow" class="mx-1 text-white"><i class="fab fa-facebook-f fa-2x"></i><span class="visually-hidden visually-hidden-focusable">Link to https://www.facebook.com/mobileparksandrec/</span></a></li><li class="list-inline-item"><a href="https://www.instagram.com/mobileparksandrec/" target="_blank" rel="nofollow" class="mx-1 text-white"><i class="fab fa-instagram fa-2x"></i><span class="visually-hidden visually-hidden-focusable">Link to https://www.instagram.com/mobileparksandrec/</span></a></li></ul>    		<p class="small">&copy;2026 City of Mobile : Parks and Recreation</p>
+          </div>
+         	<div class="col-lg-4">
+         		       <!-- Begin Constant Contact Inline Form Code -->
+<div class="ctct-inline-form" data-form-id="4f76a751-1291-48ab-9e24-34c8090b80c8"></div>
+<!-- End Constant Contact Inline Form Code -->
+         	</div>
+         	<div class="col-lg-3 order-first order-sm-last">
+				<!--	<h4 class="mt-1 mb-3 text-white">Latest News</h4> -->
+										
+				</div>
+        </div> <!-- / .row -->
+
+        
+      </div> <!-- / .container -->
+    </footer>
+ <a id="back_to_top" class="btn btn-link text-dark position-fixed  end-0 bottom-0 me-4 mb-4" href=""><i class="fas fa-chevron-up"></i></a>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+
+<script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.1/masonry.pkgd.min.js"></script>
+<script src="https://www.cityofmobile.gov/parks-rec/assets/vendor/justifiedGallery/jquery.justifiedGallery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.1/dist/locomotive-scroll.min.js"></script>
+<script src="https://www.cityofmobile.gov/parks-rec/assets/vendor/AOS/aos.js"></script>
+
+
+
+<!--EVENTS-->
+<script src="https://www.cityofmobile.gov/parks-rec/assets/js/ouical.min.js"></script>
+
+<script src="https://www.cityofmobile.gov/parks-rec/assets/js/monthly.js"></script>
+<script src="https://www.cityofmobile.gov/parks-rec/assets/js/mixitup.min.js"></script>
+
+<!--FORMS-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.2.2/jquery.form.min.js"></script>
+
+
+
+<script>
+var site = 'https://www.cityofmobile.gov/parks-rec/';
+</script>
+<script src="https://www.cityofmobile.gov/parks-rec/assets/js/main.js"></script>
+ <!-- Begin Constant Contact Active Forms -->
+  <script> var _ctct_m = "d91d02d7afb72d02be14db3bcadc00c7"; </script>
+  <script id="signupScript" src="//static.ctctcdn.com/js/signup-form-widget/current/signup-form-widget.min.js" async defer></script>
+  <!-- End Constant Contact Active Forms -->
+	<script> (function(){ var s = document.createElement('script'); var h = document.querySelector('head') || document.body; s.src = 'https://acsbapp.com/apps/app/dist/js/app.js'; s.async = true; s.onload = function(){ acsbJS.init({ statementLink : '', footerHtml : '', hideMobile : false, hideTrigger : false, disableBgProcess : false, language : 'en', position : 'left', leadColor : '#77bb40', triggerColor : '#77bb40', triggerRadius : '50%', triggerPositionX : 'left', triggerPositionY : 'bottom', triggerIcon : 'people', triggerSize : 'medium', triggerOffsetX : 20, triggerOffsetY : 20, mobile : { triggerSize : 'medium', triggerPositionX : 'left', triggerPositionY : 'bottom', triggerOffsetX : 10, triggerOffsetY : 10, triggerRadius : '50%' } }); }; h.appendChild(s); })(); </script>
+
+  </body>
+</html>
+ 

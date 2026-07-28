@@ -154,8 +154,12 @@ export interface ILocation extends Document {
     }>;
     dogParks?: Array<{
         name: string;
+        address?: string;
         city?: string;
+        stateAbbr?: string;
+        zip?: string;
         description?: string;
+        detailUrl?: string;
         source?: string;
     }>;
     airports?: Array<{
@@ -442,8 +446,12 @@ const LocationSchema = new Schema<ILocation>(
         }],
         dogParks: [{
             name: String,
+            address: String,
             city: String,
+            stateAbbr: String,
+            zip: String,
             description: String,
+            detailUrl: String,
             source: String,
         }],
         airports: [{
