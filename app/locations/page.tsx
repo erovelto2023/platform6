@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getStates } from "@/lib/actions/location.actions";
 import { Button } from "@/components/ui/button";
-import { MapPin, Search as SearchIcon, Globe, ArrowRight, ShieldCheck } from "lucide-react";
+import { MapPin, Search as SearchIcon, Globe, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { SimpleHeroSlideshow } from "@/components/animations";
 import { SiteHeader } from "@/components/shared/SiteHeader";
@@ -20,61 +20,61 @@ export default async function LocationsPage({
     const heroSlides = [
         {
             title: 'Marketers Research Database.',
-            subtitle: "Stop guessing what people want. This database helps you find exactly what people are buying in every state. Access local news, population data, and more.",
+            subtitle: "Stop guessing what people want. Access real-time state facts, live search trends, public school directories, healthcare networks, and state newspapers.",
             backgroundImage: '/heroimages/locations_premium.png',
-            ctaText: 'See the Data',
+            ctaText: 'Explore Research Database',
             ctaLink: '#explorer',
         }
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-50">
+        <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
             <SiteHeader />
 
             <main className="flex-1">
                 <SimpleHeroSlideshow slides={heroSlides} autoplay={false} />
 
                 {/* Explorer Section */}
-                <section id="explorer" className="w-full py-24 bg-slate-50">
+                <section id="explorer" className="w-full py-20 bg-slate-950 border-t border-slate-800">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-10">
+                        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
                             <div className="max-w-2xl">
-                                <span className="flex items-center gap-2 text-emerald-600 font-black tracking-[0.3em] text-xs mb-4 uppercase">
-                                    <Globe size={16} /> Market Research
+                                <span className="inline-flex items-center gap-2 text-cyan-400 font-mono font-bold tracking-wider text-xs mb-3 uppercase">
+                                    <Globe size={14} /> Market Intelligence Database
                                 </span>
-                                <h2 className="text-4xl md:text-6xl font-black text-emerald-950 leading-[1.1] italic tracking-tighter">
-                                    See the Facts in Every State.
+                                <h2 className="text-4xl md:text-6xl font-black text-slate-100 leading-tight uppercase tracking-tight">
+                                    Explore Facts Across <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent">Every US State</span>
                                 </h2>
-                                <p className="mt-6 text-xl text-emerald-900/60 font-medium italic">
-                                    Stop guessing what people want. Use our database to find real facts about your customers.
+                                <p className="mt-4 text-lg text-slate-300 font-medium leading-relaxed">
+                                    Access verified state symbols, statehood history, live search autocomplete trends, and state newspapers.
                                 </p>
                             </div>
                             <div className="w-full md:w-96">
-                                <Search placeholder="Search by region..." />
+                                <Search placeholder="Search by state name..." />
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mb-10 border-l-4 border-emerald-600 pl-6 py-2 bg-white rounded-r-2xl border border-emerald-50 shadow-sm">
-                            <h3 className="text-xl font-black text-emerald-950 uppercase tracking-tight italic">
-                                {query ? `Matches for: "${query}"` : 'States and Regions'}
+                        <div className="flex items-center gap-4 mb-10 border-l-4 border-cyan-500 pl-6 py-3 bg-slate-900 rounded-r-2xl border border-slate-800 shadow-xl">
+                            <h3 className="text-xl font-bold text-slate-100 uppercase tracking-tight">
+                                {query ? `Matches for: "${query}"` : 'United States Regions & State Hubs'}
                             </h3>
-                            <div className="ml-auto bg-emerald-600 text-white px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-200">
-                                {states.length} Regions Found
+                            <div className="ml-auto bg-cyan-950 border border-cyan-800 text-cyan-300 px-4 py-1.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider">
+                                {states.length} States Available
                             </div>
                         </div>
 
                         {(!states || states.length === 0) ? (
-                            <div className="flex flex-col items-center justify-center p-32 bg-white rounded-[4rem] border border-emerald-50 text-center shadow-xl shadow-emerald-200/20">
-                                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mb-8">
-                                    <SearchIcon size={40} />
+                            <div className="flex flex-col items-center justify-center p-24 bg-slate-900 rounded-3xl border border-slate-800 text-center shadow-xl">
+                                <div className="w-16 h-16 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-center text-cyan-400 mb-6">
+                                    <SearchIcon size={32} />
                                 </div>
-                                <h2 className="text-3xl font-black text-emerald-950 mb-4 uppercase italic">No States Found.</h2>
-                                <p className="text-emerald-900/40 max-w-sm mb-10 font-bold uppercase tracking-widest text-[10px]">
-                                    We couldn't find any states matching your search. Try searching for something else.
+                                <h2 className="text-2xl font-bold text-slate-100 mb-3 uppercase">No States Found.</h2>
+                                <p className="text-slate-400 max-w-sm mb-8 font-mono text-xs uppercase tracking-wider">
+                                    We couldn't find any states matching your search. Try adjusting your query.
                                 </p>
                                 <Link href="/locations">
-                                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white px-10 h-14 rounded-2xl font-black transition-all">
-                                        Reset Explorer
+                                    <Button className="bg-cyan-600 hover:bg-cyan-500 text-white px-8 h-12 rounded-xl font-bold transition-all">
+                                        Reset Search
                                     </Button>
                                 </Link>
                             </div>
@@ -84,22 +84,22 @@ export default async function LocationsPage({
                                     <Link 
                                         key={state.slug}
                                         href={`/locations/${state.slug}`}
-                                        className="group relative overflow-hidden bg-white p-8 rounded-[2rem] border border-emerald-50 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100 hover:-translate-y-2 shadow-sm"
+                                        className="group relative overflow-hidden bg-slate-900 p-6 rounded-3xl border border-slate-800 transition-all duration-300 hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/10"
                                     >
                                         <div className="flex items-center gap-4 mb-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500 shadow-sm">
+                                            <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300">
                                                 <MapPin size={24} />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-black text-emerald-950 text-lg group-hover:text-emerald-600 transition-colors leading-tight italic uppercase">
+                                                <span className="font-bold text-slate-100 text-lg group-hover:text-cyan-400 transition-colors leading-tight uppercase">
                                                     {state.name}
                                                 </span>
-                                                <span className="text-[9px] uppercase font-black tracking-widest text-emerald-900/40">Active Market</span>
+                                                <span className="text-[10px] uppercase font-mono font-bold tracking-wider text-slate-500">Active State Hub</span>
                                             </div>
                                         </div>
-                                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-emerald-50">
-                                            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
-                                                See Details <ArrowRight size={14} />
+                                        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-800">
+                                            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider group-hover:translate-x-1 transition-transform flex items-center gap-1.5">
+                                                State Research <ArrowRight size={14} />
                                             </span>
                                         </div>
                                     </Link>
@@ -110,23 +110,22 @@ export default async function LocationsPage({
                 </section>
 
                 {/* Bottom CTA */}
-                <section className="w-full py-24 bg-slate-900">
+                <section className="w-full py-20 bg-slate-950 border-t border-slate-800">
                     <div className="container px-4 md:px-6 mx-auto">
-                        <div className="bg-emerald-600 rounded-[4rem] p-12 md:p-24 flex flex-col md:flex-row items-center gap-16 relative overflow-hidden">
-                            <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-[100px]" />
+                        <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950 border border-slate-800 rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl relative overflow-hidden">
                             <div className="md:w-2/3 relative z-10">
-                                <span className="flex items-center gap-2 text-white font-black tracking-[0.3em] text-xs mb-8 uppercase">
-                                    <ShieldCheck size={16} /> Exclusive Intelligence
+                                <span className="flex items-center gap-2 text-cyan-400 font-mono font-bold tracking-wider text-xs mb-4 uppercase">
+                                    <ShieldCheck size={16} /> Market Intelligence Engine
                                 </span>
-                                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight italic">Know Your Niche.</h2>
-                                <p className="text-xl text-emerald-50 font-medium opacity-80 leading-relaxed">
-                                    Our state data is the secret weapon for smart marketers. Stop selling to everyone and start selling to the right people based on real facts.
+                                <h2 className="text-3xl md:text-5xl font-black text-slate-100 mb-4 leading-tight uppercase tracking-tight">Know Your Niche Demand</h2>
+                                <p className="text-lg text-slate-300 font-medium leading-relaxed max-w-2xl">
+                                    Empower your marketing campaigns with live search autocomplete, verified state symbols, demographic indicators, and news media outlets across every US state.
                                 </p>
                             </div>
-                            <div className="md:w-1/3 w-full relative z-10">
+                            <div className="md:w-auto w-full relative z-10">
                                 <Link href="/sign-up">
-                                    <Button className="w-full bg-slate-900 hover:bg-slate-800 text-white h-20 rounded-3xl font-black text-2xl shadow-2xl transition-all">
-                                        Join for Data
+                                    <Button className="w-full md:w-auto bg-cyan-600 hover:bg-cyan-500 text-white h-14 px-8 rounded-xl font-extrabold text-lg shadow-xl transition-all">
+                                        Access Research Portal
                                     </Button>
                                 </Link>
                             </div>
@@ -135,18 +134,13 @@ export default async function LocationsPage({
                 </section>
             </main>
 
-             <footer className="py-12 bg-emerald-950 text-emerald-100/40 border-t border-emerald-900">
-                <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <footer className="py-12 bg-slate-950 text-slate-500 border-t border-slate-800">
+                <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center font-black text-white text-xl">K</div>
-                        <span className="font-black tracking-tighter text-xl uppercase italic text-white">K RESEARCH DATABASE</span>
+                        <div className="w-9 h-9 bg-cyan-600 rounded-xl flex items-center justify-center font-black text-white text-lg">K</div>
+                        <span className="font-bold tracking-tight text-lg uppercase text-slate-100">K RESEARCH DATABASE</span>
                     </div>
-                    <p className="text-[10px] font-black uppercase tracking-widest italic text-emerald-100/20">© 2026 K Business Academy</p>
-                    <nav className="flex gap-10">
-                        <Link href="/courses" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">Courses</Link>
-                        <Link href="/blog" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">Blog</Link>
-                        <Link href="/questions" className="font-black hover:text-emerald-500 transition-colors text-xs uppercase tracking-widest">People Asked Questions</Link>
-                    </nav>
+                    <p className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">© 2026 K Business Academy</p>
                 </div>
             </footer>
         </div>

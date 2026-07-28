@@ -5,16 +5,15 @@ import { CensusService } from "@/lib/services/census.service";
 import { MarketService } from "@/lib/services/market.service";
 import { CityCensusStats } from "@/components/locations/city-census-stats";
 import { MarketPulse } from "@/components/locations/market-pulse";
-import { ArrowLeft, Calculator } from "lucide-react";
+import { ArrowLeft, Sparkles, MapPin, Search as SearchIcon } from "lucide-react";
 import { Metadata } from "next";
 import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
-import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
-import { getCPAsByLocation } from "@/lib/actions/cpa.actions";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { MetroRankings } from "@/components/locations/metro-rankings";
-import { SearchIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { CitySearchTrends } from "@/components/locations/city-search-trends";
+import { fetchLiveCitySearchTrends } from "@/lib/services/search-trends.service";
+import { getStateNewspapers } from "@/lib/utils/state-newspapers";
 
 export const dynamic = 'force-dynamic';
 
@@ -51,10 +50,9 @@ export default async function CityPage({
     // Fetch live market data from US Census
     const censusData = await CensusService.getCityDemographics(city.name, state.name);
     const { products } = await getDirectoryProducts();
-    const cpas = await getCPAsByLocation(city.name, state.name);
+    const searchTrends = await fetchLiveCitySearchTrends(city.name, state.name);
 
     // Fetch Market Pulse (Free/Open Data)
-    // Map state name to code for Ticketmaster/OSM
     const STATE_CODES: Record<string, string> = {
         "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
         "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
@@ -77,7 +75,7 @@ export default async function CityPage({
 
     // Fetch state newspapers for fallback/aggregation
     const stateDoc = await getLocation(stateSlug, "");
-    const stateNewspapers = stateDoc?.newspapers || [];
+    const stateNewspapers = getStateNewspapers(stateSlug || state.name);
     
     // Merge city and state newspapers, removing duplicates by name
     const allNewspapers = [...(city.newspapers || []), ...stateNewspapers];
@@ -90,33 +88,42 @@ export default async function CityPage({
     const displayNewspapers = Array.from(uniqueNewspapersMap.values());
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
+        <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
             <SiteHeader />
-            <div className="pt-24 px-6 md:px-12 lg:px-20">
+            <div className="pt-24 px-6 md:px-12 lg:px-20 max-w-7xl mx-auto w-full">
             <header className="mb-12">
                 <Link 
                     href={`/locations/${stateSlug}`}
-                    className="inline-flex items-center gap-2 text-emerald-900/40 hover:text-emerald-600 transition-all mb-8 font-black uppercase tracking-widest text-[10px] group"
+                    className="inline-flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-all mb-8 font-mono font-bold uppercase tracking-wider text-xs group"
                 >
-                    <ArrowLeft size={12} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name}
+                    <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to {state.name} State Hub
                 </Link>
                 
                 <div className="max-w-5xl">
-                    <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase italic leading-none mb-6 text-emerald-950">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-cyan-400 text-xs font-mono font-bold uppercase tracking-widest mb-4">
+                        <MapPin size={14} /> {state.name} Market Center
+                    </div>
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tight uppercase leading-none mb-6 text-slate-100">
                         {city.name}
                     </h1>
-                    <div className="flex items-center gap-3">
-                        <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[10px] uppercase font-black tracking-widest">Census Snapshot</Badge>
-                        <span className="px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm">
-                            {state.name}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span className="px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider">
+                            US Census & Live Google Intelligence
                         </span>
-                        <span className="text-emerald-900/10">•</span>
-                        <span className="text-emerald-900/40 text-[10px] font-black uppercase tracking-widest">Market Intelligence</span>
+                        <span className="text-slate-600">•</span>
+                        <span className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider">
+                            {state.name} State Ecosystem
+                        </span>
                     </div>
                 </div>
             </header>
 
-            <main className="flex-1 space-y-20">
+            <main className="flex-1 space-y-16">
+                {/* Live Google Search Trends */}
+                <section>
+                    <CitySearchTrends trends={searchTrends} cityName={city.name} stateName={state.name} />
+                </section>
+
                 {/* Metro Area Rankings */}
                 {city.metroStats && (
                     <section>
@@ -128,11 +135,12 @@ export default async function CityPage({
                 )}
 
                 {/* Census Data Insight Dashboard */}
-                <section>
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
-                        <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950">
+                <section className="space-y-12">
+                    <div className="border-l-4 border-cyan-500 pl-6">
+                        <h2 className="text-3xl font-black uppercase tracking-tight text-slate-100">
                             Market Indicators
                         </h2>
+                        <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">Census Demographics & Local Metrics</p>
                     </div>
                     <CityCensusStats 
                         data={censusData} 
@@ -144,33 +152,12 @@ export default async function CityPage({
                     <MarketPulse data={marketPulse} cityName={city.name} newspapers={displayNewspapers} />
                 </section>
 
-                {/* Tax & Accounting Hub */}
-                <section id="tax-directory">
-                    <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
-                        <div className="flex flex-col">
-                            <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950 leading-tight">
-                                Tax & Accounting Hub
-                            </h2>
-                            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-[0.2em]">Verified Local Experts</p>
-                        </div>
-                        <div className="ml-auto p-2 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm">
-                            <Calculator className="w-5 h-5 text-emerald-600" />
-                        </div>
-                    </div>
-                    
-                    <TaxDirectoryList 
-                        listings={cpas} 
-                        cityName={city.name} 
-                        stateName={state.name} 
-                    />
-                </section>
-
                 {/* Recommended Resources / Rotating Banner */}
                 {products && products.length > 0 && (
                     <section className="mb-12">
-                        <div className="flex items-center gap-3 mb-8 border-l-4 border-emerald-600 pl-4">
-                            <h2 className="text-3xl font-black uppercase italic tracking-tight text-emerald-950">
-                                Recommended Resources
+                        <div className="border-l-4 border-cyan-500 pl-6 mb-8">
+                            <h2 className="text-3xl font-black uppercase tracking-tight text-slate-100">
+                                Recommended Business Resources
                             </h2>
                         </div>
                         <div className="max-w-2xl mx-auto">
@@ -179,17 +166,17 @@ export default async function CityPage({
                     </section>
                 )}
 
-                <section className="p-10 border border-emerald-500/20 border-2 rounded-[2.5rem] bg-emerald-500/5 text-center">
-                    <h4 className="text-xl font-black uppercase text-emerald-900 mb-2 italic tracking-tighter">Your Market Roadmap</h4>
-                    <p className="text-slate-600 font-medium italic max-w-2xl mx-auto text-sm">
-                        Use the data above to determine your product market fit. Whether it&apos;s a $50 guide for toddlers or a $10,000 premium course for high-earning seniors, {city.name} has clear signals for your next big move.
+                <section className="p-8 border border-slate-800 rounded-3xl bg-slate-900 text-center shadow-xl">
+                    <h4 className="text-xl font-bold uppercase text-slate-100 mb-2">Market Execution Roadmap</h4>
+                    <p className="text-slate-400 font-medium max-w-2xl mx-auto text-sm leading-relaxed">
+                        Utilize live Google Search Autocomplete and US Census indicators above to validate digital demand, launch local campaigns, and evaluate product-market fit in {city.name}, {state.name}.
                     </p>
                 </section>
             </main>
 
-            <footer className="mt-20 py-12 border-t border-emerald-50">
-                <p className="text-[10px] text-emerald-900/40 font-black uppercase tracking-[0.3em] text-center">
-                    © 2025 K Business Academy • US Census Bureau Verified Data
+            <footer className="mt-20 py-12 border-t border-slate-800 text-center">
+                <p className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                    © 2026 K Business Academy • Live Search Trends & US Census Bureau Verified
                 </p>
             </footer>
             </div>

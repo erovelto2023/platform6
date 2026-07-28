@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -10,10 +10,10 @@ import { getDirectoryProducts } from "@/lib/actions/directory-product.actions";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
 import { StateEducationSection } from "@/components/locations/state-education-section";
 import { StateHealthcareSection } from "@/components/locations/state-healthcare-section";
-import { TaxDirectoryList } from "@/components/locations/tax-directory-list";
-import { getCPAsByState } from "@/lib/actions/cpa.actions";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
+import { getStateFacts } from "@/lib/utils/state-facts";
+import { getStateNewspapers } from "@/lib/utils/state-newspapers";
 
 export const dynamic = 'force-dynamic';
 
@@ -519,34 +519,37 @@ const uniqueLabels = Array.from(new Set([
 
     const stateDoc = await getLocation(stateSlug, "");
     const { products } = await getDirectoryProducts();
-    const stateCPAs = await getCPAsByState(state.name);
+    const verifiedFacts = getStateFacts(stateSlug || state.name);
+    const stateNewspapersList = getStateNewspapers(stateSlug || state.name);
 
     return (
-        <div className="flex flex-col min-h-screen bg-background text-foreground">
-            {/* Top Navigation Bar */}
+        <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
             <SiteHeader />
 
             <main className="flex-1 mt-16 pb-20">
-                {/* Hero Section */}
-                <section className="w-full py-12 md:py-20 bg-slate-50 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full bg-emerald-600/5" />
+                {/* Dark Hero Section */}
+                <section className="w-full py-14 md:py-24 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 border-b border-slate-800 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent pointer-events-none" />
                     <div className="container px-4 md:px-6 mx-auto relative z-10">
                         <Link 
                             href="/locations"
-                            className="inline-flex items-center gap-2 text-emerald-900/50 hover:text-emerald-900 transition-all mb-8 font-black uppercase tracking-[0.3em] text-[10px] group"
+                            className="inline-flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-all mb-8 font-mono font-bold uppercase tracking-wider text-xs group"
                         >
-                            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back to States
+                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to All States
                         </Link>
                         <div className="text-left max-w-4xl">
-                            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-emerald-950 uppercase leading-tight" suppressHydrationWarning>
-                                {state.name} <span className="text-emerald-700/60 underline decoration-emerald-500 decoration-8 underline-offset-8">Business Map</span>
+                            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-cyan-400 text-xs font-mono font-bold uppercase tracking-widest mb-6">
+                                <Sparkles size={14} /> State Research Ecosystem
+                            </div>
+                            <h1 className="text-4xl md:text-7xl font-black tracking-tight mb-6 text-slate-100 uppercase leading-tight" suppressHydrationWarning>
+                                {state.name} <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-400 bg-clip-text text-transparent underline decoration-cyan-500/40 decoration-8 underline-offset-8">Business Map</span>
                             </h1>
-                            <p className="text-emerald-900/60 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
-                                Find everything you need to start a business in {state.name}. We've collected the best data on cities, schools, hospitals, and taxes for you.
+                            <p className="text-slate-300 text-lg md:text-2xl mb-12 font-medium max-w-2xl leading-relaxed" suppressHydrationWarning>
+                                Comprehensive market intelligence, state facts, public school directories, healthcare networks, and state media for {state.name}.
                             </p>
                             
                             <div className="max-w-xl" suppressHydrationWarning>
-                                <Suspense fallback={<div className="h-12 bg-zinc-900 border border-zinc-800 rounded-xl animate-pulse" />}>
+                                <Suspense fallback={<div className="h-12 bg-slate-900 border border-slate-800 rounded-xl animate-pulse" />}>
                                     <Search placeholder={`Search cities in ${state.name}...`} />
                                 </Suspense>
                             </div>
@@ -555,69 +558,163 @@ const uniqueLabels = Array.from(new Set([
                 </section>
 
                 {/* Market & State Details Section */}
-                <section className="w-full py-12 bg-white min-h-[600px]">
+                <section className="w-full py-12 bg-slate-950 min-h-[600px]">
                     <div className="container px-4 md:px-6 mx-auto">
                         <Tabs defaultValue="details" className="w-full">
-                            <TabsList className="bg-[#283618]/5 border-2 border-[#283618]/10 p-1.5 rounded-2xl mb-12 w-full md:w-fit justify-start flex-wrap h-auto">
-                                <TabsTrigger value="details" className="px-8 py-3 rounded-xl data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50 uppercase font-black text-[10px] tracking-[0.2em] text-emerald-900/40 hover:text-emerald-900 transition-all">
-                                    State Details
+                            <TabsList className="bg-slate-900 border border-slate-800 p-1.5 rounded-2xl mb-12 w-full md:w-fit justify-start flex-wrap h-auto gap-2">
+                                <TabsTrigger value="details" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                    State Details & Facts
                                 </TabsTrigger>
-                                <TabsTrigger value="cities" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
-                                    Market Cities
+                                <TabsTrigger value="cities" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
+                                    Market Cities ({cities.length})
+                                </TabsTrigger>
+                                <TabsTrigger value="newspapers" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <Newspaper size={14} /> State Press ({stateNewspapersList.length})
                                 </TabsTrigger>
                                 {(state as any).educationalInstitutions?.length > 0 && (
-                                    <TabsTrigger value="education" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
+                                    <TabsTrigger value="education" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Education
                                     </TabsTrigger>
                                 )}
                                 {(hospitals.length > 0 || (state as any).hospitalStats) && (
-                                    <TabsTrigger value="healthcare" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
+                                    <TabsTrigger value="healthcare" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Healthcare
                                     </TabsTrigger>
                                 )}
-                                <TabsTrigger value="taxhub" className="px-8 py-3 rounded-xl data-[state=active]:bg-emerald-900 data-[state=active]:text-emerald-50 uppercase font-black text-[10px] tracking-[0.2em] text-emerald-900/40 hover:text-emerald-900 transition-all">
-                                    Tax & Accounting
-                                </TabsTrigger>
                                 {state.detailedPopulation && (
-                                    <TabsTrigger value="demographics" className="px-8 py-3 rounded-xl data-[state=active]:bg-[#283618] data-[state=active]:text-[#fefae0] uppercase font-black text-[10px] tracking-[0.2em] text-[#283618]/40 hover:text-[#283618] transition-all">
+                                    <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
                                     </TabsTrigger>
                                 )}
                             </TabsList>
 
-                             {/* State Details Tab Content */}
-                            <TabsContent value="details" className="space-y-8 w-full max-w-full" suppressHydrationWarning>
-                                <div className="flex items-center justify-between border-l-8 border-[#606c38] pl-6 mb-10">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight">Important State Facts</h2>
-                                        <p className="text-emerald-900/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 space-x-2"><span>• Symbols</span> <span>• Heritage</span> <span>• Key Info</span></p>
+                            {/* State Details Tab Content */}
+                            <TabsContent value="details" className="space-y-12 w-full max-w-full" suppressHydrationWarning>
+                                <div className="border-l-4 border-cyan-500 pl-6 mb-8">
+                                    <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight">Important State Facts</h2>
+                                    <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1 flex items-center gap-2">
+                                        <span className="text-cyan-400">• Symbols</span> 
+                                        <span className="text-emerald-400">• Heritage</span> 
+                                        <span className="text-indigo-400">• Key Info</span>
+                                    </p>
+                                </div>
+
+                                {/* Section 1: Symbols */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-black uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                                        <Award size={18} /> Official State Symbols
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Bird</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.bird}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Flower</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.flower}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Tree</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.tree}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Song</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.song}</div>
+                                        </div>
+                                        {verifiedFacts.insect && (
+                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Bug / Insect</div>
+                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.insect}</div>
+                                            </div>
+                                        )}
+                                        {verifiedFacts.mineral && (
+                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Gemstone / Mineral</div>
+                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.mineral}</div>
+                                            </div>
+                                        )}
+                                        {verifiedFacts.fish && (
+                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Fish</div>
+                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.fish}</div>
+                                            </div>
+                                        )}
+                                        {verifiedFacts.beverage && (
+                                            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 transition-all shadow-lg">
+                                                <div className="text-[10px] font-mono font-bold uppercase text-cyan-400 tracking-wider mb-2">State Beverage</div>
+                                                <div className="text-base font-bold text-slate-100">{verifiedFacts.beverage}</div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-8">
-                                    {uniqueLabels.map((label, idx) => {
-                                        const val = getFieldValue(label, state);
-                                        if (val === "Not Specified") return null;
-                                        
-                                        return (
-                                            <div key={label + idx} className="bg-white border-2 border-emerald-900/5 p-6 rounded-2xl flex flex-col justify-between hover:border-emerald-600/20 transition-all hover:shadow-lg hover:shadow-emerald-900/5">
-                                                <div className="text-[10px] font-black uppercase text-emerald-600 tracking-widest mb-3">{label}</div>
-                                                <div className="text-base font-bold text-emerald-950" suppressHydrationWarning>
-                                                    {val}
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
+                                {/* Section 2: Heritage & Statehood */}
+                                <div className="space-y-4 pt-4">
+                                    <h3 className="text-lg font-black uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                                        <Building size={18} /> Heritage & Statehood
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Capital</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.capital}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Motto</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.motto}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">State Nickname</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.nickname}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-emerald-400 tracking-wider mb-2">Statehood Date</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.statehood}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Section 3: Key Info & Metrics */}
+                                <div className="space-y-4 pt-4">
+                                    <h3 className="text-lg font-black uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                                        <Globe size={18} /> Key Info & Demographics
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Largest Metropolitan City</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.largestCity}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">US Geographic Region</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.region}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Time Zone</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.timezone}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">State Abbreviation</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.abbreviation}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">Total Land Area</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.landArea}</div>
+                                        </div>
+                                        <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-indigo-500/40 transition-all shadow-lg">
+                                            <div className="text-[10px] font-mono font-bold uppercase text-indigo-400 tracking-wider mb-2">State Population</div>
+                                            <div className="text-base font-bold text-slate-100">{verifiedFacts.population}</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </TabsContent>
 
-                             <TabsContent value="cities" className="space-y-8">
-                                <div className="flex items-center justify-between mb-8 border-l-8 border-[#283618] pl-6">
-                                    <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight">
-                                        {query ? `Results for "${query}"` : 'The Best Cities to Visit'}
+                            {/* Market Cities Tab Content */}
+                            <TabsContent value="cities" className="space-y-8">
+                                <div className="flex items-center justify-between mb-8 border-l-4 border-cyan-500 pl-6">
+                                    <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight">
+                                        {query ? `Results for "${query}"` : 'Market Cities'}
                                     </h2>
-                                    <span className="text-emerald-950 text-[10px] font-black uppercase tracking-widest bg-emerald-900/5 px-4 py-2 rounded-xl">
-                                        {cities.length} Cities in the System
+                                    <span className="text-cyan-400 text-xs font-mono font-bold uppercase tracking-wider bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl">
+                                        {cities.length} Cities Available
                                     </span>
                                 </div>
 
@@ -626,34 +723,84 @@ const uniqueLabels = Array.from(new Set([
                                         <Link 
                                             key={city.slug}
                                             href={`/locations/${stateSlug}/${city.slug}`}
-                                            className="group relative overflow-hidden bg-white border-2 border-emerald-900/5 hover:bg-emerald-900/5 p-8 rounded-[2rem] border transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-900/5"
+                                            className="group relative overflow-hidden bg-slate-900 border border-slate-800 hover:border-cyan-500 p-6 rounded-3xl transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/10"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                                                    <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300">
                                                         <MapPin size={24} />
                                                     </div>
-                                                    <span className="font-black text-emerald-950 text-lg group-hover:text-emerald-600 transition-colors leading-tight">
+                                                    <span className="font-bold text-slate-100 text-lg group-hover:text-cyan-400 transition-colors leading-tight">
                                                         {city.name}
                                                     </span>
                                                 </div>
-                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-emerald-600 -translate-x-2 group-hover:translate-x-0" size={18} />
+                                                <ArrowLeft className="rotate-180 opacity-0 group-hover:opacity-100 transition-all text-cyan-400 -translate-x-2 group-hover:translate-x-0" size={18} />
                                             </div>
-                                            <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-sky-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
+                                                <span>{state.name} Market</span>
+                                                <span className="text-cyan-400 font-bold">View Insights →</span>
+                                            </div>
                                         </Link>
                                     ))}
                                 </div>
                                 
                                 {cities.length === 0 && (
-                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-300 bg-slate-50 rounded-[2rem] text-center">
-                                        <SearchIcon className="h-12 w-12 text-slate-700 mb-4" />
-                                        <h2 className="text-xl font-bold text-slate-500 uppercase italic">No Cities Found</h2>
-                                        <p className="text-slate-600 mt-2 max-w-sm text-sm">
-                                            We couldn't find any cities matching your search.
+                                    <div className="flex flex-col items-center justify-center p-20 border border-dashed border-slate-800 bg-slate-900/50 rounded-3xl text-center">
+                                        <SearchIcon className="h-12 w-12 text-slate-600 mb-4" />
+                                        <h2 className="text-xl font-bold text-slate-400 uppercase italic">No Cities Found</h2>
+                                        <p className="text-slate-500 mt-2 max-w-sm text-sm">
+                                            We couldn't find any cities matching your search query.
                                         </p>
                                     </div>
                                 )}
                             </TabsContent>
+
+                            {/* All You Can Read State Press Hub */}
+                            <TabsContent value="newspapers" className="space-y-8">
+                                <div className="flex items-center justify-between mb-8 border-l-4 border-cyan-500 pl-6">
+                                    <div>
+                                        <h2 className="text-3xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                                            <BookOpen className="text-cyan-400" /> All-You-Can-Read {state.name} Press Hub
+                                        </h2>
+                                        <p className="text-slate-400 text-xs font-mono font-bold uppercase tracking-wider mt-1">Verified Newspapers, Journals & State Press Outlets</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {stateNewspapersList.map((paper, idx) => (
+                                        <div key={idx} className="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 p-6 rounded-3xl flex flex-col justify-between transition-all shadow-xl group">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-3">
+                                                    <span className="px-3 py-1 rounded-full bg-cyan-950 border border-cyan-800/80 text-cyan-300 text-[10px] font-mono font-bold uppercase tracking-wider">
+                                                        {paper.type}
+                                                    </span>
+                                                    {paper.city && (
+                                                        <span className="text-slate-500 text-xs font-mono">📍 {paper.city}</span>
+                                                    )}
+                                                </div>
+                                                <h3 className="text-xl font-bold text-slate-100 group-hover:text-cyan-400 transition-colors mb-2">
+                                                    {paper.name}
+                                                </h3>
+                                                <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">
+                                                    {paper.description}
+                                                </p>
+                                            </div>
+                                            <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between">
+                                                <span className="text-xs text-slate-500 font-mono">Free Online Press</span>
+                                                <a 
+                                                    href={paper.url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                                                >
+                                                    Read Publication <ExternalLink size={14} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </TabsContent>
+
                             {/* Education Tab */}
                             {(state as any).educationalInstitutions?.length > 0 && (
                                 <TabsContent value="education" className="space-y-8">
@@ -663,6 +810,7 @@ const uniqueLabels = Array.from(new Set([
                                     />
                                 </TabsContent>
                             )}
+
                             {/* Healthcare Tab */}
                             {(hospitals.length > 0 || (mongoState as any)?.hospitalStats) && (
                                 <TabsContent value="healthcare" className="space-y-8">
@@ -673,20 +821,7 @@ const uniqueLabels = Array.from(new Set([
                                     />
                                 </TabsContent>
                             )}
-                            {/* Tax Hub Tab Content */}
-                            <TabsContent value="taxhub" className="space-y-8">
-                                <div className="flex items-center justify-between mb-8 border-l-8 border-[#606c38] pl-6">
-                                    <div>
-                                        <h2 className="text-3xl font-black text-emerald-950 uppercase tracking-tight italic">Verified CPAs in {state.name}</h2>
-                                        <p className="text-emerald-950/50 text-[11px] font-black uppercase tracking-[0.2em] mt-1 italic">Professional Help in Your Area</p>
-                                    </div>
-                                </div>
-                                <TaxDirectoryList 
-                                    listings={stateCPAs} 
-                                    cityName={state.name} 
-                                    stateName={state.name} 
-                                />
-                            </TabsContent>
+
                             {/* Demographics Tab Content */}
                             {state.detailedPopulation && (
                                 <TabsContent value="demographics" className="space-y-8">
@@ -703,9 +838,9 @@ const uniqueLabels = Array.from(new Set([
             </main>
 
             {/* Footer */}
-            <footer className="py-12 bg-emerald-950 text-emerald-50/40 border-t border-emerald-50/5">
+            <footer className="py-12 bg-slate-950 text-slate-500 border-t border-slate-800">
                 <div className="container px-4 md:px-6 mx-auto text-center">
-                    <p className="text-[10px] font-black uppercase tracking-widest italic" suppressHydrationWarning>
+                    <p className="text-xs font-mono font-bold uppercase tracking-wider" suppressHydrationWarning>
                         © 2026 K Business Academy. All rights reserved.
                     </p>
                 </div>
