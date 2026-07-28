@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
+import https from "https";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { STATE_NAME_TO_ABBR } from "../lib/utils/state-mapping";
@@ -116,6 +117,105 @@ function parseCsvLine(line: string): string[] {
   return values;
 }
 
+// ─── DOG PARK SCRAPER HELPERS ────────────────────────────────────────────────
+const DOG_PARK_STATES: { urlName: string; abbr: string; slug: string }[] = [
+  { urlName: "Alabama", abbr: "AL", slug: "alabama" },
+  { urlName: "Alaska", abbr: "AK", slug: "alaska" },
+  { urlName: "Arizona", abbr: "AZ", slug: "arizona" },
+  { urlName: "Arkansas", abbr: "AR", slug: "arkansas" },
+  { urlName: "California", abbr: "CA", slug: "california" },
+  { urlName: "Colorado", abbr: "CO", slug: "colorado" },
+  { urlName: "Connecticut", abbr: "CT", slug: "connecticut" },
+  { urlName: "Delaware", abbr: "DE", slug: "delaware" },
+  { urlName: "Florida", abbr: "FL", slug: "florida" },
+  { urlName: "Georgia", abbr: "GA", slug: "georgia" },
+  { urlName: "Hawaii", abbr: "HI", slug: "hawaii" },
+  { urlName: "Idaho", abbr: "ID", slug: "idaho" },
+  { urlName: "Illinois", abbr: "IL", slug: "illinois" },
+  { urlName: "Indiana", abbr: "IN", slug: "indiana" },
+  { urlName: "Iowa", abbr: "IA", slug: "iowa" },
+  { urlName: "Kansas", abbr: "KS", slug: "kansas" },
+  { urlName: "Kentucky", abbr: "KY", slug: "kentucky" },
+  { urlName: "Louisiana", abbr: "LA", slug: "louisiana" },
+  { urlName: "Maine", abbr: "ME", slug: "maine" },
+  { urlName: "Maryland", abbr: "MD", slug: "maryland" },
+  { urlName: "Massachusetts", abbr: "MA", slug: "massachusetts" },
+  { urlName: "Michigan", abbr: "MI", slug: "michigan" },
+  { urlName: "Minnesota", abbr: "MN", slug: "minnesota" },
+  { urlName: "Mississippi", abbr: "MS", slug: "mississippi" },
+  { urlName: "Missouri", abbr: "MO", slug: "missouri" },
+  { urlName: "Montana", abbr: "MT", slug: "montana" },
+  { urlName: "Nebraska", abbr: "NE", slug: "nebraska" },
+  { urlName: "Nevada", abbr: "NV", slug: "nevada" },
+  { urlName: "New_Hampshire", abbr: "NH", slug: "new-hampshire" },
+  { urlName: "New_Jersey", abbr: "NJ", slug: "new-jersey" },
+  { urlName: "New_Mexico", abbr: "NM", slug: "new-mexico" },
+  { urlName: "New_York", abbr: "NY", slug: "new-york" },
+  { urlName: "North_Carolina", abbr: "NC", slug: "north-carolina" },
+  { urlName: "North_Dakota", abbr: "ND", slug: "north-dakota" },
+  { urlName: "Ohio", abbr: "OH", slug: "ohio" },
+  { urlName: "Oklahoma", abbr: "OK", slug: "oklahoma" },
+  { urlName: "Oregon", abbr: "OR", slug: "oregon" },
+  { urlName: "Pennsylvania", abbr: "PA", slug: "pennsylvania" },
+  { urlName: "Rhode_Island", abbr: "RI", slug: "rhode-island" },
+  { urlName: "South_Carolina", abbr: "SC", slug: "south-carolina" },
+  { urlName: "South_Dakota", abbr: "SD", slug: "south-dakota" },
+  { urlName: "Tennessee", abbr: "TN", slug: "tennessee" },
+  { urlName: "Texas", abbr: "TX", slug: "texas" },
+  { urlName: "Utah", abbr: "UT", slug: "utah" },
+  { urlName: "Vermont", abbr: "VT", slug: "vermont" },
+  { urlName: "Virginia", abbr: "VA", slug: "virginia" },
+  { urlName: "Washington", abbr: "WA", slug: "washington" },
+  { urlName: "West_Virginia", abbr: "WV", slug: "west-virginia" },
+  { urlName: "Wisconsin", abbr: "WI", slug: "wisconsin" },
+  { urlName: "Wyoming", abbr: "WY", slug: "wyoming" },
+];
+
+function fetchHtml(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: { "User-Agent": "Mozilla/5.0", Accept: "text/html" },
+      timeout: 15000,
+    }, (res: any) => {
+      if (res.statusCode >= 300 && res.statusCode < 400) {
+        const loc: string = res.headers.location;
+        return fetchHtml(loc.startsWith("http") ? loc : `https://www.animalshelter.org${loc}`)
+          .then(resolve).catch(reject);
+      }
+      let data = "";
+      res.on("data", (c: any) => (data += c));
+      res.on("end", () => resolve(data));
+    });
+    req.on("error", reject);
+    req.on("timeout", () => { req.destroy(); reject(new Error(`Timeout: ${url}`)); });
+  });
+}
+
+function parseDogParkNames(html: string): string[] {
+  const parks: string[] = [];
+  const re = /href="\/dogParks\/[^"]+_rId\d+_rS_pC\.html"[^>]*>\s*<strong>([^<]+)<\/strong>\s*<\/a>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const name = m[1].trim();
+    if (name) parks.push(name);
+  }
+  return parks;
+}
+
+function getMaxDogParkPage(html: string, abbr: string): number {
+  const re = new RegExp(`/dogParks/[^/]+/${abbr}/(\\d+)\.html`, "gi");
+  let max = 1;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const p = parseInt(m[1]);
+    if (p > max) max = p;
+  }
+  return max;
+}
+
+function sleep(ms: number) { return new Promise(r => setTimeout(r, ms)); }
+// ─── END DOG PARK HELPERS ─────────────────────────────────────────────────────
+
 async function runMasterSeed() {
   try {
     console.log("=========================================");
@@ -130,7 +230,7 @@ async function runMasterSeed() {
     const LocationModel = mongoose.models.Location || mongoose.model("Location", new mongoose.Schema({}, { strict: false }));
 
     // ─── STEP 1: INITIALIZE 50 STATES & FACTS ──────────────────────────────────
-    console.log("📍 [STEP 1/4] Initializing 50 US State Records, B2B Employers, VC, Privacy Laws, SOS & Festivals...");
+    console.log("📍 [STEP 1/5] Initializing 50 US State Records, B2B Employers, VC, Privacy Laws, SOS & Festivals...");
     let stateInitCount = 0;
     for (const [stateName, abbr] of Object.entries(STATE_NAME_TO_ABBR)) {
       const slug = stateName.replace(/\s+/g, "-");
@@ -197,7 +297,7 @@ async function runMasterSeed() {
     console.log(`✅ STEP 1 COMPLETE: ${stateInitCount} States Initialized.\n`);
 
     // ─── STEP 2: SEED MARKET CITIES FOR ALL 50 STATES ──────────────────────────
-    console.log("🏙️ [STEP 2/4] Seeding 350+ Market Cities for all 50 States...");
+    console.log("🏙️ [STEP 2/5] Seeding 350+ Market Cities for all 50 States...");
     let totalCitiesSeeded = 0;
     for (const [stateSlug, cities] of Object.entries(cityData)) {
       for (const cityName of cities) {
@@ -222,7 +322,7 @@ async function runMasterSeed() {
     console.log(`✅ STEP 2 COMPLETE: ${totalCitiesSeeded} Market Cities Seeded across all 50 States.\n`);
 
     // ─── STEP 3: IMPORT 5,356 CMS HOSPITALS ────────────────────────────────────
-    console.log("🏥 [STEP 3/4] Importing 5,356 CMS Hospitals Dataset...");
+    console.log("🏥 [STEP 3/5] Importing 5,356 CMS Hospitals Dataset...");
     const csvPath = path.join(process.cwd(), "docs", "Hospital_General_Information.csv");
     if (fs.existsSync(csvPath)) {
       const fileContent = fs.readFileSync(csvPath, "utf-8");
@@ -318,7 +418,7 @@ async function runMasterSeed() {
     }
 
     // ─── STEP 4: IMPORT 1,725 FCC BROADCAST STATIONS ───────────────────────────
-    console.log("📻 [STEP 4/4] Importing 1,725 FCC Radio & TV Broadcast Stations...");
+    console.log("📻 [STEP 4/5] Importing FCC Radio & TV Broadcast Stations...");
     const excelPath = path.join(process.cwd(), "docs", "DOC-306948A1.xls");
     if (fs.existsSync(excelPath)) {
       const workbook = XLSX.readFile(excelPath);
@@ -396,6 +496,52 @@ async function runMasterSeed() {
     } else {
       console.warn("⚠️ FCC Broadcast Excel file not found, skipping Step 4.\n");
     }
+
+    // ─── STEP 5: SCRAPE & SEED DOG PARKS ────────────────────────────────────────
+    console.log("🐕 [STEP 5/5] Scraping & Seeding Dog Parks from animalshelter.org...");
+    let totalDogParks = 0;
+    let dogParkStatesSeeded = 0;
+
+    for (const state of DOG_PARK_STATES) {
+      const baseUrl = `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}.html`;
+      const allParks: string[] = [];
+
+      try {
+        const html1 = await fetchHtml(baseUrl);
+        allParks.push(...parseDogParkNames(html1));
+
+        const maxPage = getMaxDogParkPage(html1, state.abbr);
+        for (let page = 2; page <= maxPage; page++) {
+          await sleep(400);
+          try {
+            const htmlN = await fetchHtml(
+              `https://www.animalshelter.org/dogParks/${state.urlName}/${state.abbr}/${page}.html`
+            );
+            allParks.push(...parseDogParkNames(htmlN));
+          } catch { break; }
+        }
+      } catch (err: any) {
+        console.warn(`  ⚠ Skipped ${state.slug}: ${err.message}`);
+        continue;
+      }
+
+      const unique = [...new Set(allParks)];
+      if (unique.length === 0) continue;
+
+      const dogParkDocs = unique.map(name => ({ name, city: "", description: "", source: "animalshelter.org" }));
+
+      await LocationModel.updateOne(
+        { slug: state.slug, type: "state" },
+        { $set: { dogParks: dogParkDocs } },
+        { upsert: true }
+      );
+
+      totalDogParks += unique.length;
+      dogParkStatesSeeded++;
+      console.log(`  → ${state.slug}: ${unique.length} dog parks`);
+      await sleep(700);
+    }
+    console.log(`✅ STEP 5 COMPLETE: ${totalDogParks} Dog Parks Seeded into ${dogParkStatesSeeded} States.\n`);
 
     console.log("=========================================");
     console.log("🎉 ALL SEEDING OPERATIONS FINISHED!");
