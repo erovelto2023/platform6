@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getLocation, getCitiesByState, syncHospitalData, syncEducationalInstitutions } from "@/lib/actions/location.actions";
-import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio, Plane, Building2, Compass, Rocket } from "lucide-react";
+import { MapPin, ArrowLeft, Search as SearchIcon, Newspaper, BookOpen, ExternalLink, Sparkles, Globe, Building, Award, Info, Calendar, Activity, GraduationCap, Radio, Plane, Building2, Compass, Rocket, PawPrint } from "lucide-react";
 import { Search } from "@/components/ui/Search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Metadata } from "next";
@@ -15,6 +15,7 @@ import { StateAirportsSection } from "@/components/locations/state-airports-sect
 import { StateChambersSection } from "@/components/locations/state-chambers-section";
 import { StateTourismSection } from "@/components/locations/state-tourism-section";
 import { StateB2BComplianceSection } from "@/components/locations/state-b2b-compliance-section";
+import { StateDogParksSection } from "@/components/locations/state-dog-parks-section";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { StatePopulationStats } from "@/components/locations/state-population-stats";
 import { getStateFacts } from "@/lib/utils/state-facts";
@@ -583,6 +584,9 @@ const uniqueLabels = Array.from(new Set([
                                 <TabsTrigger value="b2b" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
                                     <Rocket size={14} /> B2B Employers, VC & Compliance ({(state.b2bVenture?.length || 0) + (state.compliance?.length || 0)})
                                 </TabsTrigger>
+                                <TabsTrigger value="dogparks" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-emerald-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer flex items-center gap-1.5">
+                                    <PawPrint size={14} /> Dog Parks ({(state as any).dogParks?.length || 0})
+                                </TabsTrigger>
                                 {state.detailedPopulation && (
                                     <TabsTrigger value="demographics" className="px-6 py-2.5 rounded-xl data-[state=active]:bg-cyan-600 data-[state=active]:text-white uppercase font-bold text-xs tracking-wider text-slate-400 hover:text-slate-200 transition-all cursor-pointer">
                                         Demographics
@@ -803,6 +807,14 @@ const uniqueLabels = Array.from(new Set([
                                 <StateB2BComplianceSection
                                     b2bItems={state.b2bVenture}
                                     complianceItems={state.compliance}
+                                    stateName={state.name}
+                                />
+                            </TabsContent>
+
+                            {/* Dog Parks Tab */}
+                            <TabsContent value="dogparks" className="space-y-8">
+                                <StateDogParksSection
+                                    parks={(state as any).dogParks}
                                     stateName={state.name}
                                 />
                             </TabsContent>

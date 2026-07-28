@@ -152,6 +152,12 @@ export interface ILocation extends Document {
         virtualChannel?: number;
         dma?: string;
     }>;
+    dogParks?: Array<{
+        name: string;
+        city?: string;
+        description?: string;
+        source?: string;
+    }>;
     airports?: Array<{
         name: string;
         code: string;
@@ -433,6 +439,12 @@ const LocationSchema = new Schema<ILocation>(
             rfChannel: Number,
             virtualChannel: Number,
             dma: String
+        }],
+        dogParks: [{
+            name: String,
+            city: String,
+            description: String,
+            source: String,
         }],
         airports: [{
             name: String,
