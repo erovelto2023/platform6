@@ -102,14 +102,17 @@ export default clerkMiddleware(async (auth, req) => {
         }
 
         // Admin Route Protection (for non-admins trying to access /admin or /api/admin)
-        if (req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin')) {
-            if (req.nextUrl.pathname.startsWith('/api/')) {
-                return new NextResponse(JSON.stringify({ error: "Forbidden: Admin access required" }), {
-                    status: 403,
-                    headers: { 'Content-Type': 'application/json' },
-                });
+        if (!isAdmin && (req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin'))) {
+            // Exception: Allow Swipe File Vault & Click Campaigns tool for students/members
+            if (!req.nextUrl.pathname.startsWith('/admin/click-campaigns')) {
+                if (req.nextUrl.pathname.startsWith('/api/')) {
+                    return new NextResponse(JSON.stringify({ error: "Forbidden: Admin access required" }), {
+                        status: 403,
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                }
+                return NextResponse.redirect(new URL('/dashboard', req.url));
             }
-            return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
         // Allow all users to access their respective sidebar pages & tools
