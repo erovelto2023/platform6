@@ -24,7 +24,7 @@ export default async function DashboardPage() {
         if (freePage) {
             const themeCSS = generateThemeCSS({ ...defaultTheme, ...(freePage.theme || {}) } as any);
             return (
-                <div className="min-h-screen bg-white text-slate-900">
+                <div className="min-h-screen bg-slate-950 text-slate-100">
                     <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
                     {freePage.headerCode && (
                         <div dangerouslySetInnerHTML={{ __html: freePage.headerCode }} />
@@ -32,12 +32,7 @@ export default async function DashboardPage() {
                     {freePage.bodyCode && (
                         <div dangerouslySetInnerHTML={{ __html: freePage.bodyCode }} />
                     )}
-                    <div className="custom-html-wrapper-dashboard">
-                        <style dangerouslySetInnerHTML={{ __html: `
-                            .custom-html-wrapper-dashboard {
-                                all: revert;
-                            }
-                        `}} />
+                    <div>
                         {freePage.sections?.map((section: any, index: number) => {
                             if (section.templateId === 'puck-blocks' && section.customHTML) {
                                 try {
