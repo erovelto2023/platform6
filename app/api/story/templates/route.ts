@@ -1,41 +1,43 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import { StoryTemplate } from '@/models';
-import { getServerSession } from '@/lib/authOptions';
-import { authOptions } from '@/lib/authOptions';
+import { StoryTemplate, User } from '@/models';
+import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET(req: Request) {
   await dbConnect();
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
+    const clerkUser = await currentUser();
+    let dbUser = null;
+
+    if (clerkUser) {
+      const email = clerkUser.emailAddresses?.[0]?.emailAddress;
+      dbUser = await User.findOne({ $or: [{ clerkId: clerkUser.id }, { email }] });
+    }
+
     const { searchParams } = new URL(req.url);
     const familyId = searchParams.get('familyId');
     const subgenreId = searchParams.get('subgenreId');
-
-    const User = require('@/models').User;
-    const dbUser = await User.findOne({ email: session.user.email });
     const userId = dbUser?._id;
 
     // Build query: System templates OR templates owned by this user
     const query: any = {
       $or: [
         { isSystem: true },
-        { userId: userId }
+        ...(userId ? [{ userId: userId }] : [])
       ]
     };
 
     if (familyId) query.familyId = familyId;
     if (subgenreId) query.subgenreId = subgenreId;
 
-    const templates = await StoryTemplate.find(query).sort({ category: 1, name: 1 });
+    const templates = await StoryTemplate.find(query).sort({ category: 1, name: 1 }).lean();
+    
+    const isAdmin = dbUser?.role === 'admin' || (clerkUser?.emailAddresses?.[0]?.emailAddress?.toLowerCase() === 'erovelto1@gmail.com');
+
     return NextResponse.json({ 
       templates,
-      isAdmin: dbUser?.role === 'admin'
+      isAdmin: Boolean(isAdmin)
     });
   } catch (error) {
     console.error('Failed to fetch templates:', error);
@@ -45,24 +47,24 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   await dbConnect();
-  const session = await getServerSession(authOptions);
 
-  // if (!session?.user) {
-  //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // }
-
-  // Assuming only admins can create templates, or we allow any authenticated user for now
   try {
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const email = clerkUser.emailAddresses?.[0]?.emailAddress;
+    let dbUser = await User.findOne({ $or: [{ clerkId: clerkUser.id }, { email }] });
+
     const body = await req.json();
     const { name, category, content, familyId, subgenreId, isSystem, description } = body;
 
     if (!name || !category) {
-      return NextResponse.json({ error: 'name and category are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
     }
 
-    const User = require('@/models').User;
-    let dbUser = session?.user?.email ? await User.findOne({ email: session.user.email }) : await User.findOne();
-    const isAdmin = dbUser?.role === 'admin';
+    const isAdmin = dbUser?.role === 'admin' || (email?.toLowerCase() === 'erovelto1@gmail.com');
 
     const template = await StoryTemplate.create({
       name,
@@ -78,7 +80,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ template }, { status: 201 });
   } catch (error) {
     console.error('Failed to create template:', error);
-    require('fs').appendFileSync('scratch/err.log', String(error) + '\n');
     return NextResponse.json({ error: 'Failed to create template' }, { status: 500 });
   }
 }

@@ -164,12 +164,16 @@ function TemplatesContent() {
         }
       }
 
-      if (familyIdParam && subgenreIdParam) {
-        const tplRes = await fetch(`/api/story/templates?familyId=${familyIdParam}&subgenreId=${subgenreIdParam}`);
-        if (tplRes.ok) {
-          const tplData = await tplRes.json();
-          setTemplates(tplData.templates || []);
-        }
+      let tplUrl = '/api/story/templates';
+      const queryParts = [];
+      if (familyIdParam) queryParts.push(`familyId=${familyIdParam}`);
+      if (subgenreIdParam) queryParts.push(`subgenreId=${subgenreIdParam}`);
+      if (queryParts.length > 0) tplUrl += '?' + queryParts.join('&');
+
+      const tplRes = await fetch(tplUrl);
+      if (tplRes.ok) {
+        const tplData = await tplRes.json();
+        setTemplates(tplData.templates || []);
       }
     } catch (e) {
       console.error(e);
