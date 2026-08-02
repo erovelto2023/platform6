@@ -8,7 +8,15 @@ import { formatPrice } from "@/lib/format";
 import { format } from "date-fns";
 import { Wallet, Info, Sparkles } from "lucide-react";
 
+import { getUserRole } from "@/lib/roles";
+import { redirect } from "next/navigation";
+
 export default async function PartnerDashboardPage() {
+    const userRole = await getUserRole();
+    if (userRole !== 'admin') {
+        redirect("/dashboard");
+    }
+
     const stats = await getPartnerStats();
     const links = await getPartnerLinks();
     const network = await getPartnerNetwork();

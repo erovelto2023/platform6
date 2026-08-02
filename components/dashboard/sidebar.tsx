@@ -99,8 +99,7 @@ const groups: SidebarGroup[] = [
             { label: "Member Search", icon: Search, href: "/community/members?sort=relevance", color: "text-emerald-500" },
             { label: "Library", icon: Library, href: "/docs", color: "text-blue-600" },
             { label: "Messages", icon: MessageSquare, href: "/messages", color: "text-blue-500" },
-            { label: "Tickets", icon: FileQuestion, href: "/tickets", color: "text-rose-500" },
-            { label: "Affiliate / Partner", icon: Sparkles, href: "/partner", color: "text-amber-400" }
+            { label: "Tickets", icon: FileQuestion, href: "/tickets", color: "text-rose-500" }
         ]
     },
     {
