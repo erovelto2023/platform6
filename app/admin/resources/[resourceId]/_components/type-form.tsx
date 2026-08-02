@@ -1,6 +1,5 @@
 "use client";
 
-
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -60,7 +59,7 @@ export const TypeForm = ({
         defaultValues: initialData,
     });
 
-    const { isSubmitting, isValid } = form.formState;
+    const { isSubmitting } = form.formState;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
@@ -76,23 +75,28 @@ export const TypeForm = ({
     const selectedOption = options.find((option) => option.value === initialData.type);
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Resource type
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="border bg-slate-900 border-slate-800 rounded-2xl p-5 shadow-xl text-slate-100">
+            <div className="font-mono font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center justify-between">
+                <span>Resource Type</span>
+                <Button 
+                    onClick={toggleEdit} 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-orange-400 hover:text-amber-300 hover:bg-slate-800 cursor-pointer h-7 text-xs font-mono font-bold"
+                >
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit type
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Type
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
                 <p className={cn(
-                    "text-sm mt-2",
+                    "text-xs font-mono font-bold text-amber-300 mt-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800",
                     !initialData.type && "text-slate-500 italic"
                 )}>
                     {selectedOption?.label || "No type"}
@@ -102,7 +106,7 @@ export const TypeForm = ({
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4 mt-4"
+                        className="space-y-4 mt-3"
                     >
                         <FormField
                             control={form.control}
@@ -114,11 +118,11 @@ export const TypeForm = ({
                                         defaultValue={field.value}
                                     >
                                         <FormControl>
-                                            <SelectTrigger>
+                                            <SelectTrigger className="bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs focus:border-orange-500">
                                                 <SelectValue placeholder="Select a type" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 font-mono">
                                             {options.map((option) => (
                                                 <SelectItem
                                                     key={option.value}
@@ -137,8 +141,10 @@ export const TypeForm = ({
                             <Button
                                 disabled={isSubmitting}
                                 type="submit"
+                                size="sm"
+                                className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold font-mono text-xs cursor-pointer"
                             >
-                                Save
+                                Save Type
                             </Button>
                         </div>
                     </form>

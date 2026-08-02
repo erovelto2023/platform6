@@ -2,7 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getResource } from "@/lib/actions/resource.actions";
 import { IconBadge } from "@/components/icon-badge";
-import { LayoutDashboard, File, ListChecks, Type } from "lucide-react";
+import { LayoutDashboard, File, ListChecks, Sparkles } from "lucide-react";
 import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-form";
 import { FileForm } from "./_components/file-form";
@@ -48,20 +48,21 @@ export default async function ResourceIdPage({
     const isComplete = requiredFields.every(Boolean);
 
     return (
-        <>
+        <div className="min-h-full bg-slate-950 text-slate-100 pb-12">
             {!resource.isPublished && (
                 <Banner
                     label="This resource is unpublished. It will not be visible to users."
                 />
             )}
-            <div className="p-6 max-w-5xl mx-auto">
-                <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-y-2">
-                        <h1 className="text-2xl font-medium">
-                            Resource setup
+            <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-800/80 pb-6">
+                    <div className="flex flex-col gap-y-1">
+                        <h1 className="text-2xl md:text-3xl font-black font-mono text-slate-100 uppercase tracking-tight flex items-center gap-2">
+                            <Sparkles className="h-7 w-7 text-orange-400" />
+                            Resource Setup
                         </h1>
-                        <span className="text-sm text-slate-700">
-                            Complete all fields {completionText}
+                        <span className="text-xs font-mono text-slate-400">
+                            Complete all fields <span className="text-amber-400 font-bold">{completionText}</span>
                         </span>
                     </div>
                     <ResourceActions
@@ -70,12 +71,13 @@ export default async function ResourceIdPage({
                         isPublished={resource.isPublished}
                     />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="space-y-6">
-                        <div>
+                        <div className="space-y-4">
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={LayoutDashboard} />
-                                <h2 className="text-xl font-semibold">
+                                <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-slate-100">
                                     Customize your resource
                                 </h2>
                             </div>
@@ -92,10 +94,11 @@ export default async function ResourceIdPage({
                                 resourceId={resource._id}
                             />
                         </div>
-                        <div>
+
+                        <div className="space-y-4 pt-4 border-t border-slate-800">
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={ListChecks} />
-                                <h2 className="text-xl font-semibold">
+                                <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-slate-100">
                                     Access & Visibility
                                 </h2>
                             </div>
@@ -113,11 +116,12 @@ export default async function ResourceIdPage({
                             />
                         </div>
                     </div>
+
                     <div className="space-y-6">
-                        <div>
+                        <div className="space-y-4">
                             <div className="flex items-center gap-x-2">
                                 <IconBadge icon={File} />
-                                <h2 className="text-xl font-semibold">
+                                <h2 className="text-sm font-mono font-bold uppercase tracking-wider text-slate-100">
                                     Resource Content & Embed Code
                                 </h2>
                             </div>
@@ -132,6 +136,6 @@ export default async function ResourceIdPage({
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

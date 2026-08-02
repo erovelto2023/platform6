@@ -5,7 +5,6 @@ import { Pencil, PlusCircle, Image as ImageIcon, X } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { UploadButton } from "@/lib/uploadthing";
@@ -56,32 +55,37 @@ export const ThumbnailForm = ({
     };
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Resource Thumbnail / Cover Image
-                <Button onClick={toggleEdit} variant="ghost" size="sm">
+        <div className="border bg-slate-900 border-slate-800 rounded-2xl p-5 shadow-xl text-slate-100">
+            <div className="font-mono font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center justify-between">
+                <span>Resource Cover / Thumbnail</span>
+                <Button 
+                    onClick={toggleEdit} 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-orange-400 hover:text-amber-300 hover:bg-slate-800 cursor-pointer h-7 text-xs font-mono font-bold"
+                >
                     {isEditing && <>Cancel</>}
                     {!isEditing && !initialData.thumbnailUrl && (
                         <>
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            Add thumbnail
+                            <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Add Thumbnail
                         </>
                     )}
                     {!isEditing && initialData.thumbnailUrl && (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Change image
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Change Image
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
                 !initialData.thumbnailUrl ? (
-                    <div className="flex items-center justify-center h-40 bg-slate-200 rounded-md mt-2">
-                        <ImageIcon className="h-10 w-10 text-slate-400" />
+                    <div className="flex items-center justify-center h-40 bg-slate-950 border border-slate-800 rounded-xl mt-2">
+                        <ImageIcon className="h-10 w-10 text-slate-600" />
                     </div>
                 ) : (
-                    <div className="relative aspect-video mt-2 overflow-hidden rounded-md border border-slate-200 max-h-48 w-full group">
+                    <div className="relative aspect-video mt-2 overflow-hidden rounded-xl border border-slate-800 max-h-48 w-full group">
                         <img
                             src={initialData.thumbnailUrl}
                             alt="Resource thumbnail"
@@ -89,7 +93,7 @@ export const ThumbnailForm = ({
                         />
                         <button
                             onClick={handleRemove}
-                            className="absolute top-2 right-2 p-1 bg-rose-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-2 right-2 p-1.5 bg-rose-950/80 border border-rose-700 text-rose-300 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                             title="Remove Thumbnail"
                         >
                             <X className="h-4 w-4" />
@@ -98,7 +102,7 @@ export const ThumbnailForm = ({
                 )
             )}
             {isEditing && (
-                <div className="space-y-4 mt-4">
+                <div className="space-y-4 mt-3">
                     <UploadButton
                         endpoint="courseAttachment"
                         onClientUploadComplete={(res) => {
@@ -109,17 +113,22 @@ export const ThumbnailForm = ({
                         onUploadError={(error: Error) => {
                             toast.error(`${error?.message}`);
                         }}
+                        appearance={{
+                            button: "bg-slate-950 hover:bg-slate-800 text-orange-400 border border-slate-800 font-mono text-xs cursor-pointer",
+                            allowedContent: "hidden"
+                        }}
                     />
-                    <div className="flex items-center gap-x-2 pt-2 border-t border-slate-200">
+                    <div className="flex items-center gap-x-2 pt-2 border-t border-slate-800">
                         <Input
                             value={imageUrl}
                             onChange={(e) => setImageUrl(e.target.value)}
                             placeholder="Or paste image URL (https://...)"
-                            className="bg-white text-xs"
+                            className="bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs focus:border-orange-500"
                         />
                         <Button
                             onClick={() => onSubmit({ thumbnailUrl: imageUrl })}
                             size="sm"
+                            className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold font-mono text-xs cursor-pointer"
                         >
                             Save URL
                         </Button>

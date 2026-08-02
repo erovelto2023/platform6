@@ -1,6 +1,5 @@
 "use client";
 
-
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -61,23 +60,28 @@ export const CategoryForm = ({
     }
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Resource category
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="border bg-slate-900 border-slate-800 rounded-2xl p-5 shadow-xl text-slate-100">
+            <div className="font-mono font-bold text-xs uppercase tracking-wider text-slate-200 flex items-center justify-between">
+                <span>Resource Category</span>
+                <Button 
+                    onClick={toggleEdit} 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-orange-400 hover:text-amber-300 hover:bg-slate-800 cursor-pointer h-7 text-xs font-mono font-bold"
+                >
                     {isEditing ? (
                         <>Cancel</>
                     ) : (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit category
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Category
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
                 <p className={cn(
-                    "text-sm mt-2",
+                    "text-xs font-mono font-bold text-amber-300 mt-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800",
                     !initialData.category && "text-slate-500 italic"
                 )}>
                     {initialData.category || "No category"}
@@ -87,7 +91,7 @@ export const CategoryForm = ({
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="space-y-4 mt-4"
+                        className="space-y-4 mt-3"
                     >
                         <FormField
                             control={form.control}
@@ -98,6 +102,7 @@ export const CategoryForm = ({
                                         <Input
                                             disabled={isSubmitting}
                                             placeholder="e.g. 'Marketing', 'Templates'..."
+                                            className="bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs focus:border-orange-500"
                                             {...field}
                                         />
                                     </FormControl>
@@ -109,8 +114,10 @@ export const CategoryForm = ({
                             <Button
                                 disabled={!isValid || isSubmitting}
                                 type="submit"
+                                size="sm"
+                                className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold font-mono text-xs cursor-pointer"
                             >
-                                Save
+                                Save Category
                             </Button>
                         </div>
                     </form>
