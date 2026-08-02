@@ -256,16 +256,41 @@ export async function updateStudentAccount(data: {
     }
 }
 
+async function verifyAdminUser(clerkUser: any) {
+    if (!clerkUser) return false;
+    await connectDB();
+    const userEmail = (clerkUser.emailAddresses?.[0]?.emailAddress || "").toLowerCase().trim();
+    const adminEmails = (process.env.ADMIN_EMAILS || "erovelto1@gmail.com")
+        .split(",")
+        .map(e => e.trim().toLowerCase());
+
+    let adminUser = await User.findOne({ clerkId: clerkUser.id });
+    if (!adminUser && userEmail) {
+        adminUser = await User.findOne({ email: userEmail });
+    }
+
+    if (adminUser) {
+        if (adminUser.role === 'admin') return true;
+        if (userEmail && adminEmails.includes(userEmail)) {
+            adminUser.role = 'admin';
+            await adminUser.save();
+            return true;
+        }
+    } else if (userEmail && adminEmails.includes(userEmail)) {
+        return true;
+    }
+    return false;
+}
+
 // Admin action: Fetch all students/members with subscription details
 export async function getAllStudentsAdmin() {
     try {
         const clerkUser = await currentUser();
         if (!clerkUser) return { success: false, error: "Not authenticated" };
 
-        await connectDB();
-        const adminUser = await User.findOne({ clerkId: clerkUser.id });
-        if (!adminUser || adminUser.role !== 'admin') {
-            // Also allow admin fallback if in dev
+        const isAdmin = await verifyAdminUser(clerkUser);
+        if (!isAdmin) {
+            return { success: false, error: "Unauthorized. Admin permissions required." };
         }
 
         const students = await User.find({})
@@ -296,9 +321,8 @@ export async function updateStudentByAdmin(userId: string, data: {
         const clerkUser = await currentUser();
         if (!clerkUser) return { success: false, error: "Not authenticated" };
 
-        await connectDB();
-        const adminUser = await User.findOne({ clerkId: clerkUser.id });
-        if (!adminUser || adminUser.role !== 'admin') {
+        const isAdmin = await verifyAdminUser(clerkUser);
+        if (!isAdmin) {
             return { success: false, error: "Unauthorized. Admin permissions required." };
         }
 
