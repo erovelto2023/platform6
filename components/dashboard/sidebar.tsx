@@ -110,7 +110,6 @@ const groups: SidebarGroup[] = [
         items: [
             { label: "Browse Courses", icon: BookOpen, href: "/catalog", color: "text-violet-500" },
             { label: "Glossary", icon: BookOpen, href: "/glossary", color: "text-teal-600" },
-            { label: "Resources", icon: Library, href: "/resources", color: "text-blue-500" },
             { label: "Locations", icon: MapPin, href: "/locations", color: "text-emerald-400" }
         ]
     }
@@ -125,6 +124,7 @@ const adminGroups: SidebarGroup[] = [
         items: [
             { label: "Student Accounts", icon: Users, href: "/admin/students", color: "text-indigo-400" },
             { label: "GrooveSell Payments", icon: CreditCard, href: "/admin/groovesell", color: "text-orange-400" },
+            { label: "Resources Vault", icon: Library, href: "/resources", color: "text-blue-400" },
             { label: "PLR Dissector", icon: PackageSearch, href: "/tools/plr-dissector", color: "text-amber-400" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },
             { label: "Affiliate Catalog", icon: FileStack, href: "/admin/affiliate-catalog", color: "text-blue-300" },

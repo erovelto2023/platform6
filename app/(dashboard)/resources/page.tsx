@@ -15,14 +15,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getUserRole } from "@/lib/roles";
+import { redirect } from "next/navigation";
 import { getOrCreateUser } from "@/lib/actions/user.actions";
 
 export default async function ResourcesDashboardPage() {
+    const userRole = await getUserRole();
+    if (userRole !== 'admin') {
+        redirect("/dashboard");
+    }
+
     const user = await getOrCreateUser();
     const userLevel = user?.level || 1;
     
-    // Fetch resources specifically for students (excludes admin-only access items)
-    const publishedResources = await getResources({ forStudent: true });
+    // Fetch all resources for admin view
+    const publishedResources = await getResources();
 
     const getTypeIcon = (type: string) => {
         switch (type) {

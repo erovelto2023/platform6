@@ -205,7 +205,7 @@ export const columns: ColumnDef<any>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-slate-900 border border-slate-800 text-slate-100 font-sans shadow-2xl rounded-2xl p-1.5">
                         <DropdownMenuItem asChild className="hover:bg-slate-800 text-slate-200 focus:text-white cursor-pointer rounded-xl font-bold">
-                            <Link href={`/admin/resources/edit/${resource._id}`}>
+                            <Link href={`/admin/resources/${resource._id}`}>
                                 <Pencil className="mr-2 h-4 w-4 text-cyan-400" />
                                 Edit
                             </Link>
