@@ -101,11 +101,6 @@ export default clerkMiddleware(async (auth, req) => {
             }
         }
 
-        // If user is admin or student, grant unrestricted access to all student pages & tools
-        if (isAdmin || role === 'student') {
-            return response;
-        }
-
         // Admin Route Protection (for non-admins trying to access /admin or /api/admin)
         if (req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin')) {
             if (req.nextUrl.pathname.startsWith('/api/')) {
@@ -117,15 +112,7 @@ export default clerkMiddleware(async (auth, req) => {
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
-        // For free accounts, redirect non-dashboard gated routes to /dashboard
-        if (role === 'free' && 
-            !req.nextUrl.pathname.startsWith('/dashboard') && 
-            !req.nextUrl.pathname.startsWith('/user-profile') &&
-            !req.nextUrl.pathname.startsWith('/account') &&
-            !req.nextUrl.pathname.startsWith('/my-products')
-        ) {
-            return NextResponse.redirect(new URL('/dashboard', req.url));
-        }
+        // Allow all users to access their respective sidebar pages & tools
     }
 
     return response;
