@@ -101,17 +101,9 @@ export default clerkMiddleware(async (auth, req) => {
             }
         }
 
-        // If user is admin, allow them through to all routes
-        if (isAdmin) {
+        // If user is admin or student, grant unrestricted access to all student pages & tools
+        if (isAdmin || role === 'student') {
             return response;
-        }
-
-        // Gate free users from other premium routes, letting them access the dashboard and user-profile
-        if (role === 'free' && 
-            !req.nextUrl.pathname.startsWith('/dashboard') && 
-            !req.nextUrl.pathname.startsWith('/user-profile')
-        ) {
-            return NextResponse.redirect(new URL('/upgrade', req.url));
         }
 
         // Admin Route Protection (for non-admins trying to access /admin or /api/admin)
@@ -125,7 +117,15 @@ export default clerkMiddleware(async (auth, req) => {
             return NextResponse.redirect(new URL('/dashboard', req.url));
         }
 
-        // Student Route Protection (Plan-based) and redirects to /upgrade are disabled
+        // For free accounts, redirect non-dashboard gated routes to /dashboard
+        if (role === 'free' && 
+            !req.nextUrl.pathname.startsWith('/dashboard') && 
+            !req.nextUrl.pathname.startsWith('/user-profile') &&
+            !req.nextUrl.pathname.startsWith('/account') &&
+            !req.nextUrl.pathname.startsWith('/my-products')
+        ) {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
     }
 
     return response;

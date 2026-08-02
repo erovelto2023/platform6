@@ -101,8 +101,8 @@ export default async function DashboardPage() {
                         <p className="text-slate-500 text-sm leading-relaxed">
                             Upgrade to Premium to unlock our full curriculum, professional writing automated modules, niche boxes, and interactive group chats.
                         </p>
-                        <Link href="/upgrade" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm font-bold transition-all">
-                            Upgrade to Premium now <ArrowRight className="w-4 h-4" />
+                        <Link href="/my-products" className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm font-bold transition-all">
+                            Upgrade via GrooveSell <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
 
