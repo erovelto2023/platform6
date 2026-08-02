@@ -46,15 +46,15 @@ export const PayoutSettings = ({
     };
 
     return (
-        <Card className="overflow-hidden border-indigo-100 shadow-sm hover:shadow-md transition-shadow">
-            <CardHeader className="bg-slate-50 border-b pb-4">
+        <Card className="overflow-hidden bg-slate-900 border border-slate-800 shadow-xl text-slate-100">
+            <CardHeader className="bg-slate-900 border-b border-slate-800 pb-4">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-indigo-600" />
+                    <CardTitle className="text-sm font-mono font-bold text-slate-100 uppercase tracking-wider flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-orange-400" />
                         Payout Account
                     </CardTitle>
                     {isSaved && (
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
+                        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-full border border-emerald-800">
                             <CheckCircle2 className="h-3 w-3" />
                             Verified
                         </div>
@@ -63,14 +63,14 @@ export const PayoutSettings = ({
             </CardHeader>
             <CardContent className="pt-6 space-y-4">
                 <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        Payout Method
+                    <Label className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+                        PAYOUT METHOD
                     </Label>
                     <div className="flex gap-2">
                         <Button 
                             variant={method === 'paypal' ? 'default' : 'outline'} 
                             onClick={() => setMethod('paypal')}
-                            className="flex-1 text-xs h-9"
+                            className="flex-1 text-xs font-mono font-bold h-9 bg-orange-500 hover:bg-orange-600 text-slate-950 border-none cursor-pointer"
                             size="sm"
                         >
                             PayPal
@@ -78,7 +78,7 @@ export const PayoutSettings = ({
                         <Button 
                             variant="outline" 
                             disabled 
-                            className="flex-1 text-xs h-9 opacity-50 cursor-not-allowed"
+                            className="flex-1 text-xs font-mono h-9 bg-slate-950 border-slate-800 text-slate-500 opacity-60 cursor-not-allowed"
                             size="sm"
                         >
                             Stripe (Coming Soon)
@@ -87,8 +87,8 @@ export const PayoutSettings = ({
                 </div>
 
                 <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        PayPal Email Address
+                    <Label className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+                        PAYPAL EMAIL ADDRESS
                     </Label>
                     <Input 
                         placeholder="your-paypal@email.com" 
@@ -97,15 +97,15 @@ export const PayoutSettings = ({
                             setEmail(e.target.value);
                             setIsSaved(false);
                         }}
-                        className="bg-slate-50 border-slate-200 focus:bg-white transition-colors"
+                        className="bg-slate-950 border-slate-800 text-slate-100 font-mono text-xs focus:border-orange-500 h-10"
                     />
-                    <p className="text-[10px] text-slate-400 leading-tight">
+                    <p className="text-[11px] font-mono text-slate-400 leading-relaxed">
                         Your monthly earnings will be sent to this account once you reach the $10.00 threshold.
                     </p>
                 </div>
 
                 <Button 
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 mt-2"
+                    className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-slate-950 font-black font-mono text-xs uppercase tracking-wider h-10 mt-2 cursor-pointer shadow-md"
                     onClick={onSave}
                     disabled={loading || (isSaved && email === initialEmail)}
                 >

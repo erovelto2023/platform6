@@ -20,7 +20,7 @@ interface CommunityContentProps {
 
 export function CommunityContent({ posts, currentUser, activeTab, leaderboard = [] }: CommunityContentProps) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 text-slate-100">
             {activeTab === "feed" && (
                 <>
                     <CreatePost user={currentUser} />
@@ -33,9 +33,11 @@ export function CommunityContent({ posts, currentUser, activeTab, leaderboard = 
                             <PostCard key={post._id} post={post} currentUser={currentUser} />
                         ))}
                         {posts.length === 0 && (
-                            <div className="text-center py-12 text-slate-500 bg-white rounded-2xl border border-slate-100 shadow-sm px-4">
-                                <span className="text-base font-bold text-slate-700 block mb-1">Your community feed is ready!</span>
-                                <p className="text-xs text-slate-400 max-w-sm mx-auto">Use the templates or the onboarding checklist above to share your first post and earn your first XP points.</p>
+                            <div className="text-center py-12 text-slate-300 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl px-4 space-y-2">
+                                <span className="text-base font-bold text-slate-100 block">Your community feed is ready!</span>
+                                <p className="text-xs font-mono text-slate-300 max-w-sm mx-auto leading-relaxed">
+                                    Use the post templates or the onboarding checklist above to share your first update and earn your first XP points.
+                                </p>
                             </div>
                         )}
                     </div>

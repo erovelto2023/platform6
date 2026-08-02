@@ -7,7 +7,7 @@ const DesignEditorDetails = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="h-full w-full flex items-center justify-center bg-slate-50 text-slate-400">
+            <div className="h-full w-full flex items-center justify-center bg-slate-950 text-slate-300 font-mono text-xs">
                 Loading Design Editor...
             </div>
         )

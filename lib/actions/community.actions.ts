@@ -477,3 +477,43 @@ export async function getLeaderboard(timeframe: 'week' | 'month' | 'all' = 'all'
 export async function getTrendingTopics() {
     return [];
 }
+
+export async function getUserOnboardingProgress(userId: string) {
+    try {
+        await connectToDatabase();
+        const user = await User.findById(userId);
+        if (!user) return { success: false, completedSteps: [] };
+        return { success: true, completedSteps: (user as any).onboardingSteps || [] };
+    } catch (err: any) {
+        return { success: false, completedSteps: [] };
+    }
+}
+
+export async function toggleOnboardingStep(userId: string, stepId: number) {
+    try {
+        await connectToDatabase();
+        const user = await User.findById(userId);
+        if (!user) return { success: false };
+
+        const currentSteps: number[] = (user as any).onboardingSteps || [];
+        const isCompleted = currentSteps.includes(stepId);
+        let updatedSteps: number[];
+
+        if (isCompleted) {
+            updatedSteps = currentSteps.filter(s => s !== stepId);
+        } else {
+            updatedSteps = [...currentSteps, stepId];
+            // Award 25 XP for completing an onboarding step
+            user.xp = (user.xp || 0) + 25;
+            user.points = (user.points || 0) + 25;
+        }
+
+        (user as any).onboardingSteps = updatedSteps;
+        await user.save();
+        revalidatePath("/community");
+        return { success: true, completedSteps: updatedSteps };
+    } catch (err: any) {
+        console.error("Error toggling onboarding step:", err);
+        return { success: false };
+    }
+}

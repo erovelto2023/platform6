@@ -69,12 +69,12 @@ export function CreatePost({ user }: CreatePostProps) {
     };
 
     return (
-        <Card className="mb-6 border border-slate-150 shadow-sm">
-            <CardContent className="p-4">
+        <Card className="mb-6 border border-slate-800 bg-slate-900 shadow-xl text-slate-100">
+            <CardContent className="p-4 md:p-5">
                 <div className="flex gap-4">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-10 w-10 border border-slate-800 bg-slate-950">
                         <AvatarImage src={user.avatar || user.imageUrl} />
-                        <AvatarFallback>{user.firstName?.[0]}</AvatarFallback>
+                        <AvatarFallback className="text-orange-400 font-bold">{user.firstName?.[0]}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                         {/* Post starters */}
@@ -82,28 +82,28 @@ export function CreatePost({ user }: CreatePostProps) {
                             <button 
                                 type="button" 
                                 onClick={() => applyStarter('win')}
-                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition cursor-pointer flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-emerald-950/80 hover:bg-emerald-900/80 text-emerald-400 border border-emerald-800/80 transition cursor-pointer flex items-center gap-1"
                             >
                                 🏆 Share a Win
                             </button>
                             <button 
                                 type="button" 
                                 onClick={() => applyStarter('feedback')}
-                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition cursor-pointer flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-blue-950/80 hover:bg-blue-900/80 text-blue-400 border border-blue-800/80 transition cursor-pointer flex items-center gap-1"
                             >
                                 💬 Funnel Feedback
                             </button>
                             <button 
                                 type="button" 
                                 onClick={() => applyStarter('help')}
-                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition cursor-pointer flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-rose-950/80 hover:bg-rose-900/80 text-rose-400 border border-rose-800/80 transition cursor-pointer flex items-center gap-1"
                             >
                                 🛠️ Tech Help
                             </button>
                             <button 
                                 type="button" 
                                 onClick={() => applyStarter('sprint')}
-                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition cursor-pointer flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-amber-950/80 hover:bg-amber-900/80 text-amber-400 border border-amber-800/80 transition cursor-pointer flex items-center gap-1"
                             >
                                 ⚡ Active Sprint
                             </button>
@@ -111,14 +111,14 @@ export function CreatePost({ user }: CreatePostProps) {
 
                         <div className="mb-2">
                             {feeling && (
-                                <span className="text-sm text-slate-500 bg-slate-100 px-2 py-1 rounded-full flex items-center gap-1 w-fit mb-2">
+                                <span className="text-xs font-mono text-amber-400 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-full flex items-center gap-1 w-fit mb-2">
                                     is feeling {feeling}
-                                    <button onClick={() => setFeeling(null)} className="hover:text-red-500 ml-1 cursor-pointer"><X className="h-3 w-3" /></button>
+                                    <button onClick={() => setFeeling(null)} className="hover:text-rose-400 ml-1 cursor-pointer"><X className="h-3 w-3" /></button>
                                 </span>
                             )}
                             <Textarea
                                 placeholder="Share a win, ask for funnel feedback, or post a tech question..."
-                                className="border-none resize-none bg-slate-50 focus-visible:ring-0 min-h-[90px] text-slate-700 placeholder-slate-400"
+                                className="border border-slate-800 resize-none bg-slate-950 focus-visible:ring-1 focus-visible:ring-orange-500 min-h-[90px] text-slate-100 text-xs placeholder:text-slate-500 rounded-xl p-3"
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
                             />
@@ -126,11 +126,11 @@ export function CreatePost({ user }: CreatePostProps) {
 
                         {/* Media Previews */}
                         {mediaUrl && (
-                            <div className="relative mt-2 mb-2 rounded-lg overflow-hidden border w-fit max-h-[200px]">
+                            <div className="relative mt-2 mb-2 rounded-xl overflow-hidden border border-slate-800 w-fit max-h-[200px]">
                                 <img src={mediaUrl} alt="Upload preview" className="h-full object-cover" />
                                 <button
                                     onClick={() => setMediaUrl(null)}
-                                    className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-black/70"
+                                    className="absolute top-1 right-1 bg-slate-950/80 text-slate-200 rounded-full p-1 hover:bg-slate-950 cursor-pointer"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -144,16 +144,16 @@ export function CreatePost({ user }: CreatePostProps) {
                                     placeholder="Paste YouTube or Vimeo link..."
                                     value={videoUrl || ""}
                                     onChange={(e) => setVideoUrl(e.target.value)}
-                                    className="h-8 text-sm"
+                                    className="h-9 text-xs font-mono bg-slate-950 border-slate-800 text-slate-100 focus:border-orange-500"
                                 />
-                                <Button size="sm" variant="ghost" onClick={() => { setShowVideoInput(false); setVideoUrl(null); }}>
+                                <Button size="sm" variant="ghost" onClick={() => { setShowVideoInput(false); setVideoUrl(null); }} className="text-slate-400 hover:text-white">
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
                         )}
 
-                        <div className="flex items-center justify-between mt-3 pt-3 border-t">
-                            <div className="flex gap-2">
+                        <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-800">
+                            <div className="flex gap-2 items-center">
                                 {/* Image Upload */}
                                 <UploadButton
                                     endpoint="communityPostImage"
@@ -167,48 +167,62 @@ export function CreatePost({ user }: CreatePostProps) {
                                     appearance={{
                                         button: {
                                             background: "transparent",
-                                            color: "rgb(100 116 139)",
+                                            color: "rgb(203 213 225)",
                                             height: "36px",
                                             padding: "8px 12px",
-                                            fontSize: "14px",
-                                            fontWeight: "500",
+                                            fontSize: "12px",
+                                            fontWeight: "600",
                                             border: "none",
                                             boxShadow: "none",
-                                            transition: "colors 0.2s",
+                                            cursor: "pointer",
                                         },
                                         allowedContent: {
                                             display: "none"
                                         }
                                     }}
                                     content={{
-                                        button: () => (
-                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                                <ImageIcon className="h-5 w-5" />
-                                                <span>Photo</span>
+                                        button: (
+                                            <div className="flex items-center gap-1.5 hover:text-orange-400 transition">
+                                                <ImageIcon className="h-4 w-4 text-orange-400" />
+                                                <span>Upload File</span>
                                             </div>
                                         )
                                     }}
                                 />
 
-                                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-600" onClick={() => setShowVideoInput(!showVideoInput)}>
-                                    <Video className="h-5 w-5 mr-2" />
-                                    Video
+                                {/* Video Link Toggle */}
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-slate-300 hover:text-orange-400 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
+                                    onClick={() => setShowVideoInput(!showVideoInput)}
+                                >
+                                    <Video className="h-4 w-4 text-orange-400" />
+                                    <span>Video</span>
                                 </Button>
 
+                                {/* Feeling / Activity Popover */}
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="text-slate-500 hover:text-yellow-600">
-                                            <Smile className="h-5 w-5 mr-2" />
-                                            Feeling
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-slate-300 hover:text-orange-400 text-xs font-mono font-bold flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <Smile className="h-4 w-4 text-amber-400" />
+                                            <span>Feeling</span>
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-64 p-2" align="start">
+                                    <PopoverContent className="w-56 p-2 bg-slate-900 border-slate-800 text-slate-100 shadow-2xl">
                                         <div className="grid grid-cols-2 gap-1">
-                                            {FEELINGS.map(f => (
+                                            {FEELINGS.map((f) => (
                                                 <button
                                                     key={f}
-                                                    className="text-left px-2 py-1 hover:bg-slate-100 rounded text-sm"
+                                                    type="button"
                                                     onClick={() => setFeeling(f)}
+                                                    className="text-xs text-left p-1.5 hover:bg-slate-800 rounded-lg transition font-mono cursor-pointer"
                                                 >
                                                     {f}
                                                 </button>
@@ -217,10 +231,11 @@ export function CreatePost({ user }: CreatePostProps) {
                                     </PopoverContent>
                                 </Popover>
                             </div>
+
                             <Button
-                                className="bg-indigo-600 hover:bg-indigo-700"
-                                disabled={(!content.trim() && !mediaUrl && !videoUrl) || isPosting}
                                 onClick={handlePost}
+                                disabled={isPosting || (!content.trim() && !mediaUrl && !videoUrl)}
+                                className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-slate-950 font-black font-mono text-xs uppercase tracking-wider px-5 py-2 rounded-xl shadow-md cursor-pointer disabled:opacity-50"
                             >
                                 {isPosting ? "Posting..." : "Post"}
                             </Button>

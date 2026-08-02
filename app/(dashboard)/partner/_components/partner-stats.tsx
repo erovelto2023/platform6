@@ -23,29 +23,29 @@ export const PartnerStats = ({
             label: "Total Signups",
             value: totalSignups,
             icon: Users,
-            color: "text-blue-600",
-            bg: "bg-blue-100",
+            color: "text-indigo-400",
+            bg: "bg-indigo-950/80 border border-indigo-800/80",
         },
         {
             label: "Total Earnings",
             value: formatPrice(totalEarnings),
             icon: DollarSign,
-            color: "text-green-600",
-            bg: "bg-green-100",
+            color: "text-emerald-400",
+            bg: "bg-emerald-950/80 border border-emerald-800/80",
         },
         {
             label: "Pending (30 days)",
             value: formatPrice(pendingEarnings),
             icon: Clock,
-            color: "text-amber-600",
-            bg: "bg-amber-100",
+            color: "text-amber-400",
+            bg: "bg-amber-950/80 border border-amber-800/80",
         },
         {
             label: "Available Balance",
             value: formatPrice(availableBalance),
             icon: Wallet,
-            color: "text-purple-600",
-            bg: "bg-purple-100",
+            color: "text-purple-400",
+            bg: "bg-purple-950/80 border border-purple-800/80",
         },
     ];
 
@@ -58,17 +58,17 @@ export const PartnerStats = ({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
                 >
-                    <Card className="hover:shadow-md transition-shadow">
+                    <Card className="hover:border-orange-500/50 transition-all bg-slate-900 border border-slate-800 shadow-xl">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
+                            <CardTitle className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
                                 {stat.label}
                             </CardTitle>
-                            <div className={`${stat.bg} ${stat.color} p-2 rounded-lg`}>
-                                <stat.icon className="h-4 w-4" />
+                            <div className={`${stat.bg} p-2 rounded-xl`}>
+                                <stat.icon className={`h-4 w-4 ${stat.color}`} />
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stat.value}</div>
+                            <div className="text-2xl font-black font-mono text-slate-100">{stat.value}</div>
                         </CardContent>
                     </Card>
                 </motion.div>

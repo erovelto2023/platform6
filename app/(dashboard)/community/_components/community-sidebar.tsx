@@ -62,7 +62,6 @@ export function CommunitySidebar({
         fetchPhotos();
     }, [user]);
 
-    // Calculate level progression
     const currentXp = user.xp || 0;
     const currentLevel = user.level || 1;
     const nextLevelXp = LEVEL_THRESHOLDS[Math.min(currentLevel, LEVEL_THRESHOLDS.length - 1)] || 50000;
@@ -106,59 +105,59 @@ export function CommunitySidebar({
     };
 
     return (
-        <div className="space-y-6">
-            {/* Gamification Level Card (Skool style) */}
-            <Card className="overflow-hidden border border-indigo-100 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white shadow-md relative group">
-                <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700 text-indigo-400">
+        <div className="space-y-6 text-slate-100">
+            {/* Gamification Level Card */}
+            <Card className="overflow-hidden border border-slate-800 bg-slate-900 text-slate-100 shadow-xl relative group">
+                <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-700 text-orange-400">
                     <Crown size={120} />
                 </div>
                 <CardContent className="p-5 space-y-4">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-300 font-bold">
+                        <div className="h-10 w-10 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-amber-400 font-bold font-mono text-xs">
                             Lvl {currentLevel}
                         </div>
                         <div>
                             <div className="flex items-center gap-1.5">
-                                <span className="font-semibold tracking-wide text-indigo-100">Level {currentLevel}: {levelName}</span>
+                                <span className="font-bold tracking-wide text-slate-100 text-sm">Level {currentLevel}: {levelName}</span>
                                 <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
                             </div>
-                            <p className="text-xs text-indigo-300/80">Gamified Community Rank</p>
+                            <p className="text-xs font-mono text-slate-400">Gamified Community Rank</p>
                         </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="space-y-1.5">
-                        <div className="flex justify-between text-xs text-indigo-200">
+                        <div className="flex justify-between text-xs font-mono text-slate-300">
                             <span>{currentXp} / {nextLevelXp} XP</span>
-                            <span>{Math.round(progressPercentage)}%</span>
+                            <span className="text-amber-400 font-bold">{Math.round(progressPercentage)}%</span>
                         </div>
-                        <div className="w-full bg-indigo-950/80 rounded-full h-2 border border-indigo-900/50 overflow-hidden p-[1px]">
+                        <div className="w-full bg-slate-950 rounded-full h-2 border border-slate-800 overflow-hidden p-[1px]">
                             <div 
-                                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-full rounded-full transition-all duration-500"
+                                className="bg-gradient-to-r from-orange-500 via-amber-500 to-yellow-500 h-full rounded-full transition-all duration-500"
                                 style={{ width: `${progressPercentage}%` }}
                             />
                         </div>
                     </div>
 
                     {/* Streak / Stats */}
-                    <div className="pt-2 border-t border-indigo-900/50 grid grid-cols-2 gap-4 text-center">
+                    <div className="pt-3 border-t border-slate-800 grid grid-cols-2 gap-4 text-center">
                         <div className="space-y-0.5">
-                            <span className="text-[10px] uppercase tracking-wider text-indigo-300/60 font-semibold block">Total Points</span>
-                            <span className="text-base font-bold text-indigo-200">{user.points || 0}</span>
+                            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 font-bold block">Total Points</span>
+                            <span className="text-base font-bold font-mono text-amber-400">{user.points || 0}</span>
                         </div>
-                        <div className="space-y-0.5 border-l border-indigo-900/50">
-                            <span className="text-[10px] uppercase tracking-wider text-indigo-300/60 font-semibold flex items-center justify-center gap-1">
+                        <div className="space-y-0.5 border-l border-slate-800">
+                            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-400 font-bold flex items-center justify-center gap-1">
                                 <Flame className="h-3 w-3 text-orange-500" />
                                 Active Streak
                             </span>
-                            <span className="text-base font-bold text-indigo-200">3 Days</span>
+                            <span className="text-base font-bold font-mono text-slate-100">3 Days</span>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Navigation Menu */}
-            <Card className="border border-slate-100 shadow-sm">
+            <Card className="border border-slate-800 bg-slate-900 shadow-xl">
                 <CardContent className="p-3 space-y-1">
                     {menuItems.map((item) => {
                         const Icon = item.icon;
@@ -168,97 +167,63 @@ export function CommunitySidebar({
                             <button
                                 key={item.id}
                                 onClick={() => handleNavigation(item)}
-                                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg cursor-pointer transition ${isActive
-                                    ? 'bg-indigo-50 text-indigo-600'
-                                    : 'text-slate-600 hover:bg-slate-50'
+                                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs font-mono font-bold rounded-xl cursor-pointer transition ${isActive
+                                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/40'
+                                    : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
                                     }`}
                             >
                                 <div className="flex items-center gap-2.5">
-                                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
+                                    <Icon className={`h-4 w-4 ${isActive ? 'text-orange-400' : 'text-slate-400'}`} />
                                     <span>{item.label}</span>
                                 </div>
-                                {isActive && <div className="h-1.5 w-1.5 rounded-full bg-indigo-600" />}
+                                {isActive && <div className="h-2 w-2 rounded-full bg-orange-400" />}
                             </button>
                         );
                     })}
                 </CardContent>
             </Card>
 
-
             {/* Skool Leaderboard Preview Widget */}
-            <Card className="border border-slate-100 shadow-sm">
+            <Card className="border border-slate-800 bg-slate-900 shadow-xl">
                 <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                        <Trophy className="h-4 w-4 text-amber-500" />
+                    <CardTitle className="text-xs font-mono font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <Trophy className="h-4 w-4 text-amber-400" />
                         Weekly Leaderboard
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pt-2 space-y-3">
                     {leaderboard.slice(0, 3).map((lead, idx) => {
-                        const rankColors = ["text-amber-500", "text-slate-400", "text-amber-700"];
+                        const rankColors = ["text-amber-400", "text-slate-300", "text-amber-600"];
                         return (
                             <div key={lead.clerkId || idx} className="flex items-center justify-between group">
-                                <div className="flex items-center gap-2.5">
-                                    <div className="relative">
-                                        {lead.avatar ? (
-                                            <img src={lead.avatar} alt="avatar" className="h-8 w-8 rounded-full object-cover border border-slate-100" />
-                                        ) : (
-                                            <div className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
-                                                {lead.firstName?.[0] || "?"}
-                                            </div>
-                                        )}
-                                        <div className={`absolute -top-1 -right-1 h-4 w-4 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center text-[9px] font-bold ${rankColors[idx] || "text-slate-400"}`}>
-                                            {idx + 1}
+                                <div className="flex items-center gap-3">
+                                    <span className={`font-mono font-bold text-xs ${rankColors[idx] || "text-slate-400"}`}>
+                                        #{idx + 1}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-7 w-7 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center text-xs text-orange-400 font-bold">
+                                            {lead.firstName?.[0] || "U"}
+                                        </div>
+                                        <div>
+                                            <span className="text-xs font-bold text-slate-200 group-hover:text-amber-300 transition-colors block leading-tight">
+                                                {lead.firstName} {lead.lastName}
+                                            </span>
+                                            <span className="text-[10px] font-mono text-slate-400 block">
+                                                Lvl {lead.level || 1} • {lead.xp || 0} XP
+                                            </span>
                                         </div>
                                     </div>
-                                    <div className="truncate">
-                                        <span className="text-xs font-semibold text-slate-700 block truncate group-hover:text-indigo-600 transition">
-                                            {lead.firstName} {lead.lastName}
-                                        </span>
-                                        <span className="text-[10px] text-slate-400">Lvl {lead.level || 1}</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-xs font-bold text-slate-600">{lead.points || lead.xp || 0}</span>
-                                    <span className="text-[9px] text-slate-400 block">XP</span>
                                 </div>
                             </div>
                         );
                     })}
-
-                    <button 
-                        onClick={() => onTabChange?.("leaderboard")}
-                        className="w-full mt-2 py-1.5 text-center text-xs font-semibold text-indigo-600 hover:text-indigo-700 bg-indigo-50/50 hover:bg-indigo-50 border border-indigo-100/50 hover:border-indigo-100 rounded-lg cursor-pointer transition flex items-center justify-center gap-1"
+                    <button
+                        onClick={() => onTabChange && onTabChange("leaderboard")}
+                        className="w-full text-center py-2 text-xs font-mono font-bold text-orange-400 hover:text-amber-300 transition cursor-pointer flex items-center justify-center gap-1 border-t border-slate-800/80 pt-3"
                     >
-                        View Full Leaderboard
-                        <ChevronRight className="h-3 w-3" />
+                        <span>View Full Leaderboard</span>
+                        <ChevronRight size={14} />
                     </button>
-                </CardContent>
-            </Card>
-
-            {/* Project Showcase Gallery */}
-            <Card className="border border-slate-100 shadow-sm">
-                <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-bold text-slate-800 uppercase tracking-wider">Project Showcase</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 pt-2">
-                    <div className="grid grid-cols-3 gap-2">
-                        {loadingPhotos ? (
-                            [1, 2, 3].map((i) => (
-                                <div key={i} className="aspect-square bg-slate-100 animate-pulse rounded-md" />
-                            ))
-                        ) : photos.length > 0 ? (
-                            photos.map((url, i) => (
-                                <div key={i} className="aspect-square bg-slate-100 rounded-md overflow-hidden relative group">
-                                    <img src={url} alt="Post media" className="w-full h-full object-cover transition duration-300 group-hover:scale-110" />
-                                </div>
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-center text-xs text-slate-400 py-6 px-2">
-                                No showcase projects shared yet. Share a screenshot of your funnel or landing page!
-                            </div>
-                        )}
-                    </div>
                 </CardContent>
             </Card>
         </div>

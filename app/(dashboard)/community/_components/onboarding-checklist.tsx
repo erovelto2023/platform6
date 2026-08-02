@@ -1,29 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CheckCircle2, Circle, ArrowRight, Sparkles, BookOpen, UserPlus, Send } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, Circle, ArrowRight, UserPlus, Target, BookOpen, UserCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getUserOnboardingProgress, toggleOnboardingStep } from "@/lib/actions/community.actions";
+import { toast } from "sonner";
 
 interface OnboardingChecklistProps {
     currentUser: any;
+    onOpenPostModal?: () => void;
 }
 
-export function OnboardingChecklist({ currentUser }: OnboardingChecklistProps) {
+export function OnboardingChecklist({ currentUser, onOpenPostModal }: OnboardingChecklistProps) {
     const router = useRouter();
-    
-    // We keep track of completed steps in local storage so it persists for the user
     const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const stored = localStorage.getItem(`p6_onboarding_steps_${currentUser?._id}`);
-        if (stored) {
+        const fetchProgress = async () => {
+            if (!currentUser?._id && !currentUser?.id) return;
             try {
-                setCompletedSteps(JSON.parse(stored));
-            } catch (e) {
-                console.error(e);
+                const userId = currentUser._id || currentUser.id;
+                const result = await getUserOnboardingProgress(userId);
+                if (result.success && result.completedSteps) {
+                    setCompletedSteps(result.completedSteps);
+                }
+            } catch (error) {
+                console.error("Failed to fetch onboarding progress:", error);
+            } finally {
+                setLoading(false);
             }
-        }
+        };
+
+        fetchProgress();
     }, [currentUser]);
 
     const steps = [
@@ -32,18 +42,12 @@ export function OnboardingChecklist({ currentUser }: OnboardingChecklistProps) {
             title: "Introduce yourself to the community",
             description: "Say hello, tell us what business niche you're launching, and where you're from.",
             actionText: "Write intro post",
-            icon: Sparkles,
+            icon: UserPlus,
             action: () => {
-                // Focus the post box and insert intro template
-                const textarea = document.querySelector('textarea');
-                if (textarea) {
-                    textarea.value = `👋 Hey everyone! Just joined the K Business Academy community.\n\n📍 Based in: [Your City]\n📦 My Niche: [e.g. SaaS, Dropshipping, Agency]\n🎯 Current Goal: [Your next milestone]\n\nLet's grow together! #IntroduceYourself`;
-                    // Trigger textarea input event so React state updates
-                    const event = new Event('input', { bubbles: true });
-                    textarea.dispatchEvent(event);
-                    textarea.focus();
-                    // Scroll to textarea smoothly
-                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (onOpenPostModal) {
+                    onOpenPostModal();
+                } else {
+                    router.push("/community");
                 }
             }
         },
@@ -52,15 +56,12 @@ export function OnboardingChecklist({ currentUser }: OnboardingChecklistProps) {
             title: "Set your first business goal",
             description: "Public goals hold you accountable. Share what you want to achieve in the next 30 days.",
             actionText: "Share 30-day goal",
-            icon: Send,
+            icon: Target,
             action: () => {
-                const textarea = document.querySelector('textarea');
-                if (textarea) {
-                    textarea.value = `🎯 MY 30-DAY BUSINESS GOAL:\n\n1. Revenue/Sales target: \n2. Primary action focus: \n3. Daily habit I'm building:\n\n#DropshippingSprint #BusinessGoals`;
-                    const event = new Event('input', { bubbles: true });
-                    textarea.dispatchEvent(event);
-                    textarea.focus();
-                    textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (onOpenPostModal) {
+                    onOpenPostModal();
+                } else {
+                    router.push("/community");
                 }
             }
         },
@@ -70,52 +71,57 @@ export function OnboardingChecklist({ currentUser }: OnboardingChecklistProps) {
             description: "Unlock core strategies by finishing the 'Foundations to Profits' starter module.",
             actionText: "Go to Classroom",
             icon: BookOpen,
-            action: () => {
-                router.push("/courses");
-            }
+            action: () => router.push("/catalog")
         },
         {
             id: 4,
             title: "Add your first client profile",
             description: "Check out the Accounting module and setup your first customer record.",
             actionText: "Go to Accounting",
-            icon: UserPlus,
-            action: () => {
-                router.push("/accounting");
-            }
+            icon: UserCheck,
+            action: () => router.push("/accounting")
         }
     ];
 
-    const toggleStep = (id: number) => {
-        let updated: number[];
-        if (completedSteps.includes(id)) {
-            updated = completedSteps.filter(s => s !== id);
-        } else {
-            updated = [...completedSteps, id];
+    const toggleStep = async (stepId: number) => {
+        const userId = currentUser._id || currentUser.id;
+        if (!userId) return;
+
+        const isCurrentlyCompleted = completedSteps.includes(stepId);
+        const newCompleted = isCurrentlyCompleted
+            ? completedSteps.filter((id) => id !== stepId)
+            : [...completedSteps, stepId];
+
+        setCompletedSteps(newCompleted);
+
+        try {
+            await toggleOnboardingStep(userId, stepId);
+            toast.success(isCurrentlyCompleted ? "Step unmarked" : "Step completed! +25 XP");
+        } catch (error) {
+            toast.error("Failed to update step progress");
+            setCompletedSteps(completedSteps);
         }
-        setCompletedSteps(updated);
-        localStorage.setItem(`p6_onboarding_steps_${currentUser?._id}`, JSON.stringify(updated));
     };
 
     const completionRate = Math.round((completedSteps.length / steps.length) * 100);
 
     return (
-        <Card className="border border-indigo-100 bg-gradient-to-br from-white via-indigo-50/5 to-purple-50/10 shadow-md">
+        <Card className="border border-slate-800 bg-slate-900 shadow-xl text-slate-100 mb-6">
             <CardHeader className="pb-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                     <div>
-                        <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <CardTitle className="text-lg font-bold text-slate-100 flex items-center gap-2">
                             Welcome, {currentUser?.firstName || "Builder"}! 🚀
                         </CardTitle>
-                        <CardDescription className="text-slate-500">
+                        <CardDescription className="text-slate-400 text-xs font-mono">
                             Get started by completing your quick onboarding checklist to set up your business workspace.
                         </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100/60 px-3.5 py-1.5 rounded-xl self-start sm:self-center">
-                        <span className="text-xs font-bold text-indigo-700">{completionRate}% Completed</span>
-                        <div className="w-16 bg-indigo-100 rounded-full h-2 overflow-hidden">
+                    <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 px-3.5 py-1.5 rounded-xl self-start sm:self-center">
+                        <span className="text-xs font-mono font-bold text-amber-400">{completionRate}% Completed</span>
+                        <div className="w-16 bg-slate-800 rounded-full h-2 overflow-hidden">
                             <div 
-                                className="bg-indigo-600 h-full rounded-full transition-all duration-500" 
+                                className="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" 
                                 style={{ width: `${completionRate}%` }}
                             />
                         </div>
@@ -133,42 +139,42 @@ export function OnboardingChecklist({ currentUser }: OnboardingChecklistProps) {
                                 key={step.id} 
                                 className={`p-4 rounded-2xl border transition duration-200 flex flex-col justify-between ${
                                     isDone 
-                                        ? "bg-emerald-50/40 border-emerald-100" 
-                                        : "bg-white border-slate-100 hover:border-indigo-100 shadow-sm"
+                                        ? "bg-emerald-950/40 border-emerald-800/80" 
+                                        : "bg-slate-950 border-slate-800 hover:border-orange-500/50 shadow-md"
                                 }`}
                             >
                                 <div className="space-y-2">
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="flex items-center gap-2">
-                                            <span className={`h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold ${
+                                            <span className={`h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold font-mono ${
                                                 isDone 
-                                                    ? "bg-emerald-500 text-white" 
-                                                    : "bg-indigo-50 text-indigo-600"
+                                                    ? "bg-emerald-500 text-slate-950" 
+                                                    : "bg-orange-500/20 text-orange-400 border border-orange-500/30"
                                             }`}>
                                                 {step.id}
                                             </span>
-                                            <h4 className="font-bold text-slate-800 text-sm leading-tight">{step.title}</h4>
+                                            <h4 className="font-bold text-slate-100 text-sm leading-tight">{step.title}</h4>
                                         </div>
                                         <button 
                                             onClick={() => toggleStep(step.id)}
-                                            className="text-slate-400 hover:text-indigo-600 transition cursor-pointer"
+                                            className="text-slate-500 hover:text-orange-400 transition cursor-pointer"
                                         >
                                             {isDone ? (
-                                                <CheckCircle2 className="h-5 w-5 text-emerald-500 fill-emerald-50" />
+                                                <CheckCircle2 className="h-5 w-5 text-emerald-400 fill-emerald-950" />
                                             ) : (
-                                                <Circle className="h-5 w-5 hover:text-indigo-600" />
+                                                <Circle className="h-5 w-5 hover:text-orange-400" />
                                             )}
                                         </button>
                                     </div>
-                                    <p className="text-xs text-slate-500 leading-relaxed pl-8">
+                                    <p className="text-xs text-slate-300 leading-relaxed pl-8">
                                         {step.description}
                                     </p>
                                 </div>
 
-                                <div className="pt-3 pl-8 flex justify-between items-center mt-3 border-t border-slate-100/50">
+                                <div className="pt-3 pl-8 flex justify-between items-center mt-3 border-t border-slate-800/80">
                                     <button
                                         onClick={step.action}
-                                        className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer"
+                                        className="text-xs font-mono font-bold text-orange-400 hover:text-amber-300 flex items-center gap-1 cursor-pointer"
                                     >
                                         <StepIcon className="h-3.5 w-3.5" />
                                         {step.actionText}

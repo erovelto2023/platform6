@@ -21,7 +21,6 @@ export default function CanvasArea({ onCanvasReady }: CanvasAreaProps) {
             preserveObjectStacking: true,
         });
 
-        // Center the canvas in the container initially
         const updateCanvasSize = () => {
             if (containerRef.current) {
                 // Logic to resize or center if needed
@@ -38,8 +37,8 @@ export default function CanvasArea({ onCanvasReady }: CanvasAreaProps) {
     }, []);
 
     return (
-        <div ref={containerRef} className="flex-1 bg-slate-100 flex items-center justify-center overflow-auto p-10 h-full">
-            <div className="shadow-2xl">
+        <div ref={containerRef} className="flex-1 bg-slate-950 flex items-center justify-center overflow-auto p-10 h-full">
+            <div className="shadow-2xl border border-slate-800 rounded-xl overflow-hidden">
                 <canvas ref={canvasRef} />
             </div>
         </div>

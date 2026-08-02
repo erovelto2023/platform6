@@ -29,41 +29,42 @@ export const ReferralLinks = ({ links, affiliateCode }: ReferralLinksProps) => {
 
     return (
         <div className="space-y-4">
-            <h2 className="text-xl font-bold">Your Partner Links</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="text-xl font-black text-slate-100 uppercase font-mono tracking-tight">Your Partner Links</h2>
+            <div className="grid grid-cols-1 gap-4">
                 {links.map((link) => (
-                    <Card key={link.name} className="overflow-hidden">
+                    <Card key={link.name} className="overflow-hidden bg-slate-900 border border-slate-800 shadow-xl">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-base flex items-center justify-between">
-                                {link.name}
+                            <CardTitle className="text-sm font-bold text-slate-100 flex items-center justify-between">
+                                <span className="font-mono text-amber-400 font-bold uppercase">{link.name}</span>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => onCopy(link.url, link.name)}
+                                    className="text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer"
                                 >
                                     {copied === link.name ? (
-                                        <Check className="h-4 w-4 text-green-500" />
+                                        <Check className="h-4 w-4 text-emerald-400" />
                                     ) : (
                                         <Copy className="h-4 w-4" />
                                     )}
                                 </Button>
                             </CardTitle>
-                            <CardDescription className="text-xs line-clamp-1">
+                            <CardDescription className="text-xs font-mono text-slate-400">
                                 {link.description}
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="pt-0">
-                            <div className="flex items-center gap-2 mt-2">
-                                <code className="flex-1 bg-slate-100 p-2 rounded text-xs truncate">
+                        <CardContent className="pt-1">
+                            <div className="flex items-center gap-2 mt-1">
+                                <code className="flex-1 bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-xs font-mono text-amber-300 truncate font-semibold">
                                     {link.url}
                                 </code>
                                 <a
                                     href={link.url}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="p-2 hover:bg-slate-100 rounded-md transition-colors"
+                                    className="p-2.5 bg-slate-950 border border-slate-800 hover:border-orange-500 rounded-xl transition-colors shrink-0"
                                 >
-                                    <ExternalLink className="h-4 w-4 text-slate-500" />
+                                    <ExternalLink className="h-4 w-4 text-orange-400" />
                                 </a>
                             </div>
                         </CardContent>
@@ -71,17 +72,17 @@ export const ReferralLinks = ({ links, affiliateCode }: ReferralLinksProps) => {
                 ))}
             </div>
             
-            <Card className="bg-slate-900 text-white border-none">
+            <Card className="bg-slate-900 border border-slate-800 shadow-xl">
                 <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
                     <div>
-                        <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Your Referral Code</p>
-                        <h3 className="text-2xl font-black mt-1 font-mono tracking-tighter text-indigo-400">
+                        <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">YOUR REFERRAL CODE</p>
+                        <h3 className="text-2xl font-black mt-1 font-mono tracking-tight text-amber-400">
                             {affiliateCode}
                         </h3>
                     </div>
                     <Button 
                         onClick={() => onCopy(affiliateCode, 'Affiliate Code')}
-                        className="bg-indigo-600 hover:bg-indigo-700 h-12 px-8 rounded-xl ring-offset-slate-900"
+                        className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-slate-950 font-black font-mono text-xs uppercase tracking-wider h-11 px-6 rounded-xl cursor-pointer"
                     >
                         Copy Account Code
                     </Button>
