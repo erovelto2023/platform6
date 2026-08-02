@@ -33,7 +33,10 @@ import {
     ChevronDown,
     Megaphone,
     Layers,
-    Globe
+    Globe,
+    PackageSearch,
+    CreditCard,
+    User as UserIcon
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -64,6 +67,9 @@ const groups: SidebarGroup[] = [
         icon: Briefcase,
         color: "text-orange-500",
         items: [
+            { label: "My Account", icon: UserIcon, href: "/account", color: "text-amber-400" },
+            { label: "Digital Products", icon: ShoppingBag, href: "/my-products", color: "text-cyan-400" },
+            { label: "PLR Dissector", icon: PackageSearch, href: "/tools/plr-dissector", color: "text-amber-400" },
             { label: "Accounting", icon: BarChart3, href: "/accounting", color: "text-green-600" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/affiliates", color: "text-blue-500" },
             { label: "Swipe File Vault", icon: BookOpen, href: "/admin/click-campaigns?tab=swipe", color: "text-purple-400" },
@@ -118,6 +124,9 @@ const adminGroups: SidebarGroup[] = [
         icon: Briefcase,
         color: "text-orange-500",
         items: [
+            { label: "Student Accounts", icon: Users, href: "/admin/students", color: "text-indigo-400" },
+            { label: "GrooveSell Payments", icon: CreditCard, href: "/admin/groovesell", color: "text-orange-400" },
+            { label: "PLR Dissector", icon: PackageSearch, href: "/tools/plr-dissector", color: "text-amber-400" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },
             { label: "Affiliate Catalog", icon: FileStack, href: "/admin/affiliate-catalog", color: "text-blue-300" },
             { label: "Campaign Manager", icon: Sparkles, href: "/admin/click-campaigns", color: "text-violet-400" },

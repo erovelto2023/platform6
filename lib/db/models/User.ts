@@ -109,7 +109,21 @@ const UserSchema = new Schema({
     xp: {
         type: Number,
         default: 0
-    }
+    },
+    // GrooveSell Headless Checkout & Membership Fields
+    grooveSellCustomerId: {
+        type: String,
+        sparse: true,
+        index: true
+    },
+    membershipStatus: {
+        type: String,
+        enum: ['free', 'active', 'cancelled', 'refunded'],
+        default: 'free'
+    },
+    activeGrooveSellProducts: [{
+        type: String
+    }]
 }, { timestamps: true });
 
 const User = models.User || model('User', UserSchema);

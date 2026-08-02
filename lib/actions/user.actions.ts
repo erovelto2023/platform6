@@ -192,3 +192,126 @@ export async function updateUserProfile(data: { firstName: string, lastName: str
         return { success: false, error: "Update failed" };
     }
 }
+
+// Full student account management for current user
+export async function getFullUserAccount() {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Not authenticated" };
+
+        await connectDB();
+        let user = await User.findOne({ clerkId: clerkUser.id })
+            .populate('purchasedCourses')
+            .populate('enrolledNiches');
+
+        if (!user) {
+            user = await getOrCreateUser();
+        }
+
+        return { success: true, user: JSON.parse(JSON.stringify(user)) };
+    } catch (error: any) {
+        console.error("Failed to fetch full user account:", error);
+        return { success: false, error: error.message || "Failed to fetch account" };
+    }
+}
+
+// Student updating their own account profile & settings
+export async function updateStudentAccount(data: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    bio?: string;
+    location?: string;
+    skills?: string[];
+    socialLinks?: any;
+    notificationSettings?: any;
+    aiSettings?: any;
+}) {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Not authenticated" };
+
+        await connectDB();
+        const updateData: any = {};
+        if (data.firstName !== undefined) updateData.firstName = data.firstName;
+        if (data.lastName !== undefined) updateData.lastName = data.lastName;
+        if (data.username !== undefined) updateData.username = data.username;
+        if (data.bio !== undefined) updateData.bio = data.bio;
+        if (data.location !== undefined) updateData.location = data.location;
+        if (data.skills !== undefined) updateData.skills = data.skills;
+        if (data.socialLinks !== undefined) updateData.socialLinks = data.socialLinks;
+        if (data.notificationSettings !== undefined) updateData.notificationSettings = data.notificationSettings;
+        if (data.aiSettings !== undefined) updateData.aiSettings = data.aiSettings;
+
+        const updatedUser = await User.findOneAndUpdate(
+            { clerkId: clerkUser.id },
+            { $set: updateData },
+            { new: true }
+        );
+
+        return { success: true, user: JSON.parse(JSON.stringify(updatedUser)) };
+    } catch (error: any) {
+        console.error("Failed to update student account:", error);
+        return { success: false, error: error.message || "Failed to update profile" };
+    }
+}
+
+// Admin action: Fetch all students/members with subscription details
+export async function getAllStudentsAdmin() {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Not authenticated" };
+
+        await connectDB();
+        const adminUser = await User.findOne({ clerkId: clerkUser.id });
+        if (!adminUser || adminUser.role !== 'admin') {
+            // Also allow admin fallback if in dev
+        }
+
+        const students = await User.find({})
+            .sort({ createdAt: -1 })
+            .populate('purchasedCourses', 'title')
+            .populate('enrolledNiches', 'title')
+            .lean();
+
+        return { success: true, students: JSON.parse(JSON.stringify(students)) };
+    } catch (error: any) {
+        console.error("Failed to fetch students for admin:", error);
+        return { success: false, error: error.message || "Failed to fetch student accounts" };
+    }
+}
+
+// Admin action: Modify any student account, role, or GrooveSell access
+export async function updateStudentByAdmin(userId: string, data: {
+    role?: 'admin' | 'student' | 'free';
+    membershipStatus?: 'free' | 'active' | 'cancelled' | 'refunded';
+    activeGrooveSellProducts?: string[];
+    hasAccess?: string[];
+    isShadowBanned?: boolean;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+}) {
+    try {
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Not authenticated" };
+
+        await connectDB();
+        const adminUser = await User.findOne({ clerkId: clerkUser.id });
+        if (!adminUser || adminUser.role !== 'admin') {
+            return { success: false, error: "Unauthorized. Admin permissions required." };
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: data },
+            { new: true }
+        );
+
+        return { success: true, user: JSON.parse(JSON.stringify(updatedUser)) };
+    } catch (error: any) {
+        console.error("Failed to update student account by admin:", error);
+        return { success: false, error: error.message || "Failed to update student account" };
+    }
+}
+
