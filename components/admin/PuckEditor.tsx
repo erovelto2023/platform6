@@ -864,12 +864,35 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                         iframe: ({ children, document }) => {
                             useEffect(() => {
                                 if (document) {
-                                    if (document.getElementById('tailwind-cdn')) return;
-                                    const tag = document.createElement('script');
-                                    tag.id = 'tailwind-cdn';
-                                    tag.src = 'https://cdn.tailwindcss.com';
-                                    tag.async = true;
-                                    document.head.appendChild(tag);
+                                    if (!document.getElementById('puck-canvas-contrast-css')) {
+                                        const style = document.createElement('style');
+                                        style.id = 'puck-canvas-contrast-css';
+                                        style.textContent = `
+                                            html, body {
+                                                background-color: #020617 !important;
+                                                color: #f8fafc !important;
+                                                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                                                margin: 0;
+                                                padding: 0;
+                                                min-height: 100vh;
+                                            }
+                                            h1, h2, h3, h4, h5, h6, p, span, div, li, label, td, th {
+                                                color: inherit;
+                                            }
+                                            .puck-component {
+                                                color: #f8fafc;
+                                            }
+                                        `;
+                                        document.head.appendChild(style);
+                                    }
+
+                                    if (!document.getElementById('tailwind-cdn')) {
+                                        const tag = document.createElement('script');
+                                        tag.id = 'tailwind-cdn';
+                                        tag.src = 'https://cdn.tailwindcss.com';
+                                        tag.async = true;
+                                        document.head.appendChild(tag);
+                                    }
                                 }
                             }, [document]);
                             
