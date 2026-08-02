@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 const isProtected = createRouteMatcher([
     '/dashboard(.*)',
-    '/catalog(.*)',
     '/niche-catalog(.*)',
     '/admin(.*)',
     '/api/admin(.*)',
@@ -30,6 +29,7 @@ const isStudentRoute = createRouteMatcher([
 ]);
 
 const isPublic = createRouteMatcher([
+    '/catalog(.*)',
     '/api/uploadthing(.*)',
     '/api/click(.*)',
     '/invite(.*)',

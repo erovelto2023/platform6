@@ -31,16 +31,6 @@ export default async function LessonIdPage({
         return redirect("/");
     }
 
-    const requiredFields = [
-        lesson.title,
-        lesson.type === 'video' && lesson.videoUrl,
-        lesson.type === 'text' && lesson.content,
-        lesson.type === 'audio' && lesson.videoUrl, // Reusing videoUrl for audio
-        lesson.type === 'download' && lesson.fileUrl,
-    ].filter(Boolean);
-
-    const totalFields = requiredFields.length; // This logic is slightly flawed as I'm filtering first, but for now it's just a visual indicator. 
-    // Better logic:
     let totalRequired = 2; // Title + Content
     let completedCount = 0;
     if (lesson.title) completedCount++;
@@ -56,158 +46,167 @@ export default async function LessonIdPage({
     const completionText = `(${completedCount}/${totalRequired})`;
 
     return (
-        <div className="p-6">
-            <div className="flex items-center justify-between">
-                <div className="w-full">
-                    <Link
-                        href={`/admin/courses/${courseId}/chapters/${chapterId}`}
-                        className="flex items-center text-sm hover:opacity-75 transition mb-6"
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to chapter setup
-                    </Link>
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex flex-col gap-y-2">
-                            <h1 className="text-2xl font-medium">
-                                Lesson Creation
-                            </h1>
-                            <span className="text-sm text-slate-700">
-                                Complete all fields {completionText}
-                            </span>
+        <div className="p-6 md:p-8 bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-orange-500 selection:text-slate-950">
+            <div className="max-w-6xl mx-auto space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-6">
+                    <div className="w-full space-y-2">
+                        <Link
+                            href={`/admin/courses/${courseId}/chapters/${chapterId}`}
+                            className="inline-flex items-center text-xs font-mono font-bold text-orange-400 hover:text-amber-300 transition"
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to Chapter Setup
+                        </Link>
+                        <div className="flex items-center justify-between w-full pt-1">
+                            <div className="flex flex-col gap-y-1">
+                                <h1 className="text-2xl md:text-3xl font-black text-slate-100 uppercase tracking-tight">
+                                    Lesson Editor
+                                </h1>
+                                <span className="text-xs font-mono text-slate-400">
+                                    Complete all required fields <span className="text-amber-400 font-bold">{completionText}</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-                <div className="space-y-4">
-                    <div>
-                        <div className="flex items-center gap-x-2">
-                            <IconBadge icon={LayoutDashboard} />
-                            <h2 className="text-xl">
-                                Customize your lesson
-                            </h2>
-                        </div>
-                        <LessonTitleForm
-                            initialData={lesson}
-                            courseId={courseId}
-                            chapterId={chapterId}
-                            lessonId={lessonId}
-                        />
-                        <LessonTypeForm
-                            initialData={lesson}
-                            courseId={courseId}
-                            chapterId={chapterId}
-                            lessonId={lessonId}
-                        />
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    {lesson.type === 'video' && (
-                        <div>
-                            <div className="flex items-center gap-x-2">
-                                <IconBadge icon={Video} />
-                                <h2 className="text-xl">
-                                    Add a video
-                                </h2>
-                            </div>
-                            <LessonVideoForm
-                                initialData={lesson}
-                                courseId={courseId}
-                                chapterId={chapterId}
-                                lessonId={lessonId}
-                            />
-                            {lesson.videoUrl && (
-                                <div className="mt-4">
-                                    <div className="flex items-center gap-x-2 mb-2">
-                                        <IconBadge icon={Eye} variant="success" />
-                                        <h3 className="text-lg font-medium">
-                                            Video Preview
-                                        </h3>
-                                    </div>
-                                    <VideoPlayer
-                                        videoUrl={lesson.videoUrl}
-                                        isLocked={false}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    {lesson.type === 'audio' && (
-                        <div>
-                            <div className="flex items-center gap-x-2">
-                                <IconBadge icon={Music} />
-                                <h2 className="text-xl">
-                                    Add Audio
-                                </h2>
-                            </div>
-                            <LessonAudioForm
-                                initialData={lesson}
-                                courseId={courseId}
-                                chapterId={chapterId}
-                                lessonId={lessonId}
-                            />
-                            {lesson.videoUrl && (
-                                <div className="mt-4">
-                                    <div className="flex items-center gap-x-2 mb-2">
-                                        <IconBadge icon={Eye} variant="success" />
-                                        <h3 className="text-lg font-medium">
-                                            Audio Preview
-                                        </h3>
-                                    </div>
-                                    <VideoPlayer
-                                        videoUrl={lesson.videoUrl}
-                                        isLocked={false}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    {lesson.type === 'text' && (
-                        <div>
-                            <div className="flex items-center gap-x-2">
-                                <IconBadge icon={AlignLeft} />
-                                <h2 className="text-xl">
-                                    Lecture Content
-                                </h2>
-                            </div>
-                            <LessonDescriptionForm
-                                initialData={lesson}
-                                courseId={courseId}
-                                chapterId={chapterId}
-                                lessonId={lessonId}
-                            />
-                        </div>
-                    )}
-                    {lesson.type === 'download' && (
-                        <div>
-                            <div className="flex items-center gap-x-2">
-                                <IconBadge icon={File} />
-                                <h2 className="text-xl">
-                                    Downloadable File
-                                </h2>
-                            </div>
-                            <LessonAttachmentForm
-                                initialData={lesson}
-                                courseId={courseId}
-                                chapterId={chapterId}
-                                lessonId={lessonId}
-                            />
-                        </div>
-                    )}
 
-                    <div>
-                        <div className="flex items-center gap-x-2">
-                            <IconBadge icon={File} />
-                            <h2 className="text-xl">
-                                Resources & Attachments
-                            </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                        <div>
+                            <div className="flex items-center gap-x-2 mb-4">
+                                <IconBadge icon={LayoutDashboard} />
+                                <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                    Customize Your Lesson
+                                </h2>
+                            </div>
+                            <div className="space-y-4">
+                                <LessonTitleForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                                <LessonTypeForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                            </div>
                         </div>
-                        <LessonResourcesForm
-                            initialData={lesson}
-                            courseId={courseId}
-                            chapterId={chapterId}
-                            lessonId={lessonId}
-                        />
+                    </div>
+
+                    <div className="space-y-6">
+                        {lesson.type === 'video' && (
+                            <div>
+                                <div className="flex items-center gap-x-2 mb-4">
+                                    <IconBadge icon={Video} />
+                                    <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                        Add a Video
+                                    </h2>
+                                </div>
+                                <LessonVideoForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                                {lesson.videoUrl && (
+                                    <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                                        <div className="flex items-center gap-x-2 mb-2">
+                                            <IconBadge icon={Eye} variant="success" />
+                                            <h3 className="text-sm font-mono font-bold text-slate-200">
+                                                Video Preview
+                                            </h3>
+                                        </div>
+                                        <VideoPlayer
+                                            videoUrl={lesson.videoUrl}
+                                            isLocked={false}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {lesson.type === 'audio' && (
+                            <div>
+                                <div className="flex items-center gap-x-2 mb-4">
+                                    <IconBadge icon={Music} />
+                                    <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                        Add Audio
+                                    </h2>
+                                </div>
+                                <LessonAudioForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                                {lesson.videoUrl && (
+                                    <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl p-4">
+                                        <div className="flex items-center gap-x-2 mb-2">
+                                            <IconBadge icon={Eye} variant="success" />
+                                            <h3 className="text-sm font-mono font-bold text-slate-200">
+                                                Audio Preview
+                                            </h3>
+                                        </div>
+                                        <VideoPlayer
+                                            videoUrl={lesson.videoUrl}
+                                            isLocked={false}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {lesson.type === 'text' && (
+                            <div>
+                                <div className="flex items-center gap-x-2 mb-4">
+                                    <IconBadge icon={AlignLeft} />
+                                    <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                        Lecture Content
+                                    </h2>
+                                </div>
+                                <LessonDescriptionForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                            </div>
+                        )}
+
+                        {lesson.type === 'download' && (
+                            <div>
+                                <div className="flex items-center gap-x-2 mb-4">
+                                    <IconBadge icon={File} />
+                                    <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                        Downloadable File
+                                    </h2>
+                                </div>
+                                <LessonAttachmentForm
+                                    initialData={lesson}
+                                    courseId={courseId}
+                                    chapterId={chapterId}
+                                    lessonId={lessonId}
+                                />
+                            </div>
+                        )}
+
+                        <div>
+                            <div className="flex items-center gap-x-2 mb-4">
+                                <IconBadge icon={File} />
+                                <h2 className="text-lg font-mono font-bold text-slate-100 uppercase tracking-wider">
+                                    Resources & Attachments
+                                </h2>
+                            </div>
+                            <LessonResourcesForm
+                                initialData={lesson}
+                                courseId={courseId}
+                                chapterId={chapterId}
+                                lessonId={lessonId}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

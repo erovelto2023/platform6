@@ -22,7 +22,7 @@ import { toast } from "sonner";
 
 interface LessonAudioFormProps {
     initialData: {
-        videoUrl: string; // Reusing videoUrl for audio
+        videoUrl: string;
     };
     courseId: string;
     chapterId: string;
@@ -30,7 +30,7 @@ interface LessonAudioFormProps {
 }
 
 const formSchema = z.object({
-    videoUrl: z.string().min(1),
+    videoUrl: z.string().min(1, { message: "Audio URL is required" }),
 });
 
 export const LessonAudioForm = ({
@@ -56,7 +56,7 @@ export const LessonAudioForm = ({
         try {
             const response = await updateLesson(courseId, chapterId, lessonId, values);
             if (response.success) {
-                toast.success("Lesson updated");
+                toast.success("Lesson audio updated");
                 toggleEdit();
                 router.refresh();
             } else {
@@ -65,45 +65,46 @@ export const LessonAudioForm = ({
         } catch {
             toast.error("Something went wrong");
         }
-    }
+    };
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Lesson Audio
-                <Button onClick={toggleEdit} variant="ghost">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+            <div className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                <span>Lesson Audio</span>
+                <Button onClick={toggleEdit} variant="ghost" size="sm" className="text-orange-400 hover:text-amber-300 hover:bg-slate-800 font-mono text-xs cursor-pointer">
                     {isEditing && (
                         <>Cancel</>
                     )}
                     {!isEditing && !initialData.videoUrl && (
                         <>
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            Add audio
+                            <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Add Audio
                         </>
                     )}
                     {!isEditing && initialData.videoUrl && (
                         <>
-                            <Pencil className="h-4 w-4 mr-2" />
-                            Edit audio
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Audio
                         </>
                     )}
                 </Button>
             </div>
             {!isEditing && (
                 !initialData.videoUrl ? (
-                    <div className="flex items-center justify-center h-60 bg-slate-200 rounded-md mt-2">
-                        <Music className="h-10 w-10 text-slate-500" />
+                    <div className="flex flex-col items-center justify-center h-48 bg-slate-950 border border-slate-800 rounded-xl mt-2 text-slate-500">
+                        <Music className="h-10 w-10 text-slate-600 mb-2" />
+                        <span className="font-mono text-xs">No audio uploaded yet</span>
                     </div>
                 ) : (
-                    <div className="mt-2 p-3 bg-white rounded-md border">
-                        <p className="text-sm text-slate-600 break-all">{initialData.videoUrl}</p>
+                    <div className="mt-2 p-3 bg-slate-950 rounded-xl border border-slate-800">
+                        <p className="text-xs font-mono text-amber-400 break-all">{initialData.videoUrl}</p>
                     </div>
                 )
             )}
             {isEditing && (
-                <div>
+                <div className="space-y-4 pt-2">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-4">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="videoUrl"
@@ -112,11 +113,13 @@ export const LessonAudioForm = ({
                                         <FormControl>
                                             <div className="flex items-center gap-x-2">
                                                 <Input
-                                                    disabled={false}
                                                     placeholder="Paste Audio URL"
+                                                    className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 font-mono text-xs focus:border-orange-500"
                                                     {...field}
                                                 />
-                                                <Button type="submit" size="sm">Save</Button>
+                                                <Button type="submit" size="sm" className="bg-orange-500 hover:bg-orange-600 text-slate-950 font-black font-mono text-xs uppercase">
+                                                    Save
+                                                </Button>
                                             </div>
                                         </FormControl>
                                         <FormMessage />
@@ -125,29 +128,26 @@ export const LessonAudioForm = ({
                             />
                         </form>
                     </Form>
-                    <div className="text-xs text-muted-foreground mb-4">
+                    <div className="text-xs font-mono text-slate-400 border-t border-slate-800 pt-3">
                         OR upload an audio file directly:
                     </div>
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center w-full">
                         <UploadButton
                             endpoint="courseAttachment"
                             appearance={{
-                                button: "bg-slate-900 text-white hover:bg-slate-800 ut-uploading:cursor-not-allowed",
-                                allowedContent: "text-slate-500"
+                                button: "bg-orange-500 text-slate-950 font-mono text-xs font-black uppercase hover:bg-orange-400",
+                                allowedContent: "text-slate-400 font-mono text-xs"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ videoUrl: res[0].url || res[0].url });
+                                onSubmit({ videoUrl: res[0].url });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);
                             }}
                         />
                     </div>
-                    <div className="text-xs text-muted-foreground mt-4">
-                        Upload this lesson&apos;s audio
-                    </div>
                 </div>
             )}
         </div>
-    )
-}
+    );
+};

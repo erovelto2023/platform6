@@ -47,7 +47,7 @@ export const LessonResourcesForm = ({
         } catch {
             toast.error("Something went wrong");
         }
-    }
+    };
 
     const onDelete = async (id: string) => {
         try {
@@ -60,20 +60,19 @@ export const LessonResourcesForm = ({
         } finally {
             setDeletingId(null);
         }
-    }
+    };
 
     return (
-        <div className="mt-6 border bg-slate-100 rounded-md p-4">
-            <div className="font-medium flex items-center justify-between">
-                Lesson Resources
-                <Button onClick={toggleEdit} variant="ghost">
-                    {isEditing && (
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+            <div className="font-mono text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                <span>Lesson Resources</span>
+                <Button onClick={toggleEdit} variant="ghost" size="sm" className="text-orange-400 hover:text-amber-300 hover:bg-slate-800 font-mono text-xs cursor-pointer">
+                    {isEditing ? (
                         <>Cancel</>
-                    )}
-                    {!isEditing && (
+                    ) : (
                         <>
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            Add a file
+                            <PlusCircle className="h-3.5 w-3.5 mr-1.5" />
+                            Add Resource
                         </>
                     )}
                 </Button>
@@ -81,7 +80,7 @@ export const LessonResourcesForm = ({
             {!isEditing && (
                 <>
                     {initialData.attachments.length === 0 && (
-                        <p className="text-sm mt-2 text-slate-500 italic">
+                        <p className="text-xs font-mono italic text-slate-500 mt-2">
                             No attachments yet
                         </p>
                     )}
@@ -90,21 +89,20 @@ export const LessonResourcesForm = ({
                             {initialData.attachments.map((attachment) => (
                                 <div
                                     key={attachment._id}
-                                    className="flex items-center p-3 w-full bg-sky-100 border-sky-200 border text-sky-700 rounded-md"
+                                    className="flex items-center justify-between p-3 w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl font-mono text-xs"
                                 >
-                                    <File className="h-4 w-4 mr-2 flex-shrink-0" />
-                                    <p className="text-xs line-clamp-1 w-full">
-                                        {attachment.title}
-                                    </p>
-                                    {deletingId === attachment._id && (
-                                        <div>
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        </div>
-                                    )}
-                                    {deletingId !== attachment._id && (
+                                    <div className="flex items-center gap-2 overflow-hidden">
+                                        <File className="h-4 w-4 flex-shrink-0 text-orange-400" />
+                                        <span className="line-clamp-1 truncate font-semibold text-slate-100">
+                                            {attachment.title}
+                                        </span>
+                                    </div>
+                                    {deletingId === attachment._id ? (
+                                        <Loader2 className="h-4 w-4 animate-spin text-orange-400 shrink-0" />
+                                    ) : (
                                         <button
                                             onClick={() => onDelete(attachment._id)}
-                                            className="ml-auto hover:opacity-75 transition"
+                                            className="ml-2 text-slate-500 hover:text-rose-400 transition cursor-pointer shrink-0"
                                         >
                                             <X className="h-4 w-4" />
                                         </button>
@@ -116,27 +114,24 @@ export const LessonResourcesForm = ({
                 </>
             )}
             {isEditing && (
-                <div>
-                    <div className="flex items-center justify-center">
+                <div className="space-y-4 pt-2">
+                    <div className="flex items-center justify-center w-full">
                         <UploadButton
                             endpoint="lessonFile"
                             appearance={{
-                                button: "bg-slate-900 text-white hover:bg-slate-800 ut-uploading:cursor-not-allowed",
-                                allowedContent: "text-slate-500"
+                                button: "bg-orange-500 text-slate-950 font-mono text-xs font-black uppercase hover:bg-orange-400",
+                                allowedContent: "text-slate-400 font-mono text-xs"
                             }}
                             onClientUploadComplete={(res) => {
-                                onSubmit({ url: res[0].url || res[0].url, title: res[0].name });
+                                onSubmit({ url: res[0].url, title: res[0].name });
                             }}
                             onUploadError={(error: Error) => {
                                 toast.error(`${error?.message}`);
                             }}
                         />
                     </div>
-                    <div className="text-xs text-muted-foreground mt-4">
-                        Add anything your students might need to complete the lesson.
-                    </div>
                 </div>
             )}
         </div>
-    )
-}
+    );
+};
