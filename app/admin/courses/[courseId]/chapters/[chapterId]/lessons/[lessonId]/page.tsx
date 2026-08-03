@@ -11,6 +11,7 @@ import { LessonDescriptionForm } from "./_components/lesson-description-form";
 import { LessonAttachmentForm } from "./_components/lesson-attachment-form";
 import { LessonAudioForm } from "./_components/lesson-audio-form";
 import { LessonResourcesForm } from "./_components/lesson-resources-form";
+import { DeleteLessonButton } from "./_components/delete-lesson-button";
 import { VideoPlayer } from "@/app/(course)/catalog/[courseId]/chapters/[chapterId]/lessons/[lessonId]/_components/video-player";
 
 export default async function LessonIdPage({
@@ -66,6 +67,7 @@ export default async function LessonIdPage({
                                     Complete all required fields <span className="text-amber-400 font-bold">{completionText}</span>
                                 </span>
                             </div>
+                            <DeleteLessonButton courseId={courseId} chapterId={chapterId} lessonId={lessonId} />
                         </div>
                     </div>
                 </div>

@@ -218,3 +218,31 @@ export async function removeAttachment(courseId: string, moduleId: string, lesso
         return { error: "Something went wrong" };
     }
 }
+
+export async function deleteLesson(courseId: string, moduleId: string, lessonId: string) {
+    try {
+        const { userId } = await auth();
+        if (!userId) return { error: "Unauthorized" };
+
+        await connectDB();
+
+        const course = await Course.findById(courseId);
+        if (!course) return { error: "Course not found" };
+
+        const courseModule = course.modules.id(moduleId);
+        if (!courseModule) return { error: "Module not found" };
+
+        const lesson = courseModule.lessons.id(lessonId);
+        if (!lesson) return { error: "Lesson not found" };
+
+        courseModule.lessons.pull(lessonId);
+        await course.save();
+
+        revalidatePath(`/admin/courses/${courseId}/chapters/${moduleId}`);
+        revalidatePath(`/admin/courses/${courseId}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Delete lesson error:", error);
+        return { error: "Something went wrong" };
+    }
+}

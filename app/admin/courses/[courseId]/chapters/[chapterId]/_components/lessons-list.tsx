@@ -7,8 +7,7 @@ import {
     Draggable,
     DropResult,
 } from "@hello-pangea/dnd";
-import { Grip, Pencil } from "lucide-react";
-
+import { Grip, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -16,12 +15,14 @@ interface LessonsListProps {
     items: any[];
     onReorder: (updateData: { id: string; position: number }[]) => void;
     onEdit: (id: string) => void;
+    onDelete?: (id: string) => void;
 }
 
 export const LessonsList = ({
     items,
     onReorder,
-    onEdit
+    onEdit,
+    onDelete
 }: LessonsListProps) => {
     const [isMounted, setIsMounted] = useState(false);
     const [lessons, setLessons] = useState(items);
@@ -54,7 +55,7 @@ export const LessonsList = ({
         }));
 
         onReorder(bulkUpdateData);
-    }
+    };
 
     if (!isMounted) {
         return null;
@@ -92,11 +93,24 @@ export const LessonsList = ({
                                             )}
                                             <button
                                                 onClick={() => onEdit(lesson._id)}
-                                                className="p-1.5 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-cyan-400 transition-colors"
+                                                className="p-1.5 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-cyan-400 transition-colors cursor-pointer"
                                                 title="Edit Lesson"
                                             >
                                                 <Pencil className="h-3.5 w-3.5" />
                                             </button>
+                                            {onDelete && (
+                                                <button
+                                                    onClick={() => {
+                                                        if (confirm(`Are you sure you want to delete "${lesson.title}"?`)) {
+                                                            onDelete(lesson._id);
+                                                        }
+                                                    }}
+                                                    className="p-1.5 rounded-xl hover:bg-slate-900 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                                                    title="Delete Lesson"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 )}

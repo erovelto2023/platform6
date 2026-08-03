@@ -152,6 +152,16 @@ export const LessonsForm = ({
                     <LessonsList
                         onEdit={onEdit}
                         onReorder={onReorder}
+                        onDelete={async (lessonId) => {
+                            const { deleteLesson } = await import("@/lib/actions/lesson.actions");
+                            const res = await deleteLesson(courseId, chapterId, lessonId);
+                            if (res.success) {
+                                toast.success("Lesson deleted");
+                                router.refresh();
+                            } else {
+                                toast.error("Failed to delete lesson");
+                            }
+                        }}
                         items={initialData.lessons || []}
                     />
                 </div>
