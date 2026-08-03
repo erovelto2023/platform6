@@ -22,7 +22,7 @@ export async function saveGeneratedContent(data: any) {
     await connectToDatabase();
 
     // Map template category to contentType
-    let contentType = 'social';
+    let contentType: 'social' | 'video' | 'podcast' | 'story' | 'blog' | 'email' | 'reel' | 'carousel' | 'ad' = 'social';
     if (data.templateCategory?.includes('Written')) contentType = 'blog';
     if (data.templateCategory?.includes('Email')) contentType = 'email';
     if (data.templateCategory?.includes('Video')) contentType = 'video';

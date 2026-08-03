@@ -151,8 +151,8 @@ export async function repurposeContent(originalId: string, formats: string[]) {
 
         // Simple generation logic (placeholder for AI)
         for (const format of formats) {
-            let contentType = 'social';
-            let platformName = 'twitter';
+            let contentType: 'social' | 'video' | 'podcast' | 'story' | 'blog' | 'email' | 'reel' | 'carousel' | 'ad' = 'social';
+            let platformName: 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'tiktok' | 'pinterest' | 'youtube' | 'threads' | 'blog' | 'email' = 'twitter';
             let titlePrefix = 'Repurposed: ';
 
             if (format === 'twitter_thread') { platformName = 'twitter'; titlePrefix = 'Thread: '; }
