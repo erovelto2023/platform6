@@ -1,12 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getCourse } from "@/lib/actions/course.actions";
 import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-form";
 import { ImageForm } from "./_components/image-form";
 import { PremiumForm } from "./_components/premium-form";
 import { ChaptersForm } from "./_components/chapters-form";
-import { LayoutDashboard, ListChecks } from "lucide-react";
+import { LayoutDashboard, ListChecks, ArrowLeft } from "lucide-react";
 import { IconBadge } from "@/components/icon-badge";
 import { Banner } from "@/components/banner";
 import { CourseActions } from "./_components/course-actions";
@@ -44,27 +45,36 @@ export default async function CourseIdPage({
     const isComplete = requiredFields.every(Boolean);
 
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 font-sans space-y-6 max-w-7xl mx-auto">
+        <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-8 font-sans space-y-6 max-w-7xl mx-auto selection:bg-orange-500 selection:text-slate-950">
             {!course.isPublished && (
                 <Banner
                     label="This course is unpublished. It will not be visible to students."
                 />
             )}
-            
-            <div className="flex items-center justify-between border-b border-slate-800 pb-6">
-                <div className="flex flex-col gap-y-1">
-                    <h1 className="text-3xl font-black uppercase tracking-tight text-slate-100">
-                        Course Setup
-                    </h1>
-                    <span className="text-xs font-mono font-bold text-slate-400">
-                        Complete all required fields {completionText}
-                    </span>
+
+            <div className="border-b border-slate-800 pb-6 space-y-4">
+                <Link
+                    href="/admin/courses"
+                    className="inline-flex items-center text-xs font-mono font-bold text-orange-400 hover:text-amber-300 transition"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-1.5" />
+                    Back to All Courses
+                </Link>
+                <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-y-1">
+                        <h1 className="text-3xl font-black uppercase tracking-tight text-slate-100 font-mono">
+                            Course Setup
+                        </h1>
+                        <span className="text-xs font-mono font-bold text-slate-400">
+                            Complete all required fields <span className="text-amber-400 font-bold">{completionText}</span>
+                        </span>
+                    </div>
+                    <CourseActions
+                        disabled={!isComplete}
+                        courseId={course._id}
+                        isPublished={course.isPublished}
+                    />
                 </div>
-                <CourseActions
-                    disabled={!isComplete}
-                    courseId={course._id}
-                    isPublished={course.isPublished}
-                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
