@@ -1,141 +1,314 @@
 "use server";
 
-export interface CompetitorKeyword {
-    keyword: string;
-    position: number;
-    volume: number;
-    difficulty: number;
-    traffic: number;
-    url: string;
+import connectDB from "@/lib/db/connect";
+import Competitor from "@/lib/db/models/Competitor";
+import { currentUser } from "@clerk/nextjs/server";
+import { revalidatePath } from "next/cache";
+
+export async function getCompetitors() {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return [];
+
+        const competitors = await Competitor.find({ userId: clerkUser.id }).sort({ updatedAt: -1 }).lean();
+        return JSON.parse(JSON.stringify(competitors));
+    } catch (error) {
+        console.error("Error in getCompetitors:", error);
+        return [];
+    }
 }
 
-export interface CompetitorPage {
-    url: string;
-    topKeyword: string;
-    keywordsCount: number;
-    estimatedTraffic: number;
+export async function getCompetitor(id: string) {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return null;
+
+        const competitor = await Competitor.findOne({ _id: id, userId: clerkUser.id }).lean();
+        if (!competitor) return null;
+
+        return JSON.parse(JSON.stringify(competitor));
+    } catch (error) {
+        console.error("Error in getCompetitor:", error);
+        return null;
+    }
+}
+
+export async function createCompetitor(data: {
+    name: string;
+    webAddress?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    phone?: string;
+    fax?: string;
+    email?: string;
+    nicheMarket?: string;
+    primaryKeyword?: string;
+    notes?: string;
+    logoUrl?: string;
+}) {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Unauthorized" };
+
+        if (!data.name?.trim()) {
+            return { success: false, error: "Competitor name is required" };
+        }
+
+        const competitor = await Competitor.create({
+            userId: clerkUser.id,
+            name: data.name.trim(),
+            webAddress: data.webAddress || '',
+            address: data.address || '',
+            city: data.city || '',
+            state: data.state || '',
+            zip: data.zip || '',
+            country: data.country || '',
+            phone: data.phone || '',
+            fax: data.fax || '',
+            email: data.email || '',
+            nicheMarket: data.nicheMarket || '',
+            primaryKeyword: data.primaryKeyword || '',
+            notes: data.notes || '',
+            logoUrl: data.logoUrl || '',
+            modulesData: {}
+        });
+
+        revalidatePath("/tools/competition-black-book");
+        return { success: true, competitor: JSON.parse(JSON.stringify(competitor)) };
+    } catch (error: any) {
+        console.error("Error creating competitor:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateCompetitor(id: string, data: any) {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Unauthorized" };
+
+        const competitor = await Competitor.findOneAndUpdate(
+            { _id: id, userId: clerkUser.id },
+            { ...data, updatedAt: new Date() },
+            { new: true }
+        );
+
+        revalidatePath("/tools/competition-black-book");
+        revalidatePath(`/tools/competition-black-book/${id}`);
+        return { success: true, competitor: JSON.parse(JSON.stringify(competitor)) };
+    } catch (error: any) {
+        console.error("Error updating competitor:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function updateCompetitorModule(id: string, moduleKey: string, moduleContent: any) {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Unauthorized" };
+
+        const updateKey = `modulesData.${moduleKey}`;
+        const competitor = await Competitor.findOneAndUpdate(
+            { _id: id, userId: clerkUser.id },
+            { $set: { [updateKey]: moduleContent, updatedAt: new Date() } },
+            { new: true }
+        );
+
+        revalidatePath(`/tools/competition-black-book/${id}`);
+        return { success: true, competitor: JSON.parse(JSON.stringify(competitor)) };
+    } catch (error: any) {
+        console.error("Error updating competitor module:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function deleteCompetitor(id: string) {
+    try {
+        await connectDB();
+        const clerkUser = await currentUser();
+        if (!clerkUser) return { success: false, error: "Unauthorized" };
+
+        await Competitor.deleteOne({ _id: id, userId: clerkUser.id });
+
+        revalidatePath("/tools/competition-black-book");
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error deleting competitor:", error);
+        return { success: false, error: error.message };
+    }
 }
 
 export interface CompetitorAnalysisResult {
     domain: string;
-    organicTraffic: number;
-    organicKeywords: number;
-    paidTraffic: number;
-    paidKeywords: number;
     domainAuthority: number;
-    topKeywords: CompetitorKeyword[];
-    topPages: CompetitorPage[];
-    trafficHistory: { date: string; organic: number; paid: number }[];
+    organicKeywords: number;
+    organicTraffic: number;
+    paidTraffic: number;
+    estimatedTraffic: number;
+    trafficHistory: any[];
+    topPages: { url: string; topKeyword: string; estimatedTraffic: number }[];
+    topKeywords: { keyword: string; position: number; volume: number; difficulty: number; traffic: number }[];
 }
 
 export interface KeywordGapResult {
-    shared: CompetitorKeyword[];
-    missing: CompetitorKeyword[]; // Keywords competitor has but you don't
-    weak: CompetitorKeyword[]; // Keywords where you rank lower than competitor
-    strong: CompetitorKeyword[]; // Keywords where you rank higher
-    unique: CompetitorKeyword[]; // Keywords only you have
-}
-
-// Helper to generate consistent mock data based on a string seed
-function pseudoRandom(seed: string) {
-    let value = 0;
-    for (let i = 0; i < seed.length; i++) {
-        value += seed.charCodeAt(i);
-    }
-    return function () {
-        value = (value * 9301 + 49297) % 233280;
-        return value / 233280;
-    };
+    sharedKeywords: string[];
+    uniqueKeywords: string[];
+    gapKeywords: { keyword: string; competitorPosition: number; volume: number }[];
+    shared: any[];
+    missing: any[];
+    weak: any[];
+    strong: any[];
+    unique: any[];
 }
 
 export async function getCompetitorAnalysis(domain: string): Promise<CompetitorAnalysisResult> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const rng = pseudoRandom(domain);
-    const baseVolume = Math.floor(rng() * 50000) + 5000;
-
-    // Generate realistic-looking keywords based on domain parts
-    const domainParts = domain.split('.')[0].replace(/-/g, ' ').split(' ');
-    const coreTopic = domainParts[0] || "business";
-
-    const keywords: CompetitorKeyword[] = [];
-    const modifiers = ["best", "cheap", "guide", "review", "services", "tools", "software", "tips", "how to", "vs"];
-
-    for (let i = 0; i < 20; i++) {
-        const mod = modifiers[Math.floor(rng() * modifiers.length)];
-        const vol = Math.floor(rng() * 10000) + 100;
-        const pos = Math.floor(rng() * 20) + 1;
-        keywords.push({
-            keyword: `${mod} ${coreTopic} ${i > 10 ? 'online' : ''}`.trim(),
-            position: pos,
-            volume: vol,
-            difficulty: Math.floor(rng() * 100),
-            traffic: Math.floor(vol * (1 / pos) * 0.3), // Rough traffic est
-            url: `https://${domain}/${coreTopic}-page-${i}`
-        });
-    }
-
-    const pages: CompetitorPage[] = [];
-    for (let i = 0; i < 5; i++) {
-        pages.push({
-            url: `https://${domain}/blog/${coreTopic}-guide-${i}`,
-            topKeyword: keywords[i].keyword,
-            keywordsCount: Math.floor(rng() * 500) + 50,
-            estimatedTraffic: Math.floor(rng() * 5000) + 1000
-        });
-    }
-
-    const history = [];
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    for (const month of months) {
-        history.push({
-            date: `${month} 2024`,
-            organic: Math.floor(baseVolume * (0.8 + rng() * 0.4)),
-            paid: Math.floor(baseVolume * 0.1 * (0.8 + rng() * 0.4))
-        });
-    }
-
     return {
         domain,
-        organicTraffic: Math.floor(baseVolume * 1.5),
-        organicKeywords: Math.floor(baseVolume / 10),
-        paidTraffic: Math.floor(baseVolume * 0.2),
-        paidKeywords: Math.floor(baseVolume / 50),
-        domainAuthority: Math.floor(rng() * 60) + 20,
-        topKeywords: keywords.sort((a, b) => a.position - b.position),
-        topPages: pages.sort((a, b) => b.estimatedTraffic - a.estimatedTraffic),
-        trafficHistory: history
+        domainAuthority: 45,
+        organicKeywords: 1250,
+        organicTraffic: 45000,
+        paidTraffic: 3200,
+        estimatedTraffic: 45000,
+        trafficHistory: [],
+        topPages: [],
+        topKeywords: [
+            { keyword: `${domain} review`, position: 1, volume: 8400, difficulty: 35, traffic: 3200 },
+            { keyword: `best ${domain} alternatives`, position: 2, volume: 3200, difficulty: 42, traffic: 1500 },
+            { keyword: `how to use ${domain}`, position: 3, volume: 1900, difficulty: 28, traffic: 800 },
+        ]
     };
 }
 
 export async function getKeywordGapAnalysis(myDomain: string, competitorDomain: string): Promise<KeywordGapResult> {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const myData = await getCompetitorAnalysis(myDomain);
-    const compData = await getCompetitorAnalysis(competitorDomain);
-
-    // In a real scenario, we'd intersect real large datasets.
-    // Here we'll artificially create the segments for demonstration.
-
-    const rng = pseudoRandom(myDomain + competitorDomain);
-
-    const generateList = (count: number, prefix: string) => {
-        return Array.from({ length: count }).map((_, i) => ({
-            keyword: `${prefix} keyword ${i}`,
-            position: Math.floor(rng() * 20) + 1,
-            volume: Math.floor(rng() * 5000) + 100,
-            difficulty: Math.floor(rng() * 100),
-            traffic: 0,
-            url: `https://${competitorDomain}/page`
-        }));
-    };
-
     return {
-        shared: generateList(15, "shared"),
-        missing: generateList(20, "competitor-only"),
-        weak: generateList(10, "opportunity"),
-        strong: generateList(10, "winning"),
-        unique: generateList(15, "my-unique")
+        sharedKeywords: ["business tools", "online academy", "niche research"],
+        uniqueKeywords: ["fast funnel builder", "story generator"],
+        gapKeywords: [
+            { keyword: "wholesale supplier directory", competitorPosition: 2, volume: 14500 },
+            { keyword: "competitor tracking software", competitorPosition: 1, volume: 9200 },
+        ],
+        shared: [],
+        missing: [],
+        weak: [],
+        strong: [],
+        unique: []
     };
+}
+
+export async function extractCompetitorIntelFromUrl(url: string) {
+    try {
+        let cleanUrl = url.trim();
+        if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+            cleanUrl = `https://${cleanUrl}`;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        const response = await fetch(cleanUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            },
+            signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            return { success: false, error: `HTTP ${response.status}: Failed to reach site` };
+        }
+
+        const html = await response.text();
+
+        // 1. Extract Meta Title
+        const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+        const title = titleMatch ? titleMatch[1].trim() : '';
+
+        // 2. Extract Meta Description
+        const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i) ||
+                          html.match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["']/i);
+        const description = descMatch ? descMatch[1].trim() : '';
+
+        // 3. Extract OpenGraph Site Name & Image
+        const siteNameMatch = html.match(/<meta[^>]*property=["']og:site_name["'][^>]*content=["']([^"']+)["']/i);
+        const siteName = siteNameMatch ? siteNameMatch[1].trim() : '';
+
+        const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i);
+        const logoUrl = ogImageMatch ? ogImageMatch[1].trim() : '';
+
+        // 4. Detect Tech Stack
+        const detectedTech: string[] = [];
+        if (/shopify/i.test(html)) detectedTech.push('Shopify');
+        if (/woocommerce|wp-content/i.test(html)) detectedTech.push('WordPress / WooCommerce');
+        if (/_next\/static|__NEXT_DATA__/i.test(html)) detectedTech.push('Next.js');
+        if (/webflow/i.test(html)) detectedTech.push('Webflow');
+        if (/stripe\.com/i.test(html)) detectedTech.push('Stripe Payment Gateway');
+        if (/paypal\.com/i.test(html)) detectedTech.push('PayPal');
+        if (/googletagmanager|google-analytics/i.test(html)) detectedTech.push('Google Analytics 4 / GTM');
+        if (/connect\.facebook\.net/i.test(html)) detectedTech.push('Meta / Facebook Pixel');
+        if (/analytics\.tiktok\.com/i.test(html)) detectedTech.push('TikTok Pixel');
+        if (/hubspot/i.test(html)) detectedTech.push('HubSpot CRM');
+        if (/intercom/i.test(html)) detectedTech.push('Intercom Live Chat');
+        if (/crisp\.chat/i.test(html)) detectedTech.push('Crisp Live Chat');
+        if (/zendesk/i.test(html)) detectedTech.push('Zendesk Support');
+
+        // 5. Extract Social Media Links
+        const socialLinks: { platform: string; url: string }[] = [];
+        const socialRegex = /href=["'](https?:\/\/(?:www\.)?(facebook|instagram|twitter|x|linkedin|youtube|tiktok|pinterest|reddit|discord)\.com\/[^"']+)["']/gi;
+        let match;
+        const seenPlatforms = new Set();
+        while ((match = socialRegex.exec(html)) !== null) {
+            const platform = match[2].toLowerCase();
+            if (!seenPlatforms.has(platform)) {
+                seenPlatforms.add(platform);
+                socialLinks.push({ platform: platform.toUpperCase(), url: match[1] });
+            }
+        }
+
+        // 6. Extract Emails
+        const emailMatch = html.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
+        const email = emailMatch ? emailMatch[1] : '';
+
+        return {
+            success: true,
+            extracted: {
+                title,
+                description,
+                siteName,
+                logoUrl,
+                email,
+                detectedTech,
+                socialLinks
+            }
+        };
+    } catch (error: any) {
+        console.error("Auto extraction error:", error);
+        return { success: false, error: "Failed to scrape site (CORS or timeout)" };
+    }
+}
+
+export async function executeAiStrategyPrompt(prompt: string) {
+    try {
+        const { auth } = await import("@clerk/nextjs/server");
+        const { userId } = await auth();
+        const { AIService } = await import("@/lib/ai-service");
+
+        const response = await AIService.generate({
+            prompt,
+            systemPrompt: "You are a world-class Chief Marketing Officer and Competitive Intelligence Expert. Provide detailed, actionable markdown strategy output.",
+            userId: userId || undefined,
+            model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini"
+        });
+
+        return { success: true, result: response.content };
+    } catch (error: any) {
+        console.error("AI Strategy Prompt error:", error);
+        return { success: false, error: error.message || "Failed to generate AI strategy" };
+    }
 }

@@ -103,7 +103,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Step and text context are required" }, { status: 400 });
     }
 
-    const apiKey = userApiKey || req.headers.get("X-OpenAI-Key") || process.env.OPENAI_API_KEY;
+    const apiKey = userApiKey || 
+                   req.headers.get("X-OpenAI-Key") || 
+                   req.headers.get("X-OpenRouter-Key") || 
+                   process.env.OPENROUTER_API_KEY || 
+                   process.env.OPENAI_API_KEY;
 
     // Truncate context for safe prompt length (max ~50,000 characters)
     const safeContext = textContext.slice(0, 50000);
@@ -111,13 +115,18 @@ export async function POST(req: Request) {
     const systemPrompt = PIPELINE_PROMPTS[step] || customPrompt || "Analyze the provided PLR content thoroughly and provide a structured Markdown report.";
 
     if (apiKey) {
+      const isOpenRouter = apiKey.startsWith("sk-or-") || Boolean(process.env.OPENROUTER_API_KEY);
       const openai = new OpenAI({
         apiKey,
-        baseURL: process.env.DEEPSEEK_BASE_URL || (apiKey.startsWith("sk-or-") ? "https://openrouter.ai/api/v1" : undefined),
+        baseURL: isOpenRouter ? "https://openrouter.ai/api/v1" : (process.env.DEEPSEEK_BASE_URL || undefined),
+        defaultHeaders: isOpenRouter ? {
+          "HTTP-Referer": "https://kbusinessacademy.com",
+          "X-Title": "K Business Academy"
+        } : undefined
       });
 
       const response = await openai.chat.completions.create({
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+        model: process.env.OPENROUTER_MODEL || process.env.OPENAI_MODEL || "openai/gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Here is the PLR package content to analyze:\n\n${safeContext}` }

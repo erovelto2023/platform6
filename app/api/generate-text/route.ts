@@ -2,28 +2,34 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
 export async function POST(req: Request) {
-    const userKey = req.headers.get("X-OpenAI-Key");
+    const userKey = req.headers.get("X-OpenAI-Key") || 
+                    req.headers.get("X-OpenRouter-Key") || 
+                    process.env.OPENROUTER_API_KEY || 
+                    process.env.OPENAI_API_KEY;
 
-    // STRICT BYOK
     if (!userKey) {
-        return NextResponse.json({ error: "AI API key is required. Please set it in Settings." }, { status: 401 });
+        return NextResponse.json({ error: "AI API key is required. Please set OPENROUTER_API_KEY in environment or Settings." }, { status: 401 });
     }
 
-    // Initialize client wrapper locally with the user's key
+    const isOpenRouter = userKey.startsWith("sk-or-") || Boolean(process.env.OPENROUTER_API_KEY);
     const openai = new OpenAI({
         apiKey: userKey,
-        baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1", // Allow DeepSeek URL override from env, or default
+        baseURL: isOpenRouter ? "https://openrouter.ai/api/v1" : (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1"),
+        defaultHeaders: isOpenRouter ? {
+            "HTTP-Referer": "https://kbusinessacademy.com",
+            "X-Title": "K Business Academy"
+        } : undefined
     });
 
     try {
-        const { prompt, systemPrompt, maxTokens = 1000 } = await req.json();
+        const { prompt, systemPrompt, maxTokens = 1000, model } = await req.json();
 
         if (!prompt) {
             return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
         }
 
         const response = await openai.chat.completions.create({
-            model: "deepseek-chat", // or gpt-4
+            model: model || process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
             messages: [
                 { role: "system", content: systemPrompt || "You are a helpful assistant." },
                 { role: "user", content: prompt }

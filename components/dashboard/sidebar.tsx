@@ -8,6 +8,7 @@ import {
     BookOpen,
     Settings,
     ShieldCheck,
+    ShieldAlert,
     LogOut,
     ChevronLeft,
     ChevronRight,
@@ -69,6 +70,7 @@ const groups: SidebarGroup[] = [
         items: [
             { label: "My Account", icon: UserIcon, href: "/account", color: "text-amber-400" },
             { label: "Digital Products", icon: ShoppingBag, href: "/my-products", color: "text-cyan-400" },
+            { label: "Competition Black Book", icon: ShieldAlert, href: "/tools/competition-black-book", color: "text-rose-400" },
             { label: "PLR Dissector", icon: PackageSearch, href: "/tools/plr-dissector", color: "text-amber-400" },
             { label: "Accounting", icon: BarChart3, href: "/accounting", color: "text-green-600" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/affiliates", color: "text-blue-500" },
@@ -96,10 +98,9 @@ const groups: SidebarGroup[] = [
         color: "text-emerald-500",
         items: [
             { label: "Community", icon: Users, href: "/community", color: "text-emerald-500" },
-            { label: "Member Search", icon: Search, href: "/community/members?sort=relevance", color: "text-emerald-500" },
-            { label: "Library", icon: Library, href: "/docs", color: "text-blue-600" },
-            { label: "Messages", icon: MessageSquare, href: "/messages", color: "text-blue-500" },
-            { label: "Tickets", icon: FileQuestion, href: "/tickets", color: "text-rose-500" }
+            { label: "Keyword Explorer", icon: Search, href: "/tools/keyword-explorer", color: "text-amber-400" },
+            { label: "Student Directory", icon: Users, href: "/tools/student-directory", color: "text-teal-400" },
+            { label: "Help Center", icon: FileQuestion, href: "/help", color: "text-rose-400" }
         ]
     },
     {
@@ -124,6 +125,7 @@ const adminGroups: SidebarGroup[] = [
         items: [
             { label: "Student Accounts", icon: Users, href: "/admin/students", color: "text-indigo-400" },
             { label: "GrooveSell Payments", icon: CreditCard, href: "/admin/groovesell", color: "text-orange-400" },
+            { label: "Competition Black Book", icon: ShieldAlert, href: "/tools/competition-black-book", color: "text-rose-400" },
             { label: "Resources Vault", icon: Library, href: "/resources", color: "text-blue-400" },
             { label: "PLR Dissector", icon: PackageSearch, href: "/tools/plr-dissector", color: "text-amber-400" },
             { label: "Affiliate CRM", icon: LinkIcon, href: "/admin/affiliates", color: "text-blue-400" },

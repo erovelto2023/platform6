@@ -265,7 +265,7 @@ export async function analyzeKeywordWithAI(keyword: string) {
             prompt: prompt,
             systemPrompt: "You are an expert SEO strategist. You MUST return ONLY valid JSON. Do not include any introductory text, markdown formatting, or explanations. Just the JSON object.",
             userId: userId,
-            model: "llama2:latest" // Use the available model
+            model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini"
         });
 
         // Clean up response if it contains markdown code blocks

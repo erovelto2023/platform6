@@ -196,7 +196,7 @@ Important:
     const response = await AIService.generate({
       prompt: userPrompt,
       systemPrompt: systemPrompt,
-      model: "deepseek-llm:latest", // Default fallback, AIService will override based on settings
+      model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini", // OpenRouter model default
       userId: params.userId, // Pass userId to fetch settings
     });
 

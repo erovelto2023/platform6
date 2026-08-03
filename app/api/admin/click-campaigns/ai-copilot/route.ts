@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       uniqueSellingPoint = "All-in-one simplicity without monthly tool fatigue",
     } = await req.json();
 
-    const apiKey = process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY;
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY;
 
     // Fallback generator if no key is present in environment
     if (!apiKey) {
@@ -54,10 +54,15 @@ export async function POST(req: Request) {
       });
     }
 
-    // Call OpenAI / DeepSeek API when key exists
+    // Call OpenRouter / OpenAI API when key exists
+    const isOpenRouter = apiKey.startsWith("sk-or-") || Boolean(process.env.OPENROUTER_API_KEY);
     const openai = new OpenAI({
       apiKey,
-      baseURL: process.env.DEEPSEEK_BASE_URL || undefined,
+      baseURL: isOpenRouter ? "https://openrouter.ai/api/v1" : (process.env.DEEPSEEK_BASE_URL || undefined),
+      defaultHeaders: isOpenRouter ? {
+        "HTTP-Referer": "https://kbusinessacademy.com",
+        "X-Title": "K Business Academy"
+      } : undefined
     });
 
     const systemPrompt = `You are an expert direct-response copywriter and marketing campaign strategist. 
@@ -69,7 +74,7 @@ Key Offer/USP: ${uniqueSellingPoint}`;
     const userPrompt = `Write an ad copy for ${productName}. Return JSON with: "headline", "rawAiCopy", "callToAction".`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
