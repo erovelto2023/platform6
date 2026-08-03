@@ -65,7 +65,7 @@ export default function SidebarCourseCard({ product, accentColor = '#6366f1' }: 
 
       {hasAccess ? (
         <Link
-          href={`/courses/${product._id}`}
+          href={`/catalog/${product._id}`}
           className="block text-center w-full bg-emerald-500 hover:bg-emerald-450 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition tracking-wide text-xs flex items-center justify-center gap-2"
         >
           <BookOpen className="w-4 h-4" /> Enter Student Portal

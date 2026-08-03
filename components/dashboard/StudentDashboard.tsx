@@ -578,7 +578,7 @@ export default function StudentDashboard({ initialData }: StudentDashboardProps)
                                                     {course.modulesCount} modules
                                                 </span>
                                                 <Link 
-                                                    href={`/courses/${course._id}`}
+                                                    href={`/catalog/${course._id}`}
                                                     className="flex items-center gap-1 bg-[#10b981]/15 text-[#34d399] px-2.5 py-1 rounded-lg text-xs font-bold hover:bg-[#10b981]/25 transition-all"
                                                 >
                                                     Enter Course <ChevronRight className="w-3.5 h-3.5" />
@@ -1183,7 +1183,7 @@ export default function StudentDashboard({ initialData }: StudentDashboardProps)
                                 <h3 className="text-lg font-bold text-white">Interactive Courses Catalog</h3>
                                 <p className="text-slate-400 text-xs mt-0.5">Enroll, learn frameworks, build monetization tools, and verify completions.</p>
                             </div>
-                            <Link href="/courses" className="flex items-center gap-1.5 bg-[#10b981] hover:bg-[#34d399] text-[#07090e] px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-500/10">
+                            <Link href="/catalog" className="flex items-center gap-1.5 bg-[#10b981] hover:bg-[#34d399] text-[#07090e] px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-500/10">
                                 Browse Main Catalog <ArrowUpRight className="w-4 h-4" />
                             </Link>
                         </div>
@@ -1205,7 +1205,7 @@ export default function StudentDashboard({ initialData }: StudentDashboardProps)
                                         </div>
                                         <div className="flex items-center justify-between mt-3">
                                             <span className="text-[9px] text-[#34d399] font-bold">{Math.round(course.progress)}% done</span>
-                                            <Link href={`/courses/${course._id}`} className="text-[10px] text-indigo-400 font-extrabold hover:underline">
+                                            <Link href={`/catalog/${course._id}`} className="text-[10px] text-indigo-400 font-extrabold hover:underline">
                                                 Resume
                                             </Link>
                                         </div>
@@ -1228,7 +1228,7 @@ export default function StudentDashboard({ initialData }: StudentDashboardProps)
                                         <h4 className="text-xs font-bold text-white mt-2.5 line-clamp-1">{course.title}</h4>
                                         <div className="flex items-center justify-between mt-4">
                                             <span className="text-[9px] text-slate-500 uppercase font-bold">{course.modulesCount} Modules</span>
-                                            <Link href={`/courses/${course._id}`} className="text-[10px] bg-[#10b981]/15 text-[#34d399] px-2 py-0.5 rounded font-extrabold hover:bg-[#10b981]/25 transition-all">
+                                            <Link href={`/catalog/${course._id}`} className="text-[10px] bg-[#10b981]/15 text-[#34d399] px-2 py-0.5 rounded font-extrabold hover:bg-[#10b981]/25 transition-all">
                                                 Start
                                             </Link>
                                         </div>
