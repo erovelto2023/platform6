@@ -279,12 +279,12 @@ export class ImageElement extends CanvasElement {
 }
 
 export class ShapeElement extends CanvasElement {
-    shapeType: 'rectangle' | 'circle' | 'triangle';
+    shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'diamond';
     fillColor: string;
     strokeColor: string;
     strokeWidth: number;
 
-    constructor(name: string, x: number, y: number, shapeType: 'rectangle' | 'circle' | 'triangle' = 'rectangle') {
+    constructor(name: string, x: number, y: number, shapeType: 'rectangle' | 'circle' | 'triangle' | 'star' | 'heart' | 'diamond' = 'rectangle') {
         super('shape', name, x, y, 200, 200);
         this.shapeType = shapeType;
         this.fillColor = '#3b82f6';
@@ -309,6 +309,61 @@ export class ShapeElement extends CanvasElement {
             context.moveTo(this.x + this.width / 2, this.y);
             context.lineTo(this.x + this.width, this.y + this.height);
             context.lineTo(this.x, this.y + this.height);
+            context.closePath();
+        } else if (this.shapeType === 'star') {
+            const cx = this.x + this.width / 2;
+            const cy = this.y + this.height / 2;
+            const outerRadius = Math.min(this.width, this.height) / 2;
+            const innerRadius = outerRadius / 2.5;
+            const points = 5;
+            let rot = (Math.PI / 2) * 3;
+            let step = Math.PI / points;
+
+            context.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < points; i++) {
+                let x = cx + Math.cos(rot) * outerRadius;
+                let y = cy + Math.sin(rot) * outerRadius;
+                context.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                context.lineTo(x, y);
+                rot += step;
+            }
+            context.lineTo(cx, cy - outerRadius);
+            context.closePath();
+        } else if (this.shapeType === 'diamond') {
+            const cx = this.x + this.width / 2;
+            const cy = this.y + this.height / 2;
+            context.moveTo(cx, this.y);
+            context.lineTo(this.x + this.width, cy);
+            context.lineTo(cx, this.y + this.height);
+            context.lineTo(this.x, cy);
+            context.closePath();
+        } else if (this.shapeType === 'heart') {
+            const topCurveHeight = this.height * 0.3;
+            context.moveTo(this.x + this.width / 2, this.y + topCurveHeight);
+            context.bezierCurveTo(
+                this.x + this.width / 2, this.y,
+                this.x, this.y,
+                this.x, this.y + topCurveHeight
+            );
+            context.bezierCurveTo(
+                this.x, this.y + (this.height + topCurveHeight) / 2,
+                this.x + this.width / 2, this.y + (this.height + topCurveHeight) / 2,
+                this.x + this.width / 2, this.y + this.height
+            );
+            context.bezierCurveTo(
+                this.x + this.width / 2, this.y + (this.height + topCurveHeight) / 2,
+                this.x + this.width, this.y + (this.height + topCurveHeight) / 2,
+                this.x + this.width, this.y + topCurveHeight
+            );
+            context.bezierCurveTo(
+                this.x + this.width, this.y,
+                this.x + this.width / 2, this.y,
+                this.x + this.width / 2, this.y + topCurveHeight
+            );
             context.closePath();
         }
 

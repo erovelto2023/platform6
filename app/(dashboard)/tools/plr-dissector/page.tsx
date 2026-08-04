@@ -499,20 +499,13 @@ export default function PLRDissectorPage() {
             </div>
           </div>
 
-          {/* OpenAI API Key Panel */}
-          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-2">
-            <label className="text-[11px] font-mono font-bold text-slate-400 flex items-center gap-1.5">
-              <Key size={13} className="text-amber-400" /> OpenAI / DeepSeek API Key (Optional)
-            </label>
-            <input
-              type="password"
-              value={userApiKey}
-              onChange={(e) => setUserApiKey(e.target.value)}
-              placeholder="sk-or-... or sk-proj-..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-amber-500"
-            />
+          {/* OpenRouter AI Status Panel */}
+          <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 space-y-1">
+            <div className="text-[11px] font-mono font-bold text-amber-400 flex items-center gap-1.5">
+              <Sparkles size={13} className="text-amber-400" /> Powered by OpenRouter AI
+            </div>
             <p className="text-[10px] text-slate-500 font-mono">
-              Leave blank to use server environment key or instant fallback audit engine.
+              Automatically routes through your configured OpenRouter settings or platform key.
             </p>
           </div>
         </div>

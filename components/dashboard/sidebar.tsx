@@ -98,9 +98,13 @@ const groups: SidebarGroup[] = [
         color: "text-emerald-500",
         items: [
             { label: "Community", icon: Users, href: "/community", color: "text-emerald-500" },
+            { label: "Member Search", icon: Search, href: "/community/members?sort=relevance", color: "text-emerald-500" },
+            { label: "Library", icon: Library, href: "/docs", color: "text-blue-600" },
+            { label: "Messages", icon: MessageSquare, href: "/messages", color: "text-blue-500" },
+            { label: "Tickets", icon: FileQuestion, href: "/tickets", color: "text-rose-500" },
             { label: "Keyword Explorer", icon: Search, href: "/tools/keyword-explorer", color: "text-amber-400" },
-            { label: "Student Directory", icon: Users, href: "/tools/student-directory", color: "text-teal-400" },
-            { label: "Help Center", icon: FileQuestion, href: "/help", color: "text-rose-400" }
+            { label: "Student Directory", icon: Users, href: "/community/members", color: "text-teal-400" },
+            { label: "Help Center & Support", icon: FileQuestion, href: "/tickets?tab=support", color: "text-rose-400" }
         ]
     },
     {
@@ -245,7 +249,7 @@ export const Sidebar = ({ userRole }: SidebarProps) => {
             <div className="flex flex-col gap-1 pb-2">
                 {group.items.map((item) => (
                     <Link
-                        key={item.href}
+                        key={`${group.id}-${item.label}-${item.href}`}
                         href={item.href}
                         className={cn(
                             "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
