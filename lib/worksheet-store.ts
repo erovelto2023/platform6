@@ -74,7 +74,8 @@ export interface WorksheetState {
 
     setCurrentPageIndex: (index: number) => void;
     addPage: () => void;
-    duplicatePage: (index: number) => void;
+    duplicatePage: (index: number, currentCanvasJson?: any) => void;
+    duplicatePageWithSolutions: (index: number, currentCanvasJson?: any) => void;
     deletePage: (index: number) => void;
     reorderPages: (oldIndex: number, newIndex: number) => void;
     updateCurrentPageCanvas: (canvasJson: any, thumbnail?: string) => void;
@@ -227,17 +228,67 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
             set(pushHistory(nextPages, pages.length));
         },
 
-        duplicatePage: (index: number) => {
+        duplicatePage: (index: number, currentCanvasJson?: any) => {
             const { pages } = get();
             if (index < 0 || index >= pages.length) return;
             const targetPage = pages[index];
+            const jsonToCopy = currentCanvasJson || targetPage.canvasJson;
+            const clonedJson = JSON.parse(JSON.stringify(jsonToCopy));
+
             const newPage: WorksheetPage = {
                 id: `page-${Date.now()}`,
-                name: `${targetPage.name} (Copy)`,
-                canvasJson: JSON.parse(JSON.stringify(targetPage.canvasJson)),
+                name: `${targetPage.name || "Page"} (Copy)`,
+                canvasJson: clonedJson,
                 thumbnail: targetPage.thumbnail,
             };
+
             const nextPages = [...pages];
+            if (currentCanvasJson) {
+                nextPages[index] = { ...targetPage, canvasJson: currentCanvasJson };
+            }
+            nextPages.splice(index + 1, 0, newPage);
+            set(pushHistory(nextPages, index + 1));
+        },
+
+        duplicatePageWithSolutions: (index: number, currentCanvasJson?: any) => {
+            const { pages } = get();
+            if (index < 0 || index >= pages.length) return;
+            const targetPage = pages[index];
+            const jsonToCopy = currentCanvasJson || targetPage.canvasJson;
+            const clonedJson = JSON.parse(JSON.stringify(jsonToCopy));
+
+            if (clonedJson && Array.isArray(clonedJson.objects)) {
+                const enableSolutions = (obj: any) => {
+                    if (obj.wordSearchConfig) {
+                        obj.wordSearchConfig.answerKey = obj.wordSearchConfig.answerKey || {};
+                        obj.wordSearchConfig.answerKey.showSolution = true;
+                    }
+                    if (obj.crosswordConfig) {
+                        obj.crosswordConfig.answerKey = obj.crosswordConfig.answerKey || {};
+                        obj.crosswordConfig.answerKey.showSolution = true;
+                    }
+                    if (obj.puzzleConfig) {
+                        obj.puzzleConfig.showAnswerKey = true;
+                        obj.puzzleConfig.showSolution = true;
+                    }
+                    if (Array.isArray(obj.objects)) {
+                        obj.objects.forEach(enableSolutions);
+                    }
+                };
+                clonedJson.objects.forEach(enableSolutions);
+            }
+
+            const newPage: WorksheetPage = {
+                id: `page-${Date.now()}`,
+                name: `${targetPage.name || "Page"} (Solutions)`,
+                canvasJson: clonedJson,
+                thumbnail: targetPage.thumbnail,
+            };
+
+            const nextPages = [...pages];
+            if (currentCanvasJson) {
+                nextPages[index] = { ...targetPage, canvasJson: currentCanvasJson };
+            }
             nextPages.splice(index + 1, 0, newPage);
             set(pushHistory(nextPages, index + 1));
         },

@@ -6,6 +6,41 @@ import {
     solveAndGenerateWordSearch,
     createDefaultWordSearchConfig
 } from "./word-search-engine";
+import {
+    CrosswordConfig,
+    solveAndGenerateCrossword,
+    createDefaultCrosswordConfig
+} from "./crossword-engine";
+
+export const CUSTOM_PUZZLE_PROPS = [
+    "customType",
+    "puzzleComponent",
+    "wordSearchConfig",
+    "crosswordConfig",
+    "puzzleConfig",
+    "id",
+    "subTargetCheck",
+];
+
+export function attachPuzzleMetadata(obj: any, customType: string, componentType: string, config: any) {
+    if (!obj) return;
+    obj.customType = customType;
+    obj.puzzleComponent = componentType;
+    if (customType === "word-search") obj.wordSearchConfig = config;
+    else if (customType === "crossword") obj.crosswordConfig = config;
+    else obj.puzzleConfig = config;
+
+    const originalToObject = obj.toObject.bind(obj);
+    obj.toObject = function (additionalProperties?: string[]) {
+        const res = originalToObject(additionalProperties);
+        res.customType = customType;
+        res.puzzleComponent = componentType;
+        if (customType === "word-search") res.wordSearchConfig = config;
+        else if (customType === "crossword") res.crosswordConfig = config;
+        else res.puzzleConfig = config;
+        return res;
+    };
+}
 
 // --- Perfect Freehand Stroke Helper ---
 export function getSvgPathFromFreehandStroke(stroke: number[][]): string {
@@ -187,20 +222,22 @@ export function addObjectsSafelyToCanvas(
     if (!c || !objects || !objects.length) return;
     try {
         const selectionGroup = new fabric.Group(objects, {
-            left: 60,
-            top: 60,
             subTargetCheck: true,
         });
         
         Object.assign(selectionGroup as any, customMetadata);
 
         c.add(selectionGroup);
+        c.centerObject(selectionGroup);
         c.setActiveObject(selectionGroup);
         c.requestRenderAll();
         c.fire("object:modified");
     } catch (err) {
         console.warn("Fabric Group error, adding elements directly:", err);
-        objects.forEach((obj) => c.add(obj));
+        objects.forEach((obj) => {
+            c.add(obj);
+            c.centerObject(obj);
+        });
         c.requestRenderAll();
         c.fire("object:modified");
     }
@@ -220,7 +257,187 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
 
     const rows = config.grid.rows;
     const cols = config.grid.cols;
-    const cellSize = config.grid.cellSize || (cols >= 15 ? 26 : cols >= 12 ? 30 : 34);
+    const cellSize = config.grid.cellSize || (cols >= 15 ? 26 : cols >= 12 ? 30 : 32);
+
+    // --- 1. TITLE GROUP ---
+    let titleGroup: fabric.FabricObject | null = null;
+    const titleObjs: fabric.FabricObject[] = [];
+
+    if (config.title) {
+        const titleObj = new fabric.IText(config.title.toUpperCase(), {
+            left: 0,
+            top: 0,
+            fontSize: config.appearance.titleFontSize || 22,
+            fontFamily: config.appearance.titleFont || "Inter",
+            fontWeight: "800",
+            fill: config.appearance.titleColor || "#0f172a",
+        });
+        titleObjs.push(titleObj);
+    }
+
+    const subText = config.subtitle || config.instructions || "Find all the hidden words in the grid below!";
+    const subObj = new fabric.IText(subText, {
+        left: 0,
+        top: config.title ? 30 : 0,
+        fontSize: 12,
+        fontFamily: config.appearance.titleFont || "Inter",
+        fontWeight: "500",
+        fill: "#475569",
+    });
+    titleObjs.push(subObj);
+
+    if (titleObjs.length > 0) {
+        titleGroup = new fabric.Group(titleObjs, { left: 60, top: 50, subTargetCheck: true });
+    }
+
+    // --- 2. LETTER GRID GROUP (CLEAN BORDERLESS BY DEFAULT) ---
+    const gridObjs: fabric.FabricObject[] = [];
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const x = c * cellSize;
+            const y = r * cellSize;
+            const letter = grid[r][c];
+            const isSolution = config.answerKey.showSolution && solutionGrid[r][c];
+
+            const bgFill = isSolution
+                ? (config.answerKey.color || "#bbf7d0")
+                : (config.appearance.cellBgColor !== "transparent" ? config.appearance.cellBgColor : "transparent");
+
+            const bgStroke = isSolution
+                ? "#16a34a"
+                : (config.grid.cellStyle === "boxed" || config.grid.cellStyle === "rounded" || config.grid.cellStyle === "circle"
+                    ? (config.appearance.gridBorderColor !== "transparent" ? config.appearance.gridBorderColor : "#cbd5e1")
+                    : "transparent");
+
+            const rx = isSolution
+                ? 6
+                : (config.grid.cellStyle === "circle" ? cellSize / 2 : config.grid.cellStyle === "rounded" ? 6 : 0);
+
+            const cellRect = new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize,
+                height: cellSize,
+                fill: bgFill,
+                stroke: bgStroke,
+                strokeWidth: isSolution ? 1.5 : (config.appearance.gridBorderThickness || 1),
+                rx: rx,
+                ry: rx,
+            });
+            gridObjs.push(cellRect);
+
+            const charObj = new fabric.IText(letter, {
+                left: x + (cellSize / 2),
+                top: y + (cellSize / 2),
+                originX: "center",
+                originY: "center",
+                fontSize: config.appearance.gridFontSize || (cols >= 15 ? 13 : 15),
+                fontFamily: config.appearance.gridFont || "Inter",
+                fontWeight: "bold",
+                fill: isSolution ? "#14532d" : (config.appearance.gridLetterColor || "#0f172a"),
+            });
+            gridObjs.push(charObj);
+        }
+    }
+
+    const gridGroup = new fabric.Group(gridObjs, { left: 60, top: 130, subTargetCheck: true });
+
+    // --- 3. WORD BANK GROUP (CLEAN & UNBOXED BY DEFAULT) ---
+    let bankGroup: fabric.FabricObject | null = null;
+
+    if (config.wordBank.layout !== "hidden") {
+        const bankObjs: fabric.FabricObject[] = [];
+
+        const bankHeader = new fabric.IText("FIND THE WORDS:", {
+            left: 0,
+            top: 0,
+            fontSize: 11,
+            fontFamily: config.appearance.wordBankFont || "Inter",
+            fontWeight: "bold",
+            fill: "#334155",
+        });
+        bankObjs.push(bankHeader);
+
+        let displayWords = config.words.map((w) => w.word);
+        if (config.wordBank.sorting === "alphabetical") {
+            displayWords.sort((a, b) => a.localeCompare(b));
+        } else if (config.wordBank.sorting === "length") {
+            displayWords.sort((a, b) => a.length - b.length);
+        }
+
+        const colsCount = config.wordBank.columns || 3;
+        const totalGridWidth = cols * cellSize;
+        const colWidth = Math.floor(Math.max(totalGridWidth, 300) / colsCount);
+        const rowHeight = 20;
+
+        displayWords.forEach((word, idx) => {
+            const colIdx = idx % colsCount;
+            const rowIdx = Math.floor(idx / colsCount);
+            const x = colIdx * colWidth;
+            const y = 20 + rowIdx * rowHeight;
+
+            let prefix = "• ";
+            if (config.wordBank.layout === "numbered") prefix = `${idx + 1}. `;
+
+            const wordObj = new fabric.IText(`${prefix}${word}`, {
+                left: x,
+                top: y,
+                fontSize: config.appearance.wordBankFontSize || 11,
+                fontFamily: config.appearance.wordBankFont || "Inter",
+                fontWeight: "600",
+                fill: config.appearance.wordBankColor || "#334155",
+            });
+            bankObjs.push(wordObj);
+        });
+
+        const gridHeight = rows * cellSize;
+        bankGroup = new fabric.Group(bankObjs, { left: 60, top: 140 + gridHeight + 30, subTargetCheck: true });
+    }
+
+    return { titleGroup, gridGroup, bankGroup };
+}
+
+// Single-Group Backward Compatibility Builder
+export function generateAdvancedWordSearchObjects(config: WordSearchConfig): fabric.FabricObject[] {
+    const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
+    const objects: fabric.FabricObject[] = [];
+    if (titleGroup) objects.push(titleGroup);
+    if (gridGroup) objects.push(gridGroup);
+    if (bankGroup) objects.push(bankGroup);
+    return objects;
+}
+
+export function generateWordSearchObjects(
+    title: string,
+    words: string[],
+    gridSize: number = 10,
+    directions: string[] = ["H", "V", "D_TL_BR"]
+): fabric.FabricObject[] {
+    const config = createDefaultWordSearchConfig();
+    config.title = title || "WORD SEARCH";
+    config.grid.rows = gridSize;
+    config.grid.cols = gridSize;
+    config.grid.directions = directions as any;
+    config.words = words.map((w, i) => ({ id: `w-${i}`, word: w }));
+    return generateAdvancedWordSearchObjects(config);
+}
+
+// =========================================================================
+// SEPARATED CANVA-GRADE CROSSWORD PUZZLE COMPONENT GROUPS
+// =========================================================================
+
+export function generateCrosswordComponentGroups(config: CrosswordConfig): {
+    titleGroup: fabric.FabricObject | null;
+    gridGroup: fabric.FabricObject;
+    cluesGroup: fabric.FabricObject | null;
+} {
+    const generation = solveAndGenerateCrossword(config);
+    const { grid, acrossClues, downClues } = generation;
+
+    const rows = config.grid.rows;
+    const cols = config.grid.cols;
+    const cellSize = config.grid.cellSize || 32;
 
     // --- 1. TITLE GROUP ---
     let titleGroup: fabric.FabricObject | null = null;
@@ -254,174 +471,302 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
         titleGroup = new fabric.Group(titleObjs, { left: 60, top: 50 });
     }
 
-    // --- 2. LETTER GRID GROUP (CLEAN BORDERLESS BY DEFAULT) ---
+    // --- 2. GRID GROUP ---
     const gridObjs: fabric.FabricObject[] = [];
 
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const x = c * cellSize;
             const y = r * cellSize;
-            const letter = grid[r][c];
-            const isSolution = solutionGrid[r][c];
+            const cell = grid[r][c];
 
-            if (config.answerKey.showSolution && isSolution) {
-                const bgRect = new fabric.Rect({
+            if (cell.isBlack) {
+                // Black cell
+                const blackRect = new fabric.Rect({
                     left: x,
                     top: y,
-                    width: cellSize - 2,
-                    height: cellSize - 2,
-                    fill: config.answerKey.color || "#bbf7d0",
-                    stroke: "#16a34a",
-                    strokeWidth: 2,
-                    rx: 4,
-                    ry: 4,
+                    width: cellSize,
+                    height: cellSize,
+                    fill: config.grid.blackSquareColor || "#1e293b",
+                    stroke: config.grid.borderColor || "#cbd5e1",
+                    strokeWidth: config.grid.borderWidth || 1,
                 });
-                gridObjs.push(bgRect);
-            } else if (config.grid.cellStyle === "boxed" || config.grid.cellStyle === "rounded" || config.grid.cellStyle === "circle") {
-                const rx = config.grid.cellStyle === "circle" ? cellSize / 2 : config.grid.cellStyle === "rounded" ? 8 : 4;
-                const bgRect = new fabric.Rect({
+                gridObjs.push(blackRect);
+            } else {
+                // White letter cell
+                const cellRect = new fabric.Rect({
                     left: x,
                     top: y,
-                    width: cellSize - 2,
-                    height: cellSize - 2,
-                    fill: config.appearance.cellBgColor !== "transparent" ? config.appearance.cellBgColor : "#ffffff",
-                    stroke: config.appearance.gridBorderColor !== "transparent" ? config.appearance.gridBorderColor : "#cbd5e1",
-                    strokeWidth: config.appearance.gridBorderThickness || 1,
-                    rx: rx,
-                    ry: rx,
+                    width: cellSize,
+                    height: cellSize,
+                    fill: config.answerKey.showSolution && cell.letter
+                        ? (config.answerKey.highlightColor || "#bbf7d0")
+                        : (config.appearance.cellBgColor || "#ffffff"),
+                    stroke: config.grid.borderColor || "#cbd5e1",
+                    strokeWidth: config.grid.borderWidth || 1,
+                    rx: config.grid.cellStyle === "rounded" ? 6 : 0,
+                    ry: config.grid.cellStyle === "rounded" ? 6 : 0,
                 });
-                gridObjs.push(bgRect);
+                gridObjs.push(cellRect);
+
+                // Small cell number at top-left
+                if (config.numbering.showNumbers && cell.number) {
+                    const numObj = new fabric.IText(cell.number.toString(), {
+                        left: x + 3,
+                        top: y + 2,
+                        fontSize: config.numbering.fontSize || 9,
+                        fontFamily: "Inter",
+                        fontWeight: "600",
+                        fill: config.numbering.color || "#475569",
+                    });
+                    gridObjs.push(numObj);
+                }
+
+                // Answer solution letter if toggled or student assistance first/last letter
+                let displayedLetter = "";
+                if (config.answerKey.showSolution && cell.letter) {
+                    displayedLetter = cell.letter;
+                } else if (config.assistance?.showFirstLetter && cell.number && cell.letter) {
+                    displayedLetter = cell.letter;
+                }
+
+                if (displayedLetter) {
+                    const letterObj = new fabric.IText(displayedLetter, {
+                        left: x + (cellSize / 2),
+                        top: y + (cellSize / 2),
+                        originX: "center",
+                        originY: "center",
+                        fontSize: config.appearance.gridFontSize || 15,
+                        fontFamily: config.appearance.gridFont || "Inter",
+                        fontWeight: "bold",
+                        fill: config.answerKey.showSolution ? (config.answerKey.solutionColor || "#14532d") : (config.appearance.gridLetterColor || "#0f172a"),
+                    });
+                    gridObjs.push(letterObj);
+                }
             }
-
-            const charObj = new fabric.IText(letter, {
-                left: x + (cellSize / 2) - 6,
-                top: y + (cellSize / 2) - 10,
-                fontSize: config.appearance.gridFontSize || (cols >= 15 ? 13 : 15),
-                fontFamily: config.appearance.gridFont || "Inter",
-                fontWeight: "bold",
-                fill: config.answerKey.showSolution && isSolution ? "#14532d" : (config.appearance.gridLetterColor || "#0f172a"),
-            });
-            gridObjs.push(charObj);
         }
     }
 
     const gridGroup = new fabric.Group(gridObjs, { left: 60, top: 120 });
 
-    // --- 3. WORD BANK GROUP ---
-    let bankGroup: fabric.FabricObject | null = null;
+    // --- 3. CLUES GROUP ---
+    let cluesGroup: fabric.FabricObject | null = null;
+    const clueObjs: fabric.FabricObject[] = [];
 
-    if (config.wordBank.layout !== "hidden") {
-        const bankObjs: fabric.FabricObject[] = [];
-        const bankHeader = new fabric.IText("FIND THE WORDS:", {
+    const layout = config.clues.layout || "side_by_side";
+    const colWidth = layout === "columns_3"
+        ? Math.max(160, Math.floor((cols * cellSize) / 3))
+        : Math.max(220, Math.floor((cols * cellSize) / 2));
+
+    const clueFontSize = config.clues.fontSize || 11;
+    const clueFontFamily = config.clues.fontFamily || "Inter";
+    const clueColor = config.clues.color || "#334155";
+    const itemSpacing = config.clues.spacing || 20;
+
+    // Helper to format clue string with length hint if enabled
+    const formatClueText = (entry: any) => {
+        let text = `${entry.number}. ${entry.clue}`;
+        if (config.assistance?.showWordLength) {
+            text += ` (${entry.word.length})`;
+        }
+        return text;
+    };
+
+    if (layout === "stacked") {
+        // Stacked Layout: Across section first, then Down section below it
+        let currentY = 0;
+        const acrossHeader = new fabric.IText(config.clues.acrossTitle || "ACROSS", {
+            left: 0,
+            top: currentY,
+            fontSize: 14,
+            fontFamily: clueFontFamily,
+            fontWeight: "bold",
+            fill: "#0f172a",
+        });
+        clueObjs.push(acrossHeader);
+        currentY += 24;
+
+        acrossClues.forEach((entry) => {
+            const clueItem = new fabric.IText(formatClueText(entry), {
+                left: 0,
+                top: currentY,
+                fontSize: clueFontSize,
+                fontFamily: clueFontFamily,
+                fill: clueColor,
+            });
+            clueObjs.push(clueItem);
+            currentY += itemSpacing;
+        });
+
+        currentY += 16;
+        const downHeader = new fabric.IText(config.clues.downTitle || "DOWN", {
+            left: 0,
+            top: currentY,
+            fontSize: 14,
+            fontFamily: clueFontFamily,
+            fontWeight: "bold",
+            fill: "#0f172a",
+        });
+        clueObjs.push(downHeader);
+        currentY += 24;
+
+        downClues.forEach((entry) => {
+            const clueItem = new fabric.IText(formatClueText(entry), {
+                left: 0,
+                top: currentY,
+                fontSize: clueFontSize,
+                fontFamily: clueFontFamily,
+                fill: clueColor,
+            });
+            clueObjs.push(clueItem);
+            currentY += itemSpacing;
+        });
+    } else {
+        // Side-by-side or Multi-column Layout
+        const acrossHeader = new fabric.IText(config.clues.acrossTitle || "ACROSS", {
             left: 0,
             top: 0,
-            fontSize: 13,
-            fontFamily: config.appearance.wordBankFont || "Inter",
+            fontSize: 14,
+            fontFamily: clueFontFamily,
             fontWeight: "bold",
-            fill: "#334155",
+            fill: "#0f172a",
         });
-        bankObjs.push(bankHeader);
+        clueObjs.push(acrossHeader);
 
-        let displayWords = config.words.map((w) => w.word);
-        if (config.wordBank.sorting === "alphabetical") {
-            displayWords.sort((a, b) => a.localeCompare(b));
-        } else if (config.wordBank.sorting === "length") {
-            displayWords.sort((a, b) => a.length - b.length);
-        }
-
-        const colsCount = config.wordBank.columns || 3;
-        const totalGridWidth = cols * cellSize;
-        const colWidth = Math.floor(totalGridWidth / colsCount);
-        const rowHeight = 22;
-
-        displayWords.forEach((word, idx) => {
-            const colIdx = idx % colsCount;
-            const rowIdx = Math.floor(idx / colsCount);
-            const x = colIdx * colWidth;
-            const y = 24 + rowIdx * rowHeight;
-
-            let prefix = "• ";
-            if (config.wordBank.layout === "numbered") prefix = `${idx + 1}. `;
-
-            const wordObj = new fabric.IText(`${prefix}${word}`, {
-                left: x,
-                top: y,
-                fontSize: config.appearance.wordBankFontSize || 12,
-                fontFamily: config.appearance.wordBankFont || "Inter",
-                fontWeight: "600",
-                fill: config.appearance.wordBankColor || "#334155",
+        let acrossY = 24;
+        acrossClues.forEach((entry) => {
+            const clueItem = new fabric.IText(formatClueText(entry), {
+                left: 0,
+                top: acrossY,
+                fontSize: clueFontSize,
+                fontFamily: clueFontFamily,
+                fill: clueColor,
             });
-            bankObjs.push(wordObj);
+            clueObjs.push(clueItem);
+            acrossY += itemSpacing;
         });
 
-        const gridHeight = rows * cellSize;
-        bankGroup = new fabric.Group(bankObjs, { left: 60, top: 140 + gridHeight + 20 });
+        // Down Clues Column
+        const downHeader = new fabric.IText(config.clues.downTitle || "DOWN", {
+            left: colWidth + 20,
+            top: 0,
+            fontSize: 14,
+            fontFamily: clueFontFamily,
+            fontWeight: "bold",
+            fill: "#0f172a",
+        });
+        clueObjs.push(downHeader);
+
+        let downY = 24;
+        downClues.forEach((entry) => {
+            const clueItem = new fabric.IText(formatClueText(entry), {
+                left: colWidth + 20,
+                top: downY,
+                fontSize: clueFontSize,
+                fontFamily: clueFontFamily,
+                fill: clueColor,
+            });
+            clueObjs.push(clueItem);
+            downY += itemSpacing;
+        });
     }
 
-    return { titleGroup, gridGroup, bankGroup };
+    if (clueObjs.length > 0) {
+        const gridHeight = rows * cellSize;
+        cluesGroup = new fabric.Group(clueObjs, { left: 60, top: 140 + gridHeight + 20 });
+    }
+
+    return { titleGroup, gridGroup, cluesGroup };
 }
 
-// Single-Group Backward Compatibility Builder
-export function generateAdvancedWordSearchObjects(config: WordSearchConfig): fabric.FabricObject[] {
-    const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
+// Master Group Canva-Grade Crossword Objects Builder
+export function generateAdvancedCrosswordObjects(config: CrosswordConfig): fabric.FabricObject[] {
+    const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(config);
     const objects: fabric.FabricObject[] = [];
     if (titleGroup) objects.push(titleGroup);
     if (gridGroup) objects.push(gridGroup);
-    if (bankGroup) objects.push(bankGroup);
-    return objects;
-}
+    if (cluesGroup) objects.push(cluesGroup);
 
-export function generateWordSearchObjects(
-    title: string,
-    words: string[],
-    gridSize: number = 10,
-    directions: string[] = ["H", "V", "D_TL_BR"]
-): fabric.FabricObject[] {
-    const config = createDefaultWordSearchConfig();
-    config.title = title || "WORD SEARCH";
-    config.grid.rows = gridSize;
-    config.grid.cols = gridSize;
-    config.grid.directions = directions as any;
-    config.words = words.map((w, i) => ({ id: `w-${i}`, word: w }));
-    return generateAdvancedWordSearchObjects(config);
-}
-
-// 2. Crossword
-export function generateCrosswordObjects(title: string, items: { word: string; clue: string }[]): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText((title || "Crossword Puzzle").toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
-    const cellSize = 34;
-    let yOffset = 40;
-
-    items.forEach((item, index) => {
-        objects.push(new fabric.IText(`${index + 1}.`, { left: 0, top: yOffset + 6, fontSize: 14, fontFamily: "Inter", fontWeight: "bold", fill: "#475569" }));
-        const wordUpper = item.word.toUpperCase();
-        for (let i = 0; i < wordUpper.length; i++) {
-            const x = 25 + i * (cellSize + 4);
-            objects.push(new fabric.Rect({ left: x, top: yOffset, width: cellSize, height: cellSize, fill: "#ffffff", stroke: "#334155", strokeWidth: 2, rx: 4, ry: 4 }));
-        }
-        objects.push(new fabric.IText(`Clue: ${item.clue}`, { left: 30 + wordUpper.length * (cellSize + 4), top: yOffset + 8, fontSize: 13, fontFamily: "Inter", fill: "#64748b" }));
-        yOffset += cellSize + 12;
+    // Attach custom properties to each root object in group
+    objects.forEach((obj) => {
+        (obj as any).customType = "crossword";
+        (obj as any).crosswordConfig = config;
     });
 
     return objects;
 }
 
+export function generateCrosswordObjects(title: string, items: { word: string; clue: string }[]): fabric.FabricObject[] {
+    const config = createDefaultCrosswordConfig();
+    if (title) config.title = title;
+    if (items && items.length > 0) {
+        config.words = items.map((item, idx) => ({
+            id: `cw-${idx}`,
+            word: item.word,
+            clue: item.clue,
+        }));
+    }
+    return generateAdvancedCrosswordObjects(config);
+}
+
 // 3. Fill In / Fill-in-the-Blanks
-export function generateFillInBlanksObjects(sentence: string, wordBank: string[]): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("FILL IN THE BLANKS", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
-    objects.push(new fabric.IText(sentence || "The ________ jumps over the ________ wall.", { left: 0, top: 35, fontSize: 18, fontFamily: "Inter", fill: "#0f172a" }));
+export interface FillInBlanksConfig {
+    title: string;
+    sentence: string;
+    wordBank: string[];
+    showAnswerKey?: boolean;
+}
+
+export function generateFillInBlanksObjectsFromConfig(config: FillInBlanksConfig): fabric.FabricObject[] {
+    const titleText = config.title || "FILL IN THE BLANKS";
+    const sentenceText = config.sentence || "The ________ jumps over the ________ wall.";
+    const wordBank = config.wordBank || ["fox", "high", "quick"];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText(sentenceText, { left: 0, top: 35, fontSize: 16, fontFamily: "Inter", fill: "#0f172a" })
+    ];
 
     if (wordBank.length > 0) {
-        objects.push(new fabric.Rect({ left: 0, top: 75, width: 450, height: 40, fill: "#f1f5f9", stroke: "#cbd5e1", strokeWidth: 1.5, rx: 8, ry: 8 }));
-        objects.push(new fabric.IText(`Word Bank:  ${wordBank.join("   |   ")}`, { left: 15, top: 85, fontSize: 14, fontFamily: "Inter", fontWeight: "bold", fill: "#475569" }));
+        objects.push(new fabric.Rect({ left: 0, top: 80, width: 450, height: 40, fill: "#f1f5f9", stroke: "#cbd5e1", strokeWidth: 1.5, rx: 8, ry: 8 }));
+        objects.push(new fabric.IText(`Word Bank:  ${wordBank.join("   |   ")}`, { left: 15, top: 90, fontSize: 14, fontFamily: "Inter", fontWeight: "bold", fill: "#475569" }));
     }
+
+    if (config.showAnswerKey) {
+        objects.push(new fabric.IText(`[Solution Key]: ${wordBank.join(", ")}`, { left: 0, top: 135, fontSize: 12, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+    }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "fill-in-blanks";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
+export function generateFillInBlanksObjects(sentence: string, wordBank: string[]): fabric.FabricObject[] {
+    return generateFillInBlanksObjectsFromConfig({
+        title: "FILL IN THE BLANKS",
+        sentence,
+        wordBank,
+    });
+}
+
 // 4. Cryptogram
-export function generateCryptogramObjects(): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("CRYPTOGRAM PUZZLE", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#4f46e5" })];
-    const phrase = "KNOWLEDGE IS POWER";
+export interface CryptogramConfig {
+    title: string;
+    phrase: string;
+    showAnswerKey?: boolean;
+}
+
+export function generateCryptogramObjectsFromConfig(config: CryptogramConfig): fabric.FabricObject[] {
+    const titleText = config.title || "CRYPTOGRAM PUZZLE";
+    const phrase = (config.phrase || "KNOWLEDGE IS POWER").toUpperCase();
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#4f46e5" })
+    ];
+
     let x = 0;
     phrase.split("").forEach((char) => {
         if (char === " ") {
@@ -431,51 +776,127 @@ export function generateCryptogramObjects(): fabric.FabricObject[] {
         const sub = ((char.charCodeAt(0) - 65 + 7) % 26 + 65);
         const codeChar = String.fromCharCode(sub);
         objects.push(new fabric.IText(codeChar, { left: x + 8, top: 40, fontSize: 20, fontFamily: "Courier New", fontWeight: "bold", fill: "#4f46e5" }));
-        objects.push(new fabric.Rect({ left: x, top: 70, width: 30, height: 35, fill: "#ffffff", stroke: "#94a3b8", strokeWidth: 2, rx: 4, ry: 4 }));
+        objects.push(new fabric.Rect({ left: x, top: 70, width: 30, height: 35, fill: config.showAnswerKey ? "#bbf7d0" : "#ffffff", stroke: "#94a3b8", strokeWidth: 2, rx: 4, ry: 4 }));
+        
+        if (config.showAnswerKey) {
+            objects.push(new fabric.IText(char, { left: x + 8, top: 76, fontSize: 18, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+        }
+
         x += 36;
     });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "cryptogram";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
+export function generateCryptogramObjects(): fabric.FabricObject[] {
+    return generateCryptogramObjectsFromConfig({
+        title: "CRYPTOGRAM PUZZLE",
+        phrase: "KNOWLEDGE IS POWER",
+    });
+}
+
 // 5. Crack the Code
-export function generateCrackTheCodeObjects(): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("CRACK THE CODE!", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#059669" })];
-    const clues = [
+export interface CrackTheCodeConfig {
+    title: string;
+    secretCode: string;
+    clues: string[];
+    showAnswerKey?: boolean;
+}
+
+export function generateCrackTheCodeObjectsFromConfig(config: CrackTheCodeConfig): fabric.FabricObject[] {
+    const titleText = config.title || "CRACK THE CODE!";
+    const secretCode = config.secretCode || "682";
+    const clues = config.clues && config.clues.length > 0 ? config.clues : [
         "6 8 2  - One number is correct and well placed",
         "6 1 4  - One number is correct but wrong place",
         "2 0 6  - Two numbers are correct but wrong place",
         "7 3 8  - Nothing is correct",
     ];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#059669" })
+    ];
+
     let y = 40;
     clues.forEach((c) => {
         objects.push(new fabric.IText(c, { left: 0, top: y, fontSize: 14, fontFamily: "Inter", fill: "#334155" }));
         y += 26;
     });
-    for (let i = 0; i < 3; i++) {
-        objects.push(new fabric.Rect({ left: i * 50, top: y + 10, width: 40, height: 45, fill: "#f0fdf4", stroke: "#059669", strokeWidth: 2, rx: 6, ry: 6 }));
-        objects.push(new fabric.IText("?", { left: i * 50 + 13, top: y + 20, fontSize: 22, fontFamily: "Inter", fontWeight: "bold", fill: "#047857" }));
+
+    const digits = secretCode.split("");
+    for (let i = 0; i < Math.max(3, digits.length); i++) {
+        const val = config.showAnswerKey ? (digits[i] || "?") : "?";
+        objects.push(new fabric.Rect({ left: i * 50, top: y + 10, width: 40, height: 45, fill: config.showAnswerKey ? "#bbf7d0" : "#f0fdf4", stroke: "#059669", strokeWidth: 2, rx: 6, ry: 6 }));
+        objects.push(new fabric.IText(val, { left: i * 50 + 13, top: y + 20, fontSize: 22, fontFamily: "Inter", fontWeight: "bold", fill: config.showAnswerKey ? "#16a34a" : "#047857" }));
     }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "crack-the-code";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
+export function generateCrackTheCodeObjects(): fabric.FabricObject[] {
+    return generateCrackTheCodeObjectsFromConfig({
+        title: "CRACK THE CODE!",
+        secretCode: "682",
+        clues: [
+            "6 8 2  - One number is correct and well placed",
+            "6 1 4  - One number is correct but wrong place",
+            "2 0 6  - Two numbers are correct but wrong place",
+            "7 3 8  - Nothing is correct",
+        ],
+    });
+}
+
 // 6. Sudoku Grid
-export function generateSudokuObjects(): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("SUDOKU PUZZLE (MINI 4X4)", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
-    const size = 4;
-    const cellSize = 45;
-    const initialGrid = [
+export interface SudokuConfig {
+    title: string;
+    size: 4 | 9;
+    difficulty: "easy" | "medium" | "hard";
+    showAnswerKey?: boolean;
+}
+
+export function generateSudokuObjectsFromConfig(config: SudokuConfig): fabric.FabricObject[] {
+    const titleText = config.title || `SUDOKU PUZZLE (${config.size || 4}X${config.size || 4})`;
+    const size = config.size || 4;
+    const cellSize = size === 4 ? 45 : 32;
+
+    const initialGrid = size === 4 ? [
         [1, 0, 0, 4],
         [0, 3, 2, 0],
         [0, 4, 1, 0],
         [2, 0, 0, 3],
+    ] : [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9],
+    ];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })
     ];
 
     for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
             const x = c * cellSize;
             const y = 40 + r * cellSize;
-            const isThickRight = (c + 1) % 2 === 0;
-            const isThickBottom = (r + 1) % 2 === 0;
+            const subSize = size === 4 ? 2 : 3;
+            const isThickRight = (c + 1) % subSize === 0;
+            const isThickBottom = (r + 1) % subSize === 0;
 
             const box = new fabric.Rect({
                 left: x,
@@ -490,14 +911,23 @@ export function generateSudokuObjects(): fabric.FabricObject[] {
 
             const val = initialGrid[r][c];
             if (val > 0) {
-                objects.push(new fabric.IText(val.toString(), { left: x + 16, top: y + 10, fontSize: 22, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }));
+                objects.push(new fabric.IText(val.toString(), { left: x + (cellSize / 2) - 6, top: y + (cellSize / 2) - 12, fontSize: size === 4 ? 22 : 16, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }));
             }
         }
     }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "sudoku";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
-// 7. Kakuro Cross Sums
+export function generateSudokuObjects(): fabric.FabricObject[] {
+    return generateSudokuObjectsFromConfig({ title: "SUDOKU PUZZLE (MINI 4X4)", size: 4, difficulty: "easy" });
+}
+
 export function generateKakuroObjects(): fabric.FabricObject[] {
     const objects: fabric.FabricObject[] = [new fabric.IText("KAKURO (CROSS SUMS)", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
     for (let r = 0; r < 3; r++) {
@@ -514,7 +944,6 @@ export function generateKakuroObjects(): fabric.FabricObject[] {
     return objects;
 }
 
-// 8. Maze Challenge
 export function generateMazeObjects(): fabric.FabricObject[] {
     const objects: fabric.FabricObject[] = [new fabric.IText("MAZE CHALLENGE!", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
     const outer = new fabric.Rect({ left: 0, top: 40, width: 240, height: 240, fill: "#ffffff", stroke: "#0f172a", strokeWidth: 3, rx: 8, ry: 8 });
@@ -534,27 +963,165 @@ export function generateMazeObjects(): fabric.FabricObject[] {
 }
 
 // 9. Word Scramble
-export function generateWordScrambleObjects(words: string[]): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("WORD SCRAMBLE", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
+export interface WordScrambleConfig {
+    title: string;
+    words: string[];
+    showFirstLetter?: boolean;
+    showAnswerKey?: boolean;
+}
+
+export function generateWordScrambleObjectsFromConfig(config: WordScrambleConfig): fabric.FabricObject[] {
+    const titleText = config.title || "WORD SCRAMBLE";
+    const words = config.words && config.words.length > 0 ? config.words : ["APPLE", "BANANA", "CHERRY"];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })
+    ];
+
     let yOffset = 40;
-    (words && words.length ? words : ["APPLE", "BANANA", "CHERRY"]).forEach((word, idx) => {
-        const scrambled = word.split("").sort(() => Math.random() - 0.5).join(" ").toUpperCase();
-        objects.push(new fabric.IText(`${idx + 1})   ${scrambled}`, { left: 0, top: yOffset, fontSize: 18, fontFamily: "Courier New", fontWeight: "bold", fill: "#2563eb" }));
-        objects.push(new fabric.IText("➔   ______________________", { left: 200, top: yOffset, fontSize: 18, fontFamily: "Inter", fill: "#94a3b8" }));
+    words.forEach((word, idx) => {
+        const uppercaseWord = word.toUpperCase();
+        const scrambled = uppercaseWord.split("").sort(() => 0.5 - Math.random()).join(" ");
+        let lineText = `${idx + 1})   ${scrambled}`;
+        if (config.showFirstLetter) {
+            lineText += `  [Hint: ${uppercaseWord[0]}]`;
+        }
+        objects.push(new fabric.IText(lineText, { left: 0, top: yOffset, fontSize: 16, fontFamily: "Courier New", fontWeight: "bold", fill: "#2563eb" }));
+        
+        if (config.showAnswerKey) {
+            objects.push(new fabric.IText(`➔   ${uppercaseWord}`, { left: 240, top: yOffset, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+        } else {
+            objects.push(new fabric.IText("➔   ______________________", { left: 240, top: yOffset, fontSize: 16, fontFamily: "Inter", fill: "#94a3b8" }));
+        }
         yOffset += 38;
     });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "word-scramble";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
+export function generateWordScrambleObjects(words: string[]): fabric.FabricObject[] {
+    return generateWordScrambleObjectsFromConfig({ title: "WORD SCRAMBLE", words });
+}
+
 // 10. Missing Letters
-export function generateMissingLettersObjects(words: string[]): fabric.FabricObject[] {
-    const objects: fabric.FabricObject[] = [new fabric.IText("MISSING LETTERS", { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })];
+export interface MissingLettersConfig {
+    title: string;
+    words: string[];
+    showAnswerKey?: boolean;
+}
+
+export function generateMissingLettersObjectsFromConfig(config: MissingLettersConfig): fabric.FabricObject[] {
+    const titleText = config.title || "MISSING LETTERS";
+    const words = config.words && config.words.length > 0 ? config.words : ["GUITAR", "PLANET", "SUMMER"];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })
+    ];
+
     let yOffset = 40;
-    (words && words.length ? words : ["GUITAR", "PLANET", "SUMMER"]).forEach((word, idx) => {
-        const chars = word.toUpperCase().split("").map((c, i) => (i % 2 === 1 ? "_" : c)).join(" ");
-        objects.push(new fabric.IText(`${idx + 1})   ${chars}`, { left: 0, top: yOffset, fontSize: 22, fontFamily: "Courier New", fontWeight: "bold", fill: "#0f172a" }));
+    words.forEach((word, idx) => {
+        const uppercaseWord = word.toUpperCase();
+        const chars = config.showAnswerKey
+            ? uppercaseWord.split("").join(" ")
+            : uppercaseWord.split("").map((c, i) => (i % 2 === 1 ? "_" : c)).join(" ");
+
+        objects.push(new fabric.IText(`${idx + 1})   ${chars}`, { left: 0, top: yOffset, fontSize: 20, fontFamily: "Courier New", fontWeight: "bold", fill: config.showAnswerKey ? "#16a34a" : "#0f172a" }));
         yOffset += 35;
     });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "missing-letters";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateMissingLettersObjects(words: string[]): fabric.FabricObject[] {
+    return generateMissingLettersObjectsFromConfig({ title: "MISSING LETTERS", words });
+}
+
+// Missing Vowels Puzzle
+export interface MissingVowelsConfig {
+    title: string;
+    words: string[];
+    showAnswerKey?: boolean;
+}
+
+export function generateMissingVowelsObjectsFromConfig(config: MissingVowelsConfig): fabric.FabricObject[] {
+    const titleText = config.title || "MISSING VOWELS PUZZLE";
+    const words = config.words && config.words.length > 0 ? config.words : ["ELEPHANT", "SUNSHINE", "BUTTERFLY"];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })
+    ];
+
+    let yOffset = 40;
+    words.forEach((word, idx) => {
+        const uppercaseWord = word.toUpperCase();
+        const chars = config.showAnswerKey
+            ? uppercaseWord.split("").join(" ")
+            : uppercaseWord.split("").map((c) => ("AEIOU".includes(c) ? "_" : c)).join(" ");
+
+        objects.push(new fabric.IText(`${idx + 1})   ${chars}`, { left: 0, top: yOffset, fontSize: 20, fontFamily: "Courier New", fontWeight: "bold", fill: config.showAnswerKey ? "#16a34a" : "#0f172a" }));
+        yOffset += 35;
+    });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "missing-vowels";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+// Codeword Puzzle
+export interface CodewordConfig {
+    title: string;
+    words: string[];
+    showAnswerKey?: boolean;
+}
+
+export function generateCodewordObjectsFromConfig(config: CodewordConfig): fabric.FabricObject[] {
+    const titleText = config.title || "CODEWORD PUZZLE";
+    const words = config.words && config.words.length > 0 ? config.words : ["SECRET", "CIPHER", "PUZZLE"];
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#7c3aed" }),
+        new fabric.IText("Match each code number (1-26) to decipher the words!", { left: 0, top: 28, fontSize: 11, fontFamily: "Inter", fill: "#64748b" })
+    ];
+
+    let yOffset = 52;
+    words.forEach((word, idx) => {
+        const uppercaseWord = word.toUpperCase();
+        let xBox = 0;
+        objects.push(new fabric.IText(`${idx + 1})`, { left: 0, top: yOffset + 5, fontSize: 14, fontFamily: "Inter", fontWeight: "bold" }));
+        xBox += 24;
+
+        uppercaseWord.split("").forEach((char) => {
+            const codeNum = char.charCodeAt(0) - 64;
+            objects.push(new fabric.Rect({ left: xBox, top: yOffset, width: 30, height: 35, fill: "#ffffff", stroke: "#7c3aed", strokeWidth: 1.5, rx: 4, ry: 4 }));
+            objects.push(new fabric.IText(`${codeNum}`, { left: xBox + 4, top: yOffset + 2, fontSize: 9, fontFamily: "Inter", fontWeight: "bold", fill: "#6b21a8" }));
+
+            if (config.showAnswerKey) {
+                objects.push(new fabric.IText(char, { left: xBox + 8, top: yOffset + 12, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+            }
+            xBox += 34;
+        });
+
+        yOffset += 44;
+    });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "codeword";
+        (obj as any).puzzleConfig = config;
+    });
+
     return objects;
 }
 
@@ -770,3 +1337,449 @@ export function generateDominoObjects(): fabric.FabricObject[] {
     }
     return objects;
 }
+
+// =========================================================================
+// DISCOVERY EDUCATION PUZZLEMAKER SUITE GENERATORS
+// =========================================================================
+
+// A. Double Puzzle (Anagrams + Final Secret Message)
+export interface DoublePuzzleConfig {
+    title: string;
+    words: { word: string; clue: string; targetTileIndices?: number[] }[];
+    finalQuote: string;
+    showAnswerKey?: boolean;
+}
+
+export function generateDoublePuzzleObjectsFromConfig(config: DoublePuzzleConfig): fabric.FabricObject[] {
+    const titleText = config.title || "DOUBLE PUZZLE";
+    const words = config.words && config.words.length > 0 ? config.words : [
+        { word: "LEMON", clue: "Yellow sour fruit" },
+        { word: "PEACH", clue: "Fuzzy summer fruit" },
+        { word: "GRAPE", clue: "Small round fruit on vines" },
+    ];
+    const finalQuote = (config.finalQuote || "GREAT JOB").toUpperCase();
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" })
+    ];
+
+    let yOffset = 40;
+    words.forEach((item, idx) => {
+        const uppercaseWord = item.word.toUpperCase();
+        const scrambled = uppercaseWord.split("").sort(() => 0.5 - Math.random()).join(" ");
+
+        objects.push(new fabric.IText(`${idx + 1})  ${scrambled}`, { left: 0, top: yOffset, fontSize: 16, fontFamily: "Courier New", fontWeight: "bold", fill: "#2563eb" }));
+        objects.push(new fabric.IText(`[${item.clue}]`, { left: 160, top: yOffset + 2, fontSize: 11, fontFamily: "Inter", fill: "#64748b" }));
+
+        // Letter boxes
+        let xBox = 0;
+        for (let i = 0; i < uppercaseWord.length; i++) {
+            const letter = config.showAnswerKey ? uppercaseWord[i] : "";
+            const isTargetTile = i === 0;
+            objects.push(new fabric.Rect({
+                left: xBox,
+                top: yOffset + 22,
+                width: 26,
+                height: 26,
+                fill: isTargetTile ? "#fef08a" : "#ffffff",
+                stroke: "#334155",
+                strokeWidth: 1.5,
+                rx: 3,
+                ry: 3,
+            }));
+            if (letter) {
+                objects.push(new fabric.IText(letter, { left: xBox + 7, top: yOffset + 26, fontSize: 15, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+            }
+            if (isTargetTile) {
+                objects.push(new fabric.IText(`${idx + 1}`, { left: xBox + 2, top: yOffset + 23, fontSize: 8, fontFamily: "Inter", fontWeight: "bold", fill: "#ca8a04" }));
+            }
+            xBox += 30;
+        }
+
+        yOffset += 56;
+    });
+
+    // Final Message Slots at Bottom
+    yOffset += 10;
+    objects.push(new fabric.IText("FINAL SECRET MESSAGE:", { left: 0, top: yOffset, fontSize: 14, fontFamily: "Inter", fontWeight: "bold", fill: "#7c3aed" }));
+    yOffset += 24;
+
+    let xSlot = 0;
+    finalQuote.split("").forEach((char, i) => {
+        if (char === " ") {
+            xSlot += 20;
+            return;
+        }
+        objects.push(new fabric.Rect({ left: xSlot, top: yOffset, width: 28, height: 32, fill: "#f3e8ff", stroke: "#7c3aed", strokeWidth: 1.5, rx: 4, ry: 4 }));
+        objects.push(new fabric.IText(`${(i % words.length) + 1}`, { left: xSlot + 3, top: yOffset + 2, fontSize: 9, fontFamily: "Inter", fontWeight: "bold", fill: "#6b21a8" }));
+
+        if (config.showAnswerKey) {
+            objects.push(new fabric.IText(char, { left: xSlot + 8, top: yOffset + 10, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+        }
+        xSlot += 34;
+    });
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "double-puzzle";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateDoublePuzzleObjects(): fabric.FabricObject[] {
+    return generateDoublePuzzleObjectsFromConfig({
+        title: "DOUBLE PUZZLE",
+        words: [
+            { word: "LEMON", clue: "Yellow sour fruit" },
+            { word: "PEACH", clue: "Fuzzy summer fruit" },
+            { word: "GRAPE", clue: "Small round fruit on vines" },
+        ],
+        finalQuote: "GREAT JOB",
+    });
+}
+
+// B. Fallen Phrase (Quote Tile Drop)
+export interface FallenPhraseConfig {
+    title: string;
+    phrase: string;
+    showAnswerKey?: boolean;
+}
+
+export function generateFallenPhraseObjectsFromConfig(config: FallenPhraseConfig): fabric.FabricObject[] {
+    const titleText = config.title || "FALLEN PHRASE PUZZLE";
+    const phrase = (config.phrase || "PRACTICE MAKES PERFECT").toUpperCase();
+    const words = phrase.split(" ");
+    const cols = Math.max(10, Math.max(...words.map((w) => w.length)));
+    const rows = Math.ceil(phrase.length / cols);
+    const cellSize = 30;
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText("Slide the fallen letters vertically into the empty phrase grid above!", { left: 0, top: 28, fontSize: 11, fontFamily: "Inter", fill: "#64748b" })
+    ];
+
+    // Grid for quote
+    let charIdx = 0;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const x = c * cellSize;
+            const y = 50 + r * cellSize;
+            const char = phrase[charIdx] || "";
+            const isBlankSpace = char === " ";
+
+            objects.push(new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize - 2,
+                height: cellSize - 2,
+                fill: isBlankSpace ? "#e2e8f0" : (config.showAnswerKey ? "#bbf7d0" : "#ffffff"),
+                stroke: "#94a3b8",
+                strokeWidth: 1,
+                rx: 3,
+                ry: 3,
+            }));
+
+            if (config.showAnswerKey && char && !isBlankSpace) {
+                objects.push(new fabric.IText(char, { left: x + 8, top: y + 5, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+            }
+
+            charIdx++;
+        }
+    }
+
+    // Fallen Letters Bank Below Grid
+    const bankY = 50 + rows * cellSize + 20;
+    objects.push(new fabric.IText("FALLEN COLUMN LETTERS:", { left: 0, top: bankY - 16, fontSize: 11, fontFamily: "Inter", fontWeight: "bold", fill: "#334155" }));
+
+    for (let c = 0; c < cols; c++) {
+        const colChars: string[] = [];
+        for (let r = 0; r < rows; r++) {
+            const idx = r * cols + c;
+            const ch = phrase[idx];
+            if (ch && ch !== " ") colChars.push(ch);
+        }
+        colChars.sort();
+
+        colChars.forEach((ch, idx) => {
+            const x = c * cellSize;
+            const y = bankY + idx * 26;
+            objects.push(new fabric.Rect({ left: x, top: y, width: cellSize - 2, height: 24, fill: "#f1f5f9", stroke: "#cbd5e1", strokeWidth: 1, rx: 3, ry: 3 }));
+            objects.push(new fabric.IText(ch, { left: x + 8, top: y + 3, fontSize: 14, fontFamily: "Courier New", fontWeight: "bold", fill: "#0f172a" }));
+        });
+    }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "fallen-phrase";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateFallenPhraseObjects(): fabric.FabricObject[] {
+    return generateFallenPhraseObjectsFromConfig({
+        title: "FALLEN PHRASE PUZZLE",
+        phrase: "PRACTICE MAKES PERFECT",
+    });
+}
+
+// C. Letter Tiles (Scrambled Tile Blocks)
+export interface LetterTilesConfig {
+    title: string;
+    phrase: string;
+    chunkSize?: 2 | 3;
+    showAnswerKey?: boolean;
+}
+
+export function generateLetterTilesObjectsFromConfig(config: LetterTilesConfig): fabric.FabricObject[] {
+    const titleText = config.title || "LETTER TILES PUZZLE";
+    const phrase = (config.phrase || "WISDOM BEGINS IN WONDER").toUpperCase().replace(/[^A-Z]/g, "");
+    const chunkSize = config.chunkSize || 3;
+
+    // Break phrase into tiles
+    const tiles: string[] = [];
+    for (let i = 0; i < phrase.length; i += chunkSize) {
+        tiles.push(phrase.slice(i, i + chunkSize));
+    }
+
+    const shuffled = [...tiles].sort(() => 0.5 - Math.random());
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText("Rearrange the letter tile blocks below to construct the secret quote!", { left: 0, top: 28, fontSize: 11, fontFamily: "Inter", fill: "#64748b" })
+    ];
+
+    // Render Tile Bank Grid
+    const cols = 4;
+    const tileW = 75;
+    const tileH = 36;
+    let yStart = 55;
+
+    shuffled.forEach((tile, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        const x = col * (tileW + 12);
+        const y = yStart + row * (tileH + 10);
+
+        objects.push(new fabric.Rect({ left: x, top: y, width: tileW, height: tileH, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 1.5, rx: 6, ry: 6 }));
+        objects.push(new fabric.IText(tile, { left: x + 14, top: y + 7, fontSize: 16, fontFamily: "Courier New", fontWeight: "bold", fill: "#92400e" }));
+    });
+
+    if (config.showAnswerKey) {
+        const endY = yStart + Math.ceil(shuffled.length / cols) * (tileH + 10) + 15;
+        objects.push(new fabric.IText(`[Answer Quote]: ${config.phrase || "WISDOM BEGINS IN WONDER"}`, { left: 0, top: endY, fontSize: 13, fontFamily: "Inter", fontWeight: "bold", fill: "#16a34a" }));
+    }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "letter-tiles";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateLetterTilesObjects(): fabric.FabricObject[] {
+    return generateLetterTilesObjectsFromConfig({
+        title: "LETTER TILES PUZZLE",
+        phrase: "WISDOM BEGINS IN WONDER",
+        chunkSize: 3,
+    });
+}
+
+// D. Math Squares (Grid Operations)
+export interface MathSquaresConfig {
+    title: string;
+    size?: 3 | 4;
+    showAnswerKey?: boolean;
+}
+
+export function generateMathSquaresObjectsFromConfig(config: MathSquaresConfig): fabric.FabricObject[] {
+    const titleText = config.title || "MATH SQUARES PUZZLE";
+    const size = config.size || 3;
+    const cellSize = 42;
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText("Fill in the missing numbers so that every row and column equation equals the target sum!", { left: 0, top: 28, fontSize: 11, fontFamily: "Inter", fill: "#64748b" })
+    ];
+
+    const sampleGrid = [
+        [3, "+", 5, "=", 8],
+        ["+", "", "+", "", ""],
+        [4, "+", 2, "=", 6],
+        ["=", "", "=", "", ""],
+        [7, "", 7, "", ""]
+    ];
+
+    let yStart = 55;
+    for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+            const x = c * (cellSize + 4);
+            const y = yStart + r * (cellSize + 4);
+            const val = sampleGrid[r][c];
+            const isNumberCell = typeof val === "number";
+
+            if (isNumberCell) {
+                const isBlankInPuzzle = (r === 0 && c === 2) || (r === 2 && c === 0);
+                objects.push(new fabric.Rect({
+                    left: x,
+                    top: y,
+                    width: cellSize,
+                    height: cellSize,
+                    fill: isBlankInPuzzle ? (config.showAnswerKey ? "#bbf7d0" : "#ffffff") : "#f1f5f9",
+                    stroke: "#0f172a",
+                    strokeWidth: 1.5,
+                    rx: 6,
+                    ry: 6,
+                }));
+
+                if (!isBlankInPuzzle || config.showAnswerKey) {
+                    objects.push(new fabric.IText(val.toString(), { left: x + 14, top: y + 9, fontSize: 18, fontFamily: "Inter", fontWeight: "bold", fill: config.showAnswerKey && isBlankInPuzzle ? "#16a34a" : "#0f172a" }));
+                }
+            } else if (val) {
+                objects.push(new fabric.IText(val.toString(), { left: x + 14, top: y + 9, fontSize: 18, fontFamily: "Inter", fontWeight: "bold", fill: "#475569" }));
+            }
+        }
+    }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "math-squares";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateMathSquaresObjects(): fabric.FabricObject[] {
+    return generateMathSquaresObjectsFromConfig({
+        title: "MATH SQUARES PUZZLE",
+        size: 3,
+    });
+}
+
+// E. Number Blocks (Numeric Grid Sums)
+export interface NumberBlocksConfig {
+    title: string;
+    rows?: number;
+    cols?: number;
+    showAnswerKey?: boolean;
+}
+
+export function generateNumberBlocksObjectsFromConfig(config: NumberBlocksConfig): fabric.FabricObject[] {
+    const titleText = config.title || "NUMBER BLOCKS";
+    const rows = config.rows || 4;
+    const cols = config.cols || 4;
+    const cellSize = 38;
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText("Complete the grid numbers so that every row and column totals the target sum!", { left: 0, top: 28, fontSize: 11, fontFamily: "Inter", fill: "#64748b" })
+    ];
+
+    let yStart = 55;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const x = c * cellSize;
+            const y = yStart + r * cellSize;
+            const num = ((r * 3 + c * 2) % 9) + 1;
+            const isGiven = (r + c) % 2 === 0;
+
+            objects.push(new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize - 2,
+                height: cellSize - 2,
+                fill: isGiven ? "#f8fafc" : (config.showAnswerKey ? "#bbf7d0" : "#ffffff"),
+                stroke: "#64748b",
+                strokeWidth: 1,
+                rx: 4,
+                ry: 4,
+            }));
+
+            if (isGiven || config.showAnswerKey) {
+                objects.push(new fabric.IText(num.toString(), { left: x + 13, top: y + 8, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: config.showAnswerKey && !isGiven ? "#16a34a" : "#0f172a" }));
+            }
+        }
+    }
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "number-blocks";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateNumberBlocksObjects(): fabric.FabricObject[] {
+    return generateNumberBlocksObjectsFromConfig({
+        title: "NUMBER BLOCKS",
+        rows: 4,
+        cols: 4,
+    });
+}
+
+// F. Hidden Message Word Search
+export interface HiddenMessageSearchConfig {
+    title: string;
+    words: string[];
+    hiddenMessage: string;
+    gridSize?: number;
+    showAnswerKey?: boolean;
+}
+
+export function generateHiddenMessageSearchFromConfig(config: HiddenMessageSearchConfig): fabric.FabricObject[] {
+    const titleText = config.title || "HIDDEN MESSAGE WORD SEARCH";
+    const words = config.words && config.words.length > 0 ? config.words : ["STAR", "MOON", "SUN", "PLANET"];
+    const hiddenMessage = (config.hiddenMessage || "DISCOVERY IS FUN").toUpperCase();
+    const gridSize = config.gridSize || 10;
+    const cellSize = 30;
+
+    const objects: fabric.FabricObject[] = [
+        new fabric.IText(titleText.toUpperCase(), { left: 0, top: 0, fontSize: 20, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }),
+        new fabric.IText(`Hidden Secret Message:  ${config.showAnswerKey ? hiddenMessage : "______________________"}`, { left: 0, top: 28, fontSize: 12, fontFamily: "Inter", fontWeight: "bold", fill: "#7c3aed" })
+    ];
+
+    let yStart = 52;
+    for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+            const x = c * cellSize;
+            const y = yStart + r * cellSize;
+            const char = String.fromCharCode(65 + ((r * 7 + c * 3) % 26));
+
+            objects.push(new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize - 2,
+                height: cellSize - 2,
+                fill: "#ffffff",
+                stroke: "#cbd5e1",
+                strokeWidth: 1,
+                rx: 4,
+                ry: 4,
+            }));
+            objects.push(new fabric.IText(char, { left: x + 8, top: y + 5, fontSize: 16, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }));
+        }
+    }
+
+    // Word Bank Below
+    const bankY = yStart + gridSize * cellSize + 15;
+    objects.push(new fabric.IText(`Word Bank:  ${words.join("   |   ")}`, { left: 0, top: bankY, fontSize: 13, fontFamily: "Inter", fontWeight: "bold", fill: "#475569" }));
+
+    objects.forEach((obj) => {
+        (obj as any).customType = "hidden-message-search";
+        (obj as any).puzzleConfig = config;
+    });
+
+    return objects;
+}
+
+export function generateHiddenMessageSearch(): fabric.FabricObject[] {
+    return generateHiddenMessageSearchFromConfig({
+        title: "HIDDEN MESSAGE WORD SEARCH",
+        words: ["STAR", "MOON", "SUN", "PLANET"],
+        hiddenMessage: "DISCOVERY IS FUN",
+        gridSize: 10,
+    });
+}
+

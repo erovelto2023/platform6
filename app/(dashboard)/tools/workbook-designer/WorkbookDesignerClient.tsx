@@ -11,16 +11,32 @@ import {
     createQRCodeVector,
     createBarcodeVector,
     addObjectsSafelyToCanvas,
+    attachPuzzleMetadata,
     generateWordSearchComponentGroups,
+    generateCrosswordComponentGroups,
     generateCrosswordObjects,
     generateFillInBlanksObjects,
+    generateFillInBlanksObjectsFromConfig,
     generateCryptogramObjects,
+    generateCryptogramObjectsFromConfig,
     generateCrackTheCodeObjects,
+    generateCrackTheCodeObjectsFromConfig,
     generateSudokuObjects,
+    generateSudokuObjectsFromConfig,
     generateKakuroObjects,
     generateMazeObjects,
     generateWordScrambleObjects,
+    generateWordScrambleObjectsFromConfig,
     generateMissingLettersObjects,
+    generateMissingLettersObjectsFromConfig,
+    generateDoublePuzzleObjectsFromConfig,
+    generateFallenPhraseObjectsFromConfig,
+    generateLetterTilesObjectsFromConfig,
+    generateMathSquaresObjectsFromConfig,
+    generateNumberBlocksObjectsFromConfig,
+    generateHiddenMessageSearchFromConfig,
+    generateMissingVowelsObjectsFromConfig,
+    generateCodewordObjectsFromConfig,
     generateMatchingPairsObjects,
     generateConnectTheDotsObjects,
     generateSpotTheDifferenceObjects,
@@ -41,6 +57,10 @@ import {
     createDefaultWordSearchConfig,
     WordSearchConfig
 } from "@/lib/word-search-engine";
+import {
+    createDefaultCrosswordConfig,
+    CrosswordConfig
+} from "@/lib/crossword-engine";
 import { generateWorksheetPDF, convertSvgToHighResDataUrl } from "@/lib/worksheet-pdf";
 import { saveWorkbookProject } from "@/lib/workbook-api";
 
@@ -90,14 +110,13 @@ export default function WorkbookDesignerClient() {
         const c = fabricCanvasRef.current;
         if (!c) return;
         const textObj = new fabric.IText(text, {
-            left: kdpSpecs.safeLeft + 20,
-            top: kdpSpecs.safeTop + 20,
             fontSize: isHeader ? 24 : 16,
             fontFamily: "Inter",
             fontWeight: isHeader ? "bold" : "normal",
             fill: "#0f172a",
         });
         c.add(textObj);
+        c.centerObject(textObj);
         c.setActiveObject(textObj);
         c.requestRenderAll();
         c.fire("object:modified");
@@ -108,16 +127,14 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const tracingObj = await createTracingTextPath(text);
         if (tracingObj) {
-            tracingObj.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(tracingObj);
+            c.centerObject(tracingObj);
             c.setActiveObject(tracingObj);
             c.requestRenderAll();
             c.fire("object:modified");
             toast.success("Dotted tracing text inserted!");
         } else {
             const fallbackText = new fabric.IText(text, {
-                left: kdpSpecs.safeLeft + 20,
-                top: kdpSpecs.safeTop + 20,
                 fontSize: 42,
                 fontFamily: "Inter",
                 fill: "transparent",
@@ -126,6 +143,7 @@ export default function WorkbookDesignerClient() {
                 strokeDashArray: [6, 6],
             });
             c.add(fallbackText);
+            c.centerObject(fallbackText);
             c.setActiveObject(fallbackText);
             c.requestRenderAll();
             c.fire("object:modified");
@@ -137,15 +155,16 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         let shape: fabric.FabricObject;
         if (type === "rect") {
-            shape = new fabric.Rect({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 150, height: 100, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2, rx: 8, ry: 8 });
+            shape = new fabric.Rect({ width: 150, height: 100, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2, rx: 8, ry: 8 });
         } else if (type === "circle") {
-            shape = new fabric.Circle({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, radius: 60, fill: "#e0f2fe", stroke: "#0284c7", strokeWidth: 2 });
+            shape = new fabric.Circle({ radius: 60, fill: "#e0f2fe", stroke: "#0284c7", strokeWidth: 2 });
         } else if (type === "triangle") {
-            shape = new fabric.Triangle({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 120, height: 100, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 2 });
+            shape = new fabric.Triangle({ width: 120, height: 100, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 2 });
         } else {
-            shape = new fabric.Rect({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 100, height: 100, fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
+            shape = new fabric.Rect({ width: 100, height: 100, fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
         }
         c.add(shape);
+        c.centerObject(shape);
         c.setActiveObject(shape);
         c.requestRenderAll();
         c.fire("object:modified");
@@ -156,8 +175,8 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const qrGroup = await createQRCodeVector(qrText);
         if (qrGroup) {
-            qrGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(qrGroup);
+            c.centerObject(qrGroup);
             c.setActiveObject(qrGroup);
             c.requestRenderAll();
             c.fire("object:modified");
@@ -170,8 +189,8 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const barcodeGroup = await createBarcodeVector(barcodeVal);
         if (barcodeGroup) {
-            barcodeGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(barcodeGroup);
+            c.centerObject(barcodeGroup);
             c.setActiveObject(barcodeGroup);
             c.requestRenderAll();
             c.fire("object:modified");
@@ -198,24 +217,27 @@ export default function WorkbookDesignerClient() {
         const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
 
         if (titleGroup) {
-            titleGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
-            (titleGroup as any).customType = "word-search";
-            (titleGroup as any).wordSearchConfig = config;
+            attachPuzzleMetadata(titleGroup, "word-search", "title", config);
             c.add(titleGroup);
+            c.centerObjectH(titleGroup);
+            titleGroup.set({ top: 60 });
         }
 
+        const gridTop = 150;
         if (gridGroup) {
-            gridGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 80 });
-            (gridGroup as any).customType = "word-search";
-            (gridGroup as any).wordSearchConfig = config;
+            attachPuzzleMetadata(gridGroup, "word-search", "grid", config);
             c.add(gridGroup);
+            c.centerObjectH(gridGroup);
+            gridGroup.set({ top: gridTop });
         }
 
         if (bankGroup) {
-            gridGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 450 });
-            (bankGroup as any).customType = "word-search";
-            (bankGroup as any).wordSearchConfig = config;
+            const gridHeight = gridGroup ? (gridGroup.height || (gridSize * 32)) : 320;
+            const bankTop = gridTop + gridHeight + 35;
+            attachPuzzleMetadata(bankGroup, "word-search", "word-bank", config);
             c.add(bankGroup);
+            c.centerObjectH(bankGroup);
+            bankGroup.set({ top: bankTop });
         }
 
         c.setActiveObject(gridGroup);
@@ -224,15 +246,93 @@ export default function WorkbookDesignerClient() {
         toast.success("Word Search added! Fits cleanly inside KDP Safe Margin Zone.");
     };
 
-    const handleAddCrossword = (title: string, items: { word: string; clue: string }[]) => handleInsertObjects(generateCrosswordObjects(title, items), "Crossword Puzzle");
-    const handleAddFillInBlanks = (sentence: string, wordBank: string[]) => handleInsertObjects(generateFillInBlanksObjects(sentence, wordBank), "Fill-in-the-Blanks");
-    const handleAddCryptogram = () => handleInsertObjects(generateCryptogramObjects(), "Cryptogram Puzzle");
-    const handleAddCrackTheCode = () => handleInsertObjects(generateCrackTheCodeObjects(), "Crack the Code!");
-    const handleAddSudoku = () => handleInsertObjects(generateSudokuObjects(), "Sudoku Grid");
+    const handleAddCrossword = (title: string, items: { word: string; clue: string }[]) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+
+        const config: CrosswordConfig = createDefaultCrosswordConfig();
+        config.title = title || "CROSSWORD PUZZLE";
+        if (items && items.length > 0) {
+            config.words = items.map((item, idx) => ({
+                id: `cw-${idx}-${Date.now()}`,
+                word: item.word,
+                clue: item.clue,
+            }));
+        }
+
+        const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(config);
+
+        if (titleGroup) {
+            attachPuzzleMetadata(titleGroup, "crossword", "title", config);
+            c.add(titleGroup);
+            c.centerObjectH(titleGroup);
+            titleGroup.set({ top: 60 });
+        }
+
+        const gridTop = 150;
+        if (gridGroup) {
+            attachPuzzleMetadata(gridGroup, "crossword", "grid", config);
+            c.add(gridGroup);
+            c.centerObjectH(gridGroup);
+            gridGroup.set({ top: gridTop });
+        }
+
+        if (cluesGroup) {
+            const gridHeight = gridGroup ? (gridGroup.height || 340) : 340;
+            const cluesTop = gridTop + gridHeight + 35;
+            attachPuzzleMetadata(cluesGroup, "crossword", "clues", config);
+            c.add(cluesGroup);
+            c.centerObjectH(cluesGroup);
+            cluesGroup.set({ top: cluesTop });
+        }
+
+        c.setActiveObject(gridGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Crossword Puzzle added! Select to edit in Crossword Studio.");
+    };
+
+    const handleAddFillInBlanks = (sentence: string, wordBank: string[]) => {
+        const config = { title: "FILL IN THE BLANKS", sentence: sentence || "The ________ jumps over the ________ wall.", wordBank: wordBank || ["fox", "high", "quick"] };
+        handleInsertObjects(generateFillInBlanksObjectsFromConfig(config), "Fill-in-the-Blanks", { customType: "fill-in-blanks", puzzleConfig: config });
+    };
+
+    const handleAddCryptogram = () => {
+        const config = { title: "CRYPTOGRAM PUZZLE", phrase: "KNOWLEDGE IS POWER" };
+        handleInsertObjects(generateCryptogramObjectsFromConfig(config), "Cryptogram Puzzle", { customType: "cryptogram", puzzleConfig: config });
+    };
+
+    const handleAddCrackTheCode = () => {
+        const config = {
+            title: "CRACK THE CODE!",
+            secretCode: "682",
+            clues: [
+                "6 8 2  - One number is correct and well placed",
+                "6 1 4  - One number is correct but wrong place",
+                "2 0 6  - Two numbers are correct but wrong place",
+                "7 3 8  - Nothing is correct",
+            ],
+        };
+        handleInsertObjects(generateCrackTheCodeObjectsFromConfig(config), "Crack the Code!", { customType: "crack-the-code", puzzleConfig: config });
+    };
+
+    const handleAddSudoku = () => {
+        const config = { title: "SUDOKU PUZZLE (MINI 4X4)", size: 4 as const, difficulty: "easy" as const };
+        handleInsertObjects(generateSudokuObjectsFromConfig(config), "Sudoku Grid", { customType: "sudoku", puzzleConfig: config });
+    };
+
+    const handleAddWordScramble = (words: string[]) => {
+        const config = { title: "WORD SCRAMBLE", words: words && words.length ? words : ["APPLE", "BANANA", "CHERRY"] };
+        handleInsertObjects(generateWordScrambleObjectsFromConfig(config), "Word Scramble", { customType: "word-scramble", puzzleConfig: config });
+    };
+
+    const handleAddMissingLetters = (words: string[]) => {
+        const config = { title: "MISSING LETTERS", words: words && words.length ? words : ["GUITAR", "PLANET", "SUMMER"] };
+        handleInsertObjects(generateMissingLettersObjectsFromConfig(config), "Missing Letters", { customType: "missing-letters", puzzleConfig: config });
+    };
+
     const handleAddKakuro = () => handleInsertObjects(generateKakuroObjects(), "Kakuro");
     const handleAddMaze = () => handleInsertObjects(generateMazeObjects(), "Maze Challenge");
-    const handleAddWordScramble = (words: string[]) => handleInsertObjects(generateWordScrambleObjects(words), "Word Scramble");
-    const handleAddMissingLetters = (words: string[]) => handleInsertObjects(generateMissingLettersObjects(words), "Missing Letters");
     const handleAddMatchingPairs = () => handleInsertObjects(generateMatchingPairsObjects(), "Matching Pairs");
     const handleAddConnectTheDots = () => handleInsertObjects(generateConnectTheDotsObjects(), "Connect the Dots");
     const handleAddSpotTheDifference = () => handleInsertObjects(generateSpotTheDifferenceObjects(), "Spot the Difference");
@@ -248,6 +348,54 @@ export default function WorkbookDesignerClient() {
     const handleAddMathWorksheet = (type: string, count: number, maxNum: number) => handleInsertObjects(generateMathWorksheetObjects(type, count, maxNum), "Math Problems");
     const handleAddTicTacToe = () => handleInsertObjects(generateTicTacToeObjects(), "Tic-Tac-Toe");
     const handleAddDominoPuzzle = () => handleInsertObjects(generateDominoObjects(), "Domino Puzzle");
+
+    const handleAddDoublePuzzle = () => {
+        const config = {
+            title: "DOUBLE PUZZLE",
+            words: [
+                { word: "LEMON", clue: "Yellow sour fruit" },
+                { word: "PEACH", clue: "Fuzzy summer fruit" },
+                { word: "GRAPE", clue: "Small round fruit on vines" },
+            ],
+            finalQuote: "GREAT JOB",
+        };
+        handleInsertObjects(generateDoublePuzzleObjectsFromConfig(config), "Double Puzzle", { customType: "double-puzzle", puzzleConfig: config });
+    };
+
+    const handleAddFallenPhrase = () => {
+        const config = { title: "FALLEN PHRASE PUZZLE", phrase: "PRACTICE MAKES PERFECT" };
+        handleInsertObjects(generateFallenPhraseObjectsFromConfig(config), "Fallen Phrase", { customType: "fallen-phrase", puzzleConfig: config });
+    };
+
+    const handleAddLetterTiles = () => {
+        const config = { title: "LETTER TILES PUZZLE", phrase: "WISDOM BEGINS IN WONDER", chunkSize: 3 as const };
+        handleInsertObjects(generateLetterTilesObjectsFromConfig(config), "Letter Tiles", { customType: "letter-tiles", puzzleConfig: config });
+    };
+
+    const handleAddMathSquares = () => {
+        const config = { title: "MATH SQUARES PUZZLE", size: 3 as const };
+        handleInsertObjects(generateMathSquaresObjectsFromConfig(config), "Math Squares", { customType: "math-squares", puzzleConfig: config });
+    };
+
+    const handleAddNumberBlocks = () => {
+        const config = { title: "NUMBER BLOCKS", rows: 4, cols: 4 };
+        handleInsertObjects(generateNumberBlocksObjectsFromConfig(config), "Number Blocks", { customType: "number-blocks", puzzleConfig: config });
+    };
+
+    const handleAddHiddenMessageSearch = () => {
+        const config = { title: "HIDDEN MESSAGE WORD SEARCH", words: ["STAR", "MOON", "SUN", "PLANET"], hiddenMessage: "DISCOVERY IS FUN", gridSize: 10 };
+        handleInsertObjects(generateHiddenMessageSearchFromConfig(config), "Hidden Message Search", { customType: "hidden-message-search", puzzleConfig: config });
+    };
+
+    const handleAddMissingVowels = (words: string[]) => {
+        const config = { title: "MISSING VOWELS PUZZLE", words: words && words.length ? words : ["ELEPHANT", "SUNSHINE", "BUTTERFLY"] };
+        handleInsertObjects(generateMissingVowelsObjectsFromConfig(config), "Missing Vowels", { customType: "missing-vowels", puzzleConfig: config });
+    };
+
+    const handleAddCodeword = (words: string[]) => {
+        const config = { title: "CODEWORD PUZZLE", words: words && words.length ? words : ["SECRET", "CIPHER", "PUZZLE"] };
+        handleInsertObjects(generateCodewordObjectsFromConfig(config), "Codeword Puzzle", { customType: "codeword", puzzleConfig: config });
+    };
 
     // Save Workbook Project Handler
     const handleSaveProject = async () => {
@@ -402,11 +550,19 @@ export default function WorkbookDesignerClient() {
                     onAddMathWorksheet={handleAddMathWorksheet}
                     onAddTicTacToe={handleAddTicTacToe}
                     onAddDominoPuzzle={handleAddDominoPuzzle}
+                    onAddDoublePuzzle={handleAddDoublePuzzle}
+                    onAddFallenPhrase={handleAddFallenPhrase}
+                    onAddLetterTiles={handleAddLetterTiles}
+                    onAddMathSquares={handleAddMathSquares}
+                    onAddNumberBlocks={handleAddNumberBlocks}
+                    onAddHiddenMessageSearch={handleAddHiddenMessageSearch}
+                    onAddMissingVowels={handleAddMissingVowels}
+                    onAddCodeword={handleAddCodeword}
                 />
                 <WorksheetCanvasContainer fabricCanvasRef={fabricCanvasRef} />
                 <WorksheetPropertyPanel fabricCanvasRef={fabricCanvasRef} />
             </div>
-            <WorksheetPagesBar />
+            <WorksheetPagesBar fabricCanvasRef={fabricCanvasRef} />
         </div>
     );
 }

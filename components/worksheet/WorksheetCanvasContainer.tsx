@@ -1,12 +1,40 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import * as fabric from "fabric";
+import getStroke from "perfect-freehand";
 import { useWorksheetStore } from "@/lib/worksheet-store";
-import { createFreehandPath } from "@/lib/worksheet-fabric";
+import {
+    createFreehandPath,
+    getSvgPathFromFreehandStroke,
+    generateWordSearchComponentGroups,
+    generateAdvancedWordSearchObjects,
+    generateCrosswordComponentGroups,
+    generateAdvancedCrosswordObjects,
+    attachPuzzleMetadata
+} from "@/lib/worksheet-fabric";
 
 interface WorksheetCanvasContainerProps {
     fabricCanvasRef: React.MutableRefObject<fabric.Canvas | null>;
+}
+
+const CUSTOM_PROPS = ["customType", "puzzleComponent", "wordSearchConfig", "crosswordConfig", "puzzleConfig", "id", "subTargetCheck"];
+
+function hydrateCustomProperties(jsonObj: any, fabricObj: any) {
+    if (!jsonObj || !fabricObj) return;
+    CUSTOM_PROPS.forEach((prop) => {
+        if (jsonObj[prop] !== undefined) {
+            fabricObj[prop] = jsonObj[prop];
+        }
+    });
+    if (Array.isArray(jsonObj.objects) && typeof fabricObj.getObjects === "function") {
+        const children = fabricObj.getObjects();
+        jsonObj.objects.forEach((childJson: any, idx: number) => {
+            if (children[idx]) {
+                hydrateCustomProperties(childJson, children[idx]);
+            }
+        });
+    }
 }
 
 export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> = ({ fabricCanvasRef }) => {
@@ -50,23 +78,18 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         const c = fabricCanvasRef.current;
         if (!c) return;
 
-        if (saveStateTimeoutRef.current) clearTimeout(saveStateTimeoutRef.current);
-
-        saveStateTimeoutRef.current = setTimeout(() => {
-            if (isInternalStateUpdateRef.current) return;
+        try {
+            const json = (c as any).toJSON(CUSTOM_PROPS);
+            let thumbnail = "";
             try {
-                const json = c.toJSON();
-                let thumbnail = "";
-                try {
-                    thumbnail = c.toDataURL({ format: "png", multiplier: 0.15 });
-                } catch (e) {
-                    // thumbnail generation optional
-                }
-                updateCurrentPageCanvas(json, thumbnail);
-            } catch (err) {
-                console.error("Canvas serialization error:", err);
+                thumbnail = c.toDataURL({ format: "png", multiplier: 0.15 });
+            } catch (e) {
+                // thumbnail generation optional
             }
-        }, 150);
+            updateCurrentPageCanvas(json, thumbnail);
+        } catch (err) {
+            console.error("Canvas serialization error:", err);
+        }
     }, [fabricCanvasRef, updateCurrentPageCanvas]);
 
     // Initialize Fabric Canvas
@@ -115,8 +138,10 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         c.on("selection:updated", handleSelection);
         c.on("selection:cleared", () => setSelectedObject(null, null));
 
-        // Object modification listeners
+        // Object modification listeners for instant page state sync
+        c.on("object:added", saveState);
         c.on("object:modified", saveState);
+        c.on("object:removed", saveState);
 
         return () => {
             try {
@@ -140,6 +165,83 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                 prevPageIndexRef.current = currentPageIndex;
                 isInternalStateUpdateRef.current = true;
                 c.loadFromJSON(currentPage.canvasJson).then(() => {
+                    if (currentPage.canvasJson && Array.isArray(currentPage.canvasJson.objects)) {
+                        const fabricObjects = c.getObjects();
+                        currentPage.canvasJson.objects.forEach((jsonObj: any, idx: number) => {
+                            if (fabricObjects[idx]) {
+                                hydrateCustomProperties(jsonObj, fabricObjects[idx]);
+                            }
+                        });
+                    }
+
+                    const objectsToProcess = [...c.getObjects()];
+                    objectsToProcess.forEach((obj) => {
+                        if (obj.type === "group") {
+                            (obj as any).subTargetCheck = true;
+                        }
+
+                        const customType = (obj as any).customType;
+                        const componentType = (obj as any).puzzleComponent;
+                        const wsCfg = (obj as any).wordSearchConfig;
+                        const cwCfg = (obj as any).crosswordConfig;
+
+                        if (customType === "word-search" && wsCfg && wsCfg.answerKey && wsCfg.answerKey.showSolution) {
+                            const left = obj.left || 60;
+                            const top = obj.top || 130;
+                            const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(wsCfg);
+
+                            if (componentType === "grid" && gridGroup) {
+                                c.remove(obj);
+                                gridGroup.set({ left, top });
+                                attachPuzzleMetadata(gridGroup, "word-search", "grid", wsCfg);
+                                c.add(gridGroup);
+                            } else if (componentType === "title" && titleGroup) {
+                                c.remove(obj);
+                                titleGroup.set({ left, top });
+                                attachPuzzleMetadata(titleGroup, "word-search", "title", wsCfg);
+                                c.add(titleGroup);
+                            } else if (componentType === "word-bank" && bankGroup) {
+                                c.remove(obj);
+                                bankGroup.set({ left, top });
+                                attachPuzzleMetadata(bankGroup, "word-search", "word-bank", wsCfg);
+                                c.add(bankGroup);
+                            } else if (!componentType) {
+                                const newObjs = generateAdvancedWordSearchObjects(wsCfg);
+                                c.remove(obj);
+                                const newGrp = new fabric.Group(newObjs, { left, top, subTargetCheck: true });
+                                attachPuzzleMetadata(newGrp, "word-search", "full", wsCfg);
+                                c.add(newGrp);
+                            }
+                        } else if (customType === "crossword" && cwCfg && cwCfg.answerKey && cwCfg.answerKey.showSolution) {
+                            const left = obj.left || 60;
+                            const top = obj.top || 130;
+                            const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(cwCfg);
+
+                            if (componentType === "grid" && gridGroup) {
+                                c.remove(obj);
+                                gridGroup.set({ left, top });
+                                attachPuzzleMetadata(gridGroup, "crossword", "grid", cwCfg);
+                                c.add(gridGroup);
+                            } else if (componentType === "title" && titleGroup) {
+                                c.remove(obj);
+                                titleGroup.set({ left, top });
+                                attachPuzzleMetadata(titleGroup, "crossword", "title", cwCfg);
+                                c.add(titleGroup);
+                            } else if (componentType === "clues" && cluesGroup) {
+                                c.remove(obj);
+                                cluesGroup.set({ left, top });
+                                attachPuzzleMetadata(cluesGroup, "crossword", "clues", cwCfg);
+                                c.add(cluesGroup);
+                            } else if (!componentType) {
+                                const newObjs = generateAdvancedCrosswordObjects(cwCfg);
+                                c.remove(obj);
+                                const newGrp = new fabric.Group(newObjs, { left, top, subTargetCheck: true });
+                                attachPuzzleMetadata(newGrp, "crossword", "full", cwCfg);
+                                c.add(newGrp);
+                            }
+                        }
+                    });
+
                     c.requestRenderAll();
                     setTimeout(() => {
                         isInternalStateUpdateRef.current = false;
@@ -172,7 +274,10 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         };
     }, [kdpSpecs.canvasWidth, kdpSpecs.canvasHeight, gridSnapping, gridSize, fabricCanvasRef]);
 
-    // Perfect Freehand Pointer Events
+    const [liveStrokePathD, setLiveStrokePathD] = useState<string>("");
+    const [penPos, setPenPos] = useState<{ x: number; y: number } | null>(null);
+
+    // Perfect Freehand Pointer Events with Real-Time Live Ink & Pen Cursor
     const handlePointerDown = (e: React.PointerEvent) => {
         if (activeTool !== "draw" || !canvasElRef.current) return;
         isDrawingRef.current = true;
@@ -180,19 +285,36 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         const x = (e.clientX - rect.left) / zoom;
         const y = (e.clientY - rect.top) / zoom;
         strokePointsRef.current = [{ x, y, pressure: e.pressure || 0.5 }];
+        setPenPos({ x, y });
     };
 
     const handlePointerMove = (e: React.PointerEvent) => {
-        if (!isDrawingRef.current || activeTool !== "draw" || !canvasElRef.current) return;
-        const rect = canvasElRef.current.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / zoom;
-        const y = (e.clientY - rect.top) / zoom;
-        strokePointsRef.current.push({ x, y, pressure: e.pressure || 0.5 });
+        if (activeTool === "draw" && canvasElRef.current) {
+            const rect = canvasElRef.current.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / zoom;
+            const y = (e.clientY - rect.top) / zoom;
+            setPenPos({ x, y });
+
+            if (isDrawingRef.current) {
+                strokePointsRef.current.push({ x, y, pressure: e.pressure || 0.5 });
+                const pts = strokePointsRef.current.map((p) => [p.x, p.y, p.pressure ?? 0.5]);
+                const stroke = getStroke(pts, {
+                    size: brushSize,
+                    thinning: brushThinning,
+                    smoothing: brushSmoothing,
+                    streamline: 0.5,
+                });
+                const d = getSvgPathFromFreehandStroke(stroke);
+                setLiveStrokePathD(d);
+            }
+        }
     };
 
     const handlePointerUp = () => {
         if (!isDrawingRef.current || activeTool !== "draw") return;
         isDrawingRef.current = false;
+        setLiveStrokePathD("");
+
         const c = fabricCanvasRef.current;
         if (!c || strokePointsRef.current.length < 2) return;
 
@@ -205,6 +327,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
 
         if (pathObj) {
             c.add(pathObj);
+            c.discardActiveObject(); // Prevents selection bounding box from appearing around completed line
             c.requestRenderAll();
             saveState();
         }
@@ -228,6 +351,26 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
             >
+                {/* LIVE FREEHAND INK & PEN CURSOR OVERLAY */}
+                {activeTool === "draw" && (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible">
+                        {liveStrokePathD && <path d={liveStrokePathD} fill={brushColor} />}
+                        {penPos && (
+                            <g transform={`translate(${penPos.x}, ${penPos.y})`}>
+                                {/* Brush tip size indicator */}
+                                <circle r={Math.max(brushSize / 2, 3)} fill={brushColor} opacity="0.65" stroke="#ffffff" strokeWidth="1.5" />
+                                {/* Pen Tip Icon */}
+                                <path
+                                    d="M 0 0 L 14 -14 L 18 -10 L 4 4 Z M 0 0 L -3 5 L 2 3 Z"
+                                    fill="#2563eb"
+                                    stroke="#ffffff"
+                                    strokeWidth="1"
+                                />
+                            </g>
+                        )}
+                    </svg>
+                )}
+
                 {/* SVG Grid Overlay */}
                 {showGrid && (
                     <svg

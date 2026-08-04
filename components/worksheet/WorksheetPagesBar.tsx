@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Copy, Trash2, GripVertical, FileText } from "lucide-react";
+import { Plus, Copy, Trash2, GripVertical, FileText, Sparkles, CheckCircle2 } from "lucide-react";
 import { useWorksheetStore, WorksheetPage } from "@/lib/worksheet-store";
 import {
     DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent
@@ -68,7 +68,7 @@ const SortablePageItem: React.FC<PageItemProps> = ({
             </div>
 
             <div className="flex flex-col pr-1">
-                <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 max-w-[100px] truncate">
                     {page.name || `Page ${index + 1}`}
                 </span>
                 <span className="text-[10px] font-semibold text-slate-400">Page {index + 1}</span>
@@ -104,13 +104,63 @@ const SortablePageItem: React.FC<PageItemProps> = ({
     );
 };
 
-export const WorksheetPagesBar: React.FC = () => {
-    const { pages, currentPageIndex, setCurrentPageIndex, addPage, duplicatePage, deletePage, reorderPages } = useWorksheetStore();
+interface WorksheetPagesBarProps {
+    fabricCanvasRef?: React.MutableRefObject<any>;
+}
+
+export const WorksheetPagesBar: React.FC<WorksheetPagesBarProps> = ({ fabricCanvasRef }) => {
+    const { pages, currentPageIndex, setCurrentPageIndex, addPage, duplicatePage, duplicatePageWithSolutions, deletePage, reorderPages, updateCurrentPageCanvas } = useWorksheetStore();
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(KeyboardSensor)
     );
+
+    const getLiveCanvasJson = () => {
+        if (!fabricCanvasRef || !fabricCanvasRef.current) return null;
+        const c = fabricCanvasRef.current;
+        try {
+            return (c as any).toJSON(["customType", "puzzleConfig", "wordSearchConfig", "crosswordConfig", "puzzleComponent", "id", "subTargetCheck"]);
+        } catch (e) {
+            return null;
+        }
+    };
+
+    const flushCurrentCanvas = () => {
+        if (!fabricCanvasRef || !fabricCanvasRef.current) return;
+        const c = fabricCanvasRef.current;
+        try {
+            const json = (c as any).toJSON(["customType", "puzzleConfig", "wordSearchConfig", "crosswordConfig", "puzzleComponent", "id", "subTargetCheck"]);
+            let thumbnail = "";
+            try {
+                thumbnail = c.toDataURL({ format: "png", multiplier: 0.15 });
+            } catch (e) {}
+            updateCurrentPageCanvas(json, thumbnail);
+        } catch (err) {
+            console.error("Flush canvas error:", err);
+        }
+    };
+
+    const handleSelectPage = (index: number) => {
+        if (index === currentPageIndex) return;
+        flushCurrentCanvas();
+        setCurrentPageIndex(index);
+    };
+
+    const handleDuplicatePage = (index: number) => {
+        const liveJson = index === currentPageIndex ? getLiveCanvasJson() : null;
+        duplicatePage(index, liveJson);
+    };
+
+    const handleDuplicateSolutions = (index: number) => {
+        const liveJson = index === currentPageIndex ? getLiveCanvasJson() : null;
+        duplicatePageWithSolutions(index, liveJson);
+    };
+
+    const handleAddPage = () => {
+        flushCurrentCanvas();
+        addPage();
+    };
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -132,8 +182,8 @@ export const WorksheetPagesBar: React.FC = () => {
                                 page={page}
                                 index={index}
                                 isActive={index === currentPageIndex}
-                                onSelect={() => setCurrentPageIndex(index)}
-                                onDuplicate={() => duplicatePage(index)}
+                                onSelect={() => handleSelectPage(index)}
+                                onDuplicate={() => handleDuplicatePage(index)}
                                 onDelete={() => deletePage(index)}
                             />
                         ))}
@@ -141,15 +191,38 @@ export const WorksheetPagesBar: React.FC = () => {
                 </SortableContext>
             </DndContext>
 
-            <Button
-                variant="outline"
-                size="sm"
-                className="h-14 w-20 rounded-xl border-dashed border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-1 items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400 shrink-0 transition-all"
-                onClick={() => addPage()}
-            >
-                <Plus className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="text-[10px] font-bold">New Page</span>
-            </Button>
+            <div className="flex items-center gap-2 shrink-0 border-l border-slate-200 dark:border-slate-800 pl-3">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-14 px-3 rounded-xl border-dashed border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-1 items-center justify-center text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:border-indigo-400 shrink-0 transition-all"
+                    onClick={() => handleDuplicatePage(currentPageIndex)}
+                    title="Duplicate active page with puzzles"
+                >
+                    <Copy className="w-4 h-4 text-indigo-500" />
+                    <span className="text-[10px] font-bold">Duplicate Page</span>
+                </Button>
+
+                <Button
+                    size="sm"
+                    className="h-14 px-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md flex flex-col gap-1 items-center justify-center shrink-0 transition-all font-bold"
+                    onClick={() => handleDuplicateSolutions(currentPageIndex)}
+                    title="Duplicate active page and reveal all puzzle solution keys"
+                >
+                    <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+                    <span className="text-[10px] font-extrabold tracking-tight">Duplicate Solutions</span>
+                </Button>
+
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-14 w-20 rounded-xl border-dashed border-2 border-slate-300 dark:border-slate-700 flex flex-col gap-1 items-center justify-center text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-400 shrink-0 transition-all"
+                    onClick={() => handleAddPage()}
+                >
+                    <Plus className="w-3.5 h-3.5 text-indigo-500" />
+                    <span className="text-[10px] font-bold">New Page</span>
+                </Button>
+            </div>
         </footer>
     );
 };

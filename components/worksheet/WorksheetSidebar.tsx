@@ -4,29 +4,23 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    Accordion, AccordionItem, AccordionTrigger, AccordionContent
-} from "@/components/ui/accordion";
-import {
-    Type, PenTool, Square, QrCode, Barcode, Grid3X3, Calculator,
-    Sparkles, Star, Circle, Triangle, BookOpen, Plus, FileText, Clock, Key,
-    Scissors, Layers, Brain, Palette, Gamepad2, Shuffle, Heading
+    Type, Grid3X3, Palette, Wand2, Plus, Sparkles, Layers, RefreshCw, Eye, HelpCircle, FileText,
+    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen
 } from "lucide-react";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 
 interface WorksheetSidebarProps {
     onAddText: (text: string, isHeader?: boolean) => void;
-    onAddTracingText: (text: string) => void;
+    onAddTracingText: (text: string, fontSize: number) => void;
     onAddShape: (type: "rect" | "circle" | "triangle" | "star") => void;
-    onAddQRCode: (text: string) => void;
-    onAddBarcode: (text: string) => void;
-    
-    // 25 Puzzle Handlers
+    onAddQRCode: (data: string) => void;
+    onAddBarcode: (data: string) => void;
     onAddWordSearch: (words: string[], title: string, gridSize: number, directions?: string[]) => void;
     onAddCrossword: (title: string, items: { word: string; clue: string }[]) => void;
     onAddFillInBlanks: (sentence: string, wordBank: string[]) => void;
@@ -52,6 +46,14 @@ interface WorksheetSidebarProps {
     onAddMathWorksheet: (type: string, count: number, maxNum: number) => void;
     onAddTicTacToe: () => void;
     onAddDominoPuzzle: () => void;
+    onAddDoublePuzzle?: () => void;
+    onAddFallenPhrase?: () => void;
+    onAddLetterTiles?: () => void;
+    onAddMathSquares?: () => void;
+    onAddNumberBlocks?: () => void;
+    onAddHiddenMessageSearch?: () => void;
+    onAddMissingVowels?: (words: string[]) => void;
+    onAddCodeword?: (words: string[]) => void;
 }
 
 export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
@@ -85,6 +87,14 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddMathWorksheet,
     onAddTicTacToe,
     onAddDominoPuzzle,
+    onAddDoublePuzzle,
+    onAddFallenPhrase,
+    onAddLetterTiles,
+    onAddMathSquares,
+    onAddNumberBlocks,
+    onAddHiddenMessageSearch,
+    onAddMissingVowels,
+    onAddCodeword,
 }) => {
     const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "preset">("puzzles");
 
@@ -98,93 +108,103 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         setBrushProps,
     } = useWorksheetStore();
 
-    // Inputs
-    const [headingInput, setHeadingInput] = useState("Name: ____________ Date: ________");
-    const [bodyTextInput, setBodyTextInput] = useState("Type instructions or paragraph text here...");
-    const [tracingInput, setTracingInput] = useState("Aa Bb Cc 1 2 3");
-
-    // Optimized Word Search inputs
-    const [wsTitle, setWsTitle] = useState("ANIMALS WORD SEARCH");
-    const [wsWords, setWsWords] = useState("LION, TIGER, BEAR, ELEPHANT, MONKEY");
+    // Word Search State
+    const [wsTitle, setWsTitle] = useState("ANIMAL WORD SEARCH");
+    const [wsWords, setWsWords] = useState("LION, TIGER, ELEPHANT, GIRAFFE, ZEBRA, MONKEY, DOLPHIN, EAGLE");
     const [wsSize, setWsSize] = useState("10");
     const [wsDiag, setWsDiag] = useState(true);
     const [wsReverse, setWsReverse] = useState(false);
 
-    // Scramble input
-    const [scrambleWords, setScrambleWords] = useState("APPLE, BANANA, CHERRY, GRAPE, ORANGE");
+    // Crossword State
+    const [cwTitle, setCwTitle] = useState("CLASSROOM CROSSWORD");
+    const [cwInputText, setCwInputText] = useState("LION: King of the jungle\nELEPHANT: Large mammal with trunk\nTIGER: Large wild striped cat\nGIRAFFE: Tallest mammal");
 
-    // QR/Barcode inputs
-    const [qrText, setQrText] = useState("https://kbacademy.com");
+    // Other Puzzle Input States
+    const [fillInSentence, setFillInSentence] = useState("The ________ jumps over the ________ wall.");
+    const [fillInWordsText, setFillInWordsText] = useState("fox, high, quick");
+    const [scrambleWordsText, setScrambleWordsText] = useState("APPLE, BANANA, CHERRY, ORANGE");
+    const [missingLettersText, setMissingLettersText] = useState("GUITAR, PLANET, SUMMER, WINTER");
+    const [missingVowelsText, setMissingVowelsText] = useState("ELEPHANT, SUNSHINE, BUTTERFLY");
+    const [codewordWordsText, setCodewordWordsText] = useState("SECRET, CIPHER, PUZZLE, MATRIX");
+    const [hiddenMsgTitle, setHiddenMsgTitle] = useState("HIDDEN SECRET MESSAGE");
+    const [hiddenMsgText, setHiddenMsgText] = useState("DISCOVERY IS FUN");
+    const [hiddenWordsText, setHiddenWordsText] = useState("STAR, MOON, SUN, PLANET");
+
+    // Typography
+    const [headingInput, setHeadingInput] = useState("Name: ____________ Date: ________");
+    const [bodyTextInput, setBodyTextInput] = useState("Type instructions or paragraph text here...");
+    const [tracingInput, setTracingInput] = useState("Aa Bb Cc 1 2 3");
+
+    // Barcode / QR
+    const [qrData, setQrData] = useState("https://kbacademy.com");
+    const [barcodeData, setBarcodeData] = useState("9783161484100");
 
     const handleCreateWordSearch = () => {
-        const wordsArr = wsWords.split(",").map((w) => w.trim()).filter(Boolean);
-        const gridSizeNum = parseInt(wsSize, 10) || 10;
-        const directions = ["H", "V"];
-        if (wsDiag) directions.push("D");
-        if (wsReverse) directions.push("HR", "VR");
+        const wordsArray = wsWords.split(",").map((w) => w.trim()).filter((w) => w.length > 0);
+        if (wordsArray.length === 0) return;
+        const dirs: string[] = ["H", "V"];
+        if (wsDiag) dirs.push("D");
+        if (wsReverse) dirs.push("R_H", "R_V");
+        onAddWordSearch(wordsArray, wsTitle, parseInt(wsSize), dirs);
+    };
 
-        onAddWordSearch(wordsArr, wsTitle, gridSizeNum, directions);
+    const handleCreateCrossword = () => {
+        const lines = cwInputText.split("\n").filter((l) => l.trim().length > 0);
+        const items = lines.map((l) => {
+            const parts = l.split(":");
+            return {
+                word: parts[0].trim().toUpperCase().replace(/[^A-Z]/g, ""),
+                clue: parts.slice(1).join(":").trim() || `Clue for ${parts[0]}`,
+            };
+        }).filter((i) => i.word.length >= 2);
+
+        if (items.length > 0) {
+            onAddCrossword(cwTitle, items);
+        }
     };
 
     return (
-        <aside className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex h-[calc(100vh-4rem)] shadow-lg z-20 overflow-hidden">
-            {/* Left Vertical Icon Bar (Canva/Figma Style) */}
-            <div className="w-16 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex flex-col items-center py-3 gap-2 shrink-0">
+        <aside className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-4rem)] z-20 shadow-sm overflow-hidden select-none">
+            {/* Primary Category Selector Sidebar Navigation */}
+            <div className="grid grid-cols-5 h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-1 gap-1 shrink-0">
                 <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "puzzles" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("puzzles")}
-                    className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                        activeTab === "puzzles"
-                            ? "bg-indigo-600 text-white shadow-md shadow-indigo-500/30 scale-105"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                    }`}
                 >
                     <Grid3X3 className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Puzzles</span>
                 </button>
 
                 <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "text" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("text")}
-                    className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                        activeTab === "text"
-                            ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                    }`}
                 >
                     <Type className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Text</span>
                 </button>
 
                 <button
-                    onClick={() => setActiveTab("freehand")}
-                    className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                        activeTab === "freehand"
-                            ? "bg-emerald-600 text-white shadow-md shadow-emerald-500/30 scale-105"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                    }`}
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "freehand" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
+                    onClick={() => {
+                        setActiveTab("freehand");
+                        setActiveTool("draw");
+                    }}
                 >
-                    <PenTool className="w-5 h-5" />
+                    <Pencil className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Draw</span>
                 </button>
 
                 <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "shapes" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("shapes")}
-                    className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                        activeTab === "shapes"
-                            ? "bg-amber-600 text-white shadow-md shadow-amber-500/30 scale-105"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                    }`}
                 >
-                    <Square className="w-5 h-5" />
+                    <ImageIcon className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Shapes</span>
                 </button>
 
                 <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "preset" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("preset")}
-                    className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                        activeTab === "preset"
-                            ? "bg-rose-600 text-white shadow-md shadow-rose-500/30 scale-105"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800"
-                    }`}
                 >
                     <BookOpen className="w-5 h-5" />
                     <span className="text-[10px] font-bold">Presets</span>
@@ -195,7 +215,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
             <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
                 <div className="h-11 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
                     <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                        {activeTab === "puzzles" && "Activity Puzzles Suite"}
+                        {activeTab === "puzzles" && "21 Standalone Puzzle Accordions"}
                         {activeTab === "text" && "Typography & Tracing"}
                         {activeTab === "freehand" && "Smooth Ink Brush"}
                         {activeTab === "shapes" && "Shapes & QR / Barcodes"}
@@ -204,297 +224,446 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                 </div>
 
                 <ScrollArea className="flex-1 p-3">
-                    {/* --- TAB 1: PUZZLES ACCORDION --- */}
+                    {/* --- TAB 1: 21 INDIVIDUAL PUZZLE ACCORDIONS --- */}
                     {activeTab === "puzzles" && (
                         <div className="space-y-2">
-                            <Accordion type="single" collapsible defaultValue="words" className="w-full space-y-2">
-                                {/* Word & Letter Puzzles */}
-                                <AccordionItem value="words" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                            <Accordion type="single" collapsible className="w-full space-y-2">
+                                
+                                {/* 1. WORD SEARCH ACCORDION */}
+                                <AccordionItem value="p-word-search" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                         <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
                                             <Grid3X3 className="w-4 h-4" />
-                                            <span>Word & Letter Puzzles (7)</span>
+                                            <span>1. Word Search</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        {/* OPTIMIZED WORD SEARCH BUILDER CARD */}
-                                        <div className="space-y-2.5 p-3 bg-white dark:bg-slate-900 rounded-xl border border-indigo-200/80 dark:border-indigo-800 shadow-sm">
-                                            <div className="flex items-center gap-1 text-indigo-700 dark:text-indigo-300 font-extrabold text-[11px]">
-                                                <Grid3X3 className="w-3.5 h-3.5" />
-                                                <span>Word Search Studio</span>
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] font-bold text-slate-500">Puzzle Title</Label>
-                                                <Input value={wsTitle} onChange={(e) => setWsTitle(e.target.value)} placeholder="Title" className="h-7 text-xs" />
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] font-bold text-slate-500">Word List (Comma Separated)</Label>
-                                                <Textarea value={wsWords} onChange={(e) => setWsWords(e.target.value)} placeholder="LION, TIGER, BEAR..." className="h-16 text-xs resize-none" />
-                                            </div>
-
-                                            <div className="space-y-1">
-                                                <Label className="text-[10px] font-bold text-slate-500">Grid Dimensions</Label>
-                                                <Select value={wsSize} onValueChange={setWsSize}>
-                                                    <SelectTrigger className="h-7 text-xs">
-                                                        <SelectValue placeholder="Grid Size" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="8">8 × 8 Grid (Easy)</SelectItem>
-                                                        <SelectItem value="10">10 × 10 Grid (Standard)</SelectItem>
-                                                        <SelectItem value="12">12 × 12 Grid (Hard)</SelectItem>
-                                                        <SelectItem value="15">15 × 15 Grid (Expert)</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            <div className="flex items-center justify-between text-xs pt-1">
-                                                <div className="flex items-center space-x-1.5">
-                                                    <Checkbox id="ws-diag" checked={wsDiag} onCheckedChange={(v) => setWsDiag(!!v)} />
-                                                    <Label htmlFor="ws-diag" className="text-[11px]">Diagonal ↘</Label>
-                                                </div>
-                                                <div className="flex items-center space-x-1.5">
-                                                    <Checkbox id="ws-rev" checked={wsReverse} onCheckedChange={(v) => setWsReverse(!!v)} />
-                                                    <Label htmlFor="ws-rev" className="text-[11px]">Reverse ⬅</Label>
-                                                </div>
-                                            </div>
-
-                                            <Button
-                                                size="sm"
-                                                className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm"
-                                                onClick={handleCreateWordSearch}
-                                            >
-                                                <Plus className="w-3.5 h-3.5 mr-1" /> Add Word Search
-                                            </Button>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Puzzle Title</Label>
+                                            <Input value={wsTitle} onChange={(e) => setWsTitle(e.target.value)} placeholder="Title" className="h-7 text-xs" />
                                         </div>
-
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={() => onAddCrossword("ANIMAL CROSSWORD", [{ word: "DOG", clue: "Man's best friend" }, { word: "CAT", clue: "Chases mice" }])}>
-                                            Crossword Puzzle
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={() => onAddFillInBlanks("The ________ jumps over the ________ wall.", ["fox", "high", "quick"])}>
-                                            Fill In (Blanks)
-                                        </Button>
-
-                                        <div className="space-y-2 p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                                            <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Scramble & Missing Letters</Label>
-                                            <Input value={scrambleWords} onChange={(e) => setScrambleWords(e.target.value)} placeholder="Words..." className="h-8 text-xs" />
-                                            <div className="grid grid-cols-2 gap-1.5">
-                                                <Button size="sm" variant="outline" className="h-8 text-[10px] font-semibold" onClick={() => onAddWordScramble(scrambleWords.split(",").map((w) => w.trim()))}>
-                                                    Scramble
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-8 text-[10px] font-semibold" onClick={() => onAddMissingLetters(scrambleWords.split(",").map((w) => w.trim()))}>
-                                                    Missing Letters
-                                                </Button>
-                                            </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Word List (Comma Separated)</Label>
+                                            <Textarea value={wsWords} onChange={(e) => setWsWords(e.target.value)} placeholder="LION, TIGER, BEAR..." className="h-16 text-xs resize-none" />
                                         </div>
-
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddRebusPuzzle}>
-                                            Rebus Word Puzzle
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddAcrostic}>
-                                            Acrostic Poem
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Grid Dimensions</Label>
+                                            <Select value={wsSize} onValueChange={setWsSize}>
+                                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="8">8 × 8 Grid</SelectItem>
+                                                    <SelectItem value="10">10 × 10 Grid</SelectItem>
+                                                    <SelectItem value="12">12 × 12 Grid</SelectItem>
+                                                    <SelectItem value="15">15 × 15 Grid</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg mt-1" onClick={handleCreateWordSearch}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Word Search
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                {/* Codes & Ciphers */}
-                                <AccordionItem value="ciphers" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                {/* 2. CROSSWORD ACCORDION */}
+                                <AccordionItem value="p-crossword" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+                                            <Sparkles className="w-4 h-4" />
+                                            <span>2. Crossword Puzzle</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Title</Label>
+                                            <Input value={cwTitle} onChange={(e) => setCwTitle(e.target.value)} className="h-7 text-xs" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Clues & Answers (ANSWER: CLUE)</Label>
+                                            <Textarea value={cwInputText} onChange={(e) => setCwInputText(e.target.value)} className="h-20 text-xs font-mono resize-none" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg" onClick={handleCreateCrossword}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Crossword
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 3. FILL-IN BLANKS ACCORDION */}
+                                <AccordionItem value="p-fill-in" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                            <FileText className="w-4 h-4" />
+                                            <span>3. Fill-In (Blanks)</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Sentence (Use ____ for blanks)</Label>
+                                            <Textarea value={fillInSentence} onChange={(e) => setFillInSentence(e.target.value)} className="h-16 text-xs resize-none" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Word Bank (Comma Separated)</Label>
+                                            <Input value={fillInWordsText} onChange={(e) => setFillInWordsText(e.target.value)} className="h-7 text-xs font-mono" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddFillInBlanks(fillInSentence, fillInWordsText.split(",").map((w) => w.trim()))}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Fill-In Puzzle
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 4. WORD SCRAMBLE ACCORDION */}
+                                <AccordionItem value="p-word-scramble" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                                            <RefreshCw className="w-4 h-4" />
+                                            <span>4. Word Scramble</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Words (Comma Separated)</Label>
+                                            <Textarea value={scrambleWordsText} onChange={(e) => setScrambleWordsText(e.target.value)} className="h-16 text-xs font-mono uppercase resize-none" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddWordScramble(scrambleWordsText.split(",").map((w) => w.trim()))}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Word Scramble
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 5. CRYPTOGRAM ACCORDION */}
+                                <AccordionItem value="p-cryptogram" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                         <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                                             <Key className="w-4 h-4" />
-                                            <span>Codes & Ciphers (5)</span>
+                                            <span>5. Cryptogram</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddCryptogram}>
-                                            Cryptogram Puzzle
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddCrackTheCode}>
-                                            Crack the Code!
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddCipherWheel}>
-                                            Rotational Cipher Wheel
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddSecretMessage}>
-                                            Secret Message Code
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddDecodePuzzle}>
-                                            Decode Number Puzzle
+                                        <Button size="sm" className="w-full h-8 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg" onClick={onAddCryptogram}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Cryptogram
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                {/* Logic & Math */}
-                                <AccordionItem value="logic" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                {/* 6. CODEWORD ACCORDION */}
+                                <AccordionItem value="p-codeword" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                                            <Brain className="w-4 h-4" />
-                                            <span>Logic & Math (6)</span>
+                                        <div className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
+                                            <Key className="w-4 h-4" />
+                                            <span>6. Codeword</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddSudoku}>
-                                            Sudoku Grid (4x4 Mini)
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddKakuro}>
-                                            Kakuro (Cross Sums)
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddLogicGrid}>
-                                            Logic Grid Puzzle
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddNumberSearch}>
-                                            Number Search Grid
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={() => onAddMathWorksheet("addition", 10, 20)}>
-                                            Math Practice Problems
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddDominoPuzzle}>
-                                            Domino Math Puzzle
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Words (Comma Separated)</Label>
+                                            <Input value={codewordWordsText} onChange={(e) => setCodewordWordsText(e.target.value)} className="h-7 text-xs font-mono uppercase" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddCodeword && onAddCodeword(codewordWordsText.split(",").map((w) => w.trim()))}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Codeword Puzzle
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                {/* Visual & Fun */}
-                                <AccordionItem value="visual" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
-                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
-                                            <Palette className="w-4 h-4" />
-                                            <span>Visual & Fun (5)</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddMaze}>
-                                            Maze Challenge
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddSpotTheDifference}>
-                                            Spot the Difference
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddHiddenPicture}>
-                                            Hidden Picture Search
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddColoringPage}>
-                                            Coloring Page Frame
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddConnectTheDots}>
-                                            Connect the Dots
-                                        </Button>
-                                    </AccordionContent>
-                                </AccordionItem>
-
-                                {/* Games */}
-                                <AccordionItem value="games" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                {/* 7. SUDOKU ACCORDION */}
+                                <AccordionItem value="p-sudoku" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                         <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                                            <Gamepad2 className="w-4 h-4" />
-                                            <span>Games & Matching (2)</span>
+                                            <Brain className="w-4 h-4" />
+                                            <span>7. Sudoku</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddMatchingPairs}>
-                                            Matching Pairs
-                                        </Button>
-                                        <Button size="sm" variant="outline" className="w-full justify-start h-8 text-xs font-semibold rounded-lg bg-white dark:bg-slate-900" onClick={onAddTicTacToe}>
-                                            Tic-Tac-Toe Game Boards
+                                        <Button size="sm" className="w-full h-8 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg" onClick={onAddSudoku}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Sudoku Grid
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>
+
+                                {/* 8. KAKURO ACCORDION */}
+                                <AccordionItem value="p-kakuro" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400">
+                                            <Brain className="w-4 h-4" />
+                                            <span>8. Kakuro (Cross Sums)</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg" onClick={onAddKakuro}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Kakuro Grid
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 9. NUMBER SEARCH ACCORDION */}
+                                <AccordionItem value="p-number-search" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                                            <Grid3X3 className="w-4 h-4" />
+                                            <span>9. Number Search</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" onClick={onAddNumberSearch}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Number Search
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 10. MAZE ACCORDION */}
+                                <AccordionItem value="p-maze" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                                            <LayoutGrid className="w-4 h-4" />
+                                            <span>10. Maze Challenge</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg" onClick={onAddMaze}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Maze Challenge
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 11. HIDDEN MESSAGE ACCORDION */}
+                                <AccordionItem value="p-hidden-message" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/50 dark:bg-indigo-950/30">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                            <Sparkles className="w-4 h-4" />
+                                            <span>11. Hidden Message</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Hidden Secret Message</Label>
+                                            <Input value={hiddenMsgText} onChange={(e) => setHiddenMsgText(e.target.value)} className="h-7 text-xs font-mono uppercase font-bold" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Words (Comma Separated)</Label>
+                                            <Input value={hiddenWordsText} onChange={(e) => setHiddenWordsText(e.target.value)} className="h-7 text-xs font-mono uppercase" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddHiddenMessageSearch && onAddHiddenMessageSearch()}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Hidden Message
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 12. ACROSTIC ACCORDION */}
+                                <AccordionItem value="p-acrostic" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400">
+                                            <Type className="w-4 h-4" />
+                                            <span>12. Acrostic Poem</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg" onClick={onAddAcrostic}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Acrostic Poem
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 13. LOGIC GRID ACCORDION */}
+                                <AccordionItem value="p-logic-grid" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                            <Brain className="w-4 h-4" />
+                                            <span>13. Logic Grid</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={onAddLogicGrid}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Logic Grid
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 14. MATH SQUARES ACCORDION */}
+                                <AccordionItem value="p-math-squares" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/50 dark:bg-indigo-950/30">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                            <Brain className="w-4 h-4" />
+                                            <span>14. Math Squares</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddMathSquares && onAddMathSquares()}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Math Squares
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 15. MISSING VOWELS ACCORDION */}
+                                <AccordionItem value="p-missing-vowels" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                            <Type className="w-4 h-4" />
+                                            <span>15. Missing Vowels</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Words (Comma Separated)</Label>
+                                            <Textarea value={missingVowelsText} onChange={(e) => setMissingVowelsText(e.target.value)} className="h-16 text-xs font-mono uppercase resize-none" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddMissingVowels && onAddMissingVowels(missingVowelsText.split(",").map((w) => w.trim()))}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Missing Vowels
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 16. MISSING LETTERS ACCORDION */}
+                                <AccordionItem value="p-missing-letters" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                            <Type className="w-4 h-4" />
+                                            <span>16. Missing Letters</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Words (Comma Separated)</Label>
+                                            <Textarea value={missingLettersText} onChange={(e) => setMissingLettersText(e.target.value)} className="h-16 text-xs font-mono uppercase resize-none" />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddMissingLetters(missingLettersText.split(",").map((w) => w.trim()))}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Missing Letters
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 17. MATCHING ACCORDION */}
+                                <AccordionItem value="p-matching" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400">
+                                            <LayoutGrid className="w-4 h-4" />
+                                            <span>17. Matching Pairs</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg" onClick={onAddMatchingPairs}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Matching Pairs
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 18. SPOT THE DIFFERENCE ACCORDION */}
+                                <AccordionItem value="p-spot-difference" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
+                                            <Eye className="w-4 h-4" />
+                                            <span>18. Spot the Difference</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg" onClick={onAddSpotTheDifference}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Spot Difference
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 19. CONNECT THE DOTS ACCORDION */}
+                                <AccordionItem value="p-connect-dots" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-[orange] dark:text-orange-400">
+                                            <Pencil className="w-4 h-4" />
+                                            <span>19. Connect the Dots</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg" onClick={onAddConnectTheDots}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Connect Dots
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 20. COLORING PAGES ACCORDION */}
+                                <AccordionItem value="p-coloring-pages" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400">
+                                            <Palette className="w-4 h-4" />
+                                            <span>20. Coloring Pages</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg" onClick={onAddColoringPage}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Coloring Frame
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 21. DOT-TO-DOT ACCORDION */}
+                                <AccordionItem value="p-dot-to-dot" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                                            <Pencil className="w-4 h-4" />
+                                            <span>21. Dot-to-Dot</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <Button size="sm" className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" onClick={onAddConnectTheDots}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Dot-to-Dot Puzzle
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
                             </Accordion>
                         </div>
                     )}
 
-                    {/* --- TAB 2: TEXT --- */}
+                    {/* --- TAB 2: TEXT & TRACING --- */}
                     {activeTab === "text" && (
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Header Lines</Label>
+                            <div className="space-y-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Name & Date Header</Label>
                                 <Input value={headingInput} onChange={(e) => setHeadingInput(e.target.value)} className="h-8 text-xs" />
-                                <Button size="sm" variant="outline" className="w-full h-8 text-xs font-semibold" onClick={() => onAddText(headingInput, true)}>
-                                    Add Header Line
+                                <Button size="sm" variant="outline" className="w-full h-7 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddText(headingInput, true)}>
+                                    + Insert Header Line
                                 </Button>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Paragraph Content</Label>
-                                <Input value={bodyTextInput} onChange={(e) => setBodyTextInput(e.target.value)} className="h-8 text-xs" />
-                                <Button size="sm" variant="outline" className="w-full h-8 text-xs font-semibold" onClick={() => onAddText(bodyTextInput, false)}>
-                                    Add Text Paragraph
+                            <div className="space-y-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Instruction / Body Paragraph</Label>
+                                <Textarea value={bodyTextInput} onChange={(e) => setBodyTextInput(e.target.value)} className="h-20 text-xs resize-none" />
+                                <Button size="sm" variant="outline" className="w-full h-7 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddText(bodyTextInput, false)}>
+                                    + Insert Text Block
                                 </Button>
                             </div>
 
-                            <div className="space-y-2 bg-indigo-50/60 dark:bg-indigo-950/40 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900">
-                                <Label className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                                    <Sparkles className="w-3.5 h-3.5" /> Dotted Handwriting Tracing
-                                </Label>
-                                <Input value={tracingInput} onChange={(e) => setTracingInput(e.target.value)} className="h-8 text-xs bg-white dark:bg-slate-900" />
-                                <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg" onClick={() => onAddTracingText(tracingInput)}>
-                                    Add Dotted Tracing Line
+                            <div className="space-y-2.5 p-3 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                                <Label className="text-xs font-bold text-indigo-700 dark:text-indigo-300">K-2 Handwriting Tracing Text</Label>
+                                <Input value={tracingInput} onChange={(e) => setTracingInput(e.target.value)} className="h-8 text-xs font-mono" />
+                                <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddTracingText(tracingInput, 36)}>
+                                    + Add Dotted Tracing Line
                                 </Button>
                             </div>
                         </div>
                     )}
 
-                    {/* --- TAB 3: DRAW --- */}
+                    {/* --- TAB 3: FREEHAND DRAWING --- */}
                     {activeTab === "freehand" && (
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="font-bold text-xs text-slate-700 dark:text-slate-300">Freehand Ink</span>
-                                <Button
-                                    size="sm"
-                                    variant={activeTool === "draw" ? "default" : "outline"}
-                                    className="h-8 text-xs font-semibold"
-                                    onClick={() => setActiveTool(activeTool === "draw" ? "select" : "draw")}
-                                >
-                                    {activeTool === "draw" ? "Pencil Active" : "Activate Pencil"}
-                                </Button>
-                            </div>
-                            <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <div>
-                                    <div className="flex justify-between text-xs font-semibold mb-1">
-                                        <span>Brush Size</span>
-                                        <span>{brushSize}px</span>
-                                    </div>
-                                    <Slider value={[brushSize]} min={2} max={40} step={1} onValueChange={([val]) => setBrushProps({ size: val })} />
+                            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ink Tool Selection</Label>
+                                    <span className="text-[10px] uppercase tracking-wider font-extrabold text-indigo-600 dark:text-indigo-400">{activeTool}</span>
                                 </div>
-                                <div>
-                                    <Label className="text-xs font-semibold mb-1 block">Ink Color</Label>
-                                    <div className="flex gap-2 flex-wrap">
-                                        {["#0f172a", "#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"].map((color) => (
-                                            <button
-                                                key={color}
-                                                className={`w-6 h-6 rounded-full border-2 ${brushColor === color ? "border-indigo-600 scale-110" : "border-transparent"}`}
-                                                style={{ backgroundColor: color }}
-                                                onClick={() => setBrushProps({ color })}
-                                            />
-                                        ))}
-                                    </div>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    <Button size="sm" variant={activeTool === "select" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("select")}>Select</Button>
+                                    <Button size="sm" variant={activeTool === "draw" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("draw")}>Draw Ink</Button>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* --- TAB 4: SHAPES & CODES --- */}
+                    {/* --- TAB 4: SHAPES & BARCODES --- */}
                     {activeTab === "shapes" && (
                         <div className="space-y-4">
-                            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Vector Shapes</Label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <Button variant="outline" className="h-14 flex-col gap-1 rounded-xl" onClick={() => onAddShape("rect")}>
-                                    <Square className="w-5 h-5" />
-                                    <span className="text-[10px] font-semibold">Rectangle</span>
-                                </Button>
-                                <Button variant="outline" className="h-14 flex-col gap-1 rounded-xl" onClick={() => onAddShape("circle")}>
-                                    <Circle className="w-5 h-5" />
-                                    <span className="text-[10px] font-semibold">Circle</span>
-                                </Button>
-                            </div>
-                            <div className="space-y-2 bg-purple-50/60 dark:bg-purple-950/40 p-3 rounded-xl border border-purple-100 dark:border-purple-900">
-                                <Label className="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                                    <QrCode className="w-3.5 h-3.5" /> Vector QR Code
-                                </Label>
-                                <Input value={qrText} onChange={(e) => setQrText(e.target.value)} className="h-7 text-xs bg-white dark:bg-slate-900" />
-                                <Button size="sm" className="w-full h-7 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg" onClick={() => onAddQRCode(qrText)}>
-                                    Add QR Code
-                                </Button>
+                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Vector Shapes</Label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("rect")}>Rectangle</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("circle")}>Circle</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("triangle")}>Triangle</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("star")}>Star</Button>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -502,10 +671,10 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                     {/* --- TAB 5: PRESETS --- */}
                     {activeTab === "preset" && (
                         <div className="space-y-3">
-                            <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Quick Layout Presets</Label>
-                            <Button variant="outline" className="w-full justify-start h-9 text-xs font-semibold rounded-xl" onClick={() => { onAddText("STUDENT WORKSHEET", true); onAddText("Name: ____________________ Date: ________", false); }}>
-                                <FileText className="w-4 h-4 mr-2 text-indigo-500" /> Standard Header Banner
-                            </Button>
+                            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Standard KDP 8.5x11 Presets</span>
+                                <p className="text-[11px] text-slate-500">Includes safe margins, bleed settings, and standard page headers.</p>
+                            </div>
                         </div>
                     )}
                 </ScrollArea>
