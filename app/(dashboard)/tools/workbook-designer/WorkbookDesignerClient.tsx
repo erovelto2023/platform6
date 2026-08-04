@@ -55,7 +55,15 @@ export default function WorkbookDesignerClient() {
     const [isSaving, setIsSaving] = useState(false);
     const [projectId, setProjectId] = useState<string | null>(null);
 
-    const { name, width, height, pages, currentPageIndex } = useWorksheetStore();
+    const {
+        name,
+        setName,
+        pages,
+        currentPageIndex,
+        getKdpSpecs,
+        updateCurrentPageCanvas,
+    } = useWorksheetStore();
+    const kdpSpecs = getKdpSpecs();
 
     // Helper to insert objects onto canvas safely
     const handleInsertObjects = (
@@ -82,8 +90,8 @@ export default function WorkbookDesignerClient() {
         const c = fabricCanvasRef.current;
         if (!c) return;
         const textObj = new fabric.IText(text, {
-            left: 60,
-            top: 60,
+            left: kdpSpecs.safeLeft + 20,
+            top: kdpSpecs.safeTop + 20,
             fontSize: isHeader ? 24 : 16,
             fontFamily: "Inter",
             fontWeight: isHeader ? "bold" : "normal",
@@ -100,6 +108,7 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const tracingObj = await createTracingTextPath(text);
         if (tracingObj) {
+            tracingObj.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(tracingObj);
             c.setActiveObject(tracingObj);
             c.requestRenderAll();
@@ -107,8 +116,8 @@ export default function WorkbookDesignerClient() {
             toast.success("Dotted tracing text inserted!");
         } else {
             const fallbackText = new fabric.IText(text, {
-                left: 60,
-                top: 60,
+                left: kdpSpecs.safeLeft + 20,
+                top: kdpSpecs.safeTop + 20,
                 fontSize: 42,
                 fontFamily: "Inter",
                 fill: "transparent",
@@ -128,13 +137,13 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         let shape: fabric.FabricObject;
         if (type === "rect") {
-            shape = new fabric.Rect({ left: 100, top: 100, width: 150, height: 100, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2, rx: 8, ry: 8 });
+            shape = new fabric.Rect({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 150, height: 100, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2, rx: 8, ry: 8 });
         } else if (type === "circle") {
-            shape = new fabric.Circle({ left: 100, top: 100, radius: 60, fill: "#e0f2fe", stroke: "#0284c7", strokeWidth: 2 });
+            shape = new fabric.Circle({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, radius: 60, fill: "#e0f2fe", stroke: "#0284c7", strokeWidth: 2 });
         } else if (type === "triangle") {
-            shape = new fabric.Triangle({ left: 100, top: 100, width: 120, height: 100, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 2 });
+            shape = new fabric.Triangle({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 120, height: 100, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 2 });
         } else {
-            shape = new fabric.Rect({ left: 100, top: 100, width: 100, height: 100, fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
+            shape = new fabric.Rect({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20, width: 100, height: 100, fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
         }
         c.add(shape);
         c.setActiveObject(shape);
@@ -147,6 +156,7 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const qrGroup = await createQRCodeVector(qrText);
         if (qrGroup) {
+            qrGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(qrGroup);
             c.setActiveObject(qrGroup);
             c.requestRenderAll();
@@ -160,6 +170,7 @@ export default function WorkbookDesignerClient() {
         if (!c) return;
         const barcodeGroup = await createBarcodeVector(barcodeVal);
         if (barcodeGroup) {
+            barcodeGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             c.add(barcodeGroup);
             c.setActiveObject(barcodeGroup);
             c.requestRenderAll();
@@ -187,18 +198,21 @@ export default function WorkbookDesignerClient() {
         const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
 
         if (titleGroup) {
+            titleGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 20 });
             (titleGroup as any).customType = "word-search";
             (titleGroup as any).wordSearchConfig = config;
             c.add(titleGroup);
         }
 
         if (gridGroup) {
+            gridGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 80 });
             (gridGroup as any).customType = "word-search";
             (gridGroup as any).wordSearchConfig = config;
             c.add(gridGroup);
         }
 
         if (bankGroup) {
+            gridGroup.set({ left: kdpSpecs.safeLeft + 20, top: kdpSpecs.safeTop + 450 });
             (bankGroup as any).customType = "word-search";
             (bankGroup as any).wordSearchConfig = config;
             c.add(bankGroup);
@@ -207,7 +221,7 @@ export default function WorkbookDesignerClient() {
         c.setActiveObject(gridGroup);
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Word Search added! Title, Grid & Word Bank can be dragged independently.");
+        toast.success("Word Search added! Fits cleanly inside KDP Safe Margin Zone.");
     };
 
     const handleAddCrossword = (title: string, items: { word: string; clue: string }[]) => handleInsertObjects(generateCrosswordObjects(title, items), "Crossword Puzzle");
@@ -235,25 +249,72 @@ export default function WorkbookDesignerClient() {
     const handleAddTicTacToe = () => handleInsertObjects(generateTicTacToeObjects(), "Tic-Tac-Toe");
     const handleAddDominoPuzzle = () => handleInsertObjects(generateDominoObjects(), "Domino Puzzle");
 
+    // Save Workbook Project Handler
     const handleSaveProject = async () => {
         try {
             setIsSaving(true);
-            const projectData = { name, width, height, pages, pageCount: pages.length };
+
+            // 1. Sync current canvas state to current page store
+            const c = fabricCanvasRef.current;
+            let currentThumbnail = "";
+            let latestPages = pages;
+            if (c) {
+                const currentJson = c.toJSON();
+                try {
+                    currentThumbnail = c.toDataURL({ format: "png", multiplier: 0.15 });
+                } catch (e) {
+                    // thumbnail optional
+                }
+                updateCurrentPageCanvas(currentJson, currentThumbnail);
+                latestPages = useWorksheetStore.getState().pages;
+            }
+
+            // 2. Prepare payload
+            const projectData = {
+                name,
+                width: kdpSpecs.canvasWidth,
+                height: kdpSpecs.canvasHeight,
+                currentPageIndex,
+                pages: latestPages,
+                thumbnail: currentThumbnail || latestPages[0]?.thumbnail,
+            };
+
+            // 3. Save to API
             const result = await saveWorkbookProject(projectData, projectId);
-            if (result && result._id) setProjectId(result._id);
+            const savedId = result.project?._id || result._id;
+
+            if (savedId) {
+                setProjectId(savedId);
+            }
             toast.success("Project saved successfully!");
-        } catch (err) {
+        } catch (err: any) {
             console.error("Save project error:", err);
-            toast.error("Failed to save project.");
+            toast.error(err.message || "Failed to save project.");
         } finally {
             setIsSaving(false);
         }
     };
 
-    // Ultra-HD 4K Razor-Sharp Vector PDF Export Handler
+    // Load Project Handler
+    const handleLoadProjectData = (id: string, projectData: any) => {
+        setProjectId(id);
+        if (projectData.name) setName(projectData.name);
+        if (projectData.pages && projectData.pages.length > 0) {
+            useWorksheetStore.setState({
+                pages: projectData.pages,
+                currentPageIndex: 0,
+            });
+            const c = fabricCanvasRef.current;
+            if (c && projectData.pages[0]?.canvasJson) {
+                c.loadFromJSON(projectData.pages[0].canvasJson).then(() => c.requestRenderAll());
+            }
+        }
+    };
+
+    // Ultra-HD 4K KDP-Compliant Print PDF Export Handler
     const handleExportPDF = async () => {
         try {
-            toast.loading("Rendering Ultra-HD Print PDF...", { id: "pdf-export" });
+            toast.loading("Rendering Amazon KDP Print PDF...", { id: "pdf-export" });
 
             const highResImages: string[] = [];
 
@@ -264,7 +325,7 @@ export default function WorkbookDesignerClient() {
                 if (i === currentPageIndex && fabricCanvasRef.current) {
                     svgString = fabricCanvasRef.current.toSVG();
                 } else if (page.canvasJson) {
-                    const staticCanvas = new fabric.StaticCanvas(undefined, { width, height });
+                    const staticCanvas = new fabric.StaticCanvas(undefined, { width: kdpSpecs.canvasWidth, height: kdpSpecs.canvasHeight });
                     await staticCanvas.loadFromJSON(page.canvasJson);
                     staticCanvas.renderAll();
                     svgString = staticCanvas.toSVG();
@@ -272,7 +333,7 @@ export default function WorkbookDesignerClient() {
                 }
 
                 if (svgString) {
-                    const highResDataUrl = await convertSvgToHighResDataUrl(svgString, width, height, 4);
+                    const highResDataUrl = await convertSvgToHighResDataUrl(svgString, kdpSpecs.canvasWidth, kdpSpecs.canvasHeight, 4);
                     if (highResDataUrl) {
                         highResImages.push(highResDataUrl);
                         continue;
@@ -286,15 +347,15 @@ export default function WorkbookDesignerClient() {
 
             const pdfBytes = await generateWorksheetPDF({
                 projectName: name,
-                width,
-                height,
+                width: kdpSpecs.canvasWidth,
+                height: kdpSpecs.canvasHeight,
                 pages,
                 highResImages,
             });
 
             const blob = new Blob([pdfBytes as unknown as BlobPart], { type: "application/pdf" });
-            saveAs(blob, `${name.replace(/\s+/g, "_")}.pdf`);
-            toast.success("Razor-sharp Print PDF Downloaded!", { id: "pdf-export" });
+            saveAs(blob, `${name.replace(/\s+/g, "_")}_KDP_Print.pdf`);
+            toast.success("Amazon KDP Compliant PDF Downloaded!", { id: "pdf-export" });
         } catch (err) {
             console.error("PDF Export error:", err);
             toast.error("Failed to generate PDF.", { id: "pdf-export" });
@@ -303,7 +364,12 @@ export default function WorkbookDesignerClient() {
 
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans">
-            <WorksheetHeader onExportPDF={handleExportPDF} onSaveProject={handleSaveProject} isSaving={isSaving} />
+            <WorksheetHeader
+                onExportPDF={handleExportPDF}
+                onSaveProject={handleSaveProject}
+                onLoadProjectData={handleLoadProjectData}
+                isSaving={isSaving}
+            />
             <div className="flex-1 flex overflow-hidden">
                 <WorksheetSidebar
                     onAddText={handleAddText}

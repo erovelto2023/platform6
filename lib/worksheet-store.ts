@@ -12,12 +12,31 @@ export interface DocumentSnapshot {
     currentPageIndex: number;
 }
 
+export interface KdpSpecs {
+    trimWidth: number;          // in pixels @ 96 DPI
+    trimHeight: number;         // in pixels @ 96 DPI
+    canvasWidth: number;        // total page width including bleed
+    canvasHeight: number;       // total page height including bleed
+    gutterMargin: number;       // inside margin in px based on page count
+    outsideMargin: number;      // top, bottom, outside margin in px
+    cutBleed: number;           // 0.125" = 12px
+    safeTop: number;
+    safeLeft: number;
+    safeWidth: number;
+    safeHeight: number;
+}
+
 export interface WorksheetState {
     // Project Metadata
     name: string;
     width: number;
     height: number;
     pageSizeKey: string;
+
+    // Amazon KDP Settings
+    kdpBleed: boolean;
+    kdpPageCount: number;
+    showKdpGuides: boolean;
 
     // Multi-page State
     pages: WorksheetPage[];
@@ -33,7 +52,6 @@ export interface WorksheetState {
     gridSnapping: boolean;
     gridSize: number;
     marginsEnabled: boolean;
-    bleedEnabled: boolean;
 
     // Active Tooling State
     activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "pan";
@@ -50,12 +68,19 @@ export interface WorksheetState {
     // Actions
     setName: (name: string) => void;
     setPageSize: (sizeKey: string, width: number, height: number) => void;
+    setKdpBleed: (bleed: boolean) => void;
+    setKdpPageCount: (count: number) => void;
+    setShowKdpGuides: (show: boolean) => void;
+
     setCurrentPageIndex: (index: number) => void;
     addPage: () => void;
     duplicatePage: (index: number) => void;
     deletePage: (index: number) => void;
     reorderPages: (oldIndex: number, newIndex: number) => void;
     updateCurrentPageCanvas: (canvasJson: any, thumbnail?: string) => void;
+
+    // Helper method to compute exact KDP specs
+    getKdpSpecs: () => KdpSpecs;
 
     // Undo/Redo
     undo: () => void;
@@ -67,7 +92,6 @@ export interface WorksheetState {
     setShowGrid: (show: boolean) => void;
     setGridSnapping: (snap: boolean) => void;
     setMarginsEnabled: (enabled: boolean) => void;
-    setBleedEnabled: (enabled: boolean) => void;
 
     setActiveTool: (tool: "select" | "draw" | "text" | "tracing" | "shape" | "pan") => void;
     setBrushProps: (props: Partial<{ size: number; color: string; thinning: number; smoothing: number }>) => void;
@@ -93,7 +117,6 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
             pages: JSON.parse(JSON.stringify(pages)),
             currentPageIndex,
         });
-        // Limit history to 50 snapshots
         if (newHistory.length > 50) newHistory.shift();
         return {
             pages,
@@ -109,6 +132,11 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         height: 1056,
         pageSizeKey: "8.5x11",
 
+        // KDP Settings
+        kdpBleed: false,
+        kdpPageCount: 100,
+        showKdpGuides: true,
+
         pages: initialPages,
         currentPageIndex: 0,
 
@@ -120,7 +148,6 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         gridSnapping: true,
         gridSize: 24,
         marginsEnabled: true,
-        bleedEnabled: false,
 
         activeTool: "select",
         brushSize: 8,
@@ -135,6 +162,56 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         setName: (name: string) => set({ name }),
 
         setPageSize: (pageSizeKey: string, width: number, height: number) => set({ pageSizeKey, width, height }),
+
+        setKdpBleed: (kdpBleed: boolean) => set({ kdpBleed }),
+        setKdpPageCount: (kdpPageCount: number) => set({ kdpPageCount }),
+        setShowKdpGuides: (showKdpGuides: boolean) => set({ showKdpGuides }),
+
+        getKdpSpecs: (): KdpSpecs => {
+            const { width, height, kdpBleed, kdpPageCount } = get();
+            const dpi = 96;
+
+            // Trim dimensions in px
+            const trimWidth = width;
+            const trimHeight = height;
+
+            // Bleed calculations (0.125" = 12px @ 96 DPI)
+            const cutBleed = kdpBleed ? Math.round(0.125 * dpi) : 0;
+            const canvasWidth = trimWidth + cutBleed;
+            const canvasHeight = trimHeight + (cutBleed * 2);
+
+            // Gutter inside margin based on Amazon KDP page count table
+            let gutterInches = 0.375;
+            if (kdpPageCount >= 701) gutterInches = 0.875;
+            else if (kdpPageCount >= 501) gutterInches = 0.750;
+            else if (kdpPageCount >= 301) gutterInches = 0.625;
+            else if (kdpPageCount >= 151) gutterInches = 0.500;
+
+            const gutterMargin = Math.round(gutterInches * dpi);
+
+            // Outside margin (0.25" without bleed, 0.375" with bleed)
+            const outsideInches = kdpBleed ? 0.375 : 0.25;
+            const outsideMargin = Math.round(outsideInches * dpi);
+
+            const safeTop = cutBleed + outsideMargin;
+            const safeLeft = gutterMargin;
+            const safeWidth = canvasWidth - gutterMargin - outsideMargin;
+            const safeHeight = canvasHeight - (cutBleed * 2) - (outsideMargin * 2);
+
+            return {
+                trimWidth,
+                trimHeight,
+                canvasWidth,
+                canvasHeight,
+                gutterMargin,
+                outsideMargin,
+                cutBleed,
+                safeTop,
+                safeLeft,
+                safeWidth,
+                safeHeight,
+            };
+        },
 
         setCurrentPageIndex: (currentPageIndex: number) => set({ currentPageIndex, selectedObjectId: null }),
 
@@ -230,7 +307,6 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         setShowGrid: (showGrid: boolean) => set({ showGrid }),
         setGridSnapping: (gridSnapping: boolean) => set({ gridSnapping }),
         setMarginsEnabled: (marginsEnabled: boolean) => set({ marginsEnabled }),
-        setBleedEnabled: (bleedEnabled: boolean) => set({ bleedEnabled }),
 
         setActiveTool: (activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "pan") => set({ activeTool }),
 

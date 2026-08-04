@@ -18,8 +18,6 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
     const isInternalStateUpdateRef = useRef(false);
 
     const {
-        width,
-        height,
         pages,
         currentPageIndex,
         zoom,
@@ -33,7 +31,12 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         brushSmoothing,
         updateCurrentPageCanvas,
         setSelectedObject,
+        showKdpGuides,
+        kdpBleed,
+        getKdpSpecs,
     } = useWorksheetStore();
+
+    const kdpSpecs = getKdpSpecs();
 
     // Freehand stroke points ref
     const strokePointsRef = useRef<{ x: number; y: number; pressure?: number }[]>([]);
@@ -71,8 +74,8 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         if (!canvasElRef.current) return;
 
         const c = new fabric.Canvas(canvasElRef.current, {
-            width,
-            height,
+            width: kdpSpecs.canvasWidth,
+            height: kdpSpecs.canvasHeight,
             backgroundColor: "#ffffff",
             preserveObjectStacking: true,
             selection: true,
@@ -123,7 +126,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
             }
             fabricCanvasRef.current = null;
         };
-    }, [width, height]);
+    }, [kdpSpecs.canvasWidth, kdpSpecs.canvasHeight]);
 
     // Load canvas JSON ONLY when currentPageIndex changes
     const prevPageIndexRef = useRef<number>(-1);
@@ -150,7 +153,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
     useEffect(() => {
         const c = fabricCanvasRef.current;
         if (!c) return;
-        c.setDimensions({ width, height });
+        c.setDimensions({ width: kdpSpecs.canvasWidth, height: kdpSpecs.canvasHeight });
 
         const snapHandler = (options: any) => {
             if (!gridSnapping) return;
@@ -167,7 +170,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         return () => {
             c.off("object:moving", snapHandler);
         };
-    }, [width, height, gridSnapping, gridSize, fabricCanvasRef]);
+    }, [kdpSpecs.canvasWidth, kdpSpecs.canvasHeight, gridSnapping, gridSize, fabricCanvasRef]);
 
     // Perfect Freehand Pointer Events
     const handlePointerDown = (e: React.PointerEvent) => {
@@ -213,12 +216,12 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
             ref={containerRef}
             className="flex-1 bg-slate-200/70 dark:bg-slate-950 overflow-auto flex items-center justify-center p-8 relative select-none"
         >
-            {/* Page Canvas Container with Shadow & Grid Overlay */}
+            {/* Page Canvas Container with Shadow & Amazon KDP Overlay */}
             <div
                 className="relative bg-white shadow-2xl transition-transform origin-center border border-slate-300 dark:border-slate-800"
                 style={{
-                    width: `${width}px`,
-                    height: `${height}px`,
+                    width: `${kdpSpecs.canvasWidth}px`,
+                    height: `${kdpSpecs.canvasHeight}px`,
                     transform: `scale(${zoom})`,
                 }}
                 onPointerDown={handlePointerDown}
@@ -228,7 +231,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                 {/* SVG Grid Overlay */}
                 {showGrid && (
                     <svg
-                        className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-30"
+                        className="absolute inset-0 w-full h-full pointer-events-none z-10 opacity-25"
                         xmlns="http://www.w3.org/2000/svg"
                     >
                         <defs>
@@ -247,6 +250,61 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                             </pattern>
                         </defs>
                         <rect width="100%" height="100%" fill="url(#worksheet-grid-pattern)" />
+                    </svg>
+                )}
+
+                {/* AMAZON KDP PRINT SAFETY GUIDES OVERLAY */}
+                {showKdpGuides && (
+                    <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none z-20"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        {/* 1. Red Trim Line (where Amazon KDP blade cuts) */}
+                        {kdpBleed && (
+                            <rect
+                                x={kdpSpecs.cutBleed / 2}
+                                y={kdpSpecs.cutBleed}
+                                width={kdpSpecs.trimWidth}
+                                height={kdpSpecs.trimHeight}
+                                fill="none"
+                                stroke="#ef4444"
+                                strokeWidth="1.5"
+                                strokeDasharray="6,4"
+                            />
+                        )}
+
+                        {/* 2. Orange Content Safety Zone (Keep text inside this box) */}
+                        <rect
+                            x={kdpSpecs.safeLeft}
+                            y={kdpSpecs.safeTop}
+                            width={kdpSpecs.safeWidth}
+                            height={kdpSpecs.safeHeight}
+                            fill="none"
+                            stroke="#f59e0b"
+                            strokeWidth="1.5"
+                            strokeDasharray="4,4"
+                        />
+
+                        {/* 3. Blue Inside Spine Gutter Zone */}
+                        <rect
+                            x={0}
+                            y={kdpSpecs.cutBleed}
+                            width={kdpSpecs.gutterMargin}
+                            height={kdpSpecs.trimHeight}
+                            fill="#3b82f6"
+                            fillOpacity="0.08"
+                            stroke="#3b82f6"
+                            strokeWidth="1"
+                            strokeDasharray="3,3"
+                        />
+
+                        {/* Legend Badge */}
+                        <text x={kdpSpecs.safeLeft + 10} y={kdpSpecs.safeTop + 18} fill="#f59e0b" fontSize="11" fontWeight="bold" fontFamily="Inter">
+                            KDP Safe Zone Margin (Keep text inside)
+                        </text>
+                        <text x={10} y={kdpSpecs.safeTop + 35} fill="#3b82f6" fontSize="10" fontWeight="bold" fontFamily="Inter">
+                            Inside Spine Gutter ({kdpSpecs.gutterMargin}px)
+                        </text>
                     </svg>
                 )}
 
