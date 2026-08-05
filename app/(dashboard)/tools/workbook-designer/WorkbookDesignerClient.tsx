@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import * as fabric from "fabric";
 import toast from "react-hot-toast";
 import { saveAs } from "file-saver";
@@ -10,6 +10,14 @@ import {
     createTracingTextPath,
     createQRCodeVector,
     createBarcodeVector,
+    createPrimaryHandwritingLinedPaperGroup,
+    createMathGridPaperGroup,
+    createSpellingTestGroup,
+    createFlashcardGridGroup,
+    createLineToolObject,
+    createStarPolygon,
+    createSymbolVectorObject,
+    registerCustomFontFace,
     addObjectsSafelyToCanvas,
     attachPuzzleMetadata,
     generateWordSearchComponentGroups,
@@ -135,12 +143,15 @@ export default function WorkbookDesignerClient() {
             toast.success("Dotted tracing text inserted!");
         } else {
             const fallbackText = new fabric.IText(text, {
-                fontSize: 42,
+                fontSize: 64,
                 fontFamily: "Inter",
                 fill: "transparent",
                 stroke: "#475569",
-                strokeWidth: 2,
-                strokeDashArray: [6, 6],
+                strokeWidth: 1.2,
+                strokeDashArray: [4, 4],
+                strokeLineCap: "round",
+                strokeLineJoin: "round",
+                objectCaching: false,
             });
             c.add(fallbackText);
             c.centerObject(fallbackText);
@@ -150,7 +161,7 @@ export default function WorkbookDesignerClient() {
         }
     };
 
-    const handleAddShape = (type: "rect" | "circle" | "triangle" | "star") => {
+    const handleAddShape = (type: "rect" | "circle" | "triangle" | "star" | "starburst") => {
         const c = fabricCanvasRef.current;
         if (!c) return;
         let shape: fabric.FabricObject;
@@ -160,8 +171,10 @@ export default function WorkbookDesignerClient() {
             shape = new fabric.Circle({ radius: 60, fill: "#e0f2fe", stroke: "#0284c7", strokeWidth: 2 });
         } else if (type === "triangle") {
             shape = new fabric.Triangle({ width: 120, height: 100, fill: "#fef3c7", stroke: "#d97706", strokeWidth: 2 });
+        } else if (type === "starburst") {
+            shape = createStarPolygon(12, 60, 38, { fill: "#ffedd5", stroke: "#ea580c", strokeWidth: 2 });
         } else {
-            shape = new fabric.Rect({ width: 100, height: 100, fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
+            shape = createStarPolygon(5, 55, 24, { fill: "#fef08a", stroke: "#ca8a04", strokeWidth: 2 });
         }
         c.add(shape);
         c.centerObject(shape);
@@ -510,9 +523,112 @@ export default function WorkbookDesignerClient() {
         }
     };
 
+    const handleAddPrimaryLinedPaper = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createPrimaryHandwritingLinedPaperGroup(6);
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Primary Handwriting Lined Paper inserted!");
+    };
+
+    const handleAddMathGridPaper = (gridType: "quarter" | "half" = "quarter") => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createMathGridPaperGroup(gridType);
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Math Graph Grid Paper inserted!");
+    };
+
+    const handleAddSpellingTest = (count: 10 | 15 | 20 = 10) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createSpellingTestGroup(count);
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(`Spelling Test Template (${count} Words) inserted!`);
+    };
+
+    const handleAddFlashcardGrid = (count: 4 | 8 = 4) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createFlashcardGridGroup(count);
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(`Flashcard Cut Grid (${count} Cards) inserted!`);
+    };
+
+    const handleAddLineTool = (lineType: string) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const lineObj = createLineToolObject(lineType);
+        c.add(lineObj);
+        c.centerObject(lineObj);
+        c.setActiveObject(lineObj);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(`Inserted ${lineType.replace(/-/g, " ")}!`);
+    };
+
+    const handleAddSymbol = async (symbol: { id: string; name: string; svgString?: string; pathData?: string; textSymbol?: string }) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const obj = await createSymbolVectorObject(symbol);
+        c.add(obj);
+        c.centerObject(obj);
+        c.setActiveObject(obj);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(`Inserted ${symbol.name}!`);
+    };
+
+    const { customFonts } = useWorksheetStore();
+
+    useEffect(() => {
+        if (customFonts && customFonts.length > 0) {
+            customFonts.forEach((f) => {
+                registerCustomFontFace(f.fontFamily, f.dataUrl);
+            });
+        }
+    }, [customFonts]);
+
+    const handleAddCustomImage = async (dataUrl: string, name: string) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        try {
+            const img = await fabric.Image.fromURL(dataUrl);
+            if (img) {
+                img.scaleToWidth(250);
+                c.add(img);
+                c.centerObject(img);
+                c.setActiveObject(img);
+                c.requestRenderAll();
+                c.fire("object:modified");
+                toast.success(`Inserted ${name} onto canvas!`);
+            }
+        } catch (err) {
+            console.error("Failed to load image onto canvas:", err);
+            toast.error("Failed to load image onto canvas.");
+        }
+    };
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 font-sans">
             <WorksheetHeader
+                fabricCanvasRef={fabricCanvasRef}
                 onExportPDF={handleExportPDF}
                 onSaveProject={handleSaveProject}
                 onLoadProjectData={handleLoadProjectData}
@@ -558,6 +674,13 @@ export default function WorkbookDesignerClient() {
                     onAddHiddenMessageSearch={handleAddHiddenMessageSearch}
                     onAddMissingVowels={handleAddMissingVowels}
                     onAddCodeword={handleAddCodeword}
+                    onAddPrimaryLinedPaper={handleAddPrimaryLinedPaper}
+                    onAddMathGridPaper={handleAddMathGridPaper}
+                    onAddSpellingTest={handleAddSpellingTest}
+                    onAddFlashcardGrid={handleAddFlashcardGrid}
+                    onAddLineTool={handleAddLineTool}
+                    onAddSymbol={handleAddSymbol}
+                    onAddCustomImage={handleAddCustomImage}
                 />
                 <WorksheetCanvasContainer fabricCanvasRef={fabricCanvasRef} />
                 <WorksheetPropertyPanel fabricCanvasRef={fabricCanvasRef} />

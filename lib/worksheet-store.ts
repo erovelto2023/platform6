@@ -26,6 +26,21 @@ export interface KdpSpecs {
     safeHeight: number;
 }
 
+export interface CustomImageItem {
+    id: string;
+    name: string;
+    dataUrl: string;
+    addedAt: number;
+}
+
+export interface CustomFontItem {
+    id: string;
+    name: string;
+    fontFamily: string;
+    dataUrl: string;
+    addedAt: number;
+}
+
 export interface WorksheetState {
     // Project Metadata
     name: string;
@@ -54,18 +69,33 @@ export interface WorksheetState {
     marginsEnabled: boolean;
 
     // Active Tooling State
-    activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "pan";
+    activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "line" | "eraser" | "pan";
     brushSize: number;
     brushColor: string;
     brushThinning: number;
     brushSmoothing: number;
+    brushStyle: "pencil" | "pen" | "calligraphy" | "marker" | "highlighter" | "crayon" | "chalk" | "airbrush" | "watercolor" | "neon" | "glitter" | "vector";
+    brushOpacity: number;
+    fillColor: string;
+    strokeColor: string;
+    strokeWidth: number;
+    strokeStyle: "solid" | "dashed" | "dotted";
 
     // Active Canvas Selection Info
     selectedObjectId: string | null;
     selectedObjectType: string | null;
     selectedObjectProps: any;
 
+    // Custom User Library Assets
+    customImages: CustomImageItem[];
+    customFonts: CustomFontItem[];
+
     // Actions
+    addCustomImage: (name: string, dataUrl: string) => void;
+    removeCustomImage: (id: string) => void;
+    addCustomFont: (name: string, fontFamily: string, dataUrl: string) => void;
+    removeCustomFont: (id: string) => void;
+
     setName: (name: string) => void;
     setPageSize: (sizeKey: string, width: number, height: number) => void;
     setKdpBleed: (bleed: boolean) => void;
@@ -94,8 +124,8 @@ export interface WorksheetState {
     setGridSnapping: (snap: boolean) => void;
     setMarginsEnabled: (enabled: boolean) => void;
 
-    setActiveTool: (tool: "select" | "draw" | "text" | "tracing" | "shape" | "pan") => void;
-    setBrushProps: (props: Partial<{ size: number; color: string; thinning: number; smoothing: number }>) => void;
+    setActiveTool: (tool: "select" | "draw" | "text" | "tracing" | "shape" | "line" | "eraser" | "pan") => void;
+    setBrushProps: (props: Partial<{ size: number; color: string; thinning: number; smoothing: number; style: any; opacity: number; fillColor: string; strokeColor: string; strokeWidth: number; strokeStyle: any }>) => void;
 
     setSelectedObject: (id: string | null, type: string | null, props?: any) => void;
     updateSelectedObjectProps: (props: any) => void;
@@ -144,7 +174,7 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         history: [{ pages: JSON.parse(JSON.stringify(initialPages)), currentPageIndex: 0 }],
         historyIndex: 0,
 
-        zoom: 1,
+        zoom: 0.7,
         showGrid: true,
         gridSnapping: true,
         gridSize: 24,
@@ -155,10 +185,45 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         brushColor: "#0f172a",
         brushThinning: 0.5,
         brushSmoothing: 0.5,
+        brushStyle: "pen",
+        brushOpacity: 1.0,
+        fillColor: "#3b82f6",
+        strokeColor: "#0f172a",
+        strokeWidth: 2,
+        strokeStyle: "solid",
 
         selectedObjectId: null,
         selectedObjectType: null,
         selectedObjectProps: null,
+
+        customImages: [],
+        customFonts: [],
+
+        addCustomImage: (name: string, dataUrl: string) =>
+            set((state) => ({
+                customImages: [
+                    { id: `img_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`, name, dataUrl, addedAt: Date.now() },
+                    ...state.customImages,
+                ],
+            })),
+
+        removeCustomImage: (id: string) =>
+            set((state) => ({
+                customImages: state.customImages.filter((img) => img.id !== id),
+            })),
+
+        addCustomFont: (name: string, fontFamily: string, dataUrl: string) =>
+            set((state) => ({
+                customFonts: [
+                    { id: `font_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`, name, fontFamily, dataUrl, addedAt: Date.now() },
+                    ...state.customFonts,
+                ],
+            })),
+
+        removeCustomFont: (id: string) =>
+            set((state) => ({
+                customFonts: state.customFonts.filter((f) => f.id !== id),
+            })),
 
         setName: (name: string) => set({ name }),
 
@@ -359,14 +424,20 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
         setGridSnapping: (gridSnapping: boolean) => set({ gridSnapping }),
         setMarginsEnabled: (marginsEnabled: boolean) => set({ marginsEnabled }),
 
-        setActiveTool: (activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "pan") => set({ activeTool }),
+        setActiveTool: (activeTool: "select" | "draw" | "text" | "tracing" | "shape" | "line" | "eraser" | "pan") => set({ activeTool }),
 
-        setBrushProps: (props: Partial<{ size: number; color: string; thinning: number; smoothing: number }>) =>
+        setBrushProps: (props: Partial<{ size: number; color: string; thinning: number; smoothing: number; style: any; opacity: number; fillColor: string; strokeColor: string; strokeWidth: number; strokeStyle: any }>) =>
             set((state) => ({
                 brushSize: props.size ?? state.brushSize,
                 brushColor: props.color ?? state.brushColor,
                 brushThinning: props.thinning ?? state.brushThinning,
                 brushSmoothing: props.smoothing ?? state.brushSmoothing,
+                brushStyle: props.style ?? state.brushStyle,
+                brushOpacity: props.opacity ?? state.brushOpacity,
+                fillColor: props.fillColor ?? state.fillColor,
+                strokeColor: props.strokeColor ?? state.strokeColor,
+                strokeWidth: props.strokeWidth ?? state.strokeWidth,
+                strokeStyle: props.strokeStyle ?? state.strokeStyle,
             })),
 
         setSelectedObject: (selectedObjectId: string | null, selectedObjectType: string | null, props: any = null) =>

@@ -57,6 +57,8 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         brushColor,
         brushThinning,
         brushSmoothing,
+        brushStyle,
+        brushOpacity,
         updateCurrentPageCanvas,
         setSelectedObject,
         showKdpGuides,
@@ -323,6 +325,8 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
             color: brushColor,
             thinning: brushThinning,
             smoothing: brushSmoothing,
+            style: brushStyle,
+            opacity: brushOpacity,
         });
 
         if (pathObj) {

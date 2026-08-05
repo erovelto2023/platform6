@@ -59,30 +59,84 @@ export function getSvgPathFromFreehandStroke(stroke: number[][]): string {
 
 export function createFreehandPath(
     points: { x: number; y: number; pressure?: number }[],
-    options: { size?: number; color?: string; thinning?: number; smoothing?: number } = {}
+    options: { size?: number; color?: string; thinning?: number; smoothing?: number; style?: string; opacity?: number } = {}
 ): fabric.Path | null {
     if (points.length < 2) return null;
     const inputPoints = points.map((p) => [p.x, p.y, p.pressure ?? 0.5]);
+
+    let size = options.size ?? 8;
+    let thinning = options.thinning ?? 0.5;
+    let smoothing = options.smoothing ?? 0.5;
+    let opacity = options.opacity ?? 1.0;
+    const color = options.color ?? "#0f172a";
+
+    if (options.style === "pencil") {
+        thinning = 0.35;
+        smoothing = 0.4;
+        opacity = 0.85;
+    } else if (options.style === "calligraphy" || options.style === "fountain_pen") {
+        thinning = 0.75;
+        smoothing = 0.6;
+        size = size * 1.2;
+    } else if (options.style === "marker") {
+        thinning = -0.1;
+        smoothing = 0.5;
+        size = size * 1.4;
+        opacity = 0.95;
+    } else if (options.style === "highlighter") {
+        thinning = -0.25;
+        smoothing = 0.5;
+        size = size * 2.2;
+        opacity = 0.45;
+    } else if (options.style === "crayon" || options.style === "chalk") {
+        thinning = 0.2;
+        smoothing = 0.3;
+        opacity = 0.85;
+    } else if (options.style === "watercolor" || options.style === "airbrush") {
+        thinning = 0.4;
+        smoothing = 0.6;
+        size = size * 1.8;
+        opacity = 0.6;
+    } else if (options.style === "neon") {
+        thinning = 0.1;
+        opacity = 1.0;
+    }
+
     const stroke = getStroke(inputPoints, {
-        size: options.size ?? 8,
-        thinning: options.thinning ?? 0.5,
-        smoothing: options.smoothing ?? 0.5,
+        size: size,
+        thinning: thinning,
+        smoothing: smoothing,
         streamline: 0.5,
     });
     const pathData = getSvgPathFromFreehandStroke(stroke);
     if (!pathData) return null;
 
-    return new fabric.Path(pathData, {
-        fill: options.color ?? "#0f172a",
-        stroke: "none",
+    const pathObj = new fabric.Path(pathData, {
+        fill: color,
+        stroke: options.style === "neon" ? "#ffffff" : "none",
+        strokeWidth: options.style === "neon" ? 1.5 : 0,
+        opacity: opacity,
         selectable: true,
     });
+
+    if (options.style === "neon") {
+        pathObj.set({
+            shadow: new fabric.Shadow({
+                color: color,
+                blur: 15,
+                offsetX: 0,
+                offsetY: 0,
+            }),
+        });
+    }
+
+    return pathObj;
 }
 
 // --- Dotted Educational Font Tracing Helper (opentype.js dynamic import) ---
 export async function createTracingTextPath(
     text: string,
-    fontUrl: string = "https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZJhiI2B.woff",
+    fontUrl: string = "https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-normal.ttf",
     options: { fontSize?: number; fill?: string; stroke?: string; strokeWidth?: number; dashArray?: number[] } = {}
 ): Promise<fabric.Path | null> {
     try {
@@ -93,24 +147,46 @@ export async function createTracingTextPath(
         const opentypeModule = await import("opentype.js");
         const opentype = (opentypeModule as any).default || opentypeModule;
 
-        const font = await new Promise<any>((resolve, reject) => {
-            opentype.load(fontUrl, (err: any, loadedFont: any) => {
-                if (err || !loadedFont) reject(err || new Error("Failed to load font"));
-                else resolve(loadedFont);
-            });
-        });
+        let res = await fetch(fontUrl);
+        if (!res.ok) {
+            res = await fetch("https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest/latin-400-normal.ttf");
+        }
+        if (!res.ok) return null;
 
-        const fontSize = options.fontSize ?? 48;
-        const opentypePath = font.getPath(text, 0, fontSize, fontSize);
+        const buffer = await res.arrayBuffer();
+        const headerView = new Uint8Array(buffer.slice(0, 4));
+        if (headerView[0] === 0x3C && headerView[1] === 0x21) {
+            console.warn("Tracing font fetch returned HTML 404, falling back.");
+            return null;
+        }
+
+        const font = opentype.parse(buffer);
+        if (font.tables) {
+            font.tables.gsub = null;
+        }
+
+        const fontSize = options.fontSize ?? 64;
+        let opentypePath: any = null;
+        try {
+            opentypePath = font.getPath(text, 0, fontSize, fontSize);
+        } catch (e) {
+            console.warn("opentype.getPath error fallback:", e);
+            return null;
+        }
+
+        if (!opentypePath) return null;
         const svgPathData = opentypePath.toPathData(2);
 
         if (!svgPathData) return null;
 
         return new fabric.Path(svgPathData, {
-            fill: options.fill ?? "transparent",
-            stroke: options.stroke ?? "#64748b",
-            strokeWidth: options.strokeWidth ?? 2,
-            strokeDashArray: options.dashArray ?? [6, 6],
+            fill: "transparent",
+            stroke: options.stroke ?? "#475569",
+            strokeWidth: options.strokeWidth ?? 1.2,
+            strokeDashArray: options.dashArray ?? [4, 4],
+            strokeLineCap: "round",
+            strokeLineJoin: "round",
+            objectCaching: false, // Crisp vector rendering
             selectable: true,
         });
     } catch (err) {
@@ -1782,4 +1858,362 @@ export function generateHiddenMessageSearch(): fabric.FabricObject[] {
         gridSize: 10,
     });
 }
+
+// =========================================================================
+// K-12 EDUCATIONAL TEMPLATES & DECORATIVE GRAPHICS GENERATORS
+// =========================================================================
+
+// 1. Primary K-3 Handwriting Lined Paper (Top solid, Middle dashed, Bottom solid)
+export function createPrimaryHandwritingLinedPaperGroup(rowsCount: number = 6): fabric.Group {
+    const objs: fabric.FabricObject[] = [];
+    const width = 500;
+    const rowHeight = 50;
+
+    for (let i = 0; i < rowsCount; i++) {
+        const y = i * (rowHeight + 24);
+
+        // Top Line (Solid Blue)
+        objs.push(new fabric.Line([0, y, width, y], { stroke: "#3b82f6", strokeWidth: 1.5 }));
+        // Center Dashed Guideline (Red/Blue Dashed)
+        objs.push(new fabric.Line([0, y + rowHeight / 2, width, y + rowHeight / 2], { stroke: "#ef4444", strokeWidth: 1, strokeDashArray: [6, 4] }));
+        // Bottom Line (Solid Blue)
+        objs.push(new fabric.Line([0, y + rowHeight, width, y + rowHeight], { stroke: "#3b82f6", strokeWidth: 1.5 }));
+    }
+
+    return new fabric.Group(objs, { left: 60, top: 100, subTargetCheck: true });
+}
+
+// 2. Math Graph Grid Paper Overlay (1/4" or 1/2")
+export function createMathGridPaperGroup(gridType: "quarter" | "half" = "quarter"): fabric.Group {
+    const objs: fabric.FabricObject[] = [];
+    const cellSize = gridType === "half" ? 48 : 24;
+    const cols = Math.floor(520 / cellSize);
+    const rows = Math.floor(650 / cellSize);
+
+    // Border Box
+    objs.push(new fabric.Rect({
+        left: 0,
+        top: 0,
+        width: cols * cellSize,
+        height: rows * cellSize,
+        fill: "#ffffff",
+        stroke: "#0f172a",
+        strokeWidth: 2,
+    }));
+
+    // Vertical Lines
+    for (let c = 1; c < cols; c++) {
+        const x = c * cellSize;
+        objs.push(new fabric.Line([x, 0, x, rows * cellSize], { stroke: c % 4 === 0 ? "#94a3b8" : "#cbd5e1", strokeWidth: c % 4 === 0 ? 1 : 0.5 }));
+    }
+
+    // Horizontal Lines
+    for (let r = 1; r < rows; r++) {
+        const y = r * cellSize;
+        objs.push(new fabric.Line([0, y, cols * cellSize, y], { stroke: r % 4 === 0 ? "#94a3b8" : "#cbd5e1", strokeWidth: r % 4 === 0 ? 1 : 0.5 }));
+    }
+
+    return new fabric.Group(objs, { left: 50, top: 80, subTargetCheck: true });
+}
+
+// 3. Spelling Test Template (Numbered rows with score box)
+export function createSpellingTestGroup(wordCount: 10 | 15 | 20 = 10): fabric.Group {
+    const objs: fabric.FabricObject[] = [];
+    const width = 480;
+
+    // Header Title
+    objs.push(new fabric.IText("SPELLING TEST", { left: 0, top: 0, fontSize: 22, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }));
+    objs.push(new fabric.IText("Name: ______________________   Date: _________", { left: 0, top: 30, fontSize: 12, fontFamily: "Inter", fill: "#475569" }));
+
+    // Score Box
+    objs.push(new fabric.Rect({ left: 360, top: 0, width: 120, height: 45, fill: "#f8fafc", stroke: "#475569", strokeWidth: 1.5, rx: 6, ry: 6 }));
+    objs.push(new fabric.IText("SCORE", { left: 398, top: 5, fontSize: 9, fontFamily: "Inter", fontWeight: "bold", fill: "#64748b" }));
+    objs.push(new fabric.IText("___ / " + wordCount, { left: 392, top: 20, fontSize: 14, fontFamily: "Inter", fontWeight: "bold", fill: "#0f172a" }));
+
+    // Numbered Lines
+    const yStart = 65;
+    const rowGap = wordCount === 20 ? 28 : wordCount === 15 ? 34 : 42;
+
+    for (let i = 1; i <= wordCount; i++) {
+        const y = yStart + (i - 1) * rowGap;
+        objs.push(new fabric.IText(`${i}.`, { left: 0, top: y - 4, fontSize: 13, fontFamily: "Inter", fontWeight: "bold", fill: "#334155" }));
+        objs.push(new fabric.Line([24, y + 16, width, y + 16], { stroke: "#94a3b8", strokeWidth: 1.2 }));
+    }
+
+    return new fabric.Group(objs, { left: 60, top: 60, subTargetCheck: true });
+}
+
+// 4. Flashcard / Game Card Cut Grid (4-card or 8-card)
+export function createFlashcardGridGroup(cardsCount: 4 | 8 = 4): fabric.Group {
+    const objs: fabric.FabricObject[] = [];
+    const totalW = 500;
+    const totalH = 640;
+
+    const cols = 2;
+    const rows = cardsCount === 8 ? 4 : 2;
+    const cardW = totalW / cols;
+    const cardH = totalH / rows;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const x = c * cardW;
+            const y = r * cardH;
+
+            // Cut border box
+            objs.push(new fabric.Rect({
+                left: x,
+                top: y,
+                width: cardW - 6,
+                height: cardH - 6,
+                fill: "#ffffff",
+                stroke: "#94a3b8",
+                strokeWidth: 1.5,
+                strokeDashArray: [6, 4],
+                rx: 8,
+                ry: 8,
+            }));
+
+            // Scissors icon hint
+            objs.push(new fabric.IText("✂ FLASHCARD " + (r * cols + c + 1), {
+                left: x + 12,
+                top: y + 12,
+                fontSize: 10,
+                fontFamily: "Inter",
+                fontWeight: "bold",
+                fill: "#94a3b8",
+            }));
+        }
+    }
+
+    return new fabric.Group(objs, { left: 50, top: 60, subTargetCheck: true });
+}
+
+// =========================================================================
+// 16 ADVANCED LINE TOOLS GENERATOR
+// =========================================================================
+
+export function createLineToolObject(type: string): fabric.FabricObject {
+    const defaultProps = {
+        stroke: "#0f172a",
+        strokeWidth: 2,
+        fill: "transparent",
+        selectable: true,
+    };
+
+    switch (type) {
+        case "straight-line":
+            return new fabric.Line([0, 0, 160, 0], defaultProps);
+
+        case "polyline":
+            return new fabric.Path("M 0 0 L 40 -30 L 80 30 L 120 -30 L 160 0", defaultProps);
+
+        case "curve":
+            return new fabric.Path("M 0 0 Q 80 -60 160 0", defaultProps);
+
+        case "arc":
+            return new fabric.Path("M 0 0 A 80 80 0 0 1 160 0", defaultProps);
+
+        case "bezier-curve":
+            return new fabric.Path("M 0 0 C 40 -70 120 70 160 0", defaultProps);
+
+        case "freehand-line":
+            return new fabric.Path("M 0 0 C 30 -20 50 20 80 -10 C 110 -40 130 30 160 0", {
+                ...defaultProps,
+                strokeLineCap: "round",
+                strokeLineJoin: "round",
+            });
+
+        case "arrow": {
+            const line = new fabric.Line([0, 0, 140, 0], defaultProps);
+            const head = new fabric.Polygon(
+                [
+                    { x: 140, y: -6 },
+                    { x: 154, y: 0 },
+                    { x: 140, y: 6 },
+                ],
+                { fill: "#0f172a", stroke: "#0f172a", strokeWidth: 1 }
+            );
+            return new fabric.Group([line, head], { subTargetCheck: true });
+        }
+
+        case "double-arrow": {
+            const line = new fabric.Line([14, 0, 140, 0], defaultProps);
+            const headRight = new fabric.Polygon(
+                [
+                    { x: 140, y: -6 },
+                    { x: 154, y: 0 },
+                    { x: 140, y: 6 },
+                ],
+                { fill: "#0f172a", stroke: "#0f172a", strokeWidth: 1 }
+            );
+            const headLeft = new fabric.Polygon(
+                [
+                    { x: 14, y: -6 },
+                    { x: 0, y: 0 },
+                    { x: 14, y: 6 },
+                ],
+                { fill: "#0f172a", stroke: "#0f172a", strokeWidth: 1 }
+            );
+            return new fabric.Group([line, headLeft, headRight], { subTargetCheck: true });
+        }
+
+        case "elbow-connector":
+            return new fabric.Path("M 0 0 L 0 60 L 140 60", defaultProps);
+
+        case "curved-connector":
+            return new fabric.Path("M 0 0 C 70 0 70 80 140 80", defaultProps);
+
+        case "orthogonal-connector":
+            return new fabric.Path("M 0 0 L 70 0 L 70 80 L 140 80", defaultProps);
+
+        case "dashed-line":
+            return new fabric.Line([0, 0, 160, 0], {
+                ...defaultProps,
+                strokeDashArray: [8, 6],
+            });
+
+        case "dotted-line":
+            return new fabric.Line([0, 0, 160, 0], {
+                ...defaultProps,
+                strokeWidth: 3.5,
+                strokeDashArray: [2, 6],
+                strokeLineCap: "round",
+            });
+
+        case "zigzag":
+            return new fabric.Path("M 0 0 L 15 -18 L 30 18 L 45 -18 L 60 18 L 75 -18 L 90 18 L 105 -18 L 120 18 L 135 -18 L 150 0", defaultProps);
+
+        case "wave":
+            return new fabric.Path("M 0 0 Q 20 -25 40 0 T 80 0 T 120 0 T 160 0", defaultProps);
+
+        case "spiral":
+            return new fabric.Path("M 50 50 m -10 0 a 10 10 0 1 0 20 0 a 20 20 0 1 0 -40 0 a 30 30 0 1 0 60 0 a 40 40 0 1 0 -80 0", defaultProps);
+
+        default:
+            return new fabric.Line([0, 0, 160, 0], defaultProps);
+    }
+}
+
+// 5-Point Star / Starburst Vector Polygon Generator
+export function createStarPolygon(points: number = 5, outerRadius: number = 50, innerRadius: number = 22, options: any = {}): fabric.Polygon {
+    const pts = [];
+    const step = Math.PI / points;
+    for (let i = 0; i < 2 * points; i++) {
+        const rad = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = i * step - Math.PI / 2;
+        pts.push({
+            x: outerRadius + rad * Math.cos(angle),
+            y: outerRadius + rad * Math.sin(angle),
+        });
+    }
+    return new fabric.Polygon(pts, {
+        fill: options.fill ?? "#fef08a",
+        stroke: options.stroke ?? "#ca8a04",
+        strokeWidth: options.strokeWidth ?? 2,
+        strokeLineJoin: "round",
+        selectable: true,
+        ...options,
+    });
+}
+
+// =========================================================================
+// WICCA & SYMBOL VECTOR CONVERTER
+// =========================================================================
+
+export async function createSymbolVectorObject(symbol: {
+    id: string;
+    name: string;
+    svgString?: string;
+    pathData?: string;
+    textSymbol?: string;
+}): Promise<fabric.FabricObject> {
+    if (symbol.pathData) {
+        return new fabric.Path(symbol.pathData, {
+            fill: "none",
+            stroke: "#0f172a",
+            strokeWidth: 3,
+            strokeLineCap: "round",
+            strokeLineJoin: "round",
+            selectable: true,
+        });
+    }
+
+    if (symbol.svgString) {
+        let rawSvg = symbol.svgString;
+        if (!rawSvg.includes("xmlns")) {
+            rawSvg = rawSvg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+
+        return new Promise((resolve) => {
+            try {
+                let resolved = false;
+                const handleParsed = (results: any) => {
+                    if (resolved) return;
+                    resolved = true;
+                    const objs = Array.isArray(results) ? results : (results?.objects || []);
+                    const validObjs = objs.filter((o: any) => o != null);
+                    if (validObjs.length > 0) {
+                        const group = new fabric.Group(validObjs, {
+                            left: 100,
+                            top: 100,
+                            selectable: true,
+                            subTargetCheck: true,
+                        });
+                        resolve(group);
+                    } else {
+                        resolve(new fabric.Circle({ radius: 30, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2 }));
+                    }
+                };
+
+                const res = fabric.loadSVGFromString(rawSvg, (results: any) => {
+                    handleParsed(results);
+                });
+
+                if (res && typeof (res as any).then === "function") {
+                    (res as any).then((parsed: any) => {
+                        handleParsed(parsed);
+                    }).catch(() => {
+                        if (!resolved) {
+                            resolved = true;
+                            resolve(new fabric.Circle({ radius: 30, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2 }));
+                        }
+                    });
+                }
+            } catch {
+                resolve(new fabric.Circle({ radius: 30, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2 }));
+            }
+        });
+    }
+
+    if (symbol.textSymbol) {
+        return new fabric.IText(symbol.textSymbol, {
+            fontSize: 72,
+            fontFamily: "Segoe UI Symbol, Apple Color Emoji, Noto Color Emoji, sans-serif",
+            fill: "#0f172a",
+            selectable: true,
+        });
+    }
+
+    return new fabric.Circle({ radius: 30, fill: "#f1f5f9", stroke: "#0f172a", strokeWidth: 2 });
+}
+
+// =========================================================================
+// DYNAMIC DYNAMIC CUSTOM FONT LOADER (FontFace API)
+// =========================================================================
+
+export async function registerCustomFontFace(fontFamily: string, dataUrl: string): Promise<boolean> {
+    try {
+        if (typeof window === "undefined" || !("FontFace" in window)) return false;
+        const font = new FontFace(fontFamily, `url(${dataUrl})`);
+        await font.load();
+        document.fonts.add(font);
+        return true;
+    } catch (err) {
+        console.error("Failed to load custom font:", fontFamily, err);
+        return false;
+    }
+}
+
+
+
 

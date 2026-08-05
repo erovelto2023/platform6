@@ -80,7 +80,7 @@ interface WorksheetPropertyPanelProps {
 }
 
 export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ fabricCanvasRef }) => {
-    const { selectedObjectId, selectedObjectType, selectedObjectProps, setSelectedObject, currentPageIndex } = useWorksheetStore();
+    const { selectedObjectId, selectedObjectType, selectedObjectProps, setSelectedObject, currentPageIndex, customFonts } = useWorksheetStore();
 
     // --- PUZZLE SELECTION & CONFIG STATES ---
     const [wsConfig, setWsConfig] = useState<WordSearchConfig>(createDefaultWordSearchConfig("animals"));
@@ -798,11 +798,26 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
-        c.remove(activeObj);
-        c.discardActiveObject();
-        c.requestRenderAll();
-        c.fire("object:modified");
-        setSelectedObject(null, null);
+
+        if (activeObj.type === "activeSelection") {
+            const selection = activeObj as fabric.ActiveSelection;
+            const objects = [...selection.getObjects()];
+            c.discardActiveObject();
+            objects.forEach((obj) => {
+                c.remove(obj);
+            });
+            c.requestRenderAll();
+            c.fire("object:modified");
+            setSelectedObject(null, null);
+            toast.success(`Deleted ${objects.length} selected elements.`);
+        } else {
+            c.remove(activeObj);
+            c.discardActiveObject();
+            c.requestRenderAll();
+            c.fire("object:modified");
+            setSelectedObject(null, null);
+            toast.success("Element deleted.");
+        }
     };
 
     const handleBringToFront = () => {
@@ -999,6 +1014,89 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         }
     };
 
+    const handleToggleLock = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+        const isLocked = !!activeObj.lockMovementX;
+        activeObj.set({
+            lockMovementX: !isLocked,
+            lockMovementY: !isLocked,
+            lockRotation: !isLocked,
+            lockScalingX: !isLocked,
+            lockScalingY: !isLocked,
+        });
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(isLocked ? "Element unlocked!" : "Element locked on canvas!");
+    };
+
+    const handleFlipX = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+        activeObj.set("flipX", !activeObj.flipX);
+        c.requestRenderAll();
+        c.fire("object:modified");
+    };
+
+    const handleFlipY = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+        activeObj.set("flipY", !activeObj.flipY);
+        c.requestRenderAll();
+        c.fire("object:modified");
+    };
+
+    const handleUngroup = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) {
+            toast.error("Please select a group or puzzle to ungroup!");
+            return;
+        }
+
+        if (activeObj.type === "group" || (activeObj as any)._objects) {
+            const group = activeObj as any;
+            if (typeof group.toActiveSelection === "function") {
+                const sel = group.toActiveSelection();
+                const count = sel ? sel.getObjects().length : 0;
+                c.discardActiveObject();
+                c.requestRenderAll();
+                c.fire("object:modified");
+                toast.success(`Ungrouped ${count} objects for individual editing!`);
+            } else {
+                const items = [...(group._objects || group.getObjects())];
+                c.discardActiveObject();
+                c.remove(group);
+                items.forEach((item: any) => {
+                    delete item.group;
+                    item.group = undefined;
+                    c.add(item);
+                    item.set({ selectable: true, evented: true });
+                    item.setCoords();
+                });
+                c.requestRenderAll();
+                c.fire("object:modified");
+                toast.success(`Ungrouped ${items.length} objects for individual editing!`);
+            }
+        } else if (activeObj.type === "activeSelection") {
+            const selection = activeObj as fabric.ActiveSelection;
+            const count = selection.getObjects().length;
+            c.discardActiveObject();
+            c.requestRenderAll();
+            c.fire("object:modified");
+            toast.success(`Separated ${count} selected elements.`);
+        } else {
+            toast.error("Selected object is not a group.");
+        }
+    };
+
     if (!selectedObjectId || !selectedObjectProps) {
         return (
             <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col items-center justify-center text-slate-400 text-center select-none z-20">
@@ -1051,6 +1149,12 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                         : `${selectedObjectType || "Object"} Inspector`}
                 </span>
                 <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950" onClick={handleUngroup} title="Ungroup Objects for Individual Editing">
+                        <Unlink className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={handleToggleLock} title="Lock / Unlock Element">
+                        <Lock className="w-3.5 h-3.5" />
+                    </Button>
                     {(isWordSearchSelected || isCrosswordSelected) && (
                         <>
                             <Button
@@ -1643,13 +1747,19 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                     value={wsConfig.appearance.titleFont || "Inter"}
                                     onValueChange={(v) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, titleFont: v } }))}
                                 >
-                                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
+                                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                                     <SelectContent>
                                         <SelectItem value="Inter">Inter (Clean Modern)</SelectItem>
+                                        <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
                                         <SelectItem value="Courier New">Courier New (Typewriter)</SelectItem>
                                         <SelectItem value="Comic Sans MS">Comic Sans (Playful)</SelectItem>
                                         <SelectItem value="Georgia">Georgia (Classic Serif)</SelectItem>
-                                    </SelectContent>
+                                        {customFonts.map((f) => (
+                                            <SelectItem key={f.id} value={f.fontFamily}>
+                                                ✨ {f.fontFamily} (Custom)
+                                            </SelectItem>
+                                        ))}
+                                     </SelectContent>
                                 </Select>
                             </div>
 
@@ -1710,6 +1820,42 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
             ) : (
                 /* --- STANDARD ELEMENT PROPERTIES --- */
                 <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                    {/* Font Family Selector for Text Objects */}
+                    {selectedObjectProps && (selectedObjectType === "i-text" || selectedObjectType === "text") && (
+                        <div className="space-y-1 p-2 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                            <Label className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Font Family</Label>
+                            <Select
+                                value={selectedObjectProps.fontFamily || "Inter"}
+                                onValueChange={(v) => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        activeObj.set({ fontFamily: v });
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }
+                                }}
+                            >
+                                <SelectTrigger className="h-8 text-xs bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Inter">Inter</SelectItem>
+                                    <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
+                                    <SelectItem value="Courier New">Courier New</SelectItem>
+                                    <SelectItem value="Comic Sans MS">Comic Sans</SelectItem>
+                                    <SelectItem value="Georgia">Georgia</SelectItem>
+                                    <SelectItem value="Arial">Arial</SelectItem>
+                                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                                    {customFonts.map((f) => (
+                                        <SelectItem key={f.id} value={f.fontFamily}>
+                                            ✨ {f.fontFamily} (Custom)
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
+
                     <div className="space-y-3">
                         <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Color & Fill</Label>
                         <div className="grid grid-cols-2 gap-2">
@@ -1717,7 +1863,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                 <span className="text-[10px] text-slate-500 font-semibold block mb-1">Fill Color</span>
                                 <input
                                     type="color"
-                                    value={typeof selectedObjectProps.fill === "string" ? selectedObjectProps.fill : "#0f172a"}
+                                    value={typeof selectedObjectProps?.fill === "string" ? selectedObjectProps.fill : "#0f172a"}
                                     onChange={(e) => {
                                         const c = fabricCanvasRef.current;
                                         if (!c) return;

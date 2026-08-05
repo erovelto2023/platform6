@@ -11,14 +11,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Type, Grid3X3, Palette, Wand2, Plus, Sparkles, Layers, RefreshCw, Eye, HelpCircle, FileText,
-    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen
+    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen, Search, Moon, Upload, Trash2
 } from "lucide-react";
 import { useWorksheetStore } from "@/lib/worksheet-store";
+import { WICCA_SYMBOL_CATEGORIES } from "@/lib/worksheet-symbols";
+import { registerCustomFontFace } from "@/lib/worksheet-fabric";
+import { toast } from "sonner";
 
 interface WorksheetSidebarProps {
     onAddText: (text: string, isHeader?: boolean) => void;
     onAddTracingText: (text: string, fontSize: number) => void;
-    onAddShape: (type: "rect" | "circle" | "triangle" | "star") => void;
+    onAddShape: (type: "rect" | "circle" | "triangle" | "star" | "starburst") => void;
     onAddQRCode: (data: string) => void;
     onAddBarcode: (data: string) => void;
     onAddWordSearch: (words: string[], title: string, gridSize: number, directions?: string[]) => void;
@@ -54,6 +57,13 @@ interface WorksheetSidebarProps {
     onAddHiddenMessageSearch?: () => void;
     onAddMissingVowels?: (words: string[]) => void;
     onAddCodeword?: (words: string[]) => void;
+    onAddPrimaryLinedPaper?: () => void;
+    onAddMathGridPaper?: (type?: "quarter" | "half") => void;
+    onAddSpellingTest?: (count?: 10 | 15 | 20) => void;
+    onAddFlashcardGrid?: (count?: 4 | 8) => void;
+    onAddLineTool?: (lineType: string) => void;
+    onAddSymbol?: (symbol: any) => void;
+    onAddCustomImage?: (dataUrl: string, name: string) => void;
 }
 
 export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
@@ -95,8 +105,16 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddHiddenMessageSearch,
     onAddMissingVowels,
     onAddCodeword,
+    onAddPrimaryLinedPaper,
+    onAddMathGridPaper,
+    onAddSpellingTest,
+    onAddFlashcardGrid,
+    onAddLineTool,
+    onAddSymbol,
+    onAddCustomImage,
 }) => {
-    const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "preset">("puzzles");
+    const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "symbols" | "uploads" | "preset">("puzzles");
+    const [symbolQuery, setSymbolQuery] = useState("");
 
     const {
         activeTool,
@@ -105,7 +123,14 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         brushColor,
         brushThinning,
         brushSmoothing,
+        brushStyle,
         setBrushProps,
+        customImages,
+        customFonts,
+        addCustomImage,
+        removeCustomImage,
+        addCustomFont,
+        removeCustomFont,
     } = useWorksheetStore();
 
     // Word Search State
@@ -164,23 +189,23 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     };
 
     return (
-        <aside className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-4rem)] z-20 shadow-sm overflow-hidden select-none">
+        <aside className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-3.5rem)] z-20 shadow-sm overflow-hidden select-none shrink-0">
             {/* Primary Category Selector Sidebar Navigation */}
-            <div className="grid grid-cols-5 h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-1 gap-1 shrink-0">
+            <div className="grid grid-cols-7 h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-1 gap-1 shrink-0">
                 <button
                     className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "puzzles" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("puzzles")}
                 >
-                    <Grid3X3 className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Puzzles</span>
+                    <Grid3X3 className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Puzzles</span>
                 </button>
 
                 <button
                     className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "text" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("text")}
                 >
-                    <Type className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Text</span>
+                    <Type className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Text</span>
                 </button>
 
                 <button
@@ -190,30 +215,46 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                         setActiveTool("draw");
                     }}
                 >
-                    <Pencil className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Draw</span>
+                    <Pencil className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Draw</span>
                 </button>
 
                 <button
                     className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "shapes" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("shapes")}
                 >
-                    <ImageIcon className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Shapes</span>
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Shapes</span>
+                </button>
+
+                <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "symbols" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
+                    onClick={() => setActiveTab("symbols")}
+                >
+                    <Moon className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Symbols</span>
+                </button>
+
+                <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "uploads" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
+                    onClick={() => setActiveTab("uploads")}
+                >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Uploads</span>
                 </button>
 
                 <button
                     className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "preset" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("preset")}
                 >
-                    <BookOpen className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">Presets</span>
+                    <BookOpen className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Presets</span>
                 </button>
             </div>
 
             {/* Right Sub-Panel Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
-                <div className="h-11 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
+            <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 overflow-hidden">
+                <div className="h-11 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50 shrink-0">
                     <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
                         {activeTab === "puzzles" && "21 Standalone Puzzle Accordions"}
                         {activeTab === "text" && "Typography & Tracing"}
@@ -223,7 +264,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                     </span>
                 </div>
 
-                <ScrollArea className="flex-1 p-3">
+                <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
                     {/* --- TAB 1: 21 INDIVIDUAL PUZZLE ACCORDIONS --- */}
                     {activeTab === "puzzles" && (
                         <div className="space-y-2">
@@ -634,41 +675,361 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     + Add Dotted Tracing Line
                                 </Button>
                             </div>
+
+                            {/* K-12 Educational Guideline Paper & Spelling Presets */}
+                            <div className="space-y-2.5 p-3 bg-blue-50/50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+                                <Label className="text-xs font-bold text-blue-800 dark:text-blue-300">K-12 Primary Paper & Spelling Templates</Label>
+                                <Button size="sm" className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddPrimaryLinedPaper && onAddPrimaryLinedPaper()}>
+                                    + Add Primary Lined Paper (K-3)
+                                </Button>
+                                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                                    <Button size="sm" variant="outline" className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900" onClick={() => onAddSpellingTest && onAddSpellingTest(10)}>
+                                        Spelling (10 Words)
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900" onClick={() => onAddSpellingTest && onAddSpellingTest(20)}>
+                                        Spelling (20 Words)
+                                    </Button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    <Button size="sm" variant="outline" className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900" onClick={() => onAddMathGridPaper && onAddMathGridPaper("quarter")}>
+                                        Math Grid (1/4")
+                                    </Button>
+                                    <Button size="sm" variant="outline" className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900" onClick={() => onAddFlashcardGrid && onAddFlashcardGrid(4)}>
+                                        Flashcards (4 Grid)
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     )}
 
-                    {/* --- TAB 3: FREEHAND DRAWING --- */}
+                    {/* --- TAB 3: FREEHAND DRAWING TOOLS & PEN STYLES --- */}
                     {activeTab === "freehand" && (
                         <div className="space-y-4">
+                            {/* Ink Tool Activator */}
                             <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Ink Tool Selection</Label>
+                                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Active Canvas Mode</Label>
                                     <span className="text-[10px] uppercase tracking-wider font-extrabold text-indigo-600 dark:text-indigo-400">{activeTool}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-1.5">
-                                    <Button size="sm" variant={activeTool === "select" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("select")}>Select</Button>
-                                    <Button size="sm" variant={activeTool === "draw" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("draw")}>Draw Ink</Button>
+                                    <Button size="sm" variant={activeTool === "select" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("select")}>Select Object</Button>
+                                    <Button size="sm" variant={activeTool === "draw" ? "default" : "outline"} className="h-8 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => setActiveTool("draw")}>
+                                        <Pencil className="w-3.5 h-3.5 mr-1" /> Draw Ink
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Pen Style Categories */}
+                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Pen & Brush Styles</Label>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    {[
+                                        { id: "pen", label: "Ballpoint Pen", icon: "🖋️", size: 4 },
+                                        { id: "pencil", label: "Pencil", icon: "✏️", size: 2 },
+                                        { id: "calligraphy", label: "Calligraphy", icon: "✒️", size: 8 },
+                                        { id: "marker", label: "Felt Marker", icon: "🖍️", size: 14 },
+                                        { id: "highlighter", label: "Highlighter", icon: "🖊️", size: 28 },
+                                        { id: "crayon", label: "Crayon / Chalk", icon: "🎨", size: 10 },
+                                        { id: "watercolor", label: "Watercolor", icon: "🖌️", size: 18 },
+                                        { id: "neon", label: "Neon Glow", icon: "✨", size: 6 },
+                                    ].map((pen) => (
+                                        <Button
+                                            key={pen.id}
+                                            size="sm"
+                                            variant={brushStyle === pen.id ? "default" : "outline"}
+                                            className={`h-8 text-[11px] font-semibold justify-start px-2 ${brushStyle === pen.id ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                            onClick={() => {
+                                                setActiveTool("draw");
+                                                setBrushProps({ style: pen.id, size: pen.size });
+                                            }}
+                                        >
+                                            <span className="mr-1.5 text-xs">{pen.icon}</span>
+                                            <span className="truncate">{pen.label}</span>
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Preset Thicknesses */}
+                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Stroke Thickness</Label>
+                                    <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">{brushSize}px</span>
+                                </div>
+                                <div className="grid grid-cols-6 gap-1">
+                                    {[2, 4, 8, 14, 24, 36].map((sz) => (
+                                        <Button
+                                            key={sz}
+                                            size="sm"
+                                            variant={brushSize === sz ? "default" : "outline"}
+                                            className={`h-7 p-0 text-[10px] font-bold ${brushSize === sz ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                            onClick={() => setBrushProps({ size: sz })}
+                                        >
+                                            {sz}px
+                                        </Button>
+                                    ))}
+                                </div>
+                                <Input
+                                    type="range"
+                                    min="1"
+                                    max="60"
+                                    value={brushSize}
+                                    onChange={(e) => setBrushProps({ size: parseInt(e.target.value) || 4 })}
+                                    className="h-6 cursor-pointer mt-1"
+                                />
+                            </div>
+
+                            {/* Color Swatches */}
+                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">Ink Color Palette</Label>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {[
+                                        "#0f172a", "#1e3a8a", "#b91c1c", "#047857", "#6b21a8",
+                                        "#d97706", "#0284c7", "#db2777", "#ea580c", "#16a34a",
+                                    ].map((c) => (
+                                        <button
+                                            key={c}
+                                            className={`h-7 rounded-lg border transition-all ${brushColor === c ? "ring-2 ring-indigo-500 scale-105 border-white" : "border-transparent"}`}
+                                            style={{ backgroundColor: c }}
+                                            onClick={() => setBrushProps({ color: c })}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* --- TAB 4: SHAPES & BARCODES --- */}
+                    {/* --- TAB 4: SHAPES & DECORATIVE GRAPHICS --- */}
                     {activeTab === "shapes" && (
                         <div className="space-y-4">
+                            {/* 16 Vector Line Tools */}
+                            <div className="space-y-2 p-3 bg-indigo-50/50 dark:bg-indigo-950/30 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                                <div className="flex items-center justify-between mb-1">
+                                    <Label className="text-xs font-bold text-indigo-700 dark:text-indigo-300">16 Precision Line & Connector Tools</Label>
+                                    <span className="text-[10px] font-semibold text-indigo-500">Vector</span>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    {[
+                                        { id: "straight-line", label: "Straight Line" },
+                                        { id: "polyline", label: "Polyline" },
+                                        { id: "curve", label: "Curve" },
+                                        { id: "arc", label: "Arc" },
+                                        { id: "bezier-curve", label: "Bezier Curve" },
+                                        { id: "freehand-line", label: "Freehand Line" },
+                                        { id: "arrow", label: "Arrow →" },
+                                        { id: "double-arrow", label: "Double Arrow ↔" },
+                                        { id: "elbow-connector", label: "Elbow Connector" },
+                                        { id: "curved-connector", label: "Curved Connector" },
+                                        { id: "orthogonal-connector", label: "Orthogonal Step" },
+                                        { id: "dashed-line", label: "Dashed Line - - -" },
+                                        { id: "dotted-line", label: "Dotted Line • • •" },
+                                        { id: "zigzag", label: "Zigzag ∧∨∧" },
+                                        { id: "wave", label: "Wave ~~~" },
+                                        { id: "spiral", label: "Spiral 🌀" },
+                                    ].map((tool) => (
+                                        <Button
+                                            key={tool.id}
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-700 dark:text-slate-200 justify-start px-2"
+                                            onClick={() => onAddLineTool && onAddLineTool(tool.id)}
+                                        >
+                                            {tool.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Vector Shapes</Label>
+                                <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Basic & Decorative Shapes</Label>
                                 <div className="grid grid-cols-2 gap-2">
                                     <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("rect")}>Rectangle</Button>
-                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("circle")}>Circle</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("circle")}>Circle / Ellipse</Button>
                                     <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("triangle")}>Triangle</Button>
-                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("star")}>Star</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900" onClick={() => onAddShape("star")}>5-Point Star ⭐</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-xs font-semibold bg-white dark:bg-slate-900 col-span-2" onClick={() => onAddShape("starburst")}>Explosion Starburst 💥</Button>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* --- TAB 5: PRESETS --- */}
+                    {/* --- TAB 5: SYMBOL & VECTOR ASSET LIBRARY --- */}
+                    {activeTab === "symbols" && (
+                        <div className="space-y-3">
+                            <div className="relative">
+                                <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                                <Input
+                                    placeholder="Search Wicca, Moon, Runes..."
+                                    value={symbolQuery}
+                                    onChange={(e) => setSymbolQuery(e.target.value)}
+                                    className="pl-9 h-9 text-xs bg-slate-50 dark:bg-slate-800"
+                                />
+                            </div>
+
+                            <Accordion type="multiple" defaultValue={["core-wicca", "moon-sun", "planets-zodiac", "runes"]} className="w-full space-y-2">
+                                {WICCA_SYMBOL_CATEGORIES.map((cat) => {
+                                    const matchingSymbols = cat.symbols.filter(s =>
+                                        s.name.toLowerCase().includes(symbolQuery.toLowerCase()) ||
+                                        cat.name.toLowerCase().includes(symbolQuery.toLowerCase())
+                                    );
+
+                                    if (symbolQuery && matchingSymbols.length === 0) return null;
+
+                                    return (
+                                        <AccordionItem key={cat.id} value={cat.id} className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-white dark:bg-slate-900">
+                                            <AccordionTrigger className="py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 hover:no-underline">
+                                                <span className="flex items-center gap-2">
+                                                    <span>{cat.icon}</span>
+                                                    <span>{cat.name} ({matchingSymbols.length})</span>
+                                                </span>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="pt-1 pb-3">
+                                                <div className="grid grid-cols-2 gap-1.5">
+                                                    {matchingSymbols.map((s) => (
+                                                        <Button
+                                                            key={s.id}
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-9 text-[11px] font-semibold bg-slate-50 dark:bg-slate-800/50 hover:bg-indigo-50 dark:hover:bg-indigo-950 text-slate-700 dark:text-slate-200 justify-start px-2 truncate"
+                                                            onClick={() => onAddSymbol && onAddSymbol(s)}
+                                                            title={`Insert ${s.name}`}
+                                                        >
+                                                            <span className="truncate">{s.name}</span>
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    );
+                                })}
+                            </Accordion>
+                        </div>
+                    )}
+
+                    {/* --- TAB 6: MY UPLOADS & CUSTOM ASSETS --- */}
+                    {activeTab === "uploads" && (
+                        <div className="space-y-4">
+                            {/* Image Upload Box */}
+                            <div className="p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                                        <ImageIcon className="w-3.5 h-3.5" /> My Image Library
+                                    </Label>
+                                    <span className="text-[10px] text-slate-400 font-medium">PNG, JPG, SVG</span>
+                                </div>
+
+                                <label className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl cursor-pointer hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-all bg-white dark:bg-slate-900">
+                                    <Upload className="w-6 h-6 text-indigo-500 mb-1" />
+                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">Click to Upload Image</span>
+                                    <span className="text-[10px] text-slate-400 mt-0.5">Supports PNG, JPG, SVG, WebP</span>
+                                    <input
+                                        type="file"
+                                        accept="image/png, image/jpeg, image/jpg, image/svg+xml, image/webp"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = (evt) => {
+                                                    const result = evt.target?.result as string;
+                                                    if (result) {
+                                                        addCustomImage(file.name, result);
+                                                        toast.success(`Uploaded ${file.name} to My Library!`);
+                                                    }
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
+
+                                {customImages.length > 0 && (
+                                    <div className="grid grid-cols-3 gap-2 pt-2">
+                                        {customImages.map((img) => (
+                                            <div key={img.id} className="group relative border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-900 shadow-sm aspect-square flex items-center justify-center">
+                                                <img src={img.dataUrl} alt={img.name} className="object-contain w-full h-full p-1 cursor-pointer" onClick={() => onAddCustomImage && onAddCustomImage(img.dataUrl, img.name)} />
+                                                <button
+                                                    className="absolute top-1 right-1 bg-rose-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-md"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeCustomImage(img.id);
+                                                        toast.success("Image removed.");
+                                                    }}
+                                                    title="Delete from My Library"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Font Upload Box */}
+                            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                        <Type className="w-3.5 h-3.5 text-indigo-500" /> My Custom Fonts
+                                    </Label>
+                                    <span className="text-[10px] text-slate-400 font-medium">TTF, OTF, WOFF</span>
+                                </div>
+
+                                <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-900">
+                                    <Upload className="w-5 h-5 text-slate-500 mb-1" />
+                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Upload Font (.ttf, .otf, .woff)</span>
+                                    <input
+                                        type="file"
+                                        accept=".ttf, .otf, .woff, .woff2"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const fontFamily = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, "_");
+                                                const reader = new FileReader();
+                                                reader.onload = async (evt) => {
+                                                    const result = evt.target?.result as string;
+                                                    if (result) {
+                                                        const success = await registerCustomFontFace(fontFamily, result);
+                                                        if (success) {
+                                                            addCustomFont(file.name, fontFamily, result);
+                                                            toast.success(`Registered custom font "${fontFamily}"!`);
+                                                        } else {
+                                                            toast.error("Failed to load font file.");
+                                                        }
+                                                    }
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                    />
+                                </label>
+
+                                {customFonts.length > 0 && (
+                                    <div className="space-y-1.5 pt-1">
+                                        {customFonts.map((f) => (
+                                            <div key={f.id} className="flex items-center justify-between p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                                <div>
+                                                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block truncate max-w-[170px]" style={{ fontFamily: f.fontFamily }}>
+                                                        {f.fontFamily}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400">{f.name}</span>
+                                                </div>
+                                                <button
+                                                    className="text-rose-500 hover:text-rose-700 p-1"
+                                                    onClick={() => removeCustomFont(f.id)}
+                                                    title="Remove Font"
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- TAB 7: PRESETS --- */}
                     {activeTab === "preset" && (
                         <div className="space-y-3">
                             <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -677,7 +1038,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                             </div>
                         </div>
                     )}
-                </ScrollArea>
+                </div>
             </div>
         </aside>
     );
