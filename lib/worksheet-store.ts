@@ -81,6 +81,12 @@ export interface WorksheetState {
     strokeWidth: number;
     strokeStyle: "solid" | "dashed" | "dotted";
 
+    // Eraser Tool State & Options
+    eraserSize: number;
+    eraserShape: "round" | "square";
+    eraserMode: "brush" | "box" | "cutter" | "stroke";
+    setEraserProps: (props: Partial<{ size: number; shape: "round" | "square"; mode: "brush" | "box" | "cutter" | "stroke" }>) => void;
+
     // Active Canvas Selection Info
     selectedObjectId: string | null;
     selectedObjectType: string | null;
@@ -438,6 +444,16 @@ export const useWorksheetStore = create<WorksheetState>((set, get) => {
                 strokeColor: props.strokeColor ?? state.strokeColor,
                 strokeWidth: props.strokeWidth ?? state.strokeWidth,
                 strokeStyle: props.strokeStyle ?? state.strokeStyle,
+            })),
+
+        eraserSize: 24,
+        eraserShape: "round",
+        eraserMode: "brush",
+        setEraserProps: (props: Partial<{ size: number; shape: "round" | "square"; mode: "brush" | "box" | "cutter" | "stroke" }>) =>
+            set((state) => ({
+                eraserSize: props.size ?? state.eraserSize,
+                eraserShape: props.shape ?? state.eraserShape,
+                eraserMode: props.mode ?? state.eraserMode,
             })),
 
         setSelectedObject: (selectedObjectId: string | null, selectedObjectType: string | null, props: any = null) =>

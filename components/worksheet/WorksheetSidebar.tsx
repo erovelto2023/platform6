@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import * as fabric from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,11 +12,25 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Type, Grid3X3, Palette, Wand2, Plus, Sparkles, Layers, RefreshCw, Eye, HelpCircle, FileText,
-    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen, Search, Moon, Upload, Trash2
+    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen, Search, Moon, Upload, Trash2, Route, Spline, Scissors, Gamepad2, Dices, PenTool
 } from "lucide-react";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 import { WICCA_SYMBOL_CATEGORIES } from "@/lib/worksheet-symbols";
-import { registerCustomFontFace } from "@/lib/worksheet-fabric";
+import {
+    registerCustomFontFace,
+    mergeAndLockEraserMasks,
+    clearAllEraserMasks,
+    generateBoardGameObjectsFromConfig,
+    generatePrintableDiceGroup,
+    generatePrintableSpinnerGroup,
+    generatePrintableCardsGroup,
+    generatePrintableTokensGroup,
+    generatePrintableMoneyGroup,
+    generatePrintableScorecardGroup,
+} from "@/lib/worksheet-fabric";
+import { createDefaultBoardGameConfig, BOARD_GAME_THEMES, BoardThemeId, BoardLayoutType, BoardGameConfig, CellShape, resamplePointsAlongPath } from "@/lib/board-game-engine";
+import { BOARD_TEMPLATES, BoardTemplateId, generateBoardTemplate } from "@/lib/board-game-templates";
+import { BoardGameComponentSidebarPanel } from "@/components/worksheet/BoardGameComponentSidebarPanel";
 import { toast } from "sonner";
 
 interface WorksheetSidebarProps {
@@ -58,12 +73,16 @@ interface WorksheetSidebarProps {
     onAddMissingVowels?: (words: string[]) => void;
     onAddCodeword?: (words: string[]) => void;
     onAddPrimaryLinedPaper?: () => void;
+    onAddSnakePathMaze?: () => void;
+    onAddSinglePathSegment?: (segmentId?: number) => void;
     onAddMathGridPaper?: (type?: "quarter" | "half") => void;
     onAddSpellingTest?: (count?: 10 | 15 | 20) => void;
     onAddFlashcardGrid?: (count?: 4 | 8) => void;
     onAddLineTool?: (lineType: string) => void;
     onAddSymbol?: (symbol: any) => void;
     onAddCustomImage?: (dataUrl: string, name: string) => void;
+    fabricCanvasRef?: React.MutableRefObject<fabric.Canvas | null>;
+    onAddBoardGame?: (config?: BoardGameConfig) => void;
 }
 
 export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
@@ -106,12 +125,16 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddMissingVowels,
     onAddCodeword,
     onAddPrimaryLinedPaper,
+    onAddSnakePathMaze,
+    onAddSinglePathSegment,
     onAddMathGridPaper,
     onAddSpellingTest,
     onAddFlashcardGrid,
     onAddLineTool,
     onAddSymbol,
     onAddCustomImage,
+    fabricCanvasRef,
+    onAddBoardGame,
 }) => {
     const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "symbols" | "uploads" | "preset">("puzzles");
     const [symbolQuery, setSymbolQuery] = useState("");
@@ -125,6 +148,10 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         brushSmoothing,
         brushStyle,
         setBrushProps,
+        eraserSize,
+        eraserShape,
+        eraserMode,
+        setEraserProps,
         customImages,
         customFonts,
         addCustomImage,
@@ -132,6 +159,263 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         addCustomFont,
         removeCustomFont,
     } = useWorksheetStore();
+
+    // Board Game Studio State
+    const [bgTitle, setBgTitle] = useState("SUPER FUN BOARD GAME");
+    const [bgSubtitle, setBgSubtitle] = useState("Roll dice, answer questions & race to finish!");
+    const [bgLayout, setBgLayout] = useState<BoardLayoutType>("snake");
+    const [bgTheme, setBgTheme] = useState<BoardThemeId>("candyland");
+    const [bgSpacesCount, setBgSpacesCount] = useState(28);
+    const [bgCellShape, setBgCellShape] = useState<CellShape>("rounded");
+    const [isDrawingBoardPath, setIsDrawingBoardPath] = useState(false);
+    const [drawnPathPoints, setDrawnPathPoints] = useState<{ x: number; y: number }[]>([]);
+    const [selectedTemplate, setSelectedTemplate] = useState<BoardTemplateId>("winding-path");
+
+    const getCanvasRef = (): fabric.Canvas | null => {
+        if (fabricCanvasRef && fabricCanvasRef.current) return fabricCanvasRef.current;
+        if ((window as any).__fabricCanvas) return (window as any).__fabricCanvas;
+        const canvases = document.querySelectorAll("canvas");
+        for (let i = 0; i < canvases.length; i++) {
+            const fc = (canvases[i] as any).__fabricCanvas;
+            if (fc) return fc;
+        }
+        return null;
+    };
+
+    const handleCreateBoardGame = () => {
+        const c = getCanvasRef();
+        if (!c) {
+            toast.error("Canvas ref not found. Please try again.");
+            return;
+        }
+
+        const config = createDefaultBoardGameConfig(bgTheme);
+        config.title = bgTitle;
+        config.subtitle = bgSubtitle;
+        config.layout = bgLayout;
+        config.totalSpaces = bgSpacesCount;
+        config.cellShape = bgCellShape;
+
+        const boardGroup = generateBoardGameObjectsFromConfig(config);
+        c.add(boardGroup);
+        c.centerObject(boardGroup);
+        c.setActiveObject(boardGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Board Game to canvas!");
+    };
+
+    /** Activate freehand drawing mode so the user can draw a custom board path */
+    const handleStartDrawPath = () => {
+        const c = getCanvasRef();
+        if (!c) {
+            toast.error("Canvas not found. Please try again.");
+            return;
+        }
+
+        setDrawnPathPoints([]);
+        setIsDrawingBoardPath(true);
+
+        // Enable Fabric free-drawing
+        c.isDrawingMode = true;
+        (c as any).freeDrawingBrush = new fabric.PencilBrush(c);
+        (c as any).freeDrawingBrush.color = "#f59e0b";
+        (c as any).freeDrawingBrush.width = 4;
+
+        toast.info("🎯 Draw your board path on the canvas. When you release, click 'Convert Path → Board' to generate tiles.");
+
+        // Listen for path:created to capture the drawn path
+        const onPathCreated = (e: any) => {
+            const pathObj = e.path || e.target;
+            if (!pathObj || !pathObj.path) return;
+
+            // Extract raw points from the fabric path commands
+            const rawPts: { x: number; y: number }[] = [];
+            const matrix = pathObj.calcTransformMatrix ? pathObj.calcTransformMatrix() : null;
+
+            pathObj.path.forEach((cmd: any) => {
+                if (!Array.isArray(cmd)) return;
+                // SVG path commands: M x y, L x y, Q cx cy x y, C ...
+                // We take the endpoint coords (last 2 numbers)
+                if (cmd.length >= 3) {
+                    const px = cmd[cmd.length - 2];
+                    const py = cmd[cmd.length - 1];
+                    if (typeof px === "number" && typeof py === "number") {
+                        if (matrix) {
+                            const tp = fabric.util.transformPoint(new fabric.Point(px, py), matrix);
+                            rawPts.push({ x: tp.x, y: tp.y });
+                        } else {
+                            rawPts.push({ x: px, y: py });
+                        }
+                    }
+                }
+            });
+
+            if (rawPts.length >= 2) {
+                setDrawnPathPoints(rawPts);
+                toast.success(`Captured path with ${rawPts.length} points! Click 'Convert Path → Board' to generate.`);
+            } else {
+                toast.warning("Path too short. Draw a longer path.");
+            }
+
+            // Turn off drawing mode
+            c.isDrawingMode = false;
+            c.off("path:created", onPathCreated);
+        };
+
+        c.on("path:created", onPathCreated);
+    };
+
+    /** Cancel draw mode without converting */
+    const handleCancelDrawPath = () => {
+        const c = getCanvasRef();
+        if (c) {
+            c.isDrawingMode = false;
+        }
+        setIsDrawingBoardPath(false);
+        setDrawnPathPoints([]);
+        toast.info("Drawing cancelled.");
+    };
+
+    /** Convert the captured drawn path into a board game */
+    const handleConvertDrawnPath = () => {
+        const c = getCanvasRef();
+        if (!c) {
+            toast.error("Canvas not found.");
+            return;
+        }
+        if (drawnPathPoints.length < 2) {
+            toast.error("No drawn path found. Draw a path first.");
+            return;
+        }
+
+        // Resample the drawn path into N evenly-spaced tile positions
+        const sampledPositions = resamplePointsAlongPath(drawnPathPoints, bgSpacesCount);
+
+        // Compute bounding box of sampled positions
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        sampledPositions.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y > maxY) maxY = p.y;
+        });
+
+        const pathW = maxX - minX || 1;
+        const pathH = maxY - minY || 1;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        // Re-center positions relative to (0, 0) for the group
+        const centeredPositions = sampledPositions.map(p => ({
+            x: p.x - centerX,
+            y: p.y - centerY,
+        }));
+
+        // Build the config with custom positions
+        const config = createDefaultBoardGameConfig(bgTheme);
+        config.title = bgTitle;
+        config.subtitle = bgSubtitle;
+        config.layout = bgLayout;
+        config.totalSpaces = bgSpacesCount;
+        config.cellShape = bgCellShape;
+        config.customPositions = centeredPositions;
+
+        const boardGroup = generateBoardGameObjectsFromConfig(config);
+
+        // Remove the original drawn pencil path (the last path object on canvas)
+        const allObjs = c.getObjects();
+        for (let i = allObjs.length - 1; i >= 0; i--) {
+            const obj = allObjs[i] as any;
+            if (obj.type === "path" && obj.stroke === "#f59e0b") {
+                c.remove(obj);
+                break;
+            }
+        }
+
+        c.add(boardGroup);
+        c.centerObject(boardGroup);
+        c.setActiveObject(boardGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+
+        // Reset state
+        setIsDrawingBoardPath(false);
+        setDrawnPathPoints([]);
+        toast.success("✅ Board Game generated from your custom path!");
+    };
+
+    const handleAddPrintableDice = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const diceGroup = generatePrintableDiceGroup();
+        c.add(diceGroup);
+        c.centerObject(diceGroup);
+        c.setActiveObject(diceGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Foldout D6 Die template!");
+    };
+
+    const handleAddPrintableSpinner = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const spinnerGroup = generatePrintableSpinnerGroup();
+        c.add(spinnerGroup);
+        c.centerObject(spinnerGroup);
+        c.setActiveObject(spinnerGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Pie Spinner template!");
+    };
+
+    const handleAddPrintableCards = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const cardsGroup = generatePrintableCardsGroup();
+        c.add(cardsGroup);
+        c.centerObject(cardsGroup);
+        c.setActiveObject(cardsGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Task Cards grid!");
+    };
+
+    const handleAddPrintableTokens = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const tokensGroup = generatePrintableTokensGroup();
+        c.add(tokensGroup);
+        c.centerObject(tokensGroup);
+        c.setActiveObject(tokensGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Player Tokens!");
+    };
+
+    const handleAddPrintableMoney = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const moneyGroup = generatePrintableMoneyGroup();
+        c.add(moneyGroup);
+        c.centerObject(moneyGroup);
+        c.setActiveObject(moneyGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Play Money Sheet!");
+    };
+
+    const handleAddPrintableScorecard = () => {
+        const c = getCanvasRef();
+        if (!c) return;
+        const scorecardGroup = generatePrintableScorecardGroup();
+        c.add(scorecardGroup);
+        c.centerObject(scorecardGroup);
+        c.setActiveObject(scorecardGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Added Printable Game Scorecard & Tracker!");
+    };
 
     // Word Search State
     const [wsTitle, setWsTitle] = useState("ANIMAL WORD SEARCH");
@@ -256,7 +540,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
             <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900 overflow-hidden">
                 <div className="h-11 px-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50 shrink-0">
                     <span className="font-bold text-xs uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                        {activeTab === "puzzles" && "21 Standalone Puzzle Accordions"}
+                        {activeTab === "puzzles" && "22 Standalone Activity & Puzzle Studios"}
                         {activeTab === "text" && "Typography & Tracing"}
                         {activeTab === "freehand" && "Smooth Ink Brush"}
                         {activeTab === "shapes" && "Shapes & QR / Barcodes"}
@@ -264,18 +548,133 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                     </span>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-                    {/* --- TAB 1: 21 INDIVIDUAL PUZZLE ACCORDIONS --- */}
+                <div className="flex-1 overflow-y-auto p-3 pb-36 space-y-3 min-h-0">
+                    {/* --- TAB 1: 22 INDIVIDUAL PUZZLE ACCORDIONS --- */}
                     {activeTab === "puzzles" && (
                         <div className="space-y-2">
                             <Accordion type="single" collapsible className="w-full space-y-2">
+
+                                {/* 1. SNAKE PATH MAZE STUDIO (FEATURED) */}
+                                <AccordionItem value="p-snake-path-maze" className="border border-indigo-300 dark:border-indigo-700 rounded-xl px-3 bg-indigo-50 dark:bg-indigo-950/50 shadow-sm">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                            <Route className="w-4 h-4" />
+                                            <span>🐍 1. Snake Path Maze Studio</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Matching corridor path puzzle with custom themes, tube widths & auto answer keys.</p>
+                                        <div className="grid grid-cols-1 gap-1.5">
+                                            <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-sm" onClick={() => onAddSnakePathMaze && onAddSnakePathMaze()}>
+                                                <Plus className="w-3.5 h-3.5 mr-1" /> Add Snake Path Maze
+                                            </Button>
+                                            <Button size="sm" variant="outline" className="w-full h-8 border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 text-xs font-bold rounded-lg" onClick={() => onAddSinglePathSegment && onAddSinglePathSegment()}>
+                                                <Spline className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Insert Single Pre-Drawn Path
+                                            </Button>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* 2. BOARD GAME DESIGNER STUDIO (FEATURED) */}
+                                <AccordionItem value="p-board-game-designer" className="border border-amber-300 dark:border-amber-700 rounded-xl px-3 bg-amber-50/90 dark:bg-amber-950/50 shadow-sm">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-900 dark:text-slate-100">
+                                        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                                            <Gamepad2 className="w-4 h-4" />
+                                            <span>🎮 2. Board Game Designer Studio</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2.5 pt-1 pb-3">
+                                        <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">Build custom printable board games using premium templates, modular space components, and accessories.</p>
+                                        
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Board Game Title</Label>
+                                            <Input value={bgTitle} onChange={(e) => setBgTitle(e.target.value)} className="h-7 text-xs bg-white dark:bg-slate-900" placeholder="SUPER FUN BOARD GAME" />
+                                        </div>
+
+                                        {/* ── BOARD GAME TEMPLATES ── */}
+                                        <div className="pt-2 border-t border-amber-200 dark:border-amber-800 space-y-1.5">
+                                            <Label className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">🎲 Premium Board Templates</Label>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">One-click insert professionally-designed board game layouts.</p>
+                                            <div className="grid grid-cols-1 gap-1.5">
+                                                {BOARD_TEMPLATES.map((tmpl) => (
+                                                    <Button
+                                                        key={tmpl.id}
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="w-full h-auto py-1.5 px-2 text-left bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg"
+                                                        onClick={() => {
+                                                            const c = getCanvasRef();
+                                                            if (!c) { toast.error("Canvas not found."); return; }
+                                                            const group = generateBoardTemplate({
+                                                                template: tmpl.id,
+                                                                title: bgTitle,
+                                                                subtitle: bgSubtitle,
+                                                                totalSpaces: bgSpacesCount,
+                                                                showNumbers: true,
+                                                            });
+                                                            c.add(group);
+                                                            c.centerObject(group);
+                                                            c.setActiveObject(group);
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                            toast.success(`${tmpl.icon} ${tmpl.name} board inserted!`);
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-base">{tmpl.icon}</span>
+                                                            <div>
+                                                                <div className="text-[10px] font-bold text-amber-900 dark:text-amber-200">{tmpl.name}</div>
+                                                                <div className="text-[9px] text-slate-500 dark:text-slate-400 font-normal">{tmpl.desc}</div>
+                                                            </div>
+                                                        </div>
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Embedded Modular Component Panel (One-click multi-add directly from sidebar) */}
+                                        <BoardGameComponentSidebarPanel getCanvasRef={getCanvasRef} />
+
+                                        {/* ── PRINTABLE ACCESSORIES ── */}
+                                        <div className="pt-2 border-t border-amber-200 dark:border-amber-800 space-y-1.5">
+                                            <Label className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">✂️ Printable Game Accessories</Label>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">Foldouts, cut-outs, spinners, money, and scorecards for a complete printable game kit.</p>
+                                            <div className="grid grid-cols-2 gap-1.5">
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableDice}>
+                                                    <Dices className="w-3.5 h-3.5 mr-1.5 text-amber-600 shrink-0" />
+                                                    <span className="truncate">Foldout D6 Die</span>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableSpinner}>
+                                                    <span className="mr-1.5 text-xs">🎯</span>
+                                                    <span className="truncate">Pie Spinner</span>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableCards}>
+                                                    <span className="mr-1.5 text-xs">🃏</span>
+                                                    <span className="truncate">Task Cards</span>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableTokens}>
+                                                    <span className="mr-1.5 text-xs">👑</span>
+                                                    <span className="truncate">Player Tokens</span>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableMoney}>
+                                                    <span className="mr-1.5 text-xs">💵</span>
+                                                    <span className="truncate">Play Money</span>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableScorecard}>
+                                                    <span className="mr-1.5 text-xs">🏆</span>
+                                                    <span className="truncate">Score Tracker</span>
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
                                 
-                                {/* 1. WORD SEARCH ACCORDION */}
+                                {/* 2. WORD SEARCH ACCORDION */}
                                 <AccordionItem value="p-word-search" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                         <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
                                             <Grid3X3 className="w-4 h-4" />
-                                            <span>1. Word Search</span>
+                                            <span>2. Word Search</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
@@ -645,6 +1044,22 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     </AccordionContent>
                                 </AccordionItem>
 
+                                {/* 22. SNAKE PATH MAZE STUDIO ACCORDION */}
+                                <AccordionItem value="p-snake-path-maze" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/70 dark:bg-indigo-950/40">
+                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                            <Route className="w-4 h-4" />
+                                            <span>22. Snake Path Maze Studio</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-2 pt-1 pb-3">
+                                        <p className="text-[11px] text-slate-500">Matching corridor path puzzle with custom themes & answer keys.</p>
+                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddSnakePathMaze && onAddSnakePathMaze()}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Snake Path Maze
+                                        </Button>
+                                    </AccordionContent>
+                                </AccordionItem>
+
                             </Accordion>
                         </div>
                     )}
@@ -682,6 +1097,9 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                 <Button size="sm" className="w-full h-8 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddPrimaryLinedPaper && onAddPrimaryLinedPaper()}>
                                     + Add Primary Lined Paper (K-3)
                                 </Button>
+                                <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddSnakePathMaze && onAddSnakePathMaze()}>
+                                    🐍 Add Snake Path Maze Activity
+                                </Button>
                                 <div className="grid grid-cols-2 gap-1.5 pt-1">
                                     <Button size="sm" variant="outline" className="h-7 text-[11px] font-semibold bg-white dark:bg-slate-900" onClick={() => onAddSpellingTest && onAddSpellingTest(10)}>
                                         Spelling (10 Words)
@@ -711,10 +1129,145 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Active Canvas Mode</Label>
                                     <span className="text-[10px] uppercase tracking-wider font-extrabold text-indigo-600 dark:text-indigo-400">{activeTool}</span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-1.5">
-                                    <Button size="sm" variant={activeTool === "select" ? "default" : "outline"} className="h-8 text-xs font-semibold" onClick={() => setActiveTool("select")}>Select Object</Button>
-                                    <Button size="sm" variant={activeTool === "draw" ? "default" : "outline"} className="h-8 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white" onClick={() => setActiveTool("draw")}>
-                                        <Pencil className="w-3.5 h-3.5 mr-1" /> Draw Ink
+                                <div className="grid grid-cols-3 gap-1.5">
+                                    <Button size="sm" variant={activeTool === "select" ? "default" : "outline"} className="h-8 text-[11px] font-semibold px-1" onClick={() => setActiveTool("select")}>Select</Button>
+                                    <Button size="sm" variant={activeTool === "draw" ? "default" : "outline"} className={`h-8 text-[11px] font-bold px-1 ${activeTool === "draw" ? "bg-indigo-600 hover:bg-indigo-700 text-white" : ""}`} onClick={() => setActiveTool("draw")}>
+                                        <Pencil className="w-3 h-3 mr-1" /> Draw
+                                    </Button>
+                                    <Button size="sm" variant={activeTool === "eraser" ? "default" : "outline"} className={`h-8 text-[11px] font-bold px-1 ${activeTool === "eraser" ? "bg-rose-600 hover:bg-rose-700 text-white" : "border-rose-200 text-rose-700 dark:text-rose-400"}`} onClick={() => setActiveTool("eraser")}>
+                                        <Scissors className="w-3 h-3 mr-1" /> Erase
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Partial Eraser Tool Options Card */}
+                            <div className="space-y-3 p-3 bg-rose-50/70 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800 shadow-xs">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-extrabold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+                                        <Scissors className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" /> Eraser Tool Options
+                                    </Label>
+                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 capitalize">
+                                        {eraserMode} mode
+                                    </span>
+                                </div>
+
+                                {/* Erasing Options / Modes */}
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider">Erasing Method</Label>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        {[
+                                            { id: "brush", label: "🧹 Precision Brush", desc: "Drag freehand to erase" },
+                                            { id: "box", label: "⬛ Box Area Erase", desc: "Drag box to erase area" },
+                                            { id: "cutter", label: "✂️ Segment Cutter", desc: "Cut line between points" },
+                                            { id: "stroke", label: "🎯 Stroke Selector", desc: "Click stroke to delete" },
+                                        ].map((mode) => (
+                                            <Button
+                                                key={mode.id}
+                                                size="sm"
+                                                variant={eraserMode === mode.id ? "default" : "outline"}
+                                                className={`h-9 text-[10px] font-bold justify-start px-2 text-left ${eraserMode === mode.id ? "bg-rose-600 text-white shadow-xs" : "bg-white dark:bg-slate-900 border-slate-200"}`}
+                                                onClick={() => {
+                                                    setActiveTool("eraser");
+                                                    setEraserProps({ mode: mode.id as any });
+                                                }}
+                                            >
+                                                <div>
+                                                    <p className="font-bold leading-none">{mode.label}</p>
+                                                    <p className="text-[9px] font-normal opacity-80 mt-0.5">{mode.desc}</p>
+                                                </div>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Eraser Size Controls */}
+                                <div className="space-y-1 pt-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Eraser Tip Size</Label>
+                                        <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">{eraserSize}px</span>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-1">
+                                        {[8, 16, 32, 64].map((sz) => (
+                                            <Button
+                                                key={sz}
+                                                size="sm"
+                                                variant={eraserSize === sz ? "default" : "outline"}
+                                                className={`h-6 text-[10px] font-bold ${eraserSize === sz ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                                onClick={() => setEraserProps({ size: sz })}
+                                            >
+                                                {sz}px
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <Input
+                                        type="range"
+                                        min="4"
+                                        max="100"
+                                        value={eraserSize}
+                                        onChange={(e) => setEraserProps({ size: parseInt(e.target.value) || 24 })}
+                                        className="h-6 cursor-pointer mt-1"
+                                    />
+                                </div>
+
+                                {/* Eraser Tip Shape */}
+                                <div className="space-y-1 pt-1">
+                                    <Label className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Eraser Tip Shape</Label>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        <Button
+                                            size="sm"
+                                            variant={eraserShape === "round" ? "default" : "outline"}
+                                            className={`h-7 text-xs font-bold ${eraserShape === "round" ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                            onClick={() => setEraserProps({ shape: "round" })}
+                                        >
+                                            ● Round Tip
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant={eraserShape === "square" ? "default" : "outline"}
+                                            className={`h-7 text-xs font-bold ${eraserShape === "square" ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                            onClick={() => setEraserProps({ shape: "square" })}
+                                        >
+                                            ■ Square Tip
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Fuse / Merge Action */}
+                                <div className="pt-2 border-t border-rose-200 dark:border-rose-800/60 space-y-1.5">
+                                    <Button
+                                        size="sm"
+                                        className="w-full h-8 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow-sm"
+                                        onClick={() => {
+                                            const canvasEl = document.querySelector(".canvas-container canvas") as any;
+                                            const c = canvasEl?.__fabricCanvas;
+                                            if (!c) return;
+                                            const count = mergeAndLockEraserMasks(c);
+                                            if (count > 0) {
+                                                toast.success(`Fused ${count} erased cutout areas permanently into object!`);
+                                            } else {
+                                                toast.info("No active eraser cutouts found on canvas to merge.");
+                                            }
+                                        }}
+                                    >
+                                        🔗 Merge & Lock Erased Gaps
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="w-full h-7 text-[10px] font-bold border-rose-300 text-rose-700 hover:bg-rose-100 dark:border-rose-800 dark:text-rose-300"
+                                        onClick={() => {
+                                            const canvasEl = document.querySelector(".canvas-container canvas") as any;
+                                            const c = canvasEl?.__fabricCanvas;
+                                            if (!c) return;
+                                            const count = clearAllEraserMasks(c);
+                                            if (count > 0) {
+                                                toast.success(`Cleared ${count} eraser cutouts and restored original lines.`);
+                                            } else {
+                                                toast.info("No eraser cutouts on canvas.");
+                                            }
+                                        }}
+                                    >
+                                        <Trash2 className="w-3 h-3 mr-1" /> Restore Original Lines
                                     </Button>
                                 </div>
                             </div>
@@ -732,6 +1285,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                         { id: "crayon", label: "Crayon / Chalk", icon: "🎨", size: 10 },
                                         { id: "watercolor", label: "Watercolor", icon: "🖌️", size: 18 },
                                         { id: "neon", label: "Neon Glow", icon: "✨", size: 6 },
+                                        { id: "snake", label: "Snake Path 🐍", icon: "🐍", size: 24 },
                                     ].map((pen) => (
                                         <Button
                                             key={pen.id}
@@ -826,6 +1380,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                         { id: "zigzag", label: "Zigzag ∧∨∧" },
                                         { id: "wave", label: "Wave ~~~" },
                                         { id: "spiral", label: "Spiral 🌀" },
+                                        { id: "snake-line", label: "Snake Path 🐍" },
                                     ].map((tool) => (
                                         <Button
                                             key={tool.id}

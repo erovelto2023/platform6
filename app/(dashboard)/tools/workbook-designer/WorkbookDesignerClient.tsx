@@ -11,6 +11,9 @@ import {
     createQRCodeVector,
     createBarcodeVector,
     createPrimaryHandwritingLinedPaperGroup,
+    createSnakePathMazeGroup,
+    createSingleSnakePathFromSegment,
+    PRE_DRAWN_SINGLE_PATH_SEGMENTS_100,
     createMathGridPaperGroup,
     createSpellingTestGroup,
     createFlashcardGridGroup,
@@ -77,11 +80,14 @@ import { WorksheetSidebar } from "@/components/worksheet/WorksheetSidebar";
 import { WorksheetCanvasContainer } from "@/components/worksheet/WorksheetCanvasContainer";
 import { WorksheetPropertyPanel } from "@/components/worksheet/WorksheetPropertyPanel";
 import { WorksheetPagesBar } from "@/components/worksheet/WorksheetPagesBar";
+import { SnakePathGalleryModal } from "@/components/worksheet/SnakePathGalleryModal";
+import type { SinglePathSegmentMeta } from "@/lib/worksheet-fabric";
 
 export default function WorkbookDesignerClient() {
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [projectId, setProjectId] = useState<string | null>(null);
+    const [isSegmentPickerOpen, setIsSegmentPickerOpen] = useState(false);
 
     const {
         name,
@@ -535,6 +541,35 @@ export default function WorkbookDesignerClient() {
         toast.success("Primary Handwriting Lined Paper inserted!");
     };
 
+    const handleAddSnakePathMaze = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createSnakePathMazeGroup();
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Snake Path Maze Activity inserted!");
+    };
+
+    const handleAddSinglePathSegment = (_segmentId?: number) => {
+        // Open the segment picker gallery modal
+        setIsSegmentPickerOpen(true);
+    };
+
+    const handleInsertSegmentFromPicker = (seg: SinglePathSegmentMeta) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const group = createSingleSnakePathFromSegment(seg);
+        c.add(group);
+        c.centerObject(group);
+        c.setActiveObject(group);
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success(`Path Segment #${seg.id} (${seg.category}) inserted!`);
+    };
+
     const handleAddMathGridPaper = (gridType: "quarter" | "half" = "quarter") => {
         const c = fabricCanvasRef.current;
         if (!c) return;
@@ -675,17 +710,32 @@ export default function WorkbookDesignerClient() {
                     onAddMissingVowels={handleAddMissingVowels}
                     onAddCodeword={handleAddCodeword}
                     onAddPrimaryLinedPaper={handleAddPrimaryLinedPaper}
+                    onAddSnakePathMaze={handleAddSnakePathMaze}
+                    onAddSinglePathSegment={handleAddSinglePathSegment}
                     onAddMathGridPaper={handleAddMathGridPaper}
                     onAddSpellingTest={handleAddSpellingTest}
                     onAddFlashcardGrid={handleAddFlashcardGrid}
                     onAddLineTool={handleAddLineTool}
                     onAddSymbol={handleAddSymbol}
                     onAddCustomImage={handleAddCustomImage}
+                    fabricCanvasRef={fabricCanvasRef}
                 />
                 <WorksheetCanvasContainer fabricCanvasRef={fabricCanvasRef} />
                 <WorksheetPropertyPanel fabricCanvasRef={fabricCanvasRef} />
             </div>
             <WorksheetPagesBar fabricCanvasRef={fabricCanvasRef} />
+
+            {/* Segment Picker Modal - opened from sidebar Insert Single Pre-Drawn Path button */}
+            <SnakePathGalleryModal
+                isOpen={isSegmentPickerOpen}
+                initialView="single_segments"
+                onClose={() => setIsSegmentPickerOpen(false)}
+                onSelectTemplate={() => {}}
+                onSelectSegment={(seg) => {
+                    setIsSegmentPickerOpen(false);
+                    handleInsertSegmentFromPicker(seg);
+                }}
+            />
         </div>
     );
 }

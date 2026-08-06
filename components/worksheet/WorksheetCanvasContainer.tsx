@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useCallback, useState } from "react";
 import * as fabric from "fabric";
 import getStroke from "perfect-freehand";
+import { toast } from "sonner";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 import {
     createFreehandPath,
@@ -37,6 +38,16 @@ function hydrateCustomProperties(jsonObj: any, fabricObj: any) {
     }
 }
 
+function keepEraserMasksOnTop(c: fabric.Canvas) {
+    if (!c) return;
+    const objects = c.getObjects();
+    objects.forEach((obj: any) => {
+        if (obj.customType && typeof obj.customType === "string" && obj.customType.startsWith("eraser")) {
+            c.bringObjectToFront(obj);
+        }
+    });
+}
+
 export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> = ({ fabricCanvasRef }) => {
     const canvasElRef = useRef<HTMLCanvasElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -59,6 +70,9 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         brushSmoothing,
         brushStyle,
         brushOpacity,
+        eraserSize,
+        eraserShape,
+        eraserMode,
         updateCurrentPageCanvas,
         setSelectedObject,
         showKdpGuides,
@@ -71,6 +85,11 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
     // Freehand stroke points ref
     const strokePointsRef = useRef<{ x: number; y: number; pressure?: number }[]>([]);
     const isDrawingRef = useRef(false);
+
+    // Eraser pointer state
+    const [liveBoxRect, setLiveBoxRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+    const [liveCutLine, setLiveCutLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+    const eraserStartRef = useRef<{ x: number; y: number } | null>(null);
 
     // Debounced Save canvas state helper
     const saveStateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -107,14 +126,40 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         });
 
         fabricCanvasRef.current = c;
+        (window as any).__fabricCanvas = c;
+        if (canvasElRef.current) {
+            (canvasElRef.current as any).__fabricCanvas = c;
+        }
 
-        // Selection Listener
+        // Selection & Modification Listener for instant property sync
         const handleSelection = () => {
             const activeObj = c.getActiveObject();
             if (!activeObj) {
                 setSelectedObject(null, null);
                 return;
             }
+
+            let textVal = (activeObj as any).text;
+            let fontFamilyVal = (activeObj as any).fontFamily;
+            let fontSizeVal = (activeObj as any).fontSize;
+            let lineHeightVal = (activeObj as any).lineHeight;
+            let textAlignVal = (activeObj as any).textAlign;
+            let fontStyleVal = (activeObj as any).fontStyle;
+            let fontWeightVal = (activeObj as any).fontWeight;
+
+            if (activeObj.type === "group" && typeof (activeObj as any).getObjects === "function") {
+                const childText = (activeObj as any).getObjects().find((o: any) => o.type === "i-text" || o.type === "text");
+                if (childText) {
+                    if (textVal === undefined) textVal = childText.text;
+                    if (!fontFamilyVal) fontFamilyVal = childText.fontFamily;
+                    if (!fontSizeVal) fontSizeVal = childText.fontSize;
+                    if (!lineHeightVal) lineHeightVal = childText.lineHeight;
+                    if (!textAlignVal) textAlignVal = childText.textAlign;
+                    if (!fontStyleVal) fontStyleVal = childText.fontStyle;
+                    if (!fontWeightVal) fontWeightVal = childText.fontWeight;
+                }
+            }
+
             setSelectedObject(
                 (activeObj as any).id || "obj-" + Date.now(),
                 activeObj.type || "object",
@@ -129,9 +174,17 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                     fill: activeObj.fill,
                     stroke: activeObj.stroke,
                     strokeWidth: activeObj.strokeWidth,
+                    strokeDashArray: activeObj.strokeDashArray,
+                    strokeLineCap: activeObj.strokeLineCap,
+                    strokeLineJoin: activeObj.strokeLineJoin,
                     opacity: activeObj.opacity,
-                    fontSize: (activeObj as any).fontSize,
-                    fontFamily: (activeObj as any).fontFamily,
+                    text: textVal !== undefined ? textVal : (activeObj.type === "i-text" || activeObj.type === "text" ? "" : undefined),
+                    fontSize: fontSizeVal ?? 18,
+                    fontFamily: fontFamilyVal ?? "Inter",
+                    lineHeight: lineHeightVal ?? 1.2,
+                    textAlign: textAlignVal ?? "center",
+                    fontStyle: fontStyleVal ?? "normal",
+                    fontWeight: fontWeightVal ?? "normal",
                 }
             );
         };
@@ -139,10 +192,15 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         c.on("selection:created", handleSelection);
         c.on("selection:updated", handleSelection);
         c.on("selection:cleared", () => setSelectedObject(null, null));
+        c.on("text:changed", handleSelection);
+        c.on("text:selection:changed", handleSelection);
 
         // Object modification listeners for instant page state sync
         c.on("object:added", saveState);
-        c.on("object:modified", saveState);
+        c.on("object:modified", (e) => {
+            saveState();
+            handleSelection();
+        });
         c.on("object:removed", saveState);
 
         return () => {
@@ -276,27 +334,72 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         };
     }, [kdpSpecs.canvasWidth, kdpSpecs.canvasHeight, gridSnapping, gridSize, fabricCanvasRef]);
 
+    // Handle Active Tool Canvas Selection State (Pause Object Selection during Drawing/Erasing)
+    useEffect(() => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        if (activeTool === "eraser" || activeTool === "draw") {
+            c.selection = false;
+            c.discardActiveObject();
+            c.getObjects().forEach((obj) => {
+                obj.selectable = false;
+            });
+            keepEraserMasksOnTop(c);
+            c.requestRenderAll();
+        } else if (activeTool === "select") {
+            c.selection = true;
+            c.getObjects().forEach((obj) => {
+                obj.selectable = true;
+            });
+            keepEraserMasksOnTop(c);
+            c.requestRenderAll();
+        }
+    }, [activeTool, fabricCanvasRef]);
+
     const [liveStrokePathD, setLiveStrokePathD] = useState<string>("");
     const [penPos, setPenPos] = useState<{ x: number; y: number } | null>(null);
 
-    // Perfect Freehand Pointer Events with Real-Time Live Ink & Pen Cursor
+    // Pointer Event Handlers for Draw & Eraser Tools
     const handlePointerDown = (e: React.PointerEvent) => {
-        if (activeTool !== "draw" || !canvasElRef.current) return;
-        isDrawingRef.current = true;
+        if (!canvasElRef.current) return;
         const rect = canvasElRef.current.getBoundingClientRect();
         const x = (e.clientX - rect.left) / zoom;
         const y = (e.clientY - rect.top) / zoom;
-        strokePointsRef.current = [{ x, y, pressure: e.pressure || 0.5 }];
-        setPenPos({ x, y });
+
+        if (activeTool === "draw") {
+            isDrawingRef.current = true;
+            strokePointsRef.current = [{ x, y, pressure: e.pressure || 0.5 }];
+            setPenPos({ x, y });
+        } else if (activeTool === "eraser") {
+            isDrawingRef.current = true;
+            eraserStartRef.current = { x, y };
+            strokePointsRef.current = [{ x, y }];
+            setPenPos({ x, y });
+
+            const c = fabricCanvasRef.current;
+            if (c && eraserMode === "stroke") {
+                // Stroke selector mode: find and remove targeted vector stroke or snake path under pointer
+                const targetObj: any = c.findTarget(e.nativeEvent as any);
+                if (targetObj) {
+                    const actualObj = targetObj.target || targetObj;
+                    c.remove(actualObj);
+                    c.discardActiveObject();
+                    c.requestRenderAll();
+                    saveState();
+                    toast.success("Erased targeted vector object/segment!");
+                }
+            }
+        }
     };
 
     const handlePointerMove = (e: React.PointerEvent) => {
-        if (activeTool === "draw" && canvasElRef.current) {
-            const rect = canvasElRef.current.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / zoom;
-            const y = (e.clientY - rect.top) / zoom;
-            setPenPos({ x, y });
+        if (!canvasElRef.current) return;
+        const rect = canvasElRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / zoom;
+        const y = (e.clientY - rect.top) / zoom;
 
+        if (activeTool === "draw") {
+            setPenPos({ x, y });
             if (isDrawingRef.current) {
                 strokePointsRef.current.push({ x, y, pressure: e.pressure || 0.5 });
                 const pts = strokePointsRef.current.map((p) => [p.x, p.y, p.pressure ?? 0.5]);
@@ -309,33 +412,134 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                 const d = getSvgPathFromFreehandStroke(stroke);
                 setLiveStrokePathD(d);
             }
+        } else if (activeTool === "eraser") {
+            setPenPos({ x, y });
+            if (isDrawingRef.current && eraserStartRef.current) {
+                if (eraserMode === "brush") {
+                    strokePointsRef.current.push({ x, y });
+                    const pts = strokePointsRef.current;
+                    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+                    for (let i = 1; i < pts.length; i++) {
+                        d += ` L ${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)}`;
+                    }
+                    setLiveStrokePathD(d);
+                } else if (eraserMode === "box") {
+                    const sx = eraserStartRef.current.x;
+                    const sy = eraserStartRef.current.y;
+                    setLiveBoxRect({
+                        x: Math.min(sx, x),
+                        y: Math.min(sy, y),
+                        w: Math.abs(x - sx),
+                        h: Math.abs(y - sy),
+                    });
+                } else if (eraserMode === "cutter") {
+                    setLiveCutLine({
+                        x1: eraserStartRef.current.x,
+                        y1: eraserStartRef.current.y,
+                        x2: x,
+                        y2: y,
+                    });
+                }
+            }
         }
     };
 
     const handlePointerUp = () => {
-        if (!isDrawingRef.current || activeTool !== "draw") return;
+        if (!isDrawingRef.current) return;
         isDrawingRef.current = false;
-        setLiveStrokePathD("");
-
         const c = fabricCanvasRef.current;
-        if (!c || strokePointsRef.current.length < 2) return;
 
-        const pathObj = createFreehandPath(strokePointsRef.current, {
-            size: brushSize,
-            color: brushColor,
-            thinning: brushThinning,
-            smoothing: brushSmoothing,
-            style: brushStyle,
-            opacity: brushOpacity,
-        });
+        if (activeTool === "draw") {
+            setLiveStrokePathD("");
+            if (!c || strokePointsRef.current.length < 2) return;
 
-        if (pathObj) {
-            c.add(pathObj);
-            c.discardActiveObject(); // Prevents selection bounding box from appearing around completed line
-            c.requestRenderAll();
-            saveState();
+            const pathObj = createFreehandPath(strokePointsRef.current, {
+                size: brushSize,
+                color: brushColor,
+                thinning: brushThinning,
+                smoothing: brushSmoothing,
+                style: brushStyle,
+                opacity: brushOpacity,
+            });
+
+            if (pathObj) {
+                c.add(pathObj);
+                c.discardActiveObject();
+                c.requestRenderAll();
+                saveState();
+            }
+            strokePointsRef.current = [];
+        } else if (activeTool === "eraser") {
+            setLiveStrokePathD("");
+            eraserStartRef.current = null;
+            if (!c) return;
+
+            if (eraserMode === "brush") {
+                const pts = strokePointsRef.current;
+                if (pts.length >= 1) {
+                    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+                    if (pts.length === 1) {
+                        d += ` L ${(pts[0].x + 0.1).toFixed(1)} ${pts[0].y.toFixed(1)}`;
+                    } else {
+                        for (let i = 1; i < pts.length; i++) {
+                            d += ` L ${pts[i].x.toFixed(1)} ${pts[i].y.toFixed(1)}`;
+                        }
+                    }
+
+                    const eraserMask = new fabric.Path(d, {
+                        fill: "transparent",
+                        stroke: "#ffffff",
+                        strokeWidth: eraserSize,
+                        strokeLineCap: eraserShape === "round" ? "round" : "square",
+                        strokeLineJoin: eraserShape === "round" ? "round" : "miter",
+                        selectable: true,
+                    });
+                    (eraserMask as any).customType = "eraser-stroke";
+                    c.add(eraserMask);
+                    c.bringObjectToFront(eraserMask);
+                    c.discardActiveObject();
+                    c.requestRenderAll();
+                    saveState();
+                    toast.success(`Erased path area with ${eraserSize}px ${eraserShape} brush`);
+                }
+            } else if (eraserMode === "box" && liveBoxRect) {
+                if (liveBoxRect.w > 4 && liveBoxRect.h > 4) {
+                    const boxMask = new fabric.Rect({
+                        left: liveBoxRect.x,
+                        top: liveBoxRect.y,
+                        width: liveBoxRect.w,
+                        height: liveBoxRect.h,
+                        fill: "#ffffff",
+                        stroke: "none",
+                        selectable: true,
+                    });
+                    (boxMask as any).customType = "eraser-box";
+                    c.add(boxMask);
+                    c.bringObjectToFront(boxMask);
+                    c.discardActiveObject();
+                    c.requestRenderAll();
+                    saveState();
+                    toast.success(`Erased ${Math.round(liveBoxRect.w)}×${Math.round(liveBoxRect.h)}px box area`);
+                }
+                setLiveBoxRect(null);
+            } else if (eraserMode === "cutter" && liveCutLine) {
+                const cutMask = new fabric.Line([liveCutLine.x1, liveCutLine.y1, liveCutLine.x2, liveCutLine.y2], {
+                    stroke: "#ffffff",
+                    strokeWidth: eraserSize,
+                    strokeLineCap: eraserShape === "round" ? "round" : "square",
+                    selectable: true,
+                });
+                (cutMask as any).customType = "eraser-cut";
+                c.add(cutMask);
+                c.bringObjectToFront(cutMask);
+                c.discardActiveObject();
+                c.requestRenderAll();
+                saveState();
+                toast.success("Cut line segment!");
+                setLiveCutLine(null);
+            }
+            strokePointsRef.current = [];
         }
-        strokePointsRef.current = [];
     };
 
     return (
@@ -371,6 +575,61 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                                     strokeWidth="1"
                                 />
                             </g>
+                        )}
+                    </svg>
+                )}
+
+                {/* LIVE ERASER CURSOR OVERLAY */}
+                {activeTool === "eraser" && (
+                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-30 overflow-visible">
+                        {eraserMode === "brush" && liveStrokePathD && (
+                            <path
+                                d={liveStrokePathD}
+                                stroke="#ffffff"
+                                strokeWidth={eraserSize}
+                                strokeLinecap={eraserShape === "round" ? "round" : "square"}
+                                strokeLinejoin={eraserShape === "round" ? "round" : "miter"}
+                                fill="none"
+                                opacity={0.85}
+                            />
+                        )}
+                        {eraserMode === "box" && liveBoxRect && (
+                            <rect
+                                x={liveBoxRect.x}
+                                y={liveBoxRect.y}
+                                width={liveBoxRect.w}
+                                height={liveBoxRect.h}
+                                fill="rgba(244, 63, 94, 0.15)"
+                                stroke="#f43f5e"
+                                strokeWidth={2}
+                                strokeDasharray="6 4"
+                            />
+                        )}
+                        {eraserMode === "cutter" && liveCutLine && (
+                            <line
+                                x1={liveCutLine.x1}
+                                y1={liveCutLine.y1}
+                                x2={liveCutLine.x2}
+                                y2={liveCutLine.y2}
+                                stroke="#f43f5e"
+                                strokeWidth={eraserSize}
+                                strokeDasharray="4 4"
+                                strokeLinecap={eraserShape === "round" ? "round" : "square"}
+                            />
+                        )}
+                        {penPos && (
+                            <rect
+                                x={penPos.x - eraserSize / 2}
+                                y={penPos.y - eraserSize / 2}
+                                width={eraserSize}
+                                height={eraserSize}
+                                rx={eraserShape === "round" ? eraserSize / 2 : 2}
+                                ry={eraserShape === "round" ? eraserSize / 2 : 2}
+                                fill="rgba(244, 63, 94, 0.2)"
+                                stroke="#f43f5e"
+                                strokeWidth={2}
+                                strokeDasharray="3 3"
+                            />
                         )}
                     </svg>
                 )}

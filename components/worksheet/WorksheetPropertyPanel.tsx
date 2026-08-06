@@ -14,8 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Copy, Trash2, ArrowUp, ArrowDown, Grid3X3, Sparkles, RefreshCw, Layers,
     Palette, Type, FileText, CheckCircle2, ShieldAlert, BarChart3, Wand2, Settings2, HelpCircle,
-    Plus, Lock, Unlock, Eye, BookOpen, LayoutGrid, Award, Sliders, Unlink, Split,
-    AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, AlignLeft, AlignRight
+    Plus, Lock, Unlock, Eye, BookOpen, LayoutGrid, Award, Sliders, Unlink, Split, Link2,
+    AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter, AlignLeft, AlignRight,
+    FlipHorizontal, FlipVertical, RotateCw, Maximize2, Route, Scissors
 } from "lucide-react";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 import {
@@ -73,14 +74,41 @@ import {
     HiddenMessageSearchConfig,
     MissingVowelsConfig,
     CodewordConfig,
+    SnakePathMazeConfig,
+    createDefaultSnakePathMazeConfig,
+    generateSnakePathMazeObjectsFromConfig,
+    PRE_DRAWN_PATH_TEMPLATES_100,
+    PathTemplateMeta,
+    PRE_DRAWN_SINGLE_PATH_SEGMENTS_100,
+    SinglePathSegmentMeta,
+    createSingleSnakePathFromSegment,
+    handleUngroupFabricGroup,
+    handleGroupFabricObjects,
+    fuseSnakePathSegments,
+    mergeAndLockEraserMasks,
+    clearAllEraserMasks,
+    generateBoardGameObjectsFromConfig,
+    generatePrintableDiceGroup,
+    generatePrintableSpinnerGroup,
+    generatePrintableCardsGroup,
+    generatePrintableTokensGroup,
 } from "@/lib/worksheet-fabric";
+import {
+    BoardGameConfig,
+    BOARD_GAME_THEMES,
+    BoardThemeId,
+    BoardLayoutType,
+    createDefaultBoardGameConfig,
+} from "@/lib/board-game-engine";
+import { SnakePathGalleryModal } from "@/components/worksheet/SnakePathGalleryModal";
+import { WorksheetBoardGameDrawer } from "@/components/worksheet/WorksheetBoardGameDrawer";
 
 interface WorksheetPropertyPanelProps {
     fabricCanvasRef: React.MutableRefObject<fabric.Canvas | null>;
 }
 
 export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ fabricCanvasRef }) => {
-    const { selectedObjectId, selectedObjectType, selectedObjectProps, setSelectedObject, currentPageIndex, customFonts } = useWorksheetStore();
+    const { selectedObjectId, selectedObjectType, selectedObjectProps, setSelectedObject, currentPageIndex, customFonts, activeTool, setActiveTool, eraserSize, eraserShape, eraserMode, setEraserProps } = useWorksheetStore();
 
     // --- PUZZLE SELECTION & CONFIG STATES ---
     const [wsConfig, setWsConfig] = useState<WordSearchConfig>(createDefaultWordSearchConfig("animals"));
@@ -94,6 +122,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
     // Activity States
     const [fillInConfig, setFillInConfig] = useState<FillInBlanksConfig>({ title: "FILL IN THE BLANKS", sentence: "The ________ jumps over the ________ wall.", wordBank: ["fox", "high", "quick"] });
     const [isFillInSelected, setIsFillInSelected] = useState(false);
+    const [dashGap, setDashGap] = useState<number>(8);
 
     const [scrambleConfig, setScrambleConfig] = useState<WordScrambleConfig>({ title: "WORD SCRAMBLE", words: ["APPLE", "BANANA", "CHERRY"] });
     const [isScrambleSelected, setIsScrambleSelected] = useState(false);
@@ -139,6 +168,107 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
     const [codewordConfig, setCodewordConfig] = useState<CodewordConfig>({ title: "CODEWORD PUZZLE", words: ["SECRET", "CIPHER", "PUZZLE"] });
     const [isCodewordSelected, setIsCodewordSelected] = useState(false);
 
+    const [snakeMazeConfig, setSnakeMazeConfig] = useState<SnakePathMazeConfig>(createDefaultSnakePathMazeConfig());
+    const [isSnakeMazeSelected, setIsSnakeMazeSelected] = useState(false);
+
+    const [boardGameConfig, setBoardGameConfig] = useState<BoardGameConfig>(createDefaultBoardGameConfig());
+    const [isBoardGameSelected, setIsBoardGameSelected] = useState(false);
+
+    const handleApplyBoardGameConfig = (newConfig: BoardGameConfig) => {
+        setBoardGameConfig(newConfig);
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        let targetObj: any = activeObj;
+        while (targetObj && !targetObj.customType) {
+            if (targetObj.group) targetObj = targetObj.group;
+            else break;
+        }
+
+        const left = targetObj ? targetObj.left || 60 : 60;
+        const top = targetObj ? targetObj.top || 60 : 60;
+
+        const newGroup = generateBoardGameObjectsFromConfig(newConfig);
+        newGroup.set({ left, top });
+
+        c.remove(targetObj || activeObj);
+        c.add(newGroup);
+        c.setActiveObject(newGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+    };
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+    const [isBoardGameDrawerOpen, setIsBoardGameDrawerOpen] = useState(false);
+    const [multiSnakePathCount, setMultiSnakePathCount] = useState(0);
+    const updateActiveObjectProperty = (props: Record<string, any>) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject() as any;
+        if (!activeObj) return;
+
+        activeObj.set(props);
+        if (activeObj.type === "group" && typeof activeObj.getObjects === "function") {
+            activeObj.getObjects().forEach((child: any) => {
+                if ("text" in props && (child.type === "i-text" || child.type === "text")) {
+                    child.set({ text: props.text });
+                    if (typeof child.initDimensions === "function") child.initDimensions();
+                }
+                if ("fontFamily" in props && (child.type === "i-text" || child.type === "text")) {
+                    child.set({ fontFamily: props.fontFamily });
+                    if (typeof child.initDimensions === "function") child.initDimensions();
+                }
+                if ("fontSize" in props && (child.type === "i-text" || child.type === "text")) {
+                    child.set({ fontSize: props.fontSize });
+                    if (typeof child.initDimensions === "function") child.initDimensions();
+                }
+                if ("lineHeight" in props && (child.type === "i-text" || child.type === "text")) {
+                    child.set({ lineHeight: props.lineHeight });
+                    if (typeof child.initDimensions === "function") child.initDimensions();
+                }
+                if ("textAlign" in props && (child.type === "i-text" || child.type === "text")) {
+                    child.set({ textAlign: props.textAlign });
+                }
+                if ("stroke" in props && (child.stroke || child.type === "path" || child.type === "line")) {
+                    child.set({ stroke: props.stroke });
+                }
+                if ("fill" in props && child.fill && child.fill !== "none" && child.fill !== "transparent") {
+                    child.set({ fill: props.fill });
+                }
+                if ("strokeWidth" in props && typeof child.strokeWidth === "number") {
+                    child.set({ strokeWidth: props.strokeWidth });
+                }
+                if ("strokeDashArray" in props) {
+                    child.set({ strokeDashArray: props.strokeDashArray });
+                }
+            });
+            if (typeof activeObj.addWithUpdate === "function") {
+                activeObj.addWithUpdate();
+            }
+        }
+
+        if (activeObj.type === "i-text" || activeObj.type === "text") {
+            if (typeof activeObj.initDimensions === "function") {
+                activeObj.initDimensions();
+            }
+            activeObj.setCoords();
+        }
+
+        c.requestRenderAll();
+        c.fire("object:modified");
+
+        const storeProps = useWorksheetStore.getState().selectedObjectProps || {};
+        useWorksheetStore.getState().setSelectedObject(
+            activeObj.id || "obj-" + Date.now(),
+            activeObj.type || "object",
+            {
+                ...storeProps,
+                ...props,
+            }
+        );
+    };
+
     const updateSelectionStateRef = useRef<() => void>(() => {});
     updateSelectionStateRef.current = () => {
         const c = fabricCanvasRef.current;
@@ -160,6 +290,8 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         setIsHiddenMessageSelected(false);
         setIsMissingVowelsSelected(false);
         setIsCodewordSelected(false);
+        setIsSnakeMazeSelected(false);
+        setIsBoardGameSelected(false);
 
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
@@ -247,6 +379,14 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
             setIsHiddenMessageSelected(true);
             const cfg: HiddenMessageSearchConfig = targetObj.puzzleConfig || { title: "HIDDEN MESSAGE WORD SEARCH", words: ["STAR", "MOON", "SUN", "PLANET"], hiddenMessage: "DISCOVERY IS FUN", gridSize: 10 };
             setHiddenMessageConfig(cfg);
+        } else if (customType === "snake-path-maze") {
+            setIsSnakeMazeSelected(true);
+            const cfg: SnakePathMazeConfig = targetObj.puzzleConfig || createDefaultSnakePathMazeConfig();
+            setSnakeMazeConfig(cfg);
+        } else if (customType === "board-game") {
+            setIsBoardGameSelected(true);
+            const cfg: BoardGameConfig = targetObj.puzzleConfig || createDefaultBoardGameConfig();
+            setBoardGameConfig(cfg);
         }
     };
 
@@ -263,14 +403,49 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         c.on("selection:updated", handleSelection);
         c.on("selection:cleared", handleSelection);
 
+        // Track multi-select snake paths for Fuse button
+        const updateMultiSnake = () => {
+            const active = c.getActiveObject();
+            if (active && (active as any).type === "activeSelection") {
+                const objs = (active as any).getObjects ? (active as any).getObjects() : [];
+                const snakeCount = objs.filter((o: any) => o.customType === "snake-path" || o.customType === "snake-corridor-path").length;
+                setMultiSnakePathCount(snakeCount);
+            } else {
+                setMultiSnakePathCount(0);
+            }
+        };
+        c.on("selection:created", updateMultiSnake);
+        c.on("selection:updated", updateMultiSnake);
+        c.on("selection:cleared", updateMultiSnake);
+
         updateSelectionStateRef.current();
 
         return () => {
             c.off("selection:created", handleSelection);
             c.off("selection:updated", handleSelection);
             c.off("selection:cleared", handleSelection);
+            c.off("selection:created", updateMultiSnake);
+            c.off("selection:updated", updateMultiSnake);
+            c.off("selection:cleared", updateMultiSnake);
         };
     }, [fabricCanvasRef, currentPageIndex, selectedObjectId]);
+
+    const handleFuseSnakePaths = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObjs = c.getActiveObjects ? c.getActiveObjects() : [];
+        if (activeObjs.length < 2) {
+            toast.error("Select 2 or more path segments to fuse.");
+            return;
+        }
+        const result = fuseSnakePathSegments(activeObjs, c);
+        if (!result) {
+            toast.error("Could not fuse selected elements. Ensure 2+ path segments are selected.");
+        } else {
+            toast.success("Path segments fused into a single continuous path!");
+            setMultiSnakePathCount(0);
+        }
+    };
 
     // Live Apply Handlers for all activity types
     const handleApplyWordSearchConfig = (newConfig: WordSearchConfig) => {
@@ -774,6 +949,32 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         }
     };
 
+    const handleApplySnakeMazeConfig = (newConfig: SnakePathMazeConfig) => {
+        setSnakeMazeConfig(newConfig);
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        let targetObj: any = activeObj;
+        while (targetObj && !targetObj.customType) {
+            if (targetObj.group) targetObj = targetObj.group;
+            else break;
+        }
+
+        const left = targetObj ? targetObj.left || 60 : 60;
+        const top = targetObj ? targetObj.top || 60 : 60;
+
+        const newGroup = generateSnakePathMazeObjectsFromConfig(newConfig);
+        newGroup.set({ left, top });
+
+        c.remove(targetObj || activeObj);
+        c.add(newGroup);
+        c.setActiveObject(newGroup);
+        c.requestRenderAll();
+        c.fire("object:modified");
+    };
+
     // Standard Canvas Actions
     const handleDuplicate = () => {
         const c = fabricCanvasRef.current;
@@ -1052,6 +1253,17 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         c.fire("object:modified");
     };
 
+    const handleGroup = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const count = handleGroupFabricObjects(c);
+        if (count > 0) {
+            toast.success(`Grouped ${count} selected elements together!`);
+        } else {
+            toast.error("Please select 2 or more elements to group!");
+        }
+    };
+
     const handleUngroup = () => {
         const c = fabricCanvasRef.current;
         if (!c) return;
@@ -1062,28 +1274,11 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         }
 
         if (activeObj.type === "group" || (activeObj as any)._objects) {
-            const group = activeObj as any;
-            if (typeof group.toActiveSelection === "function") {
-                const sel = group.toActiveSelection();
-                const count = sel ? sel.getObjects().length : 0;
-                c.discardActiveObject();
-                c.requestRenderAll();
-                c.fire("object:modified");
-                toast.success(`Ungrouped ${count} objects for individual editing!`);
+            const count = handleUngroupFabricGroup(activeObj, c);
+            if (count === -1) {
+                toast.info("Snake path corridors stay connected as a single component so the tube outline and fill never separate!");
             } else {
-                const items = [...(group._objects || group.getObjects())];
-                c.discardActiveObject();
-                c.remove(group);
-                items.forEach((item: any) => {
-                    delete item.group;
-                    item.group = undefined;
-                    c.add(item);
-                    item.set({ selectable: true, evented: true });
-                    item.setCoords();
-                });
-                c.requestRenderAll();
-                c.fire("object:modified");
-                toast.success(`Ungrouped ${items.length} objects for individual editing!`);
+                toast.success(`Ungrouped ${count} objects for individual editing!`);
             }
         } else if (activeObj.type === "activeSelection") {
             const selection = activeObj as fabric.ActiveSelection;
@@ -1097,13 +1292,265 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         }
     };
 
+    if (selectedObjectType === "activeSelection") {
+        return (
+            <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-4rem)] z-20 shadow-lg overflow-hidden">
+                <div className="h-11 px-4 border-b border-indigo-200 dark:border-indigo-800 flex items-center justify-between bg-indigo-50/80 dark:bg-indigo-950/40 shrink-0">
+                    <span className="font-extrabold text-xs uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                        Multi-Element Selection
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 rounded-full border border-indigo-400/30">
+                        Active Selection
+                    </span>
+                </div>
+
+                <div className="p-5 flex flex-col gap-4 overflow-y-auto">
+                    <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                                <Link2 className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200">Group Selected Objects</p>
+                                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 mt-0.5">Combine all currently highlighted canvas elements into a single movable, resizable group.</p>
+                            </div>
+                        </div>
+                        <Button
+                            className="w-full h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2"
+                            onClick={handleGroup}
+                        >
+                            <Link2 className="w-4 h-4" />
+                            Group Selected Elements
+                        </Button>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-600 dark:text-amber-400">
+                                <Unlink className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-amber-900 dark:text-amber-200">Deselect / Separate</p>
+                                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Release multi-selection and return to single element editing mode.</p>
+                            </div>
+                        </div>
+                        <Button
+                            variant="outline"
+                            className="w-full h-9 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
+                            onClick={handleUngroup}
+                        >
+                            <Unlink className="w-4 h-4" />
+                            Separate Selection
+                        </Button>
+                    </div>
+                </div>
+            </aside>
+        );
+    }
+
     if (!selectedObjectId || !selectedObjectProps) {
+
+        // When 2+ snake-path segments are multi-selected, show the Fuse panel
+        if (multiSnakePathCount >= 2) {
+            return (
+                <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-4rem)] z-20 shadow-lg overflow-hidden">
+                    {/* Fuse Panel Header */}
+                    <div className="h-11 px-4 border-b border-amber-200 dark:border-amber-800 flex items-center justify-between bg-amber-50/80 dark:bg-amber-950/40 shrink-0">
+                        <span className="font-extrabold text-xs uppercase tracking-wider text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                            <Link2 className="w-3.5 h-3.5" />
+                            Path Fuse Studio
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-full border border-amber-400/30">
+                            {multiSnakePathCount} selected
+                        </span>
+                    </div>
+
+                    {/* Fuse Action */}
+                    <div className="p-5 flex flex-col gap-4">
+                        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 bg-amber-500/20 rounded-lg">
+                                    <Link2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-amber-800 dark:text-amber-200">Fuse {multiSnakePathCount} Path Segments</p>
+                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Detects segment endpoints and chains them into one continuous path.</p>
+                                </div>
+                            </div>
+                            <Button
+                                className="w-full h-9 bg-amber-500 hover:bg-amber-400 text-white font-bold text-sm rounded-xl shadow-sm"
+                                onClick={handleFuseSnakePaths}
+                            >
+                                <Link2 className="w-4 h-4 mr-2" />
+                                Fuse into Single Path
+                            </Button>
+                        </div>
+
+                        <p className="text-[10px] text-slate-400 text-center leading-relaxed">
+                            After fusing, the result is a single selectable path tube. You can Shift+click to select multiple snake-path segments on the canvas.
+                        </p>
+                    </div>
+                </aside>
+            );
+        }
+
+        if (activeTool === "eraser") {
+            return (
+                <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-4rem)] z-20 shadow-lg overflow-hidden select-none">
+                    {/* Header */}
+                    <div className="h-11 px-4 border-b border-rose-200 dark:border-rose-900/50 flex items-center justify-between bg-rose-50/80 dark:bg-rose-950/40 shrink-0">
+                        <span className="font-extrabold text-xs uppercase tracking-wider text-rose-700 dark:text-rose-300 flex items-center gap-1.5">
+                            <Scissors className="w-3.5 h-3.5 text-rose-500" />
+                            Eraser Studio
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-rose-500/20 text-rose-700 dark:text-rose-300 rounded-full border border-rose-400/30 capitalize">
+                            {eraserMode} mode
+                        </span>
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                        {/* Erasing Mode Options */}
+                        <div className="space-y-2 p-3 bg-rose-50/60 dark:bg-rose-950/30 rounded-xl border border-rose-200 dark:border-rose-800/60">
+                            <Label className="text-xs font-bold text-rose-800 dark:text-rose-200">Select Erasing Mode</Label>
+                            <div className="grid grid-cols-1 gap-1.5">
+                                {[
+                                    { id: "brush", label: "🧹 Precision Brush Eraser", desc: "Drag freehand to erase lines, corridor tubes, or image areas" },
+                                    { id: "box", label: "⬛ Box / Area Erase", desc: "Drag a box to erase an entire rectangular zone" },
+                                    { id: "cutter", label: "✂️ Segment Cutter", desc: "Draw a cut line across paths to split segments" },
+                                    { id: "stroke", label: "🎯 Stroke Selector Erase", desc: "Click any line or stroke to delete just that segment" },
+                                ].map((mode) => (
+                                    <Button
+                                        key={mode.id}
+                                        size="sm"
+                                        variant={eraserMode === mode.id ? "default" : "outline"}
+                                        className={`h-auto py-2 px-2.5 justify-start text-left rounded-xl transition-all ${eraserMode === mode.id ? "bg-rose-600 text-white shadow-sm" : "bg-white dark:bg-slate-900 border-slate-200 text-slate-700 dark:text-slate-200"}`}
+                                        onClick={() => setEraserProps({ mode: mode.id as any })}
+                                    >
+                                        <div>
+                                            <p className="text-xs font-bold">{mode.label}</p>
+                                            <p className="text-[10px] opacity-85 mt-0.5">{mode.desc}</p>
+                                        </div>
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Tip Size Controls */}
+                        <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Eraser Tip Size</Label>
+                                <span className="text-xs font-mono font-bold text-rose-600 dark:text-rose-400">{eraserSize}px</span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-1.5">
+                                {[8, 16, 32, 64].map((sz) => (
+                                    <Button
+                                        key={sz}
+                                        size="sm"
+                                        variant={eraserSize === sz ? "default" : "outline"}
+                                        className={`h-7 text-xs font-bold ${eraserSize === sz ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                        onClick={() => setEraserProps({ size: sz })}
+                                    >
+                                        {sz}px
+                                    </Button>
+                                ))}
+                            </div>
+                            <Slider
+                                value={[eraserSize]}
+                                min={4}
+                                max={100}
+                                step={1}
+                                onValueChange={([val]) => setEraserProps({ size: val })}
+                            />
+                        </div>
+
+                        {/* Tip Shape */}
+                        <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Eraser Tip Shape</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button
+                                    size="sm"
+                                    variant={eraserShape === "round" ? "default" : "outline"}
+                                    className={`h-8 text-xs font-bold ${eraserShape === "round" ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                    onClick={() => setEraserProps({ shape: "round" })}
+                                >
+                                    ● Round Tip
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={eraserShape === "square" ? "default" : "outline"}
+                                    className={`h-8 text-xs font-bold ${eraserShape === "square" ? "bg-rose-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                    onClick={() => setEraserProps({ shape: "square" })}
+                                >
+                                    ■ Square Tip
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Merge & Lock Erased Cutouts Action */}
+                        <div className="space-y-2 p-3 bg-amber-50/80 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800">
+                            <Label className="text-xs font-extrabold text-amber-800 dark:text-amber-200 flex items-center gap-1.5">
+                                <Link2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Permanently Fuse Erased Cutouts
+                            </Label>
+                            <p className="text-[10px] text-amber-700 dark:text-amber-300 leading-relaxed">
+                                Combines white erased cutouts with underlying lines/shapes into a single locked object so erased gaps stay bound when moved or scaled.
+                            </p>
+                            <Button
+                                size="sm"
+                                className="w-full h-8 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow-sm"
+                                onClick={() => {
+                                    if (!fabricCanvasRef.current) return;
+                                    const count = mergeAndLockEraserMasks(fabricCanvasRef.current);
+                                    if (count > 0) {
+                                        toast.success(`Merged ${count} erased cutout areas into a single locked object!`);
+                                    } else {
+                                        toast.info("No active eraser cutouts found on canvas to merge.");
+                                    }
+                                }}
+                            >
+                                <Link2 className="w-3.5 h-3.5 mr-1" /> Merge & Lock Erased Gaps
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full h-7 text-[10px] font-bold border-rose-200 text-rose-700 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300"
+                                onClick={() => {
+                                    if (!fabricCanvasRef.current) return;
+                                    const count = clearAllEraserMasks(fabricCanvasRef.current);
+                                    if (count > 0) {
+                                        toast.success(`Cleared ${count} eraser cutouts and restored original lines.`);
+                                    } else {
+                                        toast.info("No eraser cutouts on canvas.");
+                                    }
+                                }}
+                            >
+                                <Trash2 className="w-3 h-3 mr-1" /> Restore Original Lines (Clear Eraser)
+                            </Button>
+                        </div>
+
+                        {/* Quick Action: Finish Erasing */}
+                        <Button
+                            size="sm"
+                            className="w-full h-9 bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 text-white font-bold text-xs rounded-xl shadow-sm"
+                            onClick={() => setActiveTool("select")}
+                        >
+                            Finish Erasing (Select Mode)
+                        </Button>
+                    </div>
+                </aside>
+            );
+        }
+
         return (
             <aside className="w-80 border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 flex flex-col items-center justify-center text-slate-400 text-center select-none z-20">
                 <Layers className="w-10 h-10 mb-2 opacity-40" />
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Object Inspector</span>
                 <p className="text-[11px] text-slate-400 mt-1 max-w-[200px]">
                     Select any element or puzzle on the canvas to open the property studio.
+                </p>
+                <p className="text-[10px] text-slate-400/60 mt-3 max-w-[200px]">
+                    💡 Shift+click multiple snake path segments, then use the <strong>Fuse</strong> button to merge them.
                 </p>
             </aside>
         );
@@ -1146,10 +1593,15 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                         ? "Cryptogram Studio"
                         : isCrackCodeSelected
                         ? "Crack Code Studio"
+                        : isBoardGameSelected
+                        ? "Board Game Studio"
                         : `${selectedObjectType || "Object"} Inspector`}
                 </span>
                 <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950" onClick={handleUngroup} title="Ungroup Objects for Individual Editing">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950" onClick={handleGroup} title="Group Selected Elements Together">
+                        <Link2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950" onClick={handleUngroup} title="Ungroup Objects for Individual Editing">
                         <Unlink className="w-3.5 h-3.5" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={handleToggleLock} title="Lock / Unlock Element">
@@ -1460,6 +1912,257 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                         <Checkbox
                             checked={!!codewordConfig.showAnswerKey}
                             onCheckedChange={(v) => handleApplyCodewordConfig({ ...codewordConfig, showAnswerKey: !!v })}
+                        />
+                    </div>
+                </div>
+            ) : isSnakeMazeSelected ? (
+                /* --- SNAKE PATH ACTIVITY MAZE STUDIO --- */
+                <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                    <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+                        <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 rounded-lg">
+                            <Route className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">Snake Path Maze Studio</h4>
+                            <p className="text-[10px] text-slate-500">Procedural path curves, custom item packs & answer keys</p>
+                        </div>
+                    </div>
+
+                    {/* 100 Pre-Drawn Path Template Gallery Button */}
+                    <Button
+                        size="sm"
+                        className="w-full h-9 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-sm"
+                        onClick={() => setIsGalleryModalOpen(true)}
+                    >
+                        <BookOpen className="w-4 h-4 mr-1.5" /> 100 Pre-Drawn Path Template Gallery
+                    </Button>
+
+                    {/* Pre-Drawn Path Template Dropdown Selector (#1 to #100) */}
+                    <div className="space-y-1">
+                        <Label className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Pick Pre-Drawn Path (#1 to #100)</Label>
+                        <Select
+                            value={String(snakeMazeConfig.selectedTemplateId || "")}
+                            onValueChange={(val) => {
+                                const templateId = parseInt(val);
+                                const tmpl = PRE_DRAWN_PATH_TEMPLATES_100.find((t) => t.id === templateId);
+                                if (tmpl) {
+                                    handleApplySnakeMazeConfig({
+                                        ...snakeMazeConfig,
+                                        selectedTemplateId: templateId,
+                                        pairCount: tmpl.pairCount,
+                                        pathVariation: tmpl.variation,
+                                        randomSeed: tmpl.seed,
+                                        targetMapping: tmpl.mapping,
+                                    });
+                                }
+                            }}
+                        >
+                            <SelectTrigger className="h-8 text-xs font-semibold">
+                                <SelectValue placeholder="Select Pre-Drawn Template..." />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-60">
+                                {PRE_DRAWN_PATH_TEMPLATES_100.map((tmpl) => (
+                                    <SelectItem key={tmpl.id} value={String(tmpl.id)} className="text-xs">
+                                        #{tmpl.id}: {tmpl.name.split(":")[1] || tmpl.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Quick Shuffle Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs font-bold border-indigo-200 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50"
+                            onClick={() => handleApplySnakeMazeConfig({
+                                ...snakeMazeConfig,
+                                randomSeed: Math.floor(Math.random() * 90000) + 100
+                            })}
+                        >
+                            <RefreshCw className="w-3.5 h-3.5 mr-1" /> Shuffle Paths
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs font-bold border-purple-200 text-purple-700 dark:text-purple-300 hover:bg-purple-50"
+                            onClick={() => {
+                                const p = snakeMazeConfig.pairCount || 4;
+                                const shuffled = Array.from({ length: p }, (_, i) => i).sort(() => Math.random() - 0.5);
+                                handleApplySnakeMazeConfig({
+                                    ...snakeMazeConfig,
+                                    targetMapping: shuffled,
+                                    randomSeed: Math.floor(Math.random() * 90000) + 100
+                                });
+                            }}
+                        >
+                            <Wand2 className="w-3.5 h-3.5 mr-1" /> Shuffle Targets
+                        </Button>
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Activity Title</Label>
+                        <Input
+                            value={snakeMazeConfig.title}
+                            onChange={(e) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, title: e.target.value })}
+                            className="h-8 text-xs font-semibold"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Instructions Header</Label>
+                        <Input
+                            value={snakeMazeConfig.instructions}
+                            onChange={(e) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, instructions: e.target.value })}
+                            className="h-8 text-xs"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div className="space-y-1">
+                            <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Theme Preset (10 Packs)</Label>
+                            <Select
+                                value={snakeMazeConfig.theme}
+                                onValueChange={(val: any) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, theme: val })}
+                            >
+                                <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="animals">🐍 Animals & Food</SelectItem>
+                                    <SelectItem value="abc">🔤 ABC Upper/Lower</SelectItem>
+                                    <SelectItem value="numbers">🔢 Numbers & Count</SelectItem>
+                                    <SelectItem value="colors">🎨 Colors & Objects</SelectItem>
+                                    <SelectItem value="fairytale">🏰 Fairytale Magic</SelectItem>
+                                    <SelectItem value="space">🚀 Space & Planets</SelectItem>
+                                    <SelectItem value="ocean">🐬 Ocean & Shells</SelectItem>
+                                    <SelectItem value="vehicles">🚗 Vehicles & Roads</SelectItem>
+                                    <SelectItem value="math">➕ Math Addition</SelectItem>
+                                    <SelectItem value="custom">✏️ Custom Items</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                            <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Path Style Curve</Label>
+                            <Select
+                                value={snakeMazeConfig.pathVariation || "standard"}
+                                onValueChange={(val: any) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, pathVariation: val })}
+                            >
+                                <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="standard">Smooth Curves</SelectItem>
+                                    <SelectItem value="dense_cross">Dense Criss-Cross</SelectItem>
+                                    <SelectItem value="zigzag_angles">Zigzag Angles</SelectItem>
+                                    <SelectItem value="wavy_s">Wavy S-Curves</SelectItem>
+                                    <SelectItem value="random_seed">Seeded Random</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* Custom Text Lists */}
+                    <div className="space-y-2 pt-1 p-2.5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Edit Items / Emojis to Find</Label>
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-slate-500 font-bold uppercase">Top Entrance Items (Comma Separated)</Label>
+                            <Input
+                                value={snakeMazeConfig.customTopText || ""}
+                                onChange={(e) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, theme: "custom", customTopText: e.target.value })}
+                                placeholder="🐍, 🐶, 🐱, 🐻"
+                                className="h-7 text-xs font-mono"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <Label className="text-[10px] text-slate-500 font-bold uppercase">Bottom Target Items (Comma Separated)</Label>
+                            <Input
+                                value={snakeMazeConfig.customBottomText || ""}
+                                onChange={(e) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, theme: "custom", customBottomText: e.target.value })}
+                                placeholder="🍎, 🍖, 🐟, 🍯"
+                                className="h-7 text-xs font-mono"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-1">
+                            <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Pair Count (2 to 6)</Label>
+                            <Select
+                                value={String(snakeMazeConfig.pairCount)}
+                                onValueChange={(val) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, pairCount: parseInt(val) })}
+                            >
+                                <SelectTrigger className="h-8 text-xs">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="2">2 Pairs (Easy)</SelectItem>
+                                    <SelectItem value="3">3 Pairs (Medium)</SelectItem>
+                                    <SelectItem value="4">4 Pairs (Standard)</SelectItem>
+                                    <SelectItem value="5">5 Pairs (Advanced)</SelectItem>
+                                    <SelectItem value="6">6 Pairs (Expert)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Icon Size Slider */}
+                        <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Icon / Text Size</Label>
+                                <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                    {snakeMazeConfig.iconSize || 36}px
+                                </span>
+                            </div>
+                            <Slider
+                                value={[snakeMazeConfig.iconSize || 36]}
+                                min={24}
+                                max={60}
+                                step={2}
+                                onValueChange={([val]) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, iconSize: val })}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Corridor Width Slider */}
+                    <div className="space-y-1.5 pt-1">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Corridor Tube Width</Label>
+                            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                {snakeMazeConfig.corridorWidth}px
+                            </span>
+                        </div>
+                        <Slider
+                            value={[snakeMazeConfig.corridorWidth]}
+                            min={12}
+                            max={40}
+                            step={2}
+                            onValueChange={([val]) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, corridorWidth: val })}
+                        />
+                    </div>
+
+                    {/* Show Entrance Badges Toggle */}
+                    <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div>
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Entrance Badges (①, ②, ③)</Label>
+                            <p className="text-[10px] text-slate-500">Number markers above path entrances</p>
+                        </div>
+                        <Checkbox
+                            checked={!!snakeMazeConfig.showBadges}
+                            onCheckedChange={(v) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, showBadges: !!v })}
+                        />
+                    </div>
+
+                    {/* Show Solution Answer Key Toggle */}
+                    <div className="flex items-center justify-between p-2.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                        <div>
+                            <Label className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block">Auto Solution Answer Key</Label>
+                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400">Show colored solution traces</p>
+                        </div>
+                        <Checkbox
+                            checked={!!snakeMazeConfig.showSolution}
+                            onCheckedChange={(v) => handleApplySnakeMazeConfig({ ...snakeMazeConfig, showSolution: !!v })}
                         />
                     </div>
                 </div>
@@ -1808,79 +2511,672 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                     <input
                                         type="color"
                                         value={wsConfig.appearance.gridBorderColor !== "transparent" ? wsConfig.appearance.gridBorderColor : "#cbd5e1"}
-                                        onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, gridBorderColor: e.target.value } }))}
-                                        className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
-                                    />
-                                    <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-400">{wsConfig.appearance.gridBorderColor || "#cbd5e1"}</span>
+                                    onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, gridBorderColor: e.target.value } }))}
+                                    className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
+                                />
                                 </div>
                             </div>
                         </TabsContent>
                     </div>
                 </Tabs>
+            ) : isBoardGameSelected ? (
+                /* --- BOARD GAME STUDIO INSPECTOR TABS --- */
+                <Tabs defaultValue="board" className="w-full flex-1 flex flex-col min-h-0">
+                    <TabsList className="grid grid-cols-3 h-10 m-3 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 shrink-0">
+                        <TabsTrigger value="board" className="text-xs font-bold rounded-lg">Board Track</TabsTrigger>
+                        <TabsTrigger value="theme" className="text-xs font-bold rounded-lg">Theme & Style</TabsTrigger>
+                        <TabsTrigger value="accessories" className="text-xs font-bold rounded-lg">Accessories</TabsTrigger>
+                    </TabsList>
+
+                    <div className="flex-1 overflow-y-auto px-4 pb-6 min-h-0">
+                        {/* TAB 1: BOARD TRACK & LAYOUT */}
+                        <TabsContent value="board" className="space-y-4 m-0">
+                            {/* Drawer Open Trigger Button */}
+                            <Button
+                                className="w-full h-9 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2"
+                                onClick={() => setIsBoardGameDrawerOpen(true)}
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                                Component & Template Drawer
+                            </Button>
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Board Title</Label>
+                                <Input
+                                    value={boardGameConfig.title}
+                                    onChange={(e) => handleApplyBoardGameConfig({ ...boardGameConfig, title: e.target.value })}
+                                    className="h-8 text-xs font-bold bg-slate-50 dark:bg-slate-800"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Subtitle / Instructions</Label>
+                                <Input
+                                    value={boardGameConfig.subtitle || ""}
+                                    onChange={(e) => handleApplyBoardGameConfig({ ...boardGameConfig, subtitle: e.target.value })}
+                                    className="h-8 text-xs bg-slate-50 dark:bg-slate-800"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Board Track Shape</Label>
+                                <Select
+                                    value={boardGameConfig.layout}
+                                    onValueChange={(val: BoardLayoutType) => handleApplyBoardGameConfig({ ...boardGameConfig, layout: val })}
+                                >
+                                    <SelectTrigger className="h-8 text-xs bg-slate-50 dark:bg-slate-800 capitalize font-bold">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="snake">🐍 Snake Winding Grid</SelectItem>
+                                        <SelectItem value="spiral">🌀 Inward Spiral Track</SelectItem>
+                                        <SelectItem value="circle">⭕ Perimeter Circle Ring</SelectItem>
+                                        <SelectItem value="race-track">🏎️ Speedway Oval Circuit</SelectItem>
+                                        <SelectItem value="treasure-map">🏴‍☠️ S-Winding Treasure Trail</SelectItem>
+                                        <SelectItem value="figure-eight">♾️ Figure-Eight Dual Loop</SelectItem>
+                                        <SelectItem value="hexagon-grid">⬡ Honeycomb Hexagon Grid</SelectItem>
+                                        <SelectItem value="linear">➖ Linear Straight Track</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-1 pt-1">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Total Game Spaces</Label>
+                                    <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400">{boardGameConfig.totalSpaces} spaces</span>
+                                </div>
+                                <Slider
+                                    value={[boardGameConfig.totalSpaces]}
+                                    min={10}
+                                    max={50}
+                                    step={1}
+                                    onValueChange={([val]) => handleApplyBoardGameConfig({ ...boardGameConfig, totalSpaces: val })}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Cell Space Shape</Label>
+                                <div className="grid grid-cols-4 gap-1">
+                                    {[
+                                        { id: "rounded", label: "Rounded" },
+                                        { id: "circle", label: "Circle" },
+                                        { id: "square", label: "Square" },
+                                        { id: "diamond", label: "Diamond" },
+                                    ].map((s) => (
+                                        <Button
+                                            key={s.id}
+                                            size="sm"
+                                            variant={boardGameConfig.cellShape === s.id ? "default" : "outline"}
+                                            className={`h-7 text-[10px] font-bold ${boardGameConfig.cellShape === s.id ? "bg-amber-600 text-white" : ""}`}
+                                            onClick={() => handleApplyBoardGameConfig({ ...boardGameConfig, cellShape: s.id as any })}
+                                        >
+                                            {s.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* TAB 2: THEME & STYLES */}
+                        <TabsContent value="theme" className="space-y-3 m-0">
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Preset Theme Palette</Label>
+                            <div className="grid grid-cols-1 gap-2">
+                                {Object.values(BOARD_GAME_THEMES).map((t) => (
+                                    <button
+                                        key={t.id}
+                                        className={`p-2.5 rounded-xl border text-left flex items-center justify-between transition-all ${boardGameConfig.theme === t.id ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 ring-2 ring-amber-400" : "border-slate-200 dark:border-slate-800 hover:bg-slate-50"}`}
+                                        onClick={() => handleApplyBoardGameConfig({ ...boardGameConfig, theme: t.id })}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg">{t.icon}</span>
+                                            <div>
+                                                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{t.name}</p>
+                                                <p className="text-[10px] text-slate-500">Custom theme colors & badges</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {t.normalColors.slice(0, 3).map((c, i) => (
+                                                <span key={i} className="w-3.5 h-3.5 rounded-full border border-slate-300" style={{ backgroundColor: c }} />
+                                            ))}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </TabsContent>
+
+                        {/* TAB 3: PRINTABLE ACCESSORIES */}
+                        <TabsContent value="accessories" className="space-y-3 m-0">
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 block">Insert Companion Accessories</Label>
+                            <p className="text-[11px] text-slate-500 leading-relaxed">
+                                Add printable foldout dice, pie spinners, question card sheets, and player token stands directly onto your worksheet page!
+                            </p>
+                            <div className="grid grid-cols-1 gap-2 pt-1">
+                                <Button size="sm" variant="outline" className="h-9 font-bold text-xs justify-start border-amber-300 bg-amber-50/50 hover:bg-amber-100 text-amber-900 dark:text-amber-200" onClick={() => { const c = fabricCanvasRef.current; if (c) { const d = generatePrintableDiceGroup(); c.add(d); c.setActiveObject(d); c.requestRenderAll(); } }}>
+                                    🎲 Insert Printable Foldout D6 Die
+                                </Button>
+                                <Button size="sm" variant="outline" className="h-9 font-bold text-xs justify-start border-amber-300 bg-amber-50/50 hover:bg-amber-100 text-amber-900 dark:text-amber-200" onClick={() => { const c = fabricCanvasRef.current; if (c) { const s = generatePrintableSpinnerGroup(); c.add(s); c.setActiveObject(s); c.requestRenderAll(); } }}>
+                                    🎯 Insert Printable Pie Spinner
+                                </Button>
+                                <Button size="sm" variant="outline" className="h-9 font-bold text-xs justify-start border-amber-300 bg-amber-50/50 hover:bg-amber-100 text-amber-900 dark:text-amber-200" onClick={() => { const c = fabricCanvasRef.current; if (c) { const cd = generatePrintableCardsGroup(); c.add(cd); c.setActiveObject(cd); c.requestRenderAll(); } }}>
+                                    🃏 Insert Printable Game Task Cards
+                                </Button>
+                                <Button size="sm" variant="outline" className="h-9 font-bold text-xs justify-start border-amber-300 bg-amber-50/50 hover:bg-amber-100 text-amber-900 dark:text-amber-200" onClick={() => { const c = fabricCanvasRef.current; if (c) { const tk = generatePrintableTokensGroup(); c.add(tk); c.setActiveObject(tk); c.requestRenderAll(); } }}>
+                                    👑 Insert Player Tokens
+                                </Button>
+                            </div>
+                        </TabsContent>
+                    </div>
+                </Tabs>
             ) : (
-                /* --- STANDARD ELEMENT PROPERTIES --- */
-                <div className="p-4 space-y-4 flex-1 overflow-y-auto">
-                    {/* Font Family Selector for Text Objects */}
-                    {selectedObjectProps && (selectedObjectType === "i-text" || selectedObjectType === "text") && (
-                        <div className="space-y-1 p-2 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                            <Label className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300">Font Family</Label>
-                            <Select
-                                value={selectedObjectProps.fontFamily || "Inter"}
-                                onValueChange={(v) => {
+                /* --- STANDARD & DRAWING ELEMENT PROPERTIES --- */
+                <div className="p-4 space-y-5 flex-1 overflow-y-auto">
+                    {/* Dedicated Multi-Line Text & Typography Inspector for Text & Grouped Text Objects */}
+                    {selectedObjectProps && (selectedObjectType === "i-text" || selectedObjectType === "text" || typeof selectedObjectProps.text === "string") && (
+                        <div className="space-y-3 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                            <Label className="text-xs font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
+                                <Type className="w-3.5 h-3.5 text-indigo-500" /> Multi-Line Text & Typography
+                            </Label>
+
+                            {/* Inline Multi-Line Text Editor */}
+                            <div className="space-y-1">
+                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Content (Multi-Line)</Label>
+                                <Textarea
+                                    value={selectedObjectProps.text || ""}
+                                    onChange={(e) => updateActiveObjectProperty({ text: e.target.value })}
+                                    className="text-xs font-sans h-20 bg-white dark:bg-slate-900 resize-y"
+                                    placeholder="Type your multi-line text here..."
+                                />
+                            </div>
+
+                            {/* Font Family Selector */}
+                            <div className="space-y-1">
+                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Family</Label>
+                                <Select
+                                    value={selectedObjectProps.fontFamily || "Inter"}
+                                    onValueChange={(v) => updateActiveObjectProperty({ fontFamily: v })}
+                                >
+                                    <SelectTrigger className="h-8 text-xs bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Inter">Inter</SelectItem>
+                                        <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
+                                        <SelectItem value="Courier New">Courier New</SelectItem>
+                                        <SelectItem value="Comic Sans MS">Comic Sans</SelectItem>
+                                        <SelectItem value="Georgia">Georgia</SelectItem>
+                                        <SelectItem value="Arial">Arial</SelectItem>
+                                        <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                                        {customFonts.map((f) => (
+                                            <SelectItem key={f.id} value={f.fontFamily}>
+                                                ✨ {f.fontFamily} (Custom)
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Font Size & Line Height Sliders */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Size</Label>
+                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{selectedObjectProps.fontSize || 18}px</span>
+                                    </div>
+                                    <Slider
+                                        value={[selectedObjectProps.fontSize || 18]}
+                                        min={8}
+                                        max={120}
+                                        step={1}
+                                        onValueChange={([val]) => updateActiveObjectProperty({ fontSize: val })}
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Line Spacing</Label>
+                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{(selectedObjectProps.lineHeight || 1.2).toFixed(1)}</span>
+                                    </div>
+                                    <Slider
+                                        value={[selectedObjectProps.lineHeight || 1.2]}
+                                        min={0.8}
+                                        max={2.5}
+                                        step={0.1}
+                                        onValueChange={([val]) => updateActiveObjectProperty({ lineHeight: val })}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Text Alignment */}
+                            <div className="space-y-1 pt-1">
+                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Alignment</Label>
+                                <div className="grid grid-cols-3 gap-1">
+                                    {[
+                                        { id: "left", label: "Left" },
+                                        { id: "center", label: "Center" },
+                                        { id: "right", label: "Right" },
+                                    ].map((align) => (
+                                        <Button
+                                            key={align.id}
+                                            variant="outline"
+                                            size="sm"
+                                            className={`h-7 text-[10px] font-bold ${selectedObjectProps.textAlign === align.id ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                            onClick={() => updateActiveObjectProperty({ textAlign: align.id })}
+                                        >
+                                            {align.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 1. COLOR & INK CONTROLS */}
+                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <Palette className="w-3.5 h-3.5 text-indigo-500" /> Color & Ink Settings
+                        </Label>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Stroke / Line Color */}
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Stroke / Line</span>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                        onChange={(e) => updateActiveObjectProperty({ stroke: e.target.value })}
+                                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
+                                    />
+                                    <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-400 truncate">
+                                        {typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Fill Color */}
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Fill Color</span>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="color"
+                                        value={typeof selectedObjectProps?.fill === "string" && selectedObjectProps.fill !== "transparent" ? selectedObjectProps.fill : "#ffffff"}
+                                        onChange={(e) => updateActiveObjectProperty({ fill: e.target.value })}
+                                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className={`h-8 text-[10px] font-bold px-2 ${selectedObjectProps?.fill === "transparent" || !selectedObjectProps?.fill ? "bg-indigo-50 border-indigo-300 text-indigo-600" : ""}`}
+                                        onClick={() => updateActiveObjectProperty({ fill: "transparent" })}
+                                        title="Clear Fill Color (Transparent)"
+                                    >
+                                        None
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quick Palette Swatches */}
+                        <div className="flex items-center gap-1.5 pt-1">
+                            {["#0f172a", "#2563eb", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#000000", "#ffffff"].map((colorHex) => (
+                                <button
+                                    key={colorHex}
+                                    className="w-5 h-5 rounded-full border border-slate-300 hover:scale-125 transition-transform shadow-xs"
+                                    style={{ backgroundColor: colorHex }}
+                                    onClick={() => {
+                                        const c = fabricCanvasRef.current;
+                                        if (!c) return;
+                                        const activeObj = c.getActiveObject();
+                                        if (activeObj) {
+                                            if (activeObj.stroke || activeObj.type === "path" || activeObj.type === "line") {
+                                                updateActiveObjectProperty({ stroke: colorHex });
+                                            } else {
+                                                updateActiveObjectProperty({ fill: colorHex });
+                                            }
+                                        }
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 2. STROKE THICKNESS & PATTERNS */}
+                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center justify-between">
+                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Line Thickness</Label>
+                            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                {selectedObjectProps?.strokeWidth || 1}px
+                            </span>
+                        </div>
+                        <Slider
+                            value={[selectedObjectProps?.strokeWidth || 1]}
+                            min={1}
+                            max={60}
+                            step={1}
+                            onValueChange={([val]) => updateActiveObjectProperty({ strokeWidth: val })}
+                        />
+
+                        {/* Dash Patterns */}
+                        <div className="space-y-1 pt-1">
+                            <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Line Pattern</Label>
+                            <div className="grid grid-cols-4 gap-1">
+                                {[
+                                    { label: "Solid", value: null },
+                                    { label: "Dashed", value: [8, dashGap] },
+                                    { label: "Dotted", value: [3, dashGap] },
+                                    { label: "Long Dash", value: [16, dashGap] },
+                                ].map((dash) => (
+                                    <Button
+                                        key={dash.label}
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-7 text-[10px] font-bold px-1"
+                                        onClick={() => updateActiveObjectProperty({ strokeDashArray: dash.value })}
+                                    >
+                                        {dash.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Dash & Dot Gap Spacing Slider */}
+                        <div className="space-y-1 pt-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Dash & Dot Spacing / Gap</Label>
+                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                    {Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
+                                        ? selectedObjectProps.strokeDashArray[1]
+                                        : dashGap}px
+                                </span>
+                            </div>
+                            <Slider
+                                value={[
+                                    Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
+                                        ? selectedObjectProps.strokeDashArray[1]
+                                        : dashGap,
+                                ]}
+                                min={2}
+                                max={40}
+                                step={1}
+                                onValueChange={([gapVal]) => {
+                                    setDashGap(gapVal);
                                     const c = fabricCanvasRef.current;
                                     if (!c) return;
                                     const activeObj = c.getActiveObject();
                                     if (activeObj) {
-                                        activeObj.set({ fontFamily: v });
+                                        const currentDash = Array.isArray(activeObj.strokeDashArray) && activeObj.strokeDashArray.length > 0
+                                            ? activeObj.strokeDashArray[0]
+                                            : 8;
+                                        updateActiveObjectProperty({ strokeDashArray: [currentDash, gapVal] });
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {/* Opacity Slider */}
+                        <div className="space-y-1 pt-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Opacity / Transparency</Label>
+                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                    {Math.round((selectedObjectProps?.opacity ?? 1) * 100)}%
+                                </span>
+                            </div>
+                            <Slider
+                                value={[(selectedObjectProps?.opacity ?? 1) * 100]}
+                                min={10}
+                                max={100}
+                                step={5}
+                                onValueChange={([val]) => {
+                                    const opacityVal = val / 100;
+                                    updateActiveObjectProperty({ opacity: opacityVal });
+                                    if (selectedObjectProps) {
+                                        selectedObjectProps.opacity = opacityVal;
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* 3. DIMENSIONS & TRANSFORM CONTROLS */}
+                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <Maximize2 className="w-3.5 h-3.5 text-indigo-500" /> Size & Rotation
+                        </Label>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="space-y-1">
+                                <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Width (px)</Label>
+                                <Input
+                                    type="number"
+                                    value={Math.round((selectedObjectProps?.width || 100) * (selectedObjectProps?.scaleX || 1))}
+                                    onChange={(e) => {
+                                        const c = fabricCanvasRef.current;
+                                        if (!c) return;
+                                        const activeObj = c.getActiveObject();
+                                        if (activeObj && activeObj.width) {
+                                            const newW = parseFloat(e.target.value) || 10;
+                                            activeObj.set({ scaleX: newW / activeObj.width });
+                                            c.requestRenderAll();
+                                            c.fire("object:modified");
+                                        }
+                                    }}
+                                    className="h-8 text-xs font-mono font-bold"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Height (px)</Label>
+                                <Input
+                                    type="number"
+                                    value={Math.round((selectedObjectProps?.height || 100) * (selectedObjectProps?.scaleY || 1))}
+                                    onChange={(e) => {
+                                        const c = fabricCanvasRef.current;
+                                        if (!c) return;
+                                        const activeObj = c.getActiveObject();
+                                        if (activeObj && activeObj.height) {
+                                            const newH = parseFloat(e.target.value) || 10;
+                                            activeObj.set({ scaleY: newH / activeObj.height });
+                                            c.requestRenderAll();
+                                            c.fire("object:modified");
+                                        }
+                                    }}
+                                    className="h-8 text-xs font-mono font-bold"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Rotation Control */}
+                        <div className="space-y-1 pt-1">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                    <RotateCw className="w-3 h-3 text-indigo-500" /> Rotation Angle
+                                </Label>
+                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                    {Math.round(selectedObjectProps?.angle || 0)}°
+                                </span>
+                            </div>
+                            <Slider
+                                value={[Math.round(selectedObjectProps?.angle || 0)]}
+                                min={0}
+                                max={360}
+                                step={1}
+                                onValueChange={([val]) => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        activeObj.set({ angle: val });
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }
+                                }}
+                            />
+                        </div>
+
+                        {/* Flip Controls */}
+                        <div className="flex items-center gap-2 pt-1">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-8 text-xs font-bold gap-1"
+                                onClick={() => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        activeObj.set({ flipX: !activeObj.flipX });
                                         c.requestRenderAll();
                                         c.fire("object:modified");
                                     }
                                 }}
                             >
-                                <SelectTrigger className="h-8 text-xs bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Inter">Inter</SelectItem>
-                                    <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
-                                    <SelectItem value="Courier New">Courier New</SelectItem>
-                                    <SelectItem value="Comic Sans MS">Comic Sans</SelectItem>
-                                    <SelectItem value="Georgia">Georgia</SelectItem>
-                                    <SelectItem value="Arial">Arial</SelectItem>
-                                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                                    {customFonts.map((f) => (
-                                        <SelectItem key={f.id} value={f.fontFamily}>
-                                            ✨ {f.fontFamily} (Custom)
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    )}
+                                <FlipHorizontal className="w-3.5 h-3.5" /> Flip Horiz
+                            </Button>
 
-                    <div className="space-y-3">
-                        <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Color & Fill</Label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <div>
-                                <span className="text-[10px] text-slate-500 font-semibold block mb-1">Fill Color</span>
-                                <input
-                                    type="color"
-                                    value={typeof selectedObjectProps?.fill === "string" ? selectedObjectProps.fill : "#0f172a"}
-                                    onChange={(e) => {
-                                        const c = fabricCanvasRef.current;
-                                        if (!c) return;
-                                        const activeObj = c.getActiveObject();
-                                        if (activeObj) {
-                                            activeObj.set({ fill: e.target.value });
-                                            c.requestRenderAll();
-                                            c.fire("object:modified");
-                                        }
-                                    }}
-                                    className="w-full h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
-                                />
-                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 h-8 text-xs font-bold gap-1"
+                                onClick={() => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        activeObj.set({ flipY: !activeObj.flipY });
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }
+                                }}
+                            >
+                                <FlipVertical className="w-3.5 h-3.5" /> Flip Vert
+                            </Button>
                         </div>
                     </div>
+
+                    {/* 4. LAYERING & ORDERING CONTROLS */}
+                    <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5 text-indigo-500" /> Layer Arrangement
+                        </Label>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs font-semibold justify-start gap-1.5"
+                                onClick={() => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        if ((c as any).bringObjectToFront) (c as any).bringObjectToFront(activeObj);
+                                        else if ((c as any).bringToFront) (c as any).bringToFront(activeObj);
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                        toast.success("Brought to front");
+                                    }
+                                }}
+                            >
+                                <ArrowUp className="w-3.5 h-3.5 text-indigo-500" /> Bring to Front
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-xs font-semibold justify-start gap-1.5"
+                                onClick={() => {
+                                    const c = fabricCanvasRef.current;
+                                    if (!c) return;
+                                    const activeObj = c.getActiveObject();
+                                    if (activeObj) {
+                                        if ((c as any).sendObjectToBack) (c as any).sendObjectToBack(activeObj);
+                                        else if ((c as any).sendToBack) (c as any).sendToBack(activeObj);
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                        toast.success("Sent to back");
+                                    }
+                                }}
+                            >
+                                <ArrowDown className="w-3.5 h-3.5 text-indigo-500" /> Send to Back
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* 5. PATH SEGMENT FUSE CONTROL (Under Layer Arrangement - greyed out unless 2+ selected) */}
+                    {(() => {
+                        const activeObjs = fabricCanvasRef.current ? fabricCanvasRef.current.getActiveObjects() : [];
+                        const count = activeObjs.length;
+                        const canFuse = count >= 2 || selectedObjectType === "activeSelection" || selectedObjectType === "active-selection";
+
+                        return (
+                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                                        <Link2 className="w-3.5 h-3.5 text-amber-500" /> Path Segment Fuse
+                                    </Label>
+                                    {canFuse ? (
+                                        <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-full border border-amber-400/30">
+                                            Ready ({count > 0 ? count : "2+"} Selected)
+                                        </span>
+                                    ) : (
+                                        <span className="text-[10px] font-medium text-slate-400">
+                                            Requires 2+ Selected
+                                        </span>
+                                    )}
+                                </div>
+                                <Button
+                                    size="sm"
+                                    disabled={!canFuse}
+                                    className={`w-full h-9 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 ${
+                                        canFuse
+                                            ? "bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/20 cursor-pointer"
+                                            : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50"
+                                    }`}
+                                    onClick={handleFuseSnakePaths}
+                                    title={
+                                        canFuse
+                                            ? "Fuse selected path segments into one continuous path tube"
+                                            : "Select 2 or more path segments on the canvas to enable Fuse"
+                                    }
+                                >
+                                    <Link2 className="w-4 h-4" />
+                                    Fuse Path Segments
+                                </Button>
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
+
+            {/* 100 PRE-DRAWN PATH TEMPLATE GALLERY MODAL */}
+            <SnakePathGalleryModal
+                isOpen={isGalleryModalOpen}
+                onClose={() => setIsGalleryModalOpen(false)}
+                currentTemplateId={snakeMazeConfig.selectedTemplateId}
+                onSelectTemplate={(tmpl) => {
+                    handleApplySnakeMazeConfig({
+                        ...snakeMazeConfig,
+                        selectedTemplateId: tmpl.id,
+                        pairCount: tmpl.pairCount,
+                        pathVariation: tmpl.variation,
+                        randomSeed: tmpl.seed,
+                        targetMapping: tmpl.mapping,
+                    });
+                    toast.success(`Applied Pre-Drawn Path Maze #${tmpl.id}!`);
+                }}
+                onSelectSegment={(seg) => {
+                    const c = fabricCanvasRef.current;
+                    if (!c) return;
+                    const pathGrp = createSingleSnakePathFromSegment(seg);
+                    c.add(pathGrp);
+                    c.setActiveObject(pathGrp);
+                    c.requestRenderAll();
+                    c.fire("object:modified");
+                    toast.success(`Inserted Single Pre-Drawn Path Segment #${seg.id}!`);
+                }}
+            />
+            <WorksheetBoardGameDrawer
+                isOpen={isBoardGameDrawerOpen}
+                onClose={() => setIsBoardGameDrawerOpen(false)}
+                fabricCanvasRef={fabricCanvasRef}
+                onApplyTemplateConfig={handleApplyBoardGameConfig}
+            />
         </aside>
     );
 };

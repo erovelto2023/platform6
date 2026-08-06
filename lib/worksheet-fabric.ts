@@ -11,6 +11,15 @@ import {
     solveAndGenerateCrossword,
     createDefaultCrosswordConfig
 } from "./crossword-engine";
+import {
+    BoardGameConfig,
+    BoardGameSpace,
+    BOARD_GAME_THEMES,
+    SPACE_TYPE_METADATA,
+    computeBoardGameSpacePositions,
+    generateDefaultSpacesForConfig,
+    createDefaultBoardGameConfig,
+} from "./board-game-engine";
 
 export const CUSTOM_PUZZLE_PROPS = [
     "customType",
@@ -57,10 +66,26 @@ export function getSvgPathFromFreehandStroke(stroke: number[][]): string {
     return d.join(" ");
 }
 
+export function getCenterlineSvgPath(points: { x: number; y: number }[]): string {
+    if (points.length < 2) return "";
+    if (points.length === 2) {
+        return `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+    }
+
+    const pathData: string[] = [`M ${points[0].x} ${points[0].y}`];
+    for (let i = 1; i < points.length - 1; i++) {
+        const xc = (points[i].x + points[i + 1].x) / 2;
+        const yc = (points[i].y + points[i + 1].y) / 2;
+        pathData.push(`Q ${points[i].x} ${points[i].y} ${xc} ${yc}`);
+    }
+    pathData.push(`L ${points[points.length - 1].x} ${points[points.length - 1].y}`);
+    return pathData.join(" ");
+}
+
 export function createFreehandPath(
     points: { x: number; y: number; pressure?: number }[],
     options: { size?: number; color?: string; thinning?: number; smoothing?: number; style?: string; opacity?: number } = {}
-): fabric.Path | null {
+): fabric.FabricObject | null {
     if (points.length < 2) return null;
     const inputPoints = points.map((p) => [p.x, p.y, p.pressure ?? 0.5]);
 
@@ -100,6 +125,50 @@ export function createFreehandPath(
     } else if (options.style === "neon") {
         thinning = 0.1;
         opacity = 1.0;
+    }
+
+    if (options.style === "snake") {
+        const centerSvg = getCenterlineSvgPath(points);
+        if (!centerSvg) return null;
+
+        const totalWidth = Math.max(options.size || 24, 12);
+        const borderWidth = 2;
+        const innerWidth = Math.max(totalWidth - (borderWidth * 2), 4);
+
+        // White background mask creates clean space when lines overlap
+        const maskPath = new fabric.Path(centerSvg, {
+            fill: "transparent",
+            stroke: "#ffffff",
+            strokeWidth: totalWidth + 8,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        // Outer dark border along open centerline
+        const outerBorderPath = new fabric.Path(centerSvg, {
+            fill: "transparent",
+            stroke: options.color || "#000000",
+            strokeWidth: totalWidth,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        // Inner white corridor stroke erases center & leaves ends 100% OPEN!
+        const innerWhitePath = new fabric.Path(centerSvg, {
+            fill: "transparent",
+            stroke: "#ffffff",
+            strokeWidth: innerWidth,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        const grp = new fabric.Group([maskPath, outerBorderPath, innerWhitePath], {
+            opacity: opacity,
+            selectable: true,
+            subTargetCheck: true,
+        });
+        (grp as any).customType = "snake-path";
+        return grp;
     }
 
     const stroke = getStroke(inputPoints, {
@@ -2089,6 +2158,37 @@ export function createLineToolObject(type: string): fabric.FabricObject {
         case "spiral":
             return new fabric.Path("M 50 50 m -10 0 a 10 10 0 1 0 20 0 a 20 20 0 1 0 -40 0 a 30 30 0 1 0 60 0 a 40 40 0 1 0 -80 0", defaultProps);
 
+        case "snake-line": {
+            const pathD = "M 0 0 C 40 -70 80 70 120 -70 C 160 70 200 -70 240 0";
+            const maskPath = new fabric.Path(pathD, {
+                fill: "transparent",
+                stroke: "#ffffff",
+                strokeWidth: 32,
+                strokeLineCap: "butt",
+                strokeLineJoin: "round",
+            });
+            const outerPath = new fabric.Path(pathD, {
+                fill: "transparent",
+                stroke: "#000000",
+                strokeWidth: 24,
+                strokeLineCap: "butt",
+                strokeLineJoin: "round",
+            });
+            const innerPath = new fabric.Path(pathD, {
+                fill: "transparent",
+                stroke: "#ffffff",
+                strokeWidth: 20,
+                strokeLineCap: "butt",
+                strokeLineJoin: "round",
+            });
+            const grp = new fabric.Group([maskPath, outerPath, innerPath], {
+                selectable: true,
+                subTargetCheck: true,
+            });
+            (grp as any).customType = "snake-line";
+            return grp;
+        }
+
         default:
             return new fabric.Line([0, 0, 160, 0], defaultProps);
     }
@@ -2213,6 +2313,1694 @@ export async function registerCustomFontFace(fontFamily: string, dataUrl: string
         return false;
     }
 }
+
+export function handleGroupFabricObjects(canvas: fabric.Canvas): number {
+    if (!canvas) return 0;
+    const activeObj = canvas.getActiveObject();
+    if (!activeObj) return 0;
+
+    // 1. If user has an active multi-selection (Shift-click or drag-selected multiple items)
+    if (activeObj.type === "activeSelection") {
+        if (typeof (activeObj as any).toGroup === "function") {
+            const group = (activeObj as any).toGroup();
+            if (group) {
+                group.set({
+                    subTargetCheck: true,
+                    interactive: true,
+                });
+                canvas.setActiveObject(group);
+                canvas.requestRenderAll();
+                canvas.fire("object:modified");
+                return typeof group.getObjects === "function" ? group.getObjects().length : 2;
+            }
+        } else {
+            const selection = activeObj as fabric.ActiveSelection;
+            const objects = [...selection.getObjects()];
+            if (objects.length >= 2) {
+                canvas.discardActiveObject();
+                objects.forEach((obj) => canvas.remove(obj));
+
+                const group = new fabric.Group(objects, {
+                    subTargetCheck: true,
+                    interactive: true,
+                });
+
+                canvas.add(group);
+                canvas.setActiveObject(group);
+                canvas.requestRenderAll();
+                canvas.fire("object:modified");
+                return objects.length;
+            }
+        }
+    }
+
+    // 2. Smart Proximity & Overlap Grouping
+    // If user clicked 1 object (e.g. text, shape, or background tile), find all overlapping objects under/over it!
+    const targetRect = activeObj.getBoundingRect();
+    const overlappingObjs = canvas.getObjects().filter((obj) => {
+        if (obj === activeObj) return false;
+        if ((obj as any).isGridLine || (obj as any).customType === "eraser-mask") return false;
+
+        const r = obj.getBoundingRect();
+        return !(
+            r.left > targetRect.left + targetRect.width ||
+            r.left + r.width < targetRect.left ||
+            r.top > targetRect.top + targetRect.height ||
+            r.top + r.height < targetRect.top
+        );
+    });
+
+    if (overlappingObjs.length > 0) {
+        const objectsToGroup = [activeObj, ...overlappingObjs];
+        canvas.discardActiveObject();
+        objectsToGroup.forEach((obj) => canvas.remove(obj));
+
+        const group = new fabric.Group(objectsToGroup, {
+            subTargetCheck: true,
+            interactive: true,
+        });
+
+        canvas.add(group);
+        canvas.setActiveObject(group);
+        canvas.requestRenderAll();
+        canvas.fire("object:modified");
+        return objectsToGroup.length;
+    }
+
+    return 0;
+}
+
+export function handleUngroupFabricGroup(group: any, canvas: fabric.Canvas): number {
+    if (!group || !canvas) return 0;
+
+    // Snake corridor tubes should stay connected as 1 single unified component!
+    if (group.customType === "snake-corridor-path" || group.customType === "snake-path") {
+        return -1;
+    }
+
+    const items = typeof group.getObjects === "function" ? [...group.getObjects()] : [...(group._objects || [])];
+    if (items.length === 0) return 0;
+
+    const matrix = group.calcTransformMatrix ? group.calcTransformMatrix() : [1, 0, 0, 1, group.left || 0, group.top || 0];
+
+    canvas.discardActiveObject();
+    canvas.remove(group);
+
+    items.forEach((item: any) => {
+        const pt = fabric.util.transformPoint(
+            { x: item.left || 0, y: item.top || 0 },
+            matrix
+        );
+
+        delete item.group;
+        item.group = undefined;
+
+        item.set({
+            left: pt.x,
+            top: pt.y,
+            scaleX: (item.scaleX || 1) * (group.scaleX || 1),
+            scaleY: (item.scaleY || 1) * (group.scaleY || 1),
+            angle: (item.angle || 0) + (group.angle || 0),
+            selectable: true,
+            evented: true,
+        });
+
+        item.setCoords();
+        canvas.add(item);
+    });
+
+    canvas.requestRenderAll();
+    canvas.fire("object:modified");
+    return items.length;
+}
+
+/**
+ * Parse the start and end points of a simple SVG path string.
+ */
+function getPathEndpoints(d: string): { start: { x: number; y: number }; end: { x: number; y: number } } {
+    const tokens = d.trim().split(/[\s,]+/).filter(Boolean);
+    let currentX = 0, currentY = 0;
+    let startX = 0, startY = 0;
+    let i = 0;
+    let firstPoint = true;
+
+    while (i < tokens.length) {
+        const cmd = tokens[i];
+        if (/^[MmLlCcQqTtSsAaZz]$/.test(cmd)) {
+            i++;
+            if (cmd === "M" || cmd === "m") {
+                const x = parseFloat(tokens[i] || "0");
+                const y = parseFloat(tokens[i + 1] || "0");
+                i += 2;
+                currentX = cmd === "M" ? x : currentX + x;
+                currentY = cmd === "M" ? y : currentY + y;
+                if (firstPoint) { startX = currentX; startY = currentY; firstPoint = false; }
+            } else if (cmd === "L" || cmd === "l") {
+                const x = parseFloat(tokens[i] || "0");
+                const y = parseFloat(tokens[i + 1] || "0");
+                i += 2;
+                currentX = cmd === "L" ? x : currentX + x;
+                currentY = cmd === "L" ? y : currentY + y;
+            } else if (cmd === "C" || cmd === "c") {
+                const ex = parseFloat(tokens[i + 4] || "0");
+                const ey = parseFloat(tokens[i + 5] || "0");
+                i += 6;
+                currentX = cmd === "C" ? ex : currentX + ex;
+                currentY = cmd === "C" ? ey : currentY + ey;
+            } else if (cmd === "Q" || cmd === "q") {
+                const ex = parseFloat(tokens[i + 2] || "0");
+                const ey = parseFloat(tokens[i + 3] || "0");
+                i += 4;
+                currentX = cmd === "Q" ? ex : currentX + ex;
+                currentY = cmd === "Q" ? ey : currentY + ey;
+            } else {
+                // Z or unknown
+            }
+        } else if (!isNaN(parseFloat(cmd))) {
+            // Implicit lineto
+            const x = parseFloat(tokens[i]);
+            const y = parseFloat(tokens[i + 1] || "0");
+            i += 2;
+            currentX = x; currentY = y;
+        } else {
+            i++;
+        }
+    }
+
+    return { start: { x: startX, y: startY }, end: { x: currentX, y: currentY } };
+}
+
+function _fuseDist(a: { x: number; y: number }, b: { x: number; y: number }): number {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+/**
+ * Fuse multiple path, group, or line objects into a single unified snake-path tube.
+ * Chains segments by detecting nearest endpoint pairs and transforming local coords to absolute canvas space.
+ */
+export function fuseSnakePathSegments(
+    groups: any[],
+    canvas: fabric.Canvas,
+    options: { width?: number; color?: string } = {}
+): fabric.Group | null {
+    if (!groups || groups.length < 2) return null;
+
+    const candidateObjs = groups.filter((g) => {
+        if (!g) return false;
+        if (g.customType === "snake-path" || g.customType === "snake-corridor-path") return true;
+        if (g.type === "path" || g.type === "group" || g.type === "line") return true;
+        if (typeof g.getObjects === "function" && g.getObjects().length > 0) return true;
+        return false;
+    });
+
+    if (candidateObjs.length < 2) return null;
+
+    const segmentData: {
+        d: string;
+        start: { x: number; y: number };
+        end: { x: number; y: number };
+        strokeWidth: number;
+        strokeColor: string;
+    }[] = [];
+
+    for (const obj of candidateObjs) {
+        let pathObj: any = null;
+        let parentMatrix = obj.calcTransformMatrix ? obj.calcTransformMatrix() : [1, 0, 0, 1, obj.left || 0, obj.top || 0];
+
+        if (obj.type === "path") {
+            pathObj = obj;
+        } else if (typeof obj.getObjects === "function") {
+            const children = obj.getObjects();
+            pathObj = children.find((c: any) => c.type === "path" && c.stroke && c.stroke !== "#ffffff" && c.stroke !== "transparent");
+            if (!pathObj) pathObj = children.find((c: any) => c.type === "path");
+            if (pathObj) {
+                const childMatrix = pathObj.calcTransformMatrix ? pathObj.calcTransformMatrix() : [1, 0, 0, 1, pathObj.left || 0, pathObj.top || 0];
+                parentMatrix = childMatrix;
+            }
+        }
+
+        if (!pathObj || !Array.isArray(pathObj.path)) continue;
+
+        const pathArr: any[][] = pathObj.path;
+        const offX = pathObj.pathOffset ? pathObj.pathOffset.x : 0;
+        const offY = pathObj.pathOffset ? pathObj.pathOffset.y : 0;
+
+        const transformedSegs: string[] = [];
+        for (const seg of pathArr) {
+            const cmd = seg[0];
+            if (cmd === "M" || cmd === "L") {
+                const p = fabric.util.transformPoint({ x: seg[1] - offX, y: seg[2] - offY }, parentMatrix);
+                transformedSegs.push(`${cmd} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`);
+            } else if (cmd === "C") {
+                const p1 = fabric.util.transformPoint({ x: seg[1] - offX, y: seg[2] - offY }, parentMatrix);
+                const p2 = fabric.util.transformPoint({ x: seg[3] - offX, y: seg[4] - offY }, parentMatrix);
+                const p3 = fabric.util.transformPoint({ x: seg[5] - offX, y: seg[6] - offY }, parentMatrix);
+                transformedSegs.push(`C ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)} ${p3.x.toFixed(2)} ${p3.y.toFixed(2)}`);
+            } else if (cmd === "Q") {
+                const p1 = fabric.util.transformPoint({ x: seg[1] - offX, y: seg[2] - offY }, parentMatrix);
+                const p2 = fabric.util.transformPoint({ x: seg[3] - offX, y: seg[4] - offY }, parentMatrix);
+                transformedSegs.push(`Q ${p1.x.toFixed(2)} ${p1.y.toFixed(2)} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`);
+            } else if (cmd === "Z" || cmd === "z") {
+                transformedSegs.push("Z");
+            }
+        }
+
+        const absD = transformedSegs.join(" ");
+        if (!absD) continue;
+
+        const eps = getPathEndpoints(absD);
+        segmentData.push({
+            d: absD,
+            start: eps.start,
+            end: eps.end,
+            strokeWidth: pathObj.strokeWidth || 24,
+            strokeColor: pathObj.stroke || "#000000",
+        });
+    }
+
+    if (segmentData.length < 2) return null;
+
+    const used = new Array(segmentData.length).fill(false);
+    const chain: (typeof segmentData[0] & { flipped: boolean })[] = [{ ...segmentData[0], flipped: false }];
+    used[0] = true;
+
+    for (let step = 1; step < segmentData.length; step++) {
+        const last = chain[chain.length - 1];
+        const lastPt = last.flipped ? last.start : last.end;
+
+        let bestIdx = -1;
+        let bestDist = Infinity;
+        let bestFlip = false;
+
+        for (let j = 0; j < segmentData.length; j++) {
+            if (used[j]) continue;
+            const dS = _fuseDist(lastPt, segmentData[j].start);
+            const dE = _fuseDist(lastPt, segmentData[j].end);
+            if (dS < bestDist) { bestDist = dS; bestIdx = j; bestFlip = false; }
+            if (dE < bestDist) { bestDist = dE; bestIdx = j; bestFlip = true; }
+        }
+
+        if (bestIdx < 0) break;
+        used[bestIdx] = true;
+        chain.push({ ...segmentData[bestIdx], flipped: bestFlip });
+    }
+
+    let fusedD = chain[0].d;
+    for (let i = 1; i < chain.length; i++) {
+        const prev = chain[i - 1];
+        const curr = chain[i];
+        const prevEnd = prev.flipped ? prev.start : prev.end;
+        const currStart = curr.flipped ? curr.end : curr.start;
+
+        if (_fuseDist(prevEnd, currStart) > 2) {
+            fusedD += ` L ${currStart.x.toFixed(2)} ${currStart.y.toFixed(2)}`;
+        }
+
+        const stripped = curr.d.replace(/^\s*M\s+[-\d.]+\s+[-\d.]+\s*/i, "");
+        fusedD += " " + stripped;
+    }
+
+    const width = options.width || chain[0].strokeWidth || 24;
+    const outerW = width + 4;
+    const color = options.color || (chain[0].strokeColor !== "#ffffff" ? chain[0].strokeColor : "#000000");
+
+    const maskPath = new fabric.Path(fusedD, {
+        fill: "transparent",
+        stroke: "#ffffff",
+        strokeWidth: outerW + 8,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const outerPath = new fabric.Path(fusedD, {
+        fill: "transparent",
+        stroke: color,
+        strokeWidth: outerW,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const innerPath = new fabric.Path(fusedD, {
+        fill: "transparent",
+        stroke: "#ffffff",
+        strokeWidth: width,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const avgLeft = candidateObjs.reduce((s, g) => s + (g.left || 0), 0) / candidateObjs.length;
+    const avgTop = candidateObjs.reduce((s, g) => s + (g.top || 0), 0) / candidateObjs.length;
+
+    const fusedGroup = new fabric.Group([maskPath, outerPath, innerPath], {
+        left: avgLeft,
+        top: avgTop,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (fusedGroup as any).customType = "snake-path";
+    (fusedGroup as any).isFused = true;
+
+    canvas.discardActiveObject();
+    candidateObjs.forEach((g) => canvas.remove(g));
+    canvas.add(fusedGroup);
+    canvas.centerObject(fusedGroup);
+    canvas.setActiveObject(fusedGroup);
+    canvas.requestRenderAll();
+    canvas.fire("object:modified");
+
+    return fusedGroup;
+}
+
+function pseudoRandom(seed: number) {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
+
+
+export interface SinglePathSegmentMeta {
+    id: number;
+    name: string;
+    category: "sweeps" | "waves" | "loops" | "zigzags" | "serpentine";
+    svgPathD: string;
+}
+
+export const PRE_DRAWN_SINGLE_PATH_SEGMENTS_100: SinglePathSegmentMeta[] = Array.from({ length: 100 }, (_, idx) => {
+    const id = idx + 1;
+    let category: "sweeps" | "waves" | "loops" | "zigzags" | "serpentine" = "sweeps";
+    let svgPathD = "";
+    let segName = "";
+
+    const startX = 100;
+    const startY = 40;
+    const endY = 480;
+
+    if (id <= 20) {
+        category = "sweeps";
+        const sub = (id - 1) % 20;
+        const dir = sub % 2 === 0 ? 1 : -1;
+        const amp = 40 + (sub % 5) * 22;
+        const midY1 = 140 + (sub % 3) * 30;
+        const midY2 = 320 + (sub % 4) * 20;
+        const endX = startX + dir * ((sub % 6) * 18 - 30);
+
+        if (sub % 4 === 0) {
+            segName = `Parabolic Arc #${id}`;
+            svgPathD = `M ${startX} ${startY} L ${startX} 90 C ${startX + amp * dir} ${midY1} ${startX + amp * dir} ${midY2} ${endX} 430 L ${endX} ${endY}`;
+        } else if (sub % 4 === 1) {
+            segName = `S-Curve Sweep #${id}`;
+            svgPathD = `M ${startX} ${startY} C ${startX + amp * dir} 120 ${startX - amp * dir} 240 ${startX + amp * dir * 0.8} 360 C ${startX - amp * dir * 0.4} 420 ${endX} 450 ${endX} ${endY}`;
+        } else if (sub % 4 === 2) {
+            segName = `J-Hook Sweep #${id}`;
+            svgPathD = `M ${startX} ${startY} L ${startX} 220 C ${startX} 340 ${startX + amp * dir} 380 ${startX + amp * dir * 0.7} 420 C ${startX + amp * dir * 0.3} 450 ${endX} 460 ${endX} ${endY}`;
+        } else {
+            segName = `Wide Bow Arc #${id}`;
+            svgPathD = `M ${startX} ${startY} C ${startX - amp * dir * 0.5} 100 ${startX + amp * dir * 1.3} 220 ${startX + amp * dir * 1.1} 340 C ${startX + amp * dir * 0.5} 410 ${endX} 450 ${endX} ${endY}`;
+        }
+    } else if (id <= 40) {
+        category = "waves";
+        const sub = (id - 21) % 20;
+        const dir = sub % 2 === 0 ? 1 : -1;
+        const baseAmp = 35 + (sub % 4) * 15;
+        const endX = startX + (sub % 5) * 16 - 32;
+
+        if (sub % 3 === 0) {
+            segName = `Expanding Ripple Wave #${id}`;
+            const a1 = baseAmp * 0.6 * dir;
+            const a2 = baseAmp * 1.1 * -dir;
+            const a3 = baseAmp * 1.5 * dir;
+            svgPathD = `M ${startX} ${startY} C ${startX + a1} 120 ${startX + a1} 170 ${startX} 210 C ${startX + a2} 260 ${startX + a2} 310 ${startX} 360 C ${startX + a3} 400 ${startX + a3} 440 ${endX} ${endY}`;
+        } else if (sub % 3 === 1) {
+            segName = `Sinusoidal Oscillation #${id}`;
+            const a = baseAmp * dir;
+            svgPathD = `M ${startX} ${startY} C ${startX + a} 110 ${startX + a} 160 ${startX} 210 C ${startX - a} 260 ${startX - a} 310 ${startX} 360 C ${startX + a * 0.8} 410 ${startX + a * 0.8} 440 ${endX} ${endY}`;
+        } else {
+            segName = `Accelerating Wave #${id}`;
+            const a = baseAmp * dir;
+            svgPathD = `M ${startX} ${startY} C ${startX + a} 100 ${startX + a} 150 ${startX} 190 C ${startX - a * 0.9} 230 ${startX - a * 0.9} 270 ${startX} 310 C ${startX + a * 0.8} 345 ${startX + a * 0.8} 380 ${startX} 415 C ${startX - a * 0.6} 445 ${endX} 465 ${endX} ${endY}`;
+        }
+    } else if (id <= 60) {
+        category = "loops";
+        const sub = (id - 41) % 20;
+        const dir = sub % 2 === 0 ? 1 : -1;
+        const loopR = 55 + (sub % 5) * 12;
+        const endX = startX + (sub % 4) * 20 - 30;
+
+        if (sub % 4 === 0) {
+            segName = `360° Loop-the-Loop #${id}`;
+            const midY = 220 + (sub % 3) * 25;
+            svgPathD = `M ${startX} ${startY} L ${startX} ${midY - 60} C ${startX + loopR * dir} ${midY - 60} ${startX + loopR * dir} ${midY + 60} ${startX} ${midY + 60} C ${startX - loopR * dir} ${midY + 60} ${startX - loopR * dir} ${midY - 60} ${startX} ${midY - 60} C ${startX + loopR * dir * 0.6} ${midY - 60} ${startX + loopR * dir} ${midY + 100} ${endX} ${endY}`;
+        } else if (sub % 4 === 1) {
+            segName = `Teardrop Loop Twist #${id}`;
+            const midY = 200;
+            svgPathD = `M ${startX} ${startY} L ${startX} ${midY} C ${startX + loopR * 1.3 * dir} ${midY + 30} ${startX + loopR * 1.3 * dir} ${midY + 110} ${startX} ${midY + 110} C ${startX - loopR * 1.3 * dir} ${midY + 110} ${startX - loopR * 1.3 * dir} ${midY + 30} ${startX} ${midY} C ${startX + loopR * dir * 0.5} ${midY - 20} ${endX + 20 * dir} 380 ${endX} ${endY}`;
+        } else if (sub % 4 === 2) {
+            segName = `Double Loop-de-Loop #${id}`;
+            const r1 = 45;
+            const r2 = 45;
+            svgPathD = `M ${startX} ${startY} L ${startX} 120 C ${startX + r1 * dir} 120 ${startX + r1 * dir} 210 ${startX} 210 C ${startX - r1 * dir} 210 ${startX - r1 * dir} 120 ${startX} 120 C ${startX + r1 * dir * 0.5} 120 ${startX} 240 ${startX} 280 C ${startX - r2 * dir} 280 ${startX - r2 * dir} 370 ${startX} 370 C ${startX + r2 * dir} 370 ${startX + r2 * dir} 280 ${startX} 280 L ${endX} ${endY}`;
+        } else {
+            segName = `Pretzel Swirl Loop #${id}`;
+            const lw = loopR * dir;
+            svgPathD = `M ${startX} ${startY} C ${startX + lw * 1.2} 120 ${startX - lw * 0.8} 200 ${startX + lw} 260 C ${startX + lw * 1.5} 300 ${startX - lw * 1.2} 360 ${startX} 390 C ${startX + lw * 0.5} 420 ${endX} 450 ${endX} ${endY}`;
+        }
+    } else if (id <= 80) {
+        category = "zigzags";
+        const sub = (id - 61) % 20;
+        const dir = sub % 2 === 0 ? 1 : -1;
+        const stepW = 55 + (sub % 5) * 14;
+
+        if (sub % 4 === 0) {
+            segName = `4-Point Zigzag #${id}`;
+            const z1 = startX + stepW * dir;
+            const z2 = startX - stepW * dir * 0.8;
+            const z3 = startX + stepW * dir * 0.6;
+            const endX = startX + (sub % 3) * 15 - 15;
+            svgPathD = `M ${startX} ${startY} L ${startX} 110 L ${z1} 190 L ${z2} 280 L ${z3} 370 L ${endX} 440 L ${endX} ${endY}`;
+        } else if (sub % 4 === 1) {
+            segName = `Step-Stair Turn #${id}`;
+            const x1 = startX + stepW * dir;
+            const x3 = startX - stepW * dir * 0.5;
+            svgPathD = `M ${startX} ${startY} L ${startX} 130 L ${x1} 130 L ${x1} 250 L ${x3} 250 L ${x3} 370 L ${startX} 370 L ${startX} ${endY}`;
+        } else if (sub % 4 === 2) {
+            segName = `Chevron Zigzag #${id}`;
+            const z1 = startX + stepW * dir * 1.2;
+            const z2 = startX - stepW * dir * 0.9;
+            svgPathD = `M ${startX} ${startY} L ${startX} 100 Q ${startX} 130 ${z1 * 0.5} 150 L ${z1} 180 Q ${z1 + 20 * dir} 200 ${z1 * 0.5} 230 L ${z2} 290 Q ${z2 - 20 * dir} 310 ${z2 * 0.5} 340 L ${startX} 400 L ${startX} ${endY}`;
+        } else {
+            segName = `Lightning Bolt Turn #${id}`;
+            const z1 = startX + stepW * dir * 1.4;
+            const z2 = startX - stepW * dir * 0.7;
+            svgPathD = `M ${startX} ${startY} L ${startX} 140 L ${z1} 220 L ${z2} 330 L ${startX} 420 L ${startX} ${endY}`;
+        }
+    } else {
+        category = "serpentine";
+        const sub = (id - 81) % 20;
+        const dir = sub % 2 === 0 ? 1 : -1;
+        const coilW = 65 + (sub % 5) * 15;
+        const endX = startX + (sub % 4) * 20 - 30;
+
+        if (sub % 4 === 0) {
+            segName = `Triple-Coil Serpentine #${id}`;
+            const c1 = coilW * dir;
+            const c2 = -coilW * dir * 1.2;
+            const c3 = coilW * dir * 0.9;
+            svgPathD = `M ${startX} ${startY} C ${startX + c1} 110 ${startX + c1} 160 ${startX} 190 C ${startX + c2} 230 ${startX + c2} 290 ${startX} 330 C ${startX + c3} 370 ${startX + c3} 420 ${endX} ${endY}`;
+        } else if (sub % 4 === 1) {
+            segName = `Meandering River Bend #${id}`;
+            const b1 = coilW * dir * 1.3;
+            const b2 = -coilW * dir * 1.1;
+            svgPathD = `M ${startX} ${startY} L ${startX} 80 C ${startX + b1} 120 ${startX + b1} 220 ${startX} 250 C ${startX + b2} 280 ${startX + b2} 380 ${endX} 420 L ${endX} ${endY}`;
+        } else if (sub % 4 === 2) {
+            segName = `Labyrinthine Swirl #${id}`;
+            const b1 = coilW * dir;
+            const b2 = -coilW * dir * 1.3;
+            const b3 = coilW * dir * 0.8;
+            svgPathD = `M ${startX} ${startY} C ${startX - b1 * 0.5} 90 ${startX + b1 * 1.2} 150 ${startX + b1} 210 C ${startX + b2 * 1.2} 260 ${startX + b2} 330 ${startX + b3} 380 C ${startX + b3 * 0.5} 420 ${endX} 450 ${endX} ${endY}`;
+        } else {
+            segName = `Hairpin Snake Corridor #${id}`;
+            const h1 = coilW * dir * 1.2;
+            const h2 = -coilW * dir * 1.2;
+            svgPathD = `M ${startX} ${startY} L ${startX} 100 C ${startX + h1} 100 ${startX + h1} 210 ${startX} 210 C ${startX + h2} 210 ${startX + h2} 320 ${startX} 320 C ${startX + h1 * 0.7} 320 ${startX + h1 * 0.7} 430 ${endX} ${endY}`;
+        }
+    }
+
+    return {
+        id,
+        name: segName,
+        category,
+        svgPathD,
+    };
+});
+
+export function createSingleSnakePathFromSegment(
+    segment: SinglePathSegmentMeta,
+    options: { width?: number; color?: string } = {}
+): fabric.Group {
+    const width = options.width || 24;
+    const outerW = width + 4;
+    const d = segment.svgPathD;
+
+    const mask = new fabric.Path(d, {
+        fill: "transparent",
+        stroke: "#ffffff",
+        strokeWidth: outerW + 8,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const outer = new fabric.Path(d, {
+        fill: "transparent",
+        stroke: options.color || "#000000",
+        strokeWidth: outerW,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const inner = new fabric.Path(d, {
+        fill: "transparent",
+        stroke: "#ffffff",
+        strokeWidth: width,
+        strokeLineCap: "butt",
+        strokeLineJoin: "round",
+    });
+
+    const grp = new fabric.Group([mask, outer, inner], {
+        left: 200,
+        top: 150,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (grp as any).customType = "snake-path";
+    (grp as any).segmentId = segment.id;
+    return grp;
+}
+
+export interface PathTemplateMeta {
+    id: number;
+    name: string;
+    category: "easy" | "medium" | "hard" | "expert";
+    pairCount: number;
+    variation: "standard" | "dense_cross" | "zigzag_angles" | "wavy_s" | "random_seed";
+    seed: number;
+    mapping: number[];
+}
+
+export const PRE_DRAWN_PATH_TEMPLATES_100: PathTemplateMeta[] = Array.from({ length: 100 }, (_, idx) => {
+    const id = idx + 1;
+    let category: "easy" | "medium" | "hard" | "expert" = "easy";
+    let pairCount = 2;
+    let variation: "standard" | "dense_cross" | "zigzag_angles" | "wavy_s" | "random_seed" = "standard";
+
+    if (id <= 25) {
+        category = "easy";
+        pairCount = id <= 12 ? 2 : 3;
+        variation = id % 3 === 0 ? "wavy_s" : "standard";
+    } else if (id <= 50) {
+        category = "medium";
+        pairCount = 4;
+        variation = id % 4 === 0 ? "zigzag_angles" : id % 3 === 0 ? "dense_cross" : "standard";
+    } else if (id <= 75) {
+        category = "hard";
+        pairCount = id <= 62 ? 4 : 5;
+        variation = id % 2 === 0 ? "dense_cross" : "wavy_s";
+    } else {
+        category = "expert";
+        pairCount = id <= 88 ? 5 : 6;
+        variation = id % 3 === 0 ? "zigzag_angles" : "random_seed";
+    }
+
+    const categoryNames = {
+        easy: "Gentle Curve",
+        medium: "Cross Corridor",
+        hard: "Dense Intersect",
+        expert: "Complex Web",
+    };
+
+    // Deterministic shuffle for target mappings
+    const baseIndices = Array.from({ length: pairCount }, (_, i) => i);
+    const mapping = baseIndices.slice().sort((a, b) => {
+        const r = pseudoRandom(id * 97 + a * 13) - 0.5;
+        return r;
+    });
+
+    return {
+        id,
+        name: `Path #${id}: ${categoryNames[category]} (${pairCount} Pairs)`,
+        category,
+        pairCount,
+        variation,
+        seed: id * 257 + 89,
+        mapping,
+    };
+});
+
+export interface SnakePathMazeConfig {
+    title: string;
+    instructions: string;
+    pairCount: number; // 2 to 6
+    theme: "animals" | "abc" | "numbers" | "colors" | "fairytale" | "space" | "ocean" | "vehicles" | "math" | "custom";
+    corridorWidth: number; // 12 to 40
+    pathVariation: "standard" | "dense_cross" | "zigzag_angles" | "wavy_s" | "random_seed";
+    randomSeed: number;
+    targetMapping?: number[];
+    selectedTemplateId?: number;
+    iconSize: number; // 24 to 64
+    showBadges: boolean;
+    showSolution: boolean;
+    solutionColor?: string;
+    customTopText?: string;
+    customBottomText?: string;
+}
+
+export function createDefaultSnakePathMazeConfig(): SnakePathMazeConfig {
+    return {
+        title: "PATH MATCHING MAZE",
+        instructions: "Trace each snake path corridor to connect the items!",
+        pairCount: 4,
+        theme: "animals",
+        corridorWidth: 24,
+        pathVariation: "standard",
+        randomSeed: 101,
+        targetMapping: [1, 2, 0, 3],
+        iconSize: 36,
+        showBadges: false,
+        showSolution: false,
+        solutionColor: "#ec4899",
+        customTopText: "🐍 Snake, 🐦 Bird, 🪲 Beetle, 🦝 Raccoon",
+        customBottomText: "🍎 Apple, 🐭 Mouse, 🫘 Seeds, 🌻 Sunflower",
+    };
+}
+
+function generateProceduralMazePaths(pairs: number, variation: string, seed: number, mapping: number[]): string[] {
+    const paths: string[] = [];
+    const totalW = 520;
+    const startXOffset = 80;
+    const spacing = pairs > 1 ? totalW / (pairs - 1) : 0;
+
+    for (let i = 0; i < pairs; i++) {
+        const startX = startXOffset + i * spacing;
+        const endTargetIdx = mapping[i] !== undefined ? mapping[i] : (i + 1) % pairs;
+        const endX = startXOffset + endTargetIdx * spacing;
+
+        const startY = 50;
+        const endY = 520;
+        const midY1 = 180;
+        const midY2 = 360;
+
+        let s1 = seed + i * 17;
+        let randOffset1 = (pseudoRandom(s1) - 0.5) * 160;
+        let randOffset2 = (pseudoRandom(s1 + 5) - 0.5) * 160;
+
+        if (variation === "zigzag_angles") {
+            const zx1 = startX + (endX - startX) * 0.3 + randOffset1 * 0.5;
+            const zx2 = startX + (endX - startX) * 0.7 + randOffset2 * 0.5;
+            paths.push(`M ${startX} ${startY} L ${startX} 100 L ${zx1} ${midY1} L ${zx2} ${midY2} L ${endX} 460 L ${endX} ${endY}`);
+        } else if (variation === "dense_cross") {
+            const cx1 = Math.max(40, Math.min(640, startXOffset + ((i + 2) % pairs) * spacing + randOffset1 * 0.8));
+            const cx2 = Math.max(40, Math.min(640, startXOffset + ((i + 3) % pairs) * spacing + randOffset2 * 0.8));
+            paths.push(`M ${startX} ${startY} L ${startX} 100 C ${startX} ${midY1 - 40} ${cx1} ${midY1} ${cx1} 270 C ${cx1} ${midY2} ${cx2} 400 ${endX} 460 L ${endX} ${endY}`);
+        } else if (variation === "wavy_s") {
+            const waveWidth = (i % 2 === 0 ? 1 : -1) * 90;
+            const cx1 = (startX + endX) / 2 + waveWidth;
+            const cx2 = (startX + endX) / 2 - waveWidth;
+            paths.push(`M ${startX} ${startY} L ${startX} 100 C ${startX} 160 ${cx1} 220 ${cx1} 280 C ${cx1} 340 ${cx2} 400 ${endX} 460 L ${endX} ${endY}`);
+        } else if (variation === "random_seed") {
+            const rx1 = Math.max(60, Math.min(600, (startX + endX) / 2 + randOffset1 * 1.2));
+            const rx2 = Math.max(60, Math.min(600, (startX + endX) / 2 + randOffset2 * 1.2));
+            paths.push(`M ${startX} ${startY} L ${startX} 100 C ${startX} 160 ${rx1} 220 ${rx1} 280 C ${rx1} 340 ${rx2} 400 ${endX} 460 L ${endX} ${endY}`);
+        } else {
+            // Standard smooth curves
+            const cx1 = (startX * 2 + endX) / 3 + randOffset1 * 0.4;
+            const cx2 = (startX + endX * 2) / 3 + randOffset2 * 0.4;
+            paths.push(`M ${startX} ${startY} L ${startX} 100 C ${startX} 160 ${cx1} 220 ${cx1} 280 C ${cx1} 340 ${cx2} 400 ${endX} 460 L ${endX} ${endY}`);
+        }
+    }
+    return paths;
+}
+
+export function generateSnakePathMazeObjectsFromConfig(config: SnakePathMazeConfig): fabric.Group {
+    const pairs = Math.min(Math.max(config.pairCount || 4, 2), 6);
+    const width = config.corridorWidth || 24;
+    const outerW = width + 4;
+    const iconSize = config.iconSize || 36;
+    const seed = config.randomSeed || 101;
+    const variation = config.pathVariation || "standard";
+
+    // Mapping array from top entrance -> bottom exit
+    const mapping = config.targetMapping && config.targetMapping.length >= pairs
+        ? config.targetMapping
+        : Array.from({ length: pairs }, (_, i) => (i + 1) % pairs);
+
+    const themeData = {
+        animals: {
+            top: ["🐍 Snake", "🐦 Bird", "🪲 Beetle", "🦝 Raccoon", "🦊 Fox", "🐰 Rabbit"],
+            bottom: ["🍎 Apple", "🐭 Mouse", "🫘 Seeds", "🌻 Sunflower", "🍇 Grapes", "🥕 Carrot"],
+        },
+        abc: {
+            top: ["A", "B", "C", "D", "E", "F"],
+            bottom: ["🍎 Apple", "🍌 Banana", "🐱 Cat", "🐶 Dog", "🐘 Elephant", "🦊 Fox"],
+        },
+        numbers: {
+            top: ["1", "2", "3", "4", "5", "6"],
+            bottom: ["⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐", "⭐⭐⭐⭐⭐⭐"],
+        },
+        colors: {
+            top: ["🔴 Red", "🟡 Yellow", "🔵 Blue", "🟢 Green", "🟣 Purple", "🟠 Orange"],
+            bottom: ["🍒 Cherry", "☀️ Sun", "☁️ Cloud", "🍃 Leaf", "🍇 Grape", "🍊 Carrot"],
+        },
+        fairytale: {
+            top: ["🏰 Castle", "🐉 Dragon", "🧙 Wizard", "👸 Princess", "🦄 Unicorn", "⚔️ Knight"],
+            bottom: ["👑 Crown", "💎 Gem", "🪄 Wand", "🪞 Mirror", "🌈 Rainbow", "🛡️ Shield"],
+        },
+        space: {
+            top: ["🚀 Rocket", "👨‍🚀 Astronaut", "🛸 UFO", "☄️ Comet", "🌟 Star", "📡 Satellite"],
+            bottom: ["🪐 Saturn", "🌙 Moon", "👾 Alien", "🌍 Earth", "☀️ Sun", "🌌 Galaxy"],
+        },
+        ocean: {
+            top: ["🐬 Dolphin", "🐙 Octopus", "🦈 Shark", "🐢 Turtle", "🐳 Whale", "🦭 Seal"],
+            bottom: ["🐚 Shell", "🦀 Crab", "🐟 Fish", "🪸 Coral", "⚓ Anchor", "🍤 Shrimp"],
+        },
+        vehicles: {
+            top: ["🚗 Car", "✈️ Airplane", "🚂 Train", "⛵ Boat", "🚁 Helicopter", "🚀 Rocket"],
+            bottom: ["⛽ Gas", "☁️ Cloud", "🛤️ Track", "🌊 Wave", "🏁 Flag", "🪐 Space"],
+        },
+        math: {
+            top: ["2 + 3", "4 + 4", "9 - 2", "5 + 1", "10 - 4", "3 + 3"],
+            bottom: ["5", "8", "7", "6", "6", "6"],
+        },
+        custom: {
+            top: config.customTopText ? config.customTopText.split(",").map((s) => s.trim()).filter(Boolean) : ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6"],
+            bottom: config.customBottomText ? config.customBottomText.split(",").map((s) => s.trim()).filter(Boolean) : ["Target 1", "Target 2", "Target 3", "Target 4", "Target 5", "Target 6"],
+        },
+    };
+
+    const activeTheme = themeData[config.theme] || themeData.animals;
+    const topIcons = activeTheme.top.slice(0, pairs);
+
+    // Map bottom icons according to targetMapping so bottom icons align with targets!
+    const rawBottom = activeTheme.bottom.slice(0, pairs);
+    const bottomIcons = Array.from({ length: pairs }, (_, idx) => {
+        // Find which top item connects to bottom position idx
+        const topIdx = mapping.indexOf(idx);
+        return topIdx !== -1 && rawBottom[topIdx] ? rawBottom[topIdx] : rawBottom[idx];
+    });
+
+    const mazePaths = generateProceduralMazePaths(pairs, variation, seed, mapping);
+    const objs: fabric.FabricObject[] = [];
+
+    // Title & Subtitle
+    if (config.title) {
+        objs.push(
+            new fabric.IText(config.title.toUpperCase(), {
+                left: 340,
+                top: -85,
+                fontSize: 26,
+                fontFamily: "Inter",
+                fontWeight: "bold",
+                fill: "#0f172a",
+                originX: "center",
+            })
+        );
+    }
+    if (config.instructions) {
+        objs.push(
+            new fabric.IText(config.instructions, {
+                left: 340,
+                top: -50,
+                fontSize: 14,
+                fontFamily: "Inter",
+                fill: "#64748b",
+                originX: "center",
+            })
+        );
+    }
+
+    const badgeSymbols = ["①", "②", "③", "④", "⑤", "⑥"];
+
+    mazePaths.forEach((d, idx) => {
+        // White Background Mask (Non-connecting crossover gap)
+        const mask = new fabric.Path(d, {
+            fill: "transparent",
+            stroke: "#ffffff",
+            strokeWidth: outerW + 8,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        // Outer Dark Border
+        const outer = new fabric.Path(d, {
+            fill: "transparent",
+            stroke: "#000000",
+            strokeWidth: outerW,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        // Inner White Corridor (Leaves ends 100% open)
+        const inner = new fabric.Path(d, {
+            fill: "transparent",
+            stroke: "#ffffff",
+            strokeWidth: width,
+            strokeLineCap: "butt",
+            strokeLineJoin: "round",
+        });
+
+        const pathSubObjs: fabric.FabricObject[] = [mask, outer, inner];
+
+        // Solution Key Trace
+        if (config.showSolution) {
+            const solColors = ["#ec4899", "#3b82f6", "#10b981", "#8b5cf6", "#f59e0b", "#ef4444"];
+            const solTrace = new fabric.Path(d, {
+                fill: "transparent",
+                stroke: config.solutionColor || solColors[idx % solColors.length],
+                strokeWidth: Math.max(Math.round(width / 3), 4),
+                strokeDashArray: [8, 6],
+                strokeLineCap: "round",
+                strokeLineJoin: "round",
+            });
+            pathSubObjs.push(solTrace);
+        }
+
+        const corridorGrp = new fabric.Group(pathSubObjs, {
+            selectable: true,
+            subTargetCheck: true,
+        });
+        (corridorGrp as any).customType = "snake-corridor-path";
+        objs.push(corridorGrp);
+    });
+
+    const totalW = 520;
+    const startXOffset = 80;
+    const spacing = pairs > 1 ? totalW / (pairs - 1) : 0;
+
+    // Top Characters
+    topIcons.forEach((icon, i) => {
+        const xPos = startXOffset + i * spacing;
+        objs.push(
+            new fabric.IText(icon, {
+                left: xPos,
+                top: 0,
+                fontSize: iconSize,
+                originX: "center",
+            })
+        );
+        if (config.showBadges) {
+            objs.push(
+                new fabric.IText(badgeSymbols[i] || `${i + 1}`, {
+                    left: xPos,
+                    top: 38,
+                    fontSize: 16,
+                    fill: "#2563eb",
+                    fontWeight: "bold",
+                    originX: "center",
+                })
+            );
+        }
+    });
+
+    // Bottom Targets
+    bottomIcons.forEach((icon, i) => {
+        const xPos = startXOffset + i * spacing;
+        objs.push(
+            new fabric.IText(icon, {
+                left: xPos,
+                top: 540,
+                fontSize: iconSize,
+                originX: "center",
+            })
+        );
+    });
+
+    const grp = new fabric.Group(objs, {
+        left: 60,
+        top: 100,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (grp as any).customType = "snake-path-maze";
+    (grp as any).puzzleConfig = config;
+    return grp;
+}
+
+export function createSnakePathMazeGroup(): fabric.Group {
+    return generateSnakePathMazeObjectsFromConfig(createDefaultSnakePathMazeConfig());
+}
+
+/**
+ * Merges and locks all active eraser white masks on canvas with their underlying vector lines/objects into a single unified group.
+ * The erased gaps remain permanently bound to the lines so they never separate when moving or scaling!
+ */
+export function mergeAndLockEraserMasks(c: fabric.Canvas): number {
+    if (!c) return 0;
+    const allObjects = c.getObjects();
+    const masks = allObjects.filter((o: any) => o.customType && typeof o.customType === "string" && o.customType.startsWith("eraser"));
+
+    if (masks.length === 0) return 0;
+
+    const targetObjs: any[] = [];
+    masks.forEach((mask) => {
+        const maskRect = mask.getBoundingRect();
+        allObjects.forEach((obj: any) => {
+            if (obj === mask || (obj.customType && typeof obj.customType === "string" && obj.customType.startsWith("eraser")) || obj.customType === "grid-overlay") {
+                return;
+            }
+            const objRect = obj.getBoundingRect();
+            const intersects = !(
+                maskRect.left > objRect.left + objRect.width ||
+                maskRect.left + maskRect.width < objRect.left ||
+                maskRect.top > objRect.top + objRect.height ||
+                maskRect.top + maskRect.height < objRect.top
+            );
+
+            if (intersects && !targetObjs.includes(obj)) {
+                targetObjs.push(obj);
+            }
+        });
+    });
+
+    const itemsToMerge = [...targetObjs, ...masks];
+    if (itemsToMerge.length === 0) return 0;
+
+    c.discardActiveObject();
+    itemsToMerge.forEach((obj) => c.remove(obj));
+
+    const mergedGroup = new fabric.Group(itemsToMerge, {
+        subTargetCheck: true,
+        selectable: true,
+    });
+    (mergedGroup as any).customType = "erased-vector-group";
+
+    c.add(mergedGroup);
+    c.setActiveObject(mergedGroup);
+    c.requestRenderAll();
+    c.fire("object:modified");
+
+    return masks.length;
+}
+
+/**
+ * Clears all temporary eraser mask objects from canvas to restore original lines.
+ */
+export function clearAllEraserMasks(c: fabric.Canvas): number {
+    if (!c) return 0;
+    const masks = c.getObjects().filter((o: any) => o.customType && typeof o.customType === "string" && o.customType.startsWith("eraser"));
+    if (masks.length === 0) return 0;
+
+    c.discardActiveObject();
+    masks.forEach((m) => c.remove(m));
+    c.requestRenderAll();
+    c.fire("object:modified");
+    return masks.length;
+}
+
+/**
+ * Generates a complete, interactive Board Game Fabric Group from a BoardGameConfig.
+ */
+export function generateBoardGameObjectsFromConfig(config: BoardGameConfig): fabric.Group {
+    const theme = BOARD_GAME_THEMES[config.theme] || BOARD_GAME_THEMES.candyland;
+    const spaces = config.customSpaces && config.customSpaces.length > 0
+        ? config.customSpaces
+        : generateDefaultSpacesForConfig(config);
+
+    let boardWidth = 600;
+    let boardHeight = 460;
+    const cellSize = config.cellSize || 42;
+
+    const trackW = 520;
+    const trackH = 320;
+
+    let positions: { x: number; y: number }[];
+
+    if (config.customPositions && config.customPositions.length > 0) {
+        // Custom drawn path positions are already centered at (0,0)
+        positions = config.customPositions;
+
+        // Compute bounding box of custom positions to size the card
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        positions.forEach(p => {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y > maxY) maxY = p.y;
+        });
+        const pad = cellSize * 1.5 + 40;
+        boardWidth = Math.max(300, (maxX - minX) + pad * 2);
+        boardHeight = Math.max(200, (maxY - minY) + pad * 2 + 60); // extra 60 for title
+    } else {
+        const rawPositions = computeBoardGameSpacePositions(config.layout, spaces.length, trackW, trackH, cellSize);
+        positions = rawPositions.map((p) => ({
+            x: p.x - trackW / 2,
+            y: p.y - trackH / 2 + 30,
+        }));
+    }
+
+    const objs: fabric.Object[] = [];
+
+    // 1. Board Outer Card Background
+    const cardBg = new fabric.Rect({
+        left: 0,
+        top: 0,
+        width: boardWidth,
+        height: boardHeight,
+        rx: 24,
+        ry: 24,
+        fill: theme.pathColor,
+        stroke: theme.borderColor,
+        strokeWidth: 4,
+        originX: "center",
+        originY: "center",
+        shadow: new fabric.Shadow({
+            color: "rgba(0, 0, 0, 0.15)",
+            blur: 16,
+            offsetX: 0,
+            offsetY: 6,
+        }),
+    });
+    objs.push(cardBg);
+
+    // 2. Board Title & Subtitle Header Banner
+    const titleBanner = new fabric.Rect({
+        left: 0,
+        top: -boardHeight / 2 + 38,
+        width: boardWidth - 40,
+        height: 52,
+        rx: 16,
+        ry: 16,
+        fill: "#ffffff",
+        stroke: theme.borderColor,
+        strokeWidth: 2,
+        originX: "center",
+        originY: "center",
+        shadow: new fabric.Shadow({
+            color: "rgba(0,0,0,0.06)",
+            blur: 8,
+            offsetX: 0,
+            offsetY: 2,
+        }),
+    });
+    objs.push(titleBanner);
+
+    const titleText = new fabric.IText(`${theme.icon} ${config.title.toUpperCase()} ${theme.icon}`, {
+        left: 0,
+        top: -boardHeight / 2 + 30,
+        fontSize: 18,
+        fontWeight: "bold",
+        fontFamily: "Outfit, Inter, Arial, sans-serif",
+        fill: theme.titleColor,
+        originX: "center",
+        originY: "center",
+    });
+    objs.push(titleText);
+
+    if (config.subtitle) {
+        const subText = new fabric.IText(config.subtitle, {
+            left: 0,
+            top: -boardHeight / 2 + 50,
+            fontSize: 11,
+            fontWeight: "normal",
+            fontFamily: "Inter, Arial, sans-serif",
+            fill: "#475569",
+            originX: "center",
+            originY: "center",
+        });
+        objs.push(subText);
+    }
+
+    // 3. Track Connecting Path Line
+    if (positions.length >= 2) {
+        let pathD = `M ${positions[0].x.toFixed(1)} ${positions[0].y.toFixed(1)}`;
+        for (let i = 1; i < positions.length; i++) {
+            pathD += ` L ${positions[i].x.toFixed(1)} ${positions[i].y.toFixed(1)}`;
+        }
+
+        const trackLine = new fabric.Path(pathD, {
+            fill: "none",
+            stroke: theme.borderColor,
+            strokeWidth: 6,
+            strokeDashArray: [10, 6],
+            strokeLineCap: "round",
+            strokeLineJoin: "round",
+            opacity: 0.5,
+            originX: "center",
+            originY: "center",
+        });
+        objs.push(trackLine);
+    }
+
+    // 4. Board Spaces / Cells
+    positions.forEach((pos, idx) => {
+        const space = spaces[idx] || {
+            number: idx + 1,
+            type: "normal",
+            label: "",
+            icon: "⭐",
+            color: theme.normalColors[idx % theme.normalColors.length],
+            borderColor: theme.borderColor,
+            textColor: theme.textColor,
+        };
+
+        const x = pos.x;
+        const y = pos.y;
+        const r = cellSize / 2;
+
+        let cellShapeObj: fabric.Object;
+        if (config.cellShape === "circle") {
+            cellShapeObj = new fabric.Circle({
+                left: x,
+                top: y,
+                radius: r,
+                fill: space.color || theme.normalColors[idx % theme.normalColors.length],
+                stroke: space.borderColor || theme.borderColor,
+                strokeWidth: space.type === "start" || space.type === "finish" ? 3.5 : 2,
+                originX: "center",
+                originY: "center",
+                shadow: new fabric.Shadow({
+                    color: "rgba(0,0,0,0.12)",
+                    blur: 6,
+                    offsetX: 0,
+                    offsetY: 3,
+                }),
+            });
+        } else if (config.cellShape === "diamond") {
+            cellShapeObj = new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize * 0.9,
+                height: cellSize * 0.9,
+                rx: 4,
+                ry: 4,
+                angle: 45,
+                fill: space.color || theme.normalColors[idx % theme.normalColors.length],
+                stroke: space.borderColor || theme.borderColor,
+                strokeWidth: 2,
+                originX: "center",
+                originY: "center",
+            });
+        } else {
+            cellShapeObj = new fabric.Rect({
+                left: x,
+                top: y,
+                width: cellSize,
+                height: cellSize,
+                rx: config.cellShape === "rounded" ? 10 : 2,
+                ry: config.cellShape === "rounded" ? 10 : 2,
+                fill: space.color || theme.normalColors[idx % theme.normalColors.length],
+                stroke: space.borderColor || theme.borderColor,
+                strokeWidth: space.type === "start" || space.type === "finish" ? 3.5 : 2,
+                originX: "center",
+                originY: "center",
+                shadow: new fabric.Shadow({
+                    color: "rgba(0,0,0,0.12)",
+                    blur: 6,
+                    offsetX: 0,
+                    offsetY: 3,
+                }),
+            });
+        }
+        objs.push(cellShapeObj);
+
+        // Number Badge
+        if (config.showNumbers) {
+            const numText = new fabric.IText(`${space.number}`, {
+                left: x - r + 8,
+                top: y - r + 3,
+                fontSize: 10,
+                fontWeight: "extrabold",
+                fill: "#1e293b",
+                originX: "center",
+                originY: "center",
+            });
+            objs.push(numText);
+        }
+
+        // Icon / Emoji
+        if (config.showIcons && space.icon) {
+            const iconText = new fabric.IText(space.icon, {
+                left: x,
+                top: space.label ? y - 4 : y,
+                fontSize: space.type === "start" || space.type === "finish" ? 18 : 15,
+                originX: "center",
+                originY: "center",
+            });
+            objs.push(iconText);
+        }
+
+        // Label
+        if (space.label) {
+            const labelText = new fabric.IText(space.label, {
+                left: x,
+                top: y + r - 8,
+                fontSize: 8,
+                fontWeight: "bold",
+                fill: space.textColor || "#0f172a",
+                originX: "center",
+                originY: "center",
+            });
+            objs.push(labelText);
+        }
+    });
+
+    const boardGroup = new fabric.Group(objs, {
+        left: 100,
+        top: 100,
+        selectable: true,
+        subTargetCheck: true,
+    });
+
+    (boardGroup as any).customType = "board-game";
+    (boardGroup as any).puzzleConfig = config;
+    return boardGroup;
+}
+
+/**
+ * Generates a printable 3D foldout D6 cube net template with cut/fold lines and tabs.
+ */
+export function generatePrintableDiceGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const size = 50; // Each die face size
+
+    // Card Box Outer Container
+    const bg = new fabric.Rect({
+        left: 0,
+        top: 0,
+        width: 320,
+        height: 260,
+        rx: 16,
+        ry: 16,
+        fill: "#f8fafc",
+        stroke: "#94a3b8",
+        strokeWidth: 2,
+        strokeDashArray: [6, 4],
+    });
+    objs.push(bg);
+
+    // Title
+    const title = new fabric.IText("🎲 PRINTABLE D6 GAME DIE (CUT & FOLD)", {
+        left: 160,
+        top: 14,
+        fontSize: 12,
+        fontWeight: "bold",
+        fill: "#1e293b",
+        originX: "center",
+    });
+    objs.push(title);
+
+    const sub = new fabric.IText("Cut along dashed outer line ✂️, fold on dotted lines, and glue tabs!", {
+        left: 160,
+        top: 32,
+        fontSize: 9,
+        fill: "#64748b",
+        originX: "center",
+    });
+    objs.push(sub);
+
+    // Cube Net Faces Position Layout (T-Shape):
+    //       [Face 1]
+    // [Face 2][Face 3][Face 4]
+    //       [Face 5]
+    //       [Face 6]
+    const centerX = 160;
+    const startY = 60;
+
+    const faceCoords = [
+        { face: 1, x: centerX, y: startY },
+        { face: 2, x: centerX - size, y: startY + size },
+        { face: 3, x: centerX, y: startY + size },
+        { face: 4, x: centerX + size, y: startY + size },
+        { face: 5, x: centerX, y: startY + size * 2 },
+        { face: 6, x: centerX, y: startY + size * 3 },
+    ];
+
+    const pipPositions: Record<number, { x: number; y: number }[]> = {
+        1: [{ x: 0.5, y: 0.5 }],
+        2: [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.75 }],
+        3: [{ x: 0.25, y: 0.25 }, { x: 0.5, y: 0.5 }, { x: 0.75, y: 0.75 }],
+        4: [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.25 }, { x: 0.25, y: 0.75 }, { x: 0.75, y: 0.75 }],
+        5: [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.25 }, { x: 0.5, y: 0.5 }, { x: 0.25, y: 0.75 }, { x: 0.75, y: 0.75 }],
+        6: [{ x: 0.25, y: 0.25 }, { x: 0.75, y: 0.25 }, { x: 0.25, y: 0.5 }, { x: 0.75, y: 0.5 }, { x: 0.25, y: 0.75 }, { x: 0.75, y: 0.75 }],
+    };
+
+    faceCoords.forEach(({ face, x, y }) => {
+        // Face Square
+        const rect = new fabric.Rect({
+            left: x - size / 2,
+            top: y,
+            width: size,
+            height: size,
+            fill: "#ffffff",
+            stroke: "#334155",
+            strokeWidth: 2,
+        });
+        objs.push(rect);
+
+        // Pips
+        const pips = pipPositions[face] || [];
+        pips.forEach((p) => {
+            const circle = new fabric.Circle({
+                left: x - size / 2 + p.x * size,
+                top: y + p.y * size,
+                radius: 4,
+                fill: face === 1 ? "#dc2626" : "#0f172a",
+                originX: "center",
+                originY: "center",
+            });
+            objs.push(circle);
+        });
+    });
+
+    const diceGroup = new fabric.Group(objs, {
+        left: 80,
+        top: 80,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (diceGroup as any).customType = "printable-dice";
+    return diceGroup;
+}
+
+/**
+ * Generates a printable circular pie spinner with 6 colored numbered sections & cutout arrow.
+ */
+export function generatePrintableSpinnerGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const size = 260;
+    const center = size / 2;
+    const radius = 95;
+
+    const bg = new fabric.Rect({
+        left: 0,
+        top: 0,
+        width: size,
+        height: size + 40,
+        rx: 16,
+        ry: 16,
+        fill: "#ffffff",
+        stroke: "#6366f1",
+        strokeWidth: 2,
+    });
+    objs.push(bg);
+
+    const title = new fabric.IText("🎯 PRINTABLE GAME SPINNER", {
+        left: center,
+        top: 14,
+        fontSize: 12,
+        fontWeight: "bold",
+        fill: "#1e1b4b",
+        originX: "center",
+    });
+    objs.push(title);
+
+    const circle = new fabric.Circle({
+        left: center,
+        top: center + 10,
+        radius,
+        fill: "#f8fafc",
+        stroke: "#334155",
+        strokeWidth: 4,
+        originX: "center",
+        originY: "center",
+    });
+    objs.push(circle);
+
+    const colors = ["#f472b6", "#38bdf8", "#4ade80", "#facc15", "#a78bfa", "#fb923c"];
+    for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
+        const lineX = center + Math.cos(angle) * radius;
+        const lineY = center + 10 + Math.sin(angle) * radius;
+
+        const line = new fabric.Line([center, center + 10, lineX, lineY], {
+            stroke: "#334155",
+            strokeWidth: 2,
+        });
+        objs.push(line);
+
+        const numAngle = angle - Math.PI / 6;
+        const numX = center + Math.cos(numAngle) * (radius * 0.65);
+        const numY = center + 10 + Math.sin(numAngle) * (radius * 0.65);
+
+        const numText = new fabric.IText(`${i + 1}`, {
+            left: numX,
+            top: numY,
+            fontSize: 18,
+            fontWeight: "bold",
+            fill: "#0f172a",
+            originX: "center",
+            originY: "center",
+        });
+        objs.push(numText);
+    }
+
+    // Center Pivot Ring
+    const pivot = new fabric.Circle({
+        left: center,
+        top: center + 10,
+        radius: 12,
+        fill: "#6366f1",
+        stroke: "#ffffff",
+        strokeWidth: 3,
+        originX: "center",
+        originY: "center",
+    });
+    objs.push(pivot);
+
+    // Arrow Cutout Tip
+    const arrowText = new fabric.IText("✂️ Cut arrow & attach with paper fastener / paperclip", {
+        left: center,
+        top: size + 16,
+        fontSize: 9,
+        fontWeight: "bold",
+        fill: "#475569",
+        originX: "center",
+    });
+    objs.push(arrowText);
+
+    const spinnerGroup = new fabric.Group(objs, {
+        left: 80,
+        top: 80,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (spinnerGroup as any).customType = "printable-spinner";
+    return spinnerGroup;
+}
+
+/**
+ * Generates a 2x2 grid of printable Game Task / Question Cards.
+ */
+export function generatePrintableCardsGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const cardW = 160;
+    const cardH = 110;
+    const gap = 16;
+
+    const cardsData = [
+        { type: "❓ QUESTION CARD", color: "#3b82f6", bg: "#eff6ff" },
+        { type: "⚔️ CHALLENGE CARD", color: "#e11d48", bg: "#fff1f2" },
+        { type: "🚀 BONUS CARD", color: "#10b981", bg: "#ecfdf5" },
+        { type: "🃏 CHANCE CARD", color: "#8b5cf6", bg: "#f5f3ff" },
+    ];
+
+    cardsData.forEach((card, idx) => {
+        const row = Math.floor(idx / 2);
+        const col = idx % 2;
+        const x = col * (cardW + gap);
+        const y = row * (cardH + gap);
+
+        const cardBg = new fabric.Rect({
+            left: x,
+            top: y,
+            width: cardW,
+            height: cardH,
+            rx: 12,
+            ry: 12,
+            fill: card.bg,
+            stroke: card.color,
+            strokeWidth: 2,
+        });
+        objs.push(cardBg);
+
+        const header = new fabric.IText(card.type, {
+            left: x + cardW / 2,
+            top: y + 10,
+            fontSize: 10,
+            fontWeight: "bold",
+            fill: card.color,
+            originX: "center",
+        });
+        objs.push(header);
+
+        // Ruled writing lines
+        for (let l = 0; l < 3; l++) {
+            const line = new fabric.Line([x + 14, y + 36 + l * 18, x + cardW - 14, y + 36 + l * 18], {
+                stroke: "#cbd5e1",
+                strokeWidth: 1,
+                strokeDashArray: [4, 4],
+            });
+            objs.push(line);
+        }
+    });
+
+    const cardsGroup = new fabric.Group(objs, {
+        left: 80,
+        top: 80,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (cardsGroup as any).customType = "printable-cards";
+    return cardsGroup;
+}
+
+/**
+ * Generates 4 printable standing player game tokens with fold bases.
+ */
+export function generatePrintableTokensGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const tokens = [
+        { name: "Player 1", icon: "🚀", color: "#ef4444" },
+        { name: "Player 2", icon: "🦖", color: "#3b82f6" },
+        { name: "Player 3", icon: "🏴‍☠️", color: "#f59e0b" },
+        { name: "Player 4", icon: "👑", color: "#10b981" },
+    ];
+
+    tokens.forEach((t, i) => {
+        const x = i * 75;
+        const y = 0;
+
+        // Base Circle Stand
+        const circle = new fabric.Circle({
+            left: x + 30,
+            top: y + 30,
+            radius: 26,
+            fill: "#ffffff",
+            stroke: t.color,
+            strokeWidth: 3,
+            originX: "center",
+            originY: "center",
+        });
+        objs.push(circle);
+
+        const icon = new fabric.IText(t.icon, {
+            left: x + 30,
+            top: y + 24,
+            fontSize: 22,
+            originX: "center",
+            originY: "center",
+        });
+        objs.push(icon);
+
+        const label = new fabric.IText(t.name, {
+            left: x + 30,
+            top: y + 68,
+            fontSize: 9,
+            fontWeight: "bold",
+            fill: "#1e293b",
+            originX: "center",
+        });
+        objs.push(label);
+    });
+
+    const tokensGroup = new fabric.Group(objs, {
+        left: 80,
+        top: 80,
+        selectable: true,
+        subTargetCheck: true,
+    });
+    (tokensGroup as any).customType = "printable-tokens";
+    return tokensGroup;
+}
+
+/**
+ * Generates a sheet of printable play money / cash bills ($1, $5, $10, $20, $50, $100).
+ */
+export function generatePrintableMoneyGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const billW = 140;
+    const billH = 70;
+    const gapX = 14;
+    const gapY = 14;
+
+    const bills = [
+        { val: "$1", color: "#15803D", bg: "#F0FDF4", label: "ONE DOLLAR" },
+        { val: "$5", color: "#1E40AF", bg: "#EFF6FF", label: "FIVE DOLLARS" },
+        { val: "$10", color: "#B45309", bg: "#FFFBEB", label: "TEN DOLLARS" },
+        { val: "$20", color: "#047857", bg: "#ECFDF5", label: "TWENTY DOLLARS" },
+        { val: "$50", color: "#6B21A8", bg: "#FAF5FF", label: "FIFTY DOLLARS" },
+        { val: "$100", color: "#BE185D", bg: "#FDF2F8", label: "ONE HUNDRED" },
+    ];
+
+    bills.forEach((b, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const x = col * (billW + gapX);
+        const y = row * (billH + gapY);
+
+        const card = new fabric.Rect({
+            left: x, top: y, width: billW, height: billH, rx: 6, ry: 6,
+            fill: b.bg, stroke: b.color, strokeWidth: 2,
+        });
+        const borderInner = new fabric.Rect({
+            left: x + 4, top: y + 4, width: billW - 8, height: billH - 8, rx: 4, ry: 4,
+            fill: "transparent", stroke: b.color, strokeWidth: 1, strokeDashArray: [3, 2],
+        });
+        const valLeft = new fabric.IText(b.val, {
+            left: x + 12, top: y + 10, fontSize: 14, fontWeight: "900", fill: b.color,
+        });
+        const valRight = new fabric.IText(b.val, {
+            left: x + billW - 12, top: y + billH - 10, fontSize: 14, fontWeight: "900", fill: b.color,
+            originX: "right", originY: "bottom",
+        });
+        const labelText = new fabric.IText(b.label, {
+            left: x + billW / 2, top: y + billH / 2, fontSize: 10, fontWeight: "900", fill: b.color,
+            originX: "center", originY: "center",
+        });
+
+        objs.push(card, borderInner, valLeft, valRight, labelText);
+    });
+
+    const moneyGroup = new fabric.Group(objs, {
+        left: 80, top: 80, selectable: true, subTargetCheck: true,
+    });
+    (moneyGroup as any).customType = "printable-money";
+    return moneyGroup;
+}
+
+/**
+ * Generates a printable game score sheet & player score tracker.
+ */
+export function generatePrintableScorecardGroup(): fabric.Group {
+    const objs: fabric.Object[] = [];
+    const w = 320;
+    const h = 240;
+
+    const bg = new fabric.Rect({
+        left: 0, top: 0, width: w, height: h, rx: 12, ry: 12,
+        fill: "#FFFDF5", stroke: "#D97706", strokeWidth: 2.5,
+    });
+    const headerBg = new fabric.Rect({
+        left: 0, top: 0, width: w, height: 36, rx: 12, ry: 12,
+        fill: "#D97706", stroke: "none", strokeWidth: 0,
+    });
+    const title = new fabric.IText("🏆 GAME SCORECARD & TRACKER", {
+        left: w / 2, top: 18, fontSize: 11, fontWeight: "900", fill: "#ffffff",
+        originX: "center", originY: "center",
+    });
+
+    objs.push(bg, headerBg, title);
+
+    // Table Grid
+    const colW = w / 4;
+    const headers = ["PLAYER", "ROUND 1", "ROUND 2", "TOTAL"];
+    headers.forEach((hTxt, i) => {
+        const hLabel = new fabric.IText(hTxt, {
+            left: i * colW + colW / 2, top: 48, fontSize: 9, fontWeight: "900", fill: "#78350F",
+            originX: "center", originY: "center",
+        });
+        objs.push(hLabel);
+    });
+
+    // Horizontal & Vertical Grid Lines
+    for (let r = 1; r <= 6; r++) {
+        const lineY = 40 + r * 28;
+        const line = new fabric.Line([12, lineY, w - 12, lineY], {
+            stroke: "#FDE68A", strokeWidth: 1.5,
+        });
+        objs.push(line);
+    }
+    for (let c = 1; c < 4; c++) {
+        const lineX = c * colW;
+        const line = new fabric.Line([lineX, 36, lineX, h - 12], {
+            stroke: "#FEF3C7", strokeWidth: 1.5,
+        });
+        objs.push(line);
+    }
+
+    const scoreGroup = new fabric.Group(objs, {
+        left: 80, top: 80, selectable: true, subTargetCheck: true,
+    });
+    (scoreGroup as any).customType = "printable-scorecard";
+    return scoreGroup;
+}
+
 
 
 

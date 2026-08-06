@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-    Undo2, Redo2, Download, Save, Grid, Eye, EyeOff, Plus, ZoomIn, ZoomOut, RotateCcw, Sparkles, Move, Scissors, ShieldAlert, FolderOpen, Wand2, Trash2, Unlink, Layers
+    Undo2, Redo2, Download, Save, Grid, Eye, EyeOff, Plus, ZoomIn, ZoomOut, RotateCcw, Sparkles, Move, Scissors, ShieldAlert, FolderOpen, Wand2, Trash2, Unlink, Link2, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 import { WorksheetProjectsModal } from "./WorksheetProjectsModal";
+import { handleUngroupFabricGroup, handleGroupFabricObjects } from "@/lib/worksheet-fabric";
 
 interface WorksheetHeaderProps {
     fabricCanvasRef?: React.MutableRefObject<fabric.Canvas | null>;
@@ -169,6 +170,16 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                 </Button>
 
                 <Button
+                    variant={activeTool === "eraser" ? "default" : "ghost"}
+                    size="icon"
+                    className={`h-6 w-6 rounded-lg ${activeTool === "eraser" ? "bg-rose-600 text-white" : ""}`}
+                    onClick={() => setActiveTool("eraser")}
+                    title="Eraser Tool (Partial Line & Area Erase)"
+                >
+                    <Scissors className="w-3 h-3" />
+                </Button>
+
+                <Button
                     variant={showKdpGuides ? "secondary" : "ghost"}
                     size="icon"
                     className="h-6 w-6 rounded-lg"
@@ -252,7 +263,29 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950"
+                    className="h-6 w-6 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                    onClick={() => {
+                        const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
+                        if (!c) {
+                            toast.error("Canvas is not initialized.");
+                            return;
+                        }
+                        const count = handleGroupFabricObjects(c);
+                        if (count > 0) {
+                            toast.success(`Grouped ${count} overlapping elements together!`);
+                        } else {
+                            toast.info("Tip: Hold Shift + click multiple items, drag a box over them, or stack text/images on top of your background tile to group!");
+                        }
+                    }}
+                    title="Group Selected Elements Together"
+                >
+                    <Link2 className="w-3 h-3" />
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950"
                     onClick={() => {
                         const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
                         if (!c) {
@@ -265,28 +298,11 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                             return;
                         }
                         if (activeObj.type === "group" || (activeObj as any)._objects) {
-                            const group = activeObj as any;
-                            if (typeof group.toActiveSelection === "function") {
-                                const sel = group.toActiveSelection();
-                                const count = sel ? sel.getObjects().length : 0;
-                                c.discardActiveObject();
-                                c.requestRenderAll();
-                                c.fire("object:modified");
-                                toast.success(`Ungrouped ${count} objects for individual editing!`);
+                            const count = handleUngroupFabricGroup(activeObj, c);
+                            if (count === -1) {
+                                toast.info("Snake path corridors stay connected as a single component so the tube outline and fill never separate!");
                             } else {
-                                const items = [...(group._objects || group.getObjects())];
-                                c.discardActiveObject();
-                                c.remove(group);
-                                items.forEach((item: any) => {
-                                    delete item.group;
-                                    item.group = undefined;
-                                    c.add(item);
-                                    item.set({ selectable: true, evented: true });
-                                    item.setCoords();
-                                });
-                                c.requestRenderAll();
-                                c.fire("object:modified");
-                                toast.success(`Ungrouped ${items.length} objects for individual editing!`);
+                                toast.success(`Ungrouped ${count} objects for individual editing!`);
                             }
                         } else if (activeObj.type === "activeSelection") {
                             const selection = activeObj as fabric.ActiveSelection;
