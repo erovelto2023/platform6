@@ -427,6 +427,7 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
     titleGroup: fabric.FabricObject | null;
     gridGroup: fabric.FabricObject;
     bankGroup: fabric.FabricObject | null;
+    bankHeader: fabric.FabricObject | null;
 } {
     const placement = solveAndGenerateWordSearch(config);
     const { grid, solutionGrid, placedWords } = placement;
@@ -577,19 +578,10 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
 
     // --- 3. WORD BANK GROUP (CLEAN & UNBOXED BY DEFAULT) ---
     let bankGroup: fabric.FabricObject | null = null;
+    let bankHeader: fabric.FabricObject | null = null;
 
     if (config.wordBank.layout !== "hidden") {
         const bankObjs: fabric.FabricObject[] = [];
-
-        const bankHeader = new fabric.IText("FIND THE WORDS:", {
-            left: 0,
-            top: 0,
-            fontSize: 11,
-            fontFamily: config.appearance.wordBankFont || "Inter",
-            fontWeight: "bold",
-            fill: "#334155",
-        });
-        bankObjs.push(bankHeader);
 
         let displayWords = config.words.map((w) => w.word);
         if (config.wordBank.sorting === "alphabetical") {
@@ -607,7 +599,7 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
             const colIdx = idx % colsCount;
             const rowIdx = Math.floor(idx / colsCount);
             const x = colIdx * colWidth;
-            const y = 20 + rowIdx * rowHeight;
+            const y = rowIdx * rowHeight;
 
             let prefix = "• ";
             if (config.wordBank.layout === "numbered") prefix = `${idx + 1}. `;
@@ -624,18 +616,32 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
         });
 
         const gridHeight = rows * cellSize;
-        bankGroup = new fabric.Group(bankObjs, { left: 60, top: 140 + gridHeight + 30, subTargetCheck: true });
+        const bankTop = 140 + gridHeight + 30;
+        bankGroup = new fabric.Group(bankObjs, { left: 60, top: bankTop, subTargetCheck: true });
+
+        // Separate header centered over word list
+        const bankWidth = colsCount * colWidth;
+        bankHeader = new fabric.IText("FIND THE WORDS:", {
+            left: 60 + (bankWidth / 2),
+            top: bankTop - 20,
+            fontSize: 11,
+            fontFamily: config.appearance.wordBankFont || "Inter",
+            fontWeight: "bold",
+            fill: "#334155",
+            originX: "center",
+        });
     }
 
-    return { titleGroup, gridGroup, bankGroup };
+    return { titleGroup, gridGroup, bankGroup, bankHeader };
 }
 
 // Single-Group Backward Compatibility Builder
 export function generateAdvancedWordSearchObjects(config: WordSearchConfig): fabric.FabricObject[] {
-    const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
+    const { titleGroup, gridGroup, bankGroup, bankHeader } = generateWordSearchComponentGroups(config);
     const objects: fabric.FabricObject[] = [];
     if (titleGroup) objects.push(titleGroup);
     if (gridGroup) objects.push(gridGroup);
+    if (bankHeader) objects.push(bankHeader);
     if (bankGroup) objects.push(bankGroup);
     return objects;
 }
@@ -2408,36 +2414,23 @@ export function handleGroupFabricObjects(canvas: fabric.Canvas): number {
 
     // 1. If user has an active multi-selection (Shift-click or drag-selected multiple items)
     if (activeObj.type === "activeSelection") {
-        if (typeof (activeObj as any).toGroup === "function") {
-            const group = (activeObj as any).toGroup();
-            if (group) {
-                group.set({
-                    subTargetCheck: true,
-                    interactive: true,
-                });
-                canvas.setActiveObject(group);
-                canvas.requestRenderAll();
-                canvas.fire("object:modified");
-                return typeof group.getObjects === "function" ? group.getObjects().length : 2;
-            }
-        } else {
-            const selection = activeObj as fabric.ActiveSelection;
-            const objects = [...selection.getObjects()];
-            if (objects.length >= 2) {
-                canvas.discardActiveObject();
-                objects.forEach((obj) => canvas.remove(obj));
+        const selection = activeObj as fabric.ActiveSelection;
+        const objects = [...selection.getObjects()];
+        
+        if (objects.length >= 2) {
+            canvas.discardActiveObject();
+            objects.forEach((obj) => canvas.remove(obj));
 
-                const group = new fabric.Group(objects, {
-                    subTargetCheck: true,
-                    interactive: true,
-                });
+            const group = new fabric.Group(objects, {
+                subTargetCheck: true,
+                interactive: true,
+            });
 
-                canvas.add(group);
-                canvas.setActiveObject(group);
-                canvas.requestRenderAll();
-                canvas.fire("object:modified");
-                return objects.length;
-            }
+            canvas.add(group);
+            canvas.setActiveObject(group);
+            canvas.requestRenderAll();
+            canvas.fire("object:modified");
+            return objects.length;
         }
     }
 
@@ -2485,6 +2478,7 @@ export function handleUngroupFabricGroup(group: any, canvas: fabric.Canvas): num
         return -1;
     }
 
+    // Board game patterns and pieces can be ungrouped
     const items = typeof group.getObjects === "function" ? [...group.getObjects()] : [...(group._objects || [])];
     if (items.length === 0) return 0;
 
@@ -2502,7 +2496,7 @@ export function handleUngroupFabricGroup(group: any, canvas: fabric.Canvas): num
         delete item.group;
         item.group = undefined;
 
-        item.set({
+        item.set>({
             left: pt.x,
             top: pt.y,
             scaleX: (item.scaleX || 1) * (group.scaleX || 1),

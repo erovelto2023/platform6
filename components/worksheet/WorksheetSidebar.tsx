@@ -22,16 +22,11 @@ import {
     mergeAndLockEraserMasks,
     clearAllEraserMasks,
     generateBoardGameObjectsFromConfig,
-    generatePrintableDiceGroup,
-    generatePrintableSpinnerGroup,
-    generatePrintableCardsGroup,
-    generatePrintableTokensGroup,
-    generatePrintableMoneyGroup,
-    generatePrintableScorecardGroup,
 } from "@/lib/worksheet-fabric";
 import { createDefaultBoardGameConfig, BOARD_GAME_THEMES, BoardThemeId, BoardLayoutType, BoardGameConfig, CellShape, resamplePointsAlongPath } from "@/lib/board-game-engine";
 import { BOARD_TEMPLATES, BoardTemplateId, generateBoardTemplate } from "@/lib/board-game-templates";
 import { BoardGameComponentSidebarPanel } from "@/components/worksheet/BoardGameComponentSidebarPanel";
+import { BoardGameDrawerNew } from "@/components/worksheet/BoardGameDrawerNew";
 import { toast } from "sonner";
 
 interface WorksheetSidebarProps {
@@ -262,6 +257,9 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     const [bgSpacesCount, setBgSpacesCount] = useState(28);
     const [bgCellShape, setBgCellShape] = useState<CellShape>("rounded");
     const [isDrawingBoardPath, setIsDrawingBoardPath] = useState(false);
+    const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+    const [isBoardGameDrawerNewOpen, setIsBoardGameDrawerNewOpen] = useState(false);
+    const [multiSnakePathCount, setMultiSnakePathCount] = useState(0);
     const [drawnPathPoints, setDrawnPathPoints] = useState<{ x: number; y: number }[]>([]);
     const [selectedTemplate, setSelectedTemplate] = useState<BoardTemplateId>("winding-path");
 
@@ -437,78 +435,6 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         setIsDrawingBoardPath(false);
         setDrawnPathPoints([]);
         toast.success("✅ Board Game generated from your custom path!");
-    };
-
-    const handleAddPrintableDice = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const diceGroup = generatePrintableDiceGroup();
-        c.add(diceGroup);
-        c.centerObject(diceGroup);
-        c.setActiveObject(diceGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Foldout D6 Die template!");
-    };
-
-    const handleAddPrintableSpinner = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const spinnerGroup = generatePrintableSpinnerGroup();
-        c.add(spinnerGroup);
-        c.centerObject(spinnerGroup);
-        c.setActiveObject(spinnerGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Pie Spinner template!");
-    };
-
-    const handleAddPrintableCards = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const cardsGroup = generatePrintableCardsGroup();
-        c.add(cardsGroup);
-        c.centerObject(cardsGroup);
-        c.setActiveObject(cardsGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Task Cards grid!");
-    };
-
-    const handleAddPrintableTokens = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const tokensGroup = generatePrintableTokensGroup();
-        c.add(tokensGroup);
-        c.centerObject(tokensGroup);
-        c.setActiveObject(tokensGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Player Tokens!");
-    };
-
-    const handleAddPrintableMoney = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const moneyGroup = generatePrintableMoneyGroup();
-        c.add(moneyGroup);
-        c.centerObject(moneyGroup);
-        c.setActiveObject(moneyGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Play Money Sheet!");
-    };
-
-    const handleAddPrintableScorecard = () => {
-        const c = getCanvasRef();
-        if (!c) return;
-        const scorecardGroup = generatePrintableScorecardGroup();
-        c.add(scorecardGroup);
-        c.centerObject(scorecardGroup);
-        c.setActiveObject(scorecardGroup);
-        c.requestRenderAll();
-        c.fire("object:modified");
-        toast.success("Added Printable Game Scorecard & Tracker!");
     };
 
     // Word Search State
@@ -735,37 +661,14 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                             </div>
                                         </div>
 
-                                        {/* Embedded Modular Component Panel (One-click multi-add directly from sidebar) */}
-                                        <BoardGameComponentSidebarPanel getCanvasRef={getCanvasRef} />
-
-                                        {/* ── PRINTABLE ACCESSORIES ── */}
+                                        {/* ── QUICK COMPONENT ACCESS ── */}
                                         <div className="pt-2 border-t border-amber-200 dark:border-amber-800 space-y-1.5">
-                                            <Label className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">✂️ Printable Game Accessories</Label>
-                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">Foldouts, cut-outs, spinners, money, and scorecards for a complete printable game kit.</p>
-                                            <div className="grid grid-cols-2 gap-1.5">
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableDice}>
-                                                    <Dices className="w-3.5 h-3.5 mr-1.5 text-amber-600 shrink-0" />
-                                                    <span className="truncate">Foldout D6 Die</span>
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableSpinner}>
-                                                    <span className="mr-1.5 text-xs">🎯</span>
-                                                    <span className="truncate">Pie Spinner</span>
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableCards}>
-                                                    <span className="mr-1.5 text-xs">🃏</span>
-                                                    <span className="truncate">Task Cards</span>
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableTokens}>
-                                                    <span className="mr-1.5 text-xs">👑</span>
-                                                    <span className="truncate">Player Tokens</span>
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableMoney}>
-                                                    <span className="mr-1.5 text-xs">💵</span>
-                                                    <span className="truncate">Play Money</span>
-                                                </Button>
-                                                <Button size="sm" variant="outline" className="h-9 px-2 text-[10px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg justify-start" onClick={handleAddPrintableScorecard}>
-                                                    <span className="mr-1.5 text-xs">🏆</span>
-                                                    <span className="truncate">Score Tracker</span>
+                                            <Label className="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">🧩 Quick Component Access</Label>
+                                            <p className="text-[10px] text-slate-500 dark:text-slate-400">Add individual board spaces and game elements.</p>
+                                            <div className="grid grid-cols-2 gap-1">
+                                                <Button size="sm" variant="outline" className="h-8 px-1.5 text-[9px] font-bold bg-white dark:bg-slate-900 border-amber-200 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 text-amber-900 dark:text-amber-200 rounded-lg" onClick={() => setIsBoardGameDrawerNewOpen(true)}>
+                                                    <span className="text-xs">🎮</span>
+                                                    <span className="truncate">Pro Builder</span>
                                                 </Button>
                                             </div>
                                         </div>
@@ -1849,6 +1752,15 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                     })()}
                 </div>
             </div>
+
+            {/* Unified Professional Board Game Builder Drawer */}
+            {fabricCanvasRef && (
+                <BoardGameDrawerNew
+                    isOpen={isBoardGameDrawerNewOpen}
+                    onClose={() => setIsBoardGameDrawerNewOpen(false)}
+                    fabricCanvasRef={fabricCanvasRef}
+                />
+            )}
         </aside>
     );
 };

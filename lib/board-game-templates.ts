@@ -8,17 +8,17 @@ import * as fabric from "fabric";
 
 export type BoardTemplateId =
     | "winding-path"
-    | "snakes-ladders"
     | "monopoly"
     | "ludo"
-    | "checkerboard";
+    | "checkerboard"
+    | "battleship";
 
 export const BOARD_TEMPLATES: { id: BoardTemplateId; name: string; icon: string; desc: string }[] = [
     { id: "winding-path",   name: "Winding Path",      icon: "🎲", desc: "Candy Land / Crazy Race style winding S-curve" },
-    { id: "snakes-ladders", name: "Snakes & Ladders",   icon: "🐍", desc: "Classic numbered grid with snakes and ladders" },
     { id: "monopoly",       name: "Property Board",     icon: "🏠", desc: "Monopoly-style perimeter property board" },
     { id: "ludo",           name: "Ludo / Parcheesi",   icon: "🎯", desc: "4-player cross board with home paths" },
     { id: "checkerboard",   name: "Checkerboard",       icon: "♟️", desc: "8×8 alternating grid for chess / checkers" },
+    { id: "battleship",     name: "Battleship",         icon: "⚓", desc: "Classic naval combat grid with fleet deployment" },
 ];
 
 export interface BoardTemplateConfig {
@@ -56,108 +56,129 @@ export function generateWindingPathBoard(config: BoardTemplateConfig): fabric.Gr
 
     const objs: fabric.Object[] = [];
 
-    // Board card background
+    // Board card background with gradient-like effect
     objs.push(new fabric.Rect({
         left: 0, top: 0, width: bW, height: bH,
         rx: 18, ry: 18,
-        fill: "#FFFDF5", stroke: "#222", strokeWidth: 5,
+        fill: "#FFF9E6", stroke: "#8B4513", strokeWidth: 6,
         originX: "center", originY: "center",
         shadow: boardShadow(),
     }));
 
-    // Decorative inner border
-    objs.push(new fabric.Rect({
-        left: 0, top: 0, width: bW - 20, height: bH - 20,
-        rx: 12, ry: 12,
-        fill: "transparent", stroke: "#ccc", strokeWidth: 1.5,
-        originX: "center", originY: "center",
-    }));
+    // Decorative border pattern
+    const borderColors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEAA7", "#DDA0DD"];
+    for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x = Math.cos(angle) * (bW / 2 - 15);
+        const y = Math.sin(angle) * (bH / 2 - 15);
+        objs.push(new fabric.Circle({
+            left: x, top: y,
+            radius: 6,
+            fill: borderColors[i % borderColors.length],
+            originX: "center", originY: "center",
+        }));
+    }
 
-    // Title banner
+    // Title banner with decorative design
     objs.push(new fabric.Rect({
         left: 0, top: -hH + 45,
         width: bW - 50, height: 56,
         rx: 14, ry: 14,
-        fill: "#FDD835", stroke: "#222", strokeWidth: 3,
+        fill: "linear-gradient(90deg, #FF6B6B, #4ECDC4)",
+        stroke: "#8B4513", strokeWidth: 3,
         originX: "center", originY: "center",
-        shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.1)", blur: 6, offsetX: 0, offsetY: 3 }),
+        shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.15)", blur: 8, offsetX: 0, offsetY: 4 }),
     }));
     objs.push(new fabric.IText(config.title.toUpperCase(), {
         left: 0, top: -hH + 37,
         fontSize: 22, fontWeight: "900",
         fontFamily: "Impact, Arial Black, sans-serif",
-        fill: "#1a1a1a",
+        fill: "#2C3E50",
         originX: "center", originY: "center",
+        shadow: new fabric.Shadow({ color: "rgba(255,255,255,0.5)", blur: 2, offsetX: 1, offsetY: 1 }),
     }));
     if (config.subtitle) {
         objs.push(new fabric.IText(config.subtitle, {
             left: 0, top: -hH + 58,
             fontSize: 11, fontWeight: "bold",
             fontFamily: "Inter, Arial, sans-serif",
-            fill: "#555",
+            fill: "#34495E",
             originX: "center", originY: "center",
         }));
     }
 
-    // Tile positions (serpentine)
+    // Tile positions (serpentine with curved path)
     const tiles: { x: number; y: number }[] = [];
     for (let i = 0; i < total; i++) {
         const r = Math.floor(i / cols);
         const c = i % cols;
         const even = r % 2 === 0;
         const col = even ? c : cols - 1 - c;
-        tiles.push({ x: lX + col * cSp, y: bY - r * rSp });
+        
+        // Add slight curve to positions for more organic feel
+        const curveOffset = Math.sin(i * 0.3) * 8;
+        tiles.push({ x: lX + col * cSp + curveOffset, y: bY - r * rSp });
     }
 
-    // Build SVG path for the track centerline
+    // Build curved SVG path for the track with smooth bezier curves
     if (tiles.length >= 2) {
         let d = `M ${tiles[0].x.toFixed(1)} ${tiles[0].y.toFixed(1)}`;
         for (let i = 1; i < tiles.length; i++) {
             const prev = tiles[i - 1], curr = tiles[i];
             const pR = Math.floor((i - 1) / cols), cR = Math.floor(i / cols);
             if (pR !== cR) {
-                // U-turn
-                const turnR = 35;
+                // Smooth curved turn
+                const turnR = 45;
                 const right = pR % 2 === 0;
                 const cpX = right ? Math.max(prev.x, curr.x) + turnR : Math.min(prev.x, curr.x) - turnR;
                 const midY = (prev.y + curr.y) / 2;
-                d += ` Q ${cpX.toFixed(1)} ${prev.y.toFixed(1)}, ${cpX.toFixed(1)} ${midY.toFixed(1)}`;
-                d += ` Q ${cpX.toFixed(1)} ${curr.y.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+                d += ` C ${cpX.toFixed(1)} ${prev.y.toFixed(1)}, ${cpX.toFixed(1)} ${curr.y.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
             } else {
-                d += ` L ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
+                // Smooth curve between adjacent tiles
+                const midX = (prev.x + curr.x) / 2;
+                const midY = (prev.y + curr.y) / 2;
+                d += ` Q ${midX.toFixed(1)} ${midY.toFixed(1)}, ${curr.x.toFixed(1)} ${curr.y.toFixed(1)}`;
             }
         }
 
-        // Track black outline
-        objs.push(new fabric.Path(d, {
-            fill: "none", stroke: "#222",
-            strokeWidth: tS + 18,
-            strokeLineCap: "round", strokeLineJoin: "round",
-            originX: "center", originY: "center",
-        }));
-        // Track cream fill
-        objs.push(new fabric.Path(d, {
-            fill: "none", stroke: "#F5E6C8",
-            strokeWidth: tS + 10,
-            strokeLineCap: "round", strokeLineJoin: "round",
-            originX: "center", originY: "center",
-        }));
+        // Track with gradient-like layered strokes
+        const trackColors = ["#8B4513", "#D2691E", "#DEB887"];
+        trackColors.forEach((color, idx) => {
+            objs.push(new fabric.Path(d, {
+                fill: "none", stroke: color,
+                strokeWidth: tS + 18 - idx * 6,
+                strokeLineCap: "round", strokeLineJoin: "round",
+                originX: "center", originY: "center",
+                opacity: 1 - idx * 0.2,
+            }));
+        });
     }
 
-    // Draw tiles
+    // Draw tiles with enhanced design
     tiles.forEach((p, idx) => {
         const isStart = idx === 0;
         const isFin = idx === total - 1;
-        const color = isStart ? "#4CAF50" : isFin ? "#F44336" : VIVID[idx % VIVID.length];
+        const color = isStart ? "#27AE60" : isFin ? "#E74C3C" : VIVID[idx % VIVID.length];
 
+        // Tile with shadow and border
         objs.push(new fabric.Rect({
             left: p.x, top: p.y,
             width: tS, height: tS,
-            rx: 5, ry: 5,
-            fill: color, stroke: "#222",
-            strokeWidth: isStart || isFin ? 3.5 : 2.5,
+            rx: 8, ry: 8,
+            fill: color, stroke: "#2C3E50",
+            strokeWidth: isStart || isFin ? 4 : 2,
             originX: "center", originY: "center",
-            shadow: tileShadow(),
+            shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.3)", blur: 4, offsetX: 2, offsetY: 2 }),
+        }));
+
+        // Inner highlight for 3D effect
+        objs.push(new fabric.Rect({
+            left: p.x, top: p.y,
+            width: tS - 8, height: tS - 8,
+            rx: 4, ry: 4,
+            fill: "transparent", stroke: "rgba(255,255,255,0.4)",
+            strokeWidth: 2,
+            originX: "center", originY: "center",
         }));
 
         if (isStart) {
@@ -165,242 +186,55 @@ export function generateWindingPathBoard(config: BoardTemplateConfig): fabric.Gr
                 left: p.x, top: p.y,
                 fontSize: 8, fontWeight: "900", fill: "#fff",
                 originX: "center", originY: "center",
+                shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.5)", blur: 2, offsetX: 0, offsetY: 1 }),
             }));
         } else if (isFin) {
             objs.push(new fabric.IText("🏁 FINISH", {
                 left: p.x, top: p.y,
                 fontSize: 7, fontWeight: "900", fill: "#fff",
                 originX: "center", originY: "center",
+                shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.5)", blur: 2, offsetX: 0, offsetY: 1 }),
             }));
         } else if (config.showNumbers !== false) {
             objs.push(new fabric.IText(`${idx + 1}`, {
                 left: p.x, top: p.y,
                 fontSize: 15, fontWeight: "900", fill: "#fff",
                 originX: "center", originY: "center",
-                shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.35)", blur: 2, offsetX: 0, offsetY: 1 }),
+                shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.4)", blur: 3, offsetX: 0, offsetY: 1 }),
             }));
         }
 
-        // Star on every 5th space
+        // Decorative elements on special spaces
         if (!isStart && !isFin && (idx + 1) % 5 === 0) {
             objs.push(new fabric.IText("⭐", {
-                left: p.x, top: p.y - tS / 2 - 8,
-                fontSize: 12, originX: "center", originY: "center",
+                left: p.x, top: p.y - tS / 2 - 10,
+                fontSize: 14, originX: "center", originY: "center",
+            }));
+        }
+        
+        // Add small decorative dots on every 3rd space
+        if (!isStart && !isFin && (idx + 1) % 3 === 0) {
+            objs.push(new fabric.Circle({
+                left: p.x + tS / 2 - 5, top: p.y + tS / 2 - 5,
+                radius: 3,
+                fill: "rgba(255,255,255,0.6)",
+                originX: "center", originY: "center",
             }));
         }
     });
 
-    // Instructions footer
-    objs.push(new fabric.IText("Roll dice. Move. First to FINISH wins!", {
-        left: 0, top: hH - 25,
+    // Instructions footer with styled background
+    objs.push(new fabric.Rect({
+        left: 0, top: hH - 35,
+        width: bW - 60, height: 24,
+        rx: 8, ry: 8,
+        fill: "#F8F9FA", stroke: "#DEE2E6", strokeWidth: 1,
+        originX: "center", originY: "center",
+    }));
+    objs.push(new fabric.IText("🎲 Roll dice → Move → First to FINISH wins! 🏆", {
+        left: 0, top: hH - 35,
         fontSize: 10, fontWeight: "bold", fontStyle: "italic",
-        fill: "#888", originX: "center", originY: "center",
-    }));
-
-    const group = new fabric.Group(objs, {
-        left: 100, top: 50, selectable: true, subTargetCheck: true,
-    });
-    (group as any).customType = "board-game-template";
-    (group as any).templateType = config.template;
-    return group;
-}
-
-
-/* ════════════════════════════════════════════════════════════════
- *  2.  SNAKES & LADDERS
- * ════════════════════════════════════════════════════════════════ */
-export function generateSnakesAndLaddersBoard(config: BoardTemplateConfig): fabric.Group {
-    const gridCols = 6, gridRows = 5;
-    const total = gridCols * gridRows;                    // 30 spaces
-    const cellW = 72, cellH = 72;
-    const bW = gridCols * cellW + 80;                     // ~512
-    const bH = gridRows * cellH + 160;                    // ~520
-    const hW = bW / 2, hH = bH / 2;
-
-    const gridLeft = -hW + 40;
-    const gridTop = -hH + 120;
-
-    const objs: fabric.Object[] = [];
-
-    // Board background
-    objs.push(new fabric.Rect({
-        left: 0, top: 0, width: bW, height: bH,
-        rx: 16, ry: 16,
-        fill: "#FFFDE7", stroke: "#222", strokeWidth: 5,
-        originX: "center", originY: "center",
-        shadow: boardShadow(),
-    }));
-
-    // Title
-    objs.push(new fabric.Rect({
-        left: 0, top: -hH + 40,
-        width: bW - 40, height: 50,
-        rx: 12, ry: 12,
-        fill: "#FDD835", stroke: "#222", strokeWidth: 3,
-        originX: "center", originY: "center",
-    }));
-    objs.push(new fabric.IText(config.title.toUpperCase(), {
-        left: 0, top: -hH + 32,
-        fontSize: 20, fontWeight: "900",
-        fontFamily: "Impact, Arial Black, sans-serif",
-        fill: "#1a1a1a", originX: "center", originY: "center",
-    }));
-    if (config.subtitle) {
-        objs.push(new fabric.IText(config.subtitle, {
-            left: 0, top: -hH + 55,
-            fontSize: 10, fontWeight: "bold", fill: "#555",
-            originX: "center", originY: "center",
-        }));
-    }
-
-    // Row colors for alternating bands
-    const rowColors = ["#E3F2FD", "#FFF9C4", "#E8F5E9", "#FCE4EC", "#F3E5F5"];
-
-    // Grid cell map: number → { col, row, x, y }
-    const cellMap: { num: number; col: number; row: number; cx: number; cy: number }[] = [];
-
-    for (let r = 0; r < gridRows; r++) {
-        for (let c = 0; c < gridCols; c++) {
-            // Snake numbering: bottom row left-to-right, next row right-to-left, etc.
-            const displayRow = gridRows - 1 - r;
-            const even = displayRow % 2 === 0;
-            const displayCol = even ? c : gridCols - 1 - c;
-            const num = displayRow * gridCols + displayCol + 1;
-
-            const cx = gridLeft + c * cellW + cellW / 2;
-            const cy = gridTop + r * cellH + cellH / 2;
-
-            // Cell background
-            objs.push(new fabric.Rect({
-                left: cx, top: cy,
-                width: cellW - 2, height: cellH - 2,
-                rx: 4, ry: 4,
-                fill: rowColors[r % rowColors.length],
-                stroke: "#333", strokeWidth: 2,
-                originX: "center", originY: "center",
-            }));
-
-            // Cell number
-            objs.push(new fabric.IText(`${num}`, {
-                left: cx, top: cy,
-                fontSize: 20, fontWeight: "900",
-                fill: num === 1 ? "#4CAF50" : num === total ? "#F44336" : "#333",
-                originX: "center", originY: "center",
-            }));
-
-            // START / FINISH labels
-            if (num === 1) {
-                objs.push(new fabric.IText("START", {
-                    left: cx, top: cy + 22,
-                    fontSize: 8, fontWeight: "900", fill: "#4CAF50",
-                    originX: "center", originY: "center",
-                }));
-            }
-            if (num === total) {
-                objs.push(new fabric.IText("🏁 FINISH", {
-                    left: cx, top: cy + 22,
-                    fontSize: 7, fontWeight: "900", fill: "#F44336",
-                    originX: "center", originY: "center",
-                }));
-            }
-
-            cellMap.push({ num, col: c, row: r, cx, cy });
-        }
-    }
-
-    // Sort by number for lookups
-    const byNum = (n: number) => cellMap.find(c => c.num === n);
-
-    // ─── Ladders (green – go UP) ───
-    const ladders = [
-        { from: 3, to: 16 },
-        { from: 8, to: 26 },
-        { from: 11, to: 22 },
-        { from: 19, to: 28 },
-    ];
-
-    ladders.forEach(({ from, to }) => {
-        const a = byNum(from), b = byNum(to);
-        if (!a || !b) return;
-
-        const dx = 8;
-        // Two side rails
-        const rail1 = `M ${a.cx - dx} ${a.cy} L ${b.cx - dx} ${b.cy}`;
-        const rail2 = `M ${a.cx + dx} ${a.cy} L ${b.cx + dx} ${b.cy}`;
-
-        objs.push(new fabric.Path(rail1, {
-            fill: "none", stroke: "#2E7D32", strokeWidth: 4,
-            strokeLineCap: "round", originX: "center", originY: "center",
-        }));
-        objs.push(new fabric.Path(rail2, {
-            fill: "none", stroke: "#2E7D32", strokeWidth: 4,
-            strokeLineCap: "round", originX: "center", originY: "center",
-        }));
-
-        // Rungs
-        const steps = 4;
-        for (let s = 1; s < steps; s++) {
-            const t = s / steps;
-            const rx1 = a.cx - dx + (b.cx - dx - (a.cx - dx)) * t;
-            const ry1 = a.cy + (b.cy - a.cy) * t;
-            const rx2 = a.cx + dx + (b.cx + dx - (a.cx + dx)) * t;
-            const ry2 = ry1;
-            objs.push(new fabric.Path(`M ${rx1} ${ry1} L ${rx2} ${ry2}`, {
-                fill: "none", stroke: "#4CAF50", strokeWidth: 3,
-                strokeLineCap: "round", originX: "center", originY: "center",
-            }));
-        }
-
-        // Arrow label
-        objs.push(new fabric.IText("🪜", {
-            left: (a.cx + b.cx) / 2 + 14,
-            top: (a.cy + b.cy) / 2,
-            fontSize: 14, originX: "center", originY: "center",
-        }));
-    });
-
-    // ─── Snakes (red – go DOWN) ───
-    const snakes = [
-        { from: 27, to: 6 },
-        { from: 21, to: 9 },
-        { from: 17, to: 4 },
-        { from: 24, to: 14 },
-    ];
-
-    snakes.forEach(({ from, to }) => {
-        const a = byNum(from), b = byNum(to);
-        if (!a || !b) return;
-
-        // Wavy snake body
-        const midX = (a.cx + b.cx) / 2;
-        const midY = (a.cy + b.cy) / 2;
-        const wave = 30;
-        const d = `M ${a.cx} ${a.cy} Q ${midX + wave} ${midY - 20}, ${midX} ${midY} Q ${midX - wave} ${midY + 20}, ${b.cx} ${b.cy}`;
-
-        objs.push(new fabric.Path(d, {
-            fill: "none", stroke: "#C62828", strokeWidth: 6,
-            strokeLineCap: "round", originX: "center", originY: "center",
-            opacity: 0.85,
-        }));
-        // Darker outline
-        objs.push(new fabric.Path(d, {
-            fill: "none", stroke: "#B71C1C", strokeWidth: 8,
-            strokeLineCap: "round", originX: "center", originY: "center",
-            opacity: 0.3,
-        }));
-
-        // Snake head
-        objs.push(new fabric.IText("🐍", {
-            left: a.cx + 16, top: a.cy - 10,
-            fontSize: 14, originX: "center", originY: "center",
-        }));
-    });
-
-    // Footer
-    objs.push(new fabric.IText("🎲 Roll dice → Move → Land on a ladder? Climb up! Land on a snake? Slide down!", {
-        left: 0, top: hH - 20,
-        fontSize: 8, fontWeight: "bold", fontStyle: "italic", fill: "#777",
-        originX: "center", originY: "center",
+        fill: "#495057", originX: "center", originY: "center",
     }));
 
     const group = new fabric.Group(objs, {
@@ -906,15 +740,168 @@ export function generateCheckerboard(config: BoardTemplateConfig): fabric.Group 
 
 
 /* ════════════════════════════════════════════════════════════════
+ *  6.  BATTLESHIP  (Naval Combat Grid)
+ * ════════════════════════════════════════════════════════════════ */
+export function generateBattleshipBoard(config: BoardTemplateConfig): fabric.Group {
+    const gridSize = 10;
+    const cellSize = 42;
+    const boardPx = gridSize * cellSize;
+    const bW = boardPx + 120, bH = boardPx + 140;
+    const hW = bW / 2, hH = bH / 2;
+
+    const gridLeft = -hW + 60;
+    const gridTop = -hH + 70;
+
+    const objs: fabric.Object[] = [];
+
+    // Board background with ocean theme
+    objs.push(new fabric.Rect({
+        left: 0, top: 0, width: bW, height: bH,
+        rx: 16, ry: 16,
+        fill: "#E3F2FD", stroke: "#1565C0", strokeWidth: 5,
+        originX: "center", originY: "center",
+        shadow: boardShadow(),
+    }));
+
+    // Decorative wave pattern border
+    const waveColors = ["#0288D1", "#03A9F4", "#29B6F6"];
+    for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const x = Math.cos(angle) * (bW / 2 - 12);
+        const y = Math.sin(angle) * (bH / 2 - 12);
+        objs.push(new fabric.Circle({
+            left: x, top: y,
+            radius: 5,
+            fill: waveColors[i % waveColors.length],
+            originX: "center", originY: "center",
+        }));
+    }
+
+    // Title banner with naval theme
+    objs.push(new fabric.Rect({
+        left: 0, top: -hH + 30,
+        width: bW - 40, height: 44,
+        rx: 10, ry: 10,
+        fill: "linear-gradient(135deg, #0277BD, #01579B)",
+        stroke: "#0D47A1", strokeWidth: 3,
+        originX: "center", originY: "center",
+        shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.2)", blur: 6, offsetX: 0, offsetY: 3 }),
+    }));
+    objs.push(new fabric.IText(config.title.toUpperCase(), {
+        left: 0, top: -hH + 24,
+        fontSize: 18, fontWeight: "900",
+        fontFamily: "Impact, Arial Black, sans-serif",
+        fill: "#FFFFFF",
+        originX: "center", originY: "center",
+        shadow: new fabric.Shadow({ color: "rgba(0,0,0,0.3)", blur: 2, offsetX: 1, offsetY: 1 }),
+    }));
+    objs.push(new fabric.IText("⚓ NAVAL COMBAT", {
+        left: 0, top: -hH + 42,
+        fontSize: 9, fontWeight: "bold",
+        fill: "#81D4FA",
+        originX: "center", originY: "center",
+    }));
+
+    // Column labels (A-J)
+    const cols = "ABCDEFGHIJ";
+    for (let c = 0; c < gridSize; c++) {
+        const cx = gridLeft + c * cellSize + cellSize / 2;
+        objs.push(new fabric.IText(cols[c], {
+            left: cx, top: gridTop - 14,
+            fontSize: 11, fontWeight: "900", fill: "#0D47A1",
+            originX: "center", originY: "center",
+        }));
+    }
+
+    // Row labels (1-10)
+    for (let r = 0; r < gridSize; r++) {
+        const cy = gridTop + r * cellSize + cellSize / 2;
+        objs.push(new fabric.IText(`${r + 1}`, {
+            left: gridLeft - 14, top: cy,
+            fontSize: 11, fontWeight: "900", fill: "#0D47A1",
+            originX: "center", originY: "center",
+        }));
+    }
+
+    // Grid cells with alternating pattern
+    for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+            const cx = gridLeft + c * cellSize + cellSize / 2;
+            const cy = gridTop + r * cellSize + cellSize / 2;
+            const isEven = (r + c) % 2 === 0;
+
+            objs.push(new fabric.Rect({
+                left: cx, top: cy,
+                width: cellSize - 1, height: cellSize - 1,
+                fill: isEven ? "#FFFFFF" : "#E1F5FE",
+                stroke: "#90CAF9", strokeWidth: 1,
+                originX: "center", originY: "center",
+            }));
+        }
+    }
+
+    // Grid border
+    objs.push(new fabric.Rect({
+        left: gridLeft + boardPx / 2, top: gridTop + boardPx / 2,
+        width: boardPx + 2, height: boardPx + 2,
+        fill: "transparent", stroke: "#0D47A1", strokeWidth: 3,
+        originX: "center", originY: "center",
+    }));
+
+    // Fleet legend section
+    const legendY = gridTop + boardPx + 30;
+    objs.push(new fabric.Rect({
+        left: 0, top: legendY,
+        width: bW - 40, height: 28,
+        rx: 6, ry: 6,
+        fill: "#F5F5F5", stroke: "#BDBDBD", strokeWidth: 1,
+        originX: "center", originY: "center",
+    }));
+
+    const ships = [
+        { name: "Carrier", size: 5, icon: "🚢" },
+        { name: "Battleship", size: 4, icon: "⚓" },
+        { name: "Destroyer", size: 3, icon: "⚡" },
+        { name: "Submarine", size: 3, icon: "🔱" },
+        { name: "Patrol Boat", size: 2, icon: "🛥️" },
+    ];
+
+    const legendStartX = -bW / 2 + 30;
+    ships.forEach((ship, idx) => {
+        const lx = legendStartX + idx * 85;
+        objs.push(new fabric.IText(`${ship.icon} ${ship.name}`, {
+            left: lx, top: legendY,
+            fontSize: 8, fontWeight: "bold", fill: "#424242",
+            originX: "center", originY: "center",
+        }));
+    });
+
+    // Instructions footer
+    objs.push(new fabric.IText("🎯 Call shots: A-5, J-10, etc. Sink all enemy ships to win!", {
+        left: 0, top: hH - 20,
+        fontSize: 9, fontWeight: "bold", fontStyle: "italic",
+        fill: "#0277BD", originX: "center", originY: "center",
+    }));
+
+    const group = new fabric.Group(objs, {
+        left: 100, top: 50, selectable: true, subTargetCheck: true,
+    });
+    (group as any).customType = "board-game-template";
+    (group as any).templateType = config.template;
+    return group;
+}
+
+
+/* ════════════════════════════════════════════════════════════════
  *  MASTER DISPATCHER
  * ════════════════════════════════════════════════════════════════ */
 export function generateBoardTemplate(config: BoardTemplateConfig): fabric.Group {
     switch (config.template) {
         case "winding-path":   return generateWindingPathBoard(config);
-        case "snakes-ladders": return generateSnakesAndLaddersBoard(config);
         case "monopoly":       return generateMonopolyBoard(config);
         case "ludo":           return generateLudoBoard(config);
         case "checkerboard":   return generateCheckerboard(config);
+        case "battleship":     return generateBattleshipBoard(config);
         default:               return generateWindingPathBoard(config);
     }
 }

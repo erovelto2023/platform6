@@ -103,7 +103,7 @@ export const BoardGameComponentSidebarPanel: React.FC<BoardGameComponentSidebarP
             </div>
 
             <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
-                Click any component below to drop it onto your canvas. Add as many spaces as you want!
+                Each component below shows exactly what you'll get on the canvas. Click to add!
             </p>
 
             {/* Filter & Search Controls */}
@@ -136,40 +136,49 @@ export const BoardGameComponentSidebarPanel: React.FC<BoardGameComponentSidebarP
             </div>
 
             {/* Scrollable Component Palette Grid */}
-            <div className="max-h-[320px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-amber-300 dark:scrollbar-thumb-amber-800">
-                <div className="grid grid-cols-2 gap-1.5 pt-1">
+            <div className="max-h-[400px] overflow-y-auto pr-1 space-y-1 scrollbar-thin scrollbar-thumb-amber-300 dark:scrollbar-thumb-amber-800">
+                <div className="grid grid-cols-1 gap-1 pt-1">
                     {filteredComponents.map((comp) => (
                         <div
                             key={comp.id}
                             onClick={() => handleInsert(comp)}
-                            className="group p-2 bg-white dark:bg-slate-900 border border-amber-200/80 dark:border-amber-900/60 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50/80 dark:hover:bg-amber-950/40 rounded-xl transition-all cursor-pointer flex flex-col justify-between shadow-2xs"
+                            className="group p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50/80 dark:hover:bg-amber-950/40 rounded-lg transition-all cursor-pointer flex items-center gap-3 shadow-sm hover:shadow-md"
                         >
-                            <div className="flex items-center gap-1.5">
-                                <span className="text-xl select-none shrink-0 group-hover:scale-110 transition-transform">
+                            {/* Visual Preview */}
+                            <div className="w-12 h-12 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0 group-hover:border-amber-400 transition-colors">
+                                <span className="text-2xl select-none group-hover:scale-110 transition-transform">
                                     {comp.preview}
                                 </span>
-                                <div className="min-w-0 flex-1">
-                                    <div className="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate leading-tight group-hover:text-amber-700 dark:group-hover:text-amber-300">
+                            </div>
+
+                            {/* Component Info */}
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate leading-tight group-hover:text-amber-700 dark:group-hover:text-amber-300">
                                         {comp.name}
                                     </div>
                                     {comp.behavior && (
-                                        <span className="text-[8px] font-mono font-bold text-amber-700 dark:text-amber-400 block truncate">
+                                        <span className="text-[8px] font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 rounded shrink-0">
                                             {comp.behavior}
                                         </span>
                                     )}
                                 </div>
+                                <div className="text-[9px] text-slate-500 dark:text-slate-400 truncate mt-0.5 leading-snug">
+                                    {comp.description}
+                                </div>
                             </div>
 
+                            {/* Add Button */}
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                className="w-full h-5 mt-1.5 text-[9px] font-extrabold text-amber-700 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600 rounded-lg p-0 flex items-center justify-center gap-0.5"
+                                className="h-7 w-7 shrink-0 text-amber-700 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-950/60 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-600 rounded-lg p-0 flex items-center justify-center"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleInsert(comp);
                                 }}
                             >
-                                <Plus className="w-2.5 h-2.5" /> Add
+                                <Plus className="w-4 h-4" />
                             </Button>
                         </div>
                     ))}

@@ -28,6 +28,22 @@ import {
     solveAndGenerateWordSearch,
     WORD_SEARCH_THEMES
 } from "@/lib/word-search-engine";
+
+// Helper function to convert RGB to hex
+const rgbToHex = (color: string): string => {
+    if (!color || typeof color !== "string") return "#000000";
+    if (color.startsWith("#")) return color;
+    if (color.startsWith("rgb")) {
+        const rgbMatch = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+            const r = parseInt(rgbMatch[1]).toString(16).padStart(2, "0");
+            const g = parseInt(rgbMatch[2]).toString(16).padStart(2, "0");
+            const b = parseInt(rgbMatch[3]).toString(16).padStart(2, "0");
+            return `#${r}${g}${b}`;
+        }
+    }
+    return "#000000";
+};
 import {
     CrosswordConfig,
     CrosswordDifficulty,
@@ -980,22 +996,53 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
     };
 
     // Standard Canvas Actions
-    const handleDuplicate = () => {
+    const handleDuplicate = async () => {
         const c = fabricCanvasRef.current;
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
 
-        activeObj.clone().then((cloned: fabric.FabricObject) => {
-            cloned.set({
-                left: (activeObj.left || 0) + 20,
-                top: (activeObj.top || 0) + 20,
+        if (activeObj.type === "activeSelection") {
+            // Handle multiple selected objects
+            const selection = activeObj as fabric.ActiveSelection;
+            const objects = [...selection.getObjects()];
+            
+            // Clone all objects and wait for all to complete
+            const clonePromises = objects.map((obj) => 
+                obj.clone().then((cloned: fabric.FabricObject) => {
+                    cloned.set({
+                        left: (obj.left || 0) + 20,
+                        top: (obj.top || 0) + 20,
+                    });
+                    c.add(cloned);
+                    return cloned;
+                })
+            );
+            
+            const clonedObjects = await Promise.all(clonePromises);
+            
+            // Create a new selection with all cloned objects
+            const newSelection = new fabric.ActiveSelection(clonedObjects, {
+                canvas: c,
             });
-            c.add(cloned);
-            c.setActiveObject(cloned);
+            c.setActiveObject(newSelection);
             c.requestRenderAll();
             c.fire("object:modified");
-        });
+            toast.success(`Duplicated ${objects.length} selected elements.`);
+        } else {
+            // Handle single object
+            activeObj.clone().then((cloned: fabric.FabricObject) => {
+                cloned.set({
+                    left: (activeObj.left || 0) + 20,
+                    top: (activeObj.top || 0) + 20,
+                });
+                c.add(cloned);
+                c.setActiveObject(cloned);
+                c.requestRenderAll();
+                c.fire("object:modified");
+                toast.success("Element duplicated.");
+            });
+        }
     };
 
     const handleDelete = () => {
@@ -2878,7 +2925,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="color"
-                                        value={wsConfig.appearance.titleColor || "#0f172a"}
+                                        value={rgbToHex(wsConfig.appearance.titleColor || "#0f172a")}
                                         onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, titleColor: e.target.value } }))}
                                         className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
                                     />
@@ -2891,7 +2938,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="color"
-                                        value={wsConfig.appearance.gridLetterColor || "#0f172a"}
+                                        value={rgbToHex(wsConfig.appearance.gridLetterColor || "#0f172a")}
                                         onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, gridLetterColor: e.target.value } }))}
                                         className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
                                     />
@@ -2904,7 +2951,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="color"
-                                        value={wsConfig.appearance.cellBgColor !== "transparent" ? wsConfig.appearance.cellBgColor : "#ffffff"}
+                                        value={rgbToHex(wsConfig.appearance.cellBgColor !== "transparent" ? wsConfig.appearance.cellBgColor : "#ffffff")}
                                         onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, cellBgColor: e.target.value } }))}
                                         className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
                                     />
@@ -2917,7 +2964,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="color"
-                                        value={wsConfig.appearance.gridBorderColor !== "transparent" ? wsConfig.appearance.gridBorderColor : "#cbd5e1"}
+                                        value={rgbToHex(wsConfig.appearance.gridBorderColor !== "transparent" ? wsConfig.appearance.gridBorderColor : "#cbd5e1")}
                                     onChange={(e) => updateWsConfig((p) => ({ ...p, appearance: { ...p.appearance, gridBorderColor: e.target.value } }))}
                                     className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
                                 />
@@ -3195,7 +3242,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="color"
-                                                value={typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                                value={rgbToHex(typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a")}
                                                 onChange={(e) => updateActiveObjectProperty({ stroke: e.target.value })}
                                                 className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
                                             />
@@ -3211,7 +3258,7 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                         <div className="flex items-center gap-2">
                                             <input
                                                 type="color"
-                                                value={typeof selectedObjectProps?.fill === "string" && selectedObjectProps.fill !== "transparent" ? selectedObjectProps.fill : "#ffffff"}
+                                                value={rgbToHex(typeof selectedObjectProps?.fill === "string" && selectedObjectProps.fill !== "transparent" ? selectedObjectProps.fill : "#ffffff")}
                                                 onChange={(e) => updateActiveObjectProperty({ fill: e.target.value })}
                                                 className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
                                             />

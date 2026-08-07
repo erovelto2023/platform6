@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
-    Undo2, Redo2, Download, Save, Grid, Eye, EyeOff, Plus, ZoomIn, ZoomOut, RotateCcw, Sparkles, Move, Scissors, ShieldAlert, FolderOpen, Wand2, Trash2, Unlink, Link2, Layers
+    Undo2, Redo2, Download, Save, Grid, Eye, EyeOff, Plus, ZoomIn, ZoomOut, RotateCcw, Sparkles, Move, Scissors, ShieldAlert, FolderOpen, Wand2, Trash2, Unlink, Link2, Layers, Eraser
 } from "lucide-react";
 import { toast } from "sonner";
 import { useWorksheetStore } from "@/lib/worksheet-store";
@@ -154,62 +154,180 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
             </div>
 
             {/* Middle Section: Floating Viewport Toolbar */}
-            <div className="flex items-center gap-0.5 bg-slate-100/90 dark:bg-slate-800/90 p-0.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm shrink-0">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700"
-                    onClick={() => (window as any).__worksheetUndo?.()}
-                    title="Undo (Ctrl+Z)"
-                >
-                    <Undo2 className="w-3 h-3" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700"
-                    onClick={() => (window as any).__worksheetRedo?.()}
-                    title="Redo (Ctrl+Y)"
-                >
-                    <Redo2 className="w-3 h-3" />
-                </Button>
+            <div className="flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm shrink-0">
+                {/* Undo/Redo Group */}
+                <div className="flex items-center gap-0.5">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg hover:bg-white dark:hover:bg-slate-700"
+                        onClick={() => (window as any).__worksheetUndo?.()}
+                        title="Undo (Ctrl+Z)"
+                    >
+                        <Undo2 className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg hover:bg-white dark:hover:bg-slate-700"
+                        onClick={() => (window as any).__worksheetRedo?.()}
+                        title="Redo (Ctrl+Y)"
+                    >
+                        <Redo2 className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
 
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 my-auto mx-0.5" />
+                <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1" />
 
-                <Button
-                    variant={activeTool === "select" ? "default" : "ghost"}
-                    size="icon"
-                    className="h-6 w-6 rounded-lg"
-                    onClick={() => setActiveTool("select")}
-                    title="Selection Tool"
-                >
-                    <Move className="w-3 h-3" />
-                </Button>
+                {/* Tools Group */}
+                <div className="flex items-center gap-0.5">
+                    <Button
+                        variant={activeTool === "select" ? "default" : "ghost"}
+                        size="icon"
+                        className="h-7 w-7 rounded-lg"
+                        onClick={() => setActiveTool("select")}
+                        title="Selection Tool"
+                    >
+                        <Move className="w-3.5 h-3.5" />
+                    </Button>
 
-                <Button
-                    variant={activeTool === "eraser" ? "default" : "ghost"}
-                    size="icon"
-                    className={`h-6 w-6 rounded-lg ${activeTool === "eraser" ? "bg-rose-600 text-white" : ""}`}
-                    onClick={() => setActiveTool("eraser")}
-                    title="Eraser Tool (Partial Line & Area Erase)"
-                >
-                    <Scissors className="w-3 h-3" />
-                </Button>
+                    <Button
+                        variant={activeTool === "eraser" ? "default" : "ghost"}
+                        size="icon"
+                        className={`h-7 w-7 rounded-lg ${activeTool === "eraser" ? "bg-rose-600 text-white" : ""}`}
+                        onClick={() => setActiveTool("eraser")}
+                        title="Eraser Tool"
+                    >
+                        <Scissors className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
 
-                <Button
-                    variant={showKdpGuides ? "secondary" : "ghost"}
-                    size="icon"
-                    className="h-6 w-6 rounded-lg"
-                    onClick={() => setShowKdpGuides(!showKdpGuides)}
-                    title={showKdpGuides ? "Hide KDP Safety Overlay" : "Show KDP Safety Overlay"}
-                >
-                    <ShieldAlert className={`w-3 h-3 ${showKdpGuides ? "text-amber-500" : "text-slate-400"}`} />
-                </Button>
+                <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1" />
 
+                {/* View Options Group */}
+                <div className="flex items-center gap-0.5">
+                    <Button
+                        variant={showKdpGuides ? "secondary" : "ghost"}
+                        size="icon"
+                        className="h-7 w-7 rounded-lg"
+                        onClick={() => setShowKdpGuides(!showKdpGuides)}
+                        title="KDP Safety Overlay"
+                    >
+                        <ShieldAlert className={`w-3.5 h-3.5 ${showKdpGuides ? "text-amber-500" : "text-slate-400"}`} />
+                    </Button>
+
+                    <Button
+                        variant={showGrid ? "secondary" : "ghost"}
+                        size="icon"
+                        className="h-7 w-7 rounded-lg"
+                        onClick={() => setShowGrid(!showGrid)}
+                        title="Layout Grid"
+                    >
+                        <Grid className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
+
+                <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1" />
+
+                {/* Object Actions Group */}
+                <div className="flex items-center gap-0.5">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950"
+                        onClick={() => {
+                            const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
+                            if (!c) { toast.error("Canvas not initialized."); return; }
+                            const count = handleGroupFabricObjects(c);
+                            if (count > 0) toast.success(`Grouped ${count} elements!`);
+                            else toast.info("Select multiple items to group");
+                        }}
+                        title="Group Elements"
+                    >
+                        <Link2 className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950"
+                        onClick={() => {
+                            const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
+                            if (!c) { toast.error("Canvas not initialized."); return; }
+                            const activeObj = c.getActiveObject();
+                            if (!activeObj) { toast.error("Select a group to ungroup"); return; }
+                            if (activeObj.type === "group" || (activeObj as any)._objects) {
+                                const count = handleUngroupFabricGroup(activeObj, c);
+                                if (count !== -1) toast.success(`Ungrouped ${count} objects`);
+                            } else if (activeObj.type === "activeSelection") {
+                                c.discardActiveObject();
+                                c.requestRenderAll();
+                                toast.success("Separated selected elements");
+                            }
+                        }}
+                        title="Ungroup Elements"
+                    >
+                        <Unlink className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"
+                        onClick={() => {
+                            const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
+                            if (!c) { toast.error("Canvas not initialized."); return; }
+                            if (confirm("Are you sure you want to clear the entire canvas? This cannot be undone.")) {
+                                c.clear();
+                                c.requestRenderAll();
+                                c.fire("object:modified");
+                                toast.success("Canvas cleared!");
+                            }
+                        }}
+                        title="Clear Canvas"
+                    >
+                        <Eraser className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
+
+                <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-1" />
+
+                {/* Zoom Controls */}
+                <div className="flex items-center gap-0.5">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg hover:bg-white dark:hover:bg-slate-700"
+                        onClick={() => setZoom(Math.max(0.25, parseFloat((zoom - 0.1).toFixed(2))))}
+                        title="Zoom Out"
+                    >
+                        <ZoomOut className="w-3.5 h-3.5" />
+                    </Button>
+                    <button
+                        className="text-[10px] font-extrabold px-2 py-1 rounded hover:bg-white dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 min-w-[3rem]"
+                        onClick={() => setZoom(0.7)}
+                        title="Reset Zoom"
+                    >
+                        {Math.round(zoom * 100)}%
+                    </button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg hover:bg-white dark:hover:bg-slate-700"
+                        onClick={() => setZoom(Math.min(2.5, parseFloat((zoom + 0.1).toFixed(2))))}
+                        title="Zoom In"
+                    >
+                        <ZoomIn className="w-3.5 h-3.5" />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Right Section: KDP Quick Actions & Save / Export */}
+            <div className="flex items-center gap-1.5 shrink-0">
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="h-6 px-1.5 rounded-lg text-[9px] font-extrabold bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 hover:bg-amber-100 border border-amber-200 dark:border-amber-800"
+                    className="h-7 px-2.5 gap-1 rounded-lg border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-amber-950 font-semibold"
                     onClick={() => {
                         const specs = getKdpSpecs();
                         const minX = specs.safeLeft;
@@ -261,144 +379,12 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                             toast.success("KDP Check Passed: All elements are safely inside printable margins!");
                         }
                     }}
-                    title="1-Click KDP Auto-Fix: Snaps out-of-margin objects inside safe KDP margins"
+                    title="Auto-Fix KDP Margins"
                 >
-                    <Wand2 className="w-2.5 h-2.5 mr-0.5 text-amber-500" />
-                    Auto-Fix KDP
+                    <Wand2 className="w-3.5 h-3.5" />
+                    <span>Fix Margins</span>
                 </Button>
 
-                <Button
-                    variant={showGrid ? "secondary" : "ghost"}
-                    size="icon"
-                    className="h-6 w-6 rounded-lg"
-                    onClick={() => setShowGrid(!showGrid)}
-                    title="Toggle Layout Grid"
-                >
-                    <Grid className="w-3 h-3" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                    onClick={() => {
-                        const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
-                        if (!c) {
-                            toast.error("Canvas is not initialized.");
-                            return;
-                        }
-                        const count = handleGroupFabricObjects(c);
-                        if (count > 0) {
-                            toast.success(`Grouped ${count} overlapping elements together!`);
-                        } else {
-                            toast.info("Tip: Hold Shift + click multiple items, drag a box over them, or stack text/images on top of your background tile to group!");
-                        }
-                    }}
-                    title="Group Selected Elements Together"
-                >
-                    <Link2 className="w-3 h-3" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950"
-                    onClick={() => {
-                        const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
-                        if (!c) {
-                            toast.error("Canvas is not initialized.");
-                            return;
-                        }
-                        const activeObj = c.getActiveObject();
-                        if (!activeObj) {
-                            toast.error("Please select a group or puzzle to ungroup!");
-                            return;
-                        }
-                        if (activeObj.type === "group" || (activeObj as any)._objects) {
-                            const count = handleUngroupFabricGroup(activeObj, c);
-                            if (count === -1) {
-                                toast.info("Snake path corridors stay connected as a single component so the tube outline and fill never separate!");
-                            } else {
-                                toast.success(`Ungrouped ${count} objects for individual editing!`);
-                            }
-                        } else if (activeObj.type === "activeSelection") {
-                            const selection = activeObj as fabric.ActiveSelection;
-                            const count = selection.getObjects().length;
-                            c.discardActiveObject();
-                            c.requestRenderAll();
-                            c.fire("object:modified");
-                            toast.success(`Separated ${count} selected elements.`);
-                        } else {
-                            toast.error("Selected object is not a group.");
-                        }
-                    }}
-                    title="Ungroup Selected Group / Puzzle for Individual Editing"
-                >
-                    <Unlink className="w-3 h-3" />
-                </Button>
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950"
-                    onClick={() => {
-                        const c = fabricCanvasRef?.current || (document.querySelector(".canvas-container canvas") as any)?.__fabricCanvas;
-                        if (!c) {
-                            toast.error("Canvas is not initialized.");
-                            return;
-                        }
-                        const objects = c.getObjects();
-                        if (objects.length === 0) {
-                            toast("Canvas is already empty.");
-                            return;
-                        }
-                        if (confirm("Are you sure you want to clear all items from this canvas page?")) {
-                            c.discardActiveObject();
-                            [...objects].forEach((obj) => {
-                                c.remove(obj);
-                            });
-                            c.backgroundColor = "#ffffff";
-                            c.requestRenderAll();
-                            c.fire("object:modified");
-                            toast.success("Canvas page cleared!");
-                        }
-                    }}
-                    title="Clear Canvas (Remove All Elements)"
-                >
-                    <Trash2 className="w-3 h-3" />
-                </Button>
-
-                <div className="h-3 w-px bg-slate-300 dark:bg-slate-700 my-auto mx-0.5" />
-
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
-                    onClick={() => setZoom(Math.max(0.25, parseFloat((zoom - 0.1).toFixed(2))))}
-                    title="Zoom Out"
-                >
-                    <ZoomOut className="w-3 h-3" />
-                </Button>
-                <button
-                    className="text-[10px] font-extrabold px-1 py-0.5 rounded hover:bg-white dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400"
-                    onClick={() => setZoom(0.7)}
-                    title="Reset to Default 70% Page Zoom"
-                >
-                    {Math.round(zoom * 100)}%
-                </button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
-                    onClick={() => setZoom(Math.min(2.5, parseFloat((zoom + 0.1).toFixed(2))))}
-                    title="Zoom In"
-                >
-                    <ZoomIn className="w-3 h-3" />
-                </Button>
-            </div>
-
-            {/* Right Section: Add Page & Save / Export */}
-            <div className="flex items-center gap-1.5 shrink-0">
                 <Button
                     variant="outline"
                     size="sm"
@@ -407,7 +393,7 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                     title="My Projects"
                 >
                     <FolderOpen className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>My Projects</span>
+                    <span>Projects</span>
                 </Button>
 
                 <Button
@@ -430,7 +416,7 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                     title="Save Project"
                 >
                     <Save className="w-3.5 h-3.5 text-emerald-500" />
-                    <span>{isSaving ? "Saving..." : "Save Project"}</span>
+                    <span>{isSaving ? "Saving..." : "Save"}</span>
                 </Button>
 
                 <Button
