@@ -234,29 +234,42 @@ export default function WorkbookDesignerClient() {
         }
 
         const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(config);
+        const canvasW = c.width || 1275;
+
+        const centerH = (obj: fabric.FabricObject) => {
+            const br = obj.getBoundingRect();
+            const newLeft = (canvasW - br.width) / 2;
+            const leftOffset = (obj.left || 0) - br.left;
+            obj.set({ left: newLeft + leftOffset });
+            obj.setCoords();
+        };
 
         if (titleGroup) {
             attachPuzzleMetadata(titleGroup, "word-search", "title", config);
             c.add(titleGroup);
-            c.centerObjectH(titleGroup);
+            centerH(titleGroup);
             titleGroup.set({ top: 60 });
+            titleGroup.setCoords();
         }
 
         const gridTop = 150;
         if (gridGroup) {
             attachPuzzleMetadata(gridGroup, "word-search", "grid", config);
             c.add(gridGroup);
-            c.centerObjectH(gridGroup);
+            centerH(gridGroup);
             gridGroup.set({ top: gridTop });
+            gridGroup.setCoords();
         }
 
         if (bankGroup) {
-            const gridHeight = gridGroup ? (gridGroup.height || (gridSize * 32)) : 320;
+            const gridBr = gridGroup ? gridGroup.getBoundingRect() : null;
+            const gridHeight = gridBr ? gridBr.height : (gridSize * 34);
             const bankTop = gridTop + gridHeight + 35;
             attachPuzzleMetadata(bankGroup, "word-search", "word-bank", config);
             c.add(bankGroup);
-            c.centerObjectH(bankGroup);
+            centerH(bankGroup);
             bankGroup.set({ top: bankTop });
+            bankGroup.setCoords();
         }
 
         c.setActiveObject(gridGroup);
@@ -280,29 +293,42 @@ export default function WorkbookDesignerClient() {
         }
 
         const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(config);
+        const canvasW = c.width || 1275;
+
+        const centerH = (obj: fabric.FabricObject) => {
+            const br = obj.getBoundingRect();
+            const newLeft = (canvasW - br.width) / 2;
+            const leftOffset = (obj.left || 0) - br.left;
+            obj.set({ left: newLeft + leftOffset });
+            obj.setCoords();
+        };
 
         if (titleGroup) {
             attachPuzzleMetadata(titleGroup, "crossword", "title", config);
             c.add(titleGroup);
-            c.centerObjectH(titleGroup);
+            centerH(titleGroup);
             titleGroup.set({ top: 60 });
+            titleGroup.setCoords();
         }
 
         const gridTop = 150;
         if (gridGroup) {
             attachPuzzleMetadata(gridGroup, "crossword", "grid", config);
             c.add(gridGroup);
-            c.centerObjectH(gridGroup);
+            centerH(gridGroup);
             gridGroup.set({ top: gridTop });
+            gridGroup.setCoords();
         }
 
         if (cluesGroup) {
-            const gridHeight = gridGroup ? (gridGroup.height || 340) : 340;
+            const gridBr = gridGroup ? gridGroup.getBoundingRect() : null;
+            const gridHeight = gridBr ? gridBr.height : 340;
             const cluesTop = gridTop + gridHeight + 35;
             attachPuzzleMetadata(cluesGroup, "crossword", "clues", config);
             c.add(cluesGroup);
-            c.centerObjectH(cluesGroup);
+            centerH(cluesGroup);
             cluesGroup.set({ top: cluesTop });
+            cluesGroup.setCoords();
         }
 
         c.setActiveObject(gridGroup);

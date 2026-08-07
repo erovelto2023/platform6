@@ -56,6 +56,11 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
     // Ref to prevent recursive saveState <-> loadFromJSON loops
     const isInternalStateUpdateRef = useRef(false);
 
+    // Canvas-level undo/redo history (independent of Zustand for reliability)
+    const canvasHistoryRef = useRef<string[]>([]);
+    const canvasHistoryIdxRef = useRef<number>(-1);
+    const isRestoringHistoryRef = useRef(false);
+
     const {
         pages,
         currentPageIndex,
@@ -91,27 +96,100 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
     const [liveCutLine, setLiveCutLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
     const eraserStartRef = useRef<{ x: number; y: number } | null>(null);
 
-    // Debounced Save canvas state helper
+    // Debounced canvas state save (to Zustand store + local undo history)
     const saveStateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const pushToCanvasHistory = useCallback(() => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        try {
+            const json = JSON.stringify((c as any).toJSON(CUSTOM_PROPS));
+            // Truncate any redo history after current position
+            canvasHistoryRef.current = canvasHistoryRef.current.slice(0, canvasHistoryIdxRef.current + 1);
+            canvasHistoryRef.current.push(json);
+            if (canvasHistoryRef.current.length > 80) canvasHistoryRef.current.shift();
+            canvasHistoryIdxRef.current = canvasHistoryRef.current.length - 1;
+        } catch (e) {
+            // ignore serialization errors
+        }
+    }, [fabricCanvasRef]);
+
+    const restoreCanvasFromHistory = useCallback((jsonStr: string) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        isRestoringHistoryRef.current = true;
+        isInternalStateUpdateRef.current = true;
+        const parsed = JSON.parse(jsonStr);
+        c.loadFromJSON(parsed).then(() => {
+            // Hydrate custom properties
+            if (parsed && Array.isArray(parsed.objects)) {
+                const fabricObjects = c.getObjects();
+                parsed.objects.forEach((jsonObj: any, idx: number) => {
+                    if (fabricObjects[idx]) hydrateCustomProperties(jsonObj, fabricObjects[idx]);
+                });
+            }
+            c.getObjects().forEach((obj) => {
+                if (obj.type === "group") (obj as any).subTargetCheck = true;
+            });
+            c.discardActiveObject();
+            c.requestRenderAll();
+            // Persist restored state to store (without pushing to history)
+            try {
+                const restoredJson = (c as any).toJSON(CUSTOM_PROPS);
+                updateCurrentPageCanvas(restoredJson);
+            } catch (e) {}
+            setTimeout(() => {
+                isInternalStateUpdateRef.current = false;
+                isRestoringHistoryRef.current = false;
+            }, 150);
+        });
+    }, [fabricCanvasRef, updateCurrentPageCanvas]);
 
     const saveState = useCallback(() => {
         if (isInternalStateUpdateRef.current) return;
+        if (isRestoringHistoryRef.current) return;
         const c = fabricCanvasRef.current;
         if (!c) return;
 
-        try {
-            const json = (c as any).toJSON(CUSTOM_PROPS);
-            let thumbnail = "";
+        // Debounce to avoid pushing a history entry per-object during batch operations
+        if (saveStateTimeoutRef.current) clearTimeout(saveStateTimeoutRef.current);
+        saveStateTimeoutRef.current = setTimeout(() => {
+            if (isInternalStateUpdateRef.current || isRestoringHistoryRef.current) return;
             try {
-                thumbnail = c.toDataURL({ format: "png", multiplier: 0.15 });
-            } catch (e) {
-                // thumbnail generation optional
+                const json = (c as any).toJSON(CUSTOM_PROPS);
+                let thumbnail = "";
+                try { thumbnail = c.toDataURL({ format: "png", multiplier: 0.15 }); } catch (e) {}
+                updateCurrentPageCanvas(json, thumbnail);
+                pushToCanvasHistory();
+            } catch (err) {
+                console.error("Canvas serialization error:", err);
             }
-            updateCurrentPageCanvas(json, thumbnail);
-        } catch (err) {
-            console.error("Canvas serialization error:", err);
-        }
-    }, [fabricCanvasRef, updateCurrentPageCanvas]);
+        }, 300);
+    }, [fabricCanvasRef, updateCurrentPageCanvas, pushToCanvasHistory]);
+
+    // Expose canvas undo/redo to window so header buttons & keyboard shortcuts can call them
+    useEffect(() => {
+        (window as any).__worksheetUndo = () => {
+            if (canvasHistoryIdxRef.current > 0) {
+                canvasHistoryIdxRef.current -= 1;
+                restoreCanvasFromHistory(canvasHistoryRef.current[canvasHistoryIdxRef.current]);
+            }
+        };
+        (window as any).__worksheetRedo = () => {
+            if (canvasHistoryIdxRef.current < canvasHistoryRef.current.length - 1) {
+                canvasHistoryIdxRef.current += 1;
+                restoreCanvasFromHistory(canvasHistoryRef.current[canvasHistoryIdxRef.current]);
+            }
+        };
+        (window as any).__worksheetCanUndo = () => canvasHistoryIdxRef.current > 0;
+        (window as any).__worksheetCanRedo = () => canvasHistoryIdxRef.current < canvasHistoryRef.current.length - 1;
+        return () => {
+            delete (window as any).__worksheetUndo;
+            delete (window as any).__worksheetRedo;
+            delete (window as any).__worksheetCanUndo;
+            delete (window as any).__worksheetCanRedo;
+        };
+    }, [restoreCanvasFromHistory]);
 
     // Initialize Fabric Canvas
     useEffect(() => {
@@ -213,106 +291,109 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
         };
     }, [kdpSpecs.canvasWidth, kdpSpecs.canvasHeight]);
 
-    // Load canvas JSON ONLY when currentPageIndex changes
-    const prevPageIndexRef = useRef<number>(-1);
-    useEffect(() => {
-        const c = fabricCanvasRef.current;
-        if (!c) return;
+    // Load canvas JSON when switching pages - also resets canvas-level undo history for that page
+    const loadPageIntoCanvas = useCallback(
+        (canvasJson: any) => {
+            const c = fabricCanvasRef.current;
+            if (!c || !canvasJson) return;
 
-        const currentPage = pages[currentPageIndex];
-        if (currentPage && currentPage.canvasJson) {
-            if (prevPageIndexRef.current !== currentPageIndex) {
-                prevPageIndexRef.current = currentPageIndex;
-                isInternalStateUpdateRef.current = true;
-                c.loadFromJSON(currentPage.canvasJson).then(() => {
-                    if (currentPage.canvasJson && Array.isArray(currentPage.canvasJson.objects)) {
-                        const fabricObjects = c.getObjects();
-                        currentPage.canvasJson.objects.forEach((jsonObj: any, idx: number) => {
-                            if (fabricObjects[idx]) {
-                                hydrateCustomProperties(jsonObj, fabricObjects[idx]);
-                            }
-                        });
-                    }
+            isInternalStateUpdateRef.current = true;
 
-                    const objectsToProcess = [...c.getObjects()];
-                    objectsToProcess.forEach((obj) => {
-                        if (obj.type === "group") {
-                            (obj as any).subTargetCheck = true;
-                        }
-
-                        const customType = (obj as any).customType;
-                        const componentType = (obj as any).puzzleComponent;
-                        const wsCfg = (obj as any).wordSearchConfig;
-                        const cwCfg = (obj as any).crosswordConfig;
-
-                        if (customType === "word-search" && wsCfg && wsCfg.answerKey && wsCfg.answerKey.showSolution) {
-                            const left = obj.left || 60;
-                            const top = obj.top || 130;
-                            const scaleX = obj.scaleX ?? 1;
-                            const scaleY = obj.scaleY ?? 1;
-                            const angle = obj.angle ?? 0;
-                            const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(wsCfg);
-
-                            if (componentType === "grid" && gridGroup) {
-                                c.remove(obj);
-                                gridGroup.set({ left, top, scaleX, scaleY, angle });
-                                attachPuzzleMetadata(gridGroup, "word-search", "grid", wsCfg);
-                                c.add(gridGroup);
-                            } else if (componentType === "title" && titleGroup) {
-                                c.remove(obj);
-                                titleGroup.set({ left, top, scaleX, scaleY, angle });
-                                attachPuzzleMetadata(titleGroup, "word-search", "title", wsCfg);
-                                c.add(titleGroup);
-                            } else if (componentType === "word-bank" && bankGroup) {
-                                c.remove(obj);
-                                bankGroup.set({ left, top, scaleX, scaleY, angle });
-                                attachPuzzleMetadata(bankGroup, "word-search", "word-bank", wsCfg);
-                                c.add(bankGroup);
-                            } else if (!componentType) {
-                                const newObjs = generateAdvancedWordSearchObjects(wsCfg);
-                                c.remove(obj);
-                                const newGrp = new fabric.Group(newObjs, { left, top, scaleX, scaleY, angle, subTargetCheck: true });
-                                attachPuzzleMetadata(newGrp, "word-search", "full", wsCfg);
-                                c.add(newGrp);
-                            }
-                        } else if (customType === "crossword" && cwCfg && cwCfg.answerKey && cwCfg.answerKey.showSolution) {
-                            const left = obj.left || 60;
-                            const top = obj.top || 130;
-                            const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(cwCfg);
-
-                            if (componentType === "grid" && gridGroup) {
-                                c.remove(obj);
-                                gridGroup.set({ left, top });
-                                attachPuzzleMetadata(gridGroup, "crossword", "grid", cwCfg);
-                                c.add(gridGroup);
-                            } else if (componentType === "title" && titleGroup) {
-                                c.remove(obj);
-                                titleGroup.set({ left, top });
-                                attachPuzzleMetadata(titleGroup, "crossword", "title", cwCfg);
-                                c.add(titleGroup);
-                            } else if (componentType === "clues" && cluesGroup) {
-                                c.remove(obj);
-                                cluesGroup.set({ left, top });
-                                attachPuzzleMetadata(cluesGroup, "crossword", "clues", cwCfg);
-                                c.add(cluesGroup);
-                            } else if (!componentType) {
-                                const newObjs = generateAdvancedCrosswordObjects(cwCfg);
-                                c.remove(obj);
-                                const newGrp = new fabric.Group(newObjs, { left, top, subTargetCheck: true });
-                                attachPuzzleMetadata(newGrp, "crossword", "full", cwCfg);
-                                c.add(newGrp);
-                            }
+            c.loadFromJSON(canvasJson).then(() => {
+                if (canvasJson && Array.isArray(canvasJson.objects)) {
+                    const fabricObjects = c.getObjects();
+                    canvasJson.objects.forEach((jsonObj: any, idx: number) => {
+                        if (fabricObjects[idx]) {
+                            hydrateCustomProperties(jsonObj, fabricObjects[idx]);
                         }
                     });
+                }
 
-                    c.requestRenderAll();
-                    setTimeout(() => {
-                        isInternalStateUpdateRef.current = false;
-                    }, 100);
+                const objectsToProcess = [...c.getObjects()];
+                objectsToProcess.forEach((obj) => {
+                    if (obj.type === "group") {
+                        (obj as any).subTargetCheck = true;
+                    }
+
+                    const customType = (obj as any).customType;
+                    const componentType = (obj as any).puzzleComponent;
+                    const wsCfg = (obj as any).wordSearchConfig;
+                    const cwCfg = (obj as any).crosswordConfig;
+
+                    if (customType === "word-search" && wsCfg && wsCfg.answerKey && wsCfg.answerKey.showSolution) {
+                        const left = obj.left || 60;
+                        const top = obj.top || 130;
+                        const scaleX = obj.scaleX ?? 1;
+                        const scaleY = obj.scaleY ?? 1;
+                        const angle = obj.angle ?? 0;
+                        const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(wsCfg);
+
+                        if (componentType === "grid" && gridGroup) {
+                            c.remove(obj); gridGroup.set({ left, top, scaleX, scaleY, angle });
+                            attachPuzzleMetadata(gridGroup, "word-search", "grid", wsCfg); c.add(gridGroup);
+                        } else if (componentType === "title" && titleGroup) {
+                            c.remove(obj); titleGroup.set({ left, top, scaleX, scaleY, angle });
+                            attachPuzzleMetadata(titleGroup, "word-search", "title", wsCfg); c.add(titleGroup);
+                        } else if (componentType === "word-bank" && bankGroup) {
+                            c.remove(obj); bankGroup.set({ left, top, scaleX, scaleY, angle });
+                            attachPuzzleMetadata(bankGroup, "word-search", "word-bank", wsCfg); c.add(bankGroup);
+                        } else if (!componentType) {
+                            const newObjs = generateAdvancedWordSearchObjects(wsCfg);
+                            c.remove(obj);
+                            const newGrp = new fabric.Group(newObjs, { left, top, scaleX, scaleY, angle, subTargetCheck: true });
+                            attachPuzzleMetadata(newGrp, "word-search", "full", wsCfg); c.add(newGrp);
+                        }
+                    } else if (customType === "crossword" && cwCfg && cwCfg.answerKey && cwCfg.answerKey.showSolution) {
+                        const left = obj.left || 60;
+                        const top = obj.top || 130;
+                        const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(cwCfg);
+
+                        if (componentType === "grid" && gridGroup) {
+                            c.remove(obj); gridGroup.set({ left, top });
+                            attachPuzzleMetadata(gridGroup, "crossword", "grid", cwCfg); c.add(gridGroup);
+                        } else if (componentType === "title" && titleGroup) {
+                            c.remove(obj); titleGroup.set({ left, top });
+                            attachPuzzleMetadata(titleGroup, "crossword", "title", cwCfg); c.add(titleGroup);
+                        } else if (componentType === "clues" && cluesGroup) {
+                            c.remove(obj); cluesGroup.set({ left, top });
+                            attachPuzzleMetadata(cluesGroup, "crossword", "clues", cwCfg); c.add(cluesGroup);
+                        } else if (!componentType) {
+                            const newObjs = generateAdvancedCrosswordObjects(cwCfg);
+                            c.remove(obj);
+                            const newGrp = new fabric.Group(newObjs, { left, top, subTargetCheck: true });
+                            attachPuzzleMetadata(newGrp, "crossword", "full", cwCfg); c.add(newGrp);
+                        }
+                    }
                 });
-            }
+
+                c.discardActiveObject();
+                c.requestRenderAll();
+
+                // Seed canvas-level undo history fresh for this page
+                setTimeout(() => {
+                    isInternalStateUpdateRef.current = false;
+                    // Seed initial snapshot for this page
+                    try {
+                        const seedJson = JSON.stringify((c as any).toJSON(CUSTOM_PROPS));
+                        canvasHistoryRef.current = [seedJson];
+                        canvasHistoryIdxRef.current = 0;
+                    } catch (e) {}
+                }, 200);
+            });
+        },
+        [fabricCanvasRef]
+    );
+
+    // Load canvas JSON when currentPageIndex changes (page switching)
+    const prevPageIndexRef = useRef<number>(-1);
+    useEffect(() => {
+        if (!fabricCanvasRef.current) return;
+        const currentPage = pages[currentPageIndex];
+        if (currentPage && currentPage.canvasJson && prevPageIndexRef.current !== currentPageIndex) {
+            prevPageIndexRef.current = currentPageIndex;
+            loadPageIntoCanvas(currentPage.canvasJson);
         }
-    }, [currentPageIndex, pages, fabricCanvasRef]);
+    }, [currentPageIndex, pages, fabricCanvasRef, loadPageIntoCanvas]);
 
     // Update Dimensions & Grid Snapping
     useEffect(() => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as fabric from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,25 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
         canUndo,
         canRedo,
     } = useWorksheetStore();
+
+    // Global keyboard shortcuts for Undo/Redo — use canvas-level history
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const tag = (e.target as HTMLElement)?.tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+            if (e.ctrlKey || e.metaKey) {
+                if (e.key === "z" && !e.shiftKey) {
+                    e.preventDefault();
+                    (window as any).__worksheetUndo?.();
+                } else if (e.key === "y" || (e.key === "z" && e.shiftKey)) {
+                    e.preventDefault();
+                    (window as any).__worksheetRedo?.();
+                }
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
     return (
         <header className="min-h-[3.5rem] py-1.5 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg px-3 flex items-center justify-between gap-3 z-30 sticky top-0 shadow-sm overflow-x-auto w-full max-w-full">
@@ -140,8 +159,7 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700"
-                    disabled={!canUndo()}
-                    onClick={() => undo()}
+                    onClick={() => (window as any).__worksheetUndo?.()}
                     title="Undo (Ctrl+Z)"
                 >
                     <Undo2 className="w-3 h-3" />
@@ -150,8 +168,7 @@ export const WorksheetHeader: React.FC<WorksheetHeaderProps> = ({
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 rounded-lg hover:bg-white dark:hover:bg-slate-700"
-                    disabled={!canRedo()}
-                    onClick={() => redo()}
+                    onClick={() => (window as any).__worksheetRedo?.()}
                     title="Redo (Ctrl+Y)"
                 >
                     <Redo2 className="w-3 h-3" />

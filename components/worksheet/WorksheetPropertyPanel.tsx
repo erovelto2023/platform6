@@ -1149,21 +1149,37 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!activeObj) return;
 
         if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            // Shift the ENTIRE GROUP together so combined bounding box is vertically centered on canvas
+            // This preserves relative positions between objects (title stays above grid, grid above bank)
             const group = activeObj as fabric.Group;
             const objects = group.getObjects();
-            if (objects.length > 0) {
-                const minY = Math.min(...objects.map((o) => o.top || 0));
-                const maxY = Math.max(...objects.map((o) => (o.top || 0) + (o.height || 0) * (o.scaleY || 1)));
-                const midY = (minY + maxY) / 2;
-                objects.forEach((o) => o.set({ top: midY - ((o.height || 0) * (o.scaleY || 1)) / 2 }));
-                group.setCoords();
-            }
+            const canvasH = c.height || 1056;
+            c.discardActiveObject();
+
+            // Compute combined bounding box in canvas coordinates
+            let minTop = Infinity, maxBottom = -Infinity;
+            objects.forEach((o) => {
+                const br = o.getBoundingRect();
+                minTop = Math.min(minTop, br.top);
+                maxBottom = Math.max(maxBottom, br.top + br.height);
+            });
+            const combinedH = maxBottom - minTop;
+            const targetTop = (canvasH - combinedH) / 2;
+            const offset = targetTop - minTop;
+
+            objects.forEach((o) => {
+                o.set({ top: (o.top || 0) + offset });
+                o.setCoords();
+            });
+
+            const sel = new fabric.ActiveSelection(objects, { canvas: c });
+            c.setActiveObject(sel);
         } else {
             c.centerObjectV(activeObj);
         }
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Aligned Middle!");
+        toast.success("Centered vertically on canvas!");
     };
 
     const handleAlignBottom = () => {
@@ -1219,21 +1235,37 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!activeObj) return;
 
         if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            // Shift the ENTIRE GROUP together so combined bounding box is horizontally centered on canvas
+            // This preserves relative positions between objects (left/right offsets maintained)
             const group = activeObj as fabric.Group;
             const objects = group.getObjects();
-            if (objects.length > 0) {
-                const minX = Math.min(...objects.map((o) => o.left || 0));
-                const maxX = Math.max(...objects.map((o) => (o.left || 0) + (o.width || 0) * (o.scaleX || 1)));
-                const midX = (minX + maxX) / 2;
-                objects.forEach((o) => o.set({ left: midX - ((o.width || 0) * (o.scaleX || 1)) / 2 }));
-                group.setCoords();
-            }
+            const canvasW = c.width || 1275;
+            c.discardActiveObject();
+
+            // Compute combined bounding box in canvas coordinates
+            let minLeft = Infinity, maxRight = -Infinity;
+            objects.forEach((o) => {
+                const br = o.getBoundingRect();
+                minLeft = Math.min(minLeft, br.left);
+                maxRight = Math.max(maxRight, br.left + br.width);
+            });
+            const combinedW = maxRight - minLeft;
+            const targetLeft = (canvasW - combinedW) / 2;
+            const offset = targetLeft - minLeft;
+
+            objects.forEach((o) => {
+                o.set({ left: (o.left || 0) + offset });
+                o.setCoords();
+            });
+
+            const sel = new fabric.ActiveSelection(objects, { canvas: c });
+            c.setActiveObject(sel);
         } else {
             c.centerObjectH(activeObj);
         }
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Aligned Center!");
+        toast.success("Centered horizontally on canvas!");
     };
 
     const handleAlignRight = () => {
@@ -1342,32 +1374,59 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         const c = fabricCanvasRef.current;
         if (!c) return;
 
-        const objects = c.getObjects();
-        const titleGroup = objects.find((o: any) => o.puzzleComponent === "title");
-        const gridGroup = objects.find((o: any) => o.puzzleComponent === "grid");
-        const bankGroup = objects.find((o: any) => o.puzzleComponent === "word-bank" || o.puzzleComponent === "clues");
+        const canvasW = c.width || 1275;
+        const allObjs = c.getObjects();
+        const titleGroup = allObjs.find((o: any) => o.puzzleComponent === "title");
+        const gridGroup = allObjs.find((o: any) => o.puzzleComponent === "grid");
+        const bankGroup = allObjs.find((o: any) => o.puzzleComponent === "word-bank" || o.puzzleComponent === "clues");
 
-        if (titleGroup) {
-            c.centerObjectH(titleGroup);
-            titleGroup.set({ top: 60 });
-        }
+        const centerH = (obj: fabric.FabricObject) => {
+            const br = obj.getBoundingRect();
+            // Use explicit calculation: center based on rendered bounding rect width
+            const newLeft = (canvasW - br.width) / 2;
+            // Adjust: obj.left vs br.left offset (accounts for rotation, origin, scale)
+            const leftOffset = (obj.left || 0) - br.left;
+            obj.set({ left: newLeft + leftOffset });
+            obj.setCoords();
+        };
 
-        const gridTop = 150;
-        if (gridGroup) {
-            c.centerObjectH(gridGroup);
-            gridGroup.set({ top: gridTop });
-        }
+        const foundComponents = titleGroup || gridGroup || bankGroup;
 
-        if (bankGroup) {
-            const gridHeight = gridGroup ? (gridGroup.getBoundingRect().height || 320) : 320;
-            const bankTop = gridTop + gridHeight + 35;
-            c.centerObjectH(bankGroup);
-            bankGroup.set({ top: bankTop });
+        if (foundComponents) {
+            if (titleGroup) {
+                centerH(titleGroup);
+                titleGroup.set({ top: 60 });
+                titleGroup.setCoords();
+            }
+
+            const gridTop = 150;
+            if (gridGroup) {
+                centerH(gridGroup);
+                gridGroup.set({ top: gridTop });
+                gridGroup.setCoords();
+            }
+
+            if (bankGroup) {
+                const gridBr = gridGroup ? gridGroup.getBoundingRect() : null;
+                const gridHeight = gridBr ? gridBr.height : 320;
+                const bankTop = gridTop + gridHeight + 35;
+                centerH(bankGroup);
+                bankGroup.set({ top: bankTop });
+                bankGroup.setCoords();
+            }
+        } else {
+            // Fallback: center whatever is selected on the canvas
+            const activeObj = c.getActiveObject();
+            if (activeObj) {
+                c.centerObjectH(activeObj);
+                c.centerObjectV(activeObj);
+                activeObj.setCoords();
+            }
         }
 
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Page components aligned & neatly spaced!");
+        toast.success("Page components tidied & centered!");
     };
 
     const handleRegeneratePuzzle = () => {
