@@ -1147,22 +1147,6 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                {/* 22. SNAKE PATH MAZE STUDIO ACCORDION */}
-                                <AccordionItem value="p-snake-path-maze" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/70 dark:bg-indigo-950/40">
-                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                                            <Route className="w-4 h-4" />
-                                            <span>22. Snake Path Maze Studio</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <p className="text-[11px] text-slate-500">Matching corridor path puzzle with custom themes & answer keys.</p>
-                                        <Button size="sm" className="w-full h-8 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg" onClick={() => onAddSnakePathMaze && onAddSnakePathMaze()}>
-                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Snake Path Maze
-                                        </Button>
-                                    </AccordionContent>
-                                </AccordionItem>
-
                             </Accordion>
                         </div>
                     )}

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import {
     Copy, Trash2, ArrowUp, ArrowDown, Grid3X3, Sparkles, RefreshCw, Layers,
     Palette, Type, FileText, CheckCircle2, ShieldAlert, BarChart3, Wand2, Settings2, HelpCircle,
@@ -473,30 +474,33 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
             existingObjects.forEach((oldObj: any) => {
                 const left = oldObj.left || 60;
                 const top = oldObj.top || 60;
+                const scaleX = oldObj.scaleX ?? 1;
+                const scaleY = oldObj.scaleY ?? 1;
+                const angle = oldObj.angle ?? 0;
                 const comp = oldObj.puzzleComponent;
 
                 if (comp === "title" && newTitle) {
                     c.remove(oldObj);
-                    newTitle.set({ left, top });
+                    newTitle.set({ left, top, scaleX, scaleY, angle });
                     attachPuzzleMetadata(newTitle, "word-search", "title", newConfig);
                     c.add(newTitle);
                     if (activeComp === "title") activeToSelect = newTitle;
                 } else if (comp === "grid" && newGrid) {
                     c.remove(oldObj);
-                    newGrid.set({ left, top });
+                    newGrid.set({ left, top, scaleX, scaleY, angle });
                     attachPuzzleMetadata(newGrid, "word-search", "grid", newConfig);
                     c.add(newGrid);
                     if (activeComp === "grid") activeToSelect = newGrid;
                 } else if (comp === "word-bank" && newBank) {
                     c.remove(oldObj);
-                    newBank.set({ left, top });
+                    newBank.set({ left, top, scaleX, scaleY, angle });
                     attachPuzzleMetadata(newBank, "word-search", "word-bank", newConfig);
                     c.add(newBank);
                     if (activeComp === "word-bank") activeToSelect = newBank;
                 } else if (!comp) {
                     const newObjects = generateAdvancedWordSearchObjects(newConfig);
                     c.remove(oldObj);
-                    const newGroup = new fabric.Group(newObjects, { left, top, subTargetCheck: true });
+                    const newGroup = new fabric.Group(newObjects, { left, top, scaleX, scaleY, angle, subTargetCheck: true });
                     attachPuzzleMetadata(newGroup, "word-search", "full", newConfig);
                     c.add(newGroup);
                     activeToSelect = newGroup;
@@ -1116,26 +1120,74 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         }
     };
 
-    const handleAlignHorizontally = () => {
+    const handleAlignTop = () => {
         const c = fabricCanvasRef.current;
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
-        c.centerObjectH(activeObj);
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const minY = Math.min(...objects.map((o) => o.top || 0));
+                objects.forEach((o) => o.set({ top: minY }));
+                group.setCoords();
+            }
+        } else {
+            activeObj.set({ top: 40 });
+        }
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Centered horizontally on canvas!");
+        toast.success("Aligned Top!");
     };
 
-    const handleAlignVertically = () => {
+    const handleAlignMiddle = () => {
         const c = fabricCanvasRef.current;
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
-        c.centerObjectV(activeObj);
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const minY = Math.min(...objects.map((o) => o.top || 0));
+                const maxY = Math.max(...objects.map((o) => (o.top || 0) + (o.height || 0) * (o.scaleY || 1)));
+                const midY = (minY + maxY) / 2;
+                objects.forEach((o) => o.set({ top: midY - ((o.height || 0) * (o.scaleY || 1)) / 2 }));
+                group.setCoords();
+            }
+        } else {
+            c.centerObjectV(activeObj);
+        }
         c.requestRenderAll();
         c.fire("object:modified");
-        toast.success("Centered vertically on canvas!");
+        toast.success("Aligned Middle!");
+    };
+
+    const handleAlignBottom = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const maxY = Math.max(...objects.map((o) => (o.top || 0) + (o.height || 0) * (o.scaleY || 1)));
+                objects.forEach((o) => o.set({ top: maxY - (o.height || 0) * (o.scaleY || 1) }));
+                group.setCoords();
+            }
+        } else {
+            const canvasH = c.height || 792;
+            const objH = activeObj.getBoundingRect().height;
+            activeObj.set({ top: canvasH - objH - 40 });
+        }
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Aligned Bottom!");
     };
 
     const handleAlignLeft = () => {
@@ -1143,9 +1195,45 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
-        activeObj.set({ left: 40 });
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const minX = Math.min(...objects.map((o) => o.left || 0));
+                objects.forEach((o) => o.set({ left: minX }));
+                group.setCoords();
+            }
+        } else {
+            activeObj.set({ left: 40 });
+        }
         c.requestRenderAll();
         c.fire("object:modified");
+        toast.success("Aligned Left!");
+    };
+
+    const handleAlignCenter = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const minX = Math.min(...objects.map((o) => o.left || 0));
+                const maxX = Math.max(...objects.map((o) => (o.left || 0) + (o.width || 0) * (o.scaleX || 1)));
+                const midX = (minX + maxX) / 2;
+                objects.forEach((o) => o.set({ left: midX - ((o.width || 0) * (o.scaleX || 1)) / 2 }));
+                group.setCoords();
+            }
+        } else {
+            c.centerObjectH(activeObj);
+        }
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Aligned Center!");
     };
 
     const handleAlignRight = () => {
@@ -1153,11 +1241,101 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!c) return;
         const activeObj = c.getActiveObject();
         if (!activeObj) return;
-        const canvasW = c.width || 612;
-        const objW = activeObj.getBoundingRect().width;
-        activeObj.set({ left: canvasW - objW - 40 });
+
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            const group = activeObj as fabric.Group;
+            const objects = group.getObjects();
+            if (objects.length > 0) {
+                const maxX = Math.max(...objects.map((o) => (o.left || 0) + (o.width || 0) * (o.scaleX || 1)));
+                objects.forEach((o) => o.set({ left: maxX - (o.width || 0) * (o.scaleX || 1) }));
+                group.setCoords();
+            }
+        } else {
+            const canvasW = c.width || 612;
+            const objW = activeObj.getBoundingRect().width;
+            activeObj.set({ left: canvasW - objW - 40 });
+        }
         c.requestRenderAll();
         c.fire("object:modified");
+        toast.success("Aligned Right!");
+    };
+
+    const handleDistributeHorizontally = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        let objectsToSpace: fabric.FabricObject[] = [];
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            objectsToSpace = (activeObj as fabric.Group).getObjects();
+        } else {
+            objectsToSpace = c.getObjects();
+        }
+
+        if (objectsToSpace.length < 3) {
+            toast.info("Select at least 3 elements to space evenly horizontally!");
+            return;
+        }
+
+        const sorted = [...objectsToSpace].sort((a, b) => (a.left || 0) - (b.left || 0));
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        const minLeft = first.left || 0;
+        const maxLeft = last.left || 0;
+        const totalSpan = maxLeft - minLeft;
+        const step = totalSpan / (sorted.length - 1);
+
+        sorted.forEach((obj, idx) => {
+            obj.set({ left: minLeft + idx * step });
+        });
+
+        if (activeObj.type === "activeSelection") {
+            (activeObj as fabric.Group).setCoords();
+        }
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Spaced evenly horizontally!");
+    };
+
+    const handleDistributeVertically = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        const activeObj = c.getActiveObject();
+        if (!activeObj) return;
+
+        let objectsToSpace: fabric.FabricObject[] = [];
+        if (activeObj.type === "activeSelection" || (activeObj as any)._objects) {
+            objectsToSpace = (activeObj as fabric.Group).getObjects();
+        } else {
+            objectsToSpace = c.getObjects();
+        }
+
+        if (objectsToSpace.length < 3) {
+            toast.info("Select at least 3 elements to space evenly vertically!");
+            return;
+        }
+
+        const sorted = [...objectsToSpace].sort((a, b) => (a.top || 0) - (b.top || 0));
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+
+        const minTop = first.top || 0;
+        const maxTop = last.top || 0;
+        const totalSpan = maxTop - minTop;
+        const step = totalSpan / (sorted.length - 1);
+
+        sorted.forEach((obj, idx) => {
+            obj.set({ top: minTop + idx * step });
+        });
+
+        if (activeObj.type === "activeSelection") {
+            (activeObj as fabric.Group).setCoords();
+        }
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Spaced evenly vertically!");
     };
 
     const handleTidyUpPage = () => {
@@ -1298,52 +1476,75 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                 <div className="h-11 px-4 border-b border-indigo-200 dark:border-indigo-800 flex items-center justify-between bg-indigo-50/80 dark:bg-indigo-950/40 shrink-0">
                     <span className="font-extrabold text-xs uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
                         <Layers className="w-3.5 h-3.5 text-indigo-500" />
-                        Multi-Element Selection
+                        Group Inspector
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 rounded-full border border-indigo-400/30">
-                        Active Selection
+                        Multi-Selection
                     </span>
                 </div>
 
-                <div className="p-5 flex flex-col gap-4 overflow-y-auto">
-                    <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex flex-col gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-                                <Link2 className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200">Group Selected Objects</p>
-                                <p className="text-[10px] text-indigo-600 dark:text-indigo-400 mt-0.5">Combine all currently highlighted canvas elements into a single movable, resizable group.</p>
-                            </div>
-                        </div>
-                        <Button
-                            className="w-full h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-sm flex items-center justify-center gap-2"
-                            onClick={handleGroup}
-                        >
-                            <Link2 className="w-4 h-4" />
-                            Group Selected Elements
-                        </Button>
-                    </div>
+                <div className="p-3 flex flex-col gap-3 overflow-y-auto flex-1">
+                    <Accordion type="multiple" defaultValue={["group-ops", "align-ops"]} className="w-full space-y-2">
+                        {/* 1. GROUP & UNGROUP OPERATIONS ACCORDION */}
+                        <AccordionItem value="group-ops" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/40 dark:bg-indigo-950/20">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                <div className="flex items-center gap-2">
+                                    <Link2 className="w-4 h-4 text-indigo-500" />
+                                    <span>Group & Combine Tools</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-3 pt-1 pb-3">
+                                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800 flex flex-col gap-2">
+                                    <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200">Group Selected Objects</p>
+                                    <p className="text-[10px] text-slate-500">Combine all highlighted elements into a single movable, resizable group.</p>
+                                    <Button
+                                        className="w-full h-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs flex items-center justify-center gap-1.5"
+                                        onClick={handleGroup}
+                                    >
+                                        <Link2 className="w-3.5 h-3.5" />
+                                        Group Selected Elements
+                                    </Button>
+                                </div>
 
-                    <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex flex-col gap-3">
-                        <div className="flex items-center gap-2">
-                            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-600 dark:text-amber-400">
-                                <Unlink className="w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-amber-900 dark:text-amber-200">Deselect / Separate</p>
-                                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Release multi-selection and return to single element editing mode.</p>
-                            </div>
-                        </div>
-                        <Button
-                            variant="outline"
-                            className="w-full h-9 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
-                            onClick={handleUngroup}
-                        >
-                            <Unlink className="w-4 h-4" />
-                            Separate Selection
-                        </Button>
-                    </div>
+                                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800 flex flex-col gap-2">
+                                    <p className="text-xs font-bold text-amber-900 dark:text-amber-200">Deselect / Separate</p>
+                                    <p className="text-[10px] text-slate-500">Release multi-selection back to single element editing mode.</p>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full h-8 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 font-bold text-xs rounded-lg flex items-center justify-center gap-1.5"
+                                        onClick={handleUngroup}
+                                    >
+                                        <Unlink className="w-3.5 h-3.5" />
+                                        Separate Selection
+                                    </Button>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        {/* 2. MULTI-OBJECT ALIGNMENT & SPACING ACCORDION */}
+                        <AccordionItem value="align-ops" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/50 dark:bg-slate-900/40">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                <div className="flex items-center gap-2">
+                                    <LayoutGrid className="w-4 h-4 text-indigo-500" />
+                                    <span>Alignment & Even Spacing</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-2 pt-1 pb-3">
+                                <div className="grid grid-cols-3 gap-1.5">
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignTop}>Align Top</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignMiddle}>Align Middle</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignBottom}>Align Bottom</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignLeft}>Align Left</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignCenter}>Align Center</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold" onClick={handleAlignRight}>Align Right</Button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300" onClick={handleDistributeHorizontally}>Space Horizontally</Button>
+                                    <Button size="sm" variant="outline" className="h-8 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300" onClick={handleDistributeVertically}>Space Vertically</Button>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 </div>
             </aside>
         );
@@ -1633,57 +1834,210 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
             </div>
 
             {/* Alignment & Spacing Quick Bar */}
-            <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/80 flex items-center justify-between gap-1 text-slate-600 dark:text-slate-400 shrink-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Align:</span>
-                <div className="flex items-center gap-1">
+            <div className="px-3 py-1.5 border-b border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/80 flex items-center justify-between gap-1 text-slate-600 dark:text-slate-400 shrink-0 flex-wrap">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Align & Space:</span>
+                <div className="flex items-center gap-0.5 flex-wrap">
+                    {/* Vertical Alignment */}
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                        onClick={handleAlignHorizontally}
-                        title="Center Horizontally on Canvas"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        onClick={handleAlignTop}
+                        title="Align Tops"
                     >
-                        <AlignHorizontalJustifyCenter className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <ArrowUp className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                        onClick={handleAlignVertically}
-                        title="Center Vertically on Canvas"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400"
+                        onClick={handleAlignMiddle}
+                        title="Align Middles (Vertical Center)"
                     >
-                        <AlignVerticalJustifyCenter className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                        <AlignVerticalJustifyCenter className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        onClick={handleAlignBottom}
+                        title="Align Bottoms"
+                    >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5" />
+
+                    {/* Horizontal Alignment */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
                         onClick={handleAlignLeft}
-                        title="Align Left"
+                        title="Align Lefts"
                     >
                         <AlignLeft className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
-                        onClick={handleAlignRight}
-                        title="Align Right"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-indigo-600 dark:text-indigo-400"
+                        onClick={handleAlignCenter}
+                        title="Align Centers (Horizontal)"
                     >
-                        <AlignRight className="w-3.5 h-3.5" />
+                        <AlignHorizontalJustifyCenter className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                         variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                        onClick={handleAlignRight}
+                        title="Align Rights"
+                    >
+                        <AlignRight className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 mx-0.5" />
+
+                    {/* Even Spacing / Distribution */}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400"
+                        onClick={handleDistributeHorizontally}
+                        title="Space Evenly Horizontally"
+                    >
+                        <FlipHorizontal className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400"
+                        onClick={handleDistributeVertically}
+                        title="Space Evenly Vertically"
+                    >
+                        <FlipVertical className="w-3.5 h-3.5" />
+                    </Button>
+
+                    <Button
+                        variant="ghost"
                         size="sm"
-                        className="h-6 px-2 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-bold border border-indigo-200 dark:border-indigo-800"
+                        className="h-6 px-1.5 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 font-bold border border-indigo-200 dark:border-indigo-800 ml-0.5"
                         onClick={handleTidyUpPage}
                         title="1-Click Auto Tidy & Space Components (Title top, Grid center, Word Bank bottom)"
                     >
-                        <LayoutGrid className="w-3 h-3 mr-1" />
-                        <span className="text-[10px]">Tidy Page</span>
+                        <LayoutGrid className="w-3 h-3 mr-0.5" />
+                        <span className="text-[9px]">Tidy</span>
                     </Button>
                 </div>
             </div>
+
+            {/* Manual Transform Entry Fields (Width, Height, Angle, X, Y) */}
+            {(() => {
+                const c = fabricCanvasRef.current;
+                if (!c) return null;
+                const activeObj = c.getActiveObject();
+                if (!activeObj) return null;
+
+                const curWidth = Math.round((activeObj.width || 0) * (activeObj.scaleX || 1));
+                const curHeight = Math.round((activeObj.height || 0) * (activeObj.scaleY || 1));
+                const curAngle = Math.round(activeObj.angle || 0);
+                const curLeft = Math.round(activeObj.left || 0);
+                const curTop = Math.round(activeObj.top || 0);
+
+                return (
+                    <div className="px-3 py-2 border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 space-y-1.5 shrink-0">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Position & Size:</span>
+                            <span className="text-[9px] font-mono text-slate-500 font-bold uppercase">{activeObj.type || "Object"}</span>
+                        </div>
+                        <div className="grid grid-cols-5 gap-1">
+                            <div className="space-y-0.5">
+                                <span className="text-[9px] font-bold text-slate-500 block text-center">W (px)</span>
+                                <Input
+                                    type="number"
+                                    value={curWidth}
+                                    onChange={(e) => {
+                                        const newW = parseFloat(e.target.value);
+                                        if (isNaN(newW) || newW <= 0) return;
+                                        const origW = activeObj.width || 1;
+                                        activeObj.set({ scaleX: newW / origW });
+                                        activeObj.setCoords();
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }}
+                                    className="h-6 px-1 text-[10px] font-mono text-center font-bold"
+                                />
+                            </div>
+                            <div className="space-y-0.5">
+                                <span className="text-[9px] font-bold text-slate-500 block text-center">H (px)</span>
+                                <Input
+                                    type="number"
+                                    value={curHeight}
+                                    onChange={(e) => {
+                                        const newH = parseFloat(e.target.value);
+                                        if (isNaN(newH) || newH <= 0) return;
+                                        const origH = activeObj.height || 1;
+                                        activeObj.set({ scaleY: newH / origH });
+                                        activeObj.setCoords();
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }}
+                                    className="h-6 px-1 text-[10px] font-mono text-center font-bold"
+                                />
+                            </div>
+                            <div className="space-y-0.5">
+                                <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 block text-center">Rotate (°)</span>
+                                <Input
+                                    type="number"
+                                    value={curAngle}
+                                    onChange={(e) => {
+                                        const newA = parseFloat(e.target.value);
+                                        if (isNaN(newA)) return;
+                                        activeObj.set({ angle: (newA % 360 + 360) % 360 });
+                                        activeObj.setCoords();
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }}
+                                    className="h-6 px-1 text-[10px] font-mono text-center font-bold border-indigo-300 dark:border-indigo-700"
+                                />
+                            </div>
+                            <div className="space-y-0.5">
+                                <span className="text-[9px] font-bold text-slate-500 block text-center">X (px)</span>
+                                <Input
+                                    type="number"
+                                    value={curLeft}
+                                    onChange={(e) => {
+                                        const newX = parseFloat(e.target.value);
+                                        if (isNaN(newX)) return;
+                                        activeObj.set({ left: newX });
+                                        activeObj.setCoords();
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }}
+                                    className="h-6 px-1 text-[10px] font-mono text-center"
+                                />
+                            </div>
+                            <div className="space-y-0.5">
+                                <span className="text-[9px] font-bold text-slate-500 block text-center">Y (px)</span>
+                                <Input
+                                    type="number"
+                                    value={curTop}
+                                    onChange={(e) => {
+                                        const newY = parseFloat(e.target.value);
+                                        if (isNaN(newY)) return;
+                                        activeObj.set({ top: newY });
+                                        activeObj.setCoords();
+                                        c.requestRenderAll();
+                                        c.fire("object:modified");
+                                    }}
+                                    className="h-6 px-1 text-[10px] font-mono text-center"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* DISCOVERY EDUCATION & STANDARD PUZZLE STUDIOS */}
             {isDoublePuzzleSelected ? (
@@ -2662,479 +3016,492 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                 </Tabs>
             ) : (
                 /* --- STANDARD & DRAWING ELEMENT PROPERTIES --- */
-                <div className="p-4 space-y-5 flex-1 overflow-y-auto">
-                    {/* Dedicated Multi-Line Text & Typography Inspector for Text & Grouped Text Objects */}
-                    {selectedObjectProps && (selectedObjectType === "i-text" || selectedObjectType === "text" || typeof selectedObjectProps.text === "string") && (
-                        <div className="space-y-3 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
-                            <Label className="text-xs font-bold text-indigo-800 dark:text-indigo-300 flex items-center gap-1.5">
-                                <Type className="w-3.5 h-3.5 text-indigo-500" /> Multi-Line Text & Typography
-                            </Label>
-
-                            {/* Inline Multi-Line Text Editor */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Content (Multi-Line)</Label>
-                                <Textarea
-                                    value={selectedObjectProps.text || ""}
-                                    onChange={(e) => updateActiveObjectProperty({ text: e.target.value })}
-                                    className="text-xs font-sans h-20 bg-white dark:bg-slate-900 resize-y"
-                                    placeholder="Type your multi-line text here..."
-                                />
-                            </div>
-
-                            {/* Font Family Selector */}
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Family</Label>
-                                <Select
-                                    value={selectedObjectProps.fontFamily || "Inter"}
-                                    onValueChange={(v) => updateActiveObjectProperty({ fontFamily: v })}
-                                >
-                                    <SelectTrigger className="h-8 text-xs bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Inter">Inter</SelectItem>
-                                        <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
-                                        <SelectItem value="Courier New">Courier New</SelectItem>
-                                        <SelectItem value="Comic Sans MS">Comic Sans</SelectItem>
-                                        <SelectItem value="Georgia">Georgia</SelectItem>
-                                        <SelectItem value="Arial">Arial</SelectItem>
-                                        <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                                        {customFonts.map((f) => (
-                                            <SelectItem key={f.id} value={f.fontFamily}>
-                                                ✨ {f.fontFamily} (Custom)
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* Font Size & Line Height Sliders */}
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="space-y-1">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Size</Label>
-                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{selectedObjectProps.fontSize || 18}px</span>
+                <div className="p-3 flex-1 overflow-y-auto">
+                    <Accordion type="multiple" defaultValue={["text-style", "color-style", "line-style", "transform-style", "layer-style"]} className="w-full space-y-2">
+                        {/* ACCORDION 1: MULTI-LINE TEXT & TYPOGRAPHY */}
+                        {selectedObjectProps && (selectedObjectType === "i-text" || selectedObjectType === "text" || typeof selectedObjectProps.text === "string") && (
+                            <AccordionItem value="text-style" className="border border-indigo-200 dark:border-indigo-800 rounded-xl px-3 bg-indigo-50/40 dark:bg-indigo-950/20">
+                                <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                                    <div className="flex items-center gap-2">
+                                        <Type className="w-4 h-4 text-indigo-500" />
+                                        <span>Multi-Line Text & Typography</span>
                                     </div>
-                                    <Slider
-                                        value={[selectedObjectProps.fontSize || 18]}
-                                        min={8}
-                                        max={120}
-                                        step={1}
-                                        onValueChange={([val]) => updateActiveObjectProperty({ fontSize: val })}
-                                    />
-                                </div>
-
-                                <div className="space-y-1">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Line Spacing</Label>
-                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{(selectedObjectProps.lineHeight || 1.2).toFixed(1)}</span>
+                                </AccordionTrigger>
+                                <AccordionContent className="space-y-3 pt-1 pb-3">
+                                    {/* Inline Multi-Line Text Editor */}
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Content (Multi-Line)</Label>
+                                        <Textarea
+                                            value={selectedObjectProps.text || ""}
+                                            onChange={(e) => updateActiveObjectProperty({ text: e.target.value })}
+                                            className="text-xs font-sans h-20 bg-white dark:bg-slate-900 resize-y"
+                                            placeholder="Type your multi-line text here..."
+                                        />
                                     </div>
-                                    <Slider
-                                        value={[selectedObjectProps.lineHeight || 1.2]}
-                                        min={0.8}
-                                        max={2.5}
-                                        step={0.1}
-                                        onValueChange={([val]) => updateActiveObjectProperty({ lineHeight: val })}
-                                    />
-                                </div>
-                            </div>
 
-                            {/* Text Alignment */}
-                            <div className="space-y-1 pt-1">
-                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Alignment</Label>
-                                <div className="grid grid-cols-3 gap-1">
-                                    {[
-                                        { id: "left", label: "Left" },
-                                        { id: "center", label: "Center" },
-                                        { id: "right", label: "Right" },
-                                    ].map((align) => (
-                                        <Button
-                                            key={align.id}
-                                            variant="outline"
-                                            size="sm"
-                                            className={`h-7 text-[10px] font-bold ${selectedObjectProps.textAlign === align.id ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900"}`}
-                                            onClick={() => updateActiveObjectProperty({ textAlign: align.id })}
+                                    {/* Font Family Selector */}
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Family</Label>
+                                        <Select
+                                            value={selectedObjectProps.fontFamily || "Inter"}
+                                            onValueChange={(v) => updateActiveObjectProperty({ fontFamily: v })}
                                         >
-                                            {align.label}
-                                        </Button>
+                                            <SelectTrigger className="h-8 text-xs bg-white dark:bg-slate-900"><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="Inter">Inter</SelectItem>
+                                                <SelectItem value="K-12 Handwriting">K-12 Handwriting</SelectItem>
+                                                <SelectItem value="Courier New">Courier New</SelectItem>
+                                                <SelectItem value="Comic Sans MS">Comic Sans</SelectItem>
+                                                <SelectItem value="Georgia">Georgia</SelectItem>
+                                                <SelectItem value="Arial">Arial</SelectItem>
+                                                <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                                                {customFonts.map((f) => (
+                                                    <SelectItem key={f.id} value={f.fontFamily}>
+                                                        ✨ {f.fontFamily} (Custom)
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Font Size & Line Height Sliders */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-1">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Font Size</Label>
+                                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{selectedObjectProps.fontSize || 18}px</span>
+                                            </div>
+                                            <Slider
+                                                value={[selectedObjectProps.fontSize || 18]}
+                                                min={8}
+                                                max={120}
+                                                step={1}
+                                                onValueChange={([val]) => updateActiveObjectProperty({ fontSize: val })}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-1">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Line Spacing</Label>
+                                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">{(selectedObjectProps.lineHeight || 1.2).toFixed(1)}</span>
+                                            </div>
+                                            <Slider
+                                                value={[selectedObjectProps.lineHeight || 1.2]}
+                                                min={0.8}
+                                                max={2.5}
+                                                step={0.1}
+                                                onValueChange={([val]) => updateActiveObjectProperty({ lineHeight: val })}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Text Alignment */}
+                                    <div className="space-y-1 pt-1">
+                                        <Label className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider">Text Alignment</Label>
+                                        <div className="grid grid-cols-3 gap-1">
+                                            {[
+                                                { id: "left", label: "Left" },
+                                                { id: "center", label: "Center" },
+                                                { id: "right", label: "Right" },
+                                            ].map((align) => (
+                                                <Button
+                                                    key={align.id}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className={`h-7 text-[10px] font-bold ${selectedObjectProps.textAlign === align.id ? "bg-indigo-600 text-white" : "bg-white dark:bg-slate-900"}`}
+                                                    onClick={() => updateActiveObjectProperty({ textAlign: align.id })}
+                                                >
+                                                    {align.label}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        )}
+
+                        {/* ACCORDION 2: COLOR & INK SETTINGS */}
+                        <AccordionItem value="color-style" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/50 dark:bg-slate-900/40">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                <div className="flex items-center gap-2">
+                                    <Palette className="w-4 h-4 text-indigo-500" />
+                                    <span>Color & Ink Settings</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-3 pt-1 pb-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                    {/* Stroke / Line Color */}
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Stroke / Line</span>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="color"
+                                                value={typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                                onChange={(e) => updateActiveObjectProperty({ stroke: e.target.value })}
+                                                className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
+                                            />
+                                            <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-400 truncate">
+                                                {typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Fill Color */}
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Fill Color</span>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="color"
+                                                value={typeof selectedObjectProps?.fill === "string" && selectedObjectProps.fill !== "transparent" ? selectedObjectProps.fill : "#ffffff"}
+                                                onChange={(e) => updateActiveObjectProperty({ fill: e.target.value })}
+                                                className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
+                                            />
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className={`h-8 text-[10px] font-bold px-2 ${selectedObjectProps?.fill === "transparent" || !selectedObjectProps?.fill ? "bg-indigo-50 border-indigo-300 text-indigo-600" : ""}`}
+                                                onClick={() => updateActiveObjectProperty({ fill: "transparent" })}
+                                                title="Clear Fill Color (Transparent)"
+                                            >
+                                                None
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Quick Palette Swatches */}
+                                <div className="flex items-center gap-1.5 pt-1">
+                                    {["#0f172a", "#2563eb", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#000000", "#ffffff"].map((colorHex) => (
+                                        <button
+                                            key={colorHex}
+                                            className="w-5 h-5 rounded-full border border-slate-300 hover:scale-125 transition-transform shadow-xs"
+                                            style={{ backgroundColor: colorHex }}
+                                            onClick={() => {
+                                                const c = fabricCanvasRef.current;
+                                                if (!c) return;
+                                                const activeObj = c.getActiveObject();
+                                                if (activeObj) {
+                                                    if (activeObj.stroke || activeObj.type === "path" || activeObj.type === "line") {
+                                                        updateActiveObjectProperty({ stroke: colorHex });
+                                                    } else {
+                                                        updateActiveObjectProperty({ fill: colorHex });
+                                                    }
+                                                }
+                                            }}
+                                        />
                                     ))}
                                 </div>
-                            </div>
-                        </div>
-                    )}
+                            </AccordionContent>
+                        </AccordionItem>
 
-                    {/* 1. COLOR & INK CONTROLS */}
-                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                            <Palette className="w-3.5 h-3.5 text-indigo-500" /> Color & Ink Settings
-                        </Label>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* Stroke / Line Color */}
-                            <div className="space-y-1">
-                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Stroke / Line</span>
+                        {/* ACCORDION 3: LINE THICKNESS, DASHES & OPACITY */}
+                        <AccordionItem value="line-style" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/50 dark:bg-slate-900/40">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                 <div className="flex items-center gap-2">
-                                    <input
-                                        type="color"
-                                        value={typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
-                                        onChange={(e) => updateActiveObjectProperty({ stroke: e.target.value })}
-                                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
-                                    />
-                                    <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-400 truncate">
-                                        {typeof selectedObjectProps?.stroke === "string" ? selectedObjectProps.stroke : "#0f172a"}
+                                    <Sliders className="w-4 h-4 text-indigo-500" />
+                                    <span>Line Style, Pattern & Opacity</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-3 pt-1 pb-3">
+                                <div className="flex items-center justify-between">
+                                    <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Line Thickness</Label>
+                                    <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                        {selectedObjectProps?.strokeWidth || 1}px
                                     </span>
                                 </div>
-                            </div>
+                                <Slider
+                                    value={[selectedObjectProps?.strokeWidth || 1]}
+                                    min={1}
+                                    max={60}
+                                    step={1}
+                                    onValueChange={([val]) => updateActiveObjectProperty({ strokeWidth: val })}
+                                />
 
-                            {/* Fill Color */}
-                            <div className="space-y-1">
-                                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Fill Color</span>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="color"
-                                        value={typeof selectedObjectProps?.fill === "string" && selectedObjectProps.fill !== "transparent" ? selectedObjectProps.fill : "#ffffff"}
-                                        onChange={(e) => updateActiveObjectProperty({ fill: e.target.value })}
-                                        className="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5 shrink-0"
-                                    />
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className={`h-8 text-[10px] font-bold px-2 ${selectedObjectProps?.fill === "transparent" || !selectedObjectProps?.fill ? "bg-indigo-50 border-indigo-300 text-indigo-600" : ""}`}
-                                        onClick={() => updateActiveObjectProperty({ fill: "transparent" })}
-                                        title="Clear Fill Color (Transparent)"
-                                    >
-                                        None
-                                    </Button>
+                                {/* Dash Patterns */}
+                                <div className="space-y-1 pt-1">
+                                    <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Line Pattern</Label>
+                                    <div className="grid grid-cols-4 gap-1">
+                                        {[
+                                            { label: "Solid", value: null },
+                                            { label: "Dashed", value: [8, dashGap] },
+                                            { label: "Dotted", value: [3, dashGap] },
+                                            { label: "Long Dash", value: [16, dashGap] },
+                                        ].map((dash) => (
+                                            <Button
+                                                key={dash.label}
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 text-[10px] font-bold px-1"
+                                                onClick={() => updateActiveObjectProperty({ strokeDashArray: dash.value })}
+                                            >
+                                                {dash.label}
+                                            </Button>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        {/* Quick Palette Swatches */}
-                        <div className="flex items-center gap-1.5 pt-1">
-                            {["#0f172a", "#2563eb", "#ef4444", "#10b981", "#8b5cf6", "#f59e0b", "#000000", "#ffffff"].map((colorHex) => (
-                                <button
-                                    key={colorHex}
-                                    className="w-5 h-5 rounded-full border border-slate-300 hover:scale-125 transition-transform shadow-xs"
-                                    style={{ backgroundColor: colorHex }}
-                                    onClick={() => {
-                                        const c = fabricCanvasRef.current;
-                                        if (!c) return;
-                                        const activeObj = c.getActiveObject();
-                                        if (activeObj) {
-                                            if (activeObj.stroke || activeObj.type === "path" || activeObj.type === "line") {
-                                                updateActiveObjectProperty({ stroke: colorHex });
-                                            } else {
-                                                updateActiveObjectProperty({ fill: colorHex });
+                                {/* Dash Gap Spacing Slider */}
+                                <div className="space-y-1 pt-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Dash & Dot Spacing</Label>
+                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                            {Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
+                                                ? selectedObjectProps.strokeDashArray[1]
+                                                : dashGap}px
+                                        </span>
+                                    </div>
+                                    <Slider
+                                        value={[
+                                            Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
+                                                ? selectedObjectProps.strokeDashArray[1]
+                                                : dashGap,
+                                        ]}
+                                        min={2}
+                                        max={40}
+                                        step={1}
+                                        onValueChange={([gapVal]) => {
+                                            setDashGap(gapVal);
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                const currentDash = Array.isArray(activeObj.strokeDashArray) && activeObj.strokeDashArray.length > 0
+                                                    ? activeObj.strokeDashArray[0]
+                                                    : 8;
+                                                updateActiveObjectProperty({ strokeDashArray: [currentDash, gapVal] });
                                             }
-                                        }
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
+                                        }}
+                                    />
+                                </div>
 
-                    {/* 2. STROKE THICKNESS & PATTERNS */}
-                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between">
-                            <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Line Thickness</Label>
-                            <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                                {selectedObjectProps?.strokeWidth || 1}px
-                            </span>
-                        </div>
-                        <Slider
-                            value={[selectedObjectProps?.strokeWidth || 1]}
-                            min={1}
-                            max={60}
-                            step={1}
-                            onValueChange={([val]) => updateActiveObjectProperty({ strokeWidth: val })}
-                        />
+                                {/* Opacity Slider */}
+                                <div className="space-y-1 pt-2">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Opacity / Transparency</Label>
+                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                            {Math.round((selectedObjectProps?.opacity ?? 1) * 100)}%
+                                        </span>
+                                    </div>
+                                    <Slider
+                                        value={[(selectedObjectProps?.opacity ?? 1) * 100]}
+                                        min={10}
+                                        max={100}
+                                        step={5}
+                                        onValueChange={([val]) => {
+                                            const opacityVal = val / 100;
+                                            updateActiveObjectProperty({ opacity: opacityVal });
+                                            if (selectedObjectProps) {
+                                                selectedObjectProps.opacity = opacityVal;
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
 
-                        {/* Dash Patterns */}
-                        <div className="space-y-1 pt-1">
-                            <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Line Pattern</Label>
-                            <div className="grid grid-cols-4 gap-1">
-                                {[
-                                    { label: "Solid", value: null },
-                                    { label: "Dashed", value: [8, dashGap] },
-                                    { label: "Dotted", value: [3, dashGap] },
-                                    { label: "Long Dash", value: [16, dashGap] },
-                                ].map((dash) => (
+                        {/* ACCORDION 4: SIZE, ROTATION & FLIP */}
+                        <AccordionItem value="transform-style" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/50 dark:bg-slate-900/40">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                <div className="flex items-center gap-2">
+                                    <Maximize2 className="w-4 h-4 text-indigo-500" />
+                                    <span>Size, Rotation & Flip</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-3 pt-1 pb-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Width (px)</Label>
+                                        <Input
+                                            type="number"
+                                            value={Math.round((selectedObjectProps?.width || 100) * (selectedObjectProps?.scaleX || 1))}
+                                            onChange={(e) => {
+                                                const c = fabricCanvasRef.current;
+                                                if (!c) return;
+                                                const activeObj = c.getActiveObject();
+                                                if (activeObj && activeObj.width) {
+                                                    const newW = parseFloat(e.target.value) || 10;
+                                                    activeObj.set({ scaleX: newW / activeObj.width });
+                                                    c.requestRenderAll();
+                                                    c.fire("object:modified");
+                                                }
+                                            }}
+                                            className="h-8 text-xs font-mono font-bold"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Height (px)</Label>
+                                        <Input
+                                            type="number"
+                                            value={Math.round((selectedObjectProps?.height || 100) * (selectedObjectProps?.scaleY || 1))}
+                                            onChange={(e) => {
+                                                const c = fabricCanvasRef.current;
+                                                if (!c) return;
+                                                const activeObj = c.getActiveObject();
+                                                if (activeObj && activeObj.height) {
+                                                    const newH = parseFloat(e.target.value) || 10;
+                                                    activeObj.set({ scaleY: newH / activeObj.height });
+                                                    c.requestRenderAll();
+                                                    c.fire("object:modified");
+                                                }
+                                            }}
+                                            className="h-8 text-xs font-mono font-bold"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Rotation Control */}
+                                <div className="space-y-1 pt-1">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                                            <RotateCw className="w-3 h-3 text-indigo-500" /> Rotation Angle
+                                        </Label>
+                                        <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                            {Math.round(selectedObjectProps?.angle || 0)}°
+                                        </span>
+                                    </div>
+                                    <Slider
+                                        value={[Math.round(selectedObjectProps?.angle || 0)]}
+                                        min={0}
+                                        max={360}
+                                        step={1}
+                                        onValueChange={([val]) => {
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                activeObj.set({ angle: val });
+                                                c.requestRenderAll();
+                                                c.fire("object:modified");
+                                            }
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Flip Controls */}
+                                <div className="flex items-center gap-2 pt-1">
                                     <Button
-                                        key={dash.label}
                                         variant="outline"
                                         size="sm"
-                                        className="h-7 text-[10px] font-bold px-1"
-                                        onClick={() => updateActiveObjectProperty({ strokeDashArray: dash.value })}
+                                        className="flex-1 h-8 text-xs font-bold gap-1"
+                                        onClick={() => {
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                activeObj.set({ flipX: !activeObj.flipX });
+                                                c.requestRenderAll();
+                                                c.fire("object:modified");
+                                            }
+                                        }}
                                     >
-                                        {dash.label}
+                                        <FlipHorizontal className="w-3.5 h-3.5" /> Flip Horiz
                                     </Button>
-                                ))}
-                            </div>
-                        </div>
 
-                        {/* Dash & Dot Gap Spacing Slider */}
-                        <div className="space-y-1 pt-2">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Dash & Dot Spacing / Gap</Label>
-                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                                    {Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
-                                        ? selectedObjectProps.strokeDashArray[1]
-                                        : dashGap}px
-                                </span>
-                            </div>
-                            <Slider
-                                value={[
-                                    Array.isArray(selectedObjectProps?.strokeDashArray) && selectedObjectProps.strokeDashArray.length > 1
-                                        ? selectedObjectProps.strokeDashArray[1]
-                                        : dashGap,
-                                ]}
-                                min={2}
-                                max={40}
-                                step={1}
-                                onValueChange={([gapVal]) => {
-                                    setDashGap(gapVal);
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        const currentDash = Array.isArray(activeObj.strokeDashArray) && activeObj.strokeDashArray.length > 0
-                                            ? activeObj.strokeDashArray[0]
-                                            : 8;
-                                        updateActiveObjectProperty({ strokeDashArray: [currentDash, gapVal] });
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {/* Opacity Slider */}
-                        <div className="space-y-1 pt-2">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200">Opacity / Transparency</Label>
-                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                                    {Math.round((selectedObjectProps?.opacity ?? 1) * 100)}%
-                                </span>
-                            </div>
-                            <Slider
-                                value={[(selectedObjectProps?.opacity ?? 1) * 100]}
-                                min={10}
-                                max={100}
-                                step={5}
-                                onValueChange={([val]) => {
-                                    const opacityVal = val / 100;
-                                    updateActiveObjectProperty({ opacity: opacityVal });
-                                    if (selectedObjectProps) {
-                                        selectedObjectProps.opacity = opacityVal;
-                                    }
-                                }}
-                            />
-                        </div>
-                    </div>
-
-                    {/* 3. DIMENSIONS & TRANSFORM CONTROLS */}
-                    <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                            <Maximize2 className="w-3.5 h-3.5 text-indigo-500" /> Size & Rotation
-                        </Label>
-
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Width (px)</Label>
-                                <Input
-                                    type="number"
-                                    value={Math.round((selectedObjectProps?.width || 100) * (selectedObjectProps?.scaleX || 1))}
-                                    onChange={(e) => {
-                                        const c = fabricCanvasRef.current;
-                                        if (!c) return;
-                                        const activeObj = c.getActiveObject();
-                                        if (activeObj && activeObj.width) {
-                                            const newW = parseFloat(e.target.value) || 10;
-                                            activeObj.set({ scaleX: newW / activeObj.width });
-                                            c.requestRenderAll();
-                                            c.fire("object:modified");
-                                        }
-                                    }}
-                                    className="h-8 text-xs font-mono font-bold"
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <Label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Height (px)</Label>
-                                <Input
-                                    type="number"
-                                    value={Math.round((selectedObjectProps?.height || 100) * (selectedObjectProps?.scaleY || 1))}
-                                    onChange={(e) => {
-                                        const c = fabricCanvasRef.current;
-                                        if (!c) return;
-                                        const activeObj = c.getActiveObject();
-                                        if (activeObj && activeObj.height) {
-                                            const newH = parseFloat(e.target.value) || 10;
-                                            activeObj.set({ scaleY: newH / activeObj.height });
-                                            c.requestRenderAll();
-                                            c.fire("object:modified");
-                                        }
-                                    }}
-                                    className="h-8 text-xs font-mono font-bold"
-                                />
-                            </div>
-                        </div>
-
-                        {/* Rotation Control */}
-                        <div className="space-y-1 pt-1">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
-                                    <RotateCw className="w-3 h-3 text-indigo-500" /> Rotation Angle
-                                </Label>
-                                <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                                    {Math.round(selectedObjectProps?.angle || 0)}°
-                                </span>
-                            </div>
-                            <Slider
-                                value={[Math.round(selectedObjectProps?.angle || 0)]}
-                                min={0}
-                                max={360}
-                                step={1}
-                                onValueChange={([val]) => {
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        activeObj.set({ angle: val });
-                                        c.requestRenderAll();
-                                        c.fire("object:modified");
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {/* Flip Controls */}
-                        <div className="flex items-center gap-2 pt-1">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 h-8 text-xs font-bold gap-1"
-                                onClick={() => {
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        activeObj.set({ flipX: !activeObj.flipX });
-                                        c.requestRenderAll();
-                                        c.fire("object:modified");
-                                    }
-                                }}
-                            >
-                                <FlipHorizontal className="w-3.5 h-3.5" /> Flip Horiz
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 h-8 text-xs font-bold gap-1"
-                                onClick={() => {
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        activeObj.set({ flipY: !activeObj.flipY });
-                                        c.requestRenderAll();
-                                        c.fire("object:modified");
-                                    }
-                                }}
-                            >
-                                <FlipVertical className="w-3.5 h-3.5" /> Flip Vert
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* 4. LAYERING & ORDERING CONTROLS */}
-                    <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
-                        <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                            <Layers className="w-3.5 h-3.5 text-indigo-500" /> Layer Arrangement
-                        </Label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs font-semibold justify-start gap-1.5"
-                                onClick={() => {
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        if ((c as any).bringObjectToFront) (c as any).bringObjectToFront(activeObj);
-                                        else if ((c as any).bringToFront) (c as any).bringToFront(activeObj);
-                                        c.requestRenderAll();
-                                        c.fire("object:modified");
-                                        toast.success("Brought to front");
-                                    }
-                                }}
-                            >
-                                <ArrowUp className="w-3.5 h-3.5 text-indigo-500" /> Bring to Front
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs font-semibold justify-start gap-1.5"
-                                onClick={() => {
-                                    const c = fabricCanvasRef.current;
-                                    if (!c) return;
-                                    const activeObj = c.getActiveObject();
-                                    if (activeObj) {
-                                        if ((c as any).sendObjectToBack) (c as any).sendObjectToBack(activeObj);
-                                        else if ((c as any).sendToBack) (c as any).sendToBack(activeObj);
-                                        c.requestRenderAll();
-                                        c.fire("object:modified");
-                                        toast.success("Sent to back");
-                                    }
-                                }}
-                            >
-                                <ArrowDown className="w-3.5 h-3.5 text-indigo-500" /> Send to Back
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* 5. PATH SEGMENT FUSE CONTROL (Under Layer Arrangement - greyed out unless 2+ selected) */}
-                    {(() => {
-                        const activeObjs = fabricCanvasRef.current ? fabricCanvasRef.current.getActiveObjects() : [];
-                        const count = activeObjs.length;
-                        const canFuse = count >= 2 || selectedObjectType === "activeSelection" || selectedObjectType === "active-selection";
-
-                        return (
-                            <div className="space-y-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
-                                <div className="flex items-center justify-between">
-                                    <Label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                                        <Link2 className="w-3.5 h-3.5 text-amber-500" /> Path Segment Fuse
-                                    </Label>
-                                    {canFuse ? (
-                                        <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-300 rounded-full border border-amber-400/30">
-                                            Ready ({count > 0 ? count : "2+"} Selected)
-                                        </span>
-                                    ) : (
-                                        <span className="text-[10px] font-medium text-slate-400">
-                                            Requires 2+ Selected
-                                        </span>
-                                    )}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1 h-8 text-xs font-bold gap-1"
+                                        onClick={() => {
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                activeObj.set({ flipY: !activeObj.flipY });
+                                                c.requestRenderAll();
+                                                c.fire("object:modified");
+                                            }
+                                        }}
+                                    >
+                                        <FlipVertical className="w-3.5 h-3.5" /> Flip Vert
+                                    </Button>
                                 </div>
-                                <Button
-                                    size="sm"
-                                    disabled={!canFuse}
-                                    className={`w-full h-9 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 ${
-                                        canFuse
-                                            ? "bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/20 cursor-pointer"
-                                            : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50"
-                                    }`}
-                                    onClick={handleFuseSnakePaths}
-                                    title={
-                                        canFuse
-                                            ? "Fuse selected path segments into one continuous path tube"
-                                            : "Select 2 or more path segments on the canvas to enable Fuse"
-                                    }
-                                >
-                                    <Link2 className="w-4 h-4" />
-                                    Fuse Path Segments
-                                </Button>
-                            </div>
-                        );
-                    })()}
+                            </AccordionContent>
+                        </AccordionItem>
+
+                        {/* ACCORDION 5: LAYER ARRANGEMENT & PATH FUSE */}
+                        <AccordionItem value="layer-style" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/50 dark:bg-slate-900/40">
+                            <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                                <div className="flex items-center gap-2">
+                                    <Layers className="w-4 h-4 text-indigo-500" />
+                                    <span>Layer Arrangement & Fuse</span>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="space-y-3 pt-1 pb-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-xs font-semibold justify-start gap-1.5"
+                                        onClick={() => {
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                if ((c as any).bringObjectToFront) (c as any).bringObjectToFront(activeObj);
+                                                else if ((c as any).bringToFront) (c as any).bringToFront(activeObj);
+                                                c.requestRenderAll();
+                                                c.fire("object:modified");
+                                                toast.success("Brought to front");
+                                            }
+                                        }}
+                                    >
+                                        <ArrowUp className="w-3.5 h-3.5 text-indigo-500" /> Bring to Front
+                                    </Button>
+
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="h-8 text-xs font-semibold justify-start gap-1.5"
+                                        onClick={() => {
+                                            const c = fabricCanvasRef.current;
+                                            if (!c) return;
+                                            const activeObj = c.getActiveObject();
+                                            if (activeObj) {
+                                                if ((c as any).sendObjectToBack) (c as any).sendObjectToBack(activeObj);
+                                                else if ((c as any).sendToBack) (c as any).sendToBack(activeObj);
+                                                c.requestRenderAll();
+                                                c.fire("object:modified");
+                                                toast.success("Sent to back");
+                                            }
+                                        }}
+                                    >
+                                        <ArrowDown className="w-3.5 h-3.5 text-indigo-500" /> Send to Back
+                                    </Button>
+                                </div>
+
+                                {/* PATH SEGMENT FUSE CONTROL */}
+                                {(() => {
+                                    const activeObjs = fabricCanvasRef.current ? fabricCanvasRef.current.getActiveObjects() : [];
+                                    const count = activeObjs.length;
+                                    const canFuse = count >= 2 || selectedObjectType === "activeSelection" || selectedObjectType === "active-selection";
+
+                                    return (
+                                        <div className="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                                            <Button
+                                                size="sm"
+                                                disabled={!canFuse}
+                                                className={`w-full h-8 font-extrabold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 ${
+                                                    canFuse
+                                                        ? "bg-amber-600 hover:bg-amber-500 text-white shadow-amber-500/20 cursor-pointer"
+                                                        : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-50"
+                                                }`}
+                                                onClick={handleFuseSnakePaths}
+                                                title={
+                                                    canFuse
+                                                        ? "Fuse selected path segments into one continuous path tube"
+                                                        : "Select 2 or more path segments on the canvas to enable Fuse"
+                                                }
+                                            >
+                                                <Link2 className="w-4 h-4" />
+                                                Fuse Path Segments
+                                            </Button>
+                                        </div>
+                                    );
+                                })()}
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 </div>
             )}
 

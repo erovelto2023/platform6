@@ -248,27 +248,30 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                         if (customType === "word-search" && wsCfg && wsCfg.answerKey && wsCfg.answerKey.showSolution) {
                             const left = obj.left || 60;
                             const top = obj.top || 130;
+                            const scaleX = obj.scaleX ?? 1;
+                            const scaleY = obj.scaleY ?? 1;
+                            const angle = obj.angle ?? 0;
                             const { titleGroup, gridGroup, bankGroup } = generateWordSearchComponentGroups(wsCfg);
 
                             if (componentType === "grid" && gridGroup) {
                                 c.remove(obj);
-                                gridGroup.set({ left, top });
+                                gridGroup.set({ left, top, scaleX, scaleY, angle });
                                 attachPuzzleMetadata(gridGroup, "word-search", "grid", wsCfg);
                                 c.add(gridGroup);
                             } else if (componentType === "title" && titleGroup) {
                                 c.remove(obj);
-                                titleGroup.set({ left, top });
+                                titleGroup.set({ left, top, scaleX, scaleY, angle });
                                 attachPuzzleMetadata(titleGroup, "word-search", "title", wsCfg);
                                 c.add(titleGroup);
                             } else if (componentType === "word-bank" && bankGroup) {
                                 c.remove(obj);
-                                bankGroup.set({ left, top });
+                                bankGroup.set({ left, top, scaleX, scaleY, angle });
                                 attachPuzzleMetadata(bankGroup, "word-search", "word-bank", wsCfg);
                                 c.add(bankGroup);
                             } else if (!componentType) {
                                 const newObjs = generateAdvancedWordSearchObjects(wsCfg);
                                 c.remove(obj);
-                                const newGrp = new fabric.Group(newObjs, { left, top, subTargetCheck: true });
+                                const newGrp = new fabric.Group(newObjs, { left, top, scaleX, scaleY, angle, subTargetCheck: true });
                                 attachPuzzleMetadata(newGrp, "word-search", "full", wsCfg);
                                 c.add(newGrp);
                             }
