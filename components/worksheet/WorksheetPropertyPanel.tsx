@@ -1258,9 +1258,9 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
         if (!c) return;
         const count = handleGroupFabricObjects(c);
         if (count > 0) {
-            toast.success(`Grouped ${count} selected elements together!`);
+            toast.success(`Grouped ${count} overlapping elements together!`);
         } else {
-            toast.error("Please select 2 or more elements to group!");
+            toast.info("Tip: Hold Shift + click multiple items, drag a box over them, or stack text/images on top of your background tile to group!");
         }
     };
 
@@ -2294,7 +2294,19 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
 
                             <div className="space-y-1">
                                 <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Difficulty Level</Label>
-                                <Select value={wsConfig.difficulty || "medium"} onValueChange={(v) => updateWsConfig((p) => ({ ...p, difficulty: v as any }))}>
+                                <Select value={wsConfig.difficulty || "medium"} onValueChange={(v) => {
+                                    const directionSets: Record<string, string[]> = {
+                                        easy: ["H", "V"],
+                                        medium: ["H", "V", "D_TL_BR", "D_TR_BL"],
+                                        hard: ["H", "HR", "V", "VR", "D_TL_BR", "D_TR_BL"],
+                                        pro: ["H", "HR", "V", "VR", "D_TL_BR", "D_TR_BL", "D_BL_TR", "D_BR_TL"],
+                                    };
+                                    updateWsConfig((p) => ({
+                                        ...p,
+                                        difficulty: v as any,
+                                        grid: { ...p.grid, directions: (directionSets[v] || directionSets.medium) as any },
+                                    }));
+                                }}>
                                     <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="easy">Easy (Horizontal & Vertical)</SelectItem>
@@ -2319,19 +2331,6 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                                     checked={!!wsConfig.answerKey.showSolution}
                                     onCheckedChange={(v) => updateWsConfig((p) => ({ ...p, answerKey: { ...p.answerKey, showSolution: !!v } }))}
                                 />
-                            </div>
-
-                            <div className="space-y-1">
-                                <Label className="text-[11px] font-bold text-slate-700 dark:text-slate-300">Highlight Solution Color</Label>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="color"
-                                        value={wsConfig.answerKey.color || "#bbf7d0"}
-                                        onChange={(e) => updateWsConfig((p) => ({ ...p, answerKey: { ...p.answerKey, color: e.target.value } }))}
-                                        className="w-10 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5"
-                                    />
-                                    <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-400">{wsConfig.answerKey.color || "#bbf7d0"}</span>
-                                </div>
                             </div>
                         </TabsContent>
 
@@ -2360,30 +2359,25 @@ export const WorksheetPropertyPanel: React.FC<WorksheetPropertyPanelProps> = ({ 
                             <div className="space-y-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
                                 <Label className="text-xs font-bold text-slate-700 dark:text-slate-300">Word Direction Options</Label>
                                 <div className="space-y-1.5">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-slate-600 dark:text-slate-400">Horizontal (Left to Right)</span>
-                                        <Checkbox checked={wsConfig.grid.directions.includes("H" as any)} onCheckedChange={(v) => {
-                                            const dirs = new Set(wsConfig.grid.directions);
-                                            if (v) dirs.add("H" as any); else dirs.delete("H" as any);
-                                            updateWsConfig((p) => ({ ...p, grid: { ...p.grid, directions: Array.from(dirs) } }));
-                                        }} />
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-slate-600 dark:text-slate-400">Vertical (Top to Bottom)</span>
-                                        <Checkbox checked={wsConfig.grid.directions.includes("V" as any)} onCheckedChange={(v) => {
-                                            const dirs = new Set(wsConfig.grid.directions);
-                                            if (v) dirs.add("V" as any); else dirs.delete("V" as any);
-                                            updateWsConfig((p) => ({ ...p, grid: { ...p.grid, directions: Array.from(dirs) } }));
-                                        }} />
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-slate-600 dark:text-slate-400">Diagonal (Top-Left to Bottom-Right)</span>
-                                        <Checkbox checked={wsConfig.grid.directions.includes("D" as any)} onCheckedChange={(v) => {
-                                            const dirs = new Set(wsConfig.grid.directions);
-                                            if (v) dirs.add("D" as any); else dirs.delete("D" as any);
-                                            updateWsConfig((p) => ({ ...p, grid: { ...p.grid, directions: Array.from(dirs) } }));
-                                        }} />
-                                    </div>
+                                    {([
+                                        { key: "H", label: "→ Horizontal (Left to Right)" },
+                                        { key: "HR", label: "← Horizontal Reverse (Right to Left)" },
+                                        { key: "V", label: "↓ Vertical (Top to Bottom)" },
+                                        { key: "VR", label: "↑ Vertical Reverse (Bottom to Top)" },
+                                        { key: "D_TL_BR", label: "↘ Diagonal (Top-Left → Bottom-Right)" },
+                                        { key: "D_TR_BL", label: "↙ Diagonal (Top-Right → Bottom-Left)" },
+                                        { key: "D_BL_TR", label: "↗ Diagonal (Bottom-Left → Top-Right)" },
+                                        { key: "D_BR_TL", label: "↖ Diagonal (Bottom-Right → Top-Left)" },
+                                    ] as { key: string; label: string }[]).map(({ key, label }) => (
+                                        <div key={key} className="flex items-center justify-between">
+                                            <span className="text-xs text-slate-600 dark:text-slate-400">{label}</span>
+                                            <Checkbox checked={wsConfig.grid.directions.includes(key as any)} onCheckedChange={(v) => {
+                                                const dirs = new Set(wsConfig.grid.directions);
+                                                if (v) dirs.add(key as any); else dirs.delete(key as any);
+                                                updateWsConfig((p) => ({ ...p, grid: { ...p.grid, directions: Array.from(dirs) } }));
+                                            }} />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </TabsContent>

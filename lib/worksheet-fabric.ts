@@ -392,13 +392,44 @@ export function addObjectsSafelyToCanvas(
 // SEPARATED WORD SEARCH COMPONENT GROUPS (FOR INDEPENDENT CANVAS DRAGGING)
 // =========================================================================
 
+// Curated pastel palette for word search solution highlights (like the reference image)
+const WORD_HIGHLIGHT_PALETTE = [
+    "rgba(167, 139, 250, 0.45)",  // violet
+    "rgba(251, 146, 60, 0.40)",   // orange
+    "rgba(74, 222, 128, 0.40)",   // green
+    "rgba(96, 165, 250, 0.45)",   // blue
+    "rgba(251, 113, 133, 0.40)",  // pink
+    "rgba(250, 204, 21, 0.40)",   // yellow
+    "rgba(45, 212, 191, 0.40)",   // teal
+    "rgba(192, 132, 252, 0.40)",  // purple
+    "rgba(253, 164, 175, 0.40)",  // rose
+    "rgba(134, 239, 172, 0.40)",  // emerald
+    "rgba(147, 197, 253, 0.40)",  // sky
+    "rgba(253, 186, 116, 0.40)",  // amber
+    "rgba(110, 231, 183, 0.40)",  // mint
+    "rgba(196, 181, 253, 0.40)",  // lavender
+    "rgba(252, 165, 165, 0.40)",  // red-light
+];
+
+// Direction vectors used for highlight band positioning
+const HIGHLIGHT_DIR_VECTORS: Record<string, [number, number]> = {
+    H: [1, 0],
+    HR: [-1, 0],
+    V: [0, 1],
+    VR: [0, -1],
+    D_TL_BR: [1, 1],
+    D_TR_BL: [-1, 1],
+    D_BL_TR: [1, -1],
+    D_BR_TL: [-1, -1],
+};
+
 export function generateWordSearchComponentGroups(config: WordSearchConfig): {
     titleGroup: fabric.FabricObject | null;
     gridGroup: fabric.FabricObject;
     bankGroup: fabric.FabricObject | null;
 } {
     const placement = solveAndGenerateWordSearch(config);
-    const { grid, solutionGrid } = placement;
+    const { grid, solutionGrid, placedWords } = placement;
 
     const rows = config.grid.rows;
     const cols = config.grid.cols;
@@ -435,29 +466,28 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
         titleGroup = new fabric.Group(titleObjs, { left: 60, top: 50, subTargetCheck: true });
     }
 
-    // --- 2. LETTER GRID GROUP (CLEAN BORDERLESS BY DEFAULT) ---
+    // --- 2. LETTER GRID GROUP ---
     const gridObjs: fabric.FabricObject[] = [];
+    const showSolution = config.answerKey.showSolution;
 
+    // 2a. Cell backgrounds & borders (non-solution styling)
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const x = c * cellSize;
             const y = r * cellSize;
-            const letter = grid[r][c];
-            const isSolution = config.answerKey.showSolution && solutionGrid[r][c];
 
-            const bgFill = isSolution
-                ? (config.answerKey.color || "#bbf7d0")
+            // When showing solution, we draw highlight bands separately — cells get a subtle border only
+            const bgFill = showSolution
+                ? "transparent"
                 : (config.appearance.cellBgColor !== "transparent" ? config.appearance.cellBgColor : "transparent");
 
-            const bgStroke = isSolution
-                ? "#16a34a"
+            const bgStroke = showSolution
+                ? "#e2e8f0"
                 : (config.grid.cellStyle === "boxed" || config.grid.cellStyle === "rounded" || config.grid.cellStyle === "circle"
                     ? (config.appearance.gridBorderColor !== "transparent" ? config.appearance.gridBorderColor : "#cbd5e1")
                     : "transparent");
 
-            const rx = isSolution
-                ? 6
-                : (config.grid.cellStyle === "circle" ? cellSize / 2 : config.grid.cellStyle === "rounded" ? 6 : 0);
+            const rx = config.grid.cellStyle === "circle" ? cellSize / 2 : config.grid.cellStyle === "rounded" ? 6 : 0;
 
             const cellRect = new fabric.Rect({
                 left: x,
@@ -466,11 +496,68 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
                 height: cellSize,
                 fill: bgFill,
                 stroke: bgStroke,
-                strokeWidth: isSolution ? 1.5 : (config.appearance.gridBorderThickness || 1),
+                strokeWidth: showSolution ? 0.5 : (config.appearance.gridBorderThickness || 1),
                 rx: rx,
                 ry: rx,
             });
             gridObjs.push(cellRect);
+        }
+    }
+
+    // 2b. Solution highlight bands — per-word colored rounded rectangles
+    if (showSolution && placedWords.length > 0) {
+        placedWords.forEach((pw, wordIdx) => {
+            const color = WORD_HIGHLIGHT_PALETTE[wordIdx % WORD_HIGHLIGHT_PALETTE.length];
+            const vec = HIGHLIGHT_DIR_VECTORS[pw.dir];
+            if (!vec) return;
+            const [dx, dy] = vec;
+            const wordLen = pw.word.toUpperCase().replace(/[^A-Z0-9]/g, "").length;
+
+            // Compute start and end cell centers
+            const startCx = pw.startX * cellSize + cellSize / 2;
+            const startCy = pw.startY * cellSize + cellSize / 2;
+            const endCx = (pw.startX + (wordLen - 1) * dx) * cellSize + cellSize / 2;
+            const endCy = (pw.startY + (wordLen - 1) * dy) * cellSize + cellSize / 2;
+
+            // Band center, dimensions, and rotation angle
+            const bandCx = (startCx + endCx) / 2;
+            const bandCy = (startCy + endCy) / 2;
+            const bandLength = Math.sqrt((endCx - startCx) ** 2 + (endCy - startCy) ** 2) + cellSize * 0.85;
+            const bandWidth = cellSize * 0.78;
+            const angleDeg = Math.atan2(endCy - startCy, endCx - startCx) * (180 / Math.PI);
+
+            const highlightBand = new fabric.Rect({
+                left: bandCx,
+                top: bandCy,
+                originX: "center",
+                originY: "center",
+                width: bandLength,
+                height: bandWidth,
+                fill: color,
+                rx: bandWidth / 2,
+                ry: bandWidth / 2,
+                angle: angleDeg,
+                strokeWidth: 0,
+            });
+            gridObjs.push(highlightBand);
+        });
+    }
+
+    // 2c. Letters on top
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const x = c * cellSize;
+            const y = r * cellSize;
+            const letter = grid[r][c];
+            const isSolution = solutionGrid[r][c];
+
+            // In solution mode: dim non-solution letters so highlighted words pop
+            const letterColor = showSolution
+                ? (isSolution ? "#0f172a" : "#94a3b8")
+                : (config.appearance.gridLetterColor || "#0f172a");
+            const letterWeight = showSolution
+                ? (isSolution ? "800" : "500")
+                : "bold";
 
             const charObj = new fabric.IText(letter, {
                 left: x + (cellSize / 2),
@@ -479,8 +566,8 @@ export function generateWordSearchComponentGroups(config: WordSearchConfig): {
                 originY: "center",
                 fontSize: config.appearance.gridFontSize || (cols >= 15 ? 13 : 15),
                 fontFamily: config.appearance.gridFont || "Inter",
-                fontWeight: "bold",
-                fill: isSolution ? "#14532d" : (config.appearance.gridLetterColor || "#0f172a"),
+                fontWeight: letterWeight,
+                fill: letterColor,
             });
             gridObjs.push(charObj);
         }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as fabric from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    Type, Grid3X3, Palette, Wand2, Plus, Sparkles, Layers, RefreshCw, Eye, HelpCircle, FileText,
-    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen, Search, Moon, Upload, Trash2, Route, Spline, Scissors, Gamepad2, Dices, PenTool
+    Type, Grid3X3, Palette, Wand2, Plus, Sparkles, Layers, RefreshCw, Eye, EyeOff, HelpCircle, FileText,
+    Pencil, Image as ImageIcon, QrCode, Barcode, ShieldAlert, Key, Brain, LayoutGrid, Award, Sliders, BookOpen, Search, Moon, Upload, Trash2, Route, Spline, Scissors, Gamepad2, Dices, PenTool,
+    Lock, Unlock, ArrowUp, ArrowDown
 } from "lucide-react";
 import { useWorksheetStore } from "@/lib/worksheet-store";
 import { WICCA_SYMBOL_CATEGORIES } from "@/lib/worksheet-symbols";
@@ -85,6 +86,71 @@ interface WorksheetSidebarProps {
     onAddBoardGame?: (config?: BoardGameConfig) => void;
 }
 
+function getObjectDisplayName(obj: fabric.FabricObject): { name: string; icon: string } {
+    const type = obj.type;
+    const customType = (obj as any).customType;
+
+    // 1. Board Game templates or components
+    if (customType === "board-game-template" || customType === "board-game-config") {
+        return {
+            name: `${(obj as any).templateType ? `Board Game (${(obj as any).templateType})` : "Board Game Template"}`,
+            icon: "🎲",
+        };
+    }
+    if (customType === "board-game-space" || customType === "board-game-component") {
+        return {
+            name: `Board Space: ${(obj as any).spaceType || "Normal"}`,
+            icon: "🟢",
+        };
+    }
+
+    // 2. Custom Activity modules / Puzzle containers
+    if ((obj as any).puzzleConfig || (obj as any).isPuzzle) {
+        const pType = (obj as any).puzzleConfig?.type || (obj as any).puzzleType || "Puzzle";
+        return {
+            name: `${pType.charAt(0).toUpperCase()}${pType.slice(1)} Container`,
+            icon: "🧩",
+        };
+    }
+
+    // 3. Native Fabric object types
+    if (type === "i-text" || type === "textbox" || type === "text") {
+        const text = (obj as any).text || "";
+        const preview = text.trim().slice(0, 18) + (text.length > 18 ? "..." : "");
+        return {
+            name: preview ? `Text: "${preview}"` : "Text Block",
+            icon: "✍️",
+        };
+    }
+    if (type === "rect") {
+        return { name: "Rectangle Shape", icon: "⬜" };
+    }
+    if (type === "circle") {
+        return { name: "Circle Shape", icon: "⚪" };
+    }
+    if (type === "triangle") {
+        return { name: "Triangle Shape", icon: "🔺" };
+    }
+    if (type === "polygon") {
+        return { name: "Polygon / Star", icon: "⭐" };
+    }
+    if (type === "path") {
+        return { name: "Drawing Path", icon: "〰️" };
+    }
+    if (type === "image") {
+        return { name: "Uploaded Image", icon: "🖼️" };
+    }
+    if (type === "group") {
+        const groupObjectsCount = (obj as fabric.Group).getObjects ? (obj as fabric.Group).getObjects().length : 0;
+        return {
+            name: `Grouped Object (${groupObjectsCount} items)`,
+            icon: "📦",
+        };
+    }
+
+    return { name: `Canvas ${type}`, icon: "🔳" };
+}
+
 export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddText,
     onAddTracingText,
@@ -136,8 +202,36 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     fabricCanvasRef,
     onAddBoardGame,
 }) => {
-    const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "symbols" | "uploads" | "preset">("puzzles");
+    const [activeTab, setActiveTab] = useState<"puzzles" | "text" | "freehand" | "shapes" | "symbols" | "uploads" | "preset" | "layers">("puzzles");
     const [symbolQuery, setSymbolQuery] = useState("");
+    const [canvasVersion, setCanvasVersion] = useState(0);
+
+    useEffect(() => {
+        const c = fabricCanvasRef?.current;
+        if (!c) return;
+
+        const updateLayers = () => {
+            setCanvasVersion((prev) => prev + 1);
+        };
+
+        c.on("object:added", updateLayers);
+        c.on("object:removed", updateLayers);
+        c.on("selection:created", updateLayers);
+        c.on("selection:updated", updateLayers);
+        c.on("selection:cleared", updateLayers);
+        c.on("object:modified", updateLayers);
+        c.on("after:render", updateLayers);
+
+        return () => {
+            c.off("object:added", updateLayers);
+            c.off("object:removed", updateLayers);
+            c.off("selection:created", updateLayers);
+            c.off("selection:updated", updateLayers);
+            c.off("selection:cleared", updateLayers);
+            c.off("object:modified", updateLayers);
+            c.off("after:render", updateLayers);
+        };
+    }, [fabricCanvasRef?.current]);
 
     const {
         activeTool,
@@ -452,8 +546,8 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
         const wordsArray = wsWords.split(",").map((w) => w.trim()).filter((w) => w.length > 0);
         if (wordsArray.length === 0) return;
         const dirs: string[] = ["H", "V"];
-        if (wsDiag) dirs.push("D");
-        if (wsReverse) dirs.push("R_H", "R_V");
+        if (wsDiag) dirs.push("D_TL_BR", "D_TR_BL");
+        if (wsReverse) dirs.push("HR", "VR");
         onAddWordSearch(wordsArray, wsTitle, parseInt(wsSize), dirs);
     };
 
@@ -475,7 +569,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     return (
         <aside className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-[calc(100vh-3.5rem)] z-20 shadow-sm overflow-hidden select-none shrink-0">
             {/* Primary Category Selector Sidebar Navigation */}
-            <div className="grid grid-cols-7 h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-1 gap-1 shrink-0">
+            <div className="grid grid-cols-8 h-12 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 p-1 gap-1 shrink-0">
                 <button
                     className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "puzzles" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
                     onClick={() => setActiveTab("puzzles")}
@@ -534,6 +628,14 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                     <BookOpen className="w-3.5 h-3.5" />
                     <span className="text-[8px] font-bold">Presets</span>
                 </button>
+
+                <button
+                    className={`flex flex-col items-center justify-center rounded-lg transition-all ${activeTab === "layers" ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold" : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"}`}
+                    onClick={() => setActiveTab("layers")}
+                >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span className="text-[8px] font-bold">Layers</span>
+                </button>
             </div>
 
             {/* Right Sub-Panel Area */}
@@ -545,6 +647,7 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                         {activeTab === "freehand" && "Smooth Ink Brush"}
                         {activeTab === "shapes" && "Shapes & QR / Barcodes"}
                         {activeTab === "preset" && "Worksheet Layout Templates"}
+                        {activeTab === "layers" && "Canvas Layer Manager"}
                     </span>
                 </div>
 
@@ -1593,6 +1696,173 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                             </div>
                         </div>
                     )}
+
+                    {/* --- TAB 8: LAYER MANAGER --- */}
+                    {activeTab === "layers" && (() => {
+                        const c = fabricCanvasRef?.current;
+                        if (!c) return <div className="text-center py-8 text-slate-400 text-xs">Canvas not initialized</div>;
+                        const objects = c.getObjects();
+                        if (objects.length === 0) {
+                            return (
+                                <div className="text-center py-12 px-4 text-slate-400 text-xs flex flex-col items-center justify-center gap-2">
+                                    <Layers className="w-8 h-8 opacity-30 mb-1" />
+                                    <p className="font-bold">No Layers Found</p>
+                                    <p className="text-[10px]">Add text, shapes, board games, or activity modules to design your sheet.</p>
+                                </div>
+                            );
+                        }
+
+                        const reversedObjects = [...objects].reverse();
+
+                        return (
+                            <div className="space-y-2 pb-24">
+                                <div className="flex items-center justify-between px-1">
+                                    <p className="text-[10px] text-slate-500 font-semibold">
+                                        Manage layer order, visibility, and locking for every canvas component.
+                                    </p>
+                                    <span className="text-[9px] font-extrabold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-full border border-indigo-200 dark:border-indigo-800">
+                                        {objects.length} {objects.length === 1 ? "Layer" : "Layers"}
+                                    </span>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    {reversedObjects.map((obj, idx) => {
+                                        const { name, icon } = getObjectDisplayName(obj);
+                                        const activeObject = c.getActiveObject();
+                                        const isSelected = activeObject === obj || (activeObject && activeObject.type === "activeSelection" && (activeObject as any)._objects?.includes(obj));
+                                        const isLocked = !obj.selectable;
+                                        const isVisible = obj.visible !== false;
+
+                                        return (
+                                            <div
+                                                key={idx}
+                                                className={`flex items-center justify-between p-2 rounded-xl border text-xs transition-all ${
+                                                    isSelected
+                                                        ? "bg-indigo-50/80 dark:bg-indigo-950/50 border-indigo-300 dark:border-indigo-700 shadow-sm"
+                                                        : "bg-slate-50/50 dark:bg-slate-950/30 border-slate-200 dark:border-slate-800/80 hover:bg-slate-100/60 dark:hover:bg-slate-900/60"
+                                                }`}
+                                            >
+                                                {/* Left: Selectable Layer Item Info */}
+                                                <button
+                                                    className="flex items-center gap-2 flex-1 min-w-0 text-left py-1 pr-2 cursor-pointer select-none"
+                                                    onClick={() => {
+                                                        c.setActiveObject(obj);
+                                                        c.requestRenderAll();
+                                                        c.fire("object:modified");
+                                                    }}
+                                                >
+                                                    <span className="text-base shrink-0 select-none">{icon}</span>
+                                                    <span className={`font-semibold truncate text-[11px] select-none ${
+                                                        isSelected ? "text-indigo-700 dark:text-indigo-300 font-bold" : "text-slate-700 dark:text-slate-300"
+                                                    }`}>
+                                                        {name}
+                                                    </span>
+                                                </button>
+
+                                                {/* Right: Quick Action Controls */}
+                                                <div className="flex items-center gap-0.5 shrink-0">
+                                                    {/* Lock Toggle */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const nextVal = !obj.selectable;
+                                                            obj.set({
+                                                                selectable: nextVal,
+                                                                evented: nextVal,
+                                                                lockMovementX: !nextVal,
+                                                                lockMovementY: !nextVal,
+                                                                lockScalingX: !nextVal,
+                                                                lockScalingY: !nextVal,
+                                                                lockRotation: !nextVal,
+                                                            });
+                                                            if (!nextVal && c.getActiveObject() === obj) {
+                                                                c.discardActiveObject();
+                                                            }
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                            toast.success(nextVal ? "Layer unlocked" : "Layer locked on canvas");
+                                                        }}
+                                                        className={`p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors ${
+                                                            isLocked ? "text-amber-500" : "text-slate-400 hover:text-slate-600"
+                                                        }`}
+                                                        title={isLocked ? "Unlock selection" : "Lock selection"}
+                                                    >
+                                                        {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                                                    </button>
+
+                                                    {/* Visibility Toggle */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const nextVal = !isVisible;
+                                                            obj.set({ visible: nextVal });
+                                                            if (!nextVal && c.getActiveObject() === obj) {
+                                                                c.discardActiveObject();
+                                                            }
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                        }}
+                                                        className={`p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors ${
+                                                            !isVisible ? "text-slate-300 dark:text-slate-700" : "text-slate-400 hover:text-slate-600"
+                                                        }`}
+                                                        title={isVisible ? "Hide element" : "Show element"}
+                                                    >
+                                                        {isVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                                    </button>
+
+                                                    {/* Move Up */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if ((c as any).bringForward) (c as any).bringForward(obj);
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                        }}
+                                                        disabled={idx === 0}
+                                                        className={`p-1.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent`}
+                                                        title="Move up one layer"
+                                                    >
+                                                        <ArrowUp className="w-3.5 h-3.5" />
+                                                    </button>
+
+                                                    {/* Move Down */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if ((c as any).sendBackwards) (c as any).sendBackwards(obj);
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                        }}
+                                                        disabled={idx === reversedObjects.length - 1}
+                                                        className={`p-1.5 rounded-lg transition-colors text-slate-400 hover:text-slate-600 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-transparent`}
+                                                        title="Move down one layer"
+                                                    >
+                                                        <ArrowDown className="w-3.5 h-3.5" />
+                                                    </button>
+
+                                                    {/* Delete Layer */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            c.remove(obj);
+                                                            c.discardActiveObject();
+                                                            c.requestRenderAll();
+                                                            c.fire("object:modified");
+                                                            toast.success("Layer deleted");
+                                                        }}
+                                                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                                                        title="Delete layer"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
         </aside>

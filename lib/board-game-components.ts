@@ -941,5 +941,311 @@ export const BOARD_GAME_COMPONENTS: BoardComponentMeta[] = [
             });
             return createConfiguredSpaceGroup({ type: "frame_wood", category: "frames" }, bg);
         }
+    },
+
+    // ──────────────── 21. EXPANDED GAME COVERAGE ────────────────
+    // Sequence, Rummikub, Ingenious, Century, Isle of Skye, Clank! In! Space!,
+    // El Dorado, Memoir '44, Azul Summer Pavilion, Railroad Ink, Welcome To,
+    // Cartographers, Harmonies, Nemesis, The Crew, Twilight Imperium,
+    // War of the Ring, Descent, Ark Nova
+    {
+        id: 81, name: "Sequence Card Grid", category: "basic", preview: "🃏",
+        description: "Card placement grid for matching sequences (Sequence)", behavior: "card_grid",
+        generator: () => {
+            const bg = makeTile("#1E40AF", 56, 10, "#1E3A8A", 3);
+            const icon = new fabric.IText("🃏", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("SEQUENCE", 6.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "card_grid", category: "basic", behavior: "card_grid" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 82, name: "Number Tile Rack", category: "basic", preview: "🔢",
+        description: "Numbered tile for set-making and runs (Rummikub)", behavior: "number_tile",
+        generator: () => {
+            const bg = makeTile("#FFFDE7", 56, 10, "#78350F", 2.5);
+            const num = makeLabel("13", 22, "#B91C1C", "900", -4);
+            const txt = makeLabel("TILE", 7, "#78350F", "900", 16);
+            return createConfiguredSpaceGroup({ type: "number_tile", category: "basic", behavior: "number_tile" }, bg, num, txt);
+        }
+    },
+    {
+        id: 83, name: "Multi-Color Score Track", category: "basic", preview: "🌈",
+        description: "Scoring track for multi-color achievements (Ingenious)", behavior: "score_track",
+        generator: () => {
+            const bg = makeTile("#7C3AED", 56, 10, "#5B21B6", 3);
+            const icon = new fabric.IText("🌈", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("SCORE TRACK", 5.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "score_track", category: "basic", behavior: "score_track" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 84, name: "Spice Cube Converter", category: "basic", preview: "🧂",
+        description: "Resource conversion engine tile (Century: Spice Road)", behavior: "spice_convert",
+        generator: () => {
+            const bg = makeTile(AMBER, 56, 10, "#92400E", 3);
+            const icon = new fabric.IText("🧂", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("CONVERT", 7, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "spice_convert", category: "basic", behavior: "convert" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 85, name: "Landscape Auction Tile", category: "basic", preview: "🏞️",
+        description: "Auctionable landscape tile for scoring (Isle of Skye)", behavior: "landscape_auction",
+        generator: () => {
+            const bg = makeTile(EMERALD, 56, 10, "#065F46", 3);
+            const icon = new fabric.IText("🏞️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("AUCTION", 7, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "landscape_auction", category: "basic", behavior: "auction" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 86, name: "Spaceship Corridor", category: "basic", preview: "🛸",
+        description: "Sci-fi spaceship corridor tile (Clank! In! Space!)", behavior: "spaceship_corridor",
+        generator: () => {
+            const bg = makeTile("#312E81", 56, 10, "#1E1B4B", 3);
+            const icon = new fabric.IText("🛸", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("CORRIDOR", 6.5, "#A5B4FC", "900", 16);
+            return createConfiguredSpaceGroup({ type: "spaceship_corridor", category: "basic", behavior: "corridor" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 87, name: "Jungle Machete Path", category: "basic", preview: "🗡️",
+        description: "Dense jungle path requiring exploration (Quest for El Dorado)", behavior: "jungle_machete",
+        generator: () => {
+            const bg = makeTile("#166534", 56, 10, "#14532D", 3);
+            const icon = new fabric.IText("🗡️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("MACHETE", 7, "#BBF7D0", "900", 16);
+            return createConfiguredSpaceGroup({ type: "jungle_machete", category: "basic", behavior: "explore" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 88, name: "Infantry Bunker", category: "basic", preview: "🎖️",
+        description: "Military bunker with infantry unit defense (Memoir '44)", behavior: "infantry_bunker",
+        generator: () => {
+            const bg = makeTile("#4B5563", 56, 10, "#1F2937", 3);
+            const icon = new fabric.IText("🎖️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("BUNKER", 7, "#D1D5DB", "900", 16);
+            return createConfiguredSpaceGroup({ type: "infantry_bunker", category: "basic", behavior: "defense" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 89, name: "Summer Pavilion Star", category: "basic", preview: "✨",
+        description: "Radial star tile for bonus scoring (Azul: Summer Pavilion)", behavior: "pavilion_star",
+        generator: () => {
+            const bg = makeTile("#F59E0B", 56, 10, "#D97706", 3);
+            const icon = new fabric.IText("✨", { left: 0, top: -6, fontSize: 22, originX: "center", originY: "center" });
+            const txt = makeLabel("STAR TILE", 6, "#451A03", "900", 16);
+            return createConfiguredSpaceGroup({ type: "pavilion_star", category: "basic", behavior: "pattern" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 90, name: "Rail Route Drawing", category: "basic", preview: "🚃",
+        description: "Draw rail route connections on the grid (Railroad Ink)", behavior: "rail_route",
+        generator: () => {
+            const bg = makeTile("#78716C", 56, 10, "#44403C", 3);
+            const icon = new fabric.IText("🚃", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("RAIL ROUTE", 6, "#FEF3C7", "900", 16);
+            return createConfiguredSpaceGroup({ type: "rail_route", category: "basic", behavior: "route" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 91, name: "Street House Number", category: "basic", preview: "🏘️",
+        description: "Residential street with house numbering (Welcome To...)", behavior: "house_number",
+        generator: () => {
+            const bg = makeTile("#DBEAFE", 56, 10, "#1D4ED8", 2.5);
+            const num = makeLabel("42", 20, "#1E40AF", "900", -4);
+            const txt = makeLabel("HOUSE", 7, "#1E40AF", "900", 16);
+            return createConfiguredSpaceGroup({ type: "house_number", category: "basic", behavior: "place" }, bg, num, txt);
+        }
+    },
+    {
+        id: 92, name: "Cartography Terrain", category: "basic", preview: "🗺️",
+        description: "Map terrain tile for scoring regions (Cartographers)", behavior: "cartography",
+        generator: () => {
+            const bg = makeHexagonTile("#059669", 28);
+            const icon = new fabric.IText("🗺️", { left: 0, top: -2, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("MAP", 7, "#fff", "900", 18);
+            return createConfiguredSpaceGroup({ type: "cartography", category: "basic", behavior: "map" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 93, name: "Nature Ecosystem", category: "basic", preview: "🌿",
+        description: "Nature pattern ecosystem harmony tile (Harmonies)", behavior: "ecosystem",
+        generator: () => {
+            const bg = makeTile("#10B981", 56, 10, "#047857", 3);
+            const icon = new fabric.IText("🌿", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("ECOSYSTEM", 5.5, "#ECFDF5", "900", 16);
+            return createConfiguredSpaceGroup({ type: "ecosystem", category: "basic", behavior: "pattern" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 94, name: "Alien Encounter", category: "basic", preview: "👽",
+        description: "Hostile alien encounter in ship corridors (Nemesis)", behavior: "alien_encounter",
+        generator: () => {
+            const bg = makeTile("#0F172A", 56, 10, "#991B1B", 3);
+            const icon = new fabric.IText("👽", { left: 0, top: -6, fontSize: 22, originX: "center", originY: "center" });
+            const txt = makeLabel("ALIEN!", 8, "#FCA5A5", "900", 16);
+            return createConfiguredSpaceGroup({ type: "alien_encounter", category: "basic", behavior: "combat" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 95, name: "Hull Breach", category: "basic", preview: "💥",
+        description: "Damaged ship hull section requiring repair (Nemesis)", behavior: "hull_breach",
+        generator: () => {
+            const bg = makeTile("#1C1917", 56, 10, "#DC2626", 3);
+            const icon = new fabric.IText("💥", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("HULL BREACH", 5, "#FEE2E2", "900", 16);
+            return createConfiguredSpaceGroup({ type: "hull_breach", category: "basic", behavior: "hazard" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 96, name: "Mission Comms", category: "basic", preview: "📡",
+        description: "Restricted communication mission card (The Crew)", behavior: "mission_comms",
+        generator: () => {
+            const bg = makeTile("#1E3A8A", 56, 10, "#1E40AF", 3);
+            const icon = new fabric.IText("📡", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("MISSION", 7, "#BFDBFE", "900", 16);
+            return createConfiguredSpaceGroup({ type: "mission_comms", category: "basic", behavior: "cooperative" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 97, name: "Galactic Council", category: "basic", preview: "🏛️",
+        description: "Political council voting and agenda space (Twilight Imperium)", behavior: "galactic_council",
+        generator: () => {
+            const bg = makeTile("#4338CA", 56, 10, "#312E81", 3);
+            const icon = new fabric.IText("🏛️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("COUNCIL", 7, "#C7D2FE", "900", 16);
+            return createConfiguredSpaceGroup({ type: "galactic_council", category: "basic", behavior: "politics" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 98, name: "Fellowship Path", category: "basic", preview: "💍",
+        description: "Ring bearer fellowship journey path (War of the Ring)", behavior: "fellowship_path",
+        generator: () => {
+            const bg = makeTile("#92400E", 56, 10, "#78350F", 3);
+            const icon = new fabric.IText("💍", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("FELLOWSHIP", 5.5, "#FEF3C7", "900", 16);
+            return createConfiguredSpaceGroup({ type: "fellowship_path", category: "basic", behavior: "quest" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 99, name: "Hero Ability Card", category: "basic", preview: "⚔️",
+        description: "Hero character ability and equipment tile (Descent)", behavior: "hero_ability",
+        generator: () => {
+            const bg = makeTile("#7C3AED", 56, 10, "#6D28D9", 3);
+            const icon = new fabric.IText("⚔️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("HERO CARD", 6, "#DDD6FE", "900", 16);
+            return createConfiguredSpaceGroup({ type: "hero_ability", category: "basic", behavior: "ability" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 100, name: "Zoo Exhibit", category: "basic", preview: "🦁",
+        description: "Zoo exhibit enclosure for animal display (Ark Nova)", behavior: "zoo_exhibit",
+        generator: () => {
+            const bg = makeTile("#059669", 56, 10, "#047857", 3);
+            const icon = new fabric.IText("🦁", { left: 0, top: -6, fontSize: 22, originX: "center", originY: "center" });
+            const txt = makeLabel("ZOO EXHIBIT", 5.5, "#ECFDF5", "900", 16);
+            return createConfiguredSpaceGroup({ type: "zoo_exhibit", category: "basic", behavior: "place" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 101, name: "Animal Habitat Hex", category: "basic", preview: "🐘",
+        description: "Hexagonal animal habitat conservation zone (Ark Nova)", behavior: "animal_habitat",
+        generator: () => {
+            const bg = makeHexagonTile("#15803D", 28);
+            const icon = new fabric.IText("🐘", { left: 0, top: -2, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("HABITAT", 6.5, "#fff", "900", 18);
+            return createConfiguredSpaceGroup({ type: "animal_habitat", category: "basic", behavior: "habitat" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 102, name: "Ring Bearer Trail", category: "basic", preview: "🗻",
+        description: "Perilous mountain trail to Mount Doom (War of the Ring)", behavior: "ring_trail",
+        generator: () => {
+            const bg = makeTile("#44403C", 56, 10, "#1C1917", 3);
+            const icon = new fabric.IText("🗻", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("DOOM TRAIL", 5.5, "#FEF3C7", "900", 16);
+            return createConfiguredSpaceGroup({ type: "ring_trail", category: "basic", behavior: "quest" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 103, name: "Lettered Space Tile", category: "basic", preview: "🔤",
+        description: "Alphabet letter tile for spelling and literacy (Scrabble, Word games)", behavior: "lettered",
+        generator: () => {
+            const bg = makeTile("#FFFDE7", 56, 10, "#78350F", 2.5);
+            const letter = makeLabel("A", 24, "#78350F", "900", -4);
+            const txt = makeLabel("LETTER", 7, "#78350F", "900", 16);
+            return createConfiguredSpaceGroup({ type: "letter_space", category: "basic", behavior: "lettered" }, bg, letter, txt);
+        }
+    },
+    {
+        id: 104, name: "Reverse Turn Order", category: "basic", preview: "🔄",
+        description: "Reverses direction of turn play order for all players", behavior: "reverse_play",
+        generator: () => {
+            const bg = makeTile(ORANGE, 56, 10, "#9A3412", 3);
+            const icon = new fabric.IText("🔄", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("REVERSE ORDER", 5.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "reverse_order", category: "basic", behavior: "reverse_play" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 105, name: "Double Turn Space", category: "basic", preview: "⏩",
+        description: "Gives active player two turns on their next go", behavior: "double_turn",
+        generator: () => {
+            const bg = makeTile(EMERALD, 56, 10, "#065F46", 3);
+            const icon = new fabric.IText("⏩", { left: 0, top: -6, fontSize: 22, originX: "center", originY: "center" });
+            const txt = makeLabel("DOUBLE PLAY", 6, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "double_turn", category: "basic", behavior: "double_turn" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 106, name: "Odd Roll Bonus", category: "basic", preview: "⚖️",
+        description: "Get bonus if rolling an odd number", behavior: "odd_bonus",
+        generator: () => {
+            const bg = makeTile(TEAL, 56, 10, "#115E59", 3);
+            const icon = new fabric.IText("⚖️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("ODD BONUS", 6.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "odd_bonus", category: "basic", behavior: "odd_bonus" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 107, name: "Team Challenge Space", category: "basic", preview: "👥",
+        description: "Cooperative group challenge involving the entire team", behavior: "team_challenge",
+        generator: () => {
+            const bg = makeTile(INDIGO, 56, 10, "#3730A3", 3);
+            const icon = new fabric.IText("👥", { left: 0, top: -6, fontSize: 22, originX: "center", originY: "center" });
+            const txt = makeLabel("TEAM QUEST", 6.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "team_challenge", category: "basic", behavior: "team_challenge" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 108, name: "Synonym & Antonym Space", category: "basic", preview: "✍️",
+        description: "Provide a synonym and antonym for the target word", behavior: "synonym_antonym",
+        generator: () => {
+            const bg = makeTile(BLUE, 56, 10, "#1E40AF", 3);
+            const icon = new fabric.IText("✍️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("SYN / ANT", 7, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "synonym_antonym", category: "basic", behavior: "synonym_antonym" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 109, name: "Fraction Problem Space", category: "basic", preview: "🍕",
+        description: "Solve a fraction or division puzzle to proceed", behavior: "fraction_problem",
+        generator: () => {
+            const bg = makeTile("#0284C7", 56, 10, "#0369A1", 3);
+            const icon = new fabric.IText("🍕", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("FRACTIONS", 6.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "fraction_problem", category: "basic", behavior: "fraction_problem" }, bg, icon, txt);
+        }
+    },
+    {
+        id: 110, name: "Extra Life / Shield Space", category: "basic", preview: "🛡️",
+        description: "Earn an extra life or immunity shield protection", behavior: "extra_life",
+        generator: () => {
+            const bg = makeTile(ROSE, 56, 10, "#9F1239", 3);
+            const icon = new fabric.IText("🛡️", { left: 0, top: -6, fontSize: 20, originX: "center", originY: "center" });
+            const txt = makeLabel("GET SHIELD", 6.5, "#fff", "900", 16);
+            return createConfiguredSpaceGroup({ type: "extra_life", category: "basic", behavior: "extra_life" }, bg, icon, txt);
+        }
     }
 ];
