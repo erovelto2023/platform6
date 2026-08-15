@@ -1,6 +1,5 @@
 'use client';
 import { Excalidraw } from "@excalidraw/excalidraw";
-import "@excalidraw/excalidraw/dist/prod/index.css";
 import { useCallback, useRef } from "react";
 
 function useDebouncedCallback<T extends (...args: any[]) => any>(callback: T, delay: number) {
