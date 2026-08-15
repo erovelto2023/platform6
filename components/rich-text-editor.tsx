@@ -21,7 +21,8 @@ import {
     Minus,
     Music,
     FileCode,
-    Type
+    Type,
+    Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,13 +48,138 @@ interface RichTextEditorProps {
     placeholder?: string;
 }
 
-// Helper function to process inline formatting
+// Helper function to process inline formatting & bold lead-in labels
 function processInlineFormatting(text: string): string {
-    return text
+    let result = text
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/`(.+?)`/g, '<code>$1</code>')
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+
+    // Auto-bold key prefix labels (e.g. "What they don't show you:", "The Reality:", "Why?", "The Trick:", "The Trap:", "Tip 1:", "Option A:")
+    if (!result.startsWith('<strong>')) {
+        const prefixMatch = result.match(/^([A-Z0-9][A-Za-z0-9\s'–—"-]{1,40})(:|-|\?)\s+(.+)$/);
+        if (prefixMatch) {
+            const label = prefixMatch[1] + prefixMatch[2];
+            const rest = prefixMatch[3];
+            result = `<strong>${label}</strong> ${rest}`;
+        }
+    }
+    return result;
+}
+
+// Comprehensive Smart Text to Structured HTML Parser
+export function formatTextToHtml(rawText: string): string {
+    if (!rawText || !rawText.trim()) return '';
+
+    // Convert HTML linebreaks to newlines if input is raw HTML
+    const cleanText = rawText
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<\/p>/gi, '\n\n')
+        .replace(/<\/h[1-6]>/gi, '\n\n')
+        .replace(/<\/li>/gi, '\n')
+        .replace(/<[^>]*>/g, '');
+
+    const lines = cleanText.split(/\r?\n/).map(l => l.trim());
+
+    let htmlOutput = '';
+    let inList = false;
+    let listType: 'ul' | 'ol' = 'ul';
+    let listItems: string[] = [];
+
+    const closeList = () => {
+        if (inList && listItems.length > 0) {
+            htmlOutput += `<${listType}>${listItems.map(item => `<li>${item}</li>`).join('')}</${listType}>`;
+            listItems = [];
+            inList = false;
+        }
+    };
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        if (!line) {
+            closeList();
+            continue;
+        }
+
+        // 1. Horizontal Rules (3+ underscores, dashes, or asterisks)
+        if (/^[_*\-\s]{3,}$/.test(line)) {
+            closeList();
+            htmlOutput += '<hr>';
+            continue;
+        }
+
+        // 2. Markdown Headings (# Heading, ## Heading, etc.)
+        const mdHeadingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (mdHeadingMatch) {
+            closeList();
+            const level = Math.min(mdHeadingMatch[1].length, 6);
+            htmlOutput += `<h${level}>${processInlineFormatting(mdHeadingMatch[2])}</h${level}>`;
+            continue;
+        }
+
+        // 3. Auto-detect Headings (Title patterns, Anatomy, Reality, Examples, Tips, Tricks, Bottom Line)
+        const isHeading2 = (
+            /^The Anatomy of/i.test(line) ||
+            /^The Reality: The/i.test(line) ||
+            /^Real-World Examples/i.test(line) ||
+            /^Actionable Tips/i.test(line) ||
+            /^The Bottom Line/i.test(line) ||
+            /^(Section|Part|Chapter)\s+\d+/i.test(line)
+        );
+
+        const isHeading3 = (
+            /^(Tip|Trick|Example|Step|Myth|Rule|Framework|Detox|Test|Model)\s+\d+/i.test(line) ||
+            /^[A-Z][A-Za-z0-9\s'":–—\-]{3,60}\s+(Trick|Illusion|Myth|Rule|Framework|Detox|Test|Model)$/i.test(line)
+        );
+
+        if (isHeading2) {
+            closeList();
+            htmlOutput += `<h2>${processInlineFormatting(line)}</h2>`;
+            continue;
+        }
+
+        if (isHeading3) {
+            closeList();
+            htmlOutput += `<h3>${processInlineFormatting(line)}</h3>`;
+            continue;
+        }
+
+        // 4. Bullet Lists (•, -, *, +, o, ▪)
+        const bulletMatch = line.match(/^([•\-\*\+\u25cf\u25cb\u25a0o])\s*(.+)$/);
+        if (bulletMatch) {
+            if (!inList || listType !== 'ul') {
+                closeList();
+                inList = true;
+                listType = 'ul';
+            }
+            listItems.push(processInlineFormatting(bulletMatch[2]));
+            continue;
+        }
+
+        // 5. Numbered Lists (1., 2., 1), etc.)
+        const numMatch = line.match(/^(\d+)[\.\)]\s*(.+)$/);
+        if (numMatch) {
+            if (!inList || listType !== 'ol') {
+                closeList();
+                inList = true;
+                listType = 'ol';
+            }
+            listItems.push(processInlineFormatting(numMatch[2]));
+            continue;
+        }
+
+        // Close list for normal paragraphs
+        closeList();
+
+        // 6. Normal Paragraph
+        htmlOutput += `<p>${processInlineFormatting(line)}</p>`;
+    }
+
+    closeList();
+
+    return htmlOutput;
 }
 
 export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEditorProps) => {
@@ -104,93 +230,11 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
             },
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');
-                const html = event.clipboardData?.getData('text/html');
 
-                // If it looks like raw HTML being pasted, let it through as text or content
-                if (html && !text?.includes('**') && !text?.includes('# ') && !text?.includes('```')) {
-                    return false;
-                }
-
-                if (text && (text.includes('# ') || text.includes('**') || text.includes('* ') || text.includes('```') || text.includes('> '))) {
+                if (text && text.trim()) {
                     event.preventDefault();
-
-                    // Simple Markdown to HTML converter
-                    const lines = text.split('\n');
-                    let htmlOutput = '';
-                    let inList = false;
-                    let listItems: string[] = [];
-                    let inCodeBlock = false;
-                    let codeContent = '';
-
-                    for (let i = 0; i < lines.length; i++) {
-                        let line = lines[i];
-
-                        // Code Blocks
-                        if (line.trim().startsWith('```')) {
-                            if (inCodeBlock) {
-                                htmlOutput += `<pre><code>${codeContent}</code></pre>`;
-                                codeContent = '';
-                                inCodeBlock = false;
-                            } else {
-                                inCodeBlock = true;
-                            }
-                            continue;
-                        }
-
-                        if (inCodeBlock) {
-                            codeContent += line + '\n';
-                            continue;
-                        }
-
-                        // Blockquotes
-                        if (line.trim().startsWith('> ')) {
-                            htmlOutput += `<blockquote>${processInlineFormatting(line.trim().substring(2))}</blockquote>`;
-                            continue;
-                        }
-
-                        // Horizontal Rules
-                        if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
-                            htmlOutput += '<hr>';
-                            continue;
-                        }
-
-                        // Headings
-                        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
-                        if (headingMatch) {
-                            const level = headingMatch[1].length;
-                            const contentText = headingMatch[2].trim();
-                            htmlOutput += `<h${level}>${processInlineFormatting(contentText)}</h${level}>`;
-                            continue;
-                        }
-
-                        // Lists
-                        if (line.trim().startsWith('* ') || line.trim().startsWith('- ') || line.trim().startsWith('+ ')) {
-                            const contentText = line.trim().substring(2);
-                            listItems.push(processInlineFormatting(contentText));
-                            inList = true;
-                            continue;
-                        }
-
-                        // Close list
-                        if (inList && (!line.trim() || !/^[*-+]\s+/.test(line.trim()))) {
-                            htmlOutput += `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`;
-                            listItems = [];
-                            inList = false;
-                        }
-
-                        // Paragraphs
-                        if (line.trim()) {
-                            htmlOutput += `<p>${processInlineFormatting(line)}</p>`;
-                        } else {
-                            htmlOutput += '<br>';
-                        }
-                    }
-
-                    if (inList) {
-                        htmlOutput += `<ul>${listItems.map(item => `<li>${item}</li>`).join('')}</ul>`;
-                    }
-
-                    editor?.commands.insertContent(htmlOutput);
+                    const formattedHtml = formatTextToHtml(text);
+                    editor?.commands.insertContent(formattedHtml);
                     return true;
                 }
 
@@ -257,6 +301,20 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
         }
     };
 
+    const handleAutoFormat = () => {
+        if (!editor) return;
+        const textContent = editor.getText();
+        if (!textContent.trim()) {
+            toast.error("Editor is empty!");
+            return;
+        }
+        const formattedHtml = formatTextToHtml(textContent);
+        editor.commands.setContent(formattedHtml);
+        setRawHtml(formattedHtml);
+        onChange(formattedHtml);
+        toast.success("Article structure formatted!");
+    };
+
     return (
         <div className="border rounded-xl bg-white shadow-sm overflow-hidden flex flex-col">
             {/* Mode Switcher */}
@@ -273,8 +331,21 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
                         </TabsTrigger>
                     </TabsList>
                 </Tabs>
-                <div className="text-xs text-slate-400 font-medium hidden sm:block">
-                    {viewMode === 'visual' ? 'Rich Text Mode' : 'HTML Source Mode'}
+                <div className="flex items-center gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleAutoFormat}
+                        className="h-7 px-2.5 text-xs font-bold text-indigo-600 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-lg flex items-center gap-1.5 cursor-pointer transition-all"
+                        title="Automatically format headings, bullet points, horizontal dividers, and lead-in labels"
+                    >
+                        <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                        Auto-Format Structure
+                    </Button>
+                    <div className="text-xs text-slate-400 font-medium hidden sm:block">
+                        {viewMode === 'visual' ? 'Rich Text Mode' : 'HTML Source Mode'}
+                    </div>
                 </div>
             </div>
 
