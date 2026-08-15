@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { saveAs } from "file-saver";
 
 import { useWorksheetStore } from "@/lib/worksheet-store";
+import { createDefaultConnectDotsConfig, ConnectDotsConfig } from "@/lib/connect-dots-engine";
 import {
     createTracingTextPath,
     createQRCodeVector,
@@ -26,6 +27,7 @@ import {
     generateWordSearchComponentGroups,
     generateCrosswordComponentGroups,
     generateCrosswordObjects,
+    generateConnectDotsObjects,
     generateFillInBlanksObjects,
     generateFillInBlanksObjectsFromConfig,
     generateCryptogramObjects,
@@ -98,6 +100,11 @@ export default function WorkbookDesignerClient() {
         updateCurrentPageCanvas,
     } = useWorksheetStore();
     const kdpSpecs = getKdpSpecs();
+
+    const [canvasObjects, setCanvasObjects] = useState<fabric.FabricObject[]>([]);
+    const [connectDotsMode, setConnectDotsMode] = useState(false);
+    const [connectDotsPoints, setConnectDotsPoints] = useState<{ x: number; y: number; number: number }[]>([]);
+    const [connectDotsImage, setConnectDotsImage] = useState<fabric.Image | null>(null);
 
     // Helper to insert objects onto canvas safely
     const handleInsertObjects = (
@@ -278,19 +285,9 @@ export default function WorkbookDesignerClient() {
         toast.success("Word Search added! Fits cleanly inside KDP Safe Margin Zone.");
     };
 
-    const handleAddCrossword = (title: string, items: { word: string; clue: string }[]) => {
+    const handleAddCrossword = (config: CrosswordConfig) => {
         const c = fabricCanvasRef.current;
         if (!c) return;
-
-        const config: CrosswordConfig = createDefaultCrosswordConfig();
-        config.title = title || "CROSSWORD PUZZLE";
-        if (items && items.length > 0) {
-            config.words = items.map((item, idx) => ({
-                id: `cw-${idx}-${Date.now()}`,
-                word: item.word,
-                clue: item.clue,
-            }));
-        }
 
         const { titleGroup, gridGroup, cluesGroup } = generateCrosswordComponentGroups(config);
         const canvasW = c.width || 1275;
@@ -335,6 +332,148 @@ export default function WorkbookDesignerClient() {
         c.requestRenderAll();
         c.fire("object:modified");
         toast.success("Crossword Puzzle added! Select to edit in Crossword Studio.");
+    };
+
+    const handleAddConnectDots = (config: ConnectDotsConfig) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+
+        const objects = generateConnectDotsObjects(config);
+        const canvasW = c.width || 1275;
+
+        const centerH = (obj: fabric.FabricObject) => {
+            const br = obj.getBoundingRect();
+            const newLeft = (canvasW - br.width) / 2;
+            const leftOffset = (obj.left || 0) - br.left;
+            obj.set({ left: newLeft + leftOffset });
+            obj.setCoords();
+        };
+
+        objects.forEach((obj, index) => {
+            c.add(obj);
+            centerH(obj);
+            obj.set({ top: 60 + index * 450 });
+            obj.setCoords();
+        });
+
+        if (objects.length > 0) {
+            c.setActiveObject(objects[0]);
+        }
+        c.requestRenderAll();
+        c.fire("object:modified");
+        toast.success("Connect the Dots added!");
+    };
+
+    const handleAddImageToCanvas = (imageDataUrl: string) => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+
+        // Create image element first
+        const imgEl = document.createElement('img');
+        imgEl.src = imageDataUrl;
+        
+        imgEl.onload = () => {
+            const img = new fabric.Image(imgEl);
+            
+            const canvasW = c.width || 1275;
+            const canvasH = c.height || 1650;
+            
+            // Scale image to fit canvas while maintaining aspect ratio
+            const scale = Math.min((canvasW - 100) / img.width!, (canvasH - 200) / img.height!);
+            img.set({
+                scaleX: scale,
+                scaleY: scale,
+                left: (canvasW - img.width! * scale) / 2,
+                top: 100,
+            });
+            
+            // Store reference to image for connect-dots mode
+            (img as any).isConnectDotsImage = true;
+            setConnectDotsImage(img);
+            
+            c.add(img);
+            c.setActiveObject(img);
+            c.requestRenderAll();
+            
+            // Auto-enter connect-dots mode
+            setConnectDotsMode(true);
+            toast.success("Image added to canvas! Click on canvas to add dots.");
+        };
+    };
+
+    const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!connectDotsMode) return;
+        
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        
+        // Get pointer position from event
+        const rect = c.getElement()?.getBoundingClientRect();
+        if (!rect) return;
+        
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Add dot at click position
+        const dotSize = 8;
+        const dot = new fabric.Circle({
+            left: x - dotSize / 2,
+            top: y - dotSize / 2,
+            radius: dotSize / 2,
+            fill: "#0f172a",
+            originX: "center",
+            originY: "center",
+        });
+        
+        // Add number label
+        const pointNumber = connectDotsPoints.length + 1;
+        const numberText = new fabric.IText(pointNumber.toString(), {
+            left: x + 12,
+            top: y - 12,
+            fontSize: 12,
+            fontFamily: "Inter",
+            fontWeight: "bold",
+            fill: "#0f172a",
+        });
+        
+        // Store point data
+        setConnectDotsPoints([...connectDotsPoints, { x, y, number: pointNumber }]);
+        
+        c.add(dot);
+        c.add(numberText);
+        c.requestRenderAll();
+    };
+
+    const toggleConnectDotsMode = () => {
+        setConnectDotsMode(!connectDotsMode);
+        toast.success(connectDotsMode ? "Connect-dots mode disabled" : "Connect-dots mode enabled");
+    };
+
+    const toggleImageVisibility = () => {
+        const c = fabricCanvasRef.current;
+        if (!c || !connectDotsImage) return;
+        
+        connectDotsImage.set('visible', !connectDotsImage.visible);
+        c.requestRenderAll();
+    };
+
+    const clearConnectDotsPoints = () => {
+        const c = fabricCanvasRef.current;
+        if (!c) return;
+        
+        // Remove all dots and numbers (but not the image)
+        const objects = c.getObjects();
+        const objectsToRemove = objects.filter((obj) => 
+            obj.type === 'circle' || (obj.type === 'i-text' && !(obj as any).isConnectDotsImage)
+        );
+        
+        objectsToRemove.forEach((obj) => {
+            c.remove(obj);
+        });
+        
+        setConnectDotsPoints([]);
+        c.requestRenderAll();
+        toast.success("All dots cleared");
     };
 
     const handleAddFillInBlanks = (sentence: string, wordBank: string[]) => {
@@ -704,6 +843,12 @@ export default function WorkbookDesignerClient() {
                     onAddBarcode={handleAddBarcode}
                     onAddWordSearch={handleAddWordSearch}
                     onAddCrossword={handleAddCrossword}
+                    onAddConnectDots={handleAddConnectDots}
+                    onAddImageToCanvas={handleAddImageToCanvas}
+                    onToggleConnectDotsMode={toggleConnectDotsMode}
+                    onToggleImageVisibility={toggleImageVisibility}
+                    onClearConnectDotsPoints={clearConnectDotsPoints}
+                    connectDotsMode={connectDotsMode}
                     onAddFillInBlanks={handleAddFillInBlanks}
                     onAddCryptogram={handleAddCryptogram}
                     onAddCrackTheCode={handleAddCrackTheCode}
@@ -713,7 +858,6 @@ export default function WorkbookDesignerClient() {
                     onAddWordScramble={handleAddWordScramble}
                     onAddMissingLetters={handleAddMissingLetters}
                     onAddMatchingPairs={handleAddMatchingPairs}
-                    onAddConnectTheDots={handleAddConnectTheDots}
                     onAddSpotTheDifference={handleAddSpotTheDifference}
                     onAddHiddenPicture={handleAddHiddenPicture}
                     onAddColoringPage={handleAddColoringPage}
@@ -746,7 +890,10 @@ export default function WorkbookDesignerClient() {
                     onAddCustomImage={handleAddCustomImage}
                     fabricCanvasRef={fabricCanvasRef}
                 />
-                <WorksheetCanvasContainer fabricCanvasRef={fabricCanvasRef} />
+                <WorksheetCanvasContainer 
+                    fabricCanvasRef={fabricCanvasRef}
+                    onCanvasClick={handleCanvasClick}
+                />
                 <WorksheetPropertyPanel fabricCanvasRef={fabricCanvasRef} />
             </div>
             <WorksheetPagesBar fabricCanvasRef={fabricCanvasRef} />

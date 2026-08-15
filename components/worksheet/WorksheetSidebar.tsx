@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,6 +26,8 @@ import {
 } from "@/lib/worksheet-fabric";
 import { createDefaultBoardGameConfig, BOARD_GAME_THEMES, BoardThemeId, BoardLayoutType, BoardGameConfig, CellShape, resamplePointsAlongPath } from "@/lib/board-game-engine";
 import { BOARD_TEMPLATES, BoardTemplateId, generateBoardTemplate } from "@/lib/board-game-templates";
+import { CROSSWORD_THEMES, CROSSWORD_TEMPLATES, createDefaultCrosswordConfig, CrosswordConfig } from "@/lib/crossword-engine";
+import { createDefaultConnectDotsConfig, ConnectDotsConfig, DIFFICULTY_PRESETS, applyDifficultyPreset } from "@/lib/connect-dots-engine";
 import { BoardGameComponentSidebarPanel } from "@/components/worksheet/BoardGameComponentSidebarPanel";
 import { BoardGameDrawerNew } from "@/components/worksheet/BoardGameDrawerNew";
 import { toast } from "sonner";
@@ -36,7 +39,13 @@ interface WorksheetSidebarProps {
     onAddQRCode: (data: string) => void;
     onAddBarcode: (data: string) => void;
     onAddWordSearch: (words: string[], title: string, gridSize: number, directions?: string[]) => void;
-    onAddCrossword: (title: string, items: { word: string; clue: string }[]) => void;
+    onAddCrossword: (config: CrosswordConfig) => void;
+    onAddConnectDots: (config: ConnectDotsConfig) => void;
+    onAddImageToCanvas: (imageDataUrl: string) => void;
+    onToggleConnectDotsMode: () => void;
+    onToggleImageVisibility: () => void;
+    onClearConnectDotsPoints: () => void;
+    connectDotsMode: boolean;
     onAddFillInBlanks: (sentence: string, wordBank: string[]) => void;
     onAddCryptogram: () => void;
     onAddCrackTheCode: () => void;
@@ -46,7 +55,6 @@ interface WorksheetSidebarProps {
     onAddWordScramble: (words: string[]) => void;
     onAddMissingLetters: (words: string[]) => void;
     onAddMatchingPairs: () => void;
-    onAddConnectTheDots: () => void;
     onAddSpotTheDifference: () => void;
     onAddHiddenPicture: () => void;
     onAddColoringPage: () => void;
@@ -154,6 +162,12 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddBarcode,
     onAddWordSearch,
     onAddCrossword,
+    onAddConnectDots,
+    onAddImageToCanvas,
+    onToggleConnectDotsMode,
+    onToggleImageVisibility,
+    onClearConnectDotsPoints,
+    connectDotsMode,
     onAddFillInBlanks,
     onAddCryptogram,
     onAddCrackTheCode,
@@ -163,7 +177,6 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     onAddWordScramble,
     onAddMissingLetters,
     onAddMatchingPairs,
-    onAddConnectTheDots,
     onAddSpotTheDifference,
     onAddHiddenPicture,
     onAddColoringPage,
@@ -446,7 +459,32 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
 
     // Crossword State
     const [cwTitle, setCwTitle] = useState("CLASSROOM CROSSWORD");
-    const [cwInputText, setCwInputText] = useState("LION: King of the jungle\nELEPHANT: Large mammal with trunk\nTIGER: Large wild striped cat\nGIRAFFE: Tallest mammal");
+    const [cwWords, setCwWords] = useState("LION: King of the jungle, ELEPHANT: Large mammal with trunk, TIGER: Large wild striped cat, GIRAFFE: Tallest mammal");
+    const [cwSize, setCwSize] = useState("13");
+    const [cwShowSolution, setCwShowSolution] = useState(false);
+
+    // Connect Dots State
+    const [cdTitle, setCdTitle] = useState("CONNECT THE DOTS");
+    const [cdShape, setCdShape] = useState("star");
+    const [cdNumDots, setCdNumDots] = useState(20);
+    const [cdDotSize, setCdDotSize] = useState(8);
+    const [cdShowNumbers, setCdShowNumbers] = useState(true);
+    const [cdShowSolution, setCdShowSolution] = useState(false);
+    const [cdFontSize, setCdFontSize] = useState(12);
+    const [cdOffsetX, setCdOffsetX] = useState(12);
+    const [cdOffsetY, setCdOffsetY] = useState(-12);
+    const [cdPointAlpha, setCdPointAlpha] = useState(20);
+    const [cdShowPath, setCdShowPath] = useState(false);
+    const [cdShowBackground, setCdShowBackground] = useState(true);
+    const [cdSvgPathData, setCdSvgPathData] = useState("");
+    const [cdLabelFunction, setCdLabelFunction] = useState("(pathIndex, i) => ((pathIndex ? String.fromCharCode(64 + pathIndex) : '') + (i + 1))");
+    const [cdCustomFilter, setCdCustomFilter] = useState("");
+    const [cdDifficulty, setCdDifficulty] = useState("grade1_2");
+    const [cdMode, setCdMode] = useState<"auto" | "manual">("auto"); // auto or manual mode
+    const [cdImageFile, setCdImageFile] = useState<File | null>(null);
+    const [cdImageDataUrl, setCdImageDataUrl] = useState<string>("");
+    const [cdShowImage, setCdShowImage] = useState(true);
+    const [cdManualPoints, setCdManualPoints] = useState<{ x: number; y: number }[]>([]); // Manually placed points
 
     // Other Puzzle Input States
     const [fillInSentence, setFillInSentence] = useState("The ________ jumps over the ________ wall.");
@@ -478,18 +516,156 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
     };
 
     const handleCreateCrossword = () => {
-        const lines = cwInputText.split("\n").filter((l) => l.trim().length > 0);
-        const items = lines.map((l) => {
-            const parts = l.split(":");
+        const items = cwWords.split(",").map((item: string) => {
+            const parts = item.split(":");
             return {
                 word: parts[0].trim().toUpperCase().replace(/[^A-Z]/g, ""),
                 clue: parts.slice(1).join(":").trim() || `Clue for ${parts[0]}`,
             };
-        }).filter((i) => i.word.length >= 2);
+        }).filter((i: any) => i.word.length >= 2);
 
-        if (items.length > 0) {
-            onAddCrossword(cwTitle, items);
+        if (items.length === 0) {
+            toast.error("Please add valid word clues");
+            return;
         }
+
+        const gridSize = parseInt(cwSize) || 13;
+
+        const config: CrosswordConfig = {
+            title: cwTitle,
+            subtitle: "Read the clues and fill in the puzzle grid",
+            instructions: "Complete across and down entries using the given definitions.",
+            theme: "Custom",
+            difficulty: "medium",
+            type: "standard",
+            language: "English",
+            
+            grid: {
+                rows: gridSize,
+                cols: gridSize,
+                cellSize: 32,
+                cellStyle: "clean",
+                borderWidth: 1,
+                borderColor: "#cbd5e1",
+                blackSquareColor: "#1e293b",
+                symmetry: "rotational",
+                autoBlackSquares: true,
+            },
+            
+            words: items.map((item: any, idx: number) => ({
+                id: `cw-word-${idx}`,
+                word: item.word,
+                clue: item.clue,
+                clueType: "definition" as any,
+                difficulty: "medium" as any,
+            })),
+            
+            numbering: {
+                showNumbers: true,
+                fontSize: 9,
+                color: "#334155",
+                position: "top_left",
+            },
+            
+            clues: {
+                layout: "side_by_side",
+                acrossTitle: "ACROSS",
+                downTitle: "DOWN",
+                fontSize: 11,
+                fontFamily: "Inter",
+                color: "#334155",
+                spacing: 4,
+            },
+            
+            appearance: {
+                titleFont: "Inter",
+                titleFontSize: 22,
+                titleColor: "#0f172a",
+                gridFont: "Inter",
+                gridFontSize: 15,
+                gridLetterColor: "#0f172a",
+                gridBgColor: "#ffffff",
+                cellBgColor: "#ffffff",
+                blackCellColor: "#1e293b",
+            },
+            
+            answerKey: {
+                showSolution: cwShowSolution,
+                solutionColor: "#16a34a",
+                highlightColor: "#bbf7d0",
+            },
+            
+            metadata: {
+                created: new Date().toISOString(),
+                version: "2.0.0",
+            },
+        };
+
+        onAddCrossword(config);
+    };
+
+    const handleCreateConnectDots = () => {
+        let config: ConnectDotsConfig = {
+            title: cdTitle,
+            subtitle: "Connect the dots in order to reveal the picture",
+            instructions: "Start at dot 1 and connect each dot in numerical order",
+            shape: cdMode === "manual" ? "custom" : (cdShape as any),
+            customPoints: cdMode === "manual" ? cdManualPoints : undefined,
+            svgPathData: cdSvgPathData || undefined,
+            numDots: cdMode === "manual" ? cdManualPoints.length : cdNumDots,
+            dotSize: cdDotSize,
+            dotColor: "#0f172a",
+            showNumbers: cdShowNumbers,
+            fontSize: cdFontSize,
+            fontColor: "#0f172a",
+            numberOffsetX: cdOffsetX,
+            numberOffsetY: cdOffsetY,
+            labelFunction: cdLabelFunction ? new Function('pathIndex', 'i', cdLabelFunction) as any : undefined,
+            showLines: false,
+            lineColor: "#94a3b8",
+            lineWidth: 1,
+            showSolution: cdShowSolution,
+            solutionColor: "#16a34a",
+            canvasWidth: 400,
+            canvasHeight: 400,
+            backgroundColor: "#ffffff",
+            showPath: cdShowPath,
+            showBackground: cdShowBackground,
+            pointAlpha: cdPointAlpha,
+            customPointFilter: cdCustomFilter || undefined,
+        };
+
+        // Add image data URL for manual mode
+        if (cdMode === "manual" && cdImageDataUrl) {
+            (config as any).imageDataUrl = cdImageDataUrl;
+        }
+
+        // Apply difficulty preset if selected (only in auto mode)
+        if (cdMode === "auto") {
+            config = applyDifficultyPreset(config, cdDifficulty);
+        }
+
+        onAddConnectDots(config);
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCdImageFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setCdImageDataUrl(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleAddManualPoint = (x: number, y: number) => {
+        setCdManualPoints([...cdManualPoints, { x, y }]);
+    };
+
+    const handleClearManualPoints = () => {
+        setCdManualPoints([]);
     };
 
     return (
@@ -710,24 +886,41 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     </AccordionContent>
                                 </AccordionItem>
 
-                                {/* 2. CROSSWORD ACCORDION */}
+                                {/* 3. CROSSWORD ACCORDION */}
                                 <AccordionItem value="p-crossword" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                                         <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
                                             <Sparkles className="w-4 h-4" />
-                                            <span>2. Crossword Puzzle</span>
+                                            <span>3. Crossword Puzzle</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-500">Title</Label>
-                                            <Input value={cwTitle} onChange={(e) => setCwTitle(e.target.value)} className="h-7 text-xs" />
+                                            <Label className="text-[10px] font-bold text-slate-500">Puzzle Title</Label>
+                                            <Input value={cwTitle} onChange={(e) => setCwTitle(e.target.value)} placeholder="Title" className="h-7 text-xs" />
                                         </div>
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-500">Clues & Answers (ANSWER: CLUE)</Label>
-                                            <Textarea value={cwInputText} onChange={(e) => setCwInputText(e.target.value)} className="h-20 text-xs font-mono resize-none" />
+                                            <Label className="text-[10px] font-bold text-slate-500">Word List (ANSWER: CLUE, comma separated)</Label>
+                                            <Textarea value={cwWords} onChange={(e) => setCwWords(e.target.value)} placeholder="LION: King of the jungle, TIGER: Large cat..." className="h-16 text-xs resize-none" />
                                         </div>
-                                        <Button size="sm" className="w-full h-8 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg" onClick={handleCreateCrossword}>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Grid Dimensions</Label>
+                                            <Select value={cwSize} onValueChange={setCwSize}>
+                                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="8">8 × 8 Grid</SelectItem>
+                                                    <SelectItem value="10">10 × 10 Grid</SelectItem>
+                                                    <SelectItem value="12">12 × 12 Grid</SelectItem>
+                                                    <SelectItem value="13">13 × 13 Grid</SelectItem>
+                                                    <SelectItem value="15">15 × 15 Grid</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-[10px] font-bold text-slate-500">Show Solution</Label>
+                                            <Switch checked={cwShowSolution} onCheckedChange={setCwShowSolution} />
+                                        </div>
+                                        <Button size="sm" className="w-full h-8 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg mt-1" onClick={handleCreateCrossword}>
                                             <Plus className="w-3.5 h-3.5 mr-1" /> Add Crossword
                                         </Button>
                                     </AccordionContent>
@@ -1008,14 +1201,195 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                 {/* 19. CONNECT THE DOTS ACCORDION */}
                                 <AccordionItem value="p-connect-dots" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
                                     <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        <div className="flex items-center gap-2 text-[orange] dark:text-orange-400">
+                                        <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400">
                                             <Pencil className="w-4 h-4" />
                                             <span>19. Connect the Dots</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" className="w-full h-8 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg" onClick={onAddConnectTheDots}>
-                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Connect Dots
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Mode</Label>
+                                            <Select value={cdMode} onValueChange={(val: "auto" | "manual") => setCdMode(val)}>
+                                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="auto">Auto (Shapes/SVG)</SelectItem>
+                                                    <SelectItem value="manual">Manual (Image)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        
+                                        {cdMode === "manual" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Upload Image</Label>
+                                                    <Input type="file" accept="image/*" onChange={handleImageUpload} className="h-7 text-xs" />
+                                                </div>
+                                                
+                                                {cdImageDataUrl && (
+                                                    <div className="space-y-1">
+                                                        <Label className="text-[10px] font-bold text-slate-500">Image Preview</Label>
+                                                        <div className="relative w-full h-32 bg-slate-100 rounded border border-slate-200 overflow-hidden">
+                                                            <img 
+                                                                src={cdImageDataUrl} 
+                                                                alt="Uploaded" 
+                                                                className={`w-full h-full object-contain ${!cdShowImage ? 'opacity-0' : 'opacity-100'}`}
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <Button size="sm" className="h-7 text-xs bg-blue-600 hover:bg-blue-700" onClick={() => onAddImageToCanvas(cdImageDataUrl)}>
+                                                                Add to Canvas
+                                                            </Button>
+                                                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleClearManualPoints}>
+                                                                Clear Points
+                                                            </Button>
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2">
+                                                            <Button size="sm" variant={connectDotsMode ? "default" : "outline"} className={`h-7 text-xs ${connectDotsMode ? "bg-green-600 hover:bg-green-700" : ""}`} onClick={onToggleConnectDotsMode}>
+                                                                {connectDotsMode ? "Dot Mode ON" : "Dot Mode OFF"}
+                                                            </Button>
+                                                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onToggleImageVisibility}>
+                                                                Toggle Image
+                                                            </Button>
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500">
+                                                            Points: {cdManualPoints.length}
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-400 italic">
+                                                            Add image to canvas, enable dot mode, then click on canvas to place dots
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {!cdImageDataUrl && (
+                                                    <div className="text-[10px] text-slate-500 text-center py-4">
+                                                        Upload an image to start placing dots
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                        
+                                        {cdMode === "auto" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Title</Label>
+                                                    <Input value={cdTitle} onChange={(e) => setCdTitle(e.target.value)} placeholder="Title" className="h-7 text-xs" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Difficulty</Label>
+                                                    <Select value={cdDifficulty} onValueChange={(val) => {
+                                                        setCdDifficulty(val);
+                                                        const preset = DIFFICULTY_PRESETS[val];
+                                                        if (preset) {
+                                                            setCdNumDots(preset.numDots);
+                                                            setCdDotSize(preset.dotSize);
+                                                            setCdFontSize(preset.fontSize);
+                                                            setCdPointAlpha(preset.pointAlpha);
+                                                        }
+                                                    }}>
+                                                        <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            {Object.entries(DIFFICULTY_PRESETS).map(([key, preset]) => (
+                                                                <SelectItem key={key} value={key}>{preset.name}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Shape</Label>
+                                                    <Select value={cdShape} onValueChange={setCdShape}>
+                                                        <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="star">Star</SelectItem>
+                                                            <SelectItem value="heart">Heart</SelectItem>
+                                                            <SelectItem value="circle">Circle</SelectItem>
+                                                            <SelectItem value="square">Square</SelectItem>
+                                                            <SelectItem value="triangle">Triangle</SelectItem>
+                                                            <SelectItem value="svg">SVG Path</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                {cdShape === "svg" && (
+                                                    <div className="space-y-1">
+                                                        <Label className="text-[10px] font-bold text-slate-500">SVG Path Data</Label>
+                                                        <Textarea 
+                                                            value={cdSvgPathData} 
+                                                            onChange={(e) => setCdSvgPathData(e.target.value)} 
+                                                            placeholder="M 100 100 L 200 100 L 200 200 Z" 
+                                                            className="h-16 text-xs" 
+                                                        />
+                                                    </div>
+                                                )}
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Number of Dots: {cdNumDots}</Label>
+                                                    <Input type="range" min="5" max="300" value={cdNumDots} onChange={(e) => setCdNumDots(parseInt(e.target.value))} className="h-7" />
+                                                </div>
+                                            </>
+                                        )}
+                                        
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Dot Size: {cdDotSize}</Label>
+                                            <Input type="range" min="1" max="50" value={cdDotSize} onChange={(e) => setCdDotSize(parseInt(e.target.value))} className="h-7" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Font Size: {cdFontSize}</Label>
+                                            <Input type="range" min="0" max="50" value={cdFontSize} onChange={(e) => setCdFontSize(parseInt(e.target.value))} className="h-7" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Text Offset X: {cdOffsetX}</Label>
+                                            <Input type="range" min="-50" max="50" value={cdOffsetX} onChange={(e) => setCdOffsetX(parseInt(e.target.value))} className="h-7" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-500">Text Offset Y: {cdOffsetY}</Label>
+                                            <Input type="range" min="-50" max="50" value={cdOffsetY} onChange={(e) => setCdOffsetY(parseInt(e.target.value))} className="h-7" />
+                                        </div>
+                                        {cdMode === "auto" && (
+                                            <>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Point Alpha: {cdPointAlpha}</Label>
+                                                    <Input type="range" min="1" max="100" value={cdPointAlpha} onChange={(e) => setCdPointAlpha(parseInt(e.target.value))} className="h-7" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Label Function</Label>
+                                                    <Textarea 
+                                                        value={cdLabelFunction} 
+                                                        onChange={(e) => setCdLabelFunction(e.target.value)} 
+                                                        placeholder="(pathIndex, i) => i + 1" 
+                                                        className="h-12 text-xs" 
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Custom Point Filter</Label>
+                                                    <Textarea 
+                                                        value={cdCustomFilter} 
+                                                        onChange={(e) => setCdCustomFilter(e.target.value)} 
+                                                        placeholder="points => points.slice(0, 50)" 
+                                                        className="h-12 text-xs" 
+                                                    />
+                                                </div>
+                                            </>
+                                        )}
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-[10px] font-bold text-slate-500">Show Numbers</Label>
+                                            <Switch checked={cdShowNumbers} onCheckedChange={setCdShowNumbers} />
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <Label className="text-[10px] font-bold text-slate-500">Show Solution</Label>
+                                            <Switch checked={cdShowSolution} onCheckedChange={setCdShowSolution} />
+                                        </div>
+                                        {cdMode === "auto" && (
+                                            <>
+                                                <div className="flex items-center justify-between">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Show Path</Label>
+                                                    <Switch checked={cdShowPath} onCheckedChange={setCdShowPath} />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <Label className="text-[10px] font-bold text-slate-500">Show Background</Label>
+                                                    <Switch checked={cdShowBackground} onCheckedChange={setCdShowBackground} />
+                                                </div>
+                                            </>
+                                        )}
+                                        <Button size="sm" className="w-full h-8 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-lg" onClick={handleCreateConnectDots} disabled={cdMode === "manual" && cdManualPoints.length === 0}>
+                                            <Plus className="w-3.5 h-3.5 mr-1" /> {cdMode === "manual" ? "Add Connect Dots" : "Add Connect Dots"}
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -1031,21 +1405,6 @@ export const WorksheetSidebar: React.FC<WorksheetSidebarProps> = ({
                                     <AccordionContent className="space-y-2 pt-1 pb-3">
                                         <Button size="sm" className="w-full h-8 bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold rounded-lg" onClick={onAddColoringPage}>
                                             <Plus className="w-3.5 h-3.5 mr-1" /> Add Coloring Frame
-                                        </Button>
-                                    </AccordionContent>
-                                </AccordionItem>
-
-                                {/* 21. DOT-TO-DOT ACCORDION */}
-                                <AccordionItem value="p-dot-to-dot" className="border border-slate-200 dark:border-slate-800 rounded-xl px-3 bg-slate-50/70 dark:bg-slate-800/40">
-                                    <AccordionTrigger className="hover:no-underline py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200">
-                                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                                            <Pencil className="w-4 h-4" />
-                                            <span>21. Dot-to-Dot</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="space-y-2 pt-1 pb-3">
-                                        <Button size="sm" className="w-full h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg" onClick={onAddConnectTheDots}>
-                                            <Plus className="w-3.5 h-3.5 mr-1" /> Add Dot-to-Dot Puzzle
                                         </Button>
                                     </AccordionContent>
                                 </AccordionItem>

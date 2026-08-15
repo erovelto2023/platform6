@@ -100,7 +100,7 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-lg prose-indigo max-w-none focus:outline-none min-h-[500px] px-6 py-8',
+                class: 'prose prose-lg max-w-none focus:outline-none min-h-[500px] px-6 py-8 text-slate-900 bg-white selection:bg-indigo-100 selection:text-indigo-900',
             },
             handlePaste: (view, event) => {
                 const text = event.clipboardData?.getData('text/plain');
@@ -498,9 +498,98 @@ export const RichTextEditor = ({ content, onChange, placeholder }: RichTextEdito
                     </div>
 
                     {/* Editor Content */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto bg-white text-slate-900">
                         <EditorContent editor={editor} />
                     </div>
+
+                    {/* Inline CSS styling to guarantee rich text editor content visibility */}
+                    <style dangerouslySetInnerHTML={{ __html: `
+                        .ProseMirror {
+                            color: #0f172a !important;
+                            background-color: #ffffff !important;
+                            min-height: 500px;
+                            outline: none;
+                        }
+                        .ProseMirror p {
+                            color: #0f172a !important;
+                            margin-bottom: 1.25rem;
+                            line-height: 1.75;
+                            font-size: 1.05rem;
+                        }
+                        .ProseMirror p:first-child:empty::before,
+                        .ProseMirror p:first-child:has(br:only-child)::before {
+                            content: "${placeholder || 'Write your article content here...'}";
+                            color: #94a3b8 !important;
+                            pointer-events: none;
+                            float: left;
+                            height: 0;
+                        }
+                        .ProseMirror h1, .ProseMirror h2, .ProseMirror h3, .ProseMirror h4, .ProseMirror h5, .ProseMirror h6 {
+                            color: #0f172a !important;
+                            font-weight: 700;
+                            margin-top: 1.75rem;
+                            margin-bottom: 0.75rem;
+                            line-height: 1.3;
+                        }
+                        .ProseMirror h1 { font-size: 2.25rem; }
+                        .ProseMirror h2 { font-size: 1.75rem; }
+                        .ProseMirror h3 { font-size: 1.35rem; }
+                        .ProseMirror ul {
+                            list-style-type: disc !important;
+                            padding-left: 1.5rem !important;
+                            margin-bottom: 1.25rem !important;
+                            color: #0f172a !important;
+                        }
+                        .ProseMirror ol {
+                            list-style-type: decimal !important;
+                            padding-left: 1.5rem !important;
+                            margin-bottom: 1.25rem !important;
+                            color: #0f172a !important;
+                        }
+                        .ProseMirror li {
+                            margin-bottom: 0.375rem !important;
+                            color: #0f172a !important;
+                        }
+                        .ProseMirror blockquote {
+                            border-left: 4px solid #6366f1 !important;
+                            padding-left: 1rem !important;
+                            font-style: italic;
+                            color: #334155 !important;
+                            margin: 1.25rem 0 !important;
+                        }
+                        .ProseMirror pre {
+                            background-color: #0f172a !important;
+                            color: #f8fafc !important;
+                            padding: 1.25rem !important;
+                            border-radius: 0.75rem !important;
+                            overflow-x: auto;
+                            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                            margin-bottom: 1.25rem !important;
+                        }
+                        .ProseMirror code {
+                            background-color: #f1f5f9 !important;
+                            color: #0f172a !important;
+                            padding: 0.2rem 0.4rem !important;
+                            border-radius: 0.25rem !important;
+                            font-size: 0.875em !important;
+                            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                        }
+                        .ProseMirror pre code {
+                            background-color: transparent !important;
+                            color: #f8fafc !important;
+                            padding: 0 !important;
+                        }
+                        .ProseMirror a {
+                            color: #4f46e5 !important;
+                            text-decoration: underline !important;
+                            font-weight: 500;
+                        }
+                        .ProseMirror hr {
+                            border: none !important;
+                            border-top: 2px solid #e2e8f0 !important;
+                            margin: 2rem 0 !important;
+                        }
+                    ` }} />
                 </>
             )}
 

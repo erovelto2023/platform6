@@ -353,19 +353,31 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
     const rows = config.grid.rows;
     const cols = config.grid.cols;
 
-    // Clean word list (uppercase, A-Z only, min length 2)
+    // Clean word list (uppercase, A-Z only, min length 2, remove duplicates)
     const rawWords = config.words
         .map((w) => ({
             ...w,
             word: w.word.toUpperCase().replace(/[^A-Z]/g, ""),
         }))
-        .filter((w) => w.word.length >= 2);
+        .filter((w) => w.word.length >= 2 && w.word.length <= Math.max(rows, cols));
+
+    // Remove duplicate words
+    const uniqueWords = rawWords.filter((word, index, self) =>
+        index === self.findIndex((w) => w.word === word.word)
+    );
 
     // Sort words by length descending to place larger anchor words first
-    const sortedWords = [...rawWords].sort((a, b) => b.word.length - a.word.length);
+    const sortedWords = [...uniqueWords].sort((a, b) => b.word.length - a.word.length);
 
-    // Grid representation
-    const gridMatrix: (string | null)[][] = Array.from({ length: rows }, () => Array(cols).fill(null));
+    // Grid representation using CrosswordCell objects
+    const gridMatrix: CrosswordCell[][] = Array.from({ length: rows }, (_, r) => 
+        Array(cols).fill(null).map((_, c) => ({
+            row: r,
+            col: c,
+            letter: "",
+            isBlack: true,
+        }))
+    );
 
     const placedEntries: CrosswordPlacedEntry[] = [];
     const unplacedWords: CrosswordWordEntry[] = [];
@@ -376,23 +388,23 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
         if (dir === "across") {
             if (c + len > cols) return false;
             // Check cell before word
-            if (c > 0 && gridMatrix[r][c - 1] !== null) return false;
+            if (c > 0 && !gridMatrix[r][c - 1].isBlack) return false;
             // Check cell after word
-            if (c + len < cols && gridMatrix[r][c + len] !== null) return false;
+            if (c + len < cols && !gridMatrix[r][c + len].isBlack) return false;
 
             let intersections = 0;
             for (let i = 0; i < len; i++) {
                 const existing = gridMatrix[r][c + i];
                 const char = word[i];
-                if (existing !== null) {
-                    if (existing !== char) return false;
+                if (!existing.isBlack) {
+                    if (existing.letter !== char) return false;
                     intersections++;
                 } else {
                     // Check parallel adjacent cells (above and below) to avoid unneeded touchings
-                    if (r > 0 && gridMatrix[r - 1][c + i] !== null) {
+                    if (r > 0 && !gridMatrix[r - 1][c + i].isBlack) {
                         // Allowed only if forming valid cross
                     }
-                    if (r < rows - 1 && gridMatrix[r + 1][c + i] !== null) {
+                    if (r < rows - 1 && !gridMatrix[r + 1][c + i].isBlack) {
                         // Allowed only if forming valid cross
                     }
                 }
@@ -403,16 +415,16 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
         } else {
             if (r + len > rows) return false;
             // Check cell before word
-            if (r > 0 && gridMatrix[r - 1][c] !== null) return false;
+            if (r > 0 && !gridMatrix[r - 1][c].isBlack) return false;
             // Check cell after word
-            if (r + len < rows && gridMatrix[r + len][c] !== null) return false;
+            if (r + len < rows && !gridMatrix[r + len][c].isBlack) return false;
 
             let intersections = 0;
             for (let i = 0; i < len; i++) {
                 const existing = gridMatrix[r + i][c];
                 const char = word[i];
-                if (existing !== null) {
-                    if (existing !== char) return false;
+                if (!existing.isBlack) {
+                    if (existing.letter !== char) return false;
                     intersections++;
                 }
             }
@@ -425,8 +437,21 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
     const commitWord = (entry: CrosswordWordEntry, r: number, c: number, dir: "across" | "down") => {
         const word = entry.word;
         for (let i = 0; i < word.length; i++) {
-            if (dir === "across") gridMatrix[r][c + i] = word[i];
-            else gridMatrix[r + i][c] = word[i];
+            if (dir === "across") {
+                gridMatrix[r][c + i] = {
+                    row: r,
+                    col: c + i,
+                    letter: word[i],
+                    isBlack: false,
+                };
+            } else {
+                gridMatrix[r + i][c] = {
+                    row: r + i,
+                    col: c,
+                    letter: word[i],
+                    isBlack: false,
+                };
+            }
         }
         placedEntries.push({
             ...entry,
@@ -445,8 +470,15 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
         if (canPlaceWord(first.word, startR, startC, "across")) {
             commitWord(first, startR, startC, "across");
         } else {
-            // Fallback placement
-            commitWord(first, 1, 1, "across");
+            // Try vertical placement if horizontal fails
+            const startR2 = Math.max(0, Math.floor((rows - first.word.length) / 2));
+            const startC2 = Math.floor(cols / 2);
+            if (canPlaceWord(first.word, startR2, startC2, "down")) {
+                commitWord(first, startR2, startC2, "down");
+            } else {
+                // Fallback to top-left
+                commitWord(first, 1, 1, "across");
+            }
         }
     }
 
@@ -466,9 +498,11 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
                         for (let i = 0; i < word.length; i++) {
                             const curR = dir === "across" ? r : r + i;
                             const curC = dir === "across" ? c + i : c;
-                            if (gridMatrix[curR][curC] === word[i]) count++;
+                            if (!gridMatrix[curR][curC].isBlack && gridMatrix[curR][curC].letter === word[i]) count++;
                         }
-                        const score = count * 10 - Math.abs(r - rows / 2) - Math.abs(c - cols / 2);
+                        // Prefer placements with more intersections, closer to center
+                        const centerBias = Math.abs(r - rows / 2) + Math.abs(c - cols / 2);
+                        const score = count * 10 - centerBias;
                         if (!bestPlacement || score > bestPlacement.score) {
                             bestPlacement = { r, c, dir, score };
                         }
@@ -532,8 +566,9 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
     for (let r = 0; r < rows; r++) {
         grid[r] = [];
         for (let c = 0; c < cols; c++) {
-            const letter = gridMatrix[r][c];
-            const isBlack = letter === null;
+            const cell = gridMatrix[r][c];
+            const isBlack = cell.isBlack;
+            const letter = isBlack ? "" : cell.letter;
             const key = `${r},${c}`;
             const num = numberMap.get(key);
 
@@ -550,7 +585,7 @@ export function solveAndGenerateCrossword(config: CrosswordConfig): CrosswordGen
             grid[r][c] = {
                 row: r,
                 col: c,
-                letter: letter || "",
+                letter: letter,
                 isBlack,
                 number: num,
                 acrossEntryId: acrossEntry?.id,

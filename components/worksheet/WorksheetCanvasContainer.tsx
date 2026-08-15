@@ -17,6 +17,7 @@ import {
 
 interface WorksheetCanvasContainerProps {
     fabricCanvasRef: React.MutableRefObject<fabric.Canvas | null>;
+    onCanvasClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const CUSTOM_PROPS = ["customType", "puzzleComponent", "wordSearchConfig", "crosswordConfig", "puzzleConfig", "id", "subTargetCheck"];
@@ -48,7 +49,7 @@ function keepEraserMasksOnTop(c: fabric.Canvas) {
     });
 }
 
-export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> = ({ fabricCanvasRef }) => {
+export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> = ({ fabricCanvasRef, onCanvasClick }) => {
     const canvasElRef = useRef<HTMLCanvasElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const canvasWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -642,6 +643,7 @@ export const WorksheetCanvasContainer: React.FC<WorksheetCanvasContainerProps> =
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
+                onClick={onCanvasClick}
             >
                 {/* LIVE FREEHAND INK & PEN CURSOR OVERLAY */}
                 {activeTool === "draw" && (

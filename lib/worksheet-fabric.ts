@@ -20,12 +20,18 @@ import {
     generateDefaultSpacesForConfig,
     createDefaultBoardGameConfig,
 } from "./board-game-engine";
+import {
+    ConnectDotsConfig,
+    generateConnectDots,
+    createDefaultConnectDotsConfig,
+} from "./connect-dots-engine";
 
 export const CUSTOM_PUZZLE_PROPS = [
     "customType",
     "puzzleComponent",
     "wordSearchConfig",
     "crosswordConfig",
+    "connectDotsConfig",
     "puzzleConfig",
     "id",
     "subTargetCheck",
@@ -37,6 +43,7 @@ export function attachPuzzleMetadata(obj: any, customType: string, componentType
     obj.puzzleComponent = componentType;
     if (customType === "word-search") obj.wordSearchConfig = config;
     else if (customType === "crossword") obj.crosswordConfig = config;
+    else if (customType === "connect-dots") obj.connectDotsConfig = config;
     else obj.puzzleConfig = config;
 
     const originalToObject = obj.toObject.bind(obj);
@@ -46,6 +53,7 @@ export function attachPuzzleMetadata(obj: any, customType: string, componentType
         res.puzzleComponent = componentType;
         if (customType === "word-search") res.wordSearchConfig = config;
         else if (customType === "crossword") res.crosswordConfig = config;
+        else if (customType === "connect-dots") res.connectDotsConfig = config;
         else res.puzzleConfig = config;
         return res;
     };
@@ -716,10 +724,10 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
         for (let c = 0; c < cols; c++) {
             const x = c * cellSize;
             const y = r * cellSize;
-            const cell = grid[r][c];
+            const cell = grid[r]?.[c];
 
-            if (cell.isBlack) {
-                // Black cell
+            if (!cell || cell.isBlack) {
+                // Black cell or undefined cell
                 const blackRect = new fabric.Rect({
                     left: x,
                     top: y,
@@ -737,9 +745,7 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
                     top: y,
                     width: cellSize,
                     height: cellSize,
-                    fill: config.answerKey.showSolution && cell.letter
-                        ? (config.answerKey.highlightColor || "#bbf7d0")
-                        : (config.appearance.cellBgColor || "#ffffff"),
+                    fill: config.appearance.cellBgColor || "#ffffff",
                     stroke: config.grid.borderColor || "#cbd5e1",
                     strokeWidth: config.grid.borderWidth || 1,
                     rx: config.grid.cellStyle === "rounded" ? 6 : 0,
@@ -774,10 +780,11 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
                         top: y + (cellSize / 2),
                         originX: "center",
                         originY: "center",
-                        fontSize: config.appearance.gridFontSize || 15,
+                        fontSize: Math.max(12, cellSize * 0.6),
                         fontFamily: config.appearance.gridFont || "Inter",
                         fontWeight: "bold",
                         fill: config.answerKey.showSolution ? (config.answerKey.solutionColor || "#14532d") : (config.appearance.gridLetterColor || "#0f172a"),
+                        textAlign: "center",
                     });
                     gridObjs.push(letterObj);
                 }
@@ -793,13 +800,13 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
 
     const layout = config.clues.layout || "side_by_side";
     const colWidth = layout === "columns_3"
-        ? Math.max(160, Math.floor((cols * cellSize) / 3))
-        : Math.max(220, Math.floor((cols * cellSize) / 2));
+        ? Math.max(180, Math.floor((cols * cellSize) / 3))
+        : Math.max(280, Math.floor((cols * cellSize) / 2));
 
     const clueFontSize = config.clues.fontSize || 11;
     const clueFontFamily = config.clues.fontFamily || "Inter";
     const clueColor = config.clues.color || "#334155";
-    const itemSpacing = config.clues.spacing || 20;
+    const itemSpacing = config.clues.spacing || 28;
 
     // Helper to format clue string with length hint if enabled
     const formatClueText = (entry: any) => {
@@ -808,6 +815,22 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
             text += ` (${entry.word.length})`;
         }
         return text;
+    };
+
+    // Helper to create wrapped text for clues
+    const createWrappedClueText = (text: string, x: number, y: number) => {
+        const textObj = new fabric.Textbox(text, {
+            left: x,
+            top: y,
+            fontSize: clueFontSize,
+            fontFamily: clueFontFamily,
+            fill: clueColor,
+            width: colWidth,
+            splitByGrapheme: true,
+            lineHeight: 1.4,
+            textAlign: 'left',
+        });
+        return textObj;
     };
 
     if (layout === "stacked") {
@@ -825,15 +848,9 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
         currentY += 24;
 
         acrossClues.forEach((entry) => {
-            const clueItem = new fabric.IText(formatClueText(entry), {
-                left: 0,
-                top: currentY,
-                fontSize: clueFontSize,
-                fontFamily: clueFontFamily,
-                fill: clueColor,
-            });
+            const clueItem = createWrappedClueText(formatClueText(entry), 0, currentY);
             clueObjs.push(clueItem);
-            currentY += itemSpacing;
+            currentY += clueItem.height || itemSpacing;
         });
 
         currentY += 16;
@@ -849,15 +866,9 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
         currentY += 24;
 
         downClues.forEach((entry) => {
-            const clueItem = new fabric.IText(formatClueText(entry), {
-                left: 0,
-                top: currentY,
-                fontSize: clueFontSize,
-                fontFamily: clueFontFamily,
-                fill: clueColor,
-            });
+            const clueItem = createWrappedClueText(formatClueText(entry), 0, currentY);
             clueObjs.push(clueItem);
-            currentY += itemSpacing;
+            currentY += clueItem.height || itemSpacing;
         });
     } else {
         // Side-by-side or Multi-column Layout
@@ -873,15 +884,9 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
 
         let acrossY = 24;
         acrossClues.forEach((entry) => {
-            const clueItem = new fabric.IText(formatClueText(entry), {
-                left: 0,
-                top: acrossY,
-                fontSize: clueFontSize,
-                fontFamily: clueFontFamily,
-                fill: clueColor,
-            });
+            const clueItem = createWrappedClueText(formatClueText(entry), 0, acrossY);
             clueObjs.push(clueItem);
-            acrossY += itemSpacing;
+            acrossY += clueItem.height || itemSpacing;
         });
 
         // Down Clues Column
@@ -897,15 +902,9 @@ export function generateCrosswordComponentGroups(config: CrosswordConfig): {
 
         let downY = 24;
         downClues.forEach((entry) => {
-            const clueItem = new fabric.IText(formatClueText(entry), {
-                left: colWidth + 20,
-                top: downY,
-                fontSize: clueFontSize,
-                fontFamily: clueFontFamily,
-                fill: clueColor,
-            });
+            const clueItem = createWrappedClueText(formatClueText(entry), colWidth + 20, downY);
             clueObjs.push(clueItem);
-            downY += itemSpacing;
+            downY += clueItem.height || itemSpacing;
         });
     }
 
@@ -4082,7 +4081,156 @@ export function generatePrintableScorecardGroup(): fabric.Group {
     return scoreGroup;
 }
 
+// Connect the Dots Generator
+export function generateConnectDotsComponentGroups(config: ConnectDotsConfig): {
+    titleGroup: fabric.FabricObject | null;
+    dotsGroup: fabric.FabricObject;
+} {
+    const generation = generateConnectDots(config);
+    const { points, lines } = generation;
 
+    const objs: fabric.FabricObject[] = [];
 
+    // Title
+    let titleGroup: fabric.FabricObject | null = null;
+    if (config.title) {
+        const titleText = new fabric.IText(config.title, {
+            left: 0,
+            top: 0,
+            fontSize: 24,
+            fontFamily: "Inter",
+            fontWeight: "bold",
+            fill: "#0f172a",
+        });
+        objs.push(titleText);
 
+        if (config.subtitle) {
+            const subtitleText = new fabric.IText(config.subtitle, {
+                left: 0,
+                top: 35,
+                fontSize: 14,
+                fontFamily: "Inter",
+                fill: "#64748b",
+            });
+            objs.push(subtitleText);
+        }
+
+        titleGroup = new fabric.Group(objs.slice(0, objs.length), { left: 60, top: 50 });
+    }
+
+    // Dots and Lines Group
+    const dotsObjs: fabric.FabricObject[] = [];
+
+    // Add uploaded image if available (manual mode)
+    if (config.shape === "custom" && (config as any).imageDataUrl) {
+        // For now, skip image rendering to ensure points work first
+        // TODO: Implement proper async image loading
+    }
+
+    // Background
+    if (config.showBackground) {
+        const bgRect = new fabric.Rect({
+            left: 0,
+            top: 0,
+            width: config.canvasWidth,
+            height: config.canvasHeight,
+            fill: config.backgroundColor,
+        });
+        dotsObjs.push(bgRect);
+    }
+
+    // Draw SVG path if available and showPath is true
+    if (config.showPath && config.svgPathData) {
+        const pathObj = new fabric.Path(config.svgPathData, {
+            left: 0,
+            top: 0,
+            stroke: "#94a3b8",
+            strokeWidth: 1,
+            fill: "transparent",
+        });
+        dotsObjs.push(pathObj);
+    }
+
+    // Draw lines (solution or guide)
+    if (config.showLines || config.showSolution) {
+        lines.forEach((line) => {
+            const fromPoint = points[line.from];
+            const toPoint = points[line.to];
+            const lineObj = new fabric.Line(
+                [fromPoint.x, fromPoint.y, toPoint.x, toPoint.y],
+                {
+                    stroke: config.showSolution ? config.solutionColor : config.lineColor,
+                    strokeWidth: config.lineWidth,
+                }
+            );
+            dotsObjs.push(lineObj);
+        });
+    }
+
+    // Draw dots
+    points.forEach((point) => {
+        const dot = new fabric.Circle({
+            left: point.x - config.dotSize / 2,
+            top: point.y - config.dotSize / 2,
+            radius: config.dotSize / 2,
+            fill: config.dotColor,
+            originX: "center",
+            originY: "center",
+        });
+        dotsObjs.push(dot);
+
+        // Draw numbers/labels
+        if (config.showNumbers) {
+            let labelText = point.number.toString();
+            
+            // Use custom label function if provided
+            if (config.labelFunction) {
+                try {
+                    const result = config.labelFunction(0, point.number - 1);
+                    if (result !== undefined && result !== null) {
+                        labelText = String(result);
+                    }
+                } catch (e) {
+                    console.error('Error applying label function:', e);
+                }
+            }
+            
+            // Ensure labelText is a valid string
+            if (!labelText || typeof labelText !== 'string') {
+                labelText = point.number.toString();
+            }
+            
+            // Use custom label position if available, otherwise use default offsets
+            const labelX = point.customLabelX !== undefined ? point.customLabelX : point.x + config.numberOffsetX;
+            const labelY = point.customLabelY !== undefined ? point.customLabelY : point.y + config.numberOffsetY;
+            
+            const numberText = new fabric.IText(labelText, {
+                left: labelX,
+                top: labelY,
+                fontSize: config.fontSize,
+                fontFamily: "Inter",
+                fontWeight: "bold",
+                fill: config.fontColor,
+            });
+            dotsObjs.push(numberText);
+        }
+    });
+
+    const dotsGroup = new fabric.Group(dotsObjs, { left: 60, top: 120 });
+
+    return { titleGroup, dotsGroup };
+}
+
+export function generateConnectDotsObjects(config: ConnectDotsConfig): fabric.FabricObject[] {
+    const { titleGroup, dotsGroup } = generateConnectDotsComponentGroups(config);
+    const objects: fabric.FabricObject[] = [];
+    if (titleGroup) objects.push(titleGroup);
+    objects.push(dotsGroup);
+
+    objects.forEach((obj) => {
+        attachPuzzleMetadata(obj, "connect-dots", "ConnectDots", config);
+    });
+
+    return objects;
+}
 
