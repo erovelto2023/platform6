@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { calculateReadingTime } from "@/lib/utils";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function BlogPage() {
     let posts: any[] = [];
 

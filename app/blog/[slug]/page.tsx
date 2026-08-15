@@ -14,6 +14,9 @@ import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import "../blog-content.css";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     const post = await getPostBySlug(slug);

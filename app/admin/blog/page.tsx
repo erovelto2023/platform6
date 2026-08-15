@@ -5,6 +5,9 @@ import { Plus, Edit, Trash, Eye, FileText, BarChart3, TrendingUp } from "lucide-
 import { format } from "date-fns";
 import { DeletePostButton } from "./_components/delete-post-button";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function BlogAdminPage() {
     const posts = await getPosts();
 
