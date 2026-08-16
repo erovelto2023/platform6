@@ -8,7 +8,7 @@ import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
 import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, autoReplaceSingleVideo, normalizeGlossaryData } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, autoReplaceSingleVideo, normalizeGlossaryData, getAllGlossaryTermsFull } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -28,6 +28,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [auditProgress, setAuditProgress] = useState<string>("");
     const [singleFixingId, setSingleFixingId] = useState<string | null>(null);
     const [isAutoFixingAll, setIsAutoFixingAll] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -130,7 +131,6 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const handleFlushGlossary = () => {
         if (!confirm('⚠️ WARNING: This will delete ALL glossary terms and cannot be undone. This will also clear any cached data. Continue?')) return;
         startTransition(async () => {
-            // Delete all terms by selecting all IDs
             const allIds = initialTerms.map(t => t.id);
             if (allIds.length === 0) {
                 alert('No terms to delete.');
@@ -139,12 +139,10 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
             
             const res = await deleteGlossaryTerms(allIds);
             if (res.success) {
-                // Clear any client-side storage
                 if (typeof window !== 'undefined') {
                     localStorage.removeItem('glossary-mastered');
                     sessionStorage.clear();
                 }
-                
                 alert(`Successfully flushed ${allIds.length} terms from glossary! Cache cleared.`);
                 window.location.reload();
             } else {
@@ -302,49 +300,175 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         alert(`✅ Process complete! Successfully auto-replaced ${fixed} video(s).`);
     };
 
-    const handleExportCSV = () => {
-        if (initialTerms.length === 0) {
-            alert('No terms to export.');
-            return;
-        }
+    const handleExportCSV = async () => {
+        setIsExporting(true);
+        try {
+            const res = await getAllGlossaryTermsFull();
+            const termsToExport = (res.success && res.terms && res.terms.length > 0) ? res.terms : initialTerms;
 
-        // CSV Header
-        const headers = ["Term", "Short Definition", "Category", "SubCategory", "Views", "Slug", "Startup Cost", "Time to Entry", "Skill Level"];
-        
-        // Helper to escape CSV values
-        const escapeCsv = (val: any) => {
-            if (val === undefined || val === null) return "";
-            const str = String(val);
-            if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-                return `"${str.replace(/"/g, '""')}"`;
+            if (termsToExport.length === 0) {
+                alert('No terms to export.');
+                setIsExporting(false);
+                return;
             }
-            return str;
-        };
 
-        const rows = initialTerms.map(t => [
-            escapeCsv(t.term),
-            escapeCsv(t.shortDefinition),
-            escapeCsv(t.category),
-            escapeCsv(t.subCategory),
-            escapeCsv((t as any).views || 0),
-            escapeCsv(`${window.location.origin}/glossary/${t.slug}`),
-            escapeCsv(t.startupCost),
-            escapeCsv(t.timeToFirstDollar),
-            escapeCsv(t.skillRequired)
-        ]);
+            const headers = [
+                "Term", "Slug", "Public URL", "Category", "SubCategory", "Entity Type",
+                "Short Definition", "Definition (Full Explanation)", "AEO Summary", "Why It Matters",
+                "Beginner Explanation", "Advanced Perspective", "How It Works", "Benefits",
+                "Common Practices", "Use Cases", "Who Uses It", "Origin", "Traditional Meaning",
+                "Modern Usage", "Expanded Explanation", "How It Makes Money", "Best For",
+                "Startup Cost", "Time To First Dollar", "Skill Required", "Platform Preference",
+                "Low Physical Effort", "Getting Started Checklist", "Common Mistakes", "Real Examples",
+                "Misconceptions", "Warnings or Notes", "Video URL", "Image URL", "Image Prompt",
+                "Product Prompt", "Social Prompt", "Guided Practice", "Affirmations", "Visualizations",
+                "Parent Term Slug", "Child Term Slugs", "Related Term IDs", "Synonyms", "Antonyms",
+                "Opposite Terms", "See Also", "FAQs", "Question Variations", "Deep Pathways",
+                "Case Studies", "Takeaways", "Amazon Products", "Websites Ranking", "Podcasts Ranking",
+                "YouTube Titles", "Pinterest Ideas", "Instagram Ideas", "Meta Title", "Meta Description",
+                "Keywords", "Tags", "Search Intent", "Content Level", "Sources", "Scientific Perspective",
+                "Cultural Notes", "Status", "Views", "Author / Reviewer", "Last Updated"
+            ];
 
-        const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        
-        const date = new Date().toISOString().split('T')[0];
-        link.setAttribute("href", url);
-        link.setAttribute("download", `glossary_export_${date}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+            const escapeCsv = (val: any) => {
+                if (val === undefined || val === null) return "";
+                if (typeof val === 'boolean') return val ? "Yes" : "No";
+                if (Array.isArray(val)) {
+                    if (val.length === 0) return "";
+                    if (typeof val[0] === 'object') {
+                        return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+                    }
+                    return `"${val.join(' | ').replace(/"/g, '""')}"`;
+                }
+                if (typeof val === 'object') {
+                    return `"${JSON.stringify(val).replace(/"/g, '""')}"`;
+                }
+                const str = String(val);
+                if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            const rows = termsToExport.map((t: any) => [
+                escapeCsv(t.term),
+                escapeCsv(t.slug),
+                escapeCsv(`${window.location.origin}/glossary/${t.slug}`),
+                escapeCsv(t.category),
+                escapeCsv(t.subCategory),
+                escapeCsv(t.entityType),
+                escapeCsv(t.shortDefinition),
+                escapeCsv(t.definition),
+                escapeCsv(t.aeoSummary),
+                escapeCsv(t.whyItMatters),
+                escapeCsv(t.beginnerExplanation),
+                escapeCsv(t.advancedPerspective),
+                escapeCsv(t.howItWorks),
+                escapeCsv(t.benefits),
+                escapeCsv(t.commonPractices),
+                escapeCsv(t.useCases),
+                escapeCsv(t.whoUsesIt),
+                escapeCsv(t.origin),
+                escapeCsv(t.traditionalMeaning),
+                escapeCsv(t.modernUsage),
+                escapeCsv(t.expandedExplanation),
+                escapeCsv(t.howItMakesMoney),
+                escapeCsv(t.bestFor),
+                escapeCsv(t.startupCost),
+                escapeCsv(t.timeToFirstDollar),
+                escapeCsv(t.skillRequired),
+                escapeCsv(t.platformPreference),
+                escapeCsv(t.lowPhysicalEffort),
+                escapeCsv(t.gettingStartedChecklist),
+                escapeCsv(t.commonMistakes),
+                escapeCsv(t.realExamples),
+                escapeCsv(t.misconceptions),
+                escapeCsv(t.warningsOrNotes),
+                escapeCsv(t.videoUrl),
+                escapeCsv(t.imageUrl),
+                escapeCsv(t.imagePrompt),
+                escapeCsv(t.productPrompt),
+                escapeCsv(t.socialPrompt),
+                escapeCsv(t.guidedPractice),
+                escapeCsv(t.affirmations),
+                escapeCsv(t.visualizations),
+                escapeCsv(t.parentTermSlug),
+                escapeCsv(t.childTermSlugs),
+                escapeCsv(t.relatedTermIds),
+                escapeCsv(t.synonyms),
+                escapeCsv(t.antonyms),
+                escapeCsv(t.oppositeTerms),
+                escapeCsv(t.seeAlso),
+                escapeCsv(t.faqs),
+                escapeCsv(t.questionVariations),
+                escapeCsv(t.deepPathways),
+                escapeCsv(t.caseStudies),
+                escapeCsv(t.takeaways),
+                escapeCsv(t.amazonProducts),
+                escapeCsv(t.websitesRanking),
+                escapeCsv(t.podcastsRanking),
+                escapeCsv(t.youtubeTitles),
+                escapeCsv(t.pinterestIdeas),
+                escapeCsv(t.instagramIdeas),
+                escapeCsv(t.metaTitle),
+                escapeCsv(t.metaDescription),
+                escapeCsv(t.keywords),
+                escapeCsv(t.tags),
+                escapeCsv(t.searchIntent),
+                escapeCsv(t.contentLevel),
+                escapeCsv(t.sources),
+                escapeCsv(t.scientificPerspective),
+                escapeCsv(t.culturalNotes),
+                escapeCsv(t.status),
+                escapeCsv(t.views || 0),
+                escapeCsv(t.authorOrReviewer),
+                escapeCsv(t.lastUpdated || t.updatedAt)
+            ]);
+
+            const csvContent = "\uFEFF" + [headers, ...rows].map(row => row.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const date = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `glossary_full_export_${date}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err: any) {
+            alert('Error exporting CSV: ' + err.message);
+        }
+        setIsExporting(false);
+    };
+
+    const handleExportJSON = async () => {
+        setIsExporting(true);
+        try {
+            const res = await getAllGlossaryTermsFull();
+            const termsToExport = (res.success && res.terms && res.terms.length > 0) ? res.terms : initialTerms;
+
+            if (termsToExport.length === 0) {
+                alert('No terms to export.');
+                setIsExporting(false);
+                return;
+            }
+
+            const jsonContent = JSON.stringify(termsToExport, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            const date = new Date().toISOString().split('T')[0];
+            link.setAttribute("href", url);
+            link.setAttribute("download", `glossary_full_export_${date}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (err: any) {
+            alert('Error exporting JSON: ' + err.message);
+        }
+        setIsExporting(false);
     };
 
     return (
@@ -437,9 +561,19 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                             </button>
                             <button
                                 onClick={handleExportCSV}
-                                className="bg-slate-950 border border-indigo-800/80 text-cyan-300 hover:bg-indigo-950 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md"
+                                disabled={isExporting}
+                                className="bg-slate-950 border border-indigo-800/80 text-cyan-300 hover:bg-indigo-950 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md disabled:opacity-50 cursor-pointer"
+                                title="Export full glossary data with all front-facing content and fields to CSV"
                             >
-                                <FileText size={14} /> Export CSV
+                                <FileText size={14} className={isExporting ? "animate-spin" : ""} /> {isExporting ? "Exporting CSV..." : "Export Full CSV"}
+                            </button>
+                            <button
+                                onClick={handleExportJSON}
+                                disabled={isExporting}
+                                className="bg-slate-950 border border-purple-800/80 text-purple-300 hover:bg-purple-950 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md disabled:opacity-50 cursor-pointer"
+                                title="Export full glossary data with all front-facing content and fields to JSON"
+                            >
+                                <Download size={14} className={isExporting ? "animate-spin" : ""} /> {isExporting ? "Exporting JSON..." : "Export Full JSON"}
                             </button>
                         </div>
                     </div>

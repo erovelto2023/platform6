@@ -40,6 +40,17 @@ export async function getGlossaryTerms(options: { limit?: number; niche?: string
     }
 }
 
+export async function getAllGlossaryTermsFull() {
+    try {
+        await connectToDatabase();
+        const terms = await GlossaryTerm.find({}).sort({ term: 1 }).lean();
+        return { success: true, terms: JSON.parse(JSON.stringify(terms)) };
+    } catch (e: any) {
+        console.error("Failed to fetch full glossary terms for export", e);
+        return { success: false, error: e.message || "Failed to fetch terms", terms: [] };
+    }
+}
+
 export async function getNiches() {
     try {
         await connectToDatabase();
