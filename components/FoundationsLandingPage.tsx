@@ -122,22 +122,22 @@ export default function FoundationsLandingPage() {
 
     return (
         <SmoothScroll>
-            <div className="min-h-screen bg-[#050505] text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 overflow-x-hidden">
+            <div className="min-h-screen bg-[#0f172a] text-slate-100 font-sans selection:bg-blue-600/30 selection:text-blue-200 overflow-x-hidden">
                 {/* Navigation */}
-                <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-black/50 backdrop-blur-xl border-b border-white/5 py-4" : "bg-transparent py-6"}`}>
+                <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? "bg-slate-900/80 backdrop-blur-xl border-b border-slate-800 py-4" : "bg-transparent py-6"}`}>
                     <div className="max-w-7xl mx-auto px-6 sm:px-10">
                         <div className="flex justify-between items-center">
                             <Link href="/" className="flex items-center gap-3 group">
-                                <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/20">K</div>
-                                <span className="text-2xl font-black tracking-tight text-white">K Business <span className="text-emerald-500">Academy</span></span>
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-md flex items-center justify-center text-white font-extrabold text-xl shadow-md">K</div>
+                                <span className="text-2xl font-headline font-black tracking-tight text-white">KBusiness <span className="text-orange-500">Academy</span></span>
                             </Link>
                             
-                            <div className="hidden md:flex items-center gap-8 font-bold text-slate-400">
-                                <a href="#curriculum" className="hover:text-emerald-400 transition-colors text-sm">Roadmap</a>
-                                <a href="#bonuses" className="hover:text-emerald-400 transition-colors text-sm">Bonuses</a>
+                            <div className="hidden md:flex items-center gap-8 font-extrabold text-slate-300">
+                                <a href="#curriculum" className="hover:text-blue-400 transition-colors text-sm">Roadmap</a>
+                                <a href="#bonuses" className="hover:text-blue-400 transition-colors text-sm">Bonuses</a>
                                 <MagneticButton
                                     variant="primary"
-                                    className="rounded-full font-bold px-6 bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                                    className="rounded-md font-extrabold px-6 bg-orange-500 hover:bg-orange-600 text-white shadow-md"
                                     onClick={() => setIsModalOpen(true)}
                                 >
                                     Join for $297
@@ -154,27 +154,27 @@ export default function FoundationsLandingPage() {
                 {/* Hero Section */}
                 <header className="relative pt-44 pb-32 overflow-hidden flex flex-col items-center justify-center min-h-[90vh]">
                     {/* Visual Elements */}
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-[#050505] to-[#050505] -z-10" />
-                    <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] -z-10" />
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-[#0f172a] to-[#0f172a] -z-10" />
+                    <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] -z-10" />
                     
                     <div className="max-w-7xl mx-auto px-6 text-center z-10">
                         <ScrollReveal y={20} blur={10}>
-                            <div className="inline-flex items-center gap-2.5 bg-white/5 border border-white/10 px-5 py-2.5 rounded-full text-emerald-400 text-[11px] font-black uppercase tracking-[0.2em] mb-10 backdrop-blur-md">
+                            <div className="inline-flex items-center gap-2.5 bg-blue-950/60 border border-blue-500/30 px-5 py-2.5 rounded-full text-orange-400 text-[11px] font-black uppercase tracking-[0.2em] mb-10 backdrop-blur-md">
                                 <Calendar size={14} />
                                 Live 7-Day Intensive Training
                             </div>
                         </ScrollReveal>
                         
                         <ScrollReveal y={30} blur={15} delay={0.1}>
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-[1.05] tracking-tighter">
+                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-extrabold text-white mb-8 leading-[1.05] tracking-tighter">
                                 Stop Chasing Hype. <br/>
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-200">Build Real Profits.</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-blue-400 to-orange-400">Build Real Profits.</span>
                             </h1>
                         </ScrollReveal>
 
                         <ScrollReveal y={20} blur={10} delay={0.2}>
-                            <p className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-14 leading-relaxed font-medium">
-                                Forget empty promises. Foundations to Profits is a deep-dive live training designed to teach you the <span className="text-emerald-400 font-bold">actual mechanics</span> of digital product creation and marketing.
+                            <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-14 leading-relaxed font-sans font-medium">
+                                Forget empty promises. Foundations to Profits is a deep-dive live training designed to teach you the <span className="text-blue-400 font-bold">actual mechanics</span> of digital product creation, marketing systems, and sustainable skill development.
                             </p>
                         </ScrollReveal>
 
@@ -183,7 +183,7 @@ export default function FoundationsLandingPage() {
                                 <MagneticButton
                                     variant="primary"
                                     size="lg"
-                                    className="rounded-full bg-emerald-500 hover:bg-emerald-600 text-white text-lg px-10 py-7 shadow-[0_0_40px_-10px_rgba(16,185,129,0.5)] font-black"
+                                    className="rounded-md bg-orange-500 hover:bg-orange-600 text-white text-lg px-10 py-7 shadow-lg shadow-orange-500/20 font-black"
                                     onClick={() => setIsModalOpen(true)}
                                 >
                                     Enroll Now for $297
@@ -194,7 +194,7 @@ export default function FoundationsLandingPage() {
                                     variant="outline"
                                     color="neutral"
                                     size="lg"
-                                    className="rounded-full text-lg px-10 py-7 bg-white/5 border-white/10 text-white font-bold hover:bg-white/10"
+                                    className="rounded-md text-lg px-10 py-7 bg-slate-800/80 border-slate-700 text-white font-bold hover:bg-slate-800"
                                 >
                                     View Roadmap
                                 </MagneticButton>
@@ -202,15 +202,15 @@ export default function FoundationsLandingPage() {
                         </ScrollReveal>
                     </div>
 
-                    <ScrollReveal delay={0.5} y={0} blur={10} className="w-full mt-24 overflow-hidden border-y border-white/5 bg-white/5 py-4 backdrop-blur-sm">
-                        <Marquee speed={30} className="flex items-center gap-16 text-slate-400 font-black text-xs tracking-[0.2em] uppercase">
-                            <span className="flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-500" /> SECURE PAYMENT</span>
+                    <ScrollReveal delay={0.5} y={0} blur={10} className="w-full mt-24 overflow-hidden border-y border-slate-800 bg-slate-900/60 py-4 backdrop-blur-sm">
+                        <Marquee speed={30} className="flex items-center gap-16 text-slate-300 font-black text-xs tracking-[0.2em] uppercase">
+                            <span className="flex items-center gap-2"><ShieldCheck size={16} className="text-blue-400" /> SECURE PAYMENT</span>
                             <span>•</span>
-                            <span className="flex items-center gap-2"><Star size={16} className="text-amber-500" /> 7-DAY GUARANTEE</span>
+                            <span className="flex items-center gap-2"><Star size={16} className="text-orange-400" /> 7-DAY GUARANTEE</span>
                             <span>•</span>
-                            <span className="flex items-center gap-2"><Clock size={16} className="text-red-500" /> STARTS MAY 4TH</span>
+                            <span className="flex items-center gap-2"><Clock size={16} className="text-rose-400" /> STARTS MAY 4TH</span>
                             <span>•</span>
-                            <span className="flex items-center gap-2"><Users size={16} className="text-blue-500" /> COMMUNITY DRIVEN</span>
+                            <span className="flex items-center gap-2"><Users size={16} className="text-blue-400" /> COMMUNITY DRIVEN</span>
                             <span>•</span>
                         </Marquee>
                     </ScrollReveal>

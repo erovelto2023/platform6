@@ -1,11 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
+import { Montserrat, Roboto, Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
 import { ConfettiProvider } from "@/components/providers/confetti-provider";
 import { SocketProvider } from "@/components/providers/socket-provider";
 import { PaymentSupport } from "@/components/PaymentSupport";
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800", "900"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,11 +31,6 @@ const geistMono = Geist_Mono({
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
   subsets: ["latin"],
 });
 
@@ -64,7 +71,7 @@ export default async function RootLayout({
           <style dangerouslySetInnerHTML={{ __html: cssVars }} />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${manrope.variable} antialiased`}
+          className={`${montserrat.variable} ${roboto.variable} ${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
           suppressHydrationWarning
         >
           <SocketProvider>
