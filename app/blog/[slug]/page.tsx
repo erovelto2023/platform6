@@ -124,7 +124,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </div>
                     </div>
                 ) : (
-                    <div className="prose prose-lg prose-indigo max-w-none font-sans text-slate-800 leading-relaxed">
+                    <div className="blog-content prose prose-lg prose-indigo max-w-none font-sans text-slate-800 leading-relaxed">
                         <CustomHTMLRenderer html={post.content} />
                     </div>
                 )}

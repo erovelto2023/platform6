@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import parse, { attributesToProps, domToReact, HTMLReactParserOptions, Element } from 'html-react-parser';
+import { formatTextToHtml } from '@/components/rich-text-editor';
 
 // beUI Components
 import { TiltCard } from "@/components/motion/tilt-card";
@@ -45,6 +46,12 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
     React.useEffect(() => {
         setMounted(true);
     }, []);
+
+    // If html content is plain unformatted text (missing <p> or <h> tags), auto-structure it into clean HTML
+    let processedHtml = html || '';
+    if (processedHtml && !processedHtml.includes('<p>') && !processedHtml.includes('<h') && !processedHtml.includes('<ul')) {
+        processedHtml = formatTextToHtml(processedHtml);
+    }
 
     // We define the parser options inside the component to return React elements
     const options: HTMLReactParserOptions = {
@@ -225,13 +232,13 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
 
     if (!mounted) {
         return (
-            <div className={className} dangerouslySetInnerHTML={{ __html: html }} suppressHydrationWarning />
+            <div className={className} dangerouslySetInnerHTML={{ __html: processedHtml }} suppressHydrationWarning />
         );
     }
 
     return (
         <div className={className} suppressHydrationWarning>
-            {parse(html, options)}
+            {parse(processedHtml, options)}
         </div>
     );
 };
