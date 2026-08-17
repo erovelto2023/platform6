@@ -41,7 +41,7 @@ export default async function IndexPage() {
                 {page.bodyCode && (
                     <div dangerouslySetInnerHTML={{ __html: page.bodyCode }} />
                 )}
-                <div className="min-h-screen bg-white">
+                <div className="min-h-screen bg-slate-950 text-slate-100">
                     <style dangerouslySetInnerHTML={{ __html: `
                         /* Reset/Isolation for custom HTML */
                         .custom-html-wrapper {

@@ -47,9 +47,10 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
         setMounted(true);
     }, []);
 
-    // If html content is plain unformatted text (missing <p> or <h> tags), auto-structure it into clean HTML
+    // If html content is plain unformatted text (missing HTML structural tags), auto-structure it into clean HTML
     let processedHtml = html || '';
-    if (processedHtml && !processedHtml.includes('<p>') && !processedHtml.includes('<h') && !processedHtml.includes('<ul')) {
+    const hasHtmlStructure = /<\/?(div|section|article|header|footer|nav|main|p|h[1-6]|ul|ol|li|table|span|a|img|style|form|button|iframe)\b/i.test(processedHtml);
+    if (processedHtml && !hasHtmlStructure) {
         processedHtml = formatTextToHtml(processedHtml);
     }
 
