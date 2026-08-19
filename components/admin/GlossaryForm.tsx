@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { createGlossaryTerm, updateGlossaryTerm } from "@/lib/actions/glossary.actions";
-import { Save, AlertCircle, Loader2, Link as LinkIcon, Rocket, Sparkles, BookOpen, Layers, ShieldCheck, DollarSign } from "lucide-react";
+import { Save, AlertCircle, Loader2, Link as LinkIcon, Rocket, Sparkles, BookOpen, Layers, ShieldCheck, DollarSign, Wrench, Search, Trash, ExternalLink, Plus } from "lucide-react";
 import { IGlossaryTerm } from "@/lib/db/models/GlossaryTerm";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 
@@ -15,6 +15,7 @@ interface GlossaryFormProps {
 export default function GlossaryForm({ initialData, onComplete, products = [] }: GlossaryFormProps) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const [productSearch, setProductSearch] = useState("");
 
     const [formData, setFormData] = useState<Partial<IGlossaryTerm>>(
         initialData || {
@@ -81,6 +82,69 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             socialPrompt: ""
         }
     );
+
+    const matchingProducts = useMemo(() => {
+        if (!productSearch.trim()) return [];
+        const query = productSearch.toLowerCase();
+        return products.filter(p => 
+            p.name.toLowerCase().includes(query) ||
+            (p.category && p.category.toLowerCase().includes(query)) ||
+            (p.niche && p.niche.toLowerCase().includes(query)) ||
+            (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
+        ).slice(0, 10);
+    }, [products, productSearch]);
+
+    const handleAddTool = (product: IDirectoryProduct) => {
+        const currentTools = formData.recommendedTools || [];
+        if (currentTools.some(t => t.productId === product.id)) {
+            alert(`"${product.name}" is already linked to this term.`);
+            return;
+        }
+        const updatedTools = [
+            ...currentTools,
+            { productId: product.id, context: product.name }
+        ];
+
+        const currentAmazon = formData.amazonProducts || [];
+        const updatedAmazon = [...currentAmazon];
+        if (!updatedAmazon.some(p => p.name.toLowerCase() === product.name.toLowerCase())) {
+            updatedAmazon.push({
+                name: product.name,
+                url: product.affiliateLink || `/catalog/${product.slug || product.id}`,
+                description: product.shortDescription || product.category || "Recommended Tool"
+            });
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            recommendedTools: updatedTools,
+            amazonProducts: updatedAmazon
+        }));
+        setProductSearch("");
+    };
+
+    const handleRemoveTool = (productId: number, productName?: string) => {
+        const updatedTools = (formData.recommendedTools || []).filter(t => t.productId !== productId);
+        let updatedAmazon = formData.amazonProducts || [];
+        if (productName) {
+            updatedAmazon = updatedAmazon.filter(p => p.name.toLowerCase() !== productName.toLowerCase());
+        }
+        setFormData(prev => ({
+            ...prev,
+            recommendedTools: updatedTools,
+            amazonProducts: updatedAmazon
+        }));
+    };
+
+    const handleUpdateToolContext = (productId: number, newContext: string) => {
+        const updatedTools = (formData.recommendedTools || []).map(t => {
+            if (t.productId === productId) {
+                return { ...t, context: newContext };
+            }
+            return t;
+        });
+        setFormData(prev => ({ ...prev, recommendedTools: updatedTools }));
+    };
 
     const handleChange = (field: keyof IGlossaryTerm, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -596,6 +660,166 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                                 />
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Related Resources & Tools Database Picker */}
+                <div className="pt-6 mt-6 border-t border-slate-800 space-y-6">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <h4 className="font-mono font-bold text-cyan-400 text-xs uppercase tracking-wider flex items-center gap-2">
+                                <Wrench size={16} /> Related Resources & Directory Tools
+                            </h4>
+                            <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                                Search the database of directory products ({products.length} available) and attach recommended software, tools, or courses to this term.
+                            </p>
+                        </div>
+                        <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                            {(formData.recommendedTools || []).length} Attached
+                        </span>
+                    </div>
+
+                    {/* Search Box */}
+                    <div className="relative">
+                        <label className={labelClass}>Search Database of Products & Tools</label>
+                        <div className="relative">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <input
+                                type="text"
+                                value={productSearch}
+                                onChange={e => setProductSearch(e.target.value)}
+                                className={`${inputClass} pl-10`}
+                                placeholder="Type to search database products (e.g. ClickFunnels, Canva, ChatGPT, Shopify)..."
+                            />
+                            {productSearch && (
+                                <button
+                                    type="button"
+                                    onClick={() => setProductSearch('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Live Search Results Dropdown */}
+                        {productSearch.trim() !== '' && (
+                            <div className="mt-2 bg-slate-900 border border-cyan-800/80 rounded-2xl p-2 shadow-2xl max-h-64 overflow-y-auto space-y-1.5 z-20">
+                                {matchingProducts.length === 0 ? (
+                                    <div className="p-3 text-xs text-slate-400 italic text-center font-mono">
+                                        No products found matching &ldquo;{productSearch}&rdquo;. Try another term or add a product via Admin Products.
+                                    </div>
+                                ) : (
+                                    matchingProducts.map(product => {
+                                        const isAttached = (formData.recommendedTools || []).some(t => t.productId === product.id);
+                                        return (
+                                            <div
+                                                key={product.id}
+                                                className="flex items-center justify-between p-3 bg-slate-950 hover:bg-slate-800/80 rounded-xl border border-slate-800/80 transition-all gap-3"
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${product.logoColor || "bg-cyan-600"}`}>
+                                                        {product.name.charAt(0)}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-slate-100 text-xs truncate">{product.name}</span>
+                                                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                                                                {product.category || product.niche}
+                                                            </span>
+                                                            {product.priceModel && (
+                                                                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+                                                                    {product.priceModel}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                                                            {product.shortDescription || product.affiliateLink || "Directory Product"}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAddTool(product)}
+                                                    disabled={isAttached}
+                                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                                                        isAttached
+                                                            ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                                                            : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md"
+                                                    }`}
+                                                >
+                                                    {isAttached ? "Attached" : "+ Add Tool"}
+                                                </button>
+                                            </div>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Attached Tools List */}
+                    <div className="space-y-3">
+                        <label className={labelClass}>Currently Attached Tools & Products ({(formData.recommendedTools || []).length})</label>
+
+                        {(formData.recommendedTools || []).length === 0 ? (
+                            <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl text-xs text-slate-400 italic text-center font-mono">
+                                No database tools attached yet. Search above to link software or products to this term.
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5">
+                                {(formData.recommendedTools || []).map((tool, idx) => {
+                                    const matchedProduct = products.find(p => p.id === tool.productId);
+                                    const name = matchedProduct?.name || tool.context || `Tool #${tool.productId}`;
+                                    const link = matchedProduct?.affiliateLink || (matchedProduct ? `/catalog/${matchedProduct.slug || matchedProduct.id}` : "");
+
+                                    return (
+                                        <div key={idx} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${matchedProduct?.logoColor || "bg-indigo-600"}`}>
+                                                    {name.charAt(0)}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-slate-100 text-xs">{name}</span>
+                                                        {matchedProduct && (
+                                                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-950 text-cyan-400 border border-slate-800">
+                                                                ID: {matchedProduct.id}
+                                                            </span>
+                                                        )}
+                                                        {link && (
+                                                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline flex items-center gap-0.5 text-[10px]">
+                                                                Link <ExternalLink size={10} />
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                    <div className="mt-1 flex items-center gap-2">
+                                                        <span className="text-[10px] text-slate-400 font-mono shrink-0">Best For Context:</span>
+                                                        <input
+                                                            type="text"
+                                                            value={tool.context || ""}
+                                                            onChange={e => handleUpdateToolContext(tool.productId, e.target.value)}
+                                                            className="text-xs bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-slate-200 focus:outline-none focus:border-cyan-500 flex-1"
+                                                            placeholder="e.g. Best for automated email marketing..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveTool(tool.productId, matchedProduct?.name)}
+                                                className="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 text-rose-300 rounded-lg transition-colors shrink-0 self-end sm:self-auto cursor-pointer"
+                                                title="Detach tool"
+                                            >
+                                                <Trash size={14} />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
 

@@ -19,6 +19,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'performance'>('list');
     const [editingTerm, setEditingTerm] = useState<IGlossaryTerm | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedLetter, setSelectedLetter] = useState<string>('ALL');
     const [isPending, startTransition] = useTransition();
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -31,6 +32,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [isExporting, setIsExporting] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
+
+    const ALPHABET = useMemo(() => ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'], []);
+
+    const letterCounts = useMemo(() => {
+        const counts: Record<string, number> = { ALL: initialTerms.length, '#': 0 };
+        ALPHABET.forEach(l => { if (l !== 'ALL' && l !== '#') counts[l] = 0; });
+
+        initialTerms.forEach(t => {
+            const firstChar = (t.term || '').trim().toUpperCase().charAt(0);
+            if (/[A-Z]/.test(firstChar)) {
+                counts[firstChar] = (counts[firstChar] || 0) + 1;
+            } else if (firstChar) {
+                counts['#'] = (counts['#'] || 0) + 1;
+            }
+        });
+        return counts;
+    }, [initialTerms, ALPHABET]);
 
     const legendStats = useMemo(() => {
         let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0;
@@ -67,10 +85,28 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
         }
     }, [searchParams, initialTerms]);
 
-    const filteredTerms = useMemo(() => initialTerms.filter(t =>
-        t.term.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (t.category && t.category.toLowerCase().includes(searchTerm.toLowerCase()))
-    ), [initialTerms, searchTerm]);
+    const filteredTerms = useMemo(() => {
+        return initialTerms.filter(t => {
+            if (selectedLetter !== 'ALL') {
+                const firstChar = (t.term || '').trim().toUpperCase().charAt(0);
+                if (selectedLetter === '#') {
+                    if (/[A-Z]/.test(firstChar)) return false;
+                } else {
+                    if (firstChar !== selectedLetter) return false;
+                }
+            }
+
+            if (searchTerm.trim() !== '') {
+                const q = searchTerm.toLowerCase();
+                const termMatch = t.term?.toLowerCase().includes(q);
+                const catMatch = t.category?.toLowerCase().includes(q);
+                const defMatch = t.shortDefinition?.toLowerCase().includes(q);
+                if (!termMatch && !catMatch && !defMatch) return false;
+            }
+
+            return true;
+        });
+    }, [initialTerms, searchTerm, selectedLetter]);
 
     const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
     const paginatedTerms = filteredTerms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -634,6 +670,38 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
 
                     {view === 'list' && (
                         <>
+                            {/* A-Z Alphabet Quick Bar */}
+                            <div className="flex flex-wrap gap-1 p-2.5 bg-slate-950 border border-slate-800/80 rounded-2xl shadow-inner">
+                                {ALPHABET.map(letter => {
+                                    const count = letterCounts[letter] || 0;
+                                    const isActive = selectedLetter === letter;
+                                    return (
+                                        <button
+                                            key={letter}
+                                            onClick={() => {
+                                                setSelectedLetter(letter);
+                                                setCurrentPage(1);
+                                            }}
+                                            className={`px-2.5 py-1 text-xs font-mono font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                                                isActive
+                                                    ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-600/30 scale-105"
+                                                    : count > 0
+                                                    ? "bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800"
+                                                    : "bg-slate-900/40 text-slate-600 border border-slate-900/60 cursor-not-allowed opacity-40"
+                                            }`}
+                                            title={letter === 'ALL' ? `All Terms (${count})` : `${count} terms starting with ${letter}`}
+                                        >
+                                            <span>{letter}</span>
+                                            {count > 0 && (
+                                                <span className={`text-[10px] font-normal ${isActive ? "text-cyan-100" : "text-slate-500"}`}>
+                                                    ({count})
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
                             <div className="flex flex-col sm:flex-row gap-3 items-center">
                         <div className="relative flex-1 w-full">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
