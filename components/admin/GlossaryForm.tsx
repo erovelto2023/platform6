@@ -152,30 +152,49 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
         ).slice(0, 10);
     }, [products, productSearch]);
 
-    const handleAddCatalogItem = (item: any) => {
+    const handleToggleCatalogItem = (item: any) => {
         const currentTools = formData.recommendedTools || [];
         const currentAmazon = formData.amazonProducts || [];
 
-        const updatedTools = [...currentTools];
-        if (typeof item.id === 'number' && !updatedTools.some(t => t.productId === item.id)) {
-            updatedTools.push({ productId: item.id, context: item.name });
-        }
+        const isCurrentlyAttached =
+            (typeof item.id === 'number' && currentTools.some(t => t.productId === item.id)) ||
+            currentAmazon.some(p => p.name?.toLowerCase() === item.name.toLowerCase());
 
-        const updatedAmazon = [...currentAmazon];
-        if (!updatedAmazon.some(p => p.name?.toLowerCase() === item.name.toLowerCase())) {
-            updatedAmazon.push({
-                name: item.name,
-                url: item.link || '',
-                description: `${item.type === 'affiliate' ? 'Affiliate Catalog Offer' : 'Directory Product'} (${item.category})`
-            });
-        }
+        if (isCurrentlyAttached) {
+            // DETACH item
+            const updatedTools = typeof item.id === 'number'
+                ? currentTools.filter(t => t.productId !== item.id)
+                : currentTools;
 
-        setFormData(prev => ({
-            ...prev,
-            recommendedTools: updatedTools,
-            amazonProducts: updatedAmazon
-        }));
-        setProductSearch("");
+            const updatedAmazon = currentAmazon.filter(p => p.name?.toLowerCase() !== item.name.toLowerCase());
+
+            setFormData(prev => ({
+                ...prev,
+                recommendedTools: updatedTools,
+                amazonProducts: updatedAmazon
+            }));
+        } else {
+            // ATTACH item
+            const updatedTools = [...currentTools];
+            if (typeof item.id === 'number' && !updatedTools.some(t => t.productId === item.id)) {
+                updatedTools.push({ productId: item.id, context: item.name });
+            }
+
+            const updatedAmazon = [...currentAmazon];
+            if (!updatedAmazon.some(p => p.name?.toLowerCase() === item.name.toLowerCase())) {
+                updatedAmazon.push({
+                    name: item.name,
+                    url: item.link || '',
+                    description: `${item.type === 'affiliate' ? 'Affiliate Catalog Offer' : 'Directory Product'} (${item.category})`
+                });
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                recommendedTools: updatedTools,
+                amazonProducts: updatedAmazon
+            }));
+        }
     };
 
     const handleAddTool = (product: IDirectoryProduct) => {
@@ -752,135 +771,111 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
                         <div>
                             <h4 className="font-mono font-bold text-cyan-400 text-xs uppercase tracking-wider flex items-center gap-2">
-                                <Wrench size={16} /> Select Tools & Offers from Catalog ({combinedCatalogItems.length} Available)
+                                <LinkIcon size={16} /> Related Resources / Tools
                             </h4>
                             <p className="text-[11px] text-slate-400 font-sans mt-0.5">
-                                Select software tools or affiliate catalog offers below to link them to this term.
+                                Select tools or resources from the database to recommend with this term:
                             </p>
                         </div>
                         <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">
-                            {(formData.recommendedTools || []).length} Tools Attached
+                            {(formData.recommendedTools || []).length} Selected
                         </span>
                     </div>
 
-                    {/* Filter Tabs */}
-                    <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-2">
-                        <button
-                            type="button"
-                            onClick={() => setActiveCatalogTab('all')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                                activeCatalogTab === 'all'
-                                    ? 'bg-cyan-600 text-white shadow-md'
-                                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-                            }`}
-                        >
-                            <Layers size={13} /> All Items ({combinedCatalogItems.length})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveCatalogTab('directory')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                                activeCatalogTab === 'directory'
-                                    ? 'bg-cyan-600 text-white shadow-md'
-                                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-                            }`}
-                        >
-                            <Wrench size={13} /> Directory Products ({products.length})
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveCatalogTab('affiliate')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                                activeCatalogTab === 'affiliate'
-                                    ? 'bg-purple-600 text-white shadow-md'
-                                    : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-                            }`}
-                        >
-                            <LinkIcon size={13} /> Affiliate Catalog ({affiliateOffers.length})
-                        </button>
-                    </div>
-
-                    {/* Search Box */}
-                    <div className="relative">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            value={productSearch}
-                            onChange={e => setProductSearch(e.target.value)}
-                            className={`${inputClass} pl-10`}
-                            placeholder="Type to filter catalog items (e.g. ClickFunnels, Canva, ChatGPT, Shopify)..."
-                        />
-                        {productSearch && (
+                    {/* Filter Tabs & Search */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                        <div className="flex flex-wrap items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => setProductSearch('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white"
+                                onClick={() => setActiveCatalogTab('all')}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    activeCatalogTab === 'all'
+                                        ? 'bg-cyan-600 text-white shadow-md'
+                                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                                }`}
                             >
-                                Clear
+                                <Layers size={13} /> All Items ({combinedCatalogItems.length})
                             </button>
-                        )}
+                            <button
+                                type="button"
+                                onClick={() => setActiveCatalogTab('directory')}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    activeCatalogTab === 'directory'
+                                        ? 'bg-cyan-600 text-white shadow-md'
+                                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                                }`}
+                            >
+                                <Wrench size={13} /> Directory Products ({products.length})
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setActiveCatalogTab('affiliate')}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    activeCatalogTab === 'affiliate'
+                                        ? 'bg-purple-600 text-white shadow-md'
+                                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                                }`}
+                            >
+                                <LinkIcon size={13} /> Affiliate Catalog ({affiliateOffers.length})
+                            </button>
+                        </div>
+
+                        <div className="relative w-full sm:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                            <input
+                                type="text"
+                                value={productSearch}
+                                onChange={e => setProductSearch(e.target.value)}
+                                className="w-full pl-9 pr-3 py-1.5 bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl text-xs font-mono text-slate-100 placeholder:text-slate-500 outline-none"
+                                placeholder="Search products..."
+                            />
+                        </div>
                     </div>
 
-                    {/* Always-Visible Scrollable Catalog Picker List */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2 max-h-64 overflow-y-auto space-y-1.5 custom-scrollbar">
+                    {/* Interactive 2-Column Grid Card Checkbox Picker (Matching exact UI screenshot!) */}
+                    <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 max-h-80 overflow-y-auto custom-scrollbar">
                         {filteredCatalogItems.length === 0 ? (
                             <div className="p-4 text-xs text-slate-400 italic text-center font-mono">
-                                No products or offers found matching your criteria.
+                                No tools or resources found matching your search filter.
                             </div>
                         ) : (
-                            filteredCatalogItems.map(item => {
-                                const isAttached = (formData.recommendedTools || []).some(t => t.productId === item.id) ||
-                                    (formData.amazonProducts || []).some(p => p.name?.toLowerCase() === item.name.toLowerCase());
-                                const isAffiliate = item.type === 'affiliate';
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                {filteredCatalogItems.map(item => {
+                                    const isAttached = (formData.recommendedTools || []).some(t => t.productId === item.id) ||
+                                        (formData.amazonProducts || []).some(p => p.name?.toLowerCase() === item.name.toLowerCase());
+                                    const isAffiliate = item.type === 'affiliate';
 
-                                return (
-                                    <div
-                                        key={item.keyId}
-                                        className="flex items-center justify-between p-2.5 bg-slate-950 hover:bg-slate-850 rounded-xl border border-slate-800/80 transition-all gap-3"
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${isAffiliate ? "bg-purple-600" : (item.original?.logoColor || "bg-cyan-600")}`}>
-                                                {item.name.charAt(0)}
+                                    return (
+                                        <div
+                                            key={item.keyId}
+                                            onClick={() => handleToggleCatalogItem(item)}
+                                            className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center gap-3.5 group select-none ${
+                                                isAttached
+                                                    ? 'bg-slate-900/90 border-cyan-500/90 shadow-lg shadow-cyan-950/40'
+                                                    : 'bg-slate-900/50 hover:bg-slate-900 border-slate-800/80 hover:border-slate-700'
+                                            }`}
+                                        >
+                                            {/* Custom Styled Checkbox Container */}
+                                            <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
+                                                isAttached
+                                                    ? 'bg-cyan-500 text-slate-950 font-black'
+                                                    : 'bg-slate-950 border border-slate-700 group-hover:border-slate-500'
+                                            }`}>
+                                                {isAttached && <Check size={14} strokeWidth={3} />}
                                             </div>
+
                                             <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-slate-100 text-xs truncate">{item.name}</span>
-                                                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold border ${
-                                                        isAffiliate 
-                                                            ? 'bg-purple-950 text-purple-300 border-purple-800/80' 
-                                                            : 'bg-slate-800 text-slate-300 border-slate-700'
-                                                    }`}>
-                                                        {isAffiliate ? `Affiliate (${item.category})` : item.category}
-                                                    </span>
-                                                    {item.priceModel && (
-                                                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                                                            {item.priceModel}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                                                    {item.link || "Catalog Resource"}
+                                                <h5 className={`font-black text-xs truncate transition-colors ${isAttached ? 'text-cyan-300' : 'text-slate-100'}`}>
+                                                    {item.name}
+                                                </h5>
+                                                <p className="text-[10px] font-mono text-cyan-400/90 truncate mt-0.5 font-semibold">
+                                                    {item.category} {item.original?.niche ? `• ${item.original.niche}` : ''}
                                                 </p>
                                             </div>
                                         </div>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => handleAddCatalogItem(item)}
-                                            disabled={isAttached}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
-                                                isAttached
-                                                    ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                                                    : isAffiliate
-                                                        ? "bg-purple-600 hover:bg-purple-500 text-white shadow-md"
-                                                        : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md"
-                                            }`}
-                                        >
-                                            {isAttached ? "Attached" : "+ Link to Term"}
-                                        </button>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })}
+                            </div>
                         )}
                     </div>
 
