@@ -524,7 +524,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
 
     return (
         <div className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6 font-sans">
-            {(view === 'list' || view === 'performance') && (
+            {(view === 'list' || view === 'performance' || view === 'gaps') && (
                 <>
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-4">
                         <div>
