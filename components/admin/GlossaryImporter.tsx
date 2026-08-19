@@ -198,27 +198,42 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
         }
 
         let parsedData: any[] = [];
-        let trimmedData = importData.trim();
+        let rawInput = importData.trim();
 
-        if (trimmedData.startsWith('```')) {
-            const lines = trimmedData.split('\n');
-            if (lines.length > 2) {
-                trimmedData = lines.slice(1, -1).join('\n').trim();
+        // Extract JSON candidate if code blocks or markdown text surround it
+        let jsonCandidate = rawInput;
+        if (jsonCandidate.includes('```')) {
+            const match = jsonCandidate.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+            if (match && match[1]) {
+                jsonCandidate = match[1].trim();
+            } else {
+                jsonCandidate = jsonCandidate.replace(/```[a-z]*/gi, '').replace(/```/g, '').trim();
             }
         }
 
-        const isJsonPrompt = trimmedData.startsWith('[') || trimmedData.startsWith('{');
+        const firstBracket = jsonCandidate.indexOf('[');
+        const lastBracket = jsonCandidate.lastIndexOf(']');
+        const firstCurly = jsonCandidate.indexOf('{');
+        const lastCurly = jsonCandidate.lastIndexOf('}');
+
+        let isJsonPrompt = false;
+
+        if (firstBracket !== -1 && lastBracket > firstBracket) {
+            jsonCandidate = jsonCandidate.substring(firstBracket, lastBracket + 1).trim();
+            isJsonPrompt = true;
+        } else if (firstCurly !== -1 && lastCurly > firstCurly && !jsonCandidate.includes('|')) {
+            jsonCandidate = jsonCandidate.substring(firstCurly, lastCurly + 1).trim();
+            isJsonPrompt = true;
+        }
 
         try {
             if (isJsonPrompt) {
-                parsedData = JSON.parse(trimmedData);
-                if (!Array.isArray(parsedData)) {
-                    setMessage("JSON must be an array of objects.");
-                    setStatus("error");
-                    return;
+                let jsonParsed = JSON.parse(jsonCandidate);
+                if (!Array.isArray(jsonParsed)) {
+                    jsonParsed = [jsonParsed];
                 }
 
-                parsedData = parsedData.map((item: any) => {
+                parsedData = jsonParsed.map((item: any) => {
                     const newItem = { ...item };
                     const affiliateId = "weightlo0f57d-20";
 
@@ -250,14 +265,14 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                 throw new Error("Fallback to text");
             }
         } catch (e: any) {
-            if (isJsonPrompt) {
-                setMessage(`JSON Error: ${e.message}. Please check your syntax.`);
-                setStatus("error");
-                return;
-            }
-            const lines = importData.split("\n").filter(line => line.trim());
+            // Fallback to line-by-line text parser
+            const lines = rawInput
+                .split("\n")
+                .map(l => l.trim())
+                .filter(l => l !== "" && !l.startsWith("```"));
+
             if (lines.length < 1) {
-                setMessage("No data found in the input.");
+                setMessage("No valid term data found in the input.");
                 setStatus("error");
                 return;
             }
@@ -269,23 +284,22 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
             }
 
             try {
-                parsedData = lines.slice(startIdx).map((line, idx) => {
+                parsedData = lines.slice(startIdx).map((line) => {
                     let delimiter = "|";
-                    if (!line.includes("|")) {
-                        if (line.includes("#")) delimiter = "#";
-                        else if (line.includes("\t")) delimiter = "\t";
-                    }
+                    if (line.includes("|")) delimiter = "|";
+                    else if (line.includes("#")) delimiter = "#";
+                    else if (line.includes("\t")) delimiter = "\t";
+                    else if (line.includes(",")) delimiter = ",";
+                    else delimiter = "\n"; // single term per line
 
-                    const parts = line.split(delimiter).map(p => p.trim());
-                    if (parts.length < 2) {
-                        throw new Error(`Line ${idx + startIdx + 1} is missing data. Use '${delimiter}' to separate columns.`);
-                    }
+                    const parts = delimiter === "\n" ? [line] : line.split(delimiter).map(p => p.trim());
+                    const termName = parts[0] || line;
 
                     return {
-                        term: parts[0],
+                        term: termName,
                         category: parts[1] || "General",
-                        shortDefinition: parts[2] || parts[3] || parts[0],
-                        definition: parts[3] || parts[2] || parts[0]
+                        shortDefinition: parts[2] || parts[3] || `${termName} guide and definition.`,
+                        definition: parts[3] || parts[2] || `${termName} guide and definition.`
                     };
                 });
             } catch (err: any) {
