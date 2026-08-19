@@ -109,6 +109,8 @@ export default async function GlossaryTermPage({ params }: Props) {
 
     const { terms: allTerms } = await getGlossaryTerms({ limit: 1000 });
     const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
+    const personalOffersRes = await import("@/lib/actions/personal-affiliate.actions").then(mod => mod.getPersonalOffers());
+    const personalOffers: any[] = (personalOffersRes.success && Array.isArray(personalOffersRes.data)) ? personalOffersRes.data : [];
     const userRole = await getUserRole();
     const isAdmin = userRole === 'admin';
 
@@ -187,7 +189,7 @@ export default async function GlossaryTermPage({ params }: Props) {
 
     // --- Resolve Attached Tools & Products ---
     const attachedToolsFromDb = (serializedTerm.recommendedTools || []).map((tool: any) => {
-        const matchedProduct = products.find((p: any) => p.id === tool.productId);
+        const matchedProduct = products.find((p: any) => String(p.id) === String(tool.productId));
         return matchedProduct ? {
             name: matchedProduct.name,
             category: matchedProduct.category || matchedProduct.niche || 'Directory Product',
@@ -201,14 +203,25 @@ export default async function GlossaryTermPage({ params }: Props) {
         };
     });
 
-    const attachedAmazonProducts = (serializedTerm.amazonProducts || []).map((p: any) => ({
-        name: p.name,
-        category: 'Affiliate Catalog / Resource',
-        link: p.url,
-        description: p.description || `${p.name} recommended tool`
-    }));
+    const attachedAmazonProducts = (serializedTerm.amazonProducts || []).map((p: any) => {
+        const matchedOffer = personalOffers.find((o: any) => o.name?.toLowerCase().trim() === p.name?.toLowerCase().trim());
+        return {
+            name: p.name,
+            category: matchedOffer?.network ? `Affiliate (${matchedOffer.network})` : 'Affiliate Catalog Offer',
+            link: p.url || matchedOffer?.affiliateLink || '#',
+            description: p.description || matchedOffer?.description || `${p.name} recommended tool`
+        };
+    });
 
-    const allAttachedResources = [...attachedToolsFromDb, ...attachedAmazonProducts];
+    // Deduplicate attached tools & products by name
+    const combinedResourcesMap = new Map<string, any>();
+    [...attachedToolsFromDb, ...attachedAmazonProducts].forEach(res => {
+        if (res.name && !combinedResourcesMap.has(res.name.toLowerCase().trim())) {
+            combinedResourcesMap.set(res.name.toLowerCase().trim(), res);
+        }
+    });
+
+    const allAttachedResources = Array.from(combinedResourcesMap.values());
 
     return (
         <>

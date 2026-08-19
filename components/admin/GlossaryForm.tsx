@@ -141,32 +141,30 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
         }
     );
 
-    const matchingProducts = useMemo(() => {
-        if (!productSearch.trim()) return [];
-        const query = productSearch.toLowerCase();
-        return products.filter(p => 
-            p.name.toLowerCase().includes(query) ||
-            (p.category && p.category.toLowerCase().includes(query)) ||
-            (p.niche && p.niche.toLowerCase().includes(query)) ||
-            (p.tags && p.tags.some(t => t.toLowerCase().includes(query)))
-        ).slice(0, 10);
-    }, [products, productSearch]);
+    const attachedCatalogCount = useMemo(() => {
+        const toolsCount = (formData.recommendedTools || []).length;
+        const amazonCount = (formData.amazonProducts || []).filter(prod => {
+            const isDirectoryInRec = (formData.recommendedTools || []).some(t => {
+                const p = products.find(prodItem => String(prodItem.id) === String(t.productId));
+                return p && p.name.toLowerCase().trim() === prod.name?.toLowerCase().trim();
+            });
+            return !isDirectoryInRec;
+        }).length;
+        return toolsCount + amazonCount;
+    }, [formData.recommendedTools, formData.amazonProducts, products]);
 
     const handleToggleCatalogItem = (item: any) => {
         const currentTools = formData.recommendedTools || [];
         const currentAmazon = formData.amazonProducts || [];
 
         const isCurrentlyAttached =
-            (typeof item.id === 'number' && currentTools.some(t => t.productId === item.id)) ||
-            currentAmazon.some(p => p.name?.toLowerCase() === item.name.toLowerCase());
+            currentTools.some(t => String(t.productId) === String(item.id)) ||
+            currentAmazon.some(p => p.name?.toLowerCase().trim() === item.name.toLowerCase().trim());
 
         if (isCurrentlyAttached) {
             // DETACH item
-            const updatedTools = typeof item.id === 'number'
-                ? currentTools.filter(t => t.productId !== item.id)
-                : currentTools;
-
-            const updatedAmazon = currentAmazon.filter(p => p.name?.toLowerCase() !== item.name.toLowerCase());
+            const updatedTools = currentTools.filter(t => String(t.productId) !== String(item.id));
+            const updatedAmazon = currentAmazon.filter(p => p.name?.toLowerCase().trim() !== item.name.toLowerCase().trim());
 
             setFormData(prev => ({
                 ...prev,
@@ -176,12 +174,13 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
         } else {
             // ATTACH item
             const updatedTools = [...currentTools];
-            if (typeof item.id === 'number' && !updatedTools.some(t => t.productId === item.id)) {
-                updatedTools.push({ productId: item.id, context: item.name });
+            const numericId = Number(item.id);
+            if (!isNaN(numericId) && item.id !== '' && !updatedTools.some(t => String(t.productId) === String(numericId))) {
+                updatedTools.push({ productId: numericId, context: item.name });
             }
 
             const updatedAmazon = [...currentAmazon];
-            if (!updatedAmazon.some(p => p.name?.toLowerCase() === item.name.toLowerCase())) {
+            if (!updatedAmazon.some(p => p.name?.toLowerCase().trim() === item.name.toLowerCase().trim())) {
                 updatedAmazon.push({
                     name: item.name,
                     url: item.link || '',
@@ -923,8 +922,8 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                                 {filteredCatalogItems.map(item => {
-                                    const isAttached = (formData.recommendedTools || []).some(t => t.productId === item.id) ||
-                                        (formData.amazonProducts || []).some(p => p.name?.toLowerCase() === item.name.toLowerCase());
+                                    const isAttached = (formData.recommendedTools || []).some(t => String(t.productId) === String(item.id)) ||
+                                        (formData.amazonProducts || []).some(p => p.name?.toLowerCase().trim() === item.name.toLowerCase().trim());
                                     const isAffiliate = item.type === 'affiliate';
 
                                     return (
@@ -963,33 +962,36 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
 
                     {/* Attached Tools List */}
                     <div className="space-y-3">
-                        <label className={labelClass}>Currently Attached Tools & Products ({(formData.recommendedTools || []).length})</label>
+                        <div className="flex items-center justify-between">
+                            <label className={labelClass}>
+                                Currently Attached Tools & Products ({attachedCatalogCount})
+                            </label>
+                        </div>
 
-                        {(formData.recommendedTools || []).length === 0 ? (
+                        {attachedCatalogCount === 0 ? (
                             <div className="p-4 bg-slate-900/60 border border-slate-800 rounded-xl text-xs text-slate-400 italic text-center font-mono">
-                                No database tools attached yet. Search above to link software or products to this term.
+                                No database tools or affiliate offers attached yet. Check boxes above to link software or products to this term.
                             </div>
                         ) : (
                             <div className="space-y-2.5">
+                                {/* Recommended Tools (Directory Products) */}
                                 {(formData.recommendedTools || []).map((tool, idx) => {
-                                    const matchedProduct = products.find(p => p.id === tool.productId);
+                                    const matchedProduct = products.find(p => String(p.id) === String(tool.productId));
                                     const name = matchedProduct?.name || tool.context || `Tool #${tool.productId}`;
                                     const link = matchedProduct?.affiliateLink || (matchedProduct ? `/catalog/${matchedProduct.slug || matchedProduct.id}` : "");
 
                                     return (
-                                        <div key={idx} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div key={`rec-${idx}`} className="p-3.5 bg-slate-900 border border-slate-800 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${matchedProduct?.logoColor || "bg-indigo-600"}`}>
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${matchedProduct?.logoColor || "bg-cyan-600"}`}>
                                                     {name.charAt(0)}
                                                 </div>
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className="font-bold text-slate-100 text-xs">{name}</span>
-                                                        {matchedProduct && (
-                                                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-950 text-cyan-400 border border-slate-800">
-                                                                ID: {matchedProduct.id}
-                                                            </span>
-                                                        )}
+                                                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/80 font-bold">
+                                                            Directory Product
+                                                        </span>
                                                         {link && (
                                                             <a href={link} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline flex items-center gap-0.5 text-[10px]">
                                                                 Link <ExternalLink size={10} />
@@ -1014,6 +1016,54 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                                                 onClick={() => handleRemoveTool(tool.productId, matchedProduct?.name)}
                                                 className="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 text-rose-300 rounded-lg transition-colors shrink-0 self-end sm:self-auto cursor-pointer"
                                                 title="Detach tool"
+                                            >
+                                                <Trash size={14} />
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+
+                                {/* Amazon / Affiliate Catalog Offers */}
+                                {(formData.amazonProducts || []).map((prod, idx) => {
+                                    // Avoid duplicating if already shown in recommendedTools
+                                    const isDirectoryInRec = (formData.recommendedTools || []).some(t => {
+                                        const p = products.find(prodItem => String(prodItem.id) === String(t.productId));
+                                        return p && p.name.toLowerCase().trim() === prod.name?.toLowerCase().trim();
+                                    });
+                                    if (isDirectoryInRec) return null;
+
+                                    return (
+                                        <div key={`aff-${idx}`} className="p-3.5 bg-slate-900 border border-purple-900/60 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 bg-purple-600">
+                                                    {(prod.name || "A").charAt(0)}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-slate-100 text-xs">{prod.name}</span>
+                                                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-950 text-purple-300 border border-purple-800/80 font-bold">
+                                                            Affiliate Catalog Offer
+                                                        </span>
+                                                        {prod.url && (
+                                                            <a href={prod.url} target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:underline flex items-center gap-0.5 text-[10px]">
+                                                                Link <ExternalLink size={10} />
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                                                        {prod.description || prod.url || "Attached Affiliate Offer"}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const updatedAmazon = (formData.amazonProducts || []).filter(p => p.name?.toLowerCase().trim() !== prod.name?.toLowerCase().trim());
+                                                    setFormData(prev => ({ ...prev, amazonProducts: updatedAmazon }));
+                                                }}
+                                                className="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 text-rose-300 rounded-lg transition-colors shrink-0 self-end sm:self-auto cursor-pointer"
+                                                title="Detach offer"
                                             >
                                                 <Trash size={14} />
                                             </button>
