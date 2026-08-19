@@ -1,6 +1,7 @@
-import { useState, useTransition, useMemo } from "react";
+import { useState, useTransition, useMemo, useEffect } from "react";
 import { bulkCreateGlossaryTerms } from "@/lib/actions/glossary.actions";
-import { FileText, Save, List, AlertCircle, CheckCircle, Copy, Bot, Sparkles, Wrench, Search, Trash, Plus, Check } from "lucide-react";
+import { getPersonalOffers } from "@/lib/actions/personal-affiliate.actions";
+import { FileText, Save, List, AlertCircle, CheckCircle, Copy, Bot, Sparkles, Wrench, Search, Trash, Plus, Check, Link as LinkIcon, Layers } from "lucide-react";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 
 interface GlossaryImporterProps {
@@ -14,26 +15,72 @@ export default function GlossaryImporter({ products = [] }: GlossaryImporterProp
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
     const [productSearch, setProductSearch] = useState("");
-    const [selectedProducts, setSelectedProducts] = useState<IDirectoryProduct[]>([]);
+    const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+    const [affiliateOffers, setAffiliateOffers] = useState<any[]>([]);
+    const [activeCatalogTab, setActiveCatalogTab] = useState<'all' | 'directory' | 'affiliate'>('all');
 
-    const matchingProducts = useMemo(() => {
-        if (!productSearch.trim()) return [];
-        const query = productSearch.toLowerCase();
-        return products.filter(p =>
-            p.name.toLowerCase().includes(query) ||
-            (p.category && p.category.toLowerCase().includes(query)) ||
-            (p.niche && p.niche.toLowerCase().includes(query))
-        ).slice(0, 10);
-    }, [products, productSearch]);
+    useEffect(() => {
+        const fetchAffiliateOffers = async () => {
+            const res = await getPersonalOffers();
+            if (res.success && Array.isArray(res.data)) {
+                setAffiliateOffers(res.data);
+            }
+        };
+        fetchAffiliateOffers();
+    }, []);
 
-    const handleAddSelectedProduct = (product: IDirectoryProduct) => {
-        if (selectedProducts.some(p => p.id === product.id)) return;
-        setSelectedProducts(prev => [...prev, product]);
-        setProductSearch("");
+    // Combine Directory Products + Personal Affiliate Offers into a unified searchable list
+    const combinedCatalogItems = useMemo(() => {
+        const directoryItems = products.map(p => ({
+            keyId: `dir-${p.id}`,
+            id: p.id,
+            name: p.name,
+            category: p.category || p.niche || 'Directory Product',
+            link: p.affiliateLink || `/catalog/${p.slug || p.id}`,
+            type: 'directory' as const,
+            original: p
+        }));
+
+        const affiliateItems = affiliateOffers.map(o => ({
+            keyId: `aff-${o._id}`,
+            id: o._id,
+            name: o.name,
+            category: o.network || 'Affiliate Catalog Offer',
+            link: o.affiliateLink,
+            type: 'affiliate' as const,
+            original: o
+        }));
+
+        return [...directoryItems, ...affiliateItems];
+    }, [products, affiliateOffers]);
+
+    const filteredCatalogItems = useMemo(() => {
+        let list = combinedCatalogItems;
+
+        if (activeCatalogTab === 'directory') {
+            list = list.filter(item => item.type === 'directory');
+        } else if (activeCatalogTab === 'affiliate') {
+            list = list.filter(item => item.type === 'affiliate');
+        }
+
+        if (productSearch.trim()) {
+            const query = productSearch.toLowerCase();
+            list = list.filter(item =>
+                item.name.toLowerCase().includes(query) ||
+                item.category.toLowerCase().includes(query)
+            );
+        }
+
+        return list;
+    }, [combinedCatalogItems, activeCatalogTab, productSearch]);
+
+    const handleAddSelectedCatalogItem = (item: any) => {
+        if (selectedProducts.some(p => p.keyId === item.keyId)) return;
+        setSelectedProducts(prev => [...prev, item]);
     };
 
-    const handleRemoveSelectedProduct = (productId: number) => {
-        setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+    const handleRemoveSelectedCatalogItem = (keyId: string) => {
+        setSelectedProducts(prev => prev.filter(p => p.keyId !== keyId));
     };
 
     const MASTER_JSON_SCHEMA = `Generate a strict JSON array containing exactly ONE object for each of the keywords at the bottom of this prompt.
@@ -321,13 +368,13 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
 
             {/* Product Database Selector for Bulk Import */}
             <div className="p-6 bg-slate-950 border border-slate-800 rounded-3xl space-y-4 shadow-xl">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
                     <div>
                         <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-                            <Wrench size={16} /> Attach Directory Database Products to Imported Batch ({selectedProducts.length})
+                            <Wrench size={16} /> Attach Products & Affiliate Offers to Batch ({selectedProducts.length} Selected)
                         </h3>
                         <p className="text-[11px] text-slate-400 font-sans mt-0.5">
-                            Search your database of {products.length} products and select software/tools to attach automatically to ALL imported terms.
+                            Pick software tools or affiliate catalog offers below to automatically attach to ALL terms in this import.
                         </p>
                     </div>
                     {selectedProducts.length > 0 && (
@@ -341,91 +388,137 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                     )}
                 </div>
 
+                {/* Filter Tabs */}
+                <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-2">
+                    <button
+                        type="button"
+                        onClick={() => setActiveCatalogTab('all')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            activeCatalogTab === 'all'
+                                ? 'bg-cyan-600 text-white shadow-md'
+                                : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                        }`}
+                    >
+                        <Layers size={13} /> All Items ({combinedCatalogItems.length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveCatalogTab('directory')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            activeCatalogTab === 'directory'
+                                ? 'bg-cyan-600 text-white shadow-md'
+                                : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                        }`}
+                    >
+                        <Wrench size={13} /> Directory Products ({products.length})
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveCatalogTab('affiliate')}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                            activeCatalogTab === 'affiliate'
+                                ? 'bg-purple-600 text-white shadow-md'
+                                : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                        }`}
+                    >
+                        <LinkIcon size={13} /> Affiliate Catalog ({affiliateOffers.length})
+                    </button>
+                </div>
+
                 {/* Product Search Input */}
                 <div className="relative">
-                    <div className="relative">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                        <input
-                            type="text"
-                            value={productSearch}
-                            onChange={e => setProductSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl text-xs font-mono text-slate-100 placeholder:text-slate-500 outline-none"
-                            placeholder="Search product database (e.g. ClickFunnels, Canva, ChatGPT)..."
-                        />
-                        {productSearch && (
-                            <button
-                                type="button"
-                                onClick={() => setProductSearch('')}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white"
-                            >
-                                Clear
-                            </button>
-                        )}
-                    </div>
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                    <input
+                        type="text"
+                        value={productSearch}
+                        onChange={e => setProductSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl text-xs font-mono text-slate-100 placeholder:text-slate-500 outline-none"
+                        placeholder="Search by product name, tool, network, or category..."
+                    />
+                    {productSearch && (
+                        <button
+                            type="button"
+                            onClick={() => setProductSearch('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white"
+                        >
+                            Clear
+                        </button>
+                    )}
+                </div>
 
-                    {/* Search Results Dropdown */}
-                    {productSearch.trim() !== '' && (
-                        <div className="mt-2 bg-slate-900 border border-cyan-800/80 rounded-2xl p-2 shadow-2xl max-h-56 overflow-y-auto space-y-1 z-20 absolute left-0 right-0">
-                            {matchingProducts.length === 0 ? (
-                                <div className="p-3 text-xs text-slate-400 italic text-center font-mono">
-                                    No products found matching &ldquo;{productSearch}&rdquo;.
-                                </div>
-                            ) : (
-                                matchingProducts.map(product => {
-                                    const isSelected = selectedProducts.some(p => p.id === product.id);
-                                    return (
-                                        <div
-                                            key={product.id}
-                                            className="flex items-center justify-between p-2.5 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800/80 transition-all gap-3"
-                                        >
-                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${product.logoColor || "bg-cyan-600"}`}>
-                                                    {product.name.charAt(0)}
-                                                </div>
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-slate-100 text-xs truncate">{product.name}</span>
-                                                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                                                            {product.category || product.niche}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => handleAddSelectedProduct(product)}
-                                                disabled={isSelected}
-                                                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
-                                                    isSelected
-                                                        ? "bg-slate-800 text-slate-500 cursor-not-allowed"
-                                                        : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md"
-                                                }`}
-                                            >
-                                                {isSelected ? "Attached" : "+ Select Product"}
-                                            </button>
-                                        </div>
-                                    );
-                                })
-                            )}
+                {/* Interactive Catalog Picker List (Always Visible) */}
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2 max-h-60 overflow-y-auto space-y-1.5 custom-scrollbar">
+                    {filteredCatalogItems.length === 0 ? (
+                        <div className="p-4 text-xs text-slate-400 italic text-center font-mono">
+                            No items found matching your filter/search criteria.
                         </div>
+                    ) : (
+                        filteredCatalogItems.map(item => {
+                            const isSelected = selectedProducts.some(p => p.keyId === item.keyId);
+                            const isAffiliate = item.type === 'affiliate';
+
+                            return (
+                                <div
+                                    key={item.keyId}
+                                    className="flex items-center justify-between p-2.5 bg-slate-950 hover:bg-slate-850 rounded-xl border border-slate-800/80 transition-all gap-3"
+                                >
+                                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${isAffiliate ? "bg-purple-600" : (item.original?.logoColor || "bg-cyan-600")}`}>
+                                            {item.name.charAt(0)}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-slate-100 text-xs truncate">{item.name}</span>
+                                                <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full font-bold border ${
+                                                    isAffiliate 
+                                                        ? 'bg-purple-950 text-purple-300 border-purple-800/80' 
+                                                        : 'bg-slate-800 text-slate-300 border-slate-700'
+                                                }`}>
+                                                    {isAffiliate ? `Affiliate (${item.category})` : item.category}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAddSelectedCatalogItem(item)}
+                                        disabled={isSelected}
+                                        className={`px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                                            isSelected
+                                                ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                                                : isAffiliate
+                                                    ? "bg-purple-600 hover:bg-purple-500 text-white shadow-md"
+                                                    : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md"
+                                        }`}
+                                    >
+                                        {isSelected ? "Attached" : "+ Select"}
+                                    </button>
+                                </div>
+                            );
+                        })
                     )}
                 </div>
 
                 {/* Selected Products Chips */}
                 {selectedProducts.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2">
-                        {selectedProducts.map(product => (
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-800/80">
+                        <span className="text-xs font-mono font-bold text-slate-400 self-center">Attached to Batch:</span>
+                        {selectedProducts.map(item => (
                             <span
-                                key={product.id}
-                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-950 border border-cyan-800 text-cyan-300 font-mono text-xs font-bold"
+                                key={item.keyId}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-mono text-xs font-bold border ${
+                                    item.type === 'affiliate'
+                                        ? 'bg-purple-950 border-purple-800 text-purple-300'
+                                        : 'bg-cyan-950 border-cyan-800 text-cyan-300'
+                                }`}
                             >
-                                <Check size={12} className="text-cyan-400" />
-                                {product.name}
+                                <Check size={12} />
+                                {item.name}
                                 <button
                                     type="button"
-                                    onClick={() => handleRemoveSelectedProduct(product.id)}
-                                    className="hover:text-rose-400 ml-1 transition-colors"
+                                    onClick={() => handleRemoveSelectedCatalogItem(item.keyId)}
+                                    className="hover:text-rose-400 ml-1 transition-colors text-sm"
                                 >
                                     ×
                                 </button>
