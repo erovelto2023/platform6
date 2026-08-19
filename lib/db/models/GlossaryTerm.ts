@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from 'mongoose';
 
 export interface IRecommendedTool {
-    productId: number;
+    productId: number | string;
     context?: string; // "Best For" context
 }
 
@@ -262,7 +262,7 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     // Legacy / Compat
     niche: { type: String },
     recommendedTools: [{
-        productId: { type: Number },
+        productId: { type: Schema.Types.Mixed },
         context: { type: String }
     }],
     imageUrl: { type: String },

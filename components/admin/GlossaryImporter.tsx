@@ -313,17 +313,20 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
             // Merge selected database products into recommendedTools & amazonProducts for all imported terms
             if (selectedProducts.length > 0) {
                 parsedData = parsedData.map((item: any) => {
-                    const currentTools = item.recommendedTools || [];
-                    const currentAmazon = item.amazonProducts || [];
+                    const currentTools = [...(item.recommendedTools || [])];
+                    const currentAmazon = [...(item.amazonProducts || [])];
 
                     selectedProducts.forEach(prod => {
-                        if (!currentTools.some((t: any) => t.productId === prod.id)) {
-                            currentTools.push({ productId: prod.id, context: prod.name });
+                        const isNum = typeof prod.id === 'number' || (!isNaN(Number(prod.id)) && prod.id !== '' && typeof prod.id !== 'boolean');
+                        const cleanId = isNum ? Number(prod.id) : String(prod.id);
+
+                        if (!currentTools.some((t: any) => String(t.productId) === String(cleanId))) {
+                            currentTools.push({ productId: cleanId, context: prod.name });
                         }
-                        if (!currentAmazon.some((p: any) => p.name?.toLowerCase() === prod.name.toLowerCase())) {
+                        if (!currentAmazon.some((p: any) => p.name?.toLowerCase().trim() === prod.name?.toLowerCase().trim())) {
                             currentAmazon.push({
                                 name: prod.name,
-                                url: prod.affiliateLink || `/catalog/${prod.slug || prod.id}`,
+                                url: prod.affiliateLink || prod.link || `/catalog/${prod.slug || prod.id}`,
                                 description: prod.shortDescription || prod.category || "Recommended Tool"
                             });
                         }
