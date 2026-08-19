@@ -297,52 +297,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </h1>
                         </div>
 
-                        {/* Interactive Concept Mindmap Graph Component */}
-                        <ConceptGraph
-                            currentTerm={serializedTerm.term}
-                            currentSlug={serializedTerm.slug}
-                            category={primaryCategory}
-                            parentTermSlug={verifiedParentTermSlug}
-                            parentTermName={serializedAllTerms.find((t: any) => t.slug === verifiedParentTermSlug)?.term || verifiedParentTermSlug}
-                            relatedTerms={verifiedRelatedTerms.length > 0 ? verifiedRelatedTerms : serializedAllTerms.filter((t: any) => t.category === primaryCategory && t.slug !== serializedTerm.slug).slice(0, 5)}
-                            recommendedTools={serializedTerm.recommendedTools}
-                        />
 
-                        {/* Phase 2 Component: Entity Knowledge Node Box (ALWAYS RENDERED) */}
-                        <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-3 font-mono text-xs">
-                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                <div className="flex items-center gap-2 text-cyan-400 font-bold uppercase">
-                                    <Network size={16} /> Knowledge Graph Entity Node
-                                </div>
-                                <span className="text-slate-500">Entity ID: /glossary/{serializedTerm.slug}</span>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                                <div>
-                                    <span className="text-slate-400 block mb-1">Entity Classification:</span>
-                                    <span className="text-slate-100 font-bold">{serializedTerm.entityType || 'Core Concept'}</span>
-                                </div>
-                                <div>
-                                    <span className="text-slate-400 block mb-1">Knowledge Clusters:</span>
-                                    <div className="flex flex-wrap gap-1.5 mt-1">
-                                        {categoriesList.map((cat, i) => (
-                                            <span key={i} className="text-cyan-300 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-lg text-[11px] font-bold">
-                                                {cat}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="col-span-full pt-2 border-t border-slate-800 flex items-center gap-2">
-                                    <span className="text-slate-400">Parent Concept Node:</span>
-                                    {serializedTerm.parentTermSlug ? (
-                                        <Link href={`/glossary/${serializedTerm.parentTermSlug}`} className="text-cyan-400 font-bold hover:underline">
-                                            /glossary/{serializedTerm.parentTermSlug}
-                                        </Link>
-                                    ) : (
-                                        <span className="text-slate-500 italic">Root Entity / Primary Concept</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Phase 2 Component: AEO Direct Answer Summary Box (ALWAYS RENDERED) */}
                         <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-2xl relative overflow-hidden group">
