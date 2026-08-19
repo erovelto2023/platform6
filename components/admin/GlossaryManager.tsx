@@ -1185,7 +1185,7 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                     >
                         <ArrowLeft size={16} /> Back to Glossary Terms List
                     </button>
-                    <GlossaryImporter />
+                    <GlossaryImporter products={products} />
                 </div>
             )}
         </div>

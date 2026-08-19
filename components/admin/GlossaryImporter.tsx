@@ -1,23 +1,48 @@
-"use client";
-
-import { useState, useTransition } from "react";
+import { useState, useTransition, useMemo } from "react";
 import { bulkCreateGlossaryTerms } from "@/lib/actions/glossary.actions";
-import { FileText, Save, List, AlertCircle, CheckCircle, Copy, Bot, Sparkles } from "lucide-react";
+import { FileText, Save, List, AlertCircle, CheckCircle, Copy, Bot, Sparkles, Wrench, Search, Trash, Plus, Check } from "lucide-react";
+import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 
-export default function GlossaryImporter() {
+interface GlossaryImporterProps {
+    products?: IDirectoryProduct[];
+}
+
+export default function GlossaryImporter({ products = [] }: GlossaryImporterProps) {
     const [isPending, startTransition] = useTransition();
     const [importData, setImportData] = useState("");
     const [bulkKeywords, setBulkKeywords] = useState("");
     const [message, setMessage] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+    const [productSearch, setProductSearch] = useState("");
+    const [selectedProducts, setSelectedProducts] = useState<IDirectoryProduct[]>([]);
+
+    const matchingProducts = useMemo(() => {
+        if (!productSearch.trim()) return [];
+        const query = productSearch.toLowerCase();
+        return products.filter(p =>
+            p.name.toLowerCase().includes(query) ||
+            (p.category && p.category.toLowerCase().includes(query)) ||
+            (p.niche && p.niche.toLowerCase().includes(query))
+        ).slice(0, 10);
+    }, [products, productSearch]);
+
+    const handleAddSelectedProduct = (product: IDirectoryProduct) => {
+        if (selectedProducts.some(p => p.id === product.id)) return;
+        setSelectedProducts(prev => [...prev, product]);
+        setProductSearch("");
+    };
+
+    const handleRemoveSelectedProduct = (productId: number) => {
+        setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+    };
 
     const MASTER_JSON_SCHEMA = `Generate a strict JSON array containing exactly ONE object for each of the keywords at the bottom of this prompt.
 
-CRITICAL URL GUIDELINES:
+CRITICAL URL & PRODUCT GUIDELINES:
 1. FIND REAL, LIVE URLs: You MUST find actual, functional URLs for authority websites, popular podcasts, and real Amazon products related to the keyword.
 2. DO NOT HALLUCINATE OR PROTECT: Do not use "example.com", "yoursite.com", "test.com", "yoursocial.com", or any other placeholder domain. 
 3. EMPTY IS BETTER THAN FAKE: If you cannot find a verified, live URL for an item, leave the "url" field as an empty string ("") or omit the item entirely.
-4. USER VALUE: I need real resources that a human user can actually click and visit right now.
+4. RECOMMENDED TOOLS & PRODUCTS: You can link database product IDs in "recommendedTools": [{"productId": 101, "context": "Best for sales funnels"}].
 
 The JSON MUST conform precisely to this schema structure and nothing else. Output ONLY the JSON array inside a standard code block, do not include any conversational text:
 
@@ -32,7 +57,9 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "aeoSummary": "Direct, fact-dense 50-word answer optimized for AI search engine citations (ChatGPT/SearchGPT/Perplexity).",
     "entityType": "Must be one of: 'Core Concept', 'Performance Metric', 'Revenue System', or 'Traffic Channel'",
     "parentTermSlug": "",
-    "childTermSlugs": [],
+    "recommendedTools": [
+      {"productId": 1, "context": "Best for automated sales funnels"}
+    ],
     "origin": "History, Origin, and Etymology of the term.",
     "traditionalMeaning": "The traditional or classic historical understanding of the term.",
     "modernUsage": "Modern digital application and current industry context.",
@@ -47,31 +74,6 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "misconceptions": "Common misunderstandings or false myths.",
     "warningsOrNotes": "Safety, ethics, or compliance notes.",
     "guidedPractice": "Step-by-step mental or operational exercise.",
-    "realWorldScenario": {
-      "context": "Context of a real-world business execution scenario.",
-      "stepByStep": [
-        "Step 1: Audit current metrics",
-        "Step 2: Implement strategy",
-        "Step 3: Track conversion lift"
-      ],
-      "citableMetric": "+34% Conversion Rate Lift",
-      "outcome": "Final measurable business outcome"
-    },
-    "deepPathways": [
-      {
-        "title": "Comprehensive Strategy Guide",
-        "url": "https://kbusinessacademy.com/blog/guide-slug",
-        "type": "blog",
-        "description": "In-depth guide on executing this strategy."
-      }
-    ],
-    "questionVariations": [
-      {
-        "question": "What is the fastest way to get started with this?",
-        "intentType": "Problem-Solving",
-        "targetAnswer": "Direct actionable answer addressing the problem query."
-      }
-    ],
     "howItMakesMoney": "Detailed explanation of how this concept generates revenue or cuts costs.",
     "bestFor": "Ideal target audience or person best suited for this.",
     "startupCost": "Must be exactly one of: '$0', '<$100', or '$100+'",
@@ -82,19 +84,17 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "gettingStartedChecklist": [
       "Step 1: Choose a niche",
       "Step 2: Set up tracking",
-      "Step 3: Launch first test",
-      "Step 4: Optimize funnel",
-      "Step 5: Scale traffic"
+      "Step 3: Launch first test"
     ],
     "commonMistakes": "Common mistakes and pitfalls to avoid.",
     "realExamples": "Short case study of a real person or business using this concept.",
     "whyItMatters": "1-3 sentences explaining why someone in business/marketing should care.",
     "videoUrl": "Actual YouTube Video URL (e.g. https://www.youtube.com/watch?v=...) or ''",
     "takeaways": ["Takeaway 1", "Takeaway 2", "Takeaway 3"],
-    "headlines": ["Headline 1", "Headline 2", "Headline 3", "Headline 4", "Headline 5"],
-    "youtubeTitles": ["YT Title 1", "YT Title 2", "YT Title 3"],
-    "pinterestIdeas": ["Pin Idea 1", "Pin Idea 2", "Pin Idea 3"],
-    "instagramIdeas": ["IG Idea 1", "IG Idea 2", "IG Idea 3"],
+    "headlines": ["Headline 1", "Headline 2", "Headline 3"],
+    "youtubeTitles": ["YT Title 1", "YT Title 2"],
+    "pinterestIdeas": ["Pin Idea 1", "Pin Idea 2"],
+    "instagramIdeas": ["IG Idea 1", "IG Idea 2"],
     "amazonProducts": [
       {"name": "Real Amazon Product Name", "url": "Actual Amazon URL with &tag=weightlo0f57d-20 or ''"}
     ],
@@ -105,30 +105,21 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
       {"name": "Real Podcast Name", "url": "Actual Podcast URL"}
     ],
     "faqs": [
-      {"question": "Common Question 1?", "answer": "Detailed answer 1"},
-      {"question": "Common Question 2?", "answer": "Detailed answer 2"}
+      {"question": "Common Question 1?", "answer": "Detailed answer 1"}
     ],
     "caseStudies": [
       {"title": "Case Study Title", "description": "Short explanation of case study", "url": ""}
     ],
-    "sources": "Verified industry publications or case research.",
-    "scientificPerspective": "Empirical data or statistical research backing.",
-    "culturalNotes": "Cultural background or broader industry impact.",
-    "relatedTermIds": [],
     "synonyms": ["Alternative Name 1", "Alternative Name 2"],
-    "antonyms": [],
-    "seeAlso": [],
     "metaTitle": "SEO Optimized Meta Title under 60 characters",
     "metaDescription": "SEO Meta Description under 160 characters",
-    "keywords": ["keyword 1", "keyword 2", "keyword 3"],
-    "tags": ["tag1", "tag2", "tag3"],
+    "keywords": ["keyword 1", "keyword 2"],
+    "tags": ["tag1", "tag2"],
     "imagePrompt": "Detailed AI image prompt for Midjourney/DALL-E capturing the essence of this keyword.",
     "productPrompt": "AI prompt to help the user brainstorm a digital/physical product for this keyword.",
     "socialPrompt": "AI prompt to generate a viral social media content strategy for this keyword.",
     "isFeatured": false,
-    "status": "Published",
-    "aiTrainingEligible": true,
-    "niche": "Internet Marketing / Online Business"
+    "status": "Published"
   }
 ]`;
 
@@ -258,6 +249,33 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
         }
 
         startTransition(async () => {
+            // Merge selected database products into recommendedTools & amazonProducts for all imported terms
+            if (selectedProducts.length > 0) {
+                parsedData = parsedData.map((item: any) => {
+                    const currentTools = item.recommendedTools || [];
+                    const currentAmazon = item.amazonProducts || [];
+
+                    selectedProducts.forEach(prod => {
+                        if (!currentTools.some((t: any) => t.productId === prod.id)) {
+                            currentTools.push({ productId: prod.id, context: prod.name });
+                        }
+                        if (!currentAmazon.some((p: any) => p.name?.toLowerCase() === prod.name.toLowerCase())) {
+                            currentAmazon.push({
+                                name: prod.name,
+                                url: prod.affiliateLink || `/catalog/${prod.slug || prod.id}`,
+                                description: prod.shortDescription || prod.category || "Recommended Tool"
+                            });
+                        }
+                    });
+
+                    return {
+                        ...item,
+                        recommendedTools: currentTools,
+                        amazonProducts: currentAmazon
+                    };
+                });
+            }
+
             const result = await bulkCreateGlossaryTerms(parsedData);
             if (result.error) {
                 setMessage("Error: " + result.error);
@@ -282,7 +300,7 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                     setBulkKeywords(remainingLines.join('\n'));
                 }
 
-                setMessage(`Successfully imported ${result.count} terms! ${removedCount > 0 ? `Removed ${removedCount} matching imported keyword(s) from your batch list.` : ''}`);
+                setMessage(`Successfully imported ${result.count} terms! ${selectedProducts.length > 0 ? `Attached ${selectedProducts.length} product(s) to all imported terms.` : ''} ${removedCount > 0 ? `Removed ${removedCount} matching imported keyword(s) from your batch list.` : ''}`);
                 setStatus("success");
                 setImportData("");
             }
@@ -299,6 +317,122 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                     <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight">Bulk Glossary Importer & AI Generator</h2>
                     <p className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider mt-0.5">High-Coverage JSON & AI Schema Generation</p>
                 </div>
+            </div>
+
+            {/* Product Database Selector for Bulk Import */}
+            <div className="p-6 bg-slate-950 border border-slate-800 rounded-3xl space-y-4 shadow-xl">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                            <Wrench size={16} /> Attach Directory Database Products to Imported Batch ({selectedProducts.length})
+                        </h3>
+                        <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                            Search your database of {products.length} products and select software/tools to attach automatically to ALL imported terms.
+                        </p>
+                    </div>
+                    {selectedProducts.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => setSelectedProducts([])}
+                            className="text-[10px] font-mono text-rose-400 hover:underline"
+                        >
+                            Clear Selection
+                        </button>
+                    )}
+                </div>
+
+                {/* Product Search Input */}
+                <div className="relative">
+                    <div className="relative">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                            type="text"
+                            value={productSearch}
+                            onChange={e => setProductSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-900 border border-slate-800 focus:border-cyan-500 rounded-xl text-xs font-mono text-slate-100 placeholder:text-slate-500 outline-none"
+                            placeholder="Search product database (e.g. ClickFunnels, Canva, ChatGPT)..."
+                        />
+                        {productSearch && (
+                            <button
+                                type="button"
+                                onClick={() => setProductSearch('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 hover:text-white"
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Search Results Dropdown */}
+                    {productSearch.trim() !== '' && (
+                        <div className="mt-2 bg-slate-900 border border-cyan-800/80 rounded-2xl p-2 shadow-2xl max-h-56 overflow-y-auto space-y-1 z-20 absolute left-0 right-0">
+                            {matchingProducts.length === 0 ? (
+                                <div className="p-3 text-xs text-slate-400 italic text-center font-mono">
+                                    No products found matching &ldquo;{productSearch}&rdquo;.
+                                </div>
+                            ) : (
+                                matchingProducts.map(product => {
+                                    const isSelected = selectedProducts.some(p => p.id === product.id);
+                                    return (
+                                        <div
+                                            key={product.id}
+                                            className="flex items-center justify-between p-2.5 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800/80 transition-all gap-3"
+                                        >
+                                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 ${product.logoColor || "bg-cyan-600"}`}>
+                                                    {product.name.charAt(0)}
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-slate-100 text-xs truncate">{product.name}</span>
+                                                        <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                                                            {product.category || product.niche}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddSelectedProduct(product)}
+                                                disabled={isSelected}
+                                                className={`px-3 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                                                    isSelected
+                                                        ? "bg-slate-800 text-slate-500 cursor-not-allowed"
+                                                        : "bg-cyan-600 hover:bg-cyan-500 text-white shadow-md"
+                                                }`}
+                                            >
+                                                {isSelected ? "Attached" : "+ Select Product"}
+                                            </button>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Selected Products Chips */}
+                {selectedProducts.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                        {selectedProducts.map(product => (
+                            <span
+                                key={product.id}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-cyan-950 border border-cyan-800 text-cyan-300 font-mono text-xs font-bold"
+                            >
+                                <Check size={12} className="text-cyan-400" />
+                                {product.name}
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveSelectedProduct(product.id)}
+                                    className="hover:text-rose-400 ml-1 transition-colors"
+                                >
+                                    ×
+                                </button>
+                            </span>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
