@@ -476,47 +476,7 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                 </div>
             </div>
 
-            {/* Related Tools / Resources */}
-            <div className="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-6">
-                <h3 className="font-mono font-extrabold text-cyan-400 border-b border-slate-800 pb-2 flex items-center gap-2 text-xs uppercase tracking-wider">
-                    <LinkIcon size={16} className="text-cyan-400" />
-                    Related Resources / Tools
-                </h3>
-                <div className="space-y-4">
-                    <p className="text-xs font-mono text-slate-400">Select tools or resources from the database to recommend with this term:</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-4 bg-slate-900 rounded-xl border border-slate-800">
-                        {products.map(product => {
-                            const isSelected = formData.recommendedTools?.some(t => t.productId === product.id);
-                            return (
-                                <label key={product.id} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${isSelected ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`}>
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected}
-                                        onChange={(e) => {
-                                            const current = formData.recommendedTools || [];
-                                            if (e.target.checked) {
-                                                handleChange("recommendedTools", [...current, { productId: product.id, context: "Recommended Resource" }]);
-                                            } else {
-                                                handleChange("recommendedTools", current.filter(t => t.productId !== product.id));
-                                            }
-                                        }}
-                                        className="mt-1 w-4 h-4 rounded border-cyan-500 text-cyan-500 focus:ring-cyan-500"
-                                    />
-                                    <div>
-                                        <span className="font-extrabold text-slate-100 block text-xs">{product.name}</span>
-                                        <span className="text-[10px] text-cyan-400 font-mono block mt-0.5">{product.category} • {product.niche}</span>
-                                    </div>
-                                </label>
-                            );
-                        })}
-                        {products.length === 0 && (
-                            <div className="col-span-full text-center text-slate-500 text-xs py-4 font-mono">
-                                No tools found in product database.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+
 
             {/* Monetization & Business (MMO) */}
             <div className="bg-slate-950 p-6 rounded-2xl border border-emerald-900/60 space-y-6">
