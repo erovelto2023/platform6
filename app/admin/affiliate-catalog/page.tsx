@@ -10,7 +10,7 @@ export default async function AffiliateCatalogPage() {
     return (
         <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto font-sans">
             {/* Header */}
-            <AffiliateCatalogHeader />
+            <AffiliateCatalogHeader offers={offers} />
 
             {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

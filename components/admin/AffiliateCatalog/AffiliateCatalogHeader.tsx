@@ -12,8 +12,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import AffiliateOfferForm from "./AffiliateOfferForm";
+import AffiliateCatalogImportExportModal from "./AffiliateCatalogImportExportModal";
 
-export default function AffiliateCatalogHeader() {
+interface AffiliateCatalogHeaderProps {
+    offers?: any[];
+}
+
+export default function AffiliateCatalogHeader({ offers = [] }: AffiliateCatalogHeaderProps) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -32,19 +37,23 @@ export default function AffiliateCatalogHeader() {
                 <p className="text-slate-400 text-xs font-mono">Manage your personal affiliate links, networks, and payout details for instant campaign embedding.</p>
             </div>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <Button className="rounded-2xl gap-2 h-12 px-6 bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-extrabold shadow-lg shadow-indigo-600/30 border-0 cursor-pointer">
-                        <Plus size={20} /> Add New Offer
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="text-slate-100 font-black">Add New Affiliate Offer</DialogTitle>
-                    </DialogHeader>
-                    <AffiliateOfferForm onComplete={() => setOpen(false)} />
-                </DialogContent>
-            </Dialog>
+            <div className="flex flex-wrap items-center gap-3">
+                <AffiliateCatalogImportExportModal offers={offers} />
+
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="rounded-2xl gap-2 h-10 px-5 bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-extrabold shadow-lg shadow-indigo-600/30 border-0 cursor-pointer text-xs">
+                            <Plus size={18} /> Add New Offer
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl">
+                        <DialogHeader>
+                            <DialogTitle className="text-slate-100 font-black">Add New Affiliate Offer</DialogTitle>
+                        </DialogHeader>
+                        <AffiliateOfferForm onComplete={() => setOpen(false)} />
+                    </DialogContent>
+                </Dialog>
+            </div>
         </div>
     );
 }

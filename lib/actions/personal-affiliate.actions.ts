@@ -73,3 +73,63 @@ export async function trackCatalogVisitByUrl(url: string) {
         return { success: false };
     }
 }
+
+export async function bulkImportPersonalOffers(offers: any[]) {
+    try {
+        await connectDB();
+        let insertedCount = 0;
+        let updatedCount = 0;
+
+        for (const item of offers) {
+            const name = item.name || item.product || item.title || item.Name;
+            const affiliateLink = item.affiliateLink || item.url || item.link || item.AffiliateLink || item.URL;
+            if (!name || !affiliateLink) continue;
+
+            const destinationLink = item.destinationLink || item.destination || item.DestinationLink || "";
+            const productPrice = item.productPrice || item.price || item.Price || "";
+            const commissionLevel = item.commissionLevel || item.commission || item.Commission || "";
+            const payoutAmount = item.payoutAmount || item.payout || item.Payout || "";
+            const network = item.network || item.Network || "Direct";
+            const notes = item.notes || item.Notes || "";
+            const clicks = typeof item.clicks === 'number' ? item.clicks : (Number(item.Clicks) || 0);
+
+            const existing = await PersonalAffiliateOffer.findOne({
+                $or: [
+                    { name: name.trim() },
+                    { affiliateLink: affiliateLink.trim() }
+                ]
+            });
+
+            if (existing) {
+                await PersonalAffiliateOffer.findByIdAndUpdate(existing._id, {
+                    destinationLink: destinationLink || existing.destinationLink,
+                    productPrice: productPrice || existing.productPrice,
+                    commissionLevel: commissionLevel || existing.commissionLevel,
+                    payoutAmount: payoutAmount || existing.payoutAmount,
+                    network: network || existing.network,
+                    notes: notes || existing.notes,
+                });
+                updatedCount++;
+            } else {
+                await PersonalAffiliateOffer.create({
+                    name: name.trim(),
+                    affiliateLink: affiliateLink.trim(),
+                    destinationLink: destinationLink.trim(),
+                    productPrice: productPrice.trim(),
+                    commissionLevel: commissionLevel.trim(),
+                    payoutAmount: payoutAmount.trim(),
+                    network: network.trim(),
+                    notes: notes.trim(),
+                    clicks
+                });
+                insertedCount++;
+            }
+        }
+
+        revalidatePath("/admin/affiliate-catalog");
+        return { success: true, insertedCount, updatedCount };
+    } catch (error: any) {
+        console.error('[BULK_IMPORT_PERSONAL_OFFERS]', error);
+        return { success: false, error: error.message };
+    }
+}
