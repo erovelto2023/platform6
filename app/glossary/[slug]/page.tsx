@@ -15,6 +15,10 @@ import RelatedTerms from "@/components/glossary/RelatedTerms";
 import GlossaryTermStructuredData from "@/components/glossary/StructuredData";
 import AIPromptsSection from "@/components/glossary/AIPromptsSection";
 import RotatingAffiliateBanner from "@/components/glossary/RotatingAffiliateBanner";
+import ConceptGraph from "@/components/glossary/ConceptGraph";
+import CiteTermWidget from "@/components/glossary/CiteTermWidget";
+import BacklinksWidget from "@/components/glossary/BacklinksWidget";
+import HierarchyBreadcrumbs from "@/components/glossary/HierarchyBreadcrumbs";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
 import { autoLinkContent, autoLinkContentHTML } from "@/lib/utils/glossary-utils";
 import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
@@ -182,11 +186,20 @@ export default async function GlossaryTermPage({ params }: Props) {
 
                 <Link 
                     href="/glossary"
-                    className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors mb-8 group font-mono text-xs w-fit"
+                    className="flex items-center gap-2 text-slate-400 hover:text-cyan-400 transition-colors mb-6 group font-mono text-xs w-fit"
                 >
                     <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Knowledge Registry
                 </Link>
+
+                {/* BookStack-Style Hierarchy Shelf Path */}
+                <HierarchyBreadcrumbs
+                    category={primaryCategory}
+                    subCategory={serializedTerm.subCategory}
+                    entityType={serializedTerm.entityType}
+                    term={serializedTerm.term}
+                    slug={serializedTerm.slug}
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     {/* Main Content Column */}
@@ -225,6 +238,17 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 {serializedTerm.term}
                             </h1>
                         </div>
+
+                        {/* Interactive Concept Mindmap Graph Component */}
+                        <ConceptGraph
+                            currentTerm={serializedTerm.term}
+                            currentSlug={serializedTerm.slug}
+                            category={primaryCategory}
+                            parentTermSlug={serializedTerm.parentTermSlug}
+                            parentTermName={serializedAllTerms.find((t: any) => t.slug === serializedTerm.parentTermSlug)?.term || serializedTerm.parentTermSlug}
+                            relatedTerms={serializedAllTerms.filter((t: any) => t.category === primaryCategory && t.slug !== serializedTerm.slug)}
+                            recommendedTools={serializedTerm.recommendedTools}
+                        />
 
                         {/* Phase 2 Component: Entity Knowledge Node Box (ALWAYS RENDERED) */}
                         <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-3 font-mono text-xs">
@@ -758,7 +782,21 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 <GlossaryActions slug={serializedTerm.slug} term={serializedTerm.term} />
                             </div>
 
+                            {/* 1-Click Academic & Web Citation Widget */}
+                            <CiteTermWidget
+                                term={serializedTerm.term}
+                                slug={serializedTerm.slug}
+                                lastUpdated={serializedTerm.lastUpdated}
+                            />
+
                             <RelatedTerms currentTerm={serializedTerm} allTerms={serializedAllTerms} />
+
+                            {/* Bi-Directional Backlinks & Mentions Widget */}
+                            <BacklinksWidget
+                                currentTerm={serializedTerm.term}
+                                currentSlug={serializedTerm.slug}
+                                allTerms={serializedAllTerms}
+                            />
 
                         </div>
                     </div>
