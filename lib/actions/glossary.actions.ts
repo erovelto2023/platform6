@@ -655,3 +655,81 @@ export async function getGlossaryHealthData() {
         return { error: "Failed to fetch health data" };
     }
 }
+
+/**
+ * Gap Analysis: Log a search query that returned 0 results
+ */
+export async function logMissingSearch(rawQuery: string) {
+    try {
+        const query = (rawQuery || '').trim().toLowerCase();
+        if (!query || query.length < 2) return { success: false };
+
+        await connectToDatabase();
+        const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
+
+        await GlossarySearchGap.findOneAndUpdate(
+            { query },
+            { 
+                $inc: { searchCount: 1 }, 
+                $set: { lastSearchedAt: new Date() },
+                $setOnInsert: { status: 'pending' }
+            },
+            { upsert: true, new: true }
+        );
+
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error logging missing search query:", error);
+        return { error: error.message };
+    }
+}
+
+/**
+ * Gap Analysis: Fetch all logged missing searches for Admin review
+ */
+export async function getGlossarySearchGaps() {
+    try {
+        await connectToDatabase();
+        const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
+        const gaps = await GlossarySearchGap.find({}).sort({ searchCount: -1, lastSearchedAt: -1 }).lean();
+
+        return { 
+            gaps: JSON.parse(JSON.stringify(gaps))
+        };
+    } catch (error: any) {
+        console.error("Error fetching glossary search gaps:", error);
+        return { gaps: [], error: error.message };
+    }
+}
+
+/**
+ * Gap Analysis: Update status of a missing search gap entry
+ */
+export async function updateSearchGapStatus(id: string, status: 'pending' | 'created' | 'dismissed', createdTermSlug?: string) {
+    try {
+        await connectToDatabase();
+        const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
+        await GlossarySearchGap.findByIdAndUpdate(id, { status, ...(createdTermSlug ? { createdTermSlug } : {}) });
+        revalidatePath('/admin/glossary');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error updating search gap status:", error);
+        return { error: error.message };
+    }
+}
+
+/**
+ * Gap Analysis: Delete a missing search gap entry
+ */
+export async function deleteSearchGap(id: string) {
+    try {
+        await connectToDatabase();
+        const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
+        await GlossarySearchGap.findByIdAndDelete(id);
+        revalidatePath('/admin/glossary');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Error deleting search gap entry:", error);
+        return { error: error.message };
+    }
+}

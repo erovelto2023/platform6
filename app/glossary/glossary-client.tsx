@@ -8,6 +8,28 @@ import TagCloud from '../../components/glossary/TagCloud';
 import RotatingAffiliateBanner from '../../components/glossary/RotatingAffiliateBanner';
 import { SiteHeader } from '@/components/shared/SiteHeader';
 
+import { logMissingSearch } from '@/lib/actions/glossary.actions';
+
+function getLevenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
 interface GlossaryClientProps {
   initialTerms: any[];
   categories: string[];
@@ -105,6 +127,41 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       return matchesSearch && matchesLetter && matchesCategory && matchesCluster && matchesTag;
     });
   }, [terms, searchQuery, activeLetter, selectedCategory, selectedCluster, selectedTag]);
+
+  // Auto-log missing search gap queries for admin gap analysis
+  useEffect(() => {
+    if (searchQuery.trim().length >= 2 && filteredTerms.length === 0) {
+      const timer = setTimeout(() => {
+        logMissingSearch(searchQuery);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchQuery, filteredTerms.length]);
+
+  // Fuzzy matching suggestions when 0 terms found
+  const fuzzySuggestions = useMemo(() => {
+    if (filteredTerms.length > 0 || !searchQuery.trim() || searchQuery.trim().length < 2) return [];
+
+    const q = searchQuery.trim().toLowerCase();
+    const scored = terms.map(t => {
+      const name = (t.term || '').toLowerCase();
+      let dist = 999;
+      if (name.includes(q) || q.includes(name)) {
+        dist = 0;
+      } else {
+        const words = name.split(/\s+/);
+        const wordDists = words.map(w => getLevenshteinDistance(q, w));
+        dist = Math.min(getLevenshteinDistance(q, name), ...wordDists);
+      }
+      return { term: t, dist };
+    });
+
+    return scored
+      .filter(s => s.dist <= 3)
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 4)
+      .map(s => s.term);
+  }, [terms, filteredTerms.length, searchQuery]);
 
   const totalPages = Math.ceil(filteredTerms.length / itemsPerPage);
   const currentItems = filteredTerms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -275,6 +332,15 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
         </div>
       </div>
 
+      {/* Popular Tags & Categories Cloud */}
+      <div className="max-w-7xl mx-auto px-6 pt-10">
+        <TagCloud 
+          terms={terms} 
+          onSelectTag={(tag) => { setSelectedTag(tag); setCurrentPage(1); }} 
+          activeTag={selectedTag} 
+        />
+      </div>
+
       {/* Term Cards Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 text-xs font-mono text-slate-400">
@@ -314,13 +380,43 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
         </div>
 
         {filteredTerms.length === 0 ? (
-          <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-4">
-            <Book size={32} className="text-slate-600 mx-auto" />
-            <h3 className="text-xl font-bold text-slate-200 uppercase">No Terms Found</h3>
-            <p className="text-xs font-mono text-slate-400 max-w-md mx-auto">No glossary terms matched your current filter criteria.</p>
-            <button onClick={resetFilters} className="px-4 py-2 bg-cyan-600 text-white font-mono font-bold text-xs rounded-xl hover:bg-cyan-500 transition-colors uppercase">
-              Reset All Filters
-            </button>
+          <div className="p-12 text-center bg-slate-900 border border-slate-800 rounded-3xl space-y-6 shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-cyan-950/80 border border-cyan-800/60 flex items-center justify-center text-cyan-400 mx-auto">
+              <HelpCircle size={28} />
+            </div>
+            
+            <div>
+              <h3 className="text-xl font-bold text-slate-100 uppercase tracking-tight">No Exact Terms Found For &ldquo;{searchQuery || activeLetter || selectedCategory}&rdquo;</h3>
+              <p className="text-xs font-mono text-slate-400 max-w-md mx-auto mt-1">
+                We have automatically logged this missing query for our curriculum team to add next!
+              </p>
+            </div>
+
+            {fuzzySuggestions.length > 0 && (
+              <div className="pt-2 max-w-lg mx-auto bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-3">
+                <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider block">
+                  Did you mean:
+                </span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {fuzzySuggestions.map((sugg: any) => (
+                    <button
+                      key={sugg.id || sugg.slug}
+                      onClick={() => { setSearchQuery(sugg.term); setActiveLetter(null); setCurrentPage(1); }}
+                      className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-cyan-800/60 hover:border-cyan-500 text-slate-200 hover:text-white font-mono font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
+                    >
+                      <Sparkles size={13} className="text-cyan-400" />
+                      {sugg.term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <button onClick={resetFilters} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono font-bold text-xs rounded-xl transition-all uppercase cursor-pointer">
+                Reset All Filters
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

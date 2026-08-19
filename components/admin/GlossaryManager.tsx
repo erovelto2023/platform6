@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { IGlossaryTerm } from '@/lib/db/models/GlossaryTerm';
 import { IDirectoryProduct } from '@/lib/db/models/DirectoryProduct';
-import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon } from 'lucide-react';
+import { Edit, Trash2, Plus, ArrowLeft, Search, Download, Copy, ExternalLink, ChevronLeft, ChevronRight, CheckSquare, Square, Trash, RotateCcw, Sparkles, AlertCircle, Video, ShoppingCart, Globe, Mic, FileText, Lightbulb, TrendingUp, Image as ImageIcon, HelpCircle } from 'lucide-react';
 import GlossaryForm from './GlossaryForm';
 import GlossaryImporter from '@/components/admin/GlossaryImporter';
-import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, autoReplaceSingleVideo, normalizeGlossaryData, getAllGlossaryTermsFull } from '@/lib/actions/glossary.actions';
+import { deleteGlossaryTerm, deleteGlossaryTerms, bulkCreateGlossaryTerms, removeDuplicateGlossaryTerms, scrubGlossaryUrls, backfillAiPrompts, backfillAffiliateTags, verifyYouTubeLinksBatch, autoReplaceBrokenVideos, autoReplaceSingleVideo, normalizeGlossaryData, getAllGlossaryTermsFull, getGlossarySearchGaps, updateSearchGapStatus, deleteSearchGap } from '@/lib/actions/glossary.actions';
 
 interface GlossaryManagerProps {
     initialTerms: IGlossaryTerm[];
@@ -16,7 +16,7 @@ interface GlossaryManagerProps {
 }
 
 export default function GlossaryManager({ initialTerms = [], products = [] }: GlossaryManagerProps) {
-    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'performance'>('list');
+    const [view, setView] = useState<'list' | 'create' | 'edit' | 'import' | 'performance' | 'gaps'>('list');
     const [editingTerm, setEditingTerm] = useState<IGlossaryTerm | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedLetter, setSelectedLetter] = useState<string>('ALL');
@@ -30,8 +30,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
     const [singleFixingId, setSingleFixingId] = useState<string | null>(null);
     const [isAutoFixingAll, setIsAutoFixingAll] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [searchGaps, setSearchGaps] = useState<any[]>([]);
+    const [isLoadingGaps, setIsLoadingGaps] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
+
+    const loadSearchGaps = async () => {
+        setIsLoadingGaps(true);
+        const res = await getGlossarySearchGaps();
+        if (res.gaps) {
+            setSearchGaps(res.gaps);
+        }
+        setIsLoadingGaps(false);
+    };
+
+    useEffect(() => {
+        loadSearchGaps();
+    }, []);
 
     const ALPHABET = useMemo(() => ['ALL', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '#'], []);
 
@@ -596,6 +611,23 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                                 <Download size={14} /> Bulk Import
                             </button>
                             <button
+                                onClick={() => {
+                                    setView('gaps');
+                                    loadSearchGaps();
+                                }}
+                                className={`px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs cursor-pointer shadow-md ${
+                                    view === 'gaps' ? 'bg-amber-600 text-white shadow-amber-600/30' : 'bg-slate-950 border border-amber-800/80 text-amber-300 hover:bg-amber-950'
+                                }`}
+                                title="View missing terms searched by users that don't exist yet"
+                            >
+                                <HelpCircle size={14} /> Gap Analysis
+                                {searchGaps.filter(g => g.status === 'pending').length > 0 && (
+                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-400 text-slate-950 font-black ml-1">
+                                        {searchGaps.filter(g => g.status === 'pending').length}
+                                    </span>
+                                )}
+                            </button>
+                            <button
                                 onClick={handleExportCSV}
                                 disabled={isExporting}
                                 className="bg-slate-950 border border-indigo-800/80 text-cyan-300 hover:bg-indigo-950 px-4 py-2 rounded-xl font-bold flex items-center gap-1.5 transition-all text-xs shadow-md disabled:opacity-50 cursor-pointer"
@@ -991,6 +1023,142 @@ export default function GlossaryManager({ initialTerms = [], products = [] }: Gl
                 </div>
             )}
             </>
+            )}
+
+            {view === 'gaps' && (
+                <div className="space-y-6">
+                    <button
+                        onClick={() => { setView('list'); }}
+                        className="px-4 py-2 bg-slate-950 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold flex items-center gap-2 transition cursor-pointer"
+                    >
+                        <ArrowLeft size={16} /> Back to Glossary Terms List
+                    </button>
+
+                    <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl space-y-6 shadow-2xl">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                            <div>
+                                <h3 className="text-xl font-black text-slate-100 flex items-center gap-2 uppercase tracking-tight">
+                                    <HelpCircle className="text-amber-400" size={22} />
+                                    Glossary Gap Analysis & Missing Search Queries
+                                </h3>
+                                <p className="text-xs font-mono text-slate-400 mt-1">
+                                    Logged queries searched by users that returned 0 term results. Add high-demand terms directly into your glossary.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={loadSearchGaps}
+                                disabled={isLoadingGaps}
+                                className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-cyan-500 text-cyan-400 font-mono text-xs font-bold rounded-xl transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+                            >
+                                <RotateCcw size={14} className={isLoadingGaps ? "animate-spin" : ""} /> Refresh Gap Report
+                            </button>
+                        </div>
+
+                        {/* Gap Summary Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Total Missing Queries</span>
+                                <div className="text-2xl font-black text-amber-400 mt-1">{searchGaps.length}</div>
+                            </div>
+                            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Total User Search Volume</span>
+                                <div className="text-2xl font-black text-cyan-400 mt-1">
+                                    {searchGaps.reduce((acc, g) => acc + (g.searchCount || 0), 0)}
+                                </div>
+                            </div>
+                            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                                <span className="text-[10px] font-mono font-bold text-slate-400 uppercase">Pending Review</span>
+                                <div className="text-2xl font-black text-emerald-400 mt-1">
+                                    {searchGaps.filter(g => g.status === 'pending').length}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Gap Analysis Table */}
+                        {searchGaps.length === 0 ? (
+                            <div className="p-8 text-center bg-slate-950 rounded-2xl border border-slate-800/80 text-xs font-mono text-slate-400 italic">
+                                🎉 No missing search terms recorded yet! When users search for unlisted terms, they will appear here automatically.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto rounded-2xl border border-slate-800">
+                                <table className="w-full text-left text-xs font-sans">
+                                    <thead className="bg-slate-950 font-mono text-[10px] text-slate-400 uppercase border-b border-slate-800">
+                                        <tr>
+                                            <th className="px-6 py-4">Missing Search Query</th>
+                                            <th className="px-6 py-4">Search Demand</th>
+                                            <th className="px-6 py-4">Last Searched</th>
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-800/80 bg-slate-950/60 font-mono">
+                                        {searchGaps.map(gap => (
+                                            <tr key={gap._id || gap.query} className="hover:bg-slate-900/60 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-extrabold text-slate-100 text-sm capitalize">{gap.query}</div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="px-2.5 py-1 rounded-xl bg-amber-950 text-amber-300 border border-amber-800 font-extrabold text-xs">
+                                                        {gap.searchCount} {gap.searchCount === 1 ? 'search' : 'searches'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-slate-400 text-xs">
+                                                    {new Date(gap.lastSearchedAt || gap.updatedAt).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2.5 py-1 rounded-xl font-bold text-[10px] uppercase ${
+                                                        gap.status === 'created' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
+                                                        gap.status === 'dismissed' ? 'bg-slate-900 text-slate-500 border border-slate-800' :
+                                                        'bg-amber-950 text-amber-400 border border-amber-800'
+                                                    }`}>
+                                                        {gap.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingTerm({ term: gap.query.charAt(0).toUpperCase() + gap.query.slice(1) } as any);
+                                                                setView('create');
+                                                                updateSearchGapStatus(gap._id, 'created');
+                                                            }}
+                                                            className="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-[10px] uppercase rounded-xl transition-all flex items-center gap-1 shadow-md cursor-pointer"
+                                                        >
+                                                            <Plus size={13} /> Create Term
+                                                        </button>
+                                                        {gap.status !== 'dismissed' && (
+                                                            <button
+                                                                onClick={async () => {
+                                                                    await updateSearchGapStatus(gap._id, 'dismissed');
+                                                                    loadSearchGaps();
+                                                                }}
+                                                                className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 font-bold text-[10px] uppercase rounded-xl transition-colors cursor-pointer"
+                                                            >
+                                                                Dismiss
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={async () => {
+                                                                if (!confirm(`Delete missing query "${gap.query}"?`)) return;
+                                                                await deleteSearchGap(gap._id);
+                                                                loadSearchGaps();
+                                                            }}
+                                                            className="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl transition-colors cursor-pointer"
+                                                            title="Delete Gap Query"
+                                                        >
+                                                            <Trash size={13} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
 
             {(view === 'create' || view === 'edit') && (
