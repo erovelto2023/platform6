@@ -629,8 +629,130 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                             value={formData.videoUrl || ""}
                             onChange={e => handleChange("videoUrl", e.target.value)}
                             className={inputClass}
-                            placeholder="https://www.youtube.com/watch?v=..."
+                            placeholder="https://youtu.be/8z5t3dRqOxo"
                         />
+                        <p className="text-[10px] text-slate-400 font-mono mt-1">
+                            Leave blank to use default placeholder video (https://youtu.be/8z5t3dRqOxo).
+                        </p>
+                    </div>
+
+                    {/* Deep Content Pathways & Conversion Funnels Editor */}
+                    <div className="col-span-full pt-4 border-t border-slate-800 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h4 className="font-mono font-bold text-cyan-400 text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <Rocket size={16} /> Deep Content Pathways & Conversion Funnels
+                                </h4>
+                                <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                                    Link high-converting blog posts, strategy guides, or affiliate funnels. Defaults to https://kbusinessacademy.com/blog if empty.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const current = formData.deepPathways || [];
+                                    handleChange("deepPathways", [
+                                        ...current,
+                                        {
+                                            title: "Comprehensive Strategy Guide",
+                                            url: "https://kbusinessacademy.com/blog",
+                                            type: "blog",
+                                            description: "Read step-by-step strategy guides on the KBusiness Academy Blog."
+                                        }
+                                    ]);
+                                }}
+                                className="px-3 py-1.5 bg-cyan-950 border border-cyan-800 hover:bg-cyan-900 text-cyan-300 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
+                            >
+                                + Add Default Blog Pathway
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {(formData.deepPathways || []).map((pathway, idx) => (
+                                <div key={idx} className="p-4 bg-slate-900 border border-slate-800 rounded-2xl space-y-3 relative group">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const updated = (formData.deepPathways || []).filter((_, i) => i !== idx);
+                                            handleChange("deepPathways", updated);
+                                        }}
+                                        className="absolute right-3 top-3 text-slate-500 hover:text-rose-400 font-mono text-xs"
+                                    >
+                                        Remove ×
+                                    </button>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="sm:col-span-2">
+                                            <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block mb-1">Pathway Title</label>
+                                            <input
+                                                type="text"
+                                                value={pathway.title || ""}
+                                                onChange={e => {
+                                                    const updated = [...(formData.deepPathways || [])];
+                                                    updated[idx] = { ...updated[idx], title: e.target.value };
+                                                    handleChange("deepPathways", updated);
+                                                }}
+                                                className={inputClass}
+                                                placeholder="e.g. Master Guide to CRO"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block mb-1">Pathway Type</label>
+                                            <select
+                                                value={pathway.type || "blog"}
+                                                onChange={e => {
+                                                    const updated = [...(formData.deepPathways || [])];
+                                                    updated[idx] = { ...updated[idx], type: e.target.value as any };
+                                                    handleChange("deepPathways", updated);
+                                                }}
+                                                className={inputClass}
+                                            >
+                                                <option value="blog">Blog Guide</option>
+                                                <option value="tool">Software Tool</option>
+                                                <option value="product">Digital Product</option>
+                                                <option value="conversion">Conversion Funnel</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block mb-1">URL Link</label>
+                                        <input
+                                            type="text"
+                                            value={pathway.url || ""}
+                                            onChange={e => {
+                                                const updated = [...(formData.deepPathways || [])];
+                                                updated[idx] = { ...updated[idx], url: e.target.value };
+                                                handleChange("deepPathways", updated);
+                                            }}
+                                            className={inputClass}
+                                            placeholder="https://kbusinessacademy.com/blog"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-mono font-bold uppercase text-slate-400 block mb-1">Description</label>
+                                        <input
+                                            type="text"
+                                            value={pathway.description || ""}
+                                            onChange={e => {
+                                                const updated = [...(formData.deepPathways || [])];
+                                                updated[idx] = { ...updated[idx], description: e.target.value };
+                                                handleChange("deepPathways", updated);
+                                            }}
+                                            className={inputClass}
+                                            placeholder="Short description of where this pathway leads..."
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            {(formData.deepPathways || []).length === 0 && (
+                                <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl text-center text-xs font-mono text-slate-500 italic">
+                                    No custom pathways added. Will default to https://kbusinessacademy.com/blog on the public term page.
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="col-span-full">

@@ -143,14 +143,72 @@ export default async function GlossaryTermPage({ params }: Props) {
         { label: serializedTerm.term, href: `/glossary/${serializedTerm.slug}` }
     ];
 
+    // --- Semantic Connections & Relationships Check against allTerms Database ---
+    const verifiedParentTermSlug = (serializedTerm.parentTermSlug && serializedAllTerms.some((t: any) => t.slug === serializedTerm.parentTermSlug))
+        ? serializedTerm.parentTermSlug
+        : undefined;
+
+    const verifiedChildTermSlugs = (serializedTerm.childTermSlugs || []).filter((childSlug: string) =>
+        serializedAllTerms.some((t: any) => t.slug === childSlug)
+    );
+
+    const verifiedRelatedTerms = (serializedAllTerms || []).filter((t: any) =>
+        t.slug !== slug &&
+        t.category === primaryCategory &&
+        ((serializedTerm.relatedTermIds || []).includes(t.id) || (serializedTerm.relatedTermIds || []).includes(t.slug))
+    );
+
+    // --- Video URL Resolution with Default Placeholder ---
+    const DEFAULT_VIDEO_URL = "https://youtu.be/8z5t3dRqOxo";
+    const effectiveVideoUrl = serializedTerm.videoUrl && serializedTerm.videoUrl.trim() !== ""
+        ? serializedTerm.videoUrl
+        : DEFAULT_VIDEO_URL;
+
     let youtubeEmbedUrl = null;
-    if (serializedTerm.videoUrl && serializedTerm.videoUrl.includes('youtube.com/watch?v=')) {
-        const videoId = serializedTerm.videoUrl.split('v=')[1]?.split('&')[0];
+    if (effectiveVideoUrl && effectiveVideoUrl.includes('youtube.com/watch?v=')) {
+        const videoId = effectiveVideoUrl.split('v=')[1]?.split('&')[0];
         if (videoId) youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
-    } else if (serializedTerm.videoUrl && serializedTerm.videoUrl.includes('youtu.be/')) {
-        const videoId = serializedTerm.videoUrl.split('youtu.be/')[1]?.split('?')[0];
+    } else if (effectiveVideoUrl && effectiveVideoUrl.includes('youtu.be/')) {
+        const videoId = effectiveVideoUrl.split('youtu.be/')[1]?.split('?')[0];
         if (videoId) youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
     }
+
+    // --- Deep Content Pathways Fallback to Blog ---
+    const effectiveDeepPathways = (serializedTerm.deepPathways && serializedTerm.deepPathways.length > 0)
+        ? serializedTerm.deepPathways
+        : [
+            {
+                title: "Comprehensive Strategy & Execution Guide",
+                url: "https://kbusinessacademy.com/blog",
+                type: "blog",
+                description: "Explore in-depth business strategy, traffic, and monetization guides on the KBusiness Academy blog."
+            }
+        ];
+
+    // --- Resolve Attached Tools & Products ---
+    const attachedToolsFromDb = (serializedTerm.recommendedTools || []).map((tool: any) => {
+        const matchedProduct = products.find((p: any) => p.id === tool.productId);
+        return matchedProduct ? {
+            name: matchedProduct.name,
+            category: matchedProduct.category || matchedProduct.niche || 'Directory Product',
+            link: matchedProduct.affiliateLink || `/catalog/${matchedProduct.slug || matchedProduct.id}`,
+            description: tool.context || matchedProduct.shortDescription || `${matchedProduct.name} software tool`
+        } : {
+            name: tool.context || `Tool #${tool.productId}`,
+            category: 'Directory Tool',
+            link: '/catalog',
+            description: tool.context || 'Recommended Resource'
+        };
+    });
+
+    const attachedAmazonProducts = (serializedTerm.amazonProducts || []).map((p: any) => ({
+        name: p.name,
+        category: 'Affiliate Catalog / Resource',
+        link: p.url,
+        description: p.description || `${p.name} recommended tool`
+    }));
+
+    const allAttachedResources = [...attachedToolsFromDb, ...attachedAmazonProducts];
 
     return (
         <>
@@ -244,9 +302,9 @@ export default async function GlossaryTermPage({ params }: Props) {
                             currentTerm={serializedTerm.term}
                             currentSlug={serializedTerm.slug}
                             category={primaryCategory}
-                            parentTermSlug={serializedTerm.parentTermSlug}
-                            parentTermName={serializedAllTerms.find((t: any) => t.slug === serializedTerm.parentTermSlug)?.term || serializedTerm.parentTermSlug}
-                            relatedTerms={serializedAllTerms.filter((t: any) => t.category === primaryCategory && t.slug !== serializedTerm.slug)}
+                            parentTermSlug={verifiedParentTermSlug}
+                            parentTermName={serializedAllTerms.find((t: any) => t.slug === verifiedParentTermSlug)?.term || verifiedParentTermSlug}
+                            relatedTerms={verifiedRelatedTerms.length > 0 ? verifiedRelatedTerms : serializedAllTerms.filter((t: any) => t.category === primaryCategory && t.slug !== serializedTerm.slug).slice(0, 5)}
                             recommendedTools={serializedTerm.recommendedTools}
                         />
 
@@ -361,17 +419,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 <Rocket size={16} /> Deep Content Pathways & Conversion Funnels
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                {(serializedTerm.deepPathways && serializedTerm.deepPathways.length > 0
-                                    ? serializedTerm.deepPathways
-                                    : [
-                                        {
-                                            title: `${serializedTerm.term} Master Strategy Guide`,
-                                            url: "/glossary",
-                                            type: "blog",
-                                            description: `Comprehensive step-by-step masterclass on implementing ${serializedTerm.term}.`
-                                        }
-                                      ]
-                                ).map((pathway: any, idx: number) => (
+                                {effectiveDeepPathways.map((pathway: any, idx: number) => (
                                     <a
                                         key={idx}
                                         href={pathway.url}
@@ -695,6 +743,46 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Dedicated Attached Recommended Resources & Tools Section */}
+                        {allAttachedResources.length > 0 && (
+                            <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-xl space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                        <Wrench className="text-cyan-400" size={20} /> Attached Resources & Tools ({allAttachedResources.length})
+                                    </h3>
+                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">
+                                        Verified Term Database Selection
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-400 font-sans">
+                                    The following tools and resources have been specifically selected and attached to {serializedTerm.term}:
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    {allAttachedResources.map((res: any, idx: number) => (
+                                        <div key={idx} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/80 rounded-2xl flex flex-col justify-between transition-all group">
+                                            <div>
+                                                <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md inline-block mb-2">
+                                                    {res.category}
+                                                </span>
+                                                <h4 className="font-extrabold text-slate-100 group-hover:text-cyan-300 text-sm">{res.name}</h4>
+                                                <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed line-clamp-2">{res.description}</p>
+                                            </div>
+                                            {res.link && (
+                                                <a
+                                                    href={res.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-3 inline-flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
+                                                >
+                                                    Access Tool / Offer <ExternalLink size={12} />
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Content Creator Assets (ALWAYS RENDERED) */}
                         <div className="pt-8 border-t border-slate-800 space-y-6">

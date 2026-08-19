@@ -315,10 +315,22 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
                         }
                     });
 
+                    const defaultVideoUrl = item.videoUrl && item.videoUrl.trim() !== "" ? item.videoUrl : "https://youtu.be/8z5t3dRqOxo";
+                    const defaultPathways = (item.deepPathways && item.deepPathways.length > 0) ? item.deepPathways : [
+                        {
+                            title: "Comprehensive Strategy Guide",
+                            url: "https://kbusinessacademy.com/blog",
+                            type: "blog",
+                            description: "Read in-depth strategy and execution guides on the KBusiness Academy blog."
+                        }
+                    ];
+
                     return {
                         ...item,
                         recommendedTools: currentTools,
-                        amazonProducts: currentAmazon
+                        amazonProducts: currentAmazon,
+                        videoUrl: defaultVideoUrl,
+                        deepPathways: defaultPathways
                     };
                 });
             }
