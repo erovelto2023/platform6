@@ -99,7 +99,7 @@ export interface IGlossaryTerm {
     youtubeTitles?: string[];
     pinterestIdeas?: string[];
     instagramIdeas?: string[];
-    amazonProducts?: { name: string; url?: string }[];
+    amazonProducts?: { name: string; url?: string; description?: string }[];
     websitesRanking?: { name: string; url?: string }[];
     podcastsRanking?: { name: string; url?: string }[];
 
@@ -230,7 +230,7 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     youtubeTitles: [String],
     pinterestIdeas: [String],
     instagramIdeas: [String],
-    amazonProducts: [{ name: String, url: String }],
+    amazonProducts: [{ name: String, url: String, description: String }],
     websitesRanking: [{ name: String, url: String }],
     podcastsRanking: [{ name: String, url: String }],
 
