@@ -379,6 +379,46 @@ export default async function GlossaryTermPage({ params }: Props) {
                             )}
                         </div>
 
+                        {/* Dedicated Attached Recommended Resources & Tools Section (Directly under YouTube Video) */}
+                        {allAttachedResources.length > 0 && (
+                            <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-xl space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                        <Wrench className="text-cyan-400" size={20} /> Attached Resources & Tools ({allAttachedResources.length})
+                                    </h3>
+                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">
+                                        Verified Term Database Selection
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-400 font-sans">
+                                    The following tools and resources have been specifically selected and attached to {serializedTerm.term}:
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    {allAttachedResources.map((res: any, idx: number) => (
+                                        <div key={idx} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/80 rounded-2xl flex flex-col justify-between transition-all group">
+                                            <div>
+                                                <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md inline-block mb-2">
+                                                    {res.category}
+                                                </span>
+                                                <h4 className="font-extrabold text-slate-100 group-hover:text-cyan-300 text-sm">{res.name}</h4>
+                                                <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed line-clamp-2">{res.description}</p>
+                                            </div>
+                                            {res.link && (
+                                                <a
+                                                    href={res.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-3 inline-flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
+                                                >
+                                                    Access Tool / Offer <ExternalLink size={12} />
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Real-World Business Scenario & ROI Impact (ALWAYS RENDERED) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
@@ -744,45 +784,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         </div>
 
-                        {/* Dedicated Attached Recommended Resources & Tools Section */}
-                        {allAttachedResources.length > 0 && (
-                            <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-xl space-y-4">
-                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                    <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                        <Wrench className="text-cyan-400" size={20} /> Attached Resources & Tools ({allAttachedResources.length})
-                                    </h3>
-                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">
-                                        Verified Term Database Selection
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-400 font-sans">
-                                    The following tools and resources have been specifically selected and attached to {serializedTerm.term}:
-                                </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    {allAttachedResources.map((res: any, idx: number) => (
-                                        <div key={idx} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/80 rounded-2xl flex flex-col justify-between transition-all group">
-                                            <div>
-                                                <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md inline-block mb-2">
-                                                    {res.category}
-                                                </span>
-                                                <h4 className="font-extrabold text-slate-100 group-hover:text-cyan-300 text-sm">{res.name}</h4>
-                                                <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed line-clamp-2">{res.description}</p>
-                                            </div>
-                                            {res.link && (
-                                                <a
-                                                    href={res.link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-3 inline-flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
-                                                >
-                                                    Access Tool / Offer <ExternalLink size={12} />
-                                                </a>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
 
                         {/* Content Creator Assets (ALWAYS RENDERED) */}
                         <div className="pt-8 border-t border-slate-800 space-y-6">
