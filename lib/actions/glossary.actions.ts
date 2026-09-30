@@ -62,16 +62,52 @@ export async function getNiches() {
     }
 }
 
-// Coerce string values in object-array fields to {name, url} shape
-function normalizeObjectArrayFields(term: any) {
+// Normalize and coerce field types to prevent Mongoose validation cast errors
+function normalizeGlossaryTermFields(term: any) {
+    if (!term || typeof term !== 'object') return term;
+
+    // 1. Convert Arrays to String for single string schema fields
+    const stringFields = [
+        'benefits', 'commonPractices', 'useCases', 'whoUsesIt',
+        'misconceptions', 'commonMistakes', 'warningsOrNotes', 'howItWorks',
+        'origin', 'traditionalMeaning', 'modernUsage', 'expandedExplanation',
+        'beginnerExplanation', 'advancedPerspective', 'howItMakesMoney',
+        'bestFor', 'whyItMatters', 'shortDefinition', 'definition', 'aeoSummary',
+        'articleTitle', 'articleContent', 'videoUrl'
+    ];
+
+    for (const field of stringFields) {
+        if (Array.isArray(term[field])) {
+            term[field] = term[field].map((item: any) => String(item).trim()).filter(Boolean).join('. ');
+        }
+    }
+
+    // 2. Convert Strings to Array for array schema fields
+    const arrayFields = [
+        'takeaways', 'gettingStartedChecklist', 'synonyms', 'keywords', 'tags',
+        'headlines', 'youtubeTitles', 'pinterestIdeas', 'instagramIdeas',
+        'antonyms', 'oppositeTerms', 'seeAlso', 'childTermSlugs'
+    ];
+
+    for (const field of arrayFields) {
+        if (typeof term[field] === 'string') {
+            const raw = term[field].trim();
+            term[field] = raw ? raw.split(/[\n,;]+/).map((s: string) => s.trim()).filter(Boolean) : [];
+        }
+    }
+
+    // 3. Coerce string values in object-array fields to {name, url} shape
     const objectArrayFields = ['amazonProducts', 'websitesRanking', 'podcastsRanking'];
     for (const field of objectArrayFields) {
         if (Array.isArray(term[field])) {
             term[field] = term[field].map((item: any) =>
                 typeof item === 'string' ? { name: item, url: '' } : item
             );
+        } else if (typeof term[field] === 'string' && term[field].trim() !== '') {
+            term[field] = [{ name: term[field].trim(), url: '' }];
         }
     }
+
     return term;
 }
 
@@ -87,7 +123,7 @@ export async function bulkCreateGlossaryTerms(terms: any[]) {
             const baseSlug = slugify(term.term || term.id);
             const slug = makeUniqueSlug(baseSlug, existingSlugs);
             existingSlugs.push(slug);
-            const normalized = normalizeObjectArrayFields({ ...term });
+            const normalized = normalizeGlossaryTermFields({ ...term });
             return {
                 ...normalized,
                 id: term.id || `g-bulk-${Date.now()}-${index}`,
@@ -122,8 +158,10 @@ export async function createGlossaryTerm(data: any) {
             slug = makeUniqueSlug(baseSlug, existingSlugs);
         }
 
+        const normalizedData = normalizeGlossaryTermFields({ ...data });
+
         const newTerm = await GlossaryTerm.create({
-            ...data,
+            ...normalizedData,
             id: nextId,
             slug
         });
@@ -148,7 +186,9 @@ export async function updateGlossaryTerm(data: any) {
             data.slug = makeUniqueSlug(baseSlug, existingSlugs);
         }
 
-        await GlossaryTerm.findOneAndUpdate({ id: data.id }, data);
+        const normalizedData = normalizeGlossaryTermFields({ ...data });
+
+        await GlossaryTerm.findOneAndUpdate({ id: data.id }, normalizedData);
         revalidatePath('/admin/glossary');
         return { success: true };
     } catch (error: any) {
