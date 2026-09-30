@@ -21,7 +21,7 @@ export async function getGlossaryTerms(options: { limit?: number; niche?: string
         } else if (options.summaryOnly) {
             dbQuery = dbQuery.select({
                 id: 1, term: 1, slug: 1, category: 1, subCategory: 1, entityType: 1,
-                shortDefinition: 1, aeoSummary: 1, definition: 1,
+                shortDefinition: 1, aeoSummary: 1, definition: 1, articleTitle: 1, articleContent: 1,
                 imageUrl: 1, videoUrl: 1, amazonProducts: 1, recommendedTools: 1,
                 websitesRanking: 1, podcastsRanking: 1, caseStudies: 1,
                 youtubeTitles: 1, pinterestIdeas: 1, instagramIdeas: 1,

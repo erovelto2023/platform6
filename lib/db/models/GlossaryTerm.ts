@@ -103,6 +103,10 @@ export interface IGlossaryTerm {
     websitesRanking?: { name: string; url?: string }[];
     podcastsRanking?: { name: string; url?: string }[];
 
+    // --- Featured In-Depth Article ---
+    articleTitle?: string;       // Custom title for full article
+    articleContent?: string;     // In-depth long-form editorial article content (Markdown/HTML)
+    
     keywords?: string[];
     tags?: string[];         // Freeform tags for tag cloud
     searchIntent?: string;
@@ -233,6 +237,10 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     amazonProducts: [{ name: String, url: String, description: String }],
     websitesRanking: [{ name: String, url: String }],
     podcastsRanking: [{ name: String, url: String }],
+
+    // Featured In-Depth Article
+    articleTitle: { type: String },
+    articleContent: { type: String },
 
     keywords: [String],
     tags: [String],

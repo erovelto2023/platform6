@@ -90,6 +90,7 @@ CRITICAL URL & PRODUCT GUIDELINES:
 2. DO NOT HALLUCINATE OR PROTECT: Do not use "example.com", "yoursite.com", "test.com", "yoursocial.com", or any other placeholder domain. 
 3. EMPTY IS BETTER THAN FAKE: If you cannot find a verified, live URL for an item, leave the "url" field as an empty string ("") or omit the item entirely.
 4. RECOMMENDED TOOLS & PRODUCTS: You can link database product IDs in "recommendedTools": [{"productId": 101, "context": "Best for sales funnels"}].
+5. IN-DEPTH MASTERCLASS ARTICLE: For "articleContent", write a complete, publication-ready 1,000 to 5,000 word masterclass article using Markdown headers (## Section, ### Sub-section), bold key takeaways, numbered execution steps, real-world monetization blueprints, and actionable advice.
 
 The JSON MUST conform precisely to this schema structure and nothing else. Output ONLY the JSON array inside a standard code block, do not include any conversational text:
 
@@ -104,6 +105,26 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "aeoSummary": "Direct, fact-dense 50-word answer optimized for AI search engine citations (ChatGPT/SearchGPT/Perplexity).",
     "entityType": "Must be one of: 'Core Concept', 'Performance Metric', 'Revenue System', or 'Traffic Channel'",
     "parentTermSlug": "",
+    "questionVariations": [
+      {
+        "question": "What is the most effective way to start with [Keyword]?",
+        "intentType": "Problem-Solving",
+        "targetAnswer": "Direct, actionable answer answering this problem query."
+      }
+    ],
+    "realWorldScenario": {
+      "context": "Practical operational execution scenario for this term in digital business.",
+      "stepByStep": ["Step 1: Baseline evaluation", "Step 2: Workflow setup", "Step 3: Optimization"],
+      "citableMetric": "+34% Operational ROI Lift (Benchmark)"
+    },
+    "deepPathways": [
+      {
+        "title": "[Keyword] Masterclass",
+        "url": "/catalog",
+        "type": "conversion",
+        "description": "Enroll in step-by-step video training."
+      }
+    ],
     "recommendedTools": [
       {"productId": 1, "context": "Best for automated sales funnels"}
     ],
@@ -165,6 +186,8 @@ The JSON MUST conform precisely to this schema structure and nothing else. Outpu
     "imagePrompt": "Detailed AI image prompt for Midjourney/DALL-E capturing the essence of this keyword.",
     "productPrompt": "AI prompt to help the user brainstorm a digital/physical product for this keyword.",
     "socialPrompt": "AI prompt to generate a viral social media content strategy for this keyword.",
+    "articleTitle": "Master Guide: How to Scale & Monetize [Keyword]",
+    "articleContent": "Write a complete, publication-ready 1,000 to 5,000 word masterclass editorial article formatted with Markdown headers (## Section, ### Sub-section), bold key takeaways, numbered execution steps, real-world monetization blueprints, and actionable advice.",
     "isFeatured": false,
     "status": "Published"
   }

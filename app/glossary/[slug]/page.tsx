@@ -6,7 +6,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { 
     ArrowLeft, Calculator, Lightbulb, Bookmark, Share2, Info, ExternalLink, Heart, Rocket, ChevronRight,
-    Video as Youtube, Camera as Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, TriangleAlert as AlertTriangle, Star, CircleCheck as CheckCircle2, Zap, CirclePlay as PlayCircle, BookOpen, Quote, CircleHelp as HelpCircle, History, Users, SquareCheck as CheckSquare, Briefcase, Sparkles, Clock, TrendingUp, Wrench, Layers, Network, Cpu, ShieldCheck, Tag, FileText
+    Video as Youtube, Camera as Instagram, ShoppingBag, Globe, Podcast, LayoutList, Target, TriangleAlert as AlertTriangle, Star, CircleCheck as CheckCircle2, Zap, CirclePlay as PlayCircle, BookOpen, Quote, CircleHelp as HelpCircle, History, Users, SquareCheck as CheckSquare, Briefcase, Sparkles, Clock, TrendingUp, Wrench, Layers, Network, Cpu, ShieldCheck, Tag, FileText, Download, FileSpreadsheet, Check, XCircle
 } from "lucide-react";
 import { getUserRole } from "@/lib/roles";
 import GlossaryActions from "@/components/glossary/GlossaryActions";
@@ -175,10 +175,16 @@ export default async function GlossaryTermPage({ params }: Props) {
         if (videoId) youtubeEmbedUrl = `https://www.youtube.com/embed/${videoId}`;
     }
 
-    // --- Deep Content Pathways Fallback to Blog ---
+    // --- Deep Content Pathways Fallback to Course & Blog ---
     const effectiveDeepPathways = (serializedTerm.deepPathways && serializedTerm.deepPathways.length > 0)
         ? serializedTerm.deepPathways
         : [
+            {
+                title: `${serializedTerm.term} Academy Masterclass`,
+                url: "/catalog",
+                type: "course",
+                description: `Enroll in step-by-step video training and execution blueprints for ${serializedTerm.term}.`
+            },
             {
                 title: "Comprehensive Strategy & Execution Guide",
                 url: "https://kbusinessacademy.com/blog",
@@ -278,6 +284,9 @@ export default async function GlossaryTermPage({ params }: Props) {
                         {/* Term Header & Meta */}
                         <div>
                             <div className="flex items-center flex-wrap gap-2 mb-4 font-mono text-xs">
+                                <span className="px-3 py-1 rounded-xl text-cyan-400 bg-cyan-950/80 border border-cyan-800/80 uppercase font-extrabold tracking-wider">
+                                    Phase 1 • Above The Fold
+                                </span>
                                 {categoriesList.map((cat, i) => (
                                     <Link 
                                         key={i} 
@@ -322,18 +331,53 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         </div>
 
+                        {/* Featured Course & Training Masterclass Banner */}
+                        <div className="p-8 bg-gradient-to-r from-slate-900 via-indigo-950/80 to-slate-900 border border-indigo-500/40 rounded-3xl shadow-2xl space-y-4 relative overflow-hidden">
+                            <div className="flex items-center justify-between border-b border-indigo-900/50 pb-3">
+                                <div className="flex items-center gap-2 text-indigo-400 font-mono font-bold text-xs uppercase tracking-wider">
+                                    <BookOpen size={16} /> Official Academy Course & Certification
+                                </div>
+                                <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/90 px-3 py-1 rounded-full border border-emerald-800 uppercase">
+                                    Instant Access
+                                </span>
+                            </div>
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div className="space-y-1">
+                                    <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tight">
+                                        Master {serializedTerm.term} & Monetization
+                                    </h3>
+                                    <p className="text-xs md:text-sm text-slate-300 font-sans leading-relaxed max-w-xl">
+                                        Turn this concept into a automated revenue stream. Access our step-by-step video curriculum, launch templates, and monetization blueprints.
+                                    </p>
+                                </div>
+                                <Link 
+                                    href="/catalog" 
+                                    className="shrink-0 px-6 py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
+                                >
+                                    <span>Browse Courses</span>
+                                    <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </div>
+
                         {/* Video Masterclass (Moved directly below AEO Direct Answer Snippet) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                <PlayCircle className="text-cyan-400" size={20} /> Video Masterclass
-                            </h3>
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                    <PlayCircle className="text-cyan-400" size={20} /> 5. Video Masterclass
+                                </h3>
+                                <span className="text-xs font-mono text-slate-400 font-bold">[EMBED VIDEO: URL]</span>
+                            </div>
+                            <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                                Watch this step-by-step masterclass explaining practical execution principles, key workflow setups, and monetization mechanics for {serializedTerm.term}.
+                            </p>
                             {youtubeEmbedUrl ? (
                                 <div className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-slate-800 bg-slate-950">
                                     <iframe 
                                         width="100%" 
                                         height="100%" 
                                         src={youtubeEmbedUrl} 
-                                        title="YouTube video player" 
+                                        title={`Video Masterclass: ${serializedTerm.term}`}
                                         frameBorder="0" 
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                                         allowFullScreen
@@ -345,110 +389,20 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     <span>Video masterclass for {serializedTerm.term} is currently scheduled for production.</span>
                                 </div>
                             )}
-                        </div>
-
-                        {/* Dedicated Attached Recommended Resources & Tools Section (Directly under YouTube Video) */}
-                        {allAttachedResources.length > 0 && (
-                            <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-xl space-y-4">
-                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                    <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                        <Wrench className="text-cyan-400" size={20} /> Attached Resources & Tools ({allAttachedResources.length})
-                                    </h3>
-                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">
-                                        Verified Term Database Selection
-                                    </span>
-                                </div>
-                                <p className="text-xs text-slate-400 font-sans">
-                                    The following tools and resources have been specifically selected and attached to {serializedTerm.term}:
-                                </p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                    {allAttachedResources.map((res: any, idx: number) => (
-                                        <div key={idx} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/80 rounded-2xl flex flex-col justify-between transition-all group">
-                                            <div>
-                                                <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md inline-block mb-2">
-                                                    {res.category}
-                                                </span>
-                                                <h4 className="font-extrabold text-slate-100 group-hover:text-cyan-300 text-sm">{res.name}</h4>
-                                                <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed line-clamp-2">{res.description}</p>
-                                            </div>
-                                            {res.link && (
-                                                <a
-                                                    href={res.link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-3 inline-flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
-                                                >
-                                                    Access Tool / Offer <ExternalLink size={12} />
-                                                </a>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Real-World Business Scenario & ROI Impact (ALWAYS RENDERED) */}
-                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <div className="flex items-center gap-2 text-emerald-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
-                                <Target size={16} /> Real-World Execution Scenario & ROI Impact
-                            </div>
-                            <p className="text-sm font-sans text-slate-300 italic">
-                                {serializedTerm.realWorldScenario?.context || `Operational execution scenario for ${serializedTerm.term} in digital business.`}
-                            </p>
-                            <div className="space-y-3 pt-2">
-                                <h4 className="text-xs font-mono font-bold uppercase text-slate-400">Step-by-Step Execution Roadmap:</h4>
-                                <ol className="space-y-2 font-sans text-sm text-slate-200">
-                                    {(serializedTerm.realWorldScenario?.stepByStep && serializedTerm.realWorldScenario.stepByStep.length > 0
-                                        ? serializedTerm.realWorldScenario.stepByStep
-                                        : [
-                                            `Step 1: Perform baseline evaluation of ${serializedTerm.term} parameters`,
-                                            `Step 2: Deploy recommended tools and strategic workflows`,
-                                            `Step 3: Monitor conversion lift and optimize operational performance`
-                                          ]
-                                    ).map((step: string, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
-                                            <span className="w-5 h-5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800 flex items-center justify-center text-[10px] font-bold shrink-0">{idx + 1}</span>
-                                            <span>{step}</span>
-                                        </li>
-                                    ))}
-                                </ol>
-                            </div>
-                            <div className="mt-4 p-4 bg-slate-950 border border-emerald-800/80 rounded-2xl flex items-center justify-between text-xs font-mono">
-                                <span className="text-slate-400">Citable Performance Metric:</span>
-                                <span className="text-emerald-400 font-bold">
-                                    {serializedTerm.realWorldScenario?.citableMetric || "+34% Operational ROI Lift (Benchmark)"}
-                                </span>
+                            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center gap-2">
+                                <FileText size={14} className="text-cyan-400 shrink-0" />
+                                <span>Note: A complete verbatim audio transcript and downloadable timestamp guide are included for offline reading.</span>
                             </div>
                         </div>
 
-                        {/* Deep Content Pathways & Conversion Funnels (ALWAYS RENDERED) */}
-                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <div className="flex items-center gap-2 text-purple-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
-                                <Rocket size={16} /> Deep Content Pathways & Conversion Funnels
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                {effectiveDeepPathways.map((pathway: any, idx: number) => (
-                                    <a
-                                        key={idx}
-                                        href={pathway.url}
-                                        className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500 rounded-2xl flex flex-col justify-between group transition-all"
-                                    >
-                                        <div>
-                                            <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg inline-block mb-2">
-                                                {pathway.type || "conversion"}
-                                            </span>
-                                            <h4 className="font-bold text-slate-100 group-hover:text-cyan-300 text-sm">{pathway.title}</h4>
-                                            <p className="text-xs text-slate-400 font-sans mt-1 line-clamp-2">{pathway.description || "Actionable pathway to execution."}</p>
-                                        </div>
-                                        <div className="mt-4 flex items-center justify-end text-xs font-mono text-cyan-400 gap-1">
-                                            Explore Pathway <ExternalLink size={12} />
-                                        </div>
-                                    </a>
-                                ))}
-                            </div>
+                        {/* Phase 2 • Core Understanding */}
+                        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span className="text-xs font-mono font-extrabold uppercase text-indigo-400 tracking-wider bg-indigo-950/80 border border-indigo-800/80 px-3 py-1 rounded-xl">
+                                Phase 2 • Core Understanding
+                            </span>
                         </div>
 
-                        {/* User Intent Variations Accordion (ALWAYS RENDERED) */}
+                        {/* User Intent Variations Accordion (AEO Accordion) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <div className="flex items-center gap-2 text-cyan-400 font-mono font-bold text-xs uppercase tracking-wider border-b border-slate-800 pb-3">
                                 <HelpCircle size={16} /> User Intent & Problem Query Variations (AEO Accordion)
@@ -485,29 +439,7 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         </div>
 
-                        {/* In-Depth Technical Analysis (ALWAYS RENDERED) */}
-                        <div className="space-y-6 pt-4">
-                            <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
-                                <BookOpen size={20} className="text-cyan-400" />
-                                Detailed Technical Analysis
-                            </h2>
-                            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl font-sans text-base leading-relaxed text-slate-200">
-                                <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.definition, termMap)} />
-                            </div>
-                        </div>
-
-                        {/* Deeper Conceptual Dive / Expanded History (ALWAYS RENDERED) */}
-                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                <Sparkles className="text-cyan-400" size={20} />
-                                Deeper Conceptual Dive
-                            </h3>
-                            <div className="text-sm font-sans leading-relaxed text-slate-300">
-                                <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.expandedExplanation || `Expanded conceptual analysis and historical context for ${serializedTerm.term} are currently being indexed by our editorial team.`, termMap)} />
-                            </div>
-                        </div>
-
-                        {/* History, Origins & Traditional Context (ALWAYS RENDERED) */}
+                        {/* History, Origins & Context */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                                 <History className="text-cyan-400" size={20} />
@@ -527,6 +459,24 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Deeper Conceptual Dive */}
+                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
+                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                <Sparkles className="text-cyan-400" size={20} />
+                                Deeper Conceptual Dive
+                            </h3>
+                            <div className="text-sm font-sans leading-relaxed text-slate-300">
+                                <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.expandedExplanation || `Expanded conceptual analysis and historical context for ${serializedTerm.term} are currently being indexed by our editorial team.`, termMap)} />
+                            </div>
+                        </div>
+
+                        {/* Phase 3 • Practical Application & Proof */}
+                        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span className="text-xs font-mono font-extrabold uppercase text-emerald-400 tracking-wider bg-emerald-950/80 border border-emerald-800/80 px-3 py-1 rounded-xl">
+                                Phase 3 • Practical Application & Proof
+                            </span>
                         </div>
 
                         {/* How It Works & Monetization Mechanics (ALWAYS RENDERED) */}
@@ -668,12 +618,24 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         </div>
 
-                        {/* Getting Started Action Checklist (ALWAYS RENDERED) */}
-                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
-                            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                <CheckSquare className="text-cyan-400" size={20} />
-                                Getting Started Action Checklist
-                            </h3>
+                        {/* Phase 4 • Action & Implementation */}
+                        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span className="text-xs font-mono font-extrabold uppercase text-amber-400 tracking-wider bg-amber-950/80 border border-amber-800/80 px-3 py-1 rounded-xl">
+                                Phase 4 • Action & Implementation
+                            </span>
+                        </div>
+
+                        {/* Getting Started Action Checklist & Lead Magnet Download */}
+                        <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-6">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                    <CheckSquare className="text-cyan-400" size={20} />
+                                    Getting Started Action Checklist
+                                </h3>
+                                <span className="text-[10px] font-mono font-bold text-amber-400 bg-amber-950 px-2.5 py-1 rounded-md border border-amber-800 uppercase">
+                                    Action Plan
+                                </span>
+                            </div>
                             <div className="space-y-2.5 font-sans text-sm">
                                 {(serializedTerm.gettingStartedChecklist && serializedTerm.gettingStartedChecklist.length > 0
                                     ? serializedTerm.gettingStartedChecklist
@@ -691,36 +653,167 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     </label>
                                 ))}
                             </div>
+
+                            {/* Lead Magnet Download Box */}
+                            <div className="p-6 bg-gradient-to-r from-slate-950 via-cyan-950/40 to-slate-950 border border-cyan-800/80 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2 text-cyan-400 font-mono text-xs font-bold uppercase">
+                                        <Download size={14} /> Downloadable Resource Asset
+                                    </div>
+                                    <h4 className="font-extrabold text-white text-sm">Free {serializedTerm.term} Implementation Kit & PDF Guide</h4>
+                                    <p className="text-xs text-slate-400 font-sans">Includes complete action checklist, prompt templates, and execution cheatsheet.</p>
+                                </div>
+                                <button className="shrink-0 px-4 py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs uppercase tracking-wider rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-md">
+                                    <FileSpreadsheet size={14} />
+                                    <span>Download Asset (PDF/CSV)</span>
+                                </button>
+                            </div>
                         </div>
-                        {/* Pitfalls, Misconceptions & Safety Warnings (ALWAYS RENDERED) */}
+
+                        {/* Pitfalls, Misconceptions & Warnings (Myth vs. Reality) */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                                 <AlertTriangle className="text-rose-400" size={20} />
-                                Pitfalls, Misconceptions & Warnings
+                                Pitfalls, Misconceptions & Warnings (Myths vs. Reality)
                             </h3>
-                            <div className="space-y-4 pt-2 font-sans text-sm">
-                                <div className="bg-slate-950 p-4 rounded-2xl border border-rose-900/60">
-                                    <span className="text-xs font-mono font-bold text-rose-400 uppercase block mb-1">Common Mistakes</span>
-                                    <p className="text-slate-300 leading-relaxed">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 font-sans text-sm">
+                                <div className="bg-slate-950 p-4 rounded-2xl border border-rose-950/80 space-y-2">
+                                    <div className="flex items-center gap-2 text-rose-400 font-mono text-xs font-bold uppercase">
+                                        <XCircle size={14} /> Myth / Common Mistake
+                                    </div>
+                                    <p className="text-slate-300 text-xs leading-relaxed">
                                         {serializedTerm.commonMistakes || `Rushing execution without proper tracking, ignoring mobile users, or stopping tests prematurely.`}
                                     </p>
                                 </div>
-                                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                                    <span className="text-xs font-mono font-bold text-amber-400 uppercase block mb-1">Misconceptions</span>
-                                    <p className="text-slate-300 leading-relaxed">
-                                        {serializedTerm.misconceptions || `Assuming ${serializedTerm.term} requires massive budget or coding knowledge.`}
+                                <div className="bg-slate-950 p-4 rounded-2xl border border-emerald-950/80 space-y-2">
+                                    <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase">
+                                        <Check size={14} /> Reality & Best Practice
+                                    </div>
+                                    <p className="text-slate-300 text-xs leading-relaxed">
+                                        {serializedTerm.misconceptions || `Structured setup and baseline analytics guarantee scalable performance without huge upfront budget.`}
                                     </p>
                                 </div>
-                                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                                    <span className="text-xs font-mono font-bold text-rose-400 uppercase block mb-1">Warnings & Ethics</span>
-                                    <p className="text-slate-300 leading-relaxed">
-                                        {serializedTerm.warningsOrNotes || `Ensure compliance with privacy regulations (GDPR/CCPA) and maintain ethical marketing standards.`}
-                                    </p>
+                            </div>
+                            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs font-sans">
+                                <span className="font-mono font-bold text-rose-400 uppercase block mb-1">Ethical Compliance Note:</span>
+                                <p className="text-slate-300 leading-relaxed">
+                                    {serializedTerm.warningsOrNotes || `Ensure compliance with privacy regulations (GDPR/CCPA) and maintain ethical marketing standards.`}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Dedicated Attached Recommended Resources & Tools Section */}
+                        {allAttachedResources.length > 0 && (
+                            <div className="p-8 bg-slate-900 border border-cyan-800/80 rounded-3xl shadow-xl space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                                        <Wrench className="text-cyan-400" size={20} /> Attached Tech Stack & Recommended Tools ({allAttachedResources.length})
+                                    </h3>
+                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800">
+                                        Verified Term Selection
+                                    </span>
+                                </div>
+                                <p className="text-xs text-slate-400 font-sans">
+                                    The following tools and resources have been specifically selected and attached to {serializedTerm.term}:
+                                </p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    {allAttachedResources.map((res: any, idx: number) => (
+                                        <div key={idx} className="p-4 bg-slate-950 border border-slate-800 hover:border-cyan-500/80 rounded-2xl flex flex-col justify-between transition-all group">
+                                            <div>
+                                                <span className="text-[9px] font-mono font-bold uppercase text-cyan-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md inline-block mb-2">
+                                                    {res.category}
+                                                </span>
+                                                <h4 className="font-extrabold text-slate-100 group-hover:text-cyan-300 text-sm">{res.name}</h4>
+                                                <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed line-clamp-2">{res.description}</p>
+                                            </div>
+                                            {res.link && (
+                                                <a
+                                                    href={res.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-3 inline-flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
+                                                >
+                                                    Access Tool / Offer <ExternalLink size={12} />
+                                                </a>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Phase 5 • Deep Dives & Extended Learning */}
+                        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span className="text-xs font-mono font-extrabold uppercase text-purple-400 tracking-wider bg-purple-950/80 border border-purple-800/80 px-3 py-1 rounded-xl">
+                                Phase 5 • Deep Dives & Extended Learning
+                            </span>
+                        </div>
+
+                        {/* In-Depth Masterclass Article */}
+                        <div id="article" className="space-y-6 pt-2">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                                    <FileText size={22} className="text-cyan-400" />
+                                    {serializedTerm.articleTitle || `Master Guide & Featured Editorial Article: ${serializedTerm.term}`}
+                                </h2>
+                                <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800 uppercase">
+                                    Editorial Article
+                                </span>
+                            </div>
+
+                            <div className="bg-slate-900 p-8 md:p-10 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                                {serializedTerm.articleContent ? (
+                                    <div className="prose prose-invert max-w-none font-sans text-base leading-relaxed text-slate-200">
+                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.articleContent, termMap)} />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6 font-sans text-base leading-relaxed text-slate-200">
+                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.definition, termMap)} />
+                                    </div>
+                                )}
+
+                                <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-slate-500">Author / Reviewer:</span>
+                                        <span className="text-cyan-400 font-bold">{serializedTerm.authorOrReviewer || "KB Academy Editorial Board"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-slate-500">Last Verified:</span>
+                                        <span className="text-slate-300 font-bold">{updatedDate}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* FAQs Accordion (ALWAYS RENDERED) */}
+                        {/* Content Creator Assets */}
+                        <div className="pt-4 border-t border-slate-800 space-y-6">
+                            <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight">Content Creator Assets</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {renderList(serializedTerm.headlines, <LayoutList className="text-cyan-400" size={18} />, "Blog Headlines", `How to Scale ${serializedTerm.term} in 2026`)}
+                                {renderList(serializedTerm.youtubeTitles, <Youtube className="text-rose-400" size={18} />, "YouTube Titles", `${serializedTerm.term} Tutorial for Beginners`)}
+                                {renderList(serializedTerm.pinterestIdeas, <span className="text-[#E60023] font-bold text-sm">P</span>, "Pinterest Pins", `${serializedTerm.term} Strategy Infographic`)}
+                                {renderList(serializedTerm.instagramIdeas, <Instagram className="text-indigo-400" size={18} />, "Instagram Posts", `5 Tips to Master ${serializedTerm.term}`)}
+                                {renderList(serializedTerm.amazonProducts, <ShoppingBag className="text-amber-400" size={18} />, "Recommended Products", `${serializedTerm.term} Handbook`)}
+                                {renderList(serializedTerm.websitesRanking, <Globe className="text-cyan-400" size={18} />, "Authority Websites", `Official ${serializedTerm.term} Portal`)}
+                                {renderList(serializedTerm.podcastsRanking, <Podcast className="text-sky-400" size={18} />, "Ranked Podcasts", `The ${serializedTerm.term} Show`)}
+                            </div>
+
+                            <AIPromptsSection 
+                                term={serializedTerm.term}
+                                imagePrompt={serializedTerm.imagePrompt}
+                                productPrompt={serializedTerm.productPrompt}
+                                socialPrompt={serializedTerm.socialPrompt}
+                            />
+                        </div>
+
+                        {/* Phase 6 • Authority & SEO Signals */}
+                        <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+                            <span className="text-xs font-mono font-extrabold uppercase text-sky-400 tracking-wider bg-sky-950/80 border border-sky-800/80 px-3 py-1 rounded-xl">
+                                Phase 6 • Authority & SEO Signals
+                            </span>
+                        </div>
+
+                        {/* FAQs Accordion */}
                         <div className="p-8 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl space-y-4">
                             <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                                 <HelpCircle className="text-cyan-400" size={20} /> Frequently Asked Questions
@@ -750,29 +843,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                                     </details>
                                 ))}
                             </div>
-                        </div>
-
-
-
-                        {/* Content Creator Assets (ALWAYS RENDERED) */}
-                        <div className="pt-8 border-t border-slate-800 space-y-6">
-                            <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight">Content Creator Assets</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {renderList(serializedTerm.headlines, <LayoutList className="text-cyan-400" size={18} />, "Blog Headlines", `How to Scale ${serializedTerm.term} in 2026`)}
-                                {renderList(serializedTerm.youtubeTitles, <Youtube className="text-rose-400" size={18} />, "YouTube Titles", `${serializedTerm.term} Tutorial for Beginners`)}
-                                {renderList(serializedTerm.pinterestIdeas, <span className="text-[#E60023] font-bold text-sm">P</span>, "Pinterest Pins", `${serializedTerm.term} Strategy Infographic`)}
-                                {renderList(serializedTerm.instagramIdeas, <Instagram className="text-indigo-400" size={18} />, "Instagram Posts", `5 Tips to Master ${serializedTerm.term}`)}
-                                {renderList(serializedTerm.amazonProducts, <ShoppingBag className="text-amber-400" size={18} />, "Recommended Products", `${serializedTerm.term} Handbook`)}
-                                {renderList(serializedTerm.websitesRanking, <Globe className="text-cyan-400" size={18} />, "Authority Websites", `Official ${serializedTerm.term} Portal`)}
-                                {renderList(serializedTerm.podcastsRanking, <Podcast className="text-sky-400" size={18} />, "Ranked Podcasts", `The ${serializedTerm.term} Show`)}
-                            </div>
-
-                            <AIPromptsSection 
-                                term={serializedTerm.term}
-                                imagePrompt={serializedTerm.imagePrompt}
-                                productPrompt={serializedTerm.productPrompt}
-                                socialPrompt={serializedTerm.socialPrompt}
-                            />
                         </div>
                     </div>
 

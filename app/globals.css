@@ -129,12 +129,33 @@
   --ring: #0284c7;
 }
 
+/* ScalePlus Theme Palette */
+:root {
+  --scaleplus-bg: #f8fafc;
+  --scaleplus-lime-bg: #dcfce7;
+  --scaleplus-lime-text: #166534;
+  --scaleplus-pink-tint: #fdf2f8;
+  --scaleplus-purple-tint: #faf5ff;
+  --scaleplus-mint-tint: #f0fdf4;
+  --scaleplus-yellow-tint: #fffbeb;
+  --scaleplus-sky-tint: #f0f9ff;
+  --scaleplus-orange-tint: #fff7ed;
+}
+
 /* Redesign Utility Classes */
 @layer utilities {
   .glass-nav {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(198, 198, 204, 0.3);
+  }
+
+  .scaleplus-banner-magenta {
+    background: linear-gradient(135deg, #d91b5c 0%, #e91e63 100%);
+  }
+
+  .scaleplus-banner-blue {
+    background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
   }
   
   .hero-gradient {

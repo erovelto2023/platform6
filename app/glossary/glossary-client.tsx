@@ -39,6 +39,7 @@ interface GlossaryClientProps {
 const SEMANTIC_CLUSTERS = [
   { id: 'all', label: '🌐 All Concepts', icon: Layers, desc: 'Complete knowledge registry' },
   { id: 'business-models', label: '🚀 Core Business Models', icon: Target, desc: 'Affiliate, SaaS, E-Commerce, Monetization' },
+  { id: 'publishing-pod', label: '📚 KDP & Digital Publishing', icon: Book, desc: 'Coloring Books, Low Content, KDP, POD' },
   { id: 'traffic-conversion', label: '🎯 Traffic & Conversions', icon: TrendingUp, desc: 'SEO, CTR, CRO, Organic Systems' },
   { id: 'technical-systems', label: '💻 Technical & Systems', icon: Cpu, desc: 'API, Webhooks, HTML, Analytics' },
   { id: 'monetization', label: '💰 Monetization & Payouts', icon: DollarSign, desc: 'CPA, Revenue Share, Commissions' },
@@ -60,7 +61,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
   const characters = ["0-9", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
 
   const legendStats = useMemo(() => {
-    let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0;
+    let images = 0, videos = 0, products = 0, websites = 0, podcasts = 0, caseStudies = 0, aiPrompts = 0, aeoFaqs = 0, articles = 0;
     (initialTerms || []).forEach(t => {
       if (t.imageUrl) images++;
       if (t.videoUrl) videos++;
@@ -70,8 +71,9 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       if (t.caseStudies && t.caseStudies.length > 0) caseStudies++;
       if (t.imagePrompt || t.productPrompt || t.socialPrompt || (t.youtubeTitles && t.youtubeTitles.length > 0) || (t.pinterestIdeas && t.pinterestIdeas.length > 0) || (t.instagramIdeas && t.instagramIdeas.length > 0)) aiPrompts++;
       if ((t.faqs && t.faqs.length > 0) || (t.questionVariations && t.questionVariations.length > 0) || t.aeoSummary) aeoFaqs++;
+      if (t.articleContent || t.definition) articles++;
     });
-    return { images, videos, products, websites, podcasts, caseStudies, aiPrompts, aeoFaqs };
+    return { images, videos, products, websites, podcasts, caseStudies, aiPrompts, aeoFaqs, articles };
   }, [initialTerms]);
 
   useEffect(() => {
@@ -111,8 +113,14 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       const matchesCategory = selectedCategory === 'all' || term.category === selectedCategory;
 
       let matchesCluster = true;
+      const termCat = (term.category || '').toLowerCase();
+      const termTitle = (term.term || '').toLowerCase();
+      
       if (selectedCluster === 'business-models') {
         matchesCluster = ['Affiliate Marketing', 'Business Models', 'Monetization', 'E-Commerce', 'SaaS'].includes(term.category);
+      } else if (selectedCluster === 'publishing-pod') {
+        matchesCluster = ['KDP', 'Publishing', 'Print on Demand', 'Low Content', 'Books', 'E-Books', 'KDP Publishing', 'Coloring Books'].includes(term.category) ||
+                         termTitle.includes('coloring') || termTitle.includes('kdp') || termTitle.includes('book') || termTitle.includes('author');
       } else if (selectedCluster === 'traffic-conversion') {
         matchesCluster = ['SEO', 'Traffic', 'Conversions', 'Marketing', 'Analytics'].includes(term.category);
       } else if (selectedCluster === 'technical-systems') {
@@ -120,7 +128,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
       } else if (selectedCluster === 'monetization') {
         matchesCluster = ['Monetization', 'Finance', 'Affiliate', 'Revenue'].includes(term.category);
       } else if (selectedCluster === 'ai-automation') {
-        matchesCluster = ['AI', 'Automation', 'AEO', 'Prompts'].includes(term.category);
+        matchesCluster = ['AI', 'Automation', 'AEO', 'Prompts'].includes(term.category) || termTitle.includes('ai') || termTitle.includes('aeo');
       }
 
       const matchesTag = selectedTag === 'all' || (term.tags && term.tags.includes(selectedTag));
@@ -150,7 +158,7 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
         dist = 0;
       } else {
         const words = name.split(/\s+/);
-        const wordDists = words.map(w => getLevenshteinDistance(q, w));
+        const wordDists = words.map((w: string) => getLevenshteinDistance(q, w));
         dist = Math.min(getLevenshteinDistance(q, name), ...wordDists);
       }
       return { term: t, dist };
@@ -373,6 +381,9 @@ function GlossaryClientInner({ initialTerms, categories, products = [] }: Glossa
           </div>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aiPrompts} terms have AI Prompts`}>
             <Lightbulb size={14} className="text-indigo-400" /> AI Prompts <span className="text-[10px] font-mono text-indigo-400 font-bold">({legendStats.aiPrompts})</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.articles} terms have Featured Articles`}>
+            <Book size={14} className="text-cyan-400" /> Articles <span className="text-[10px] font-mono text-cyan-400 font-bold">({legendStats.articles})</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200" title={`${legendStats.aeoFaqs} terms have AEO Summaries or FAQs`}>
             <Sparkles size={14} className="text-purple-400" /> AEO / FAQs <span className="text-[10px] font-mono text-purple-400 font-bold">({legendStats.aeoFaqs})</span>

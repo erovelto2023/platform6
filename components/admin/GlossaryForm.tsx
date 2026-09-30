@@ -347,6 +347,35 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                             placeholder="## Detailed Concept Explanation..."
                         />
                     </div>
+
+                    {/* Featured In-Depth Article Editor */}
+                    <div className="col-span-full border-t border-slate-800/80 pt-4 space-y-4">
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className={labelClass}>Featured Article Custom Title (Optional)</label>
+                                <span className="text-[10px] font-mono text-cyan-400 font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-md">In-Depth Editorial Article</span>
+                            </div>
+                            <input
+                                type="text"
+                                value={formData.articleTitle || ""}
+                                onChange={e => handleChange("articleTitle", e.target.value)}
+                                className={inputClass}
+                                placeholder="e.g. Master Guide: How to Scale & Monetize 100 Animals Adult Coloring Books"
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>In-Depth Article Content (Markdown / HTML)</label>
+                            <textarea
+                                rows={10}
+                                value={formData.articleContent || ""}
+                                onChange={e => handleChange("articleContent", e.target.value)}
+                                className={inputClass}
+                                placeholder="Write or paste your full long-form masterclass article here. Supports Markdown formatting (## Headings, **bold**, lists)..."
+                            />
+                            <span className="text-[10px] font-mono text-slate-500 mt-1 block">Renders prominently in the Featured Editorial Masterclass Article section on the term page.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1003,7 +1032,7 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                                                         <input
                                                             type="text"
                                                             value={tool.context || ""}
-                                                            onChange={e => handleUpdateToolContext(tool.productId, e.target.value)}
+                                                            onChange={e => handleUpdateToolContext(Number(tool.productId), e.target.value)}
                                                             className="text-xs bg-slate-950 border border-slate-800 rounded-lg px-2 py-0.5 text-slate-200 focus:outline-none focus:border-cyan-500 flex-1"
                                                             placeholder="e.g. Best for automated email marketing..."
                                                         />
@@ -1013,7 +1042,7 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
 
                                             <button
                                                 type="button"
-                                                onClick={() => handleRemoveTool(tool.productId, matchedProduct?.name)}
+                                                onClick={() => handleRemoveTool(Number(tool.productId), matchedProduct?.name)}
                                                 className="p-1.5 bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 text-rose-300 rounded-lg transition-colors shrink-0 self-end sm:self-auto cursor-pointer"
                                                 title="Detach tool"
                                             >
