@@ -193,36 +193,59 @@ export default async function GlossaryTermPage({ params }: Props) {
             }
         ];
 
-    // --- Resolve Attached Tools & Products ---
-    const attachedToolsFromDb = (serializedTerm.recommendedTools || []).map((tool: any) => {
-        const matchedProduct = products.find((p: any) => String(p.id) === String(tool.productId));
-        return matchedProduct ? {
-            name: matchedProduct.name,
-            category: matchedProduct.category || matchedProduct.niche || 'Directory Product',
-            link: matchedProduct.affiliateLink || `/catalog/${matchedProduct.slug || matchedProduct.id}`,
-            description: tool.context || matchedProduct.shortDescription || `${matchedProduct.name} software tool`
-        } : {
-            name: tool.context || `Tool #${tool.productId}`,
-            category: 'Directory Tool',
-            link: '/catalog',
-            description: tool.context || 'Recommended Resource'
-        };
-    });
+    // --- Resolve Attached Tools & Products (Strict URL & Validity Filtering) ---
+    const cleanResourceUrl = (url: any) => {
+        if (!url || typeof url !== 'string') return null;
+        const trimmed = url.trim();
+        if (
+            !trimmed ||
+            trimmed === '#' ||
+            trimmed === '/catalog' ||
+            trimmed.includes('example.com') ||
+            trimmed.includes('yoursite.com')
+        ) return null;
+        return trimmed;
+    };
 
-    const attachedAmazonProducts = (serializedTerm.amazonProducts || []).map((p: any) => {
-        const matchedOffer = personalOffers.find((o: any) => o.name?.toLowerCase().trim() === p.name?.toLowerCase().trim());
-        return {
-            name: p.name,
-            category: matchedOffer?.network ? `Affiliate (${matchedOffer.network})` : 'Affiliate Catalog Offer',
-            link: p.url || matchedOffer?.affiliateLink || '#',
-            description: p.description || matchedOffer?.description || `${p.name} recommended tool`
-        };
-    });
+    const attachedToolsFromDb = (serializedTerm.recommendedTools || [])
+        .map((tool: any) => {
+            const matchedProduct = products.find((p: any) => String(p.id) === String(tool.productId));
+            if (!matchedProduct) return null;
+
+            const link = cleanResourceUrl(matchedProduct.affiliateLink) ||
+                (matchedProduct.slug ? `/tools-products/${matchedProduct.slug}` : null);
+
+            if (!link) return null;
+
+            return {
+                name: matchedProduct.name,
+                category: matchedProduct.category || matchedProduct.niche || 'Directory Tool',
+                link: link,
+                description: tool.context || matchedProduct.shortDescription || matchedProduct.description || `${matchedProduct.name} software tool`
+            };
+        })
+        .filter(Boolean);
+
+    const attachedAmazonProducts = (serializedTerm.amazonProducts || [])
+        .map((p: any) => {
+            const matchedOffer = personalOffers.find((o: any) => o.name?.toLowerCase().trim() === p.name?.toLowerCase().trim());
+            const targetLink = cleanResourceUrl(p.url) || cleanResourceUrl(matchedOffer?.affiliateLink);
+
+            if (!targetLink) return null;
+
+            return {
+                name: p.name,
+                category: matchedOffer?.network ? `Affiliate (${matchedOffer.network})` : 'Affiliate Offer',
+                link: targetLink,
+                description: p.description || matchedOffer?.description || `${p.name} recommended tool`
+            };
+        })
+        .filter(Boolean);
 
     // Deduplicate attached tools & products by name
     const combinedResourcesMap = new Map<string, any>();
     [...attachedToolsFromDb, ...attachedAmazonProducts].forEach(res => {
-        if (res.name && !combinedResourcesMap.has(res.name.toLowerCase().trim())) {
+        if (res && res.name && !combinedResourcesMap.has(res.name.toLowerCase().trim())) {
             combinedResourcesMap.set(res.name.toLowerCase().trim(), res);
         }
     });
