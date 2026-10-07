@@ -806,30 +806,6 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         )}
 
-                        {/* Interactive HTML CODE Tools Section */}
-                        {attachedHtmlTools.length > 0 && (
-                            <div className="space-y-6 pt-4 border-t border-slate-800">
-                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                    <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-2">
-                                        <Wrench className="text-cyan-400" size={20} />
-                                        Interactive Tools &amp; Calculators ({attachedHtmlTools.length})
-                                    </h3>
-                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800 uppercase">
-                                        Embedded Tools
-                                    </span>
-                                </div>
-                                <div className="space-y-6">
-                                    {attachedHtmlTools.map((htmlTool: any) => (
-                                        <HtmlToolRenderer
-                                            key={htmlTool._id}
-                                            htmlCode={htmlTool.htmlCode}
-                                            name={htmlTool.name}
-                                            description={htmlTool.description}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {/* Phase 5 • Deep Dives & Extended Learning */}
                         <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
@@ -908,6 +884,26 @@ export default async function GlossaryTermPage({ params }: Props) {
                                 selectedOfferId={serializedTerm.selectedAffiliateOfferId} 
                                 products={products} 
                             />
+
+                            {/* Interactive HTML CODE Tools Section */}
+                            {attachedHtmlTools.length > 0 && (
+                                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900 shadow-xl space-y-4">
+                                    <h4 className="font-extrabold text-slate-100 text-sm flex items-center gap-2">
+                                        <Wrench size={16} className="text-cyan-400" />
+                                        Interactive Tools
+                                    </h4>
+                                    <div className="space-y-4">
+                                        {attachedHtmlTools.map((htmlTool: any) => (
+                                            <HtmlToolRenderer
+                                                key={htmlTool._id}
+                                                htmlCode={htmlTool.htmlCode}
+                                                name={htmlTool.name}
+                                                description={htmlTool.description}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <GlossaryProgressTracker slug={serializedTerm.slug} term={serializedTerm.term} />
                             
