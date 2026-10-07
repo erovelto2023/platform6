@@ -10,6 +10,7 @@ export interface IPersonalAffiliateOffer {
     payoutAmount: string;
     network: string;
     notes?: string;
+    imageUrl?: string;
     clicks: number;
     createdAt: Date;
     updatedAt: Date;
@@ -24,6 +25,7 @@ const PersonalAffiliateOfferSchema = new Schema({
     payoutAmount: { type: String },
     network: { type: String },
     notes: { type: String },
+    imageUrl: { type: String },
     clicks: { type: Number, default: 0 },
 }, { timestamps: true });
 

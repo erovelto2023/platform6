@@ -91,6 +91,7 @@ export async function bulkImportPersonalOffers(offers: any[]) {
             const payoutAmount = item.payoutAmount || item.payout || item.Payout || "";
             const network = item.network || item.Network || "Direct";
             const notes = item.notes || item.Notes || "";
+            const imageUrl = item.imageUrl || item.ImageUrl || item.image || item.Image || "";
             const clicks = typeof item.clicks === 'number' ? item.clicks : (Number(item.Clicks) || 0);
 
             const existing = await PersonalAffiliateOffer.findOne({
@@ -108,6 +109,7 @@ export async function bulkImportPersonalOffers(offers: any[]) {
                     payoutAmount: payoutAmount || existing.payoutAmount,
                     network: network || existing.network,
                     notes: notes || existing.notes,
+                    imageUrl: imageUrl || existing.imageUrl,
                 });
                 updatedCount++;
             } else {
@@ -120,6 +122,7 @@ export async function bulkImportPersonalOffers(offers: any[]) {
                     payoutAmount: payoutAmount.trim(),
                     network: network.trim(),
                     notes: notes.trim(),
+                    imageUrl: imageUrl.trim(),
                     clicks
                 });
                 insertedCount++;

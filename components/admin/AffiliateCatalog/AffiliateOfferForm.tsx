@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { createPersonalOffer, updatePersonalOffer } from "@/lib/actions/personal-affiliate.actions";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, Image as ImageIcon } from "lucide-react";
+import MediaPicker from "@/components/admin/MediaPicker";
 
 interface AffiliateOfferFormProps {
     initialData?: any;
@@ -26,7 +27,8 @@ export default function AffiliateOfferForm({ initialData, onComplete }: Affiliat
         commissionLevel: initialData?.commissionLevel || "",
         payoutAmount: initialData?.payoutAmount || "",
         network: initialData?.network || "",
-        notes: initialData?.notes || ""
+        notes: initialData?.notes || "",
+        imageUrl: initialData?.imageUrl || ""
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +91,34 @@ export default function AffiliateOfferForm({ initialData, onComplete }: Affiliat
                     <Input name="payoutAmount" value={formData.payoutAmount} onChange={handleChange} placeholder="e.g. $40" />
                 </div>
             </div>
+            
+            <div className="space-y-2 p-4 border border-slate-800 rounded-xl bg-slate-900">
+                <Label>Product Image URL</Label>
+                <div className="flex gap-2">
+                    <Input 
+                        name="imageUrl" 
+                        value={formData.imageUrl} 
+                        onChange={handleChange} 
+                        placeholder="https://..." 
+                        className="flex-1"
+                    />
+                    <MediaPicker 
+                        onSelect={(url) => setFormData(prev => ({ ...prev, imageUrl: url }))} 
+                        title="Gallery"
+                    />
+                </div>
+                {formData.imageUrl && (
+                    <div className="mt-4 w-32 h-32 rounded-xl overflow-hidden border border-slate-800 bg-black flex items-center justify-center relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                            src={formData.imageUrl} 
+                            alt="Preview" 
+                            className="object-contain w-full h-full"
+                        />
+                    </div>
+                )}
+            </div>
+
             <div className="space-y-2">
                 <Label>Personal Notes</Label>
                 <Textarea name="notes" value={formData.notes} onChange={handleChange} placeholder="Any specific details for your use..." />
