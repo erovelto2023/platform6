@@ -22,6 +22,7 @@ import HierarchyBreadcrumbs from "@/components/glossary/HierarchyBreadcrumbs";
 import { getReadingTimeEstimate } from "@/lib/utils/readingTime";
 import { autoLinkContent, autoLinkContentHTML } from "@/lib/utils/glossary-utils";
 import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
+import HtmlToolRenderer from "@/components/glossary/HtmlToolRenderer";
 
 interface Props {
     params: Promise<{ slug: string }>;
@@ -111,6 +112,7 @@ export default async function GlossaryTermPage({ params }: Props) {
     const { products } = await import("@/lib/actions/directory-product.actions").then(mod => mod.getDirectoryProducts());
     const personalOffersRes = await import("@/lib/actions/personal-affiliate.actions").then(mod => mod.getPersonalOffers());
     const personalOffers: any[] = (personalOffersRes.success && Array.isArray(personalOffersRes.data)) ? personalOffersRes.data : [];
+    
     const userRole = await getUserRole();
     const isAdmin = userRole === 'admin';
 
@@ -119,6 +121,9 @@ export default async function GlossaryTermPage({ params }: Props) {
 
     const serializedTerm = JSON.parse(JSON.stringify(term));
     const serializedAllTerms = JSON.parse(JSON.stringify(allTerms));
+
+    const htmlToolsRes = await import("@/lib/actions/html-code-tool.actions").then(mod => mod.getHtmlCodeToolsByIds(serializedTerm.htmlCodeToolIds || []));
+    const attachedHtmlTools: any[] = htmlToolsRes.success ? htmlToolsRes.data : [];
 
     const termMap = new Map<string, string>();
     serializedAllTerms.forEach((t: any) => {
@@ -415,6 +420,42 @@ export default async function GlossaryTermPage({ params }: Props) {
                             <div className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 text-[11px] font-mono text-slate-400 flex items-center gap-2">
                                 <FileText size={14} className="text-cyan-400 shrink-0" />
                                 <span>Note: A complete verbatim audio transcript and downloadable timestamp guide are included for offline reading.</span>
+                            </div>
+                        </div>
+
+                        {/* Featured Editorial Article (Moved directly under Video Masterclass) */}
+                        <div id="article" className="space-y-6 pt-2">
+                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
+                                    <FileText size={22} className="text-cyan-400" />
+                                    {serializedTerm.articleTitle || `Master Guide & Featured Editorial Article: ${serializedTerm.term}`}
+                                </h2>
+                                <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800 uppercase">
+                                    Editorial Article
+                                </span>
+                            </div>
+
+                            <div className="bg-slate-900 p-8 md:p-10 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+                                {serializedTerm.articleContent ? (
+                                    <div className="prose prose-invert max-w-none font-sans text-base leading-relaxed text-slate-200">
+                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.articleContent, termMap)} />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6 font-sans text-base leading-relaxed text-slate-200">
+                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.definition, termMap)} />
+                                    </div>
+                                )}
+
+                                <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-slate-500">Author / Reviewer:</span>
+                                        <span className="text-cyan-400 font-bold">{serializedTerm.authorOrReviewer || "KB Academy Editorial Board"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-slate-500">Last Verified:</span>
+                                        <span className="text-slate-300 font-bold">{updatedDate}</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -765,47 +806,36 @@ export default async function GlossaryTermPage({ params }: Props) {
                             </div>
                         )}
 
+                        {/* Interactive HTML CODE Tools Section */}
+                        {attachedHtmlTools.length > 0 && (
+                            <div className="space-y-6 pt-4 border-t border-slate-800">
+                                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <h3 className="text-xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-2">
+                                        <Wrench className="text-cyan-400" size={20} />
+                                        Interactive Tools &amp; Calculators ({attachedHtmlTools.length})
+                                    </h3>
+                                    <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800 uppercase">
+                                        Embedded Tools
+                                    </span>
+                                </div>
+                                <div className="space-y-6">
+                                    {attachedHtmlTools.map((htmlTool: any) => (
+                                        <HtmlToolRenderer
+                                            key={htmlTool._id}
+                                            htmlCode={htmlTool.htmlCode}
+                                            name={htmlTool.name}
+                                            description={htmlTool.description}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Phase 5 • Deep Dives & Extended Learning */}
                         <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
                             <span className="text-xs font-mono font-extrabold uppercase text-purple-400 tracking-wider bg-purple-950/80 border border-purple-800/80 px-3 py-1 rounded-xl">
                                 Phase 5 • Deep Dives & Extended Learning
                             </span>
-                        </div>
-
-                        {/* In-Depth Masterclass Article */}
-                        <div id="article" className="space-y-6 pt-2">
-                            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                                <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight flex items-center gap-3">
-                                    <FileText size={22} className="text-cyan-400" />
-                                    {serializedTerm.articleTitle || `Master Guide & Featured Editorial Article: ${serializedTerm.term}`}
-                                </h2>
-                                <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-800 uppercase">
-                                    Editorial Article
-                                </span>
-                            </div>
-
-                            <div className="bg-slate-900 p-8 md:p-10 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
-                                {serializedTerm.articleContent ? (
-                                    <div className="prose prose-invert max-w-none font-sans text-base leading-relaxed text-slate-200">
-                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.articleContent, termMap)} />
-                                    </div>
-                                ) : (
-                                    <div className="space-y-6 font-sans text-base leading-relaxed text-slate-200">
-                                        <CustomHTMLRenderer html={formatDefinitionHTML(serializedTerm.definition, termMap)} />
-                                    </div>
-                                )}
-
-                                <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-slate-400">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-slate-500">Author / Reviewer:</span>
-                                        <span className="text-cyan-400 font-bold">{serializedTerm.authorOrReviewer || "KB Academy Editorial Board"}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-slate-500">Last Verified:</span>
-                                        <span className="text-slate-300 font-bold">{updatedDate}</span>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Content Creator Assets */}
@@ -873,7 +903,11 @@ export default async function GlossaryTermPage({ params }: Props) {
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 space-y-6 font-sans text-xs">
                             
-                            <RotatingAffiliateBanner products={products} />
+                            <RotatingAffiliateBanner 
+                                offers={personalOffers} 
+                                selectedOfferId={serializedTerm.selectedAffiliateOfferId} 
+                                products={products} 
+                            />
 
                             <GlossaryProgressTracker slug={serializedTerm.slug} term={serializedTerm.term} />
                             

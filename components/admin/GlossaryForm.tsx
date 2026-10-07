@@ -1,7 +1,8 @@
 import { useState, useTransition, useMemo, useEffect } from "react";
 import { createGlossaryTerm, updateGlossaryTerm } from "@/lib/actions/glossary.actions";
 import { getPersonalOffers } from "@/lib/actions/personal-affiliate.actions";
-import { Save, AlertCircle, Loader2, Link as LinkIcon, Rocket, Sparkles, BookOpen, Layers, ShieldCheck, DollarSign, Wrench, Search, Trash, ExternalLink, Plus, Check } from "lucide-react";
+import { getHtmlCodeTools } from "@/lib/actions/html-code-tool.actions";
+import { Save, AlertCircle, Loader2, Link as LinkIcon, Rocket, Sparkles, BookOpen, Layers, ShieldCheck, DollarSign, Wrench, Search, Trash, ExternalLink, Plus, Check, Code } from "lucide-react";
 import { IGlossaryTerm } from "@/lib/db/models/GlossaryTerm";
 import { IDirectoryProduct } from "@/lib/db/models/DirectoryProduct";
 
@@ -16,16 +17,23 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
     const [error, setError] = useState<string | null>(null);
     const [productSearch, setProductSearch] = useState("");
     const [affiliateOffers, setAffiliateOffers] = useState<any[]>([]);
+    const [htmlToolsList, setHtmlToolsList] = useState<any[]>([]);
     const [activeCatalogTab, setActiveCatalogTab] = useState<'all' | 'directory' | 'affiliate'>('all');
 
     useEffect(() => {
-        const fetchOffers = async () => {
-            const res = await getPersonalOffers();
-            if (res.success && Array.isArray(res.data)) {
-                setAffiliateOffers(res.data);
+        const fetchOffersAndTools = async () => {
+            const [resOffers, resTools] = await Promise.all([
+                getPersonalOffers(),
+                getHtmlCodeTools()
+            ]);
+            if (resOffers.success && Array.isArray(resOffers.data)) {
+                setAffiliateOffers(resOffers.data);
+            }
+            if (resTools.success && Array.isArray(resTools.data)) {
+                setHtmlToolsList(resTools.data);
             }
         };
-        fetchOffers();
+        fetchOffersAndTools();
     }, []);
 
     // Combine Directory Products + Personal Affiliate Offers
@@ -137,7 +145,9 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
             videoUrl: "",
             imagePrompt: "",
             productPrompt: "",
-            socialPrompt: ""
+            socialPrompt: "",
+            selectedAffiliateOfferId: "",
+            htmlCodeToolIds: []
         }
     );
 
@@ -523,6 +533,31 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                             className={inputClass}
                             placeholder="e.g. Earn commissions by promoting third-party products..."
                         />
+                    </div>
+
+                    {/* Featured Affiliate Catalog Product Selection */}
+                    <div className="col-span-full bg-slate-900 border border-purple-900/60 p-4 rounded-xl space-y-2">
+                        <div className="flex items-center justify-between">
+                            <label className={labelClass}>Featured Affiliate Catalog Product (Sidebar Banner)</label>
+                            <span className="text-[10px] font-mono text-purple-300 font-bold bg-purple-950 border border-purple-800 px-2 py-0.5 rounded-md">
+                                Affiliate Catalog Selection
+                            </span>
+                        </div>
+                        <p className="text-[11px] font-mono text-slate-400">
+                            Select a specific product from your Affiliate Catalog (https://kbusinessacademy.com/admin/affiliate-catalog) to display on this page. If unselected, a random product will be shown.
+                        </p>
+                        <select
+                            value={formData.selectedAffiliateOfferId || ""}
+                            onChange={e => handleChange("selectedAffiliateOfferId", e.target.value)}
+                            className={inputClass}
+                        >
+                            <option value="">-- Random Product from Affiliate Catalog (Default) --</option>
+                            {affiliateOffers.map((offer: any) => (
+                                <option key={offer._id} value={offer._id}>
+                                    {offer.name} {offer.network ? `(${offer.network})` : ''} {offer.productPrice ? `- ${offer.productPrice}` : ''}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="col-span-full">
                         <label className={labelClass}>Best For (Target Audience)</label>
@@ -1096,6 +1131,65 @@ export default function GlossaryForm({ initialData, onComplete, products = [] }:
                                             >
                                                 <Trash size={14} />
                                             </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Attached HTML CODE Tools Section */}
+                    <div className="pt-6 mt-6 border-t border-slate-800 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                            <div>
+                                <h4 className="font-mono font-bold text-cyan-400 text-xs uppercase tracking-wider flex items-center gap-2">
+                                    <Code size={16} /> Attached HTML CODE Tools
+                                </h4>
+                                <p className="text-[11px] text-slate-400 font-sans mt-0.5">
+                                    Select custom HTML/JS code tools from your HTML CODE Tools library to embed into this glossary page:
+                                </p>
+                            </div>
+                            <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800/60">
+                                {(formData.htmlCodeToolIds || []).length} Tools Attached
+                            </span>
+                        </div>
+
+                        {htmlToolsList.length === 0 ? (
+                            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl text-center text-xs font-mono text-slate-400 italic">
+                                No HTML CODE Tools created yet. You can create them in <a href="/admin/html-code-tools" target="_blank" className="text-cyan-400 underline font-bold">Admin -&gt; HTML CODE Tools</a>.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2 bg-slate-950 border border-slate-800 rounded-2xl">
+                                {htmlToolsList.map((tool: any) => {
+                                    const isAttached = (formData.htmlCodeToolIds || []).includes(tool._id);
+
+                                    return (
+                                        <div
+                                            key={tool._id}
+                                            onClick={() => {
+                                                const current = formData.htmlCodeToolIds || [];
+                                                const updated = isAttached
+                                                    ? current.filter((id: string) => id !== tool._id)
+                                                    : [...current, tool._id];
+                                                handleChange("htmlCodeToolIds", updated);
+                                            }}
+                                            className={`p-3 rounded-xl border cursor-pointer flex items-center gap-3 transition-all select-none ${
+                                                isAttached
+                                                    ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200 shadow-md shadow-cyan-950/40'
+                                                    : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-slate-700'
+                                            }`}
+                                        >
+                                            <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
+                                                isAttached ? 'bg-cyan-500 text-slate-950 font-black' : 'border border-slate-700'
+                                            }`}>
+                                                {isAttached && <Check size={12} strokeWidth={3} />}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <h5 className="font-bold text-xs truncate">{tool.name}</h5>
+                                                <p className="text-[10px] font-mono text-slate-400 truncate">
+                                                    [html-tool:{tool.slug}]
+                                                </p>
+                                            </div>
                                         </div>
                                     );
                                 })}

@@ -159,6 +159,15 @@ export default async function AdminDashboardPage() {
                     hover: "group-hover:border-violet-500/50 group-hover:bg-violet-500/20"
                 },
                 {
+                    title: "HTML CODE Tools",
+                    description: "Manage custom HTML & JS tools to embed on glossary pages",
+                    href: "/admin/html-code-tools",
+                    icon: FileCode,
+                    color: "text-cyan-400",
+                    bg: "bg-cyan-500/10 border-cyan-500/20",
+                    hover: "group-hover:border-cyan-500/50 group-hover:bg-cyan-500/20"
+                },
+                {
                     title: "State & Location Facts",
                     description: "Manage official state facts, symbols, elevations, and government URLs",
                     href: "/admin/locations",

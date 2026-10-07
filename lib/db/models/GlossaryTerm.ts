@@ -132,6 +132,10 @@ export interface IGlossaryTerm {
     deepLinkClicks?: number;
     aiCitationCount?: number;
 
+    // --- Custom HTML Tools & Affiliate Catalog Selections ---
+    selectedAffiliateOfferId?: string; // Selected PersonalAffiliateOffer ID for sidebar banner
+    htmlCodeToolIds?: string[];        // Array of HtmlCodeTool IDs attached to this term
+
     // --- Legacy / Compat ---
     niche?: string;
     recommendedTools: IRecommendedTool[];
@@ -266,6 +270,10 @@ const GlossaryTermSchema = new Schema<IGlossaryTerm>({
     views: { type: Number, default: 0 },
     deepLinkClicks: { type: Number, default: 0 },
     aiCitationCount: { type: Number, default: 0 },
+
+    // Custom Selections
+    selectedAffiliateOfferId: { type: String },
+    htmlCodeToolIds: [String],
 
     // Legacy / Compat
     niche: { type: String },

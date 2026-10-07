@@ -37,7 +37,8 @@ import {
     Globe,
     PackageSearch,
     CreditCard,
-    User as UserIcon
+    User as UserIcon,
+    Code
 } from "lucide-react";
 import { useSidebarStore } from "@/hooks/use-sidebar-store";
 import Link from "next/link";
@@ -167,6 +168,7 @@ const adminGroups: SidebarGroup[] = [
             { label: "Blogs", icon: FileText, href: "/admin/blog", color: "text-indigo-500" },
             { label: "FAQ", icon: FileQuestion, href: "/admin/faqs", color: "text-teal-400" },
             { label: "Glossary", icon: BookOpen, href: "/admin/glossary", color: "text-violet-500" },
+            { label: "HTML CODE Tools", icon: Code, href: "/admin/html-code-tools", color: "text-cyan-400" },
             { label: "Page Builder", icon: LayoutDashboard, href: "/admin/page-builder-simple", color: "text-sky-500" },
             { label: "Custom Page Types", icon: FileStack, href: "/admin/custom-pages", color: "text-rose-500" },
             { label: "Publishing Admin", icon: ShieldCheck, href: "/admin/publishing", color: "text-amber-500" },
