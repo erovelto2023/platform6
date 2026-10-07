@@ -3,6 +3,7 @@
 import connectToDatabase from "@/lib/db/connect";
 import HtmlCodeTool, { IHtmlCodeTool } from "@/lib/db/models/HtmlCodeTool";
 import { revalidatePath } from "next/cache";
+import { getUserRole } from "@/lib/roles";
 
 export async function getHtmlCodeTools() {
     try {
@@ -50,6 +51,11 @@ export async function getHtmlCodeToolsByIds(ids: string[]) {
 
 export async function createHtmlCodeTool(data: Partial<IHtmlCodeTool>) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { success: false, error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         if (!data.name || !data.htmlCode) {
             return { success: false, error: "Name and HTML Code are required." };
@@ -91,6 +97,11 @@ export async function createHtmlCodeTool(data: Partial<IHtmlCodeTool>) {
 
 export async function updateHtmlCodeTool(id: string, data: Partial<IHtmlCodeTool>) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { success: false, error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         if (!id) return { success: false, error: "ID is required" };
 
@@ -121,6 +132,11 @@ export async function updateHtmlCodeTool(id: string, data: Partial<IHtmlCodeTool
 
 export async function deleteHtmlCodeTool(id: string) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { success: false, error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         if (!id) return { success: false, error: "ID is required" };
 

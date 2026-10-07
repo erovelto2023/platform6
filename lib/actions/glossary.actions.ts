@@ -3,6 +3,7 @@
 import connectToDatabase from "@/lib/db/connect";
 import GlossaryTerm from "@/lib/db/models/GlossaryTerm";
 import { revalidatePath } from "next/cache";
+import { getUserRole } from "@/lib/roles";
 
 export async function getGlossaryTerms(options: { limit?: number; niche?: string; sortBy?: "term" | "views"; summaryOnly?: boolean; selectFields?: any } = {}) {
     try {
@@ -113,6 +114,11 @@ function normalizeGlossaryTermFields(term: any) {
 
 export async function bulkCreateGlossaryTerms(terms: any[]) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const { slugify, makeUniqueSlug } = await import('@/lib/utils/slugify');
         
@@ -142,6 +148,11 @@ export async function bulkCreateGlossaryTerms(terms: any[]) {
 
 export async function createGlossaryTerm(data: any) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         
         // Simple ID generation
@@ -176,6 +187,11 @@ export async function createGlossaryTerm(data: any) {
 
 export async function updateGlossaryTerm(data: any) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
 
         if (data.term && !data.slug) {
@@ -199,6 +215,11 @@ export async function updateGlossaryTerm(data: any) {
 
 export async function deleteGlossaryTerm(termId: string) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         await GlossaryTerm.findOneAndDelete({ id: termId });
         revalidatePath('/admin/glossary');
@@ -211,6 +232,11 @@ export async function deleteGlossaryTerm(termId: string) {
 
 export async function deleteGlossaryTerms(termIds: string[]) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         await GlossaryTerm.deleteMany({ id: { $in: termIds } });
         revalidatePath('/admin/glossary');
@@ -249,6 +275,11 @@ export async function findDuplicateGlossaryTerms(category?: string) {
 
 export async function removeDuplicateGlossaryTerms() {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         // Find all duplicate groups (case-insensitive term match)
         const duplicates = await GlossaryTerm.aggregate([
@@ -293,6 +324,11 @@ export async function removeDuplicateGlossaryTerms() {
 
 export async function scrubGlossaryUrls() {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const terms = await GlossaryTerm.find({});
         let updatedCount = 0;
@@ -371,6 +407,11 @@ export async function scrubGlossaryUrls() {
 
 export async function backfillAffiliateTags() {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const affiliateId = "weightlo0f57d-20";
         let glossaryUpdated = 0;
@@ -425,6 +466,11 @@ export async function backfillAffiliateTags() {
 
 export async function backfillAiPrompts() {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const terms = await GlossaryTerm.find({});
         let updatedCount = 0;
@@ -511,6 +557,11 @@ export async function verifyYouTubeLinksBatch(termsToVerify: { id: string; term:
 
 export async function autoReplaceSingleVideo(id: string, term: string) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const ytSearch = (await import('yt-search')).default;
         const searchResults = await ytSearch(term);
@@ -532,6 +583,11 @@ export async function autoReplaceSingleVideo(id: string, term: string) {
 
 export async function autoReplaceBrokenVideos(brokenTerms: { id: string; term: string }[]) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         
         let fixedCount = 0;
@@ -580,6 +636,11 @@ export async function autoReplaceBrokenVideos(brokenTerms: { id: string; term: s
 
 export async function normalizeGlossaryData() {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const collection = GlossaryTerm.collection;
         const terms = await collection.find({}).toArray();
@@ -747,6 +808,11 @@ export async function getGlossarySearchGaps() {
  */
 export async function updateSearchGapStatus(id: string, status: 'pending' | 'created' | 'dismissed', createdTermSlug?: string) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
         await GlossarySearchGap.findByIdAndUpdate(id, { status, ...(createdTermSlug ? { createdTermSlug } : {}) });
@@ -763,6 +829,11 @@ export async function updateSearchGapStatus(id: string, status: 'pending' | 'cre
  */
 export async function deleteSearchGap(id: string) {
     try {
+        const role = await getUserRole();
+        if (role !== 'admin') {
+            return { error: "Unauthorized. Admin privileges required." };
+        }
+
         await connectToDatabase();
         const GlossarySearchGap = (await import('@/lib/db/models/GlossarySearchGap')).default;
         await GlossarySearchGap.findByIdAndDelete(id);
