@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import parse, { attributesToProps, domToReact, HTMLReactParserOptions, Element } from 'html-react-parser';
 import { formatTextToHtml } from '@/components/rich-text-editor';
+import { IframeHtmlRenderer } from '@/components/IframeHtmlRenderer';
 
 // beUI Components
 import { TiltCard } from "@/components/motion/tilt-card";
@@ -52,6 +53,17 @@ export const CustomHTMLRenderer: React.FC<CustomHTMLRendererProps> = ({ html, cl
     const hasHtmlStructure = /<\/?(div|section|article|header|footer|nav|main|p|h[1-6]|ul|ol|li|table|span|a|img|style|form|button|iframe)\b/i.test(processedHtml);
     if (processedHtml && !hasHtmlStructure) {
         processedHtml = formatTextToHtml(processedHtml);
+    }
+
+    // Check if the HTML contains JavaScript, full documents, or interactive events that React DOM would strip
+    const isInteractiveOrFullDoc =
+        /<script\b/i.test(processedHtml) ||
+        /<!DOCTYPE\b/i.test(processedHtml) ||
+        /<html\b/i.test(processedHtml) ||
+        /\bon[a-z]+\s*=/i.test(processedHtml);
+
+    if (isInteractiveOrFullDoc) {
+        return <IframeHtmlRenderer html={processedHtml} className={className} />;
     }
 
     // We define the parser options inside the component to return React elements

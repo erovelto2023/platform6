@@ -95,15 +95,16 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
   let initialHtmlMode = false;
   let initialHtmlContent = "";
 
-  if (initialData?.sections?.[0]?.templateId === 'puck-blocks' && initialData?.sections?.[0]?.customHTML) {
+  const firstSection = initialData?.sections?.[0];
+  if (firstSection?.templateId === 'puck-blocks' && firstSection?.customHTML) {
       try {
-          initialPuckData = JSON.parse(initialData.sections[0].customHTML);
+          initialPuckData = JSON.parse(firstSection.customHTML);
       } catch (e) {
           console.error("Failed to parse Puck data", e);
       }
-  } else if (initialData?.sections?.[0]?.customHTML) {
+  } else if (firstSection?.customHTML || firstSection?.templateId === 'custom-html') {
       initialHtmlMode = true;
-      initialHtmlContent = initialData.sections[0].customHTML;
+      initialHtmlContent = firstSection?.customHTML || "";
   }
 
   const [editorMode, setEditorMode] = useState<"visual" | "code">(initialHtmlMode ? "code" : "visual");
@@ -310,94 +311,26 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
 
   const [htmlContent, setHtmlContent] = useState(initialHtmlContent);
   const [iframeSrcDoc, setIframeSrcDoc] = useState("");
-  const lastUpdateFromIframeRef = useRef(false);
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'HTML_EDIT') {
-        const newHtml = event.data.html;
-        if (newHtml && newHtml.trim() !== htmlContent.trim()) {
-          lastUpdateFromIframeRef.current = true;
-          setHtmlContent(newHtml);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => {
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [htmlContent]);
-
-  useEffect(() => {
-    if (lastUpdateFromIframeRef.current) {
-      lastUpdateFromIframeRef.current = false;
+    const hasFullDoc = /<!DOCTYPE\b/i.test(htmlContent) || /<html\b/i.test(htmlContent);
+    if (hasFullDoc) {
+      setIframeSrcDoc(htmlContent);
     } else {
-      const docTemplate = `
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <script src="https://cdn.tailwindcss.com"></script>
-                <style>
-                    body { margin: 0; padding: 0; font-family: sans-serif; }
-                </style>
-            </head>
-            <body>
-                ${htmlContent || '<div class="h-full min-h-screen flex flex-col items-center justify-center text-slate-400 font-sans p-6 text-center"><p class="text-lg font-bold">Empty HTML Page</p><p class="text-xs text-slate-400 mt-2">Type or paste your code on the left to see the changes rendered instantly.</p></div>'}
-                <script>
-                    const cleanAndSend = () => {
-                        const clone = document.body.cloneNode(true);
-                        clone.querySelectorAll('[contenteditable]').forEach(el => {
-                            el.removeAttribute('contenteditable');
-                            if (el.style.outline) el.style.outline = '';
-                            if (el.style.outlineOffset) el.style.outlineOffset = '';
-                            if (el.getAttribute('style') === '') el.removeAttribute('style');
-                        });
-                        clone.querySelectorAll('script').forEach(el => el.remove());
-                        
-                        window.parent.postMessage({
-                            type: 'HTML_EDIT',
-                            html: clone.innerHTML
-                        }, '*');
-                    };
-
-                    const initEditable = () => {
-                        const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, a, button, li, td, th');
-                        textElements.forEach(el => {
-                            const hasText = Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0);
-                            if (hasText) {
-                                el.contentEditable = 'true';
-                                el.style.outline = 'none';
-                                
-                                el.addEventListener('mouseenter', () => {
-                                    el.style.outline = '2px dashed #0ea5e9';
-                                    el.style.outlineOffset = '2px';
-                                });
-                                el.addEventListener('mouseleave', () => {
-                                    el.style.outline = 'none';
-                                });
-                                
-                                el.addEventListener('blur', () => {
-                                    cleanAndSend();
-                                });
-
-                                el.addEventListener('input', () => {
-                                    cleanAndSend();
-                                });
-                            }
-                        });
-                    };
-
-                    window.addEventListener('DOMContentLoaded', initEditable);
-                    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                        initEditable();
-                    }
-                </script>
-            </body>
-        </html>
-      `;
+      const docTemplate = `<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <style>
+            body { margin: 0; padding: 0; font-family: sans-serif; }
+        </style>
+    </head>
+    <body>
+        ${htmlContent || '<div class="h-full min-h-screen flex flex-col items-center justify-center text-slate-400 font-sans p-6 text-center"><p class="text-lg font-bold">Empty HTML Page</p><p class="text-xs text-slate-400 mt-2">Type or paste your code on the left to see the changes rendered instantly.</p></div>'}
+    </body>
+</html>`;
       setIframeSrcDoc(docTemplate);
     }
   }, [htmlContent]);
@@ -956,6 +889,7 @@ export function PuckEditor({ initialData }: PuckEditorProps) {
                                     srcDoc={iframeSrcDoc}
                                     className="w-full h-full border-none bg-white"
                                     title="HTML Preview"
+                                    sandbox="allow-scripts allow-same-origin allow-modals allow-forms allow-popups allow-downloads"
                                 />
                             </div>
                         </div>

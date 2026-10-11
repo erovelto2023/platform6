@@ -12,6 +12,7 @@ const YoutubeIcon = ({ className }: { className?: string }) => <svg viewBox="0 0
 const GithubIcon = ({ className }: { className?: string }) => <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>;
 import { useState, useEffect } from "react";
 import { getCollectionItems } from "@/lib/actions/custom-pages.actions";
+import { IframeHtmlRenderer } from "@/components/IframeHtmlRenderer";
 
 // Every block type gets the full StyleProps injected
 type W<T> = T & StyleProps;
@@ -79,6 +80,7 @@ export type PuckBlocksProps = {
   NavBarBlock: W<{ logoText: string; links: Array<{ label: string; href: string }> }>;
   FooterBlock: W<{ copyright: string; links: Array<{ label: string; href: string }> }>;
   DynamicCollectionBlock: W<{ collection: "GlossaryTerm" | "Offer" | "WebPage" | "NicheBox" | "CPAListing"; limit: number; layout: "grid" | "list" }>;
+  CustomCodeBlock: W<{ code: string; title: string; height: "auto" | "400px" | "600px" | "800px" | "1000px" | "screen"; fullWidth: boolean }>;
 };
 
 export const puckConfig: Config<PuckBlocksProps> = {
@@ -90,6 +92,7 @@ export const puckConfig: Config<PuckBlocksProps> = {
     uiElements: { title: "UI Elements", components: ["AlertBlock", "BadgeBlock", "AvatarBlock", "BreadcrumbBlock", "ProgressBarBlock", "CountdownTimerBlock"] },
     media: { title: "Media & Assets", components: ["ImageBlock", "ImageGalleryBlock", "IconBlock", "VideoEmbedBlock", "SocialIconsBlock", "ShareButtonsBlock"] },
     compound: { title: "Compound Widgets", components: ["HeroBlock", "NavBarBlock", "FooterBlock", "AccordionBlock", "PricingTableBlock", "TestimonialsBlock", "VideoVSLBlock"] },
+    customCode: { title: "Custom Code & Embeds", components: ["CustomCodeBlock"] },
     dynamic: { title: "Dynamic DB Data", components: ["DynamicCollectionBlock"] }
   },
   components: {
@@ -1409,6 +1412,56 @@ export const puckConfig: Config<PuckBlocksProps> = {
                 ))}
               </div>
             )}
+          </Styled>
+        );
+      }
+    },
+
+    // --- CUSTOM CODE & EMBEDS ---
+    CustomCodeBlock: {
+      fields: {
+        title: { type: "text" },
+        code: { type: "textarea" },
+        height: {
+          type: "select",
+          options: [
+            { label: "Auto Fit Content", value: "auto" },
+            { label: "Medium (600px)", value: "600px" },
+            { label: "Large (800px)", value: "800px" },
+            { label: "Extra Large (1000px)", value: "1000px" },
+            { label: "Full Viewport (100vh)", value: "screen" },
+          ]
+        },
+        fullWidth: {
+          type: "radio",
+          options: [
+            { label: "Contained", value: false },
+            { label: "Full Width (100%)", value: true },
+          ]
+        },
+        ...styleFieldDefs,
+      },
+      defaultProps: {
+        title: "",
+        code: `<div style="padding: 24px; text-align: center; background: #0f172a; color: #38bdf8; border-radius: 12px; font-family: sans-serif;">\n  <h3 style="margin-bottom: 8px; font-size: 1.25rem;">Custom Interactive Code Block</h3>\n  <p style="color: #94a3b8; font-size: 0.9rem;">Paste any HTML, CSS, or JavaScript code here to render custom tools or widgets.</p>\n</div>`,
+        height: "auto",
+        fullWidth: true,
+        ...styleDefaults
+      },
+      render: (props) => {
+        const { code, title, height, fullWidth } = props;
+        return (
+          <Styled p={props}>
+            <div className={`w-full ${fullWidth ? "" : "max-w-6xl mx-auto px-4"}`}>
+              {title && (
+                <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-slate-100">{title}</h3>
+              )}
+              <IframeHtmlRenderer
+                html={code}
+                height={height}
+                title={title || "Custom Code Block"}
+              />
+            </div>
           </Styled>
         );
       }

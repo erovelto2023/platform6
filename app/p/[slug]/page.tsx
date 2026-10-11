@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { CustomHTMLRenderer } from "@/components/CustomHTMLRenderer";
 import { PuckRenderer } from "@/components/PuckRenderer";
+import { IframeHtmlRenderer } from "@/components/IframeHtmlRenderer";
 import { generateThemeCSS, defaultTheme } from "@/lib/theme-config";
 import { auth } from "@clerk/nextjs/server";
 import { getUserRole } from "@/lib/roles";
@@ -133,6 +134,29 @@ export default async function PublicPageView({
     }
 
     const themeCSS = generateThemeCSS({ ...defaultTheme, ...(page.theme || {}) } as any);
+
+    const firstSection = page.sections?.[0];
+    const isStandaloneCustomPage = 
+        page.sections?.length === 1 && 
+        firstSection?.customHTML && 
+        (firstSection.templateId === 'custom-html' || 
+         /<!DOCTYPE\b/i.test(firstSection.customHTML) || 
+         /<html\b/i.test(firstSection.customHTML) ||
+         /<script\b/i.test(firstSection.customHTML));
+
+    if (isStandaloneCustomPage) {
+        return (
+            <div className="w-full min-h-screen bg-black">
+                <IframeHtmlRenderer 
+                    html={firstSection.customHTML}
+                    isFullPage={true}
+                    headerCode={page.headerCode}
+                    footerCode={page.footerCode}
+                    title={page.metaTitle || page.name}
+                />
+            </div>
+        );
+    }
 
     return (
         <>
